@@ -1,0 +1,145 @@
+# Configuration File BankPlus
+#
+# Made by Pulsi_
+
+Update-Checker: true
+
+Join-Start-Amount: 500
+
+Interest:
+  # Interest will give players that has money in bank
+  # an % of the amount every amount of days / hours etc..
+  Enabled: true
+  Money-Given: "5" # 5% of the amount
+  # <num>-m -> Minutes
+  # <num>-h -> Hours
+  # <num>-d -> Days
+  Delay: "5-m"
+
+General:
+  Withdraw-Sound:
+    Enabled: true
+    Sound: "ENTITY_PLAYER_LEVEL_UP,5,1" #Sound Type, Volume, Pitch
+  Deposit-Sound:
+    Enabled: true
+    Sound: "ENTITY_ORB_PICKUP,5,1"
+  View-Sound:
+    Enabled: true
+    Sound: "ENTITY_ORB_PICKUP,5,1"
+  Personal-Sound:
+    Enabled: true
+    Sound: "ENTITY_ORB_PICKUP,5,1"
+
+Gui:
+  #
+  # If the GUI its enabled, typing /bank
+  # won't display the amount of Money
+  # but will open this GUI
+  #
+  # Local Placeholders:
+  # %player_name% -> Returns the player name
+  # %balance% -> Returns the balance
+  # %balance_formatted% -> Returns the players balance formatted
+  # (( It also works on Title ))
+  Enabled: true
+  Title: "&a&lGui Bank"
+  Lines: 3
+  Filler:
+    Enabled: true
+    Material: "WHITE_STAINED_GLASS_PANE"
+    DisplayName: "&6"
+    Glowing: false
+  Items:
+    # You can add as many items as you want
+    # and not only for make the bank work
+    Withdraw:
+      Material: "EMERALD"
+      DisplayName: "&aWithdraw"
+      Slot: 11
+      Lore:
+        - ""
+        - "&7Withdraw &a500$ &7from your bank"
+        - ""
+      Glowing: true
+      Action:
+        # You can choose a number or:
+        # "ALL" -> All money
+        # "HALF" -> Half of the money
+        Action-Type: "Withdraw"
+        Amount: "500"
+
+    WithdrawHalf:
+      Material: "EMERALD"
+      DisplayName: "&aWithdraw"
+      Slot: 12
+      Lore:
+        - ""
+        - "&7Withdraw &aHalf &7of the money from your bank"
+        - ""
+      Glowing: true
+      Action:
+        Action-Type: "Withdraw"
+        Amount: "HALF"
+
+    WithdrawAll:
+      Material: "EMERALD"
+      DisplayName: "&aWithdraw"
+      Slot: 21
+      Lore:
+        - ""
+        - "&7Withdraw &aAll &7of the money from your bank"
+        - ""
+      Glowing: true
+      Action:
+        Action-Type: "Withdraw"
+        Amount: "ALL"
+
+    Personal-Info:
+      Material: "PAPER"
+      DisplayName: "&aPersonal"
+      Slot: 14
+      Lore:
+        - ""
+        - "&7Account Name: &f%player_name%"
+        - "&7Balance: &a%balance_formatted%"
+        - ""
+      Glowing: true
+
+    Deposit:
+      Material: "EMERALD"
+      Slot: 17
+      DisplayName: "&aDeposit"
+      Lore:
+        - ""
+        - "&7Deposit &a500$ &7to your bank"
+        - ""
+      Glowing: true
+      Action:
+        Action-Type: "Deposit"
+        Amount: "500"
+
+    DepositHalf:
+      Material: "EMERALD"
+      Slot: 16
+      DisplayName: "&aDeposit"
+      Lore:
+        - ""
+        - "&7Deposit &aHalf &7of your money to your bank"
+        - ""
+      Glowing: true
+      Action:
+        Action-Type: "Deposit"
+        Amount: "HALF"
+
+    DepositAll:
+      Material: "EMERALD"
+      Slot: 25
+      DisplayName: "&aDeposit"
+      Lore:
+        - ""
+        - "&7Deposit &aAll &7of your money to your bank"
+        - ""
+      Glowing: true
+      Action:
+        Action-Type: "Deposit"
+        Amount: "ALL"

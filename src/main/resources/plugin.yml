@@ -1,0 +1,12 @@
+name: BankPlus
+version: @version@
+main: me.pulsi_.bankplus.BankPlus
+api-version: 1.13
+depend: [ Vault ]
+softdepend: [ PlaceholderAPI ]
+authors: [ Pulsi_ ]
+load: POSTWORLD
+description: Bank Plugin
+commands:
+  bankplus:
+    aliases: [bankp, bank, bp]
