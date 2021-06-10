@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.interest;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.MethodUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -50,6 +51,9 @@ public class Interest {
             for (Player p : Bukkit.getOnlinePlayers()) {
                 int bankBalance = plugin.getPlayers().getInt("Players." + p.getUniqueId() + ".Money");
                 plugin.getPlayers().set("Players." + p.getUniqueId() + ".Money", bankBalance + bankBalance * finalMoneyPercentage);
+                if (plugin.getMessages().getBoolean("Interest-Broadcast.Enabled")) {
+                    Bukkit.broadcastMessage(ChatUtils.c(plugin.getMessages().getString("Interest-Broadcast.Message")));
+                }
             }
         }, 0, (long) intDelay);
     }

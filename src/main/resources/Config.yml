@@ -4,8 +4,6 @@
 
 Update-Checker: true
 
-Join-Start-Amount: 500
-
 Interest:
   # Interest will give players that has money in bank
   # an % of the amount every amount of days / hours etc..
@@ -17,6 +15,13 @@ Interest:
   Delay: "5-m"
 
 General:
+
+  Join-Start-Amount: 500
+
+  # Will use players UUIDs for store moneys,
+  # otherwise, it will use players Names
+  Use-UUID: true
+
   Withdraw-Sound:
     Enabled: true
     Sound: "ENTITY_PLAYER_LEVEL_UP,5,1" #Sound Type, Volume, Pitch

@@ -13,14 +13,15 @@ public class GuiBankListener implements Listener {
 
     private EconomyManager economyManager;
     private BankPlus plugin;
-
+    private GuiBank guiBank;
     public GuiBankListener(BankPlus plugin) {
         this.plugin = plugin;
         this.economyManager = new EconomyManager(plugin);
+        this.guiBank = new GuiBank(plugin);
     }
 
     @EventHandler
-    public void guiWithdraw(InventoryClickEvent e) {
+    public void guiListener(InventoryClickEvent e) {
 
         String displayName = plugin.getConfiguration().getString("Gui.Title");
 
@@ -64,6 +65,7 @@ public class GuiBankListener implements Listener {
                     economyManager.deposit(p, intAmount);
                 }
             }
+            guiBank.openGui(p);
         }
     }
 }

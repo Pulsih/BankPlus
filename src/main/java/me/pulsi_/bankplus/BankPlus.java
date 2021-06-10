@@ -30,30 +30,34 @@ public final class BankPlus extends JavaPlugin {
             getServer().getConsoleSender().sendMessage(ChatUtils.c("&f&nhttps://www.spigotmc.org/resources/vault.34315/"));
             getServer().getConsoleSender().sendMessage("");
             getServer().getPluginManager().disablePlugin(this);
-        }
 
-        if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null){
-            new Placeholders(this).register();
         } else {
-            getServer().getConsoleSender().sendMessage("");
-            getServer().getConsoleSender().sendMessage(ChatUtils.c("&cCannot setup Placeholders, PlaceholderAPI is not installed!"));
-            getServer().getConsoleSender().sendMessage("");
+
+            if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+                new Placeholders(this).register();
+            } else {
+                getServer().getConsoleSender().sendMessage("");
+                getServer().getConsoleSender().sendMessage(ChatUtils.c("&cCannot setup Placeholders, PlaceholderAPI is not installed!"));
+                getServer().getConsoleSender().sendMessage("");
+            }
+
+            this.configManager = new ConfigManager(this);
+            configManager.createConfigs();
+            DataManager.registerEvents(this);
+            DataManager.setupCommands(this);
+
+            new bStats(this, 11612);
+
+            DataManager.startupMessage(this);
+
+            this.interest = new Interest(this);
+            interest.giveInterest();
         }
-
-        this.configManager = new ConfigManager(this);
-        configManager.createConfigs();
-        DataManager.registerEvents(this);
-        DataManager.setupCommands(this);
-
-        new bStats(this, 11612);
-
-        this.interest = new Interest(this);
-        interest.giveInterest();
     }
 
     @Override
     public void onDisable() {
-
+        DataManager.shutdownMessage(this);
     }
 
     public Economy getEconomy() {

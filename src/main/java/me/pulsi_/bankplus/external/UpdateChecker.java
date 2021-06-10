@@ -42,8 +42,8 @@ public class UpdateChecker implements Listener {
         if (p.isOp() || p.hasPermission("bankplus.notify")) {
             if (!isUpToDate()) {
 
-                TextComponent update = new TextComponent(ChatUtils.c("&8&l<&d&lAdvanced&a&lAuto&c&lSmelt&8&l> &b&lNew update available! Click here!"));
-                update.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.spigotmc.org/resources/advancedautosmelt-smelt-ores-autopickup-items-and-exp.90587/"));
+                TextComponent update = new TextComponent(ChatUtils.c("&a&lBank&9&lPlus &aNew update available! Click here!"));
+                update.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.spigotmc.org/resources/%E2%9C%A8-bankplus-%E2%9C%A8-easy-and-lightweight-bank-plugin.93130/"));
                 update.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click here to download it!").color(ChatColor.LIGHT_PURPLE).create()));
 
                 new BukkitRunnable() {

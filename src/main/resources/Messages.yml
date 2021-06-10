@@ -20,6 +20,9 @@ Bank-Others: "&a&lBank&9&lPlus &f%player% &ahas &f%money_formatted% Money &ain t
 Set-Message: "&a&lBank&9&lPlus &fYou have set &f%player%'s bank balance &ato &f%amount%&a!"
 Add-Message: "&a&lBank&9&lPlus &fYou have added &f%amount_formatted% Money &ato &f%player%'s bank balance&a!"
 Remove-Message: "&a&lBank&9&lPlus &fYou have removed &f%amount_formatted% Money &ato &f%player%'s bank balance&a!"
+Interest-Broadcast:
+  Enabled: true
+  Message: "&aBank&9Plus &aThe interest was delivered!"
 Help-Message:
   - "&a&lBank&9&lPlus &aHelp page"
   - "&a/bank deposit <amount> &7Deposit an amount of Money."

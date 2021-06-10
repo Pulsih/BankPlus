@@ -1,14 +1,10 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
 public class MethodUtils {
-
-    private BankPlus plugin;
-    public MethodUtils(BankPlus plugin) {
-        this.plugin = plugin;
-    }
 
     public static String formatter(int balance) {
         if (balance < 1000) {
@@ -28,7 +24,7 @@ public class MethodUtils {
 
     public static void playSound(String path, Player p, BankPlus plugin, boolean booleanPath) {
 
-        if (!booleanPath) return;
+        if (booleanPath) return;
 
         String[] pathSlitted = path.split(",");
         String soundType = pathSlitted[0];
@@ -36,9 +32,9 @@ public class MethodUtils {
         int pitch = Integer.parseInt(pathSlitted[2]);
 
         try {
-            p.playSound(p.getLocation(), soundType, volume, pitch);
+            p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
         } catch (NullPointerException exception) {
-            plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cCannot find the SoundType at: &f" + path));
+            plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cCannot find the SoundType at path: &f" + path));
         } catch (IllegalArgumentException exception) {
             plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cInvalid SoundType at: &f" + path));
         }

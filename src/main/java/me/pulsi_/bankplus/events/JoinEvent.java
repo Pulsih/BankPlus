@@ -21,17 +21,28 @@ public class JoinEvent implements Listener {
 
         Player p = e.getPlayer();
 
-        if (plugin.getPlayers().getString("Players." + p.getUniqueId() + ".Money") == null) {
+        if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
+            if (plugin.getPlayers().getString("Players." + p.getUniqueId() + ".Money") == null) {
 
-            int startAmount = plugin.getConfiguration().getInt("Join-Start-Amount");
+                int startAmount = plugin.getConfiguration().getInt("General.Join-Start-Amount");
 
-            plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &aSuccessfully registered " + p.getName()));
-            plugin.getPlayers().set("Players." + p.getUniqueId() + ".Money", startAmount);
-            plugin.savePlayers();
-        }
-        if (plugin.getPlayers().getString("Players." + p.getUniqueId() + ".Name") == null) {
-            plugin.getPlayers().set("Players." + p.getUniqueId() + ".Name", p.getName());
-            plugin.savePlayers();
+                plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &aSuccessfully registered " + p.getName()));
+                plugin.getPlayers().set("Players." + p.getUniqueId() + ".Money", startAmount);
+                plugin.savePlayers();
+            }
+            if (plugin.getPlayers().getString("Players." + p.getUniqueId() + ".Name") == null) {
+                plugin.getPlayers().set("Players." + p.getUniqueId() + ".Name", p.getName());
+                plugin.savePlayers();
+            }
+        } else {
+            if (plugin.getPlayers().getString("Players." + p.getName() + ".Money") == null) {
+
+                int startAmount = plugin.getConfiguration().getInt("General.Join-Start-Amount");
+
+                plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &aSuccessfully registered " + p.getName()));
+                plugin.getPlayers().set("Players." + p.getName() + ".Money", startAmount);
+                plugin.savePlayers();
+            }
         }
     }
 }

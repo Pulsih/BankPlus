@@ -4,7 +4,6 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.MethodUtils;
-import org.apache.commons.lang.ObjectUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -35,7 +34,10 @@ public class ItemCreator {
         ItemMeta itemMeta = item.getItemMeta();
 
         try {
-            itemMeta.setDisplayName(ChatUtils.c(c.getString("DisplayName")));
+            itemMeta.setDisplayName(ChatUtils.c(c.getString("DisplayName")
+                    .replace("%player_name%", p.getName())
+                    .replace("%balance%", String.valueOf(economyManager.getPersonalBalance(p)))
+                    .replace("%balance_formatted%", String.valueOf(MethodUtils.formatter(economyManager.getPersonalBalance(p))))));
         } catch (NullPointerException exception) {
             itemMeta.setDisplayName(ChatUtils.c("&c&l*CANNOT FIND DISPLAYNAME*"));
         }
@@ -45,8 +47,8 @@ public class ItemCreator {
             for (String lines : c.getStringList("Lore")) {
                 lore.add(ChatColor.translateAlternateColorCodes('&', lines)
                         .replace("%player_name%", p.getName())
-                        .replace("%balance%", String.valueOf(economyManager.getPersonalBalance(p))
-                        .replace("%balance_formatted%", String.valueOf(MethodUtils.formatter(economyManager.getPersonalBalance(p))))));
+                        .replace("%balance%", String.valueOf(economyManager.getPersonalBalance(p)))
+                        .replace("%balance_formatted%", String.valueOf(MethodUtils.formatter(economyManager.getPersonalBalance(p)))));
             }
             itemMeta.setLore(lore);
         }
@@ -79,6 +81,11 @@ public class ItemCreator {
             fillerMeta.setDisplayName(ChatUtils.c(plugin.getConfiguration().getString("Gui.Filler.DisplayName")));
         } catch (NullPointerException exception) {
             fillerMeta.setDisplayName(ChatUtils.c("&c&l*CANNOT FIND DISPLAYNAME*"));
+        }
+
+        if (plugin.getConfiguration().getBoolean("Gui.Filler.Glowing")) {
+            fillerMeta.addEnchant(Enchantment.DURABILITY, 1, false);
+            filler.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
 
         filler.setItemMeta(fillerMeta);
