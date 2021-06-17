@@ -2,29 +2,40 @@
 #
 # Made by Pulsi_
 
-#You can use %money% for the raw number (Ex: 50000 will be 50000, with %money_formatted%: 50000 -> 50k)
-Invalid-Number: "&a&lBank&9&lPlus &aPlease choose a valid number!"
-Specify-Number: "&a&lBank&9&lPlus &aPlease specify a number!"
+# Placeholders
+# %amount% -> Raw Number
+# %amount_formatted% -> Number Formatted
+# %amount_formatted_long% -> Number formatted without "."
+# %player_name% -> Returns the player name based on the action
+
+Invalid-Number: "&a&lBank&9&lPlus &cPlease choose a valid number!"
+Specify-Number: "&a&lBank&9&lPlus &cPlease specify a number!"
 Reload: "&a&lBank&9&lPlus &aPlugin reloaded!"
-Not-Player: "&a&lBank&9&lPlus &aYou are not a player!"
-Insufficient-Money-Withdraw: "&a&lBank&9&lPlus &aYou don't have sufficient money to withdraw!"
-Insufficient-Money-Deposit: "&a&lBank&9&lPlus &aYou don't have sufficient money to deposit!"
-Personal-Bank: "&a&lBank&9&lPlus &aYou have &f%money_formatted% Money &ain your bank."
+Not-Player: "&a&lBank&9&lPlus &cYou are not a player!"
+Insufficient-Money-Withdraw: "&a&lBank&9&lPlus &cYou don't have sufficient money to withdraw!"
+Insufficient-Money-Deposit: "&a&lBank&9&lPlus &cYou don't have sufficient money to deposit!"
+Personal-Bank: "&a&lBank&9&lPlus &aYou have &f%amount_formatted% Money &ain your bank."
 Unknown-Command: "&a&lBank&9&lPlus &cUnknown Command!"
-Success-Withdraw: "&a&lBank&9&lPlus &aSuccessfully withdrew &f%money_formatted% Money&a!"
-Success-Deposit: "&a&lBank&9&lPlus &aSuccessfully deposited &f%money_formatted% Money&a!"
+Success-Withdraw: "&a&lBank&9&lPlus &aSuccessfully withdrew &f%amount_formatted% Money&a!"
+Success-Deposit: "&a&lBank&9&lPlus &aSuccessfully deposited &f%amount_formatted% Money&a!"
 No-Permission: "&a&lBank&9&lPlus &cYou don't have the permission!"
 Specify-Player: "&a&lBank&9&lPlus &cPlease specify a player!"
 Cannot-Find-Player: "&a&lBank&9&lPlus &cCannot find this player!"
-Bank-Others: "&a&lBank&9&lPlus &f%player% &ahas &f%money_formatted% Money &ain their bank!"
-Set-Message: "&a&lBank&9&lPlus &fYou have set &f%player%'s bank balance &ato &f%amount%&a!"
-Add-Message: "&a&lBank&9&lPlus &fYou have added &f%amount_formatted% Money &ato &f%player%'s bank balance&a!"
-Remove-Message: "&a&lBank&9&lPlus &fYou have removed &f%amount_formatted% Money &ato &f%player%'s bank balance&a!"
+Bank-Others: "&a&lBank&9&lPlus &f%player_name% &ahas &f%amount_formatted% Money &ain their bank!"
+Set-Message: "&a&lBank&9&lPlus &aYou have set &f%player_name%'s &abank balance to &f%amount_formatted%&a!"
+Add-Message: "&a&lBank&9&lPlus &aYou have added &f%amount_formatted% Money &ato &f%player_name%'s &abank balance!"
+Remove-Message: "&a&lBank&9&lPlus &aYou have removed &f%amount_formatted% Money &ato &f%player_name%'s &abank balance!"
+Interest-Restarted: "&a&lBank&9&lPlus &aInterest Restarted!"
+Interest-Disabled: "&a&lBank&9&lPlus &cYou can't use Interest, please enabled it in the config!"
+Error: "&a&lBank&9&lPlus &cSome errors occurred..."
+Interest-Usage: "&a&lBank&9&lPlus &aUsage: /bank interest restart"
 Interest-Broadcast:
   Enabled: true
-  Message: "&aBank&9Plus &aThe interest was delivered!"
+  Message: "&a&lBank&9&lPlus &aYou have earned &f%amount_formatted% Money &ain interest!"
 Help-Message:
   - "&a&lBank&9&lPlus &aHelp page"
   - "&a/bank deposit <amount> &7Deposit an amount of Money."
   - "&a/bank withdraw <amount> &7Withdraw an amount of Money."
   - "&a/bank view <player> &7View the balance of a player."
+  - "&7Plugin made by Pulsi_"
+  - "&aRate 5 Star!"

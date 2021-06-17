@@ -1,9 +1,11 @@
 package me.pulsi_.bankplus.guis;
 
+import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.MethodUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -18,10 +20,11 @@ import java.util.List;
 
 public class ItemCreator {
 
-    public static ItemStack createItemStack(ConfigurationSection c, Player p, EconomyManager economyManager) {
+    public ItemStack createItemStack(ConfigurationSection c, Player p, EconomyManager economyManager, BankPlus plugin) {
 
-        ItemStack item = new ItemStack(Material.BARRIER);
-        if (c.getString("Material") != null) {
+        int cooldown = Integer.parseInt(plugin.getPlayers().getString("Interest-Cooldown"));
+
+        ItemStack item;
             try {
                 item = new ItemStack(Material.valueOf(c.getString("Material")));
             } catch (NullPointerException exception) {
@@ -29,15 +32,20 @@ public class ItemCreator {
             } catch (IllegalArgumentException exception) {
                 item = new ItemStack(Material.BARRIER);
             }
-        }
 
         ItemMeta itemMeta = item.getItemMeta();
 
         try {
-            itemMeta.setDisplayName(ChatUtils.c(c.getString("DisplayName")
-                    .replace("%player_name%", p.getName())
+            String displayName = c.getString("DisplayName").replace("%player_name%", p.getName())
                     .replace("%balance%", String.valueOf(economyManager.getPersonalBalance(p)))
-                    .replace("%balance_formatted%", String.valueOf(MethodUtils.formatter(economyManager.getPersonalBalance(p))))));
+                    .replace("%balance_formatted%", MethodUtils.format(economyManager.getPersonalBalance(p), plugin))
+                    .replace("%balance_formatted_long%", MethodUtils.formatLong(economyManager.getPersonalBalance(p), plugin))
+                    .replace("%interest_cooldown%", MethodUtils.formatTime(cooldown, plugin));
+            if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+                itemMeta.setDisplayName(ChatUtils.c(PlaceholderAPI.setPlaceholders(p, displayName)));
+            } else {
+                itemMeta.setDisplayName(ChatUtils.c(displayName));
+            }
         } catch (NullPointerException exception) {
             itemMeta.setDisplayName(ChatUtils.c("&c&l*CANNOT FIND DISPLAYNAME*"));
         }
@@ -48,9 +56,15 @@ public class ItemCreator {
                 lore.add(ChatColor.translateAlternateColorCodes('&', lines)
                         .replace("%player_name%", p.getName())
                         .replace("%balance%", String.valueOf(economyManager.getPersonalBalance(p)))
-                        .replace("%balance_formatted%", String.valueOf(MethodUtils.formatter(economyManager.getPersonalBalance(p)))));
+                        .replace("%balance_formatted%", MethodUtils.format(economyManager.getPersonalBalance(p), plugin))
+                        .replace("%balance_formatted_long%", MethodUtils.formatLong(economyManager.getPersonalBalance(p), plugin))
+                        .replace("%interest_cooldown%", MethodUtils.formatTime(cooldown, plugin)));
             }
-            itemMeta.setLore(lore);
+            if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+                itemMeta.setLore(PlaceholderAPI.setPlaceholders(p, lore));
+            } else {
+                itemMeta.setLore(lore);
+            }
         }
 
         if (c.getBoolean("Glowing")) {
@@ -64,8 +78,7 @@ public class ItemCreator {
 
     public static ItemStack guiFiller(BankPlus plugin) {
 
-        ItemStack filler = new ItemStack(Material.BARRIER);
-        if (plugin.getConfiguration().getString("Gui.Filler.Material") != null) {
+        ItemStack filler;
             try {
                 filler = new ItemStack(Material.valueOf(plugin.getConfiguration().getString("Gui.Filler.Material")));
             } catch (NullPointerException exception) {
@@ -73,7 +86,6 @@ public class ItemCreator {
             } catch (IllegalArgumentException exception) {
                 filler = new ItemStack(Material.BARRIER);
             }
-        }
 
         ItemMeta fillerMeta = filler.getItemMeta();
 

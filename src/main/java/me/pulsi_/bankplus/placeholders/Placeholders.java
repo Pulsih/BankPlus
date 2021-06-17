@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.placeholders;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.managers.EconomyManager;
+import me.pulsi_.bankplus.utils.MethodUtils;
 import org.bukkit.entity.Player;
 
 public class Placeholders extends PlaceholderExpansion {
@@ -38,33 +39,24 @@ public class Placeholders extends PlaceholderExpansion {
     }
 
     @Override
-    public String onPlaceholderRequest(Player p, String identifier){
+    public String onPlaceholderRequest(Player p, String identifier) {
         if (p == null) {
-            return "The players is not Online!";
+            return "Player not online";
         }
 
         EconomyManager economyManager = new EconomyManager(plugin);
-        int balance = economyManager.getPersonalBalance(p);
+        long balance = economyManager.getPersonalBalance(p);
+        int cooldown = Integer.parseInt(plugin.getPlayers().getString("Interest-Cooldown"));
 
-        if (identifier.equals("balance")) {
-            return "" + balance;
+        switch (identifier) {
+            case "balance": return "" + balance;
+
+            case "balance_formatted": return MethodUtils.format(balance, plugin);
+
+            case "balance_formatted_long": return MethodUtils.formatLong(balance, plugin);
+
+            case "interest_cooldown": return MethodUtils.formatTime(cooldown, plugin);
         }
-
-        if (identifier.equals("balance_formatted")) {
-            if (balance < 1000) {
-                return String.valueOf(balance);
-            }
-            if (balance >= 1000 && balance < 1000000) {
-                return Math.round(balance / 1000) + "K";
-            }
-            if (balance >= 1000000 && balance < 1000000000) {
-                return Math.round(balance / 1000000) + "M";
-            }
-            if (balance >= 1000000000) {
-                return Math.round(balance / 1000000000) + "B";
-            }
-        }
-
         return null;
     }
 }

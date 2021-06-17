@@ -9,6 +9,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
+import java.io.IOException;
+
 public class GuiBankListener implements Listener {
 
     private EconomyManager economyManager;
@@ -21,8 +23,9 @@ public class GuiBankListener implements Listener {
     }
 
     @EventHandler
-    public void guiListener(InventoryClickEvent e) {
+    public void guiListener(InventoryClickEvent e) throws IOException {
 
+        Player p = (Player) e.getWhoClicked();
         String displayName = plugin.getConfiguration().getString("Gui.Title");
 
         if (e.getCurrentItem() == null) return;
@@ -34,37 +37,37 @@ public class GuiBankListener implements Listener {
             ConfigurationSection items = plugin.getConfiguration().getConfigurationSection("Gui.Items." + key);
 
             if (!(e.getSlot() + 1 == items.getInt("Slot"))) continue;
-
             if (items.getString("Action.Action-Type") == null) continue;
 
             String actionType = items.getString("Action.Action-Type");
-            String amount = items.getString("Action.Amount");
-            Player p = (Player) e.getWhoClicked();
+            String actionAmount = items.getString("Action.Amount");
 
             if (actionType.contains("Withdraw")) {
-                if (amount.contains("ALL")) {
-                    int intAmount = economyManager.getPersonalBalance(p);
-                    economyManager.withdraw(p, intAmount);
-                } else if (amount.contains("HALF")) {
-                    int intAmount = economyManager.getPersonalBalance(p) / 2;
-                    economyManager.withdraw(p, intAmount);
+                if (actionAmount.contains("ALL")) {
+                    long amount = economyManager.getPersonalBalance(p);
+                    economyManager.withdraw(p, amount);
+                } else if (actionAmount.contains("HALF")) {
+                    long amount = economyManager.getPersonalBalance(p) / 2;
+                    economyManager.withdraw(p, amount);
                 } else {
-                    int intAmount = Integer.parseInt(amount);
-                    economyManager.withdraw(p, intAmount);
+                    long amount = Long.parseLong(actionAmount);
+                    economyManager.withdraw(p, amount);
                 }
             }
             if (actionType.contains("Deposit")) {
-                if (amount.contains("ALL")) {
-                    int intAmount = (int) plugin.getEconomy().getBalance(p);
-                    economyManager.deposit(p, intAmount);
-                } else if (amount.contains("HALF")) {
-                    int intAmount = (int) plugin.getEconomy().getBalance(p) / 2;
-                    economyManager.deposit(p, intAmount);
+                if (actionAmount.contains("ALL")) {
+                    long amount = (long) plugin.getEconomy().getBalance(p);
+                    economyManager.deposit(p, amount);
+                } else if (actionAmount.contains("HALF")) {
+                    long amount = (long) (plugin.getEconomy().getBalance(p) / 2);
+                    economyManager.deposit(p, amount);
                 } else {
-                    int intAmount = Integer.parseInt(amount);
-                    economyManager.deposit(p, intAmount);
+                    long amount = Long.parseLong(actionAmount);
+                    economyManager.deposit(p, amount);
                 }
             }
+        }
+        if (plugin.getConfiguration().getBoolean("Gui.Update-On-Click")) {
             guiBank.openGui(p);
         }
     }

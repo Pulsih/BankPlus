@@ -16,7 +16,7 @@ import java.io.IOException;
 
 public final class BankPlus extends JavaPlugin {
 
-    private static Economy econ = null;
+    private static Economy econ;
     private ConfigManager configManager;
     private Interest interest;
 
@@ -25,12 +25,11 @@ public final class BankPlus extends JavaPlugin {
 
         if (!setupEconomy()) {
             getServer().getConsoleSender().sendMessage("");
-            getServer().getConsoleSender().sendMessage(ChatUtils.c("&cCannot load &a&lBank&9&lPlus&c, Vault is not installed!"));
+            getServer().getConsoleSender().sendMessage(ChatUtils.c("&cCannot load &a&lBank&9&lPlus&c, No economy plugin found!"));
             getServer().getConsoleSender().sendMessage(ChatUtils.c("&cPlease download it if you want to use this plugin!"));
-            getServer().getConsoleSender().sendMessage(ChatUtils.c("&f&nhttps://www.spigotmc.org/resources/vault.34315/"));
+            getServer().getConsoleSender().sendMessage(ChatUtils.c("&fPlugin advised: &nhttps://www.spigotmc.org/resources/essentialsx.9089/"));
             getServer().getConsoleSender().sendMessage("");
             getServer().getPluginManager().disablePlugin(this);
-
         } else {
 
             if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {

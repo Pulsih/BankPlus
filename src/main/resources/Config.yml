@@ -6,13 +6,10 @@ Update-Checker: true
 
 Interest:
   # Interest will give players that has money in bank
-  # an % of the amount every amount of days / hours etc..
+  # a % of the amount every <num> of minutes etc..
   Enabled: true
-  Money-Given: "5" # 5% of the amount
-  # <num>-m -> Minutes
-  # <num>-h -> Hours
-  # <num>-d -> Days
-  Delay: "5-m"
+  Money-Given: "5" # 5% of the bank amount
+  Delay: "5" #5 Minutes
 
 General:
 
@@ -35,20 +32,41 @@ General:
     Enabled: true
     Sound: "ENTITY_ORB_PICKUP,5,1"
 
+Placeholders:
+  Money:
+    Thousands: "K"
+    Millions: "M"
+    Billions: "B"
+    Trillions: "T"
+    Quadrillions: "Q"
+  Time:
+    Minute: " Minute"
+    Minutes: " Minutes"
+    Hour: " Hour"
+    Hours: " Hours"
+    Day: " Day"
+    Days: " Days"
+
 Gui:
   #
   # If the GUI its enabled, typing /bank
   # won't display the amount of Money
   # but will open this GUI
   #
-  # Local Placeholders:
-  # %player_name% -> Returns the player name
-  # %balance% -> Returns the balance
-  # %balance_formatted% -> Returns the players balance formatted
-  # (( It also works on Title ))
+  # The gui now supports Placeholders!
+  #
+  # In case you don't have PlaceholderAPI installed
+  # You can use Local placeholders:
+  # %player_name% -> Return the player naem
+  # %balance% -> Return player balance
+  # %balance_formatted% -> Return player balance formatted
+  # %balance_formatted_long% -> Return player balance formatted without "."
+  # %interest_cooldown% -> Return the interest cooldown
+  #
   Enabled: true
   Title: "&a&lGui Bank"
   Lines: 3
+  Update-On-Click: true
   Filler:
     Enabled: true
     Material: "WHITE_STAINED_GLASS_PANE"
@@ -106,7 +124,9 @@ Gui:
       Lore:
         - ""
         - "&7Account Name: &f%player_name%"
-        - "&7Balance: &a%balance_formatted%"
+        - "&7Balance: &a%bankplus_balance_formatted%"
+        - ""
+        - "&7Wait more &a%bankplus_interest_cooldown% &7to get interest!"
         - ""
       Glowing: true
 

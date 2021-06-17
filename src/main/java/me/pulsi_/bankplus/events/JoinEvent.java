@@ -21,10 +21,10 @@ public class JoinEvent implements Listener {
 
         Player p = e.getPlayer();
 
+        long startAmount = plugin.getConfiguration().getLong("General.Join-Start-Amount");
+
         if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
             if (plugin.getPlayers().getString("Players." + p.getUniqueId() + ".Money") == null) {
-
-                int startAmount = plugin.getConfiguration().getInt("General.Join-Start-Amount");
 
                 plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &aSuccessfully registered " + p.getName()));
                 plugin.getPlayers().set("Players." + p.getUniqueId() + ".Money", startAmount);
@@ -36,8 +36,6 @@ public class JoinEvent implements Listener {
             }
         } else {
             if (plugin.getPlayers().getString("Players." + p.getName() + ".Money") == null) {
-
-                int startAmount = plugin.getConfiguration().getInt("General.Join-Start-Amount");
 
                 plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &aSuccessfully registered " + p.getName()));
                 plugin.getPlayers().set("Players." + p.getName() + ".Money", startAmount);

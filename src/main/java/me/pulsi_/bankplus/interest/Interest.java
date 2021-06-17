@@ -1,11 +1,12 @@
 package me.pulsi_.bankplus.interest;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.utils.ChatUtils;
+import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.MethodUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
+
+import java.io.IOException;
 
 public class Interest {
 
@@ -14,24 +15,36 @@ public class Interest {
         this.plugin = plugin;
     }
 
-    private BukkitTask giveInterestPerTime;
     public void giveInterest() {
         if (!plugin.getConfiguration().getBoolean("Interest.Enabled")) return;
 
-        String getDelay = plugin.getConfiguration().getString("Interest.Delay");
-        String[] time = getDelay.split("-");
+        String delay = plugin.getConfiguration().getString("Interest.Delay");
 
-        double intDelay = Integer.parseInt(time[0]);
+        if (plugin.getPlayers().getString("Interest-Cooldown") == null) {
+            plugin.getPlayers().set("Interest-Cooldown", delay);
+        }
 
-        if (time[1].equalsIgnoreCase("m")) {
-            intDelay = MethodUtils.ticksInMinutes(intDelay);
-        }
-        if (time[1].equalsIgnoreCase("h")) {
-            intDelay = MethodUtils.ticksInHours(intDelay);
-        }
-        if (time[1].equalsIgnoreCase("d")) {
-            intDelay = MethodUtils.ticksInDays(intDelay);
-        }
+        Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            if (Integer.parseInt(plugin.getPlayers().getString("Interest-Cooldown")) != 1) {
+                plugin.getPlayers().set("Interest-Cooldown", String.valueOf(Integer.parseInt(plugin.getPlayers().getString("Interest-Cooldown")) -1));
+                try {
+                    plugin.savePlayers();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                giveInterestToEveryone();
+                plugin.getPlayers().set("Interest-Cooldown", delay);
+                try {
+                    plugin.savePlayers();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, 0, MethodUtils.ticksInMinutes(1));
+    }
+
+    public void giveInterestToEveryone() {
 
         String moneyPercentage = plugin.getConfiguration().getString("Interest.Money-Given");
         String intMoneyPercentage = "0";
@@ -41,24 +54,39 @@ public class Interest {
         if (moneyPercentage.length() == 2) {
             intMoneyPercentage = "0." + moneyPercentage;
         }
-        if (moneyPercentage.length() == 3) {
+        if (moneyPercentage.length() >= 3) {
             intMoneyPercentage = moneyPercentage;
         }
 
         double finalMoneyPercentage = Double.parseDouble(intMoneyPercentage);
 
-        this.giveInterestPerTime = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-            for (Player p : Bukkit.getOnlinePlayers()) {
-                int bankBalance = plugin.getPlayers().getInt("Players." + p.getUniqueId() + ".Money");
-                plugin.getPlayers().set("Players." + p.getUniqueId() + ".Money", bankBalance + bankBalance * finalMoneyPercentage);
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
+                long bankBalance = plugin.getPlayers().getLong("Players." + p.getUniqueId() + ".Money");
+                if ((long) (bankBalance * finalMoneyPercentage) == 0) {
+                    plugin.getPlayers().set("Players." + p.getUniqueId() + ".Money", bankBalance + 1);
+                } else {
+                    plugin.getPlayers().set("Players." + p.getUniqueId() + ".Money", (long) (bankBalance + bankBalance * finalMoneyPercentage));
+                }
                 if (plugin.getMessages().getBoolean("Interest-Broadcast.Enabled")) {
-                    Bukkit.broadcastMessage(ChatUtils.c(plugin.getMessages().getString("Interest-Broadcast.Message")));
+                    MessageManager.interestBroadcastMessage(p, plugin, bankBalance, finalMoneyPercentage);
+                }
+            } else {
+                long bankBalance = plugin.getPlayers().getLong("Players." + p.getName() + ".Money");
+                if ((long) (bankBalance * finalMoneyPercentage) == 0) {
+                    plugin.getPlayers().set("Players." + p.getName() + ".Money", bankBalance + 1);
+                } else {
+                    plugin.getPlayers().set("Players." + p.getName() + ".Money", (long) (bankBalance + bankBalance * finalMoneyPercentage));
+                }
+                if (plugin.getMessages().getBoolean("Interest-Broadcast.Enabled")) {
+                    MessageManager.interestBroadcastMessage(p, plugin, bankBalance, finalMoneyPercentage);
                 }
             }
-        }, 0, (long) intDelay);
-    }
-
-    public BukkitTask getGiveInterestPerTime() {
-        return giveInterestPerTime;
+            try {
+                plugin.savePlayers();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

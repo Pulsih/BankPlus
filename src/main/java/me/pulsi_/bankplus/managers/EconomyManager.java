@@ -1,9 +1,12 @@
 package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.MethodUtils;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import java.io.IOException;
+import java.math.BigDecimal;
 
 public class EconomyManager {
 
@@ -12,134 +15,114 @@ public class EconomyManager {
         this.plugin = plugin;
     }
 
-    public int getPersonalBalance(Player p) {
+    public long getPersonalBalance(Player p) {
 
-        int personalBalance;
+        long personalBalance;
 
         if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
-            personalBalance = plugin.getPlayers().getInt("Players." + p.getUniqueId() + ".Money");
+            personalBalance = plugin.getPlayers().getLong("Players." + p.getUniqueId() + ".Money");
         } else {
-            personalBalance = plugin.getPlayers().getInt("Players." + p.getName() + ".Money");
+            personalBalance = plugin.getPlayers().getLong("Players." + p.getName() + ".Money");
         }
         return personalBalance;
     }
 
-    public int getOthersBalance(Player target) {
+    public long getOthersBalance(Player target) {
 
-        int othersBalance;
+        long othersBalance;
 
         if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
-            othersBalance = plugin.getPlayers().getInt("Players." + target.getUniqueId() + ".Money");
+            othersBalance = plugin.getPlayers().getLong("Players." + target.getUniqueId() + ".Money");
         } else {
-            othersBalance = plugin.getPlayers().getInt("Players." + target.getName() + ".Money");
+            othersBalance = plugin.getPlayers().getLong("Players." + target.getName() + ".Money");
         }
         return othersBalance;
     }
 
-    public void withdraw(Player p, int withdraw) {
+    public void withdraw(Player p, long withdraw) throws IOException {
 
+        long bankMoney;
         if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
+            bankMoney = plugin.getPlayers().getLong("Players." + p.getUniqueId() + ".Money");
+        } else {
+            bankMoney = plugin.getPlayers().getLong("Players." + p.getName() + ".Money");
+        }
 
-            double bankMoney = plugin.getPlayers().getDouble("Players." + p.getUniqueId() + ".Money");
-
-            if (bankMoney >= withdraw) {
+        if (bankMoney >= withdraw) {
+            if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
                 plugin.getPlayers().set("Players." + p.getUniqueId() + ".Money", bankMoney - withdraw);
-                plugin.getEconomy().depositPlayer(p, withdraw);
-                p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Success-Withdraw")
-                        .replace("%money%", String.valueOf(withdraw))
-                        .replace("%money_formatted%", String.valueOf(MethodUtils.formatter(withdraw)))));
-                String soundPath = plugin.getConfiguration().getString("General.Withdraw-Sound.Sound");
-                boolean soundBoolean = plugin.getConfiguration().getBoolean("General.Withdraw-Sound.Enabled");
-                MethodUtils.playSound(soundPath, p, plugin, soundBoolean);
             } else {
-                p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Insufficient-Money-Withdraw")));
-            }
-        } else {
-
-            double bankMoney = plugin.getPlayers().getDouble("Players." + p.getName() + ".Money");
-
-            if (bankMoney >= withdraw) {
                 plugin.getPlayers().set("Players." + p.getName() + ".Money", bankMoney - withdraw);
-                plugin.getEconomy().depositPlayer(p, withdraw);
-                p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Success-Withdraw")
-                        .replace("%money%", String.valueOf(withdraw))
-                        .replace("%money_formatted%", String.valueOf(MethodUtils.formatter(withdraw)))));
-                String soundPath = plugin.getConfiguration().getString("General.Withdraw-Sound.Sound");
-                boolean soundBoolean = plugin.getConfiguration().getBoolean("General.Withdraw-Sound.Enabled");
-                MethodUtils.playSound(soundPath, p, plugin, soundBoolean);
-            } else {
-                p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Insufficient-Money-Withdraw")));
             }
+            plugin.getEconomy().depositPlayer(p, withdraw);
+            MethodUtils.playSound(plugin.getConfiguration().getString("General.Withdraw-Sound.Sound"), p, plugin, plugin.getConfiguration().getBoolean("General.Withdraw-Sound.Enabled"));
+            MessageManager.successWithdraw(p, withdraw, plugin);
+            plugin.savePlayers();
+        } else {
+            MessageManager.insufficientMoneyWithdraw(p, plugin);
         }
     }
 
-    public void deposit(Player p, int deposit) {
+    public void deposit(Player p, long deposit) throws IOException {
 
+        long money = (long) plugin.getEconomy().getBalance(p);
+        long bankMoney;
         if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
+            bankMoney = plugin.getPlayers().getLong("Players." + p.getUniqueId() + ".Money");
+        } else {
+            bankMoney = plugin.getPlayers().getLong("Players." + p.getName() + ".Money");
+        }
 
-            double bankMoney = plugin.getPlayers().getDouble("Players." + p.getUniqueId() + ".Money");
-            double money = plugin.getEconomy().getBalance(p);
-
-            if (money >= deposit) {
+        if (money >= deposit) {
+            if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
                 plugin.getPlayers().set("Players." + p.getUniqueId() + ".Money", bankMoney + deposit);
-                plugin.getEconomy().withdrawPlayer(p, deposit);
-                p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Success-Deposit"))
-                        .replace("%money%", String.valueOf(deposit))
-                        .replace("%money_formatted%", String.valueOf(MethodUtils.formatter(deposit))));
-                String soundPath = plugin.getConfiguration().getString("General.Deposit-Sound.Sound");
-                boolean soundBoolean = plugin.getConfiguration().getBoolean("General.Deposit-Sound.Enabled");
-                MethodUtils.playSound(soundPath, p, plugin, soundBoolean);
             } else {
-                p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Insufficient-Money-Deposit")));
-            }
-        } else {
-
-            double bankMoney = plugin.getPlayers().getDouble("Players." + p.getName() + ".Money");
-            double money = plugin.getEconomy().getBalance(p);
-
-            if (money >= deposit) {
                 plugin.getPlayers().set("Players." + p.getName() + ".Money", bankMoney + deposit);
-                plugin.getEconomy().withdrawPlayer(p, deposit);
-                p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Success-Deposit"))
-                        .replace("%money%", String.valueOf(deposit))
-                        .replace("%money_formatted%", String.valueOf(MethodUtils.formatter(deposit))));
-                String soundPath = plugin.getConfiguration().getString("General.Deposit-Sound.Sound");
-                boolean soundBoolean = plugin.getConfiguration().getBoolean("General.Deposit-Sound.Enabled");
-                MethodUtils.playSound(soundPath, p, plugin, soundBoolean);
-            } else {
-                p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Insufficient-Money-Deposit")));
             }
-        }
-    }
-
-    public void setPlayerBankBalance(Player target, int amount) {
-
-        if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
-            plugin.getPlayers().set("Players." + target.getUniqueId() + ".Money", amount);
+            plugin.getEconomy().withdrawPlayer(p, deposit);
+            MethodUtils.playSound(plugin.getConfiguration().getString("General.Deposit-Sound.Sound"), p, plugin, plugin.getConfiguration().getBoolean("General.Deposit-Sound.Enabled"));
+            MessageManager.successDeposit(p, deposit, plugin);
+            MethodUtils.playSound(plugin.getConfiguration().getString("General.Deposit-Sound.Sound"), p, plugin, plugin.getConfiguration().getBoolean("General.Deposit-Sound.Enabled"));
+            plugin.savePlayers();
         } else {
-            plugin.getPlayers().set("Players." + target.getName() + ".Money", amount);
+            MessageManager.insufficientMoneyDeposit(p, plugin);
         }
     }
 
-    public void addPlayerBankBalance(Player target, int amount) {
+    public void setPlayerBankBalance(CommandSender s, Player target, long amount) throws IOException {
 
         if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
-            int targetBank = plugin.getPlayers().getInt("Players." + target.getUniqueId() + ".Money");
+            plugin.getPlayers().set("Players." + target.getUniqueId() + ".Money", BigDecimal.valueOf(amount));
+        } else {
+            plugin.getPlayers().set("Players." + target.getName() + ".Money", BigDecimal.valueOf(amount));
+        }
+        MessageManager.setMessage(s, plugin, target, amount);
+        plugin.savePlayers();
+    }
+
+    public void addPlayerBankBalance(CommandSender s, Player target, long amount) throws IOException {
+
+        if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
+            long targetBank = plugin.getPlayers().getLong("Players." + target.getUniqueId() + ".Money");
             plugin.getPlayers().set("Players." + target.getUniqueId() + ".Money", targetBank + amount);
         } else {
-            int targetBank = plugin.getPlayers().getInt("Players." + target.getName() + ".Money");
+            long targetBank = plugin.getPlayers().getLong("Players." + target.getName() + ".Money");
             plugin.getPlayers().set("Players." + target.getName() + ".Money", targetBank + amount);
         }
+        MessageManager.addMessage(s, plugin, target, amount);
+        plugin.savePlayers();
     }
 
-    public void removePlayerBankBalance(Player target, int amount) {
+    public void removePlayerBankBalance(CommandSender s, Player target, long amount) throws IOException {
 
         if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
-            int targetBank = plugin.getPlayers().getInt("Players." + target.getUniqueId() + ".Money");
+            long targetBank = plugin.getPlayers().getLong("Players." + target.getUniqueId() + ".Money");
             plugin.getPlayers().set("Players." + target.getUniqueId() + ".Money", targetBank - amount);
         } else {
-            int targetBank = plugin.getPlayers().getInt("Players." + target.getName() + ".Money");
+            long targetBank = plugin.getPlayers().getLong("Players." + target.getName() + ".Money");
             plugin.getPlayers().set("Players." + target.getName() + ".Money", targetBank - amount);
         }
+        MessageManager.removeMessage(s, plugin, target, amount);
+        plugin.savePlayers();
     }
 }

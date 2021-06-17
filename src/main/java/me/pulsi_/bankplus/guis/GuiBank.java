@@ -10,8 +10,8 @@ import org.bukkit.inventory.Inventory;
 
 public class GuiBank {
 
-    private EconomyManager economyManager;
     private BankPlus plugin;
+    private EconomyManager economyManager;
     public GuiBank(BankPlus plugin) {
         this.plugin = plugin;
         this.economyManager = new EconomyManager(plugin);
@@ -20,18 +20,30 @@ public class GuiBank {
     public void openGui(Player p) {
 
         int lines = guiLines(plugin.getConfiguration().getInt("Gui.Lines"));
-        String title = plugin.getConfiguration().getString("Gui.Title");
+        String title;
+        try {
+            title = plugin.getConfiguration().getString("Gui.Title");
+        } catch (NullPointerException ex) {
+            title = "&c&l*CANNOT FIND TITLE*";
+        }
 
         Inventory guiBank = Bukkit.createInventory(null, lines, ChatUtils.c(title));
 
         ConfigurationSection c = plugin.getConfiguration().getConfigurationSection("Gui.Items");
 
+        ItemCreator itemCreator = new ItemCreator();
+
         for (String items : c.getKeys(false)) {
-            guiBank.setItem(c.getConfigurationSection(items).getInt("Slot") -1, ItemCreator.createItemStack(c.getConfigurationSection(items), p, economyManager));
+            try {
+                guiBank.setItem(c.getConfigurationSection(items).getInt("Slot") - 1, itemCreator.createItemStack(c.getConfigurationSection(items), p, economyManager, plugin));
+            } catch (ArrayIndexOutOfBoundsException ex) {
+                plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &aThere are some items that go out of the gui! Please fix it in the config!"));
+                guiBank.addItem(itemCreator.createItemStack(c.getConfigurationSection(items), p, economyManager, plugin));
+            }
         }
 
         if (plugin.getConfiguration().getBoolean("Gui.Filler.Enabled")) {
-            for (int i = 0; i < guiLines(lines); i++) {
+            for (int i = 0; i < lines; i++) {
                 guiBank.getItem(i);
                 if (guiBank.getItem(i) == null) {
                     guiBank.setItem(i, ItemCreator.guiFiller(plugin));
@@ -58,14 +70,11 @@ public class GuiBank {
         if(number == 4) {
             return 36;
         }
-        if(number == 1) {
+        if(number == 5) {
             return 45;
         }
-        if(number == 5) {
-            return 54;
-        }
         if(number == 6) {
-            return 63;
+            return 54;
         }
 
         return lines;
