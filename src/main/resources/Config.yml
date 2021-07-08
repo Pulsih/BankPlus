@@ -10,6 +10,7 @@ Interest:
   Enabled: true
   Money-Given: "5" # 5% of the bank amount
   Delay: "5" #5 Minutes
+  Max-Amount: 500000
 
 General:
 
@@ -57,7 +58,7 @@ Gui:
   #
   # In case you don't have PlaceholderAPI installed
   # You can use Local placeholders:
-  # %player_name% -> Return the player naem
+  # %player_name% -> Return the player name
   # %balance% -> Return player balance
   # %balance_formatted% -> Return player balance formatted
   # %balance_formatted_long% -> Return player balance formatted without "."

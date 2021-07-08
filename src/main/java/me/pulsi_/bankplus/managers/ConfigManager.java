@@ -20,21 +20,21 @@ public class ConfigManager {
     }
 
     public void createConfigs() {
-        configFile = new File(plugin.getDataFolder(), "Config.yml");
-        messagesFile = new File(plugin.getDataFolder(), "Messages.yml");
-        playersFile = new File(plugin.getDataFolder(), "Players.yml");
+        configFile = new File(plugin.getDataFolder(), "config.yml");
+        messagesFile = new File(plugin.getDataFolder(), "messages.yml");
+        playersFile = new File(plugin.getDataFolder(), "players.yml");
 
         if (!configFile.exists()) {
             configFile.getParentFile().mkdir();
-            plugin.saveResource("Config.yml", false);
+            plugin.saveResource("config.yml", false);
         }
         if (!messagesFile.exists()) {
             messagesFile.getParentFile().mkdir();
-            plugin.saveResource("Messages.yml", false);
+            plugin.saveResource("messages.yml", false);
         }
         if (!playersFile.exists()) {
             playersFile.getParentFile().mkdir();
-            plugin.saveResource("Players.yml", false);
+            plugin.saveResource("players.yml", false);
         }
 
         config = new YamlConfiguration();

@@ -23,34 +23,41 @@ public final class BankPlus extends JavaPlugin {
     @Override
     public void onEnable() {
 
-        if (!setupEconomy()) {
-            getServer().getConsoleSender().sendMessage("");
-            getServer().getConsoleSender().sendMessage(ChatUtils.c("&cCannot load &a&lBank&9&lPlus&c, No economy plugin found!"));
-            getServer().getConsoleSender().sendMessage(ChatUtils.c("&cPlease download it if you want to use this plugin!"));
-            getServer().getConsoleSender().sendMessage(ChatUtils.c("&fPlugin advised: &nhttps://www.spigotmc.org/resources/essentialsx.9089/"));
-            getServer().getConsoleSender().sendMessage("");
-            getServer().getPluginManager().disablePlugin(this);
-        } else {
+        if (Bukkit.getPluginManager().getPlugin("Vault") != null) {
+            if (setupEconomy()) {
 
-            if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-                new Placeholders(this).register();
+                if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+                    new Placeholders(this).register();
+                } else {
+                    getServer().getConsoleSender().sendMessage("");
+                    getServer().getConsoleSender().sendMessage(ChatUtils.c("&cCannot setup Placeholders, PlaceholderAPI is not installed!"));
+                    getServer().getConsoleSender().sendMessage("");
+                }
+
+                this.configManager = new ConfigManager(this);
+                configManager.createConfigs();
+                DataManager.registerEvents(this);
+                DataManager.setupCommands(this);
+
+                new bStats(this, 11612);
+
+                DataManager.startupMessage(this);
+
+                this.interest = new Interest(this);
+                interest.giveInterest();
             } else {
                 getServer().getConsoleSender().sendMessage("");
-                getServer().getConsoleSender().sendMessage(ChatUtils.c("&cCannot setup Placeholders, PlaceholderAPI is not installed!"));
+                getServer().getConsoleSender().sendMessage(ChatUtils.c("&cCannot load &a&lBank&9&lPlus&c, No economy plugin found!"));
+                getServer().getConsoleSender().sendMessage(ChatUtils.c("&cPlease download it if you want to use this plugin!"));
                 getServer().getConsoleSender().sendMessage("");
+                getServer().getPluginManager().disablePlugin(this);
             }
-
-            this.configManager = new ConfigManager(this);
-            configManager.createConfigs();
-            DataManager.registerEvents(this);
-            DataManager.setupCommands(this);
-
-            new bStats(this, 11612);
-
-            DataManager.startupMessage(this);
-
-            this.interest = new Interest(this);
-            interest.giveInterest();
+        } else {
+            getServer().getConsoleSender().sendMessage("");
+            getServer().getConsoleSender().sendMessage(ChatUtils.c("&cCannot load &a&lBank&9&lPlus&c, Vault is not installed!"));
+            getServer().getConsoleSender().sendMessage(ChatUtils.c("&cPlease download it if you want to use this plugin!"));
+            getServer().getConsoleSender().sendMessage("");
+            getServer().getPluginManager().disablePlugin(this);
         }
     }
 
