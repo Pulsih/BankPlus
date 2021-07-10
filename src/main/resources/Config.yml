@@ -67,7 +67,7 @@ Gui:
   Enabled: true
   Title: "&a&lGui Bank"
   Lines: 3
-  Update-On-Click: true
+  Update-Delay: 1 #In seconds, put 0 to disable
   Filler:
     Enabled: true
     Material: "WHITE_STAINED_GLASS_PANE"
@@ -117,6 +117,18 @@ Gui:
       Action:
         Action-Type: "Withdraw"
         Amount: "ALL"
+    WithdrawCustom:
+      Material: "EMERALD"
+      Slot: 20
+      DisplayName: "&aWithdraw"
+      Lore:
+        - ""
+        - "&7Withdraw a &acustom &7amount of your money to your bank"
+        - ""
+      Glowing: true
+      Action:
+        Action-Type: "Withdraw"
+        Amount: "CUSTOM"
 
     Personal-Info:
       Material: "PAPER"
@@ -169,3 +181,16 @@ Gui:
       Action:
         Action-Type: "Deposit"
         Amount: "ALL"
+
+    DepositCustom:
+      Material: "EMERALD"
+      Slot: 26
+      DisplayName: "&aDeposit"
+      Lore:
+        - ""
+        - "&7Deposit a &acustom &7amount of your money to your bank"
+        - ""
+      Glowing: true
+      Action:
+        Action-Type: "Deposit"
+        Amount: "CUSTOM"

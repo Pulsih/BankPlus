@@ -29,6 +29,9 @@ Interest-Restarted: "&a&lBank&9&lPlus &aInterest Restarted!"
 Interest-Disabled: "&a&lBank&9&lPlus &cYou can't use Interest, please enabled it in the config!"
 Error: "&a&lBank&9&lPlus &cSome errors occurred..."
 Interest-Usage: "&a&lBank&9&lPlus &aUsage: /bank interest restart"
+Title-Custom-Amount:
+  Enabled: true
+  Title: "&fType in &achat &fan, amount to deposit"
 Interest-Broadcast:
   Enabled: true
   Message: "&a&lBank&9&lPlus &aYou have earned &f%amount_formatted% Money &ain interest!"

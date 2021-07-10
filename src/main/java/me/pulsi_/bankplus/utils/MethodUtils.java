@@ -1,11 +1,15 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
+import net.milkbowl.vault.chat.Chat;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
 import java.text.NumberFormat;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
+import java.util.UUID;
 
 public class MethodUtils {
 
@@ -123,6 +127,15 @@ public class MethodUtils {
         } catch (IllegalArgumentException exception) {
             plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cInvalid SoundType at: &f" + path));
         }
+    }
+
+    public static void sendTitle(String path, Player p, BankPlus plugin) {
+
+        String[] pathSlitted = plugin.getMessages().getString(path).split(",");
+        String title1 = pathSlitted[0];
+        String title2 = pathSlitted[1];
+
+        p.sendTitle(ChatUtils.c(title1), ChatUtils.c(title2));
     }
 
     public static int ticksInMinutes(int delay) {

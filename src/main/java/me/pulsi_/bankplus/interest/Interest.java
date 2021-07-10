@@ -59,35 +59,49 @@ public class Interest {
         }
 
         double finalMoneyPercentage = Double.parseDouble(intMoneyPercentage);
+        long maxAmount = plugin.getConfiguration().getLong("Interest.Max-Amount");
 
         for (Player p : Bukkit.getOnlinePlayers()) {
-            if (p.hasPermission("bankplus.receive.interest")) {
-                if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
-                    long bankBalance = plugin.getPlayers().getLong("Players." + p.getUniqueId() + ".Money");
-                    if ((long) (bankBalance * finalMoneyPercentage) == 0) {
-                        plugin.getPlayers().set("Players." + p.getUniqueId() + ".Money", bankBalance + 1);
-                    } else {
-                        plugin.getPlayers().set("Players." + p.getUniqueId() + ".Money", (long) (bankBalance + bankBalance * finalMoneyPercentage));
-                    }
+            if (!p.hasPermission("bankplus.receive.interest")) continue;
+            if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
+                long bankBalance = plugin.getPlayers().getLong("Players." + p.getUniqueId() + ".Money");
+                if ((long) (bankBalance * finalMoneyPercentage) >= maxAmount) {
+                    plugin.getPlayers().set("Players." + p.getUniqueId() + ".Money", bankBalance + maxAmount);
                     if (plugin.getMessages().getBoolean("Interest-Broadcast.Enabled")) {
-                        MessageManager.interestBroadcastMessage(p, plugin, bankBalance, finalMoneyPercentage);
+                        MessageManager.interestBroadcastMessageMax(p, plugin, maxAmount);
                     }
+                    return;
+                }
+                if ((long) (bankBalance * finalMoneyPercentage) == 0) {
+                    plugin.getPlayers().set("Players." + p.getUniqueId() + ".Money", bankBalance + 1);
                 } else {
-                    long bankBalance = plugin.getPlayers().getLong("Players." + p.getName() + ".Money");
-                    if ((long) (bankBalance * finalMoneyPercentage) == 0) {
-                        plugin.getPlayers().set("Players." + p.getName() + ".Money", bankBalance + 1);
-                    } else {
-                        plugin.getPlayers().set("Players." + p.getName() + ".Money", (long) (bankBalance + bankBalance * finalMoneyPercentage));
-                    }
+                    plugin.getPlayers().set("Players." + p.getUniqueId() + ".Money", (long) (bankBalance + bankBalance * finalMoneyPercentage));
+                }
+                if (plugin.getMessages().getBoolean("Interest-Broadcast.Enabled")) {
+                    MessageManager.interestBroadcastMessage(p, plugin, bankBalance, finalMoneyPercentage);
+                }
+            } else {
+                long bankBalance = plugin.getPlayers().getLong("Players." + p.getName() + ".Money");
+                if ((long) (bankBalance * finalMoneyPercentage) >= maxAmount) {
+                    plugin.getPlayers().set("Players." + p.getName() + ".Money", bankBalance + maxAmount);
                     if (plugin.getMessages().getBoolean("Interest-Broadcast.Enabled")) {
-                        MessageManager.interestBroadcastMessage(p, plugin, bankBalance, finalMoneyPercentage);
+                        MessageManager.interestBroadcastMessageMax(p, plugin, maxAmount);
                     }
+                    return;
                 }
-                try {
-                    plugin.savePlayers();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if ((long) (bankBalance * finalMoneyPercentage) == 0) {
+                    plugin.getPlayers().set("Players." + p.getName() + ".Money", bankBalance + 1);
+                } else {
+                    plugin.getPlayers().set("Players." + p.getName() + ".Money", (long) (bankBalance + bankBalance * finalMoneyPercentage));
                 }
+                if (plugin.getMessages().getBoolean("Interest-Broadcast.Enabled")) {
+                    MessageManager.interestBroadcastMessage(p, plugin, bankBalance, finalMoneyPercentage);
+                }
+            }
+            try {
+                plugin.savePlayers();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }

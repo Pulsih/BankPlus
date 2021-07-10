@@ -69,6 +69,14 @@ public class MessageManager {
         }
     }
 
+    public static void interestBroadcastMessageMax(Player p, BankPlus plugin, long amount) {
+
+            p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Interest-Broadcast.Message")
+                    .replace("%amount%", String.valueOf(amount))
+                    .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
+                    .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
+    }
+
     public static void insufficientMoneyWithdraw(Player p, BankPlus plugin) {
         p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Insufficient-Money-Withdraw")));
     }

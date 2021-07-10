@@ -4,10 +4,12 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
+import me.pulsi_.bankplus.utils.HeadUtils;
 import me.pulsi_.bankplus.utils.MethodUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -20,11 +22,42 @@ import java.util.List;
 
 public class ItemCreator {
 
-    public ItemStack createItemStack(ConfigurationSection c, Player p, EconomyManager economyManager, BankPlus plugin) {
+    public static ItemStack createItemStack(ConfigurationSection c, Player p, BankPlus plugin) {
+
+        EconomyManager economyManager = new EconomyManager(plugin);
 
         int cooldown = Integer.parseInt(plugin.getPlayers().getString("Interest-Cooldown"));
 
         ItemStack item;
+        if (c.getString("Material").contains("HEAD-%PLAYER%")) {
+            try {
+                item = HeadUtils.getOwnerHead(p);
+            } catch (NullPointerException exception) {
+                item = new ItemStack(Material.BARRIER);
+            } catch (IllegalArgumentException exception) {
+                item = new ItemStack(Material.BARRIER);
+            }
+        } else if (c.getString("Material").startsWith("HEAD-")) {
+                try {
+                    String[] player = c.getString("Material").split("-");
+                    String configPlayer = player[1];
+                    item = HeadUtils.getNameHead(configPlayer);
+                } catch (NullPointerException exception) {
+                    item = new ItemStack(Material.BARRIER);
+                } catch (IllegalArgumentException exception) {
+                    item = new ItemStack(Material.BARRIER);
+                }
+        } else if (c.getString("Material").startsWith("HEAD-<")) {
+            try {
+                String[] textureValue = c.getString("Material").split("-<");
+                String value = textureValue[1].replace(">", "");
+                item = HeadUtils.getTextureHead(value);
+            } catch (NullPointerException exception) {
+                item = new ItemStack(Material.BARRIER);
+            } catch (IllegalArgumentException exception) {
+                item = new ItemStack(Material.BARRIER);
+            }
+        } else {
             try {
                 item = new ItemStack(Material.valueOf(c.getString("Material")));
             } catch (NullPointerException exception) {
@@ -32,6 +65,7 @@ public class ItemCreator {
             } catch (IllegalArgumentException exception) {
                 item = new ItemStack(Material.BARRIER);
             }
+        }
 
         ItemMeta itemMeta = item.getItemMeta();
 

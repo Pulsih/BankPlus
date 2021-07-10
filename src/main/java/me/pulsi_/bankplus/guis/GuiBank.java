@@ -1,7 +1,6 @@
 package me.pulsi_.bankplus.guis;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
@@ -10,11 +9,10 @@ import org.bukkit.inventory.Inventory;
 
 public class GuiBank {
 
+    private static Inventory guiBank;
     private BankPlus plugin;
-    private EconomyManager economyManager;
     public GuiBank(BankPlus plugin) {
         this.plugin = plugin;
-        this.economyManager = new EconomyManager(plugin);
     }
 
     public void openGui(Player p) {
@@ -27,20 +25,9 @@ public class GuiBank {
             title = "&c&l*CANNOT FIND TITLE*";
         }
 
-        Inventory guiBank = Bukkit.createInventory(null, lines, ChatUtils.c(title));
+        guiBank = Bukkit.createInventory(null, lines, ChatUtils.c(title));
 
-        ConfigurationSection c = plugin.getConfiguration().getConfigurationSection("Gui.Items");
-
-        ItemCreator itemCreator = new ItemCreator();
-
-        for (String items : c.getKeys(false)) {
-            try {
-                guiBank.setItem(c.getConfigurationSection(items).getInt("Slot") - 1, itemCreator.createItemStack(c.getConfigurationSection(items), p, economyManager, plugin));
-            } catch (ArrayIndexOutOfBoundsException ex) {
-                plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &aThere are some items that go out of the gui! Please fix it in the config!"));
-                guiBank.addItem(itemCreator.createItemStack(c.getConfigurationSection(items), p, economyManager, plugin));
-            }
-        }
+        setItems(plugin, p);
 
         if (plugin.getConfiguration().getBoolean("Gui.Filler.Enabled")) {
             for (int i = 0; i < lines; i++) {
@@ -78,5 +65,19 @@ public class GuiBank {
         }
 
         return lines;
+    }
+
+    public static void setItems(BankPlus plugin, Player p) {
+
+        ConfigurationSection c = plugin.getConfiguration().getConfigurationSection("Gui.Items");
+
+        for (String items : c.getKeys(false)) {
+            try {
+                guiBank.setItem(c.getConfigurationSection(items).getInt("Slot") - 1, ItemCreator.createItemStack(c.getConfigurationSection(items), p, plugin));
+            } catch (ArrayIndexOutOfBoundsException ex) {
+                plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &aThere are some items that go out of the gui! Please fix it in the config!"));
+                guiBank.addItem(ItemCreator.createItemStack(c.getConfigurationSection(items), p, plugin));
+            }
+        }
     }
 }

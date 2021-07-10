@@ -6,7 +6,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 
 public class EconomyManager {
 
@@ -92,9 +91,9 @@ public class EconomyManager {
     public void setPlayerBankBalance(CommandSender s, Player target, long amount) throws IOException {
 
         if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
-            plugin.getPlayers().set("Players." + target.getUniqueId() + ".Money", BigDecimal.valueOf(amount));
+            plugin.getPlayers().set("Players." + target.getUniqueId() + ".Money", amount);
         } else {
-            plugin.getPlayers().set("Players." + target.getName() + ".Money", BigDecimal.valueOf(amount));
+            plugin.getPlayers().set("Players." + target.getName() + ".Money", amount);
         }
         MessageManager.setMessage(s, plugin, target, amount);
         plugin.savePlayers();
