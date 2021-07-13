@@ -2,7 +2,7 @@ BankPlus GitHub
 
 Thanks for using this plugin!
 
-For any issues, you can check the official wiki of the plugin, or join my discord with this invite!
+For any issues, you can check the official [wiki](https://github.com/Pulsih/BankPlus/wiki) of the plugin, or join my [discord](https://discord.gg/gDweRZ2FeC) with this invite!
 
 ### Wiki
 
