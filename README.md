@@ -1,4 +1,4 @@
-BankPlus GitHub
+### BankPlus GitHub
 
 Thanks for using this plugin!
 
