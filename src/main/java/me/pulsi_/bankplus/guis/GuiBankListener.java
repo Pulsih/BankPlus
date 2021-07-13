@@ -5,6 +5,7 @@ import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.MethodUtils;
 import me.pulsi_.bankplus.utils.SetUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,7 +13,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.IOException;
@@ -22,11 +22,9 @@ public class GuiBankListener implements Listener {
     private BukkitTask runnable;
     private EconomyManager economyManager;
     private BankPlus plugin;
-    private GuiBank guiBank;
     public GuiBankListener(BankPlus plugin) {
         this.plugin = plugin;
         this.economyManager = new EconomyManager(plugin);
-        this.guiBank = new GuiBank(plugin);
     }
 
     @EventHandler
@@ -57,10 +55,10 @@ public class GuiBankListener implements Listener {
                     }
                     p.closeInventory();
                 } else if (actionAmount.contains("ALL")) {
-                    long amount = economyManager.getPersonalBalance(p);
+                    long amount = economyManager.getPersonalBalance(p, plugin);
                     economyManager.withdraw(p, amount);
                 } else if (actionAmount.contains("HALF")) {
-                    long amount = economyManager.getPersonalBalance(p) / 2;
+                    long amount = economyManager.getPersonalBalance(p, plugin) / 2;
                     economyManager.withdraw(p, amount);
                 } else {
                     long amount = Long.parseLong(actionAmount);
@@ -95,19 +93,15 @@ public class GuiBankListener implements Listener {
         if (!e.getView().getTitle().equalsIgnoreCase(ChatUtils.c(plugin.getConfiguration().getString("Gui.Title")))) return;
 
         if (plugin.getConfiguration().getInt("Gui.Update-Delay") != 0) {
-            runnable = new BukkitRunnable() {
-                @Override
-                public void run(){
-                    GuiBank.setItems(plugin, p);
-                }
-            }.runTaskTimer(plugin, plugin.getConfiguration().getInt("Gui.Update-Delay") * 20L, 0);
+            runnable = Bukkit.getScheduler().runTaskTimer(plugin, () -> GuiBank.setItems(plugin, p), plugin.getConfiguration().getInt("Gui.Update-Delay") * 20L, 0);
         }
     }
 
     @EventHandler
     public void closeGUI(InventoryCloseEvent e) {
-
-        if (!e.getView().getTitle().equalsIgnoreCase(ChatUtils.c(plugin.getConfiguration().getString("Gui.Title")))) return;
-        runnable.cancel();
+        try {
+            if (!e.getView().getTitle().equalsIgnoreCase(ChatUtils.c(plugin.getConfiguration().getString("Gui.Title")))) return;
+            runnable.cancel();
+        } catch (NullPointerException ex) {}
     }
 }

@@ -14,7 +14,7 @@ public class EconomyManager {
         this.plugin = plugin;
     }
 
-    public long getPersonalBalance(Player p) {
+    public static long getPersonalBalance(Player p, BankPlus plugin) {
 
         long personalBalance;
 

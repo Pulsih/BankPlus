@@ -41,13 +41,13 @@ public class HeadUtils {
         return getPlayerHead(Bukkit.createProfile(uuid));
     }
 
-    public static ItemStack getTextureHead(String textureValue) {
-        return getPlayerHead(UUID.randomUUID(), textureValue);
+    public static ItemStack getTextureHead(String textureValue, String textureSignature) {
+        return getPlayerHead(UUID.randomUUID(), textureValue, textureSignature);
     }
 
-    private static ItemStack getPlayerHead(UUID uuid, String textureValue) {
+    private static ItemStack getPlayerHead(UUID uuid, String textureValue, String textureSignature) {
         PlayerProfile playerProfile = Bukkit.createProfile(uuid);
-        playerProfile.setProperty(new ProfileProperty("textures", textureValue));
+        playerProfile.setProperty(new ProfileProperty("textures", textureValue, textureSignature));
         return getPlayerHead(playerProfile);
     }
 

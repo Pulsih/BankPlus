@@ -45,7 +45,7 @@ public class Placeholders extends PlaceholderExpansion {
         }
 
         EconomyManager economyManager = new EconomyManager(plugin);
-        long balance = economyManager.getPersonalBalance(p);
+        long balance = economyManager.getPersonalBalance(p, plugin);
         int cooldown = Integer.parseInt(plugin.getPlayers().getString("Interest-Cooldown"));
 
         switch (identifier) {

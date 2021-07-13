@@ -8,6 +8,13 @@ import org.bukkit.entity.Player;
 
 public class MessageManager {
 
+    public static void personalBalance(Player p, BankPlus plugin) {
+        p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Personal-Bank")
+                .replace("%amount%", String.valueOf(EconomyManager.getPersonalBalance(p, plugin)))
+                .replace("%amount_formatted%", MethodUtils.format(EconomyManager.getPersonalBalance(p, plugin), plugin))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(EconomyManager.getPersonalBalance(p, plugin), plugin))));
+    }
+
     public static void successWithdraw(Player p, long amount, BankPlus plugin) {
         p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Success-Withdraw")
                 .replace("%amount%", String.valueOf(amount))

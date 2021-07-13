@@ -47,18 +47,8 @@ public class Interest {
     public void giveInterestToEveryone() {
 
         String moneyPercentage = plugin.getConfiguration().getString("Interest.Money-Given");
-        String intMoneyPercentage = "0";
-        if (moneyPercentage.length() == 1) {
-            intMoneyPercentage = "0.0" + moneyPercentage;
-        }
-        if (moneyPercentage.length() == 2) {
-            intMoneyPercentage = "0." + moneyPercentage;
-        }
-        if (moneyPercentage.length() >= 3) {
-            intMoneyPercentage = moneyPercentage;
-        }
 
-        double finalMoneyPercentage = Double.parseDouble(intMoneyPercentage);
+        double finalMoneyPercentage = Double.parseDouble(moneyPercentage);
         long maxAmount = plugin.getConfiguration().getLong("Interest.Max-Amount");
 
         for (Player p : Bukkit.getOnlinePlayers()) {

@@ -34,10 +34,7 @@ public class Commands implements CommandExecutor {
                     GuiBank gui = new GuiBank(plugin);
                     gui.openGui(p);
                 } else {
-                    p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Personal-Bank")
-                        .replace("%amount%", String.valueOf(economyManager.getPersonalBalance(p)))
-                        .replace("%amount_formatted%", MethodUtils.format(economyManager.getPersonalBalance(p), plugin))
-                        .replace("%amount_formatted_long%", String.valueOf(MethodUtils.formatLong(economyManager.getPersonalBalance(p), plugin)))));
+                    MessageManager.personalBalance(p, plugin);
                 }
                 String soundPath = plugin.getConfiguration().getString("General.Personal-Sound.Sound");
                 boolean soundBoolean = plugin.getConfiguration().getBoolean("General.Personal-Sound.Enabled");

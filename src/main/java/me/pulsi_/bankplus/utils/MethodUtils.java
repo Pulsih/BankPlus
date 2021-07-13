@@ -75,7 +75,7 @@ public class MethodUtils {
         return null;
     }
 
-    public static String format(long balance, BankPlus plugin) {
+    public static String format(double balance, BankPlus plugin) {
 
         String k = plugin.getConfiguration().getString("Placeholders.Money.Thousands");
         String m = plugin.getConfiguration().getString("Placeholders.Money.Millions");
@@ -83,22 +83,22 @@ public class MethodUtils {
         String t = plugin.getConfiguration().getString("Placeholders.Money.Trillions");
         String q = plugin.getConfiguration().getString("Placeholders.Money.Quadrillions");
 
-        if (Double.parseDouble(String.valueOf(balance)) < 1000L) {
+        if (balance < 1000L) {
             return formatString(balance);
         }
-        if (Double.parseDouble(String.valueOf(balance)) >= 1000L && Double.parseDouble(String.valueOf(balance)) < 1000000L) {
+        if (balance >= 1000L && balance < 1000000L) {
             return formatString(Double.parseDouble(String.valueOf(balance)) / 1000L) + k;
         }
-        if (Double.parseDouble(String.valueOf(balance)) >= 1000000L && Double.parseDouble(String.valueOf(balance)) < 1000000000L) {
+        if (balance >= 1000000L && balance < 1000000000L) {
             return formatString(Double.parseDouble(String.valueOf(balance)) / 1000000L) + m;
         }
-        if (Double.parseDouble(String.valueOf(balance)) >= 1000000000L && Double.parseDouble(String.valueOf(balance)) < 1000000000000L) {
+        if (balance >= 1000000000L && balance < 1000000000000L) {
             return formatString(Double.parseDouble(String.valueOf(balance)) / 1000000000L) + b;
         }
-        if (Double.parseDouble(String.valueOf(balance)) >= 1000000000000L && Double.parseDouble(String.valueOf(balance)) < 1000000000000000L) {
+        if (balance >= 1000000000000L && balance < 1000000000000000L) {
             return formatString(Double.parseDouble(String.valueOf(balance)) / 1000000000000L) + t;
         }
-        if (Double.parseDouble(String.valueOf(balance)) >= 1000000000000000L && Double.parseDouble(String.valueOf(balance)) < 1000000000000000000L) {
+        if (balance >= 1000000000000000L && balance < 1000000000000000000L) {
             return formatString(Double.parseDouble(String.valueOf(balance)) / 1000000000000000L) + q;
         }
         return null;
