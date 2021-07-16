@@ -8,8 +8,8 @@ Interest:
   # Interest will give players that has money in bank
   # a % of the amount every <num> of minutes etc..
   Enabled: true
-  Money-Given: "0.05" # 2% of the bank amount
-  Delay: "5" #5 Minutes
+  Money-Given: "0.05" # 5% of the bank amount
+  Delay: "5" #5 Minutes | DO NOT USE NUMBERS WITH DECIMALS!
   Max-Amount: 500000
 
 General:
@@ -20,6 +20,10 @@ General:
   # Will use players UUIDs for store moneys,
   # otherwise, it will use players Names
   Use-UUID: true
+
+  # Enabling this option, will reopen the inventory after
+  # typing the custom amount in the chat to deposit / withdraw
+  Reopen-Bank-After-Chat: true
 
   Withdraw-Sound:
     Enabled: true
@@ -50,20 +54,20 @@ Placeholders:
     Days: " Days"
 
 Gui:
-  # Now the gui supports custom heads, use https://mineskin.org/
-  # to create custom heads and the format:
-  # HEAD-<textureValue,textureSignature>
+  # Now the gui supports custom heads, use https://minecraft-heads.com/custom-heads/search?searchword=
+  # to search custom values heads and use the following format:
+  # HEAD-<textureValue>
   #
   # You can also take a head from a player name or use
   # your head with:
   # HEAD-%PLAYER% The head of the player which is opening the gui
-  # HEAD-<player-name> The head of the selected player
+  # HEAD[player-name] The head of the selected player
   #
   # If you want to know more about this: https://github.com/Pulsih/BankPlus/wiki
 
   Enabled: true
   Title: "&a&lGui Bank"
-  Lines: 3
+  Lines: 4
   Update-Delay: 1 #In seconds, put 0 to disable
   Filler:
     Enabled: true
@@ -120,7 +124,7 @@ Gui:
       DisplayName: "&aWithdraw"
       Lore:
         - ""
-        - "&7Withdraw a &acustom &7amount of your money to your bank"
+        - "&7Withdraw a &acustom &7amount of money to your bank"
         - ""
       Glowing: true
       Action:
@@ -128,8 +132,7 @@ Gui:
         Amount: "CUSTOM"
 
     Personal-Info:
-      Material: "HEAD-<ewogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJpZCIgOiAiNTdjZWJiZTU4ZGNlNDhlYTllZjk4OGNhZGM4YmRkMmYiLAogICAgICAidHlwZSIgOiAiU0tJTiIsCiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTFiOGU3YWY0ZTU0NmU3MWI0ZTg3YzFjZjk3M2NiYzYwNWQ3ZmRkMjllYThjYmE1MjVmYzVmZjgzNDUxMzA0IiwKICAgICAgInByb2ZpbGVJZCIgOiAiOTFmZTE5Njg3YzkwNDY1NmFhMWZjMDU5ODZkZDNmZTciLAogICAgICAidGV4dHVyZUlkIiA6ICI1MWI4ZTdhZjRlNTQ2ZTcxYjRlODdjMWNmOTczY2JjNjA1ZDdmZGQyOWVhOGNiYTUyNWZjNWZmODM0NTEzMDQiCiAgICB9CiAgfSwKICAic2tpbiIgOiB7CiAgICAiaWQiIDogIjU3Y2ViYmU1OGRjZTQ4ZWE5ZWY5ODhjYWRjOGJkZDJmIiwKICAgICJ0eXBlIiA6ICJTS0lOIiwKICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTFiOGU3YWY0ZTU0NmU3MWI0ZTg3YzFjZjk3M2NiYzYwNWQ3ZmRkMjllYThjYmE1MjVmYzVmZjgzNDUxMzA0IiwKICAgICJwcm9maWxlSWQiIDogIjkxZmUxOTY4N2M5MDQ2NTZhYTFmYzA1OTg2ZGQzZmU3IiwKICAgICJ0ZXh0dXJlSWQiIDogIjUxYjhlN2FmNGU1NDZlNzFiNGU4N2MxY2Y5NzNjYmM2MDVkN2ZkZDI5ZWE4Y2JhNTI1ZmM1ZmY4MzQ1MTMwNCIKICB9LAogICJjYXBlIiA6IG51bGwKfQ==,
-      oJ9PBTV+8Bczh07LrkfIgNVpv17wOjM5k8tDW8St1q5DRYzAtWX4UGJM2h/m6aZPfGTIcagz7lT0kXasYQ+H8zn4NxRaKcYMR36F32gYxEC+EnL7eWpctHWYO++7EAe4pTOb1cIAP+FpREfNe1i5az3vai15UipFp7y9PWDcWXEFfLybZmSRbU1v2UnfCdz4lugGPV3blk1bjaGXyP3x8NG81joxOkWSxB5ecP0hBun1R3AYmKudOC/4iukyliVr+qM7IjWE4WZN7wpf8KEUypokqqn2KOyhK8VCgp3YrglPpSg8nlESCLKK9RRtEJ0kYdEsSHJbZRQTA4/FwFHC23+Y3t7l6eH4TKsFT5Uvh7e82JwaUizVSBM9cNM1repqTCltVr2By41vkmvi6o2gAzsPegjtKCTeLP7y6ngWq39zj/s/hydhqc+3m+EO2pWiOpzhk3zC6D9+JALTeXWBlqiDgkwl7v/bz98kH4+2xLdQpqx/3etzVAu5qKqERJljmpgxL1MhW9h/X35NyI4ED/B656pNk03FDZqLQd4c5cD38lcOTDtal/Vunt8XCyWW42ZLfnFlu4Ifxgv6ThBjlT2O0/8CkKfOvWd+A1s4fCOom2mV85q4niWLKKmS3ohZs9a3VaUf0flOvx/M73Rm73WYpy9K5JYRUhNybURed9A=>"
+      Material: "HEAD-%PLAYER%"
       DisplayName: "&aPersonal"
       Slot: 14
       Lore:
@@ -138,6 +141,20 @@ Gui:
         - "&7Balance: &a%bankplus_balance_formatted%"
         - ""
         - "&7Wait &a%bankplus_interest_cooldown% &7to get interest!"
+        - ""
+      Glowing: true
+
+    How-Does-It-Work:
+      Material: "HEAD-<eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzU3NDcwMTBkODRhYTU2NDgzYjc1ZjYyNDNkOTRmMzRjNTM0NjAzNTg0YjJjYzY4YTQ1YmYzNjU4NDAxMDVmZCJ9fX0=>"
+      DisplayName: "&aHow Does It Work?"
+      Slot: 23
+      Lore:
+        - ""
+        - "&7This is a bank, you can &adeposit &7all your"
+        - "&7money here to keep them &asafe&7, your money"
+        - "&7kept in the bank will &aincrease &7thanks to"
+        - "&7the &a&ninterest&7, which gives you a percentage of"
+        - "&7your money in the &abank&7!"
         - ""
       Glowing: true
 
@@ -160,7 +177,7 @@ Gui:
       DisplayName: "&aDeposit"
       Lore:
         - ""
-        - "&7Deposit &aHalf &7of your money to your bank"
+        - "&7Deposit &aHalf &7of money to your bank"
         - ""
       Glowing: true
       Action:
@@ -173,7 +190,7 @@ Gui:
       DisplayName: "&aDeposit"
       Lore:
         - ""
-        - "&7Deposit &aAll &7of your money to your bank"
+        - "&7Deposit &aAll &7of money to your bank"
         - ""
       Glowing: true
       Action:
@@ -186,7 +203,7 @@ Gui:
       DisplayName: "&aDeposit"
       Lore:
         - ""
-        - "&7Deposit a &acustom &7amount of your money to your bank"
+        - "&7Deposit a &acustom &7amount of money to your bank"
         - ""
       Glowing: true
       Action:

@@ -2,17 +2,13 @@ package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.utils.MethodUtils;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.io.IOException;
 
 public class EconomyManager {
-
-    private BankPlus plugin;
-    public EconomyManager(BankPlus plugin) {
-        this.plugin = plugin;
-    }
 
     public static long getPersonalBalance(Player p, BankPlus plugin) {
 
@@ -26,7 +22,7 @@ public class EconomyManager {
         return personalBalance;
     }
 
-    public long getOthersBalance(Player target) {
+    public static long getOthersBalance(Player target, BankPlus plugin) {
 
         long othersBalance;
 
@@ -38,7 +34,19 @@ public class EconomyManager {
         return othersBalance;
     }
 
-    public void withdraw(Player p, long withdraw) throws IOException {
+    public static long getOthersBalance(OfflinePlayer target, BankPlus plugin) {
+
+        long othersBalance;
+
+        if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
+            othersBalance = plugin.getPlayers().getLong("Players." + target.getUniqueId() + ".Money");
+        } else {
+            othersBalance = plugin.getPlayers().getLong("Players." + target.getName() + ".Money");
+        }
+        return othersBalance;
+    }
+
+    public static void withdraw(Player p, long withdraw, BankPlus plugin) throws IOException {
 
         long bankMoney;
         if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
@@ -62,7 +70,7 @@ public class EconomyManager {
         }
     }
 
-    public void deposit(Player p, long deposit) throws IOException {
+    public static void deposit(Player p, long deposit, BankPlus plugin) throws IOException {
 
         long money = (long) plugin.getEconomy().getBalance(p);
         long bankMoney;
@@ -88,7 +96,7 @@ public class EconomyManager {
         }
     }
 
-    public void setPlayerBankBalance(CommandSender s, Player target, long amount) throws IOException {
+    public static void setPlayerBankBalance(CommandSender s, Player target, long amount, BankPlus plugin) throws IOException {
 
         if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
             plugin.getPlayers().set("Players." + target.getUniqueId() + ".Money", amount);
@@ -99,7 +107,7 @@ public class EconomyManager {
         plugin.savePlayers();
     }
 
-    public void addPlayerBankBalance(CommandSender s, Player target, long amount) throws IOException {
+    public static void addPlayerBankBalance(CommandSender s, Player target, long amount, BankPlus plugin) throws IOException {
 
         if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
             long targetBank = plugin.getPlayers().getLong("Players." + target.getUniqueId() + ".Money");
@@ -112,7 +120,7 @@ public class EconomyManager {
         plugin.savePlayers();
     }
 
-    public void removePlayerBankBalance(CommandSender s, Player target, long amount) throws IOException {
+    public static void removePlayerBankBalance(CommandSender s, Player target, long amount, BankPlus plugin) throws IOException {
 
         if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
             long targetBank = plugin.getPlayers().getLong("Players." + target.getUniqueId() + ".Money");

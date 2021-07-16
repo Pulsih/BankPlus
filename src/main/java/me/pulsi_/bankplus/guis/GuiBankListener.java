@@ -20,11 +20,9 @@ import java.io.IOException;
 public class GuiBankListener implements Listener {
 
     private BukkitTask runnable;
-    private EconomyManager economyManager;
     private BankPlus plugin;
     public GuiBankListener(BankPlus plugin) {
         this.plugin = plugin;
-        this.economyManager = new EconomyManager(plugin);
     }
 
     @EventHandler
@@ -51,36 +49,36 @@ public class GuiBankListener implements Listener {
                 if (actionAmount.contains("CUSTOM")) {
                     SetUtils.playerWithdrawing.add(p.getUniqueId());
                     if (plugin.getMessages().getBoolean("Title-Custom-Amount.Enabled")) {
-                        MethodUtils.sendTitle("Title-Custom-Amount.Title", p, plugin);
+                        MethodUtils.sendTitle("Title-Custom-Amount.Title-Withdraw", p, plugin);
                     }
                     p.closeInventory();
                 } else if (actionAmount.contains("ALL")) {
-                    long amount = economyManager.getPersonalBalance(p, plugin);
-                    economyManager.withdraw(p, amount);
+                    long amount = EconomyManager.getPersonalBalance(p, plugin);
+                    EconomyManager.withdraw(p, amount, plugin);
                 } else if (actionAmount.contains("HALF")) {
-                    long amount = economyManager.getPersonalBalance(p, plugin) / 2;
-                    economyManager.withdraw(p, amount);
+                    long amount = EconomyManager.getPersonalBalance(p, plugin) / 2;
+                    EconomyManager.withdraw(p, amount, plugin);
                 } else {
                     long amount = Long.parseLong(actionAmount);
-                    economyManager.withdraw(p, amount);
+                    EconomyManager.withdraw(p, amount, plugin);
                 }
             }
             if (actionType.contains("Deposit")) {
                 if (actionAmount.contains("CUSTOM")) {
                     SetUtils.playerDepositing.add(p.getUniqueId());
                     if (plugin.getMessages().getBoolean("Title-Custom-Amount.Enabled")) {
-                        MethodUtils.sendTitle("Title-Custom-Amount.Title", p, plugin);
+                        MethodUtils.sendTitle("Title-Custom-Amount.Title-Deposit", p, plugin);
                     }
                     p.closeInventory();
                 } else if (actionAmount.contains("ALL")) {
                     long amount = (long) plugin.getEconomy().getBalance(p);
-                    economyManager.deposit(p, amount);
+                    EconomyManager.deposit(p, amount, plugin);
                 } else if (actionAmount.contains("HALF")) {
                     long amount = (long) (plugin.getEconomy().getBalance(p) / 2);
-                    economyManager.deposit(p, amount);
+                    EconomyManager.deposit(p, amount, plugin);
                 } else {
                     long amount = Long.parseLong(actionAmount);
-                    economyManager.deposit(p, amount);
+                    EconomyManager.deposit(p, amount, plugin);
                 }
             }
         }

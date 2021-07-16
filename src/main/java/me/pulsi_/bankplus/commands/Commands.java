@@ -7,6 +7,7 @@ import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.MethodUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -16,12 +17,9 @@ import java.io.IOException;
 
 public class Commands implements CommandExecutor {
 
-    private EconomyManager economyManager;
     private BankPlus plugin;
-
     public Commands(BankPlus plugin) {
         this.plugin = plugin;
-        this.economyManager = new EconomyManager(plugin);
     }
 
     @Override
@@ -71,6 +69,7 @@ public class Commands implements CommandExecutor {
                     } else {
                         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("No-Permission")));
                     }
+                    break;
 
                 case "withdraw":
                     if (s.hasPermission("bankplus.withdraw")) {
@@ -158,9 +157,10 @@ public class Commands implements CommandExecutor {
                                 MethodUtils.playSound(plugin.getConfiguration().getString("General.View-Sound.Sound"), p, plugin, plugin.getConfiguration().getBoolean("General.View-Sound.Enabled"));
                             }
                             Player target = Bukkit.getPlayerExact(args[1]);
-                            MessageManager.bankOthers(s, plugin, target, economyManager);
-                        } catch (Error err) {
-                            MessageManager.cannotFindPlayer(s, plugin);
+                            MessageManager.bankOthers(s, plugin, target);
+                        } catch (NullPointerException err) {
+                            OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
+                            MessageManager.bankOthers(s, plugin, target);
                         }
                     } else {
                         MessageManager.noPermission(s, plugin);
@@ -173,7 +173,7 @@ public class Commands implements CommandExecutor {
                             Player p = (Player) s;
                             try {
                                 long withdraw = Long.parseLong(args[1]);
-                                economyManager.withdraw(p, withdraw);
+                                EconomyManager.withdraw(p, withdraw, plugin);
                             } catch (NumberFormatException | IOException ex) {
                                 MessageManager.invalidNumber(s, plugin);
                             }
@@ -191,7 +191,7 @@ public class Commands implements CommandExecutor {
                             Player p = (Player) s;
                             try {
                                 long deposit = Long.parseLong(args[1]);
-                                economyManager.deposit(p, deposit);
+                                EconomyManager.deposit(p, deposit, plugin);
                             } catch (NumberFormatException | IOException ex) {
                                 MessageManager.invalidNumber(s, plugin);
                             }
@@ -216,8 +216,8 @@ public class Commands implements CommandExecutor {
                         if (s.hasPermission("bankplus.interest.restart")) {
                             if (plugin.getConfiguration().getBoolean("Interest.Enabled")) {
                                 try {
-                                    String interestCooldown = plugin.getConfiguration().getString("Interest.Delay");
-                                    plugin.getPlayers().set("Interest-Cooldown", interestCooldown);
+                                    String delay = plugin.getConfiguration().getString("Interest.Delay");
+                                    plugin.getPlayers().set("Interest-Cooldown", delay);
                                     plugin.savePlayers();
                                     MessageManager.interestRestarted(s, plugin);
                                 } catch (NullPointerException | IOException ex) {
@@ -245,7 +245,7 @@ public class Commands implements CommandExecutor {
                         try {
                             Player target = Bukkit.getPlayerExact(args[1]);
                             long amount = Long.parseLong(args[2]);
-                            economyManager.setPlayerBankBalance(s, target, amount);
+                            EconomyManager.setPlayerBankBalance(s, target, amount, plugin);
                         } catch (NumberFormatException ex) {
                             MessageManager.invalidNumber(s, plugin);
                         } catch (Error | IOException err) {
@@ -261,7 +261,7 @@ public class Commands implements CommandExecutor {
                         try {
                             Player target = Bukkit.getPlayerExact(args[1]);
                             long amount = Long.parseLong(args[2]);
-                            economyManager.addPlayerBankBalance(s, target, amount);
+                            EconomyManager.addPlayerBankBalance(s, target, amount, plugin);
                         } catch (NumberFormatException ex) {
                             MessageManager.invalidNumber(s, plugin);
                         } catch (Error err) {
@@ -279,7 +279,7 @@ public class Commands implements CommandExecutor {
                         try {
                             Player target = Bukkit.getPlayerExact(args[1]);
                             long amount = Long.parseLong(args[2]);
-                            economyManager.removePlayerBankBalance(s, target, amount);
+                            EconomyManager.removePlayerBankBalance(s, target, amount, plugin);
                         } catch (NumberFormatException ex) {
                             MessageManager.invalidNumber(s, plugin);
                         } catch (Error err) {

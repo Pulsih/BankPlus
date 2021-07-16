@@ -31,7 +31,8 @@ Error: "&a&lBank&9&lPlus &cSome errors occurred..."
 Interest-Usage: "&a&lBank&9&lPlus &aUsage: /bank interest restart"
 Title-Custom-Amount:
   Enabled: true
-  Title: "&fType in &achat &fan, amount to deposit"
+  Title-Deposit: "&fType in &achat &fan, amount to &adeposit"
+  Title-Withdraw: "&fType in &achat &fan, amount to &awithdraw"
 Interest-Broadcast:
   Enabled: true
   Message: "&a&lBank&9&lPlus &aYou have earned &f%amount_formatted% Money &ain interest!"

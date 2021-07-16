@@ -18,28 +18,29 @@ public class Interest {
     public void giveInterest() {
         if (!plugin.getConfiguration().getBoolean("Interest.Enabled")) return;
 
-        String delay = plugin.getConfiguration().getString("Interest.Delay");
-
-        if (plugin.getPlayers().getString("Interest-Cooldown") == null) {
-            plugin.getPlayers().set("Interest-Cooldown", delay);
-        }
-
         Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-            if (Integer.parseInt(plugin.getPlayers().getString("Interest-Cooldown")) != 1) {
-                plugin.getPlayers().set("Interest-Cooldown", String.valueOf(Integer.parseInt(plugin.getPlayers().getString("Interest-Cooldown")) -1));
-                try {
-                    plugin.savePlayers();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                giveInterestToEveryone();
+
+            String delay = plugin.getConfiguration().getString("Interest.Delay");
+
+            if (plugin.getPlayers().getString("Interest-Cooldown") == null || plugin.getPlayers().getString("Interest-Cooldown").contains("-")) {
                 plugin.getPlayers().set("Interest-Cooldown", delay);
                 try {
                     plugin.savePlayers();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
+
+            if (Integer.parseInt(plugin.getPlayers().getString("Interest-Cooldown")) == 1 || Integer.parseInt(plugin.getPlayers().getString("Interest-Cooldown")) == 0) {
+                giveInterestToEveryone();
+                plugin.getPlayers().set("Interest-Cooldown", delay);
+            } else {
+                plugin.getPlayers().set("Interest-Cooldown", String.valueOf(Integer.parseInt(delay) -1));
+            }
+            try {
+                plugin.savePlayers();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }, 0, MethodUtils.ticksInMinutes(1));
     }

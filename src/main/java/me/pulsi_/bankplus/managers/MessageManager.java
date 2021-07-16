@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.managers;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.MethodUtils;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -29,12 +30,20 @@ public class MessageManager {
                 .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
     }
 
-    public static void bankOthers(CommandSender s, BankPlus plugin, Player target, EconomyManager economyManager) {
+    public static void bankOthers(CommandSender s, BankPlus plugin, Player target) {
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Bank-Others")
                 .replace("%player_name%", target.getName())
-                .replace("%amount%", String.valueOf(economyManager.getOthersBalance(target)))
-                .replace("%amount_formatted%", MethodUtils.format(economyManager.getOthersBalance(target), plugin))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(economyManager.getOthersBalance(target), plugin))));
+                .replace("%amount%", String.valueOf(EconomyManager.getOthersBalance(target, plugin)))
+                .replace("%amount_formatted%", MethodUtils.format(EconomyManager.getOthersBalance(target, plugin), plugin))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(EconomyManager.getOthersBalance(target, plugin), plugin))));
+    }
+
+    public static void bankOthers(CommandSender s, BankPlus plugin, OfflinePlayer target) {
+        s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Bank-Others")
+                .replace("%player_name%", target.getName())
+                .replace("%amount%", String.valueOf(EconomyManager.getOthersBalance(target, plugin)))
+                .replace("%amount_formatted%", MethodUtils.format(EconomyManager.getOthersBalance(target, plugin), plugin))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(EconomyManager.getOthersBalance(target, plugin), plugin))));
     }
 
     public static void setMessage(CommandSender s, BankPlus plugin, Player target, long amount) {
@@ -106,6 +115,10 @@ public class MessageManager {
 
     public static void invalidNumber(CommandSender s, BankPlus plugin) {
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Invalid-Number")));
+    }
+
+    public static void invalidNumber(Player p, BankPlus plugin) {
+        p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Invalid-Number")));
     }
 
     public static void specifyNumber(CommandSender s, BankPlus plugin) {

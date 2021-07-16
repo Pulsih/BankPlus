@@ -9,71 +9,85 @@ import me.pulsi_.bankplus.utils.MethodUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.SkullType;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.MaterialData;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ItemCreator {
 
+    private static final ItemStack barrier = new ItemStack(Material.BARRIER);
+    
     public static ItemStack createItemStack(ConfigurationSection c, Player p, BankPlus plugin) {
-
-        EconomyManager economyManager = new EconomyManager(plugin);
 
         int cooldown = Integer.parseInt(plugin.getPlayers().getString("Interest-Cooldown"));
 
         ItemStack item;
         if (c.getString("Material").contains("HEAD-%PLAYER%")) {
             try {
-                item = HeadUtils.getOwnerHead(p);
+                item = HeadUtils.getNameHead(p.getName(), new ItemStack(Material.PLAYER_HEAD));
+            } catch (NoSuchFieldError er) {
+                item = HeadUtils.getNameHead(p.getName(), new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()));
             } catch (NullPointerException exception) {
-                item = new ItemStack(Material.BARRIER);
+                item = barrier;
             } catch (IllegalArgumentException exception) {
-                item = new ItemStack(Material.BARRIER);
+                item = barrier;
             }
         } else if (c.getString("Material").startsWith("HEAD[")) {
-                try {
-                    String player = c.getString("Material").replace("HEAD[", "").replace("]", "");
-                    item = HeadUtils.getNameHead(player);
-                } catch (NullPointerException exception) {
-                    item = new ItemStack(Material.BARRIER);
-                } catch (IllegalArgumentException exception) {
-                    item = new ItemStack(Material.BARRIER);
-                }
-        } else if (c.getString("Material").startsWith("HEAD-<")) {
+            String player = c.getString("Material").replace("HEAD[", "").replace("]", "");
             try {
-                String textureValue = c.getString("Material").replace("HEAD-<", "").replace(">", "");
-                String[] values = textureValue.split(",");
-                String value1 = values[0];
-                String value2 = values[1];
-                item = HeadUtils.getTextureHead(value1, value2);
+                item = HeadUtils.getNameHead(player, new ItemStack(Material.PLAYER_HEAD));
+            } catch (NoSuchFieldError er) {
+                item = HeadUtils.getNameHead(player, new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()));
+            } catch (NoSuchMethodError er) {
+                item = barrier;
             } catch (NullPointerException exception) {
-                item = new ItemStack(Material.BARRIER);
+                item = barrier;
             } catch (IllegalArgumentException exception) {
-                item = new ItemStack(Material.BARRIER);
+                item = barrier;
+            }
+        } else if (c.getString("Material").startsWith("HEAD-<")) {
+            String textureValue = c.getString("Material").replace("HEAD-<", "").replace(">", "");
+            try {
+                item = HeadUtils.getValueHead(new ItemStack(Material.PLAYER_HEAD), textureValue);
+            } catch (NoSuchFieldError er) {
+                item = HeadUtils.getValueHead(new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()), textureValue);
+            } catch (NullPointerException exception) {
+                item = barrier;
+            } catch (IllegalArgumentException exception) {
+                item = barrier;
             }
         } else {
             try {
-                item = new ItemStack(Material.valueOf(c.getString("Material")));
+                if (c.getString("Material").contains(":")) {
+                    String[] itemData = c.getString("Material").split(":");
+                    item = new ItemStack(Material.valueOf(itemData[0]), 1, Byte.parseByte(itemData[1]));
+                } else {
+                    item = new ItemStack(Material.valueOf(c.getString("Material")));
+                }
             } catch (NullPointerException exception) {
-                item = new ItemStack(Material.BARRIER);
+                item = barrier;
             } catch (IllegalArgumentException exception) {
-                item = new ItemStack(Material.BARRIER);
+                item = barrier;
             }
         }
 
         ItemMeta itemMeta = item.getItemMeta();
 
         try {
-            String displayName = c.getString("DisplayName").replace("%player_name%", p.getName())
-                    .replace("%balance%", String.valueOf(economyManager.getPersonalBalance(p, plugin)))
-                    .replace("%balance_formatted%", MethodUtils.format(economyManager.getPersonalBalance(p, plugin), plugin))
-                    .replace("%balance_formatted_long%", MethodUtils.formatLong(economyManager.getPersonalBalance(p, plugin), plugin))
+            String displayName = c.getString("DisplayName")
+                    .replace("%player_name%", p.getName())
+                    .replace("%balance%", String.valueOf(EconomyManager.getPersonalBalance(p, plugin)))
+                    .replace("%balance_formatted%", MethodUtils.format(EconomyManager.getPersonalBalance(p, plugin), plugin))
+                    .replace("%balance_formatted_long%", MethodUtils.formatLong(EconomyManager.getPersonalBalance(p, plugin), plugin))
                     .replace("%interest_cooldown%", MethodUtils.formatTime(cooldown, plugin));
             if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
                 itemMeta.setDisplayName(ChatUtils.c(PlaceholderAPI.setPlaceholders(p, displayName)));
@@ -89,9 +103,9 @@ public class ItemCreator {
             for (String lines : c.getStringList("Lore")) {
                 lore.add(ChatColor.translateAlternateColorCodes('&', lines)
                         .replace("%player_name%", p.getName())
-                        .replace("%balance%", String.valueOf(economyManager.getPersonalBalance(p, plugin)))
-                        .replace("%balance_formatted%", MethodUtils.format(economyManager.getPersonalBalance(p, plugin), plugin))
-                        .replace("%balance_formatted_long%", MethodUtils.formatLong(economyManager.getPersonalBalance(p, plugin), plugin))
+                        .replace("%balance%", String.valueOf(EconomyManager.getPersonalBalance(p, plugin)))
+                        .replace("%balance_formatted%", MethodUtils.format(EconomyManager.getPersonalBalance(p, plugin), plugin))
+                        .replace("%balance_formatted_long%", MethodUtils.formatLong(EconomyManager.getPersonalBalance(p, plugin), plugin))
                         .replace("%interest_cooldown%", MethodUtils.formatTime(cooldown, plugin)));
             }
             if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
@@ -114,11 +128,16 @@ public class ItemCreator {
 
         ItemStack filler;
             try {
-                filler = new ItemStack(Material.valueOf(plugin.getConfiguration().getString("Gui.Filler.Material")));
+                if (plugin.getConfiguration().getString("Gui.Filler.Material").contains(":")) {
+                    String[] itemData = plugin.getConfiguration().getString("Gui.Filler.Material").split(":");
+                    filler = new ItemStack(Material.valueOf(itemData[0]), 1, Byte.parseByte(itemData[1]));
+                } else {
+                    filler = new ItemStack(Material.valueOf(plugin.getConfiguration().getString("Gui.Filler.Material")));
+                }
             } catch (NullPointerException exception) {
-                filler = new ItemStack(Material.BARRIER);
+                filler = barrier;
             } catch (IllegalArgumentException exception) {
-                filler = new ItemStack(Material.BARRIER);
+                filler = barrier;
             }
 
         ItemMeta fillerMeta = filler.getItemMeta();

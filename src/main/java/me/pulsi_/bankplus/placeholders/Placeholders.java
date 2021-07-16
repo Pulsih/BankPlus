@@ -44,17 +44,13 @@ public class Placeholders extends PlaceholderExpansion {
             return "Player not online";
         }
 
-        EconomyManager economyManager = new EconomyManager(plugin);
-        long balance = economyManager.getPersonalBalance(p, plugin);
+        long balance = EconomyManager.getPersonalBalance(p, plugin);
         int cooldown = Integer.parseInt(plugin.getPlayers().getString("Interest-Cooldown"));
 
         switch (identifier) {
             case "balance": return "" + balance;
-
             case "balance_formatted": return MethodUtils.format(balance, plugin);
-
             case "balance_formatted_long": return MethodUtils.formatLong(balance, plugin);
-
             case "interest_cooldown": return MethodUtils.formatTime(cooldown, plugin);
         }
         return null;
