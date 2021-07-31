@@ -12,8 +12,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.IOException;
-
 public final class BankPlus extends JavaPlugin {
 
     private static Economy econ;
@@ -81,7 +79,7 @@ public final class BankPlus extends JavaPlugin {
     public void reloadConfigs() {
         configManager.reloadConfigs();
     }
-    public void savePlayers() throws IOException {
+    public void savePlayers() {
         configManager.savePlayers();
     }
     private boolean setupEconomy() {

@@ -1,15 +1,11 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
-import net.milkbowl.vault.chat.Chat;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
 import java.text.NumberFormat;
-import java.util.HashSet;
 import java.util.Locale;
-import java.util.Set;
-import java.util.UUID;
 
 public class MethodUtils {
 

@@ -70,7 +70,12 @@ public class ConfigManager {
         players = YamlConfiguration.loadConfiguration(playersFile);
     }
 
-    public void savePlayers() throws IOException {
-        players.save(playersFile);
+    public void savePlayers() {
+        try {
+            players.save(playersFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        players = YamlConfiguration.loadConfiguration(playersFile);
     }
 }

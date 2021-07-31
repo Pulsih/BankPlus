@@ -9,6 +9,10 @@ import org.bukkit.entity.Player;
 
 public class MessageManager {
 
+    public static void cannotDepositMore(Player p, BankPlus plugin) {
+        p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Cannot-Deposit-Anymore")));
+    }
+
     public static void personalBalance(Player p, BankPlus plugin) {
         p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Personal-Bank")
                 .replace("%amount%", String.valueOf(EconomyManager.getPersonalBalance(p, plugin)))

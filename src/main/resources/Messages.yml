@@ -29,6 +29,7 @@ Interest-Restarted: "&a&lBank&9&lPlus &aInterest Restarted!"
 Interest-Disabled: "&a&lBank&9&lPlus &cYou can't use Interest, please enabled it in the config!"
 Error: "&a&lBank&9&lPlus &cSome errors occurred..."
 Interest-Usage: "&a&lBank&9&lPlus &aUsage: /bank interest restart"
+Cannot-Deposit-Anymore: "&a&lBank&9&lPlus &cYou can't deposit anymore money!"
 Title-Custom-Amount:
   Enabled: true
   Title-Deposit: "&fType in &achat &fan, amount to &adeposit"

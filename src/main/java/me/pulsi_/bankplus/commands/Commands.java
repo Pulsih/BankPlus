@@ -13,8 +13,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.io.IOException;
-
 public class Commands implements CommandExecutor {
 
     private BankPlus plugin;
@@ -79,12 +77,7 @@ public class Commands implements CommandExecutor {
                         } else {
                             s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Not-Player")));
                         }
-
-                        try {
-                            plugin.savePlayers();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        plugin.savePlayers();
                     } else {
                         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("No-Permission")));
                     }
@@ -98,12 +91,7 @@ public class Commands implements CommandExecutor {
                         } else {
                             s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Not-Player")));
                         }
-
-                        try {
-                            plugin.savePlayers();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        plugin.savePlayers();
                     } else {
                         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("No-Permission")));
                     }
@@ -172,9 +160,17 @@ public class Commands implements CommandExecutor {
                         if (s instanceof Player) {
                             Player p = (Player) s;
                             try {
+                                long maxWithdrawAmount = plugin.getConfiguration().getLong("General.Max-Withdrawn-Amount");
                                 long withdraw = Long.parseLong(args[1]);
+                                if (maxWithdrawAmount != 0) {
+                                    if (withdraw >= maxWithdrawAmount) {
+                                        withdraw = maxWithdrawAmount;
+                                    } else {
+                                        withdraw = Long.parseLong(args[1]);
+                                    }
+                                }
                                 EconomyManager.withdraw(p, withdraw, plugin);
-                            } catch (NumberFormatException | IOException ex) {
+                            } catch (NumberFormatException ex) {
                                 MessageManager.invalidNumber(s, plugin);
                             }
                         } else {
@@ -190,9 +186,17 @@ public class Commands implements CommandExecutor {
                         if (s instanceof Player) {
                             Player p = (Player) s;
                             try {
+                                long maxDepositAmount = plugin.getConfiguration().getLong("General.Max-Deposit-Amount");
                                 long deposit = Long.parseLong(args[1]);
+                                if (maxDepositAmount != 0) {
+                                    if (deposit >= maxDepositAmount) {
+                                        deposit = maxDepositAmount;
+                                    } else {
+                                        deposit = Long.parseLong(args[1]);
+                                    }
+                                }
                                 EconomyManager.deposit(p, deposit, plugin);
-                            } catch (NumberFormatException | IOException ex) {
+                            } catch (NumberFormatException ex) {
                                 MessageManager.invalidNumber(s, plugin);
                             }
                         } else {
@@ -216,11 +220,11 @@ public class Commands implements CommandExecutor {
                         if (s.hasPermission("bankplus.interest.restart")) {
                             if (plugin.getConfiguration().getBoolean("Interest.Enabled")) {
                                 try {
-                                    String delay = plugin.getConfiguration().getString("Interest.Delay");
+                                    long delay = plugin.getConfiguration().getLong("Interest.Delay");
                                     plugin.getPlayers().set("Interest-Cooldown", delay);
-                                    plugin.savePlayers();
                                     MessageManager.interestRestarted(s, plugin);
-                                } catch (NullPointerException | IOException ex) {
+                                    plugin.savePlayers();
+                                } catch (NullPointerException ex) {
                                     MessageManager.internalError(s, plugin);
                                 }
                             } else {
@@ -248,7 +252,7 @@ public class Commands implements CommandExecutor {
                             EconomyManager.setPlayerBankBalance(s, target, amount, plugin);
                         } catch (NumberFormatException ex) {
                             MessageManager.invalidNumber(s, plugin);
-                        } catch (Error | IOException err) {
+                        } catch (Error err) {
                             MessageManager.cannotFindPlayer(s, plugin);
                         }
                     } else {
@@ -266,8 +270,6 @@ public class Commands implements CommandExecutor {
                             MessageManager.invalidNumber(s, plugin);
                         } catch (Error err) {
                             MessageManager.cannotFindPlayer(s, plugin);
-                        } catch (IOException e) {
-                            e.printStackTrace();
                         }
                     } else {
                         MessageManager.noPermission(s, plugin);
@@ -284,8 +286,6 @@ public class Commands implements CommandExecutor {
                             MessageManager.invalidNumber(s, plugin);
                         } catch (Error err) {
                             MessageManager.cannotFindPlayer(s, plugin);
-                        } catch (IOException e) {
-                            e.printStackTrace();
                         }
                     } else {
                         MessageManager.noPermission(s, plugin);

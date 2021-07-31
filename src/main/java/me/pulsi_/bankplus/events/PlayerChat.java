@@ -10,8 +10,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
-import java.io.IOException;
-
 public class PlayerChat implements Listener {
 
     private BankPlus plugin;
@@ -27,34 +25,28 @@ public class PlayerChat implements Listener {
         String amount = e.getMessage();
 
         if (SetUtils.playerDepositing.contains(p.getUniqueId())) {
-
             try {
                 EconomyManager.deposit(p, Long.parseLong(amount), plugin);
-                SetUtils.playerDepositing.remove(p.getUniqueId());
                 if (plugin.getConfiguration().getBoolean("General.Reopen-Bank-After-Chat")) {
                     guiBank.openGui(p);
                 }
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
             } catch (NumberFormatException ex) {
                 MessageManager.invalidNumber(p, plugin);
             }
             e.setCancelled(true);
+            SetUtils.playerDepositing.remove(p.getUniqueId());
         }
         if (SetUtils.playerWithdrawing.contains(p.getUniqueId())) {
-
             try {
                 EconomyManager.withdraw(p, Long.parseLong(amount), plugin);
-                SetUtils.playerWithdrawing.remove(p.getUniqueId());
                 if (plugin.getConfiguration().getBoolean("General.Reopen-Bank-After-Chat")) {
                     guiBank.openGui(p);
                 }
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
             } catch (NumberFormatException ex) {
                 MessageManager.invalidNumber(p, plugin);
             }
             e.setCancelled(true);
+            SetUtils.playerWithdrawing.remove(p.getUniqueId());
         }
     }
 }

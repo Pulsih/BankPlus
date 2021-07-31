@@ -6,14 +6,10 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.io.IOException;
-
 public class EconomyManager {
 
     public static long getPersonalBalance(Player p, BankPlus plugin) {
-
         long personalBalance;
-
         if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
             personalBalance = plugin.getPlayers().getLong("Players." + p.getUniqueId() + ".Money");
         } else {
@@ -23,9 +19,7 @@ public class EconomyManager {
     }
 
     public static long getOthersBalance(Player target, BankPlus plugin) {
-
         long othersBalance;
-
         if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
             othersBalance = plugin.getPlayers().getLong("Players." + target.getUniqueId() + ".Money");
         } else {
@@ -35,9 +29,7 @@ public class EconomyManager {
     }
 
     public static long getOthersBalance(OfflinePlayer target, BankPlus plugin) {
-
         long othersBalance;
-
         if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
             othersBalance = plugin.getPlayers().getLong("Players." + target.getUniqueId() + ".Money");
         } else {
@@ -46,15 +38,8 @@ public class EconomyManager {
         return othersBalance;
     }
 
-    public static void withdraw(Player p, long withdraw, BankPlus plugin) throws IOException {
-
-        long bankMoney;
-        if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
-            bankMoney = plugin.getPlayers().getLong("Players." + p.getUniqueId() + ".Money");
-        } else {
-            bankMoney = plugin.getPlayers().getLong("Players." + p.getName() + ".Money");
-        }
-
+    public static void withdraw(Player p, long withdraw, BankPlus plugin) {
+        long bankMoney = getOthersBalance(p, plugin);
         if (bankMoney >= withdraw) {
             if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
                 plugin.getPlayers().set("Players." + p.getUniqueId() + ".Money", bankMoney - withdraw);
@@ -70,34 +55,46 @@ public class EconomyManager {
         }
     }
 
-    public static void deposit(Player p, long deposit, BankPlus plugin) throws IOException {
-
+    public static void deposit(Player p, long deposit, BankPlus plugin) {
         long money = (long) plugin.getEconomy().getBalance(p);
-        long bankMoney;
-        if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
-            bankMoney = plugin.getPlayers().getLong("Players." + p.getUniqueId() + ".Money");
-        } else {
-            bankMoney = plugin.getPlayers().getLong("Players." + p.getName() + ".Money");
+        long bankMoney = getOthersBalance(p, plugin);
+        long maxCapacity = plugin.getConfiguration().getLong("General.Max-Bank-Capacity");
+
+        if (money < deposit) {
+            MessageManager.insufficientMoneyDeposit(p, plugin);
+            return;
         }
 
-        if (money >= deposit) {
+        if (maxCapacity != 0) {
+            if (bankMoney >= maxCapacity) {
+                MessageManager.cannotDepositMore(p, plugin);
+                return;
+            }
+            if (bankMoney + deposit >= maxCapacity) {
+                if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
+                    plugin.getPlayers().set("Players." + p.getUniqueId() + ".Money", maxCapacity);
+                } else {
+                    plugin.getPlayers().set("Players." + p.getName() + ".Money", maxCapacity);
+                }
+                plugin.getEconomy().withdrawPlayer(p, maxCapacity - bankMoney);
+                deposit(p, maxCapacity - bankMoney, plugin);
+                MessageManager.successDeposit(p, maxCapacity - bankMoney, plugin);
+                return;
+            }
+        } else {
             if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
                 plugin.getPlayers().set("Players." + p.getUniqueId() + ".Money", bankMoney + deposit);
             } else {
                 plugin.getPlayers().set("Players." + p.getName() + ".Money", bankMoney + deposit);
             }
             plugin.getEconomy().withdrawPlayer(p, deposit);
-            MethodUtils.playSound(plugin.getConfiguration().getString("General.Deposit-Sound.Sound"), p, plugin, plugin.getConfiguration().getBoolean("General.Deposit-Sound.Enabled"));
             MessageManager.successDeposit(p, deposit, plugin);
             MethodUtils.playSound(plugin.getConfiguration().getString("General.Deposit-Sound.Sound"), p, plugin, plugin.getConfiguration().getBoolean("General.Deposit-Sound.Enabled"));
             plugin.savePlayers();
-        } else {
-            MessageManager.insufficientMoneyDeposit(p, plugin);
         }
     }
 
-    public static void setPlayerBankBalance(CommandSender s, Player target, long amount, BankPlus plugin) throws IOException {
-
+    public static void setPlayerBankBalance(CommandSender s, Player target, long amount, BankPlus plugin) {
         if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
             plugin.getPlayers().set("Players." + target.getUniqueId() + ".Money", amount);
         } else {
@@ -107,8 +104,7 @@ public class EconomyManager {
         plugin.savePlayers();
     }
 
-    public static void addPlayerBankBalance(CommandSender s, Player target, long amount, BankPlus plugin) throws IOException {
-
+    public static void addPlayerBankBalance(CommandSender s, Player target, long amount, BankPlus plugin) {
         if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
             long targetBank = plugin.getPlayers().getLong("Players." + target.getUniqueId() + ".Money");
             plugin.getPlayers().set("Players." + target.getUniqueId() + ".Money", targetBank + amount);
@@ -120,14 +116,21 @@ public class EconomyManager {
         plugin.savePlayers();
     }
 
-    public static void removePlayerBankBalance(CommandSender s, Player target, long amount, BankPlus plugin) throws IOException {
-
+    public static void removePlayerBankBalance(CommandSender s, Player target, long amount, BankPlus plugin) {
         if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
             long targetBank = plugin.getPlayers().getLong("Players." + target.getUniqueId() + ".Money");
-            plugin.getPlayers().set("Players." + target.getUniqueId() + ".Money", targetBank - amount);
+            if (targetBank >= 0) {
+                plugin.getPlayers().set("Players." + target.getUniqueId() + ".Money", targetBank - amount);
+            } else {
+                plugin.getPlayers().set("Players." + target.getUniqueId() + ".Money", 0);
+            }
         } else {
             long targetBank = plugin.getPlayers().getLong("Players." + target.getName() + ".Money");
-            plugin.getPlayers().set("Players." + target.getName() + ".Money", targetBank - amount);
+            if (targetBank >= 0) {
+                plugin.getPlayers().set("Players." + target.getName() + ".Money", targetBank - amount);
+            } else {
+                plugin.getPlayers().set("Players." + target.getName() + ".Money", 0);
+            }
         }
         MessageManager.removeMessage(s, plugin, target, amount);
         plugin.savePlayers();

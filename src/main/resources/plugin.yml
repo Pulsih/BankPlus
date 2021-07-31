@@ -7,7 +7,7 @@ depend:
 softdepend:
   - PlaceholderAPI
   - EssentialsX
-  - HeadDatabase
+  - EconomyPlus
 authors: [ Pulsi_ ]
 load: POSTWORLD
 description: Bank Plugin

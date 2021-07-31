@@ -14,7 +14,7 @@ public class DataManager {
     public static void registerEvents(BankPlus plugin) {
         plugin.getServer().getPluginManager().registerEvents(new JoinEvent(plugin), plugin);
         plugin.getServer().getPluginManager().registerEvents(new GuiBankListener(plugin), plugin);
-        plugin.getServer().getPluginManager().registerEvents(new UpdateChecker(plugin, 93130), plugin);
+        plugin.getServer().getPluginManager().registerEvents(new UpdateChecker(plugin), plugin);
         plugin.getServer().getPluginManager().registerEvents(new PlayerChat(plugin), plugin);
     }
 
