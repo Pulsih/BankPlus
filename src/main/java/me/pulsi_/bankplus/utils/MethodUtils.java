@@ -1,6 +1,8 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.managers.EconomyManager;
+import me.pulsi_.bankplus.managers.MessageManager;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
@@ -107,34 +109,151 @@ public class MethodUtils {
         return format.format(balance);
     }
 
-    public static void playSound(String path, Player p, BankPlus plugin, boolean booleanPath) {
-
-        if (booleanPath) return;
-
-        String[] pathSlitted = path.split(",");
-        String soundType = pathSlitted[0];
-        int volume = Integer.parseInt(pathSlitted[1]);
-        int pitch = Integer.parseInt(pathSlitted[2]);
-
+    public static void sendTitle(String path, Player p, BankPlus plugin) {
         try {
-            p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
-        } catch (NullPointerException exception) {
-            plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cCannot find the SoundType at path: &f" + path));
-        } catch (IllegalArgumentException exception) {
-            plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cInvalid SoundType at: &f" + path));
+            String[] pathSlitted = plugin.getMessages().getString(path).split(",");
+            String title1 = pathSlitted[0];
+            String title2 = pathSlitted[1];
+            p.sendTitle(ChatUtils.c(title1), ChatUtils.c(title2));
+        } catch (NullPointerException | IllegalArgumentException e) {
+            plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cInvalid Title at: &f" + path));
         }
     }
 
-    public static void sendTitle(String path, Player p, BankPlus plugin) {
+    public static void playSound(String sound, Player p, BankPlus plugin) {
+        switch (sound) {
+            case "WITHDRAW":
+            if (!plugin.getConfiguration().getBoolean("General.Withdraw-Sound.Enabled")) return;
+            try {
+                String[] pathSlitted = plugin.getConfiguration().getString("General.Withdraw-Sound.Sound").split(",");
+                String soundType = pathSlitted[0];
+                int volume = Integer.parseInt(pathSlitted[1]);
+                int pitch = Integer.parseInt(pathSlitted[2]);
+                p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
+            } catch (NullPointerException | IllegalArgumentException exception) {
+                plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.Withdraw-Sound.Sound"));
+            }
+            break;
 
-        String[] pathSlitted = plugin.getMessages().getString(path).split(",");
-        String title1 = pathSlitted[0];
-        String title2 = pathSlitted[1];
+            case "DEPOSIT":
+                if (!plugin.getConfiguration().getBoolean("General.Deposit-Sound.Enabled")) return;
+                try {
+                    String[] pathSlitted = plugin.getConfiguration().getString("General.Deposit-Sound.Sound").split(",");
+                    String soundType = pathSlitted[0];
+                    int volume = Integer.parseInt(pathSlitted[1]);
+                    int pitch = Integer.parseInt(pathSlitted[2]);
+                    p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
+                } catch (NullPointerException | IllegalArgumentException exception) {
+                    plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.Deposit-Sound.Sound"));
+                }
+                break;
 
-        p.sendTitle(ChatUtils.c(title1), ChatUtils.c(title2));
+            case "VIEW":
+                if (!plugin.getConfiguration().getBoolean("General.View-Sound.Enabled")) return;
+                try {
+                    String[] pathSlitted = plugin.getConfiguration().getString("General.View-Sound.Sound").split(",");
+                    String soundType = pathSlitted[0];
+                    int volume = Integer.parseInt(pathSlitted[1]);
+                    int pitch = Integer.parseInt(pathSlitted[2]);
+                    p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
+                } catch (NullPointerException | IllegalArgumentException exception) {
+                    plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.View-Sound.Sound"));
+                }
+                break;
+
+            case "PERSONAL":
+                if (!plugin.getConfiguration().getBoolean("General.Personal-Sound.Enabled")) return;
+                try {
+                    String[] pathSlitted = plugin.getConfiguration().getString("General.Personal-Sound.Sound").split(",");
+                    String soundType = pathSlitted[0];
+                    int volume = Integer.parseInt(pathSlitted[1]);
+                    int pitch = Integer.parseInt(pathSlitted[2]);
+                    p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
+                } catch (NullPointerException | IllegalArgumentException exception) {
+                    plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.Personal-Sound.Sound"));
+                }
+                break;
+        }
     }
 
     public static int ticksInMinutes(int delay) {
         return delay * 1200;
+    }
+
+    public static void withdraw(Player p, long amount, BankPlus plugin) {
+        long bankBalance = EconomyManager.getBankBalance(p, plugin);
+        long maxWithdrawAmount = plugin.getConfiguration().getLong("General.Max-Withdrawn-Amount");
+        if (bankBalance <= 0) {
+            MessageManager.insufficientMoneyWithdraw(p, plugin);
+            return;
+        }
+        if (maxWithdrawAmount != 0) {
+            if (amount >= maxWithdrawAmount) {
+                amount = maxWithdrawAmount;
+            }
+        }
+        if (bankBalance - amount <= 0) {
+            EconomyManager.withdraw(p, bankBalance, plugin);
+            MessageManager.successWithdraw(p, bankBalance, plugin);
+            MethodUtils.playSound("WITHDRAW", p, plugin);
+            return;
+        }
+        EconomyManager.withdraw(p, amount, plugin);
+        MessageManager.successWithdraw(p, amount, plugin);
+        MethodUtils.playSound("WITHDRAW", p, plugin);
+    }
+
+    public static void deposit(Player p, long amount, BankPlus plugin) {
+        long bankBalance = EconomyManager.getBankBalance(p, plugin);
+        long money = (long) plugin.getEconomy().getBalance(p);
+        long maxDepositAmount = plugin.getConfiguration().getLong("General.Max-Deposit-Amount");
+        long maxBankCapacity = plugin.getConfiguration().getLong("General.Max-Bank-Capacity");
+        if (money <= 0) {
+            MessageManager.insufficientMoneyDeposit(p, plugin);
+            return;
+        }
+        if (money < amount) {
+            EconomyManager.deposit(p, money, plugin);
+            MessageManager.successWithdraw(p, money, plugin);
+            MethodUtils.playSound("DEPOSIT", p, plugin);
+            return;
+        }
+        if (maxBankCapacity != 0) {
+            if (bankBalance >= maxBankCapacity) {
+                MessageManager.cannotDepositMore(p, plugin);
+                return;
+            }
+            if (bankBalance + amount >= maxBankCapacity) {
+                EconomyManager.deposit(p, maxBankCapacity - bankBalance, plugin);
+                MessageManager.successWithdraw(p, maxBankCapacity - bankBalance, plugin);
+            } else {
+                if (maxDepositAmount != 0) {
+                    if (amount >= maxDepositAmount) {
+                        EconomyManager.deposit(p, maxDepositAmount, plugin);
+                        MessageManager.successWithdraw(p, maxDepositAmount, plugin);
+                    } else {
+                        EconomyManager.deposit(p, amount, plugin);
+                        MessageManager.successWithdraw(p, amount, plugin);
+                    }
+                } else {
+                    EconomyManager.deposit(p, amount, plugin);
+                    MessageManager.successWithdraw(p, amount, plugin);
+                }
+            }
+        } else {
+            if (maxDepositAmount != 0) {
+                if (amount >= maxDepositAmount) {
+                    EconomyManager.deposit(p, maxDepositAmount, plugin);
+                    MessageManager.successWithdraw(p, maxDepositAmount, plugin);
+                } else {
+                    EconomyManager.deposit(p, amount, plugin);
+                    MessageManager.successWithdraw(p, amount, plugin);
+                }
+            } else {
+                EconomyManager.deposit(p, amount, plugin);
+                MessageManager.successWithdraw(p, amount, plugin);
+            }
+        }
+        MethodUtils.playSound("DEPOSIT", p, plugin);
     }
 }

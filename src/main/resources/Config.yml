@@ -8,28 +8,25 @@ Interest:
   # Interest will give players that has money in bank
   # a % of the amount every <num> of minutes etc..
   Enabled: true
-  Money-Given: 0.05 # 5% of the bank amount
-  Delay: 5 #5 Minutes | DO NOT USE NUMBERS WITH DECIMALS!
+  # 5% of the bank amount
+  Money-Given: 0.05
+  # 5 Minutes | DO NOT USE NUMBERS WITH DECIMALS!
+  Delay: 5
+  # The max amount that you can receive with interest.
   Max-Amount: 500000
 
 General:
-
   # The amount that a player will receive when joining for the first time
   Join-Start-Amount: 500
-
   # Will use players UUIDs for store moneys,
   # otherwise, it will use players Names
   Use-UUID: true
-
   # The max amount that a player can deposit, use 0 to disable.
   Max-Bank-Capacity: 500000000
-
-  # The max amount to withdraw per time.
-  Max-Withdrawn-Amount: 50000
-
-  # The max amount to deposit per time.
-  Max-Deposit-Amount: 50000
-
+  # The max amount to withdraw per time, use 0 to disable.
+  Max-Withdrawn-Amount: 0
+  # The max amount to deposit per time, use 0 to disable.
+  Max-Deposit-Amount: 0
   # Enabling this option, will reopen the inventory after
   # typing the custom amount in the chat to deposit / withdraw
   Reopen-Bank-After-Chat: true

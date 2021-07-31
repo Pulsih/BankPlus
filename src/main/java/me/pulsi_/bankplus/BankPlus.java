@@ -42,7 +42,7 @@ public final class BankPlus extends JavaPlugin {
                 DataManager.startupMessage(this);
 
                 this.interest = new Interest(this);
-                interest.giveInterest();
+                interest.startsInterest();
             } else {
                 getServer().getConsoleSender().sendMessage("");
                 getServer().getConsoleSender().sendMessage(ChatUtils.c("&cCannot load &a&lBank&9&lPlus&c, No economy plugin found!"));

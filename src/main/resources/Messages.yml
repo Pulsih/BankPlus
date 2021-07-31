@@ -8,28 +8,31 @@
 # %amount_formatted_long% -> Number formatted without "."
 # %player_name% -> Returns the player name based on the action
 
-Invalid-Number: "&a&lBank&9&lPlus &cPlease choose a valid number!"
-Specify-Number: "&a&lBank&9&lPlus &cPlease specify a number!"
+# System
 Reload: "&a&lBank&9&lPlus &aPlugin reloaded!"
+Error: "&a&lBank&9&lPlus &cSome errors occurred..."
+Unknown-Command: "&a&lBank&9&lPlus &cUnknown Command!"
+Interest-Restarted: "&a&lBank&9&lPlus &aInterest Restarted!"
+Interest-Disabled: "&a&lBank&9&lPlus &cYou can't use Interest, please enabled it in the config!"
+Interest-Usage: "&a&lBank&9&lPlus &aUsage: /bank interest restart"
+
+# Error
+Specify-Number: "&a&lBank&9&lPlus &cPlease specify a number!"
+Specify-Player: "&a&lBank&9&lPlus &cPlease specify a player!"
 Not-Player: "&a&lBank&9&lPlus &cYou are not a player!"
 Insufficient-Money-Withdraw: "&a&lBank&9&lPlus &cYou don't have sufficient money to withdraw!"
 Insufficient-Money-Deposit: "&a&lBank&9&lPlus &cYou don't have sufficient money to deposit!"
+No-Permission: "&a&lBank&9&lPlus &cYou don't have the permission!"
+Cannot-Deposit-Anymore: "&a&lBank&9&lPlus &cYou can't deposit anymore money!"
+
+# Plugin
 Personal-Bank: "&a&lBank&9&lPlus &aYou have &f%amount_formatted% Money &ain your bank."
-Unknown-Command: "&a&lBank&9&lPlus &cUnknown Command!"
 Success-Withdraw: "&a&lBank&9&lPlus &aSuccessfully withdrew &f%amount_formatted% Money&a!"
 Success-Deposit: "&a&lBank&9&lPlus &aSuccessfully deposited &f%amount_formatted% Money&a!"
-No-Permission: "&a&lBank&9&lPlus &cYou don't have the permission!"
-Specify-Player: "&a&lBank&9&lPlus &cPlease specify a player!"
-Cannot-Find-Player: "&a&lBank&9&lPlus &cCannot find this player!"
 Bank-Others: "&a&lBank&9&lPlus &f%player_name% &ahas &f%amount_formatted% Money &ain their bank!"
 Set-Message: "&a&lBank&9&lPlus &aYou have set &f%player_name%'s &abank balance to &f%amount_formatted%&a!"
 Add-Message: "&a&lBank&9&lPlus &aYou have added &f%amount_formatted% Money &ato &f%player_name%'s &abank balance!"
 Remove-Message: "&a&lBank&9&lPlus &aYou have removed &f%amount_formatted% Money &ato &f%player_name%'s &abank balance!"
-Interest-Restarted: "&a&lBank&9&lPlus &aInterest Restarted!"
-Interest-Disabled: "&a&lBank&9&lPlus &cYou can't use Interest, please enabled it in the config!"
-Error: "&a&lBank&9&lPlus &cSome errors occurred..."
-Interest-Usage: "&a&lBank&9&lPlus &aUsage: /bank interest restart"
-Cannot-Deposit-Anymore: "&a&lBank&9&lPlus &cYou can't deposit anymore money!"
 Title-Custom-Amount:
   Enabled: true
   Title-Deposit: "&fType in &achat &fan, amount to &adeposit"
@@ -37,6 +40,7 @@ Title-Custom-Amount:
 Interest-Broadcast:
   Enabled: true
   Message: "&a&lBank&9&lPlus &aYou have earned &f%amount_formatted% Money &ain interest!"
+  No-Money: "&a&lBank&9&lPlus &aSadly, you received 0 money from interest."
 Help-Message:
   - "&a&lBank&9&lPlus &aHelp page"
   - "&a/bank deposit <amount> &7Deposit an amount of Money."

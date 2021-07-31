@@ -13,11 +13,15 @@ public class MessageManager {
         p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Cannot-Deposit-Anymore")));
     }
 
+    public static void noMoneyInterest(Player p, BankPlus plugin) {
+        p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Interest-Broadcast.No-Money")));
+    }
+
     public static void personalBalance(Player p, BankPlus plugin) {
         p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Personal-Bank")
-                .replace("%amount%", String.valueOf(EconomyManager.getPersonalBalance(p, plugin)))
-                .replace("%amount_formatted%", MethodUtils.format(EconomyManager.getPersonalBalance(p, plugin), plugin))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(EconomyManager.getPersonalBalance(p, plugin), plugin))));
+                .replace("%amount%", String.valueOf(EconomyManager.getBankBalance(p, plugin)))
+                .replace("%amount_formatted%", MethodUtils.format(EconomyManager.getBankBalance(p, plugin), plugin))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(EconomyManager.getBankBalance(p, plugin), plugin))));
     }
 
     public static void successWithdraw(Player p, long amount, BankPlus plugin) {
@@ -37,20 +41,27 @@ public class MessageManager {
     public static void bankOthers(CommandSender s, BankPlus plugin, Player target) {
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Bank-Others")
                 .replace("%player_name%", target.getName())
-                .replace("%amount%", String.valueOf(EconomyManager.getOthersBalance(target, plugin)))
-                .replace("%amount_formatted%", MethodUtils.format(EconomyManager.getOthersBalance(target, plugin), plugin))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(EconomyManager.getOthersBalance(target, plugin), plugin))));
+                .replace("%amount%", String.valueOf(EconomyManager.getBankBalance(target, plugin)))
+                .replace("%amount_formatted%", MethodUtils.format(EconomyManager.getBankBalance(target, plugin), plugin))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(EconomyManager.getBankBalance(target, plugin), plugin))));
     }
 
     public static void bankOthers(CommandSender s, BankPlus plugin, OfflinePlayer target) {
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Bank-Others")
                 .replace("%player_name%", target.getName())
-                .replace("%amount%", String.valueOf(EconomyManager.getOthersBalance(target, plugin)))
-                .replace("%amount_formatted%", MethodUtils.format(EconomyManager.getOthersBalance(target, plugin), plugin))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(EconomyManager.getOthersBalance(target, plugin), plugin))));
+                .replace("%amount%", String.valueOf(EconomyManager.getBankBalance(target, plugin)))
+                .replace("%amount_formatted%", MethodUtils.format(EconomyManager.getBankBalance(target, plugin), plugin))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(EconomyManager.getBankBalance(target, plugin), plugin))));
     }
 
-    public static void setMessage(CommandSender s, BankPlus plugin, Player target, long amount) {
+    public static void setMessage(CommandSender s, Player target, long amount, BankPlus plugin) {
+        s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Set-Message")
+                .replace("%player_name%", target.getName())
+                .replace("%amount%", String.valueOf(amount))
+                .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
+    }
+    public static void setMessage(CommandSender s, OfflinePlayer target, long amount, BankPlus plugin) {
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Set-Message")
                 .replace("%player_name%", target.getName())
                 .replace("%amount%", String.valueOf(amount))
@@ -58,7 +69,14 @@ public class MessageManager {
                 .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
     }
 
-    public static void addMessage(CommandSender s, BankPlus plugin, Player target, long amount) {
+    public static void addMessage(CommandSender s, Player target, long amount, BankPlus plugin) {
+        s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Add-Message")
+                .replace("%player_name%", target.getName())
+                .replace("%amount%", String.valueOf(amount))
+                .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
+    }
+    public static void addMessage(CommandSender s, OfflinePlayer target, long amount, BankPlus plugin) {
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Add-Message")
                 .replace("%player_name%", target.getName())
                 .replace("%amount%", String.valueOf(amount))
@@ -66,7 +84,14 @@ public class MessageManager {
                 .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
     }
 
-    public static void removeMessage(CommandSender s, BankPlus plugin, Player target, long amount) {
+    public static void removeMessage(CommandSender s, Player target, long amount, BankPlus plugin) {
+        s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Remove-Message")
+                .replace("%player_name%", target.getName())
+                .replace("%amount%", String.valueOf(amount))
+                .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
+    }
+    public static void removeMessage(CommandSender s, OfflinePlayer target, long amount, BankPlus plugin) {
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Remove-Message")
                 .replace("%player_name%", target.getName())
                 .replace("%amount%", String.valueOf(amount))

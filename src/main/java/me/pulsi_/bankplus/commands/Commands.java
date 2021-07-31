@@ -27,14 +27,11 @@ public class Commands implements CommandExecutor {
             if (s instanceof Player) {
                 Player p = (Player) s;
                 if (plugin.getConfiguration().getBoolean("Gui.Enabled")) {
-                    GuiBank gui = new GuiBank(plugin);
-                    gui.openGui(p);
+                    new GuiBank(plugin).openGui(p);
+                    MethodUtils.playSound("PERSONAL", p, plugin);
                 } else {
                     MessageManager.personalBalance(p, plugin);
                 }
-                String soundPath = plugin.getConfiguration().getString("General.Personal-Sound.Sound");
-                boolean soundBoolean = plugin.getConfiguration().getBoolean("General.Personal-Sound.Enabled");
-                MethodUtils.playSound(soundPath, p, plugin, soundBoolean);
             } else {
                 s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Not-Player")));
             }
@@ -53,9 +50,8 @@ public class Commands implements CommandExecutor {
 
                 case "help":
                     if (s.hasPermission("bankplus.help")) {
-                        for (String helpMessage : plugin.getMessages().getStringList("Help-Message")) {
+                        for (String helpMessage : plugin.getMessages().getStringList("Help-Message"))
                             s.sendMessage(ChatUtils.c(helpMessage));
-                        }
                     } else {
                         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("No-Permission")));
                     }
@@ -72,12 +68,10 @@ public class Commands implements CommandExecutor {
                 case "withdraw":
                     if (s.hasPermission("bankplus.withdraw")) {
                         if (s instanceof Player) {
-                            Player p = (Player) s;
-                            p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Specify-Number")));
+                            s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Specify-Number")));
                         } else {
                             s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Not-Player")));
                         }
-                        plugin.savePlayers();
                     } else {
                         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("No-Permission")));
                     }
@@ -86,12 +80,10 @@ public class Commands implements CommandExecutor {
                 case "deposit":
                     if (s.hasPermission("bankplus.deposit")) {
                         if (s instanceof Player) {
-                            Player p = (Player) s;
-                            p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Specify-Number")));
+                            s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Specify-Number")));
                         } else {
                             s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Not-Player")));
                         }
-                        plugin.savePlayers();
                     } else {
                         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("No-Permission")));
                     }
@@ -141,8 +133,7 @@ public class Commands implements CommandExecutor {
                     if (s.hasPermission("bankplus.view")) {
                         try {
                             if (s instanceof Player) {
-                                Player p = (Player) s;
-                                MethodUtils.playSound(plugin.getConfiguration().getString("General.View-Sound.Sound"), p, plugin, plugin.getConfiguration().getBoolean("General.View-Sound.Enabled"));
+                                MethodUtils.playSound("VIEW", (Player) s, plugin);
                             }
                             Player target = Bukkit.getPlayerExact(args[1]);
                             MessageManager.bankOthers(s, plugin, target);
@@ -158,18 +149,10 @@ public class Commands implements CommandExecutor {
                 case "withdraw":
                     if (s.hasPermission("bankplus.withdraw")) {
                         if (s instanceof Player) {
-                            Player p = (Player) s;
                             try {
-                                long maxWithdrawAmount = plugin.getConfiguration().getLong("General.Max-Withdrawn-Amount");
-                                long withdraw = Long.parseLong(args[1]);
-                                if (maxWithdrawAmount != 0) {
-                                    if (withdraw >= maxWithdrawAmount) {
-                                        withdraw = maxWithdrawAmount;
-                                    } else {
-                                        withdraw = Long.parseLong(args[1]);
-                                    }
-                                }
-                                EconomyManager.withdraw(p, withdraw, plugin);
+                                Player p = (Player) s;
+                                long amount = Long.parseLong(args[1]);
+                                MethodUtils.withdraw(p, amount, plugin);
                             } catch (NumberFormatException ex) {
                                 MessageManager.invalidNumber(s, plugin);
                             }
@@ -186,16 +169,8 @@ public class Commands implements CommandExecutor {
                         if (s instanceof Player) {
                             Player p = (Player) s;
                             try {
-                                long maxDepositAmount = plugin.getConfiguration().getLong("General.Max-Deposit-Amount");
-                                long deposit = Long.parseLong(args[1]);
-                                if (maxDepositAmount != 0) {
-                                    if (deposit >= maxDepositAmount) {
-                                        deposit = maxDepositAmount;
-                                    } else {
-                                        deposit = Long.parseLong(args[1]);
-                                    }
-                                }
-                                EconomyManager.deposit(p, deposit, plugin);
+                                long amount = Long.parseLong(args[1]);
+                                MethodUtils.deposit(p, amount, plugin);
                             } catch (NumberFormatException ex) {
                                 MessageManager.invalidNumber(s, plugin);
                             }
@@ -249,11 +224,15 @@ public class Commands implements CommandExecutor {
                         try {
                             Player target = Bukkit.getPlayerExact(args[1]);
                             long amount = Long.parseLong(args[2]);
-                            EconomyManager.setPlayerBankBalance(s, target, amount, plugin);
+                            EconomyManager.setPlayerBankBalance(target, amount, plugin);
+                            MessageManager.setMessage(s, target, amount, plugin);
+                        } catch (NullPointerException err) {
+                            OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
+                            long amount = Long.parseLong(args[2]);
+                            EconomyManager.setPlayerBankBalance(target, amount, plugin);
+                            MessageManager.setMessage(s, target, amount, plugin);
                         } catch (NumberFormatException ex) {
                             MessageManager.invalidNumber(s, plugin);
-                        } catch (Error err) {
-                            MessageManager.cannotFindPlayer(s, plugin);
                         }
                     } else {
                         MessageManager.noPermission(s, plugin);
@@ -265,11 +244,16 @@ public class Commands implements CommandExecutor {
                         try {
                             Player target = Bukkit.getPlayerExact(args[1]);
                             long amount = Long.parseLong(args[2]);
-                            EconomyManager.addPlayerBankBalance(s, target, amount, plugin);
+                            EconomyManager.addPlayerBankBalance(target, amount, plugin);
+                            MessageManager.addMessage(s, target, amount, plugin);
+                        } catch (NullPointerException err) {
+                            OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
+                            long amount = Long.parseLong(args[2]);
+                            EconomyManager.addPlayerBankBalance(target, amount, plugin);
+                            MessageManager.addMessage(s, target, amount, plugin);
+                            MessageManager.cannotFindPlayer(s, plugin);
                         } catch (NumberFormatException ex) {
                             MessageManager.invalidNumber(s, plugin);
-                        } catch (Error err) {
-                            MessageManager.cannotFindPlayer(s, plugin);
                         }
                     } else {
                         MessageManager.noPermission(s, plugin);
@@ -281,11 +265,15 @@ public class Commands implements CommandExecutor {
                         try {
                             Player target = Bukkit.getPlayerExact(args[1]);
                             long amount = Long.parseLong(args[2]);
-                            EconomyManager.removePlayerBankBalance(s, target, amount, plugin);
+                            EconomyManager.removePlayerBankBalance(target, amount, plugin);
+                            MessageManager.removeMessage(s, target, amount, plugin);
+                        } catch (NullPointerException err) {
+                            OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
+                            long amount = Long.parseLong(args[2]);
+                            EconomyManager.removePlayerBankBalance(target, amount, plugin);
+                            MessageManager.removeMessage(s, target, amount, plugin);
                         } catch (NumberFormatException ex) {
                             MessageManager.invalidNumber(s, plugin);
-                        } catch (Error err) {
-                            MessageManager.cannotFindPlayer(s, plugin);
                         }
                     } else {
                         MessageManager.noPermission(s, plugin);

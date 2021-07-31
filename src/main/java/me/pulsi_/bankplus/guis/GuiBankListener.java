@@ -53,14 +53,14 @@ public class GuiBankListener implements Listener {
                     }
                     p.closeInventory();
                 } else if (actionAmount.contains("ALL")) {
-                    long amount = EconomyManager.getPersonalBalance(p, plugin);
-                    EconomyManager.withdraw(p, amount, plugin);
+                    long amount = EconomyManager.getBankBalance(p, plugin);
+                    MethodUtils.withdraw(p, amount, plugin);
                 } else if (actionAmount.contains("HALF")) {
-                    long amount = EconomyManager.getPersonalBalance(p, plugin) / 2;
-                    EconomyManager.withdraw(p, amount, plugin);
+                    long amount = EconomyManager.getBankBalance(p, plugin) / 2;
+                    MethodUtils.withdraw(p, amount, plugin);
                 } else {
                     long amount = Long.parseLong(actionAmount);
-                    EconomyManager.withdraw(p, amount, plugin);
+                    MethodUtils.withdraw(p, amount, plugin);
                 }
             }
             if (actionType.contains("Deposit")) {
@@ -72,13 +72,13 @@ public class GuiBankListener implements Listener {
                     p.closeInventory();
                 } else if (actionAmount.contains("ALL")) {
                     long amount = (long) plugin.getEconomy().getBalance(p);
-                    EconomyManager.deposit(p, amount, plugin);
+                    MethodUtils.deposit(p, amount, plugin);
                 } else if (actionAmount.contains("HALF")) {
                     long amount = (long) (plugin.getEconomy().getBalance(p) / 2);
-                    EconomyManager.deposit(p, amount, plugin);
+                    MethodUtils.deposit(p, amount, plugin);
                 } else {
                     long amount = Long.parseLong(actionAmount);
-                    EconomyManager.deposit(p, amount, plugin);
+                    MethodUtils.deposit(p, amount, plugin);
                 }
             }
         }

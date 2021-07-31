@@ -22,7 +22,7 @@ public class UpdateChecker implements Listener {
         this.plugin = plugin;
     }
 
-    public final boolean isUpToDate() throws Exception {
+    private final boolean isUpToDate() throws Exception {
         final URL url = new URL("https://api.spigotmc.org/legacy/update.php?resource=" + 93130);
         final String currentVersion = new BufferedReader(new InputStreamReader(url.openConnection().getInputStream())).readLine();
         return plugin.getDescription().getVersion().equals(currentVersion);

@@ -10,7 +10,7 @@ softdepend:
   - EconomyPlus
 authors: [ Pulsi_ ]
 load: POSTWORLD
-description: Bank Plugin
+description: The best bank plugin of Spigot!
 commands:
   bankplus:
     aliases: [bankp, bank, bp]

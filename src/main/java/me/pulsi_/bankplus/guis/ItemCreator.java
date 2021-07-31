@@ -83,9 +83,9 @@ public class ItemCreator {
         try {
             String displayName = c.getString("DisplayName")
                     .replace("%player_name%", p.getName())
-                    .replace("%balance%", String.valueOf(EconomyManager.getPersonalBalance(p, plugin)))
-                    .replace("%balance_formatted%", MethodUtils.format(EconomyManager.getPersonalBalance(p, plugin), plugin))
-                    .replace("%balance_formatted_long%", MethodUtils.formatLong(EconomyManager.getPersonalBalance(p, plugin), plugin))
+                    .replace("%balance%", String.valueOf(EconomyManager.getBankBalance(p, plugin)))
+                    .replace("%balance_formatted%", MethodUtils.format(EconomyManager.getBankBalance(p, plugin), plugin))
+                    .replace("%balance_formatted_long%", MethodUtils.formatLong(EconomyManager.getBankBalance(p, plugin), plugin))
                     .replace("%interest_cooldown%", MethodUtils.formatTime(cooldown, plugin));
             if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
                 itemMeta.setDisplayName(ChatUtils.c(PlaceholderAPI.setPlaceholders(p, displayName)));
@@ -101,9 +101,9 @@ public class ItemCreator {
             for (String lines : c.getStringList("Lore")) {
                 lore.add(ChatColor.translateAlternateColorCodes('&', lines)
                         .replace("%player_name%", p.getName())
-                        .replace("%balance%", String.valueOf(EconomyManager.getPersonalBalance(p, plugin)))
-                        .replace("%balance_formatted%", MethodUtils.format(EconomyManager.getPersonalBalance(p, plugin), plugin))
-                        .replace("%balance_formatted_long%", MethodUtils.formatLong(EconomyManager.getPersonalBalance(p, plugin), plugin))
+                        .replace("%balance%", String.valueOf(EconomyManager.getBankBalance(p, plugin)))
+                        .replace("%balance_formatted%", MethodUtils.format(EconomyManager.getBankBalance(p, plugin), plugin))
+                        .replace("%balance_formatted_long%", MethodUtils.formatLong(EconomyManager.getBankBalance(p, plugin), plugin))
                         .replace("%interest_cooldown%", MethodUtils.formatTime(cooldown, plugin)));
             }
             if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {

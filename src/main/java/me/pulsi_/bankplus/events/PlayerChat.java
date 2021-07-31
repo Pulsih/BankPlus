@@ -2,8 +2,8 @@ package me.pulsi_.bankplus.events;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.guis.GuiBank;
-import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.managers.MessageManager;
+import me.pulsi_.bankplus.utils.MethodUtils;
 import me.pulsi_.bankplus.utils.SetUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -26,24 +26,28 @@ public class PlayerChat implements Listener {
 
         if (SetUtils.playerDepositing.contains(p.getUniqueId())) {
             try {
-                EconomyManager.deposit(p, Long.parseLong(amount), plugin);
+                MethodUtils.deposit(p, Long.parseLong(amount), plugin);
                 if (plugin.getConfiguration().getBoolean("General.Reopen-Bank-After-Chat")) {
                     guiBank.openGui(p);
                 }
             } catch (NumberFormatException ex) {
+                e.setCancelled(true);
                 MessageManager.invalidNumber(p, plugin);
+                return;
             }
             e.setCancelled(true);
             SetUtils.playerDepositing.remove(p.getUniqueId());
         }
         if (SetUtils.playerWithdrawing.contains(p.getUniqueId())) {
             try {
-                EconomyManager.withdraw(p, Long.parseLong(amount), plugin);
+                MethodUtils.withdraw(p, Long.parseLong(amount), plugin);
                 if (plugin.getConfiguration().getBoolean("General.Reopen-Bank-After-Chat")) {
                     guiBank.openGui(p);
                 }
             } catch (NumberFormatException ex) {
+                e.setCancelled(true);
                 MessageManager.invalidNumber(p, plugin);
+                return;
             }
             e.setCancelled(true);
             SetUtils.playerWithdrawing.remove(p.getUniqueId());
