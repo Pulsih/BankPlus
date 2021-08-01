@@ -8,7 +8,7 @@ import me.pulsi_.bankplus.utils.SetUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerChatEvent;
 
 public class PlayerChat implements Listener {
 
@@ -18,17 +18,16 @@ public class PlayerChat implements Listener {
     }
 
     @EventHandler
-    public void onChat(AsyncPlayerChatEvent e) {
+    public void onChat(PlayerChatEvent e) {
 
         Player p = e.getPlayer();
-        GuiBank guiBank = new GuiBank(plugin);
         String amount = e.getMessage();
 
         if (SetUtils.playerDepositing.contains(p.getUniqueId())) {
             try {
                 MethodUtils.deposit(p, Long.parseLong(amount), plugin);
                 if (plugin.getConfiguration().getBoolean("General.Reopen-Bank-After-Chat")) {
-                    guiBank.openGui(p);
+                    new GuiBank(plugin).openGui(p);
                 }
             } catch (NumberFormatException ex) {
                 e.setCancelled(true);
@@ -42,7 +41,7 @@ public class PlayerChat implements Listener {
             try {
                 MethodUtils.withdraw(p, Long.parseLong(amount), plugin);
                 if (plugin.getConfiguration().getBoolean("General.Reopen-Bank-After-Chat")) {
-                    guiBank.openGui(p);
+                    new GuiBank(plugin).openGui(p);
                 }
             } catch (NumberFormatException ex) {
                 e.setCancelled(true);

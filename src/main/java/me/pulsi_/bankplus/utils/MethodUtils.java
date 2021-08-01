@@ -12,14 +12,12 @@ import java.util.Locale;
 public class MethodUtils {
 
     public static String formatTime(int cooldown, BankPlus plugin) {
-
         String minute = plugin.getConfiguration().getString("Placeholders.Time.Minute");
         String minutes = plugin.getConfiguration().getString("Placeholders.Time.Minutes");
         String hour = plugin.getConfiguration().getString("Placeholders.Time.Hour");
         String hours = plugin.getConfiguration().getString("Placeholders.Time.Hours");
         String day = plugin.getConfiguration().getString("Placeholders.Time.Day");
         String days = plugin.getConfiguration().getString("Placeholders.Time.Days");
-
         if (cooldown < 60) {
             if (cooldown == 1) {
                 return cooldown + minute;
@@ -123,54 +121,58 @@ public class MethodUtils {
     public static void playSound(String sound, Player p, BankPlus plugin) {
         switch (sound) {
             case "WITHDRAW":
-            if (!plugin.getConfiguration().getBoolean("General.Withdraw-Sound.Enabled")) return;
-            try {
-                String[] pathSlitted = plugin.getConfiguration().getString("General.Withdraw-Sound.Sound").split(",");
-                String soundType = pathSlitted[0];
-                int volume = Integer.parseInt(pathSlitted[1]);
-                int pitch = Integer.parseInt(pathSlitted[2]);
-                p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
-            } catch (NullPointerException | IllegalArgumentException exception) {
-                plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.Withdraw-Sound.Sound"));
-            }
-            break;
+                if (plugin.getConfiguration().getBoolean("General.Withdraw-Sound.Enabled")) {
+                    try {
+                        String[] pathSlitted = plugin.getConfiguration().getString("General.Withdraw-Sound.Sound").split(",");
+                        String soundType = pathSlitted[0];
+                        int volume = Integer.parseInt(pathSlitted[1]);
+                        int pitch = Integer.parseInt(pathSlitted[2]);
+                        p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
+                    } catch (NullPointerException | IllegalArgumentException exception) {
+                        plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.Withdraw-Sound.Sound"));
+                    }
+                }
+                break;
 
             case "DEPOSIT":
-                if (!plugin.getConfiguration().getBoolean("General.Deposit-Sound.Enabled")) return;
-                try {
-                    String[] pathSlitted = plugin.getConfiguration().getString("General.Deposit-Sound.Sound").split(",");
-                    String soundType = pathSlitted[0];
-                    int volume = Integer.parseInt(pathSlitted[1]);
-                    int pitch = Integer.parseInt(pathSlitted[2]);
-                    p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
-                } catch (NullPointerException | IllegalArgumentException exception) {
-                    plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.Deposit-Sound.Sound"));
+                if (plugin.getConfiguration().getBoolean("General.Deposit-Sound.Enabled")) {
+                    try {
+                        String[] pathSlitted = plugin.getConfiguration().getString("General.Deposit-Sound.Sound").split(",");
+                        String soundType = pathSlitted[0];
+                        int volume = Integer.parseInt(pathSlitted[1]);
+                        int pitch = Integer.parseInt(pathSlitted[2]);
+                        p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
+                    } catch (NullPointerException | IllegalArgumentException exception) {
+                        plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.Deposit-Sound.Sound"));
+                    }
                 }
                 break;
 
             case "VIEW":
-                if (!plugin.getConfiguration().getBoolean("General.View-Sound.Enabled")) return;
-                try {
-                    String[] pathSlitted = plugin.getConfiguration().getString("General.View-Sound.Sound").split(",");
-                    String soundType = pathSlitted[0];
-                    int volume = Integer.parseInt(pathSlitted[1]);
-                    int pitch = Integer.parseInt(pathSlitted[2]);
-                    p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
-                } catch (NullPointerException | IllegalArgumentException exception) {
-                    plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.View-Sound.Sound"));
+                if (plugin.getConfiguration().getBoolean("General.View-Sound.Enabled")) {
+                    try {
+                        String[] pathSlitted = plugin.getConfiguration().getString("General.View-Sound.Sound").split(",");
+                        String soundType = pathSlitted[0];
+                        int volume = Integer.parseInt(pathSlitted[1]);
+                        int pitch = Integer.parseInt(pathSlitted[2]);
+                        p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
+                    } catch (NullPointerException | IllegalArgumentException exception) {
+                        plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.View-Sound.Sound"));
+                    }
                 }
                 break;
 
             case "PERSONAL":
-                if (!plugin.getConfiguration().getBoolean("General.Personal-Sound.Enabled")) return;
-                try {
-                    String[] pathSlitted = plugin.getConfiguration().getString("General.Personal-Sound.Sound").split(",");
-                    String soundType = pathSlitted[0];
-                    int volume = Integer.parseInt(pathSlitted[1]);
-                    int pitch = Integer.parseInt(pathSlitted[2]);
-                    p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
-                } catch (NullPointerException | IllegalArgumentException exception) {
-                    plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.Personal-Sound.Sound"));
+                if (plugin.getConfiguration().getBoolean("General.Personal-Sound.Enabled")) {
+                    try {
+                        String[] pathSlitted = plugin.getConfiguration().getString("General.Personal-Sound.Sound").split(",");
+                        String soundType = pathSlitted[0];
+                        int volume = Integer.parseInt(pathSlitted[1]);
+                        int pitch = Integer.parseInt(pathSlitted[2]);
+                        p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
+                    } catch (NullPointerException | IllegalArgumentException exception) {
+                        plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.Personal-Sound.Sound"));
+                    }
                 }
                 break;
         }
