@@ -1,5 +1,5 @@
 name: BankPlus
-version: 2.9
+version: 3.0
 main: me.pulsi_.bankplus.BankPlus
 api-version: 1.13
 depend:

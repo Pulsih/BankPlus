@@ -15,18 +15,16 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.io.IOException;
-
 public class GuiBankListener implements Listener {
 
-    private BukkitTask runnable;
+    BukkitTask runnable;
     private BankPlus plugin;
     public GuiBankListener(BankPlus plugin) {
         this.plugin = plugin;
     }
 
     @EventHandler
-    public void guiListener(InventoryClickEvent e) throws IOException {
+    public void guiListener(InventoryClickEvent e) {
 
         Player p = (Player) e.getWhoClicked();
         EconomyManager economy = new EconomyManager(plugin);
@@ -38,47 +36,64 @@ public class GuiBankListener implements Listener {
         for (String key : plugin.getConfiguration().getConfigurationSection("Gui.Items").getKeys(false)) {
             ConfigurationSection items = plugin.getConfiguration().getConfigurationSection("Gui.Items." + key);
 
-            if (!(e.getSlot() + 1 == items.getInt("Slot"))) continue;
-            if (items.getString("Action.Action-Type") == null) continue;
+            if (e.getSlot() + 1 != items.getInt("Slot") || items.getString("Action.Action-Type") == null) continue;
 
-            String actionType = items.getString("Action.Action-Type");
-            String actionAmount = items.getString("Action.Amount");
+            final String actionType = items.getString("Action.Action-Type");
+            final String actionAmount = items.getString("Action.Amount");
 
-            if (actionType.contains("Withdraw")) {
-                if (actionAmount.contains("CUSTOM")) {
-                    SetUtils.playerWithdrawing.add(p.getUniqueId());
-                    if (plugin.getMessages().getBoolean("Title-Custom-Amount.Enabled")) {
-                        MethodUtils.sendTitle("Title-Custom-Amount.Title-Withdraw", p, plugin);
+            long amount;
+            switch (actionType) {
+                case "Withdraw":
+                    switch (actionAmount) {
+                        case "CUSTOM":
+                            SetUtils.playerWithdrawing.add(p.getUniqueId());
+                            if (plugin.getMessages().getBoolean("Title-Custom-Amount.Enabled"))
+                                MethodUtils.sendTitle("Title-Custom-Amount.Title-Withdraw", p, plugin);
+                            p.closeInventory();
+                            break;
+
+                        case "ALL":
+                            amount = economy.getBankBalance(p);
+                            MethodUtils.withdraw(p, amount, plugin);
+                            break;
+
+                        case "HALF":
+                            amount = economy.getBankBalance(p) / 2;
+                            MethodUtils.withdraw(p, amount, plugin);
+                            break;
+
+                        default:
+                            amount = Long.parseLong(actionAmount);
+                            MethodUtils.withdraw(p, amount, plugin);
+                            break;
                     }
-                    p.closeInventory();
-                } else if (actionAmount.contains("ALL")) {
-                    long amount = economy.getBankBalance(p);
-                    MethodUtils.withdraw(p, amount, plugin);
-                } else if (actionAmount.contains("HALF")) {
-                    long amount = economy.getBankBalance(p) / 2;
-                    MethodUtils.withdraw(p, amount, plugin);
-                } else {
-                    long amount = Long.parseLong(actionAmount);
-                    MethodUtils.withdraw(p, amount, plugin);
-                }
-            }
-            if (actionType.contains("Deposit")) {
-                if (actionAmount.contains("CUSTOM")) {
-                    SetUtils.playerDepositing.add(p.getUniqueId());
-                    if (plugin.getMessages().getBoolean("Title-Custom-Amount.Enabled")) {
-                        MethodUtils.sendTitle("Title-Custom-Amount.Title-Deposit", p, plugin);
+                    break;
+
+                case "Deposit":
+                    switch (actionAmount) {
+                        case "CUSTOM":
+                            SetUtils.playerDepositing.add(p.getUniqueId());
+                            if (plugin.getMessages().getBoolean("Title-Custom-Amount.Enabled"))
+                                MethodUtils.sendTitle("Title-Custom-Amount.Title-Deposit", p, plugin);
+                            p.closeInventory();
+                            break;
+
+                        case "ALL":
+                            amount = (long) plugin.getEconomy().getBalance(p);
+                            MethodUtils.deposit(p, amount, plugin);
+                            break;
+
+                        case "HALF":
+                            amount = (long) (plugin.getEconomy().getBalance(p) / 2);
+                            MethodUtils.deposit(p, amount, plugin);
+                            break;
+
+                        default:
+                            amount = Long.parseLong(actionAmount);
+                            MethodUtils.deposit(p, amount, plugin);
+                            break;
                     }
-                    p.closeInventory();
-                } else if (actionAmount.contains("ALL")) {
-                    long amount = (long) plugin.getEconomy().getBalance(p);
-                    MethodUtils.deposit(p, amount, plugin);
-                } else if (actionAmount.contains("HALF")) {
-                    long amount = (long) (plugin.getEconomy().getBalance(p) / 2);
-                    MethodUtils.deposit(p, amount, plugin);
-                } else {
-                    long amount = Long.parseLong(actionAmount);
-                    MethodUtils.deposit(p, amount, plugin);
-                }
+                    break;
             }
         }
     }
@@ -86,19 +101,16 @@ public class GuiBankListener implements Listener {
     @EventHandler
     public void updateGui(InventoryOpenEvent e) {
         Player p = (Player) e.getPlayer();
-
         if (!e.getView().getTitle().equalsIgnoreCase(ChatUtils.c(plugin.getConfiguration().getString("Gui.Title")))) return;
-
         if (plugin.getConfiguration().getInt("Gui.Update-Delay") != 0) {
-            runnable = Bukkit.getScheduler().runTaskTimer(plugin, () -> GuiBank.setItems(plugin, p), plugin.getConfiguration().getInt("Gui.Update-Delay") * 20L, 0);
+            runnable = Bukkit.getScheduler().runTaskTimer(plugin, () -> GuiBank.updateLore(p, plugin),
+                    plugin.getConfiguration().getInt("Gui.Update-Delay") * 20L, 0);
         }
     }
 
     @EventHandler
     public void closeGUI(InventoryCloseEvent e) {
-        try {
-            if (!e.getView().getTitle().equalsIgnoreCase(ChatUtils.c(plugin.getConfiguration().getString("Gui.Title")))) return;
-            runnable.cancel();
-        } catch (NullPointerException ex) {}
+        if (runnable == null || !e.getView().getTitle().equalsIgnoreCase(ChatUtils.c(plugin.getConfiguration().getString("Gui.Title")))) return;
+        runnable.cancel();
     }
 }

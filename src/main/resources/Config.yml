@@ -15,7 +15,10 @@ Interest:
   # The max amount that you can receive with interest.
   Max-Amount: 500000
   # Choose if give the interest to offline players too
-  Give-Offline-Players: false
+  # This option is not recommended if having a server
+  # with too many players, in these cases, it could
+  # cause lag.
+  Give-To-Offline-Players: false
 
 General:
   # The amount that a player will receive when joining for the first time

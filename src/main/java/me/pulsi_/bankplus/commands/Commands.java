@@ -31,8 +31,10 @@ public class Commands implements CommandExecutor {
         if (!worldBlacklist.isEmpty()) {
             if (s instanceof Player) {
                 if (worldBlacklist.contains(((Player)s).getWorld().getName())) {
-                    MessageManager.cannotUseBankHere(s, plugin);
-                    return false;
+                    if (!s.hasPermission("bankplus.worlds.blacklist.bypass")) {
+                        MessageManager.cannotUseBankHere(s, plugin);
+                        return false;
+                    }
                 }
             }
         }

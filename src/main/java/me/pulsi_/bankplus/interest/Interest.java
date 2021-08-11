@@ -5,6 +5,7 @@ import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.MethodUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 public class Interest {
@@ -32,6 +33,10 @@ public class Interest {
     public void giveInterestToEveryone() {
         double moneyPercentage = plugin.getConfiguration().getDouble("Interest.Money-Given");
         long maxAmount = plugin.getConfiguration().getLong("Interest.Max-Amount");
+        if (plugin.getConfiguration().getBoolean("Interest.Give-To-Offline-Players")) {
+            for (OfflinePlayer p : Bukkit.getOfflinePlayers())
+                giveInterestOffline(p, moneyPercentage, maxAmount);
+        }
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (!p.hasPermission("bankplus.receive.interest")) continue;
             giveInterest(p, moneyPercentage, maxAmount);
@@ -91,6 +96,43 @@ public class Interest {
             } else {
                 if (plugin.getMessages().getBoolean("Interest-Broadcast.Enabled"))
                     MessageManager.noMoneyInterest(p, plugin);
+            }
+        }
+    }
+
+    private void giveInterestOffline(OfflinePlayer p, double moneyPercentage, long maxAmount) {
+        EconomyManager economy = new EconomyManager(plugin);
+        final long bankBalance = economy.getBankBalance(p);
+        final long interestMoney = (long)(bankBalance * moneyPercentage);
+        long maxBankCapacity = plugin.getConfiguration().getLong("General.Max-Bank-Capacity");
+
+        if (maxBankCapacity != 0) {
+            if (bankBalance + interestMoney >= maxBankCapacity) {
+                economy.setPlayerBankBalance(p, maxBankCapacity);
+            } else {
+                if (bankBalance != 0) {
+                    if (interestMoney == 0) {
+                        economy.addPlayerBankBalance(p, 1);
+                    } else {
+                        if (interestMoney >= maxAmount) {
+                            economy.addPlayerBankBalance(p, maxAmount);
+                            return;
+                        }
+                        economy.addPlayerBankBalance(p, interestMoney);
+                    }
+                }
+            }
+        } else {
+            if (bankBalance != 0) {
+                if (interestMoney == 0) {
+                    economy.addPlayerBankBalance(p, 1);
+                } else {
+                    if (interestMoney >= maxAmount) {
+                        economy.addPlayerBankBalance(p, maxAmount);
+                        return;
+                    }
+                    economy.addPlayerBankBalance(p, interestMoney);
+                }
             }
         }
     }

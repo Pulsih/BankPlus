@@ -6,11 +6,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 public class GuiBank {
 
-    private static Inventory guiBank;
-    private BankPlus plugin;
+    private final BankPlus plugin;
     public GuiBank(BankPlus plugin) {
         this.plugin = plugin;
     }
@@ -21,20 +21,26 @@ public class GuiBank {
         String title;
         try {
             title = plugin.getConfiguration().getString("Gui.Title");
-        } catch (NullPointerException ex) {
+        } catch (NullPointerException | IllegalArgumentException e) {
             title = "&c&l*CANNOT FIND TITLE*";
         }
 
-        guiBank = Bukkit.createInventory(null, lines, ChatUtils.c(title));
+        Inventory guiBank = Bukkit.createInventory(null, lines, ChatUtils.c(title));
 
-        setItems(plugin, p);
+        ConfigurationSection c = plugin.getConfiguration().getConfigurationSection("Gui.Items");
+        for (String items : c.getKeys(false)) {
+            try {
+                guiBank.setItem(c.getConfigurationSection(items).getInt("Slot") - 1, ItemCreator.createItemStack(c.getConfigurationSection(items), p, plugin));
+            } catch (ArrayIndexOutOfBoundsException ex) {
+                plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &aSome items go arent set properly! Please fix it in the config!"));
+                guiBank.addItem(ItemCreator.createItemStack(c.getConfigurationSection(items), p, plugin));
+            }
+        }
 
         if (plugin.getConfiguration().getBoolean("Gui.Filler.Enabled")) {
             for (int i = 0; i < lines; i++) {
-                guiBank.getItem(i);
-                if (guiBank.getItem(i) == null) {
+                if (guiBank.getItem(i) == null)
                     guiBank.setItem(i, ItemCreator.guiFiller(plugin));
-                }
             }
         }
 
@@ -42,42 +48,37 @@ public class GuiBank {
     }
 
     public int guiLines(int number) {
-
-        int lines = 27;
-
-        if(number == 1) {
-            return 9;
+        int lines;
+        switch (number) {
+            case 1:
+                lines = 9;
+                break;
+            case 2:
+                lines = 18;
+                break;
+            case 3:
+                lines = 27;
+                break;
+            default:
+                lines = 36;
+                break;
+            case 5:
+                lines = 45;
+                break;
+            case 6:
+                lines = 54;
+                break;
         }
-        if(number == 2) {
-            return 18;
-        }
-        if(number == 3) {
-            return 27;
-        }
-        if(number == 4) {
-            return 36;
-        }
-        if(number == 5) {
-            return 45;
-        }
-        if(number == 6) {
-            return 54;
-        }
-
         return lines;
     }
 
-    public static void setItems(BankPlus plugin, Player p) {
-
+    public static void updateLore(Player p, BankPlus plugin) {
         ConfigurationSection c = plugin.getConfiguration().getConfigurationSection("Gui.Items");
-
         for (String items : c.getKeys(false)) {
             try {
-                guiBank.setItem(c.getConfigurationSection(items).getInt("Slot") - 1, ItemCreator.createItemStack(c.getConfigurationSection(items), p, plugin));
-            } catch (ArrayIndexOutOfBoundsException ex) {
-                plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &aThere are some items that go out of the gui! Please fix it in the config!"));
-                guiBank.addItem(ItemCreator.createItemStack(c.getConfigurationSection(items), p, plugin));
-            }
+                ItemStack i = p.getOpenInventory().getItem(c.getConfigurationSection(items).getInt("Slot") - 1);
+                i.setItemMeta(ItemCreator.setLore(c.getConfigurationSection(items), i, p));
+            } catch (NullPointerException | IllegalArgumentException | ArrayIndexOutOfBoundsException ignored) {}
         }
     }
 }

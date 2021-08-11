@@ -35,9 +35,7 @@ public class ItemCreator {
                 item = HeadUtils.getNameHead(p.getName(), new ItemStack(Material.PLAYER_HEAD));
             } catch (NoSuchFieldError er) {
                 item = HeadUtils.getNameHead(p.getName(), new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()));
-            } catch (NullPointerException exception) {
-                item = barrier;
-            } catch (IllegalArgumentException exception) {
+            } catch (NullPointerException | IllegalArgumentException e) {
                 item = barrier;
             }
         } else if (c.getString("Material").startsWith("HEAD[")) {
@@ -46,11 +44,7 @@ public class ItemCreator {
                 item = HeadUtils.getNameHead(player, new ItemStack(Material.PLAYER_HEAD));
             } catch (NoSuchFieldError er) {
                 item = HeadUtils.getNameHead(player, new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()));
-            } catch (NoSuchMethodError er) {
-                item = barrier;
-            } catch (NullPointerException exception) {
-                item = barrier;
-            } catch (IllegalArgumentException exception) {
+            } catch (NullPointerException | IllegalArgumentException e) {
                 item = barrier;
             }
         } else if (c.getString("Material").startsWith("HEAD-<")) {
@@ -59,9 +53,7 @@ public class ItemCreator {
                 item = HeadUtils.getValueHead(new ItemStack(Material.PLAYER_HEAD), textureValue);
             } catch (NoSuchFieldError er) {
                 item = HeadUtils.getValueHead(new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()), textureValue);
-            } catch (NullPointerException exception) {
-                item = barrier;
-            } catch (IllegalArgumentException exception) {
+            } catch (NullPointerException | IllegalArgumentException e) {
                 item = barrier;
             }
         } else {
@@ -72,9 +64,7 @@ public class ItemCreator {
                 } else {
                     item = new ItemStack(Material.valueOf(c.getString("Material")));
                 }
-            } catch (NullPointerException exception) {
-                item = barrier;
-            } catch (IllegalArgumentException exception) {
+            } catch (NullPointerException | IllegalArgumentException e) {
                 item = barrier;
             }
         }
@@ -84,7 +74,7 @@ public class ItemCreator {
         try {
             String displayName = c.getString("DisplayName")
                     .replace("%player_name%", p.getName())
-                    .replace("%balance%", String.valueOf(economy.getBankBalance(p)))
+                    .replace("%balance%", MethodUtils.formatCommas(economy.getBankBalance(p)))
                     .replace("%balance_formatted%", MethodUtils.format(economy.getBankBalance(p), plugin))
                     .replace("%balance_formatted_long%", MethodUtils.formatLong(economy.getBankBalance(p), plugin))
                     .replace("%interest_cooldown%", MethodUtils.formatTime(cooldown, plugin));
@@ -102,7 +92,7 @@ public class ItemCreator {
             for (String lines : c.getStringList("Lore")) {
                 lore.add(ChatColor.translateAlternateColorCodes('&', lines)
                         .replace("%player_name%", p.getName())
-                        .replace("%balance%", String.valueOf(economy.getBankBalance(p)))
+                        .replace("%balance%", MethodUtils.formatCommas(economy.getBankBalance(p)))
                         .replace("%balance_formatted%", MethodUtils.format(economy.getBankBalance(p), plugin))
                         .replace("%balance_formatted_long%", MethodUtils.formatLong(economy.getBankBalance(p), plugin))
                         .replace("%interest_cooldown%", MethodUtils.formatTime(cooldown, plugin)));
@@ -133,9 +123,7 @@ public class ItemCreator {
                 } else {
                     filler = new ItemStack(Material.valueOf(plugin.getConfiguration().getString("Gui.Filler.Material")));
                 }
-            } catch (NullPointerException exception) {
-                filler = barrier;
-            } catch (IllegalArgumentException exception) {
+            } catch (NullPointerException | IllegalArgumentException exception) {
                 filler = barrier;
             }
 
@@ -154,5 +142,21 @@ public class ItemCreator {
 
         filler.setItemMeta(fillerMeta);
         return filler;
+    }
+
+    public static ItemMeta setLore(ConfigurationSection c, ItemStack i, Player p) {
+        ItemMeta itemMeta = i.getItemMeta();
+        List<String> lore = new ArrayList<>();
+        if (c.getStringList("Lore") != null) {
+            for (String lines : c.getStringList("Lore")) {
+                lore.add(ChatColor.translateAlternateColorCodes('&', lines));
+            }
+            if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+                itemMeta.setLore(PlaceholderAPI.setPlaceholders(p, lore));
+            } else {
+                itemMeta.setLore(lore);
+            }
+        }
+        return itemMeta;
     }
 }

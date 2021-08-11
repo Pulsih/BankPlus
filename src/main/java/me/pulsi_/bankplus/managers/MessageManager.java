@@ -23,7 +23,7 @@ public class MessageManager {
     public static void personalBalance(Player p, BankPlus plugin) {
         if (plugin.getMessages().getString("Personal-Bank") == null) return;
         p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Personal-Bank")
-                .replace("%amount%", String.valueOf(new EconomyManager(plugin).getBankBalance(p)))
+                .replace("%amount%", MethodUtils.formatCommas(new EconomyManager(plugin).getBankBalance(p)))
                 .replace("%amount_formatted%", MethodUtils.format(new EconomyManager(plugin).getBankBalance(p), plugin))
                 .replace("%amount_formatted_long%", MethodUtils.formatLong(new EconomyManager(plugin).getBankBalance(p), plugin))));
     }
@@ -31,7 +31,7 @@ public class MessageManager {
     public static void successWithdraw(Player p, long amount, BankPlus plugin) {
         if (plugin.getMessages().getString("Success-Withdraw") == null) return;
         p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Success-Withdraw")
-                .replace("%amount%", String.valueOf(amount))
+                .replace("%amount%", MethodUtils.formatCommas(new EconomyManager(plugin).getBankBalance(p)))
                 .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
                 .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
     }
@@ -39,7 +39,7 @@ public class MessageManager {
     public static void successDeposit(Player p, long amount, BankPlus plugin) {
         if (plugin.getMessages().getString("Success-Deposit") == null) return;
         p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Success-Deposit")
-                .replace("%amount%", String.valueOf(amount))
+                .replace("%amount%", MethodUtils.formatCommas(new EconomyManager(plugin).getBankBalance(p)))
                 .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
                 .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
     }
@@ -48,7 +48,7 @@ public class MessageManager {
         if (plugin.getMessages().getString("Bank-Others") == null) return;
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Bank-Others")
                 .replace("%player_name%", p.getName())
-                .replace("%amount%", String.valueOf(new EconomyManager(plugin).getBankBalance(p)))
+                .replace("%amount%", MethodUtils.formatCommas(new EconomyManager(plugin).getBankBalance(p)))
                 .replace("%amount_formatted%", MethodUtils.format(new EconomyManager(plugin).getBankBalance(p), plugin))
                 .replace("%amount_formatted_long%", MethodUtils.formatLong(new EconomyManager(plugin).getBankBalance(p), plugin))));
     }
@@ -57,58 +57,58 @@ public class MessageManager {
         if (plugin.getMessages().getString("Bank-Others") == null) return;
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Bank-Others")
                 .replace("%player_name%", p.getName())
-                .replace("%amount%", String.valueOf(new EconomyManager(plugin).getBankBalance(p)))
+                .replace("%amount%", MethodUtils.formatCommas(new EconomyManager(plugin).getBankBalance(p)))
                 .replace("%amount_formatted%", MethodUtils.format(new EconomyManager(plugin).getBankBalance(p), plugin))
                 .replace("%amount_formatted_long%", MethodUtils.formatLong(new EconomyManager(plugin).getBankBalance(p), plugin))));
     }
 
-    public static void setMessage(CommandSender s, Player target, long amount, BankPlus plugin) {
+    public static void setMessage(CommandSender s, Player p, long amount, BankPlus plugin) {
         if (plugin.getMessages().getString("Set-Message") == null) return;
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Set-Message")
-                .replace("%player_name%", target.getName())
-                .replace("%amount%", String.valueOf(amount))
+                .replace("%player_name%", p.getName())
+                .replace("%amount%", MethodUtils.formatCommas(amount))
                 .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
                 .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
     }
-    public static void setMessage(CommandSender s, OfflinePlayer target, long amount, BankPlus plugin) {
+    public static void setMessage(CommandSender s, OfflinePlayer p, long amount, BankPlus plugin) {
         if (plugin.getMessages().getString("Set-Message") == null) return;
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Set-Message")
-                .replace("%player_name%", target.getName())
-                .replace("%amount%", String.valueOf(amount))
+                .replace("%player_name%", p.getName())
+                .replace("%amount%", MethodUtils.formatCommas(amount))
                 .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
                 .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
     }
 
-    public static void addMessage(CommandSender s, Player target, long amount, BankPlus plugin) {
+    public static void addMessage(CommandSender s, Player p, long amount, BankPlus plugin) {
         if (plugin.getMessages().getString("Add-Message") == null) return;
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Add-Message")
-                .replace("%player_name%", target.getName())
-                .replace("%amount%", String.valueOf(amount))
+                .replace("%player_name%", p.getName())
+                .replace("%amount%", MethodUtils.formatCommas(amount))
                 .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
                 .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
     }
-    public static void addMessage(CommandSender s, OfflinePlayer target, long amount, BankPlus plugin) {
+    public static void addMessage(CommandSender s, OfflinePlayer p, long amount, BankPlus plugin) {
         if (plugin.getMessages().getString("Add-Message") == null) return;
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Add-Message")
-                .replace("%player_name%", target.getName())
-                .replace("%amount%", String.valueOf(amount))
+                .replace("%player_name%", p.getName())
+                .replace("%amount%", MethodUtils.formatCommas(amount))
                 .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
                 .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
     }
 
-    public static void removeMessage(CommandSender s, Player target, long amount, BankPlus plugin) {
+    public static void removeMessage(CommandSender s, Player p, long amount, BankPlus plugin) {
         if (plugin.getMessages().getString("Remove-Message") == null) return;
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Remove-Message")
-                .replace("%player_name%", target.getName())
-                .replace("%amount%", String.valueOf(amount))
+                .replace("%player_name%", p.getName())
+                .replace("%amount%", MethodUtils.formatCommas(amount))
                 .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
                 .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
     }
-    public static void removeMessage(CommandSender s, OfflinePlayer target, long amount, BankPlus plugin) {
+    public static void removeMessage(CommandSender s, OfflinePlayer p, long amount, BankPlus plugin) {
         if (plugin.getMessages().getString("Remove-Message") == null) return;
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Remove-Message")
-                .replace("%player_name%", target.getName())
-                .replace("%amount%", String.valueOf(amount))
+                .replace("%player_name%", p.getName())
+                .replace("%amount%", MethodUtils.formatCommas(amount))
                 .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
                 .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
     }
@@ -122,7 +122,7 @@ public class MessageManager {
                     .replace("%amount_formatted_long%", "1")));
         } else {
             p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Interest-Broadcast.Message")
-                    .replace("%amount%", String.valueOf((long) (bankBalance * finalMoneyPercentage)))
+                    .replace("%amount%", MethodUtils.formatCommas((long) (bankBalance * finalMoneyPercentage)))
                     .replace("%amount_formatted%", MethodUtils.format((long) (bankBalance * finalMoneyPercentage), plugin))
                     .replace("%amount_formatted_long%", MethodUtils.formatLong((long) (bankBalance * finalMoneyPercentage), plugin))));
         }
@@ -131,7 +131,7 @@ public class MessageManager {
     public static void interestBroadcastMessageMax(Player p, BankPlus plugin, long amount) {
         if (plugin.getMessages().getString("Interest-Broadcast.Message") == null) return;
         p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Interest-Broadcast.Message")
-                .replace("%amount%", String.valueOf(amount))
+                .replace("%amount%", MethodUtils.formatCommas(amount))
                 .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
                 .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
     }

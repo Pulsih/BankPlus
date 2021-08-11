@@ -6,6 +6,7 @@ import me.pulsi_.bankplus.managers.MessageManager;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
 
@@ -73,11 +74,11 @@ public class MethodUtils {
 
     public static String format(double balance, BankPlus plugin) {
 
-        String k = plugin.getConfiguration().getString("Placeholders.Money.Thousands");
-        String m = plugin.getConfiguration().getString("Placeholders.Money.Millions");
-        String b = plugin.getConfiguration().getString("Placeholders.Money.Billions");
-        String t = plugin.getConfiguration().getString("Placeholders.Money.Trillions");
-        String q = plugin.getConfiguration().getString("Placeholders.Money.Quadrillions");
+        final String k = plugin.getConfiguration().getString("Placeholders.Money.Thousands");
+        final String m = plugin.getConfiguration().getString("Placeholders.Money.Millions");
+        final String b = plugin.getConfiguration().getString("Placeholders.Money.Billions");
+        final String t = plugin.getConfiguration().getString("Placeholders.Money.Trillions");
+        final String q = plugin.getConfiguration().getString("Placeholders.Money.Quadrillions");
 
         if (balance < 1000L) {
             return formatString(balance);
@@ -105,6 +106,11 @@ public class MethodUtils {
         format.setMaximumFractionDigits(2);
         format.setMinimumFractionDigits(0);
         return format.format(balance);
+    }
+
+    public static String formatCommas(double amount) {
+        DecimalFormat formatter = new DecimalFormat("#,###");
+        return formatter.format(amount);
     }
 
     public static void sendTitle(String path, Player p, BankPlus plugin) {
