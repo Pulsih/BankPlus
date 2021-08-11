@@ -13,6 +13,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.List;
+
 public class Commands implements CommandExecutor {
 
     private BankPlus plugin;
@@ -23,106 +25,92 @@ public class Commands implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender s, Command command, String label, String[] args) {
 
-        if (args.length == 0) {
+        EconomyManager economy = new EconomyManager(plugin);
+
+        List<String> worldBlacklist = plugin.getConfiguration().getStringList("General.Worlds-Blacklist");
+        if (!worldBlacklist.isEmpty()) {
             if (s instanceof Player) {
-                Player p = (Player) s;
-                if (plugin.getConfiguration().getBoolean("Gui.Enabled")) {
-                    new GuiBank(plugin).openGui(p);
-                    MethodUtils.playSound("PERSONAL", p, plugin);
-                } else {
-                    MessageManager.personalBalance(p, plugin);
+                if (worldBlacklist.contains(((Player)s).getWorld().getName())) {
+                    MessageManager.cannotUseBankHere(s, plugin);
+                    return false;
                 }
+            }
+        }
+
+        if (args.length == 0) {
+            if (!(s instanceof Player)) {
+                MessageManager.notPlayer(s, plugin);
+                return false;
+            }
+            if (plugin.getConfiguration().getBoolean("Gui.Enabled")) {
+                new GuiBank(plugin).openGui((Player) s);
+                MethodUtils.playSound("PERSONAL", (Player) s, plugin);
             } else {
-                s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Not-Player")));
+                MessageManager.personalBalance((Player) s, plugin);
             }
         }
 
         if (args.length == 1) {
             switch (args[0]) {
                 case "reload":
-                    if (s.hasPermission("bankplus.reload")) {
-                        plugin.reloadConfigs();
-                        s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Reload")));
-                    } else {
-                        s.sendMessage(ChatUtils.c(plugin.getMessages().getString("No-Permission")));
+                    if (!s.hasPermission("bankplus.reload")) {
+                        MessageManager.noPermission(s, plugin);
+                        return false;
                     }
+                    plugin.reloadConfigs();
+                    MessageManager.reloadMessage(s, plugin);
                     break;
 
                 case "help":
-                    if (s.hasPermission("bankplus.help")) {
-                        for (String helpMessage : plugin.getMessages().getStringList("Help-Message"))
-                            s.sendMessage(ChatUtils.c(helpMessage));
-                    } else {
-                        s.sendMessage(ChatUtils.c(plugin.getMessages().getString("No-Permission")));
+                    if (!s.hasPermission("bankplus.help")) {
+                        MessageManager.noPermission(s, plugin);
+                        return false;
                     }
+                    for (String helpMessage : plugin.getMessages().getStringList("Help-Message"))
+                        s.sendMessage(ChatUtils.c(helpMessage));
                     break;
 
                 case "view":
-                    if (s.hasPermission("bankplus.view")) {
-                        s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Specify-Player")));
-                    } else {
-                        s.sendMessage(ChatUtils.c(plugin.getMessages().getString("No-Permission")));
+                    if (!s.hasPermission("bankplus.view")) {
+                        MessageManager.noPermission(s, plugin);
+                        return false;
                     }
+                    MessageManager.specifyPlayer(s, plugin);
                     break;
 
                 case "withdraw":
-                    if (s.hasPermission("bankplus.withdraw")) {
-                        if (s instanceof Player) {
-                            s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Specify-Number")));
-                        } else {
-                            s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Not-Player")));
-                        }
-                    } else {
-                        s.sendMessage(ChatUtils.c(plugin.getMessages().getString("No-Permission")));
-                    }
-                    break;
-
                 case "deposit":
-                    if (s.hasPermission("bankplus.deposit")) {
-                        if (s instanceof Player) {
-                            s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Specify-Number")));
-                        } else {
-                            s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Not-Player")));
-                        }
-                    } else {
-                        s.sendMessage(ChatUtils.c(plugin.getMessages().getString("No-Permission")));
+                    if (!(s.hasPermission("bankplus.deposit") || s.hasPermission("bankplus.withdraw"))) {
+                        MessageManager.noPermission(s, plugin);
+                        return false;
                     }
+                    if (!(s instanceof Player)) {
+                        MessageManager.notPlayer(s, plugin);
+                        return false;
+                    }
+                    MessageManager.specifyNumber(s, plugin);
                     break;
 
                 case "set":
-                    if (s.hasPermission("bankplus.set")) {
-                        s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Specify-Player")));
-                    } else {
-                        s.sendMessage(ChatUtils.c(plugin.getMessages().getString("No-Permission")));
-                    }
-                    break;
-
                 case "add":
-                    if (s.hasPermission("bankplus.add")) {
-                        s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Specify-Player")));
-                    } else {
-                        s.sendMessage(ChatUtils.c(plugin.getMessages().getString("No-Permission")));
-                    }
-                    break;
-
                 case "remove":
-                    if (s.hasPermission("bankplus.remove")) {
-                        s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Specify-Player")));
-                    } else {
-                        s.sendMessage(ChatUtils.c(plugin.getMessages().getString("No-Permission")));
+                    if (!(s.hasPermission("bankplus.remove") || s.hasPermission("bankplus.add") || s.hasPermission("bankplus.set"))) {
+                        MessageManager.noPermission(s, plugin);
+                        return false;
                     }
+                    MessageManager.specifyPlayer(s, plugin);
                     break;
 
                 case "interest":
-                    if (s.hasPermission("bankplus.interest.restart")) {
-                        s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Interest-Usage")));
-                    } else {
-                        s.sendMessage(ChatUtils.c(plugin.getMessages().getString("No-Permission")));
+                    if (!s.hasPermission("bankplus.interest.restart")) {
+                        MessageManager.noPermission(s, plugin);
+                        return false;
                     }
+                    MessageManager.interestUsage(s, plugin);
                     break;
 
                 default:
-                    s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Unknown-Command")));
+                    MessageManager.unknownCommand(s, plugin);
                     break;
             }
         }
@@ -130,83 +118,81 @@ public class Commands implements CommandExecutor {
         if (args.length == 2) {
             switch (args[0]) {
                 case "view":
-                    if (s.hasPermission("bankplus.view")) {
-                        try {
-                            if (s instanceof Player) {
-                                MethodUtils.playSound("VIEW", (Player) s, plugin);
-                            }
-                            Player target = Bukkit.getPlayerExact(args[1]);
-                            MessageManager.bankOthers(s, plugin, target);
-                        } catch (NullPointerException err) {
-                            OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
-                            MessageManager.bankOthers(s, plugin, target);
-                        }
-                    } else {
+                    if (!s.hasPermission("bankplus.view")) {
                         MessageManager.noPermission(s, plugin);
+                        return false;
                     }
+                    if (s instanceof Player) {
+                        MethodUtils.playSound("VIEW", (Player) s, plugin);
+                    }
+                    if (Bukkit.getPlayerExact(args[1]) == null) {
+                        OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
+                        MessageManager.bankOthers(s, plugin, p);
+                        return false;
+                    }
+                    MessageManager.bankOthers(s, plugin, Bukkit.getPlayerExact(args[1]));
                     break;
 
                 case "withdraw":
-                    if (s.hasPermission("bankplus.withdraw")) {
-                        if (s instanceof Player) {
-                            try {
-                                Player p = (Player) s;
-                                long amount = Long.parseLong(args[1]);
-                                MethodUtils.withdraw(p, amount, plugin);
-                            } catch (NumberFormatException ex) {
-                                MessageManager.invalidNumber(s, plugin);
-                            }
-                        } else {
-                            MessageManager.notPlayer(s, plugin);
-                        }
-                    } else {
+                    if (!s.hasPermission("bankplus.withdraw")) {
                         MessageManager.noPermission(s, plugin);
+                        return false;
+                    }
+                    if (!(s instanceof Player)) {
+                        MessageManager.notPlayer(s, plugin);
+                        return false;
+                    }
+                    try {
+                        long amount = Long.parseLong(args[1]);
+                        MethodUtils.withdraw((Player) s, amount, plugin);
+                    } catch (NumberFormatException ex) {
+                        MessageManager.invalidNumber(s, plugin);
                     }
                     break;
 
                 case "deposit":
-                    if (s.hasPermission("bankplus.deposit")) {
-                        if (s instanceof Player) {
-                            Player p = (Player) s;
-                            try {
-                                long amount = Long.parseLong(args[1]);
-                                MethodUtils.deposit(p, amount, plugin);
-                            } catch (NumberFormatException ex) {
-                                MessageManager.invalidNumber(s, plugin);
-                            }
-                        } else {
-                            MessageManager.notPlayer(s, plugin);
-                        }
-                    } else {
+                    if (!s.hasPermission("bankplus.deposit")) {
                         MessageManager.noPermission(s, plugin);
+                        return false;
+                    }
+                    if (!(s instanceof Player)) {
+                        MessageManager.notPlayer(s, plugin);
+                        return false;
+                    }
+                    try {
+                        long amount = Long.parseLong(args[1]);
+                        MethodUtils.deposit((Player) s, amount, plugin);
+                    } catch (NumberFormatException ex) {
+                        MessageManager.invalidNumber(s, plugin);
                     }
                     break;
 
                 case "set":
-                    if (s.hasPermission("bankplus.set")) {
-                        MessageManager.specifyNumber(s, plugin);
-                    } else {
+                case "add":
+                case "remove":
+                    if (!(s.hasPermission("bankplus.set") || s.hasPermission("bankplus.add") || s.hasPermission("bankplus.remove"))) {
                         MessageManager.noPermission(s, plugin);
+                        return false;
                     }
+                    MessageManager.specifyNumber(s, plugin);
                     break;
 
                 case "interest":
                     if (args[1].equalsIgnoreCase("restart")) {
-                        if (s.hasPermission("bankplus.interest.restart")) {
-                            if (plugin.getConfiguration().getBoolean("Interest.Enabled")) {
-                                try {
-                                    long delay = plugin.getConfiguration().getLong("Interest.Delay");
-                                    plugin.getPlayers().set("Interest-Cooldown", delay);
-                                    MessageManager.interestRestarted(s, plugin);
-                                    plugin.savePlayers();
-                                } catch (NullPointerException ex) {
-                                    MessageManager.internalError(s, plugin);
-                                }
-                            } else {
-                                MessageManager.interestIsDisabled(s, plugin);
-                            }
-                        } else {
+                        if (!s.hasPermission("bankplus.interest.restart")) {
                             MessageManager.noPermission(s, plugin);
+                            return false;
+                        }
+                        if (!plugin.getConfiguration().getBoolean("Interest.Enabled")) {
+                            MessageManager.interestIsDisabled(s, plugin);
+                            return false;
+                        }
+                        try {
+                            plugin.getPlayers().set("Interest-Cooldown", plugin.getConfiguration().getLong("Interest.Delay"));
+                            MessageManager.interestRestarted(s, plugin);
+                            plugin.savePlayers();
+                        } catch (Error e) {
+                            MessageManager.internalError(s, plugin);
                         }
                     }
                     break;
@@ -220,63 +206,59 @@ public class Commands implements CommandExecutor {
         if (args.length == 3) {
             switch (args[0]) {
                 case "set":
-                    if (s.hasPermission("bankplus.set")) {
-                        try {
-                            Player target = Bukkit.getPlayerExact(args[1]);
-                            long amount = Long.parseLong(args[2]);
-                            EconomyManager.setPlayerBankBalance(target, amount, plugin);
-                            MessageManager.setMessage(s, target, amount, plugin);
-                        } catch (NullPointerException err) {
-                            OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
-                            long amount = Long.parseLong(args[2]);
-                            EconomyManager.setPlayerBankBalance(target, amount, plugin);
-                            MessageManager.setMessage(s, target, amount, plugin);
-                        } catch (NumberFormatException ex) {
-                            MessageManager.invalidNumber(s, plugin);
-                        }
-                    } else {
+                    if (!s.hasPermission("bankplus.set")) {
                         MessageManager.noPermission(s, plugin);
+                        return false;
+                    }
+                    try {
+                        long amount = Long.parseLong(args[2]);
+                        if(Bukkit.getPlayerExact(args[1]) == null) {
+                            economy.setPlayerBankBalance(Bukkit.getOfflinePlayer(args[1]), amount);
+                            MessageManager.setMessage(s, Bukkit.getOfflinePlayer(args[1]), amount, plugin);
+                            return false;
+                        }
+                        economy.setPlayerBankBalance(Bukkit.getPlayerExact(args[1]), amount);
+                        MessageManager.setMessage(s, Bukkit.getPlayerExact(args[1]), amount, plugin);
+                    } catch (NumberFormatException ex) {
+                        MessageManager.invalidNumber(s, plugin);
                     }
                     break;
 
                 case "add":
-                    if (s.hasPermission("bankplus.add")) {
-                        try {
-                            Player target = Bukkit.getPlayerExact(args[1]);
-                            long amount = Long.parseLong(args[2]);
-                            EconomyManager.addPlayerBankBalance(target, amount, plugin);
-                            MessageManager.addMessage(s, target, amount, plugin);
-                        } catch (NullPointerException err) {
-                            OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
-                            long amount = Long.parseLong(args[2]);
-                            EconomyManager.addPlayerBankBalance(target, amount, plugin);
-                            MessageManager.addMessage(s, target, amount, plugin);
-                            MessageManager.cannotFindPlayer(s, plugin);
-                        } catch (NumberFormatException ex) {
-                            MessageManager.invalidNumber(s, plugin);
-                        }
-                    } else {
+                    if (!s.hasPermission("bankplus.add")) {
                         MessageManager.noPermission(s, plugin);
+                        return false;
+                    }
+                    try {
+                        long amount = Long.parseLong(args[2]);
+                        if(Bukkit.getPlayerExact(args[1]) == null) {
+                            economy.addPlayerBankBalance(Bukkit.getOfflinePlayer(args[1]), amount);
+                            MessageManager.addMessage(s, Bukkit.getOfflinePlayer(args[1]), amount, plugin);
+                            return false;
+                        }
+                        economy.addPlayerBankBalance(Bukkit.getPlayerExact(args[1]), amount);
+                        MessageManager.addMessage(s, Bukkit.getPlayerExact(args[1]), amount, plugin);
+                    } catch (NumberFormatException ex) {
+                        MessageManager.invalidNumber(s, plugin);
                     }
                     break;
 
                 case "remove":
-                    if (s.hasPermission("bankplus.remove")) {
-                        try {
-                            Player target = Bukkit.getPlayerExact(args[1]);
-                            long amount = Long.parseLong(args[2]);
-                            EconomyManager.removePlayerBankBalance(target, amount, plugin);
-                            MessageManager.removeMessage(s, target, amount, plugin);
-                        } catch (NullPointerException err) {
-                            OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
-                            long amount = Long.parseLong(args[2]);
-                            EconomyManager.removePlayerBankBalance(target, amount, plugin);
-                            MessageManager.removeMessage(s, target, amount, plugin);
-                        } catch (NumberFormatException ex) {
-                            MessageManager.invalidNumber(s, plugin);
-                        }
-                    } else {
+                    if (!s.hasPermission("bankplus.remove")) {
                         MessageManager.noPermission(s, plugin);
+                        return false;
+                    }
+                    try {
+                        long amount = Long.parseLong(args[2]);
+                        if(Bukkit.getPlayerExact(args[1]) == null) {
+                            economy.removePlayerBankBalance(Bukkit.getOfflinePlayer(args[1]), amount);
+                            MessageManager.removeMessage(s, Bukkit.getOfflinePlayer(args[1]), amount, plugin);
+                            return false;
+                        }
+                        economy.removePlayerBankBalance(Bukkit.getPlayerExact(args[1]), amount);
+                        MessageManager.removeMessage(s, Bukkit.getPlayerExact(args[1]), amount, plugin);
+                    } catch (NumberFormatException ex) {
+                        MessageManager.invalidNumber(s, plugin);
                     }
                     break;
 

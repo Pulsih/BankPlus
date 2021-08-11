@@ -183,7 +183,8 @@ public class MethodUtils {
     }
 
     public static void withdraw(Player p, long amount, BankPlus plugin) {
-        long bankBalance = EconomyManager.getBankBalance(p, plugin);
+        EconomyManager economy = new EconomyManager(plugin);
+        long bankBalance = economy.getBankBalance(p);
         long maxWithdrawAmount = plugin.getConfiguration().getLong("General.Max-Withdrawn-Amount");
         if (bankBalance <= 0) {
             MessageManager.insufficientMoneyWithdraw(p, plugin);
@@ -195,18 +196,19 @@ public class MethodUtils {
             }
         }
         if (bankBalance - amount <= 0) {
-            EconomyManager.withdraw(p, bankBalance, plugin);
+            economy.withdraw(p, bankBalance);
             MessageManager.successWithdraw(p, bankBalance, plugin);
             MethodUtils.playSound("WITHDRAW", p, plugin);
             return;
         }
-        EconomyManager.withdraw(p, amount, plugin);
+        economy.withdraw(p, amount);
         MessageManager.successWithdraw(p, amount, plugin);
         MethodUtils.playSound("WITHDRAW", p, plugin);
     }
 
     public static void deposit(Player p, long amount, BankPlus plugin) {
-        long bankBalance = EconomyManager.getBankBalance(p, plugin);
+        EconomyManager economy = new EconomyManager(plugin);
+        long bankBalance = economy.getBankBalance(p);
         long money = (long) plugin.getEconomy().getBalance(p);
         long maxDepositAmount = plugin.getConfiguration().getLong("General.Max-Deposit-Amount");
         long maxBankCapacity = plugin.getConfiguration().getLong("General.Max-Bank-Capacity");
@@ -215,8 +217,8 @@ public class MethodUtils {
             return;
         }
         if (money < amount) {
-            EconomyManager.deposit(p, money, plugin);
-            MessageManager.successWithdraw(p, money, plugin);
+            economy.deposit(p, money);
+            MessageManager.successDeposit(p, money, plugin);
             MethodUtils.playSound("DEPOSIT", p, plugin);
             return;
         }
@@ -226,34 +228,34 @@ public class MethodUtils {
                 return;
             }
             if (bankBalance + amount >= maxBankCapacity) {
-                EconomyManager.deposit(p, maxBankCapacity - bankBalance, plugin);
-                MessageManager.successWithdraw(p, maxBankCapacity - bankBalance, plugin);
+                economy.deposit(p, maxBankCapacity - bankBalance);
+                MessageManager.successDeposit(p, maxBankCapacity - bankBalance, plugin);
             } else {
                 if (maxDepositAmount != 0) {
                     if (amount >= maxDepositAmount) {
-                        EconomyManager.deposit(p, maxDepositAmount, plugin);
-                        MessageManager.successWithdraw(p, maxDepositAmount, plugin);
+                        economy.deposit(p, maxDepositAmount);
+                        MessageManager.successDeposit(p, maxDepositAmount, plugin);
                     } else {
-                        EconomyManager.deposit(p, amount, plugin);
-                        MessageManager.successWithdraw(p, amount, plugin);
+                        economy.deposit(p, amount);
+                        MessageManager.successDeposit(p, amount, plugin);
                     }
                 } else {
-                    EconomyManager.deposit(p, amount, plugin);
-                    MessageManager.successWithdraw(p, amount, plugin);
+                    economy.deposit(p, amount);
+                    MessageManager.successDeposit(p, amount, plugin);
                 }
             }
         } else {
             if (maxDepositAmount != 0) {
                 if (amount >= maxDepositAmount) {
-                    EconomyManager.deposit(p, maxDepositAmount, plugin);
-                    MessageManager.successWithdraw(p, maxDepositAmount, plugin);
+                    economy.deposit(p, maxDepositAmount);
+                    MessageManager.successDeposit(p, maxDepositAmount, plugin);
                 } else {
-                    EconomyManager.deposit(p, amount, plugin);
-                    MessageManager.successWithdraw(p, amount, plugin);
+                    economy.deposit(p, amount);
+                    MessageManager.successDeposit(p, amount, plugin);
                 }
             } else {
-                EconomyManager.deposit(p, amount, plugin);
-                MessageManager.successWithdraw(p, amount, plugin);
+                economy.deposit(p, amount);
+                MessageManager.successDeposit(p, amount, plugin);
             }
         }
         MethodUtils.playSound("DEPOSIT", p, plugin);

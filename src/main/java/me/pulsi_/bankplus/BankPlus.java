@@ -23,7 +23,6 @@ public final class BankPlus extends JavaPlugin {
 
         if (Bukkit.getPluginManager().getPlugin("Vault") != null) {
             if (setupEconomy()) {
-
                 if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
                     new Placeholders(this).register();
                 } else {
@@ -31,16 +30,12 @@ public final class BankPlus extends JavaPlugin {
                     getServer().getConsoleSender().sendMessage(ChatUtils.c("&cCannot setup Placeholders, PlaceholderAPI is not installed!"));
                     getServer().getConsoleSender().sendMessage("");
                 }
-
                 this.configManager = new ConfigManager(this);
                 configManager.createConfigs();
                 DataManager.registerEvents(this);
                 DataManager.setupCommands(this);
-
                 new bStats(this, 11612);
-
                 DataManager.startupMessage(this);
-
                 this.interest = new Interest(this);
                 interest.startsInterest();
             } else {
@@ -49,6 +44,7 @@ public final class BankPlus extends JavaPlugin {
                 getServer().getConsoleSender().sendMessage(ChatUtils.c("&cPlease download it if you want to use this plugin!"));
                 getServer().getConsoleSender().sendMessage("");
                 getServer().getPluginManager().disablePlugin(this);
+                return;
             }
         } else {
             getServer().getConsoleSender().sendMessage("");
@@ -56,6 +52,7 @@ public final class BankPlus extends JavaPlugin {
             getServer().getConsoleSender().sendMessage(ChatUtils.c("&cPlease download it if you want to use this plugin!"));
             getServer().getConsoleSender().sendMessage("");
             getServer().getPluginManager().disablePlugin(this);
+            return;
         }
     }
 

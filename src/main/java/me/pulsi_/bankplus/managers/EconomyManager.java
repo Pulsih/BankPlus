@@ -6,72 +6,79 @@ import org.bukkit.entity.Player;
 
 public class EconomyManager {
 
-    public static long getBankBalance(Player target, BankPlus plugin) {
+    private final boolean isUUIDStorage;
+    private BankPlus plugin;
+    public EconomyManager(BankPlus plugin) {
+        this.plugin = plugin;
+        this.isUUIDStorage = plugin.getConfiguration().getBoolean("General.Use-UUID");
+    }
+    
+    public final long getBankBalance(Player p) {
         long othersBalance;
-        if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
-            othersBalance = plugin.getPlayers().getLong("Players." + target.getUniqueId() + ".Money");
+        if (isUUIDStorage) {
+            othersBalance = plugin.getPlayers().getLong("Players." + p.getUniqueId() + ".Money");
         } else {
-            othersBalance = plugin.getPlayers().getLong("Players." + target.getName() + ".Money");
+            othersBalance = plugin.getPlayers().getLong("Players." + p.getName() + ".Money");
         }
         return othersBalance;
     }
-    public static long getBankBalance(OfflinePlayer target, BankPlus plugin) {
+    public final long getBankBalance(OfflinePlayer p) {
         long othersBalance;
-        if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
-            othersBalance = plugin.getPlayers().getLong("Players." + target.getUniqueId() + ".Money");
+        if (isUUIDStorage) {
+            othersBalance = plugin.getPlayers().getLong("Players." + p.getUniqueId() + ".Money");
         } else {
-            othersBalance = plugin.getPlayers().getLong("Players." + target.getName() + ".Money");
+            othersBalance = plugin.getPlayers().getLong("Players." + p.getName() + ".Money");
         }
         return othersBalance;
     }
 
-    public static void withdraw(Player p, long withdraw, BankPlus plugin) {
-        long bankMoney = getBankBalance(p, plugin);
+    public final void withdraw(Player p, long withdraw) {
+        long bankMoney = getBankBalance(p);
         plugin.getEconomy().depositPlayer(p, withdraw);
-        setValue(p, bankMoney - withdraw, plugin);
+        setValue(p, bankMoney - withdraw);
     }
 
-    public static void deposit(Player p, long deposit, BankPlus plugin) {
-        long bankMoney = getBankBalance(p, plugin);
+    public final void deposit(Player p, long deposit) {
+        long bankMoney = getBankBalance(p);
         plugin.getEconomy().withdrawPlayer(p, deposit);
-        setValue(p, bankMoney + deposit, plugin);
+        setValue(p, bankMoney + deposit);
     }
 
-    public static void setPlayerBankBalance(Player target, long amount, BankPlus plugin) {
-        setValue(target, amount, plugin);
+    public final void setPlayerBankBalance(Player p, long amount) {
+        setValue(p, amount);
     }
-    public static void setPlayerBankBalance(OfflinePlayer target, long amount, BankPlus plugin) {
-        setValue(target, amount, plugin);
-    }
-
-    public static void addPlayerBankBalance(Player target, long amount, BankPlus plugin) {
-        long targetBank = getBankBalance(target, plugin);
-        setValue(target, targetBank + amount, plugin);
-    }
-    public static void addPlayerBankBalance(OfflinePlayer target, long amount, BankPlus plugin) {
-        long targetBank = getBankBalance(target, plugin);
-        setValue(target, targetBank + amount, plugin);
+    public final void setPlayerBankBalance(OfflinePlayer p, long amount) {
+        setValue(p, amount);
     }
 
-    public static void removePlayerBankBalance(Player target, long amount, BankPlus plugin) {
-        long targetBank = getBankBalance(target, plugin);
-        setValue(target, targetBank - amount, plugin);
+    public final void addPlayerBankBalance(Player p, long amount) {
+        long targetBank = getBankBalance(p);
+        setValue(p, targetBank + amount);
     }
-    public static void removePlayerBankBalance(OfflinePlayer target, long amount, BankPlus plugin) {
-        long targetBank = getBankBalance(target, plugin);
-        setValue(target, targetBank - amount, plugin);
+    public final void addPlayerBankBalance(OfflinePlayer p, long amount) {
+        long targetBank = getBankBalance(p);
+        setValue(p, targetBank + amount);
     }
 
-    private static void setValue(Player p, long amount, BankPlus plugin) {
-        if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
+    public final void removePlayerBankBalance(Player p, long amount) {
+        long targetBank = getBankBalance(p);
+        setValue(p, targetBank - amount);
+    }
+    public final void removePlayerBankBalance(OfflinePlayer p, long amount) {
+        long targetBank = getBankBalance(p);
+        setValue(p, targetBank - amount);
+    }
+
+    private void setValue(Player p, long amount) {
+        if (isUUIDStorage) {
             plugin.getPlayers().set("Players." + p.getUniqueId() + ".Money", amount);
         } else {
             plugin.getPlayers().set("Players." + p.getName() + ".Money", amount);
         }
         plugin.savePlayers();
     }
-    private static void setValue(OfflinePlayer p, long amount, BankPlus plugin) {
-        if (plugin.getConfiguration().getBoolean("General.Use-UUID")) {
+    private void setValue(OfflinePlayer p, long amount) {
+        if (isUUIDStorage) {
             plugin.getPlayers().set("Players." + p.getUniqueId() + ".Money", amount);
         } else {
             plugin.getPlayers().set("Players." + p.getName() + ".Money", amount);

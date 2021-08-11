@@ -7,6 +7,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+@SuppressWarnings("all")
 public class MessageManager {
 
     public static void cannotDepositMore(Player p, BankPlus plugin) {
@@ -22,9 +23,9 @@ public class MessageManager {
     public static void personalBalance(Player p, BankPlus plugin) {
         if (plugin.getMessages().getString("Personal-Bank") == null) return;
         p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Personal-Bank")
-                .replace("%amount%", String.valueOf(EconomyManager.getBankBalance(p, plugin)))
-                .replace("%amount_formatted%", MethodUtils.format(EconomyManager.getBankBalance(p, plugin), plugin))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(EconomyManager.getBankBalance(p, plugin), plugin))));
+                .replace("%amount%", String.valueOf(new EconomyManager(plugin).getBankBalance(p)))
+                .replace("%amount_formatted%", MethodUtils.format(new EconomyManager(plugin).getBankBalance(p), plugin))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(new EconomyManager(plugin).getBankBalance(p), plugin))));
     }
 
     public static void successWithdraw(Player p, long amount, BankPlus plugin) {
@@ -43,22 +44,22 @@ public class MessageManager {
                 .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
     }
 
-    public static void bankOthers(CommandSender s, BankPlus plugin, Player target) {
+    public static void bankOthers(CommandSender s, BankPlus plugin, Player p) {
         if (plugin.getMessages().getString("Bank-Others") == null) return;
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Bank-Others")
-                .replace("%player_name%", target.getName())
-                .replace("%amount%", String.valueOf(EconomyManager.getBankBalance(target, plugin)))
-                .replace("%amount_formatted%", MethodUtils.format(EconomyManager.getBankBalance(target, plugin), plugin))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(EconomyManager.getBankBalance(target, plugin), plugin))));
+                .replace("%player_name%", p.getName())
+                .replace("%amount%", String.valueOf(new EconomyManager(plugin).getBankBalance(p)))
+                .replace("%amount_formatted%", MethodUtils.format(new EconomyManager(plugin).getBankBalance(p), plugin))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(new EconomyManager(plugin).getBankBalance(p), plugin))));
     }
 
-    public static void bankOthers(CommandSender s, BankPlus plugin, OfflinePlayer target) {
+    public static void bankOthers(CommandSender s, BankPlus plugin, OfflinePlayer p) {
         if (plugin.getMessages().getString("Bank-Others") == null) return;
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Bank-Others")
-                .replace("%player_name%", target.getName())
-                .replace("%amount%", String.valueOf(EconomyManager.getBankBalance(target, plugin)))
-                .replace("%amount_formatted%", MethodUtils.format(EconomyManager.getBankBalance(target, plugin), plugin))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(EconomyManager.getBankBalance(target, plugin), plugin))));
+                .replace("%player_name%", p.getName())
+                .replace("%amount%", String.valueOf(new EconomyManager(plugin).getBankBalance(p)))
+                .replace("%amount_formatted%", MethodUtils.format(new EconomyManager(plugin).getBankBalance(p), plugin))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(new EconomyManager(plugin).getBankBalance(p), plugin))));
     }
 
     public static void setMessage(CommandSender s, Player target, long amount, BankPlus plugin) {
@@ -174,6 +175,11 @@ public class MessageManager {
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Specify-Number")));
     }
 
+    public static void specifyPlayer(CommandSender s, BankPlus plugin) {
+        if (plugin.getMessages().getString("Specify-Player") == null) return;
+        s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Specify-Player")));
+    }
+
     public static void unknownCommand(CommandSender s, BankPlus plugin) {
         if (plugin.getMessages().getString("Unknown-Command") == null) return;
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Unknown-Command")));
@@ -189,8 +195,23 @@ public class MessageManager {
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Error")));
     }
 
+    public static void interestUsage(CommandSender s, BankPlus plugin) {
+        if (plugin.getMessages().getString("Interest-Usage") == null) return;
+        s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Interest-Usage")));
+    }
+
     public static void interestRestarted(CommandSender s, BankPlus plugin) {
         if (plugin.getMessages().getString("Interest-Restarted") == null) return;
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Interest-Restarted")));
+    }
+
+    public static void reloadMessage(CommandSender s, BankPlus plugin) {
+        if (plugin.getMessages().getString("Reload") == null) return;
+        s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Reload")));
+    }
+
+    public static void cannotUseBankHere(CommandSender s, BankPlus plugin) {
+        if (plugin.getMessages().getString("Cannot-Use-Bank-Here") == null) return;
+        s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Cannot-Use-Bank-Here")));
     }
 }

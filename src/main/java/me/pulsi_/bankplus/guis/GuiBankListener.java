@@ -29,11 +29,10 @@ public class GuiBankListener implements Listener {
     public void guiListener(InventoryClickEvent e) throws IOException {
 
         Player p = (Player) e.getWhoClicked();
+        EconomyManager economy = new EconomyManager(plugin);
         String displayName = plugin.getConfiguration().getString("Gui.Title");
 
-        if (e.getCurrentItem() == null) return;
-        if (!e.getView().getTitle().equals(ChatUtils.c(displayName))) return;
-
+        if (e.getCurrentItem() == null || !e.getView().getTitle().equals(ChatUtils.c(displayName))) return;
         e.setCancelled(true);
 
         for (String key : plugin.getConfiguration().getConfigurationSection("Gui.Items").getKeys(false)) {
@@ -53,10 +52,10 @@ public class GuiBankListener implements Listener {
                     }
                     p.closeInventory();
                 } else if (actionAmount.contains("ALL")) {
-                    long amount = EconomyManager.getBankBalance(p, plugin);
+                    long amount = economy.getBankBalance(p);
                     MethodUtils.withdraw(p, amount, plugin);
                 } else if (actionAmount.contains("HALF")) {
-                    long amount = EconomyManager.getBankBalance(p, plugin) / 2;
+                    long amount = economy.getBankBalance(p) / 2;
                     MethodUtils.withdraw(p, amount, plugin);
                 } else {
                     long amount = Long.parseLong(actionAmount);
