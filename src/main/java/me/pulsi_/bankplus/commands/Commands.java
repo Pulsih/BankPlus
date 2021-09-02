@@ -135,7 +135,7 @@ public class Commands implements CommandExecutor {
                     MessageManager.bankOthers(s, plugin, Bukkit.getPlayerExact(args[1]));
                     break;
 
-                case "withdraw":
+                case "withdraw": {
                     if (!s.hasPermission("bankplus.withdraw")) {
                         MessageManager.noPermission(s, plugin);
                         return false;
@@ -144,15 +144,30 @@ public class Commands implements CommandExecutor {
                         MessageManager.notPlayer(s, plugin);
                         return false;
                     }
-                    try {
-                        long amount = Long.parseLong(args[1]);
-                        MethodUtils.withdraw((Player) s, amount, plugin);
-                    } catch (NumberFormatException ex) {
-                        MessageManager.invalidNumber(s, plugin);
-                    }
-                    break;
+                    long amount;
+                    switch (args[1]) {
+                        case "all":
+                            amount = economy.getBankBalance((Player) s);
+                            MethodUtils.withdraw((Player) s, amount, plugin);
+                            break;
 
-                case "deposit":
+                        case "half":
+                            amount = economy.getBankBalance((Player) s) / 2;
+                            MethodUtils.withdraw((Player) s, amount, plugin);
+                            break;
+
+                        default:
+                            try {
+                                amount = Long.parseLong(args[1]);
+                                MethodUtils.withdraw((Player) s, amount, plugin);
+                            } catch (NumberFormatException e) {
+                                MessageManager.invalidNumber(s, plugin);
+                            }
+                    }
+                }
+                break;
+
+                case "deposit": {
                     if (!s.hasPermission("bankplus.deposit")) {
                         MessageManager.noPermission(s, plugin);
                         return false;
@@ -161,13 +176,28 @@ public class Commands implements CommandExecutor {
                         MessageManager.notPlayer(s, plugin);
                         return false;
                     }
-                    try {
-                        long amount = Long.parseLong(args[1]);
-                        MethodUtils.deposit((Player) s, amount, plugin);
-                    } catch (NumberFormatException ex) {
-                        MessageManager.invalidNumber(s, plugin);
+                    long amount;
+                    switch (args[1]) {
+                        case "all":
+                            amount = (long) plugin.getEconomy().getBalance((Player) s);
+                            MethodUtils.deposit((Player) s, amount, plugin);
+                            break;
+
+                        case "half":
+                            amount = (long) (plugin.getEconomy().getBalance((Player) s) / 2);
+                            MethodUtils.deposit((Player) s, amount, plugin);
+                            break;
+
+                        default:
+                            try {
+                                amount = Long.parseLong(args[1]);
+                                MethodUtils.deposit((Player) s, amount, plugin);
+                            } catch (NumberFormatException ex) {
+                                MessageManager.invalidNumber(s, plugin);
+                            }
                     }
-                    break;
+                }
+                break;
 
                 case "set":
                 case "add":

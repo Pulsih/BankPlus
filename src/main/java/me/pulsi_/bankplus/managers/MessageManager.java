@@ -66,7 +66,7 @@ public class MessageManager {
         if (plugin.getMessages().getString("Set-Message") == null) return;
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Set-Message")
                 .replace("%player_name%", p.getName())
-                .replace("%amount%", MethodUtils.formatCommas(amount))
+                .replace("%amount%", MethodUtils.formatCommas(amount)).replace("%amount_long%", "" + amount)
                 .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
                 .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
     }
@@ -74,7 +74,7 @@ public class MessageManager {
         if (plugin.getMessages().getString("Set-Message") == null) return;
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Set-Message")
                 .replace("%player_name%", p.getName())
-                .replace("%amount%", MethodUtils.formatCommas(amount))
+                .replace("%amount%", MethodUtils.formatCommas(amount)).replace("%amount_long%", "" + amount).replace("%amount_long%", "" + amount)
                 .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
                 .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
     }
@@ -83,7 +83,7 @@ public class MessageManager {
         if (plugin.getMessages().getString("Add-Message") == null) return;
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Add-Message")
                 .replace("%player_name%", p.getName())
-                .replace("%amount%", MethodUtils.formatCommas(amount))
+                .replace("%amount%", MethodUtils.formatCommas(amount)).replace("%amount_long%", "" + amount).replace("%amount_long%", "" + amount)
                 .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
                 .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
     }
@@ -91,7 +91,7 @@ public class MessageManager {
         if (plugin.getMessages().getString("Add-Message") == null) return;
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Add-Message")
                 .replace("%player_name%", p.getName())
-                .replace("%amount%", MethodUtils.formatCommas(amount))
+                .replace("%amount%", MethodUtils.formatCommas(amount)).replace("%amount_long%", "" + amount)
                 .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
                 .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
     }
@@ -100,7 +100,7 @@ public class MessageManager {
         if (plugin.getMessages().getString("Remove-Message") == null) return;
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Remove-Message")
                 .replace("%player_name%", p.getName())
-                .replace("%amount%", MethodUtils.formatCommas(amount))
+                .replace("%amount%", MethodUtils.formatCommas(amount)).replace("%amount_long%", "" + amount)
                 .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
                 .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
     }
@@ -108,7 +108,7 @@ public class MessageManager {
         if (plugin.getMessages().getString("Remove-Message") == null) return;
         s.sendMessage(ChatUtils.c(plugin.getMessages().getString("Remove-Message")
                 .replace("%player_name%", p.getName())
-                .replace("%amount%", MethodUtils.formatCommas(amount))
+                .replace("%amount%", MethodUtils.formatCommas(amount)).replace("%amount_long%", "" + amount)
                 .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
                 .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
     }
@@ -131,7 +131,7 @@ public class MessageManager {
     public static void interestBroadcastMessageMax(Player p, BankPlus plugin, long amount) {
         if (plugin.getMessages().getString("Interest-Broadcast.Message") == null) return;
         p.sendMessage(ChatUtils.c(plugin.getMessages().getString("Interest-Broadcast.Message")
-                .replace("%amount%", MethodUtils.formatCommas(amount))
+                .replace("%amount%", MethodUtils.formatCommas(amount)).replace("%amount_long%", "" + amount)
                 .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
                 .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))));
     }

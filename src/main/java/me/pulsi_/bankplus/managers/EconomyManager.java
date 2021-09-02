@@ -32,6 +32,25 @@ public class EconomyManager {
         return othersBalance;
     }
 
+    public final long getOfflineInterest(Player p) {
+        long othersBalance;
+        if (isUUIDStorage) {
+            othersBalance = plugin.getPlayers().getLong("Players." + p.getUniqueId() + ".Offline-Interest");
+        } else {
+            othersBalance = plugin.getPlayers().getLong("Players." + p.getName() + ".Offline-Interest");
+        }
+        return othersBalance;
+    }
+    public final long getOfflineInterest(OfflinePlayer p) {
+        long othersBalance;
+        if (isUUIDStorage) {
+            othersBalance = plugin.getPlayers().getLong("Players." + p.getUniqueId() + ".Offline-Interest");
+        } else {
+            othersBalance = plugin.getPlayers().getLong("Players." + p.getName() + ".Offline-Interest");
+        }
+        return othersBalance;
+    }
+
     public final void withdraw(Player p, long withdraw) {
         long bankMoney = getBankBalance(p);
         plugin.getEconomy().depositPlayer(p, withdraw);
@@ -67,6 +86,23 @@ public class EconomyManager {
     public final void removePlayerBankBalance(OfflinePlayer p, long amount) {
         long targetBank = getBankBalance(p);
         setValue(p, targetBank - amount);
+    }
+
+    public final void setOfflineInterest(Player p, long amount) {
+        if (isUUIDStorage) {
+            plugin.getPlayers().set("Players." + p.getUniqueId() + ".Offline-Interest", amount);
+        } else {
+            plugin.getPlayers().set("Players." + p.getName() + ".Offline-Interest", amount);
+        }
+        plugin.savePlayers();
+    }
+    public final void setOfflineInterest(OfflinePlayer p, long amount) {
+        if (isUUIDStorage) {
+            plugin.getPlayers().set("Players." + p.getUniqueId() + ".Offline-Interest", amount);
+        } else {
+            plugin.getPlayers().set("Players." + p.getName() + ".Offline-Interest", amount);
+        }
+        plugin.savePlayers();
     }
 
     private void setValue(Player p, long amount) {

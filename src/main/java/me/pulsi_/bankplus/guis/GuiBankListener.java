@@ -28,9 +28,9 @@ public class GuiBankListener implements Listener {
 
         Player p = (Player) e.getWhoClicked();
         EconomyManager economy = new EconomyManager(plugin);
-        String displayName = plugin.getConfiguration().getString("Gui.Title");
+        String title = ChatUtils.c(plugin.getConfiguration().getString("Gui.Title"));
 
-        if (e.getCurrentItem() == null || !e.getView().getTitle().equals(ChatUtils.c(displayName))) return;
+        if (e.getCurrentItem() == null || !e.getView().getTitle().equals(title)) return;
         e.setCancelled(true);
 
         for (String key : plugin.getConfiguration().getConfigurationSection("Gui.Items").getKeys(false)) {
@@ -63,8 +63,12 @@ public class GuiBankListener implements Listener {
                             break;
 
                         default:
-                            amount = Long.parseLong(actionAmount);
-                            MethodUtils.withdraw(p, amount, plugin);
+                            try {
+                                amount = Long.parseLong(actionAmount);
+                                MethodUtils.withdraw(p, amount, plugin);
+                            } catch (NumberFormatException ex) {
+                                ChatUtils.consoleMessage("&a&lBank&9&lPlus &cInvalid number in the withdraw amount!");
+                            }
                             break;
                     }
                     break;
@@ -89,8 +93,13 @@ public class GuiBankListener implements Listener {
                             break;
 
                         default:
-                            amount = Long.parseLong(actionAmount);
-                            MethodUtils.deposit(p, amount, plugin);
+                            try {
+                                amount = Long.parseLong(actionAmount);
+                                MethodUtils.deposit(p, amount, plugin);
+                                break;
+                            } catch (NumberFormatException ex) {
+                                ChatUtils.consoleMessage("&a&lBank&9&lPlus &cInvalid number in the deposit amount!");
+                            }
                             break;
                     }
                     break;
@@ -101,16 +110,16 @@ public class GuiBankListener implements Listener {
     @EventHandler
     public void updateGui(InventoryOpenEvent e) {
         Player p = (Player) e.getPlayer();
-        if (!e.getView().getTitle().equalsIgnoreCase(ChatUtils.c(plugin.getConfiguration().getString("Gui.Title")))) return;
-        if (plugin.getConfiguration().getInt("Gui.Update-Delay") != 0) {
-            runnable = Bukkit.getScheduler().runTaskTimer(plugin, () -> GuiBank.updateLore(p, plugin),
-                    plugin.getConfiguration().getInt("Gui.Update-Delay") * 20L, 0);
-        }
+        String title = ChatUtils.c(plugin.getConfiguration().getString("Gui.Title"));
+        if (!e.getView().getTitle().equals(title) || plugin.getConfiguration().getInt("Gui.Update-Delay") == 0) return;
+        runnable = Bukkit.getScheduler().runTaskTimer(plugin, () -> GuiBank.updateLore(p, title, plugin),
+                plugin.getConfiguration().getInt("Gui.Update-Delay") * 20L, 0);
     }
 
     @EventHandler
     public void closeGUI(InventoryCloseEvent e) {
-        if (runnable == null || !e.getView().getTitle().equalsIgnoreCase(ChatUtils.c(plugin.getConfiguration().getString("Gui.Title")))) return;
+        String title = ChatUtils.c(plugin.getConfiguration().getString("Gui.Title"));
+        if (runnable == null || !e.getView().getTitle().equals(title)) return;
         runnable.cancel();
     }
 }

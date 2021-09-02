@@ -3,10 +3,11 @@
 # Made by Pulsi_
 
 # Placeholders
-# %amount% -> Raw Number
+# %amount% -> Number Formatted with commas
+# %amount_long% -> Raw Number
 # %amount_formatted% -> Number Formatted
 # %amount_formatted_long% -> Number formatted without "."
-# %player_name% -> Returns the player name based on the action
+# %player_name% -> Player name
 
 # System
 Reload: "&a&lBank&9&lPlus &aPlugin reloaded!"

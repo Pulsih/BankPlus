@@ -34,8 +34,9 @@ public class Interest {
         double moneyPercentage = plugin.getConfiguration().getDouble("Interest.Money-Given");
         long maxAmount = plugin.getConfiguration().getLong("Interest.Max-Amount");
         if (plugin.getConfiguration().getBoolean("Interest.Give-To-Offline-Players")) {
-            for (OfflinePlayer p : Bukkit.getOfflinePlayers())
+            for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
                 giveInterestOffline(p, moneyPercentage, maxAmount);
+            }
         }
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (!p.hasPermission("bankplus.receive.interest")) continue;
@@ -109,16 +110,20 @@ public class Interest {
         if (maxBankCapacity != 0) {
             if (bankBalance + interestMoney >= maxBankCapacity) {
                 economy.setPlayerBankBalance(p, maxBankCapacity);
+                addOfflineInterest(p, maxBankCapacity);
             } else {
                 if (bankBalance != 0) {
                     if (interestMoney == 0) {
                         economy.addPlayerBankBalance(p, 1);
+                        addOfflineInterest(p, 1);
                     } else {
                         if (interestMoney >= maxAmount) {
                             economy.addPlayerBankBalance(p, maxAmount);
+                            addOfflineInterest(p, maxAmount);
                             return;
                         }
                         economy.addPlayerBankBalance(p, interestMoney);
+                        addOfflineInterest(p, interestMoney);
                     }
                 }
             }
@@ -126,14 +131,24 @@ public class Interest {
             if (bankBalance != 0) {
                 if (interestMoney == 0) {
                     economy.addPlayerBankBalance(p, 1);
+                    addOfflineInterest(p, 1);
                 } else {
                     if (interestMoney >= maxAmount) {
                         economy.addPlayerBankBalance(p, maxAmount);
+                        addOfflineInterest(p, maxAmount);
                         return;
                     }
                     economy.addPlayerBankBalance(p, interestMoney);
+                    addOfflineInterest(p, interestMoney);
                 }
             }
         }
+    }
+
+    private void addOfflineInterest(OfflinePlayer p, long amount) {
+        if (!plugin.getConfiguration().getBoolean("General.Offline-Interest-Earned-Message.Enabled")) return;
+        EconomyManager economy = new EconomyManager(plugin);
+        final long offlineInterest = economy.getOfflineInterest(p);
+        economy.setOfflineInterest(p, offlineInterest + amount);
     }
 }

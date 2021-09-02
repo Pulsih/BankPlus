@@ -49,6 +49,7 @@ public class Placeholders extends PlaceholderExpansion {
 
         switch (identifier) {
             case "balance": return MethodUtils.formatCommas(balance);
+            case "balance_long": return "" + balance;
             case "balance_formatted": return MethodUtils.format(balance, plugin);
             case "balance_formatted_long": return MethodUtils.formatLong(balance, plugin);
             case "interest_cooldown": return MethodUtils.formatTime(cooldown, plugin);

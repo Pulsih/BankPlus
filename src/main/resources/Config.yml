@@ -39,6 +39,14 @@ General:
   Worlds-Blacklist:
     - "noBankWorld"
 
+  # Send an alert message to remember the player
+  # how much interest has earned while being offline
+  Offline-Interest-Earned-Message:
+    Enabled: true
+    # 2 Seconds, put 0 to disable the delay
+    Delay: 2
+    Message: "&a&lBank&9&lPlus &aYou have earned &f%amount% money &awhile being offline!"
+
   Withdraw-Sound:
     Enabled: true
     Sound: "ENTITY_PLAYER_LEVEL_UP,5,1" #Sound Type, Volume, Pitch

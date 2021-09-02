@@ -72,7 +72,8 @@ public class GuiBank {
         return lines;
     }
 
-    public static void updateLore(Player p, BankPlus plugin) {
+    public static void updateLore(Player p, String title, BankPlus plugin) {
+        if (!p.getOpenInventory().getTitle().equals(title)) return;
         ConfigurationSection c = plugin.getConfiguration().getConfigurationSection("Gui.Items");
         for (String items : c.getKeys(false)) {
             try {
