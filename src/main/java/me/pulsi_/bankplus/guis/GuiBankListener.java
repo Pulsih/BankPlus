@@ -17,7 +17,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 public class GuiBankListener implements Listener {
 
-    BukkitTask runnable;
+    public BukkitTask runnable;
     private BankPlus plugin;
     public GuiBankListener(BankPlus plugin) {
         this.plugin = plugin;
@@ -28,13 +28,13 @@ public class GuiBankListener implements Listener {
 
         Player p = (Player) e.getWhoClicked();
         EconomyManager economy = new EconomyManager(plugin);
-        String title = ChatUtils.c(plugin.getConfiguration().getString("Gui.Title"));
+        String title = ChatUtils.color(plugin.config().getString("Gui.Title"));
 
         if (e.getCurrentItem() == null || !e.getView().getTitle().equals(title)) return;
         e.setCancelled(true);
 
-        for (String key : plugin.getConfiguration().getConfigurationSection("Gui.Items").getKeys(false)) {
-            ConfigurationSection items = plugin.getConfiguration().getConfigurationSection("Gui.Items." + key);
+        for (String key : plugin.config().getConfigurationSection("Gui.Items").getKeys(false)) {
+            ConfigurationSection items = plugin.config().getConfigurationSection("Gui.Items." + key);
 
             if (e.getSlot() + 1 != items.getInt("Slot") || items.getString("Action.Action-Type") == null) continue;
 
@@ -47,7 +47,7 @@ public class GuiBankListener implements Listener {
                     switch (actionAmount) {
                         case "CUSTOM":
                             SetUtils.playerWithdrawing.add(p.getUniqueId());
-                            if (plugin.getMessages().getBoolean("Title-Custom-Amount.Enabled"))
+                            if (plugin.messages().getBoolean("Title-Custom-Amount.Enabled"))
                                 MethodUtils.sendTitle("Title-Custom-Amount.Title-Withdraw", p, plugin);
                             p.closeInventory();
                             break;
@@ -77,7 +77,7 @@ public class GuiBankListener implements Listener {
                     switch (actionAmount) {
                         case "CUSTOM":
                             SetUtils.playerDepositing.add(p.getUniqueId());
-                            if (plugin.getMessages().getBoolean("Title-Custom-Amount.Enabled"))
+                            if (plugin.messages().getBoolean("Title-Custom-Amount.Enabled"))
                                 MethodUtils.sendTitle("Title-Custom-Amount.Title-Deposit", p, plugin);
                             p.closeInventory();
                             break;
@@ -109,17 +109,18 @@ public class GuiBankListener implements Listener {
 
     @EventHandler
     public void updateGui(InventoryOpenEvent e) {
-        Player p = (Player) e.getPlayer();
-        String title = ChatUtils.c(plugin.getConfiguration().getString("Gui.Title"));
-        if (!e.getView().getTitle().equals(title) || plugin.getConfiguration().getInt("Gui.Update-Delay") == 0) return;
-        runnable = Bukkit.getScheduler().runTaskTimer(plugin, () -> GuiBank.updateLore(p, title, plugin),
-                plugin.getConfiguration().getInt("Gui.Update-Delay") * 20L, 0);
+        final Player p = (Player) e.getPlayer();
+        final String title = ChatUtils.color(plugin.config().getString("Gui.Title"));
+        if (!e.getView().getTitle().equals(title) || plugin.config().getInt("Gui.Update-Delay") == 0) return;
+
+        final int delay = plugin.config().getInt("Gui.Update-Delay");
+        runnable = Bukkit.getScheduler().runTaskTimer(plugin, () -> GuiBank.updateLore(p, title),0, delay * 20L);
     }
 
     @EventHandler
     public void closeGUI(InventoryCloseEvent e) {
-        String title = ChatUtils.c(plugin.getConfiguration().getString("Gui.Title"));
-        if (runnable == null || !e.getView().getTitle().equals(title)) return;
-        runnable.cancel();
+        final String title = ChatUtils.color(plugin.config().getString("Gui.Title"));
+        if (runnable != null && e.getView().getTitle().equals(title))
+            runnable.cancel();
     }
 }

@@ -1,4 +1,4 @@
-package me.pulsi_.bankplus.events;
+package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.guis.GuiBank;
@@ -22,16 +22,17 @@ public class PlayerChat implements Listener {
 
         Player p = e.getPlayer();
         String amount = e.getMessage();
+        final MessageManager messMan = new MessageManager(plugin);
 
         if (SetUtils.playerDepositing.contains(p.getUniqueId())) {
             try {
                 MethodUtils.deposit(p, Long.parseLong(amount), plugin);
-                if (plugin.getConfiguration().getBoolean("General.Reopen-Bank-After-Chat")) {
+                if (plugin.config().getBoolean("General.Reopen-Bank-After-Chat")) {
                     new GuiBank(plugin).openGui(p);
                 }
             } catch (NumberFormatException ex) {
                 e.setCancelled(true);
-                MessageManager.invalidNumber(p, plugin);
+                messMan.invalidNumber(p);
                 return;
             }
             e.setCancelled(true);
@@ -40,12 +41,12 @@ public class PlayerChat implements Listener {
         if (SetUtils.playerWithdrawing.contains(p.getUniqueId())) {
             try {
                 MethodUtils.withdraw(p, Long.parseLong(amount), plugin);
-                if (plugin.getConfiguration().getBoolean("General.Reopen-Bank-After-Chat")) {
+                if (plugin.config().getBoolean("General.Reopen-Bank-After-Chat")) {
                     new GuiBank(plugin).openGui(p);
                 }
             } catch (NumberFormatException ex) {
                 e.setCancelled(true);
-                MessageManager.invalidNumber(p, plugin);
+                messMan.invalidNumber(p);
                 return;
             }
             e.setCancelled(true);

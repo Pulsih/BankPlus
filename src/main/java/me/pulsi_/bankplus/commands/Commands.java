@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.commands;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.guis.GuiBank;
+import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
@@ -25,14 +26,15 @@ public class Commands implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender s, Command command, String label, String[] args) {
 
-        EconomyManager economy = new EconomyManager(plugin);
+        final MessageManager messMan = new MessageManager(plugin);
+        final EconomyManager economy = new EconomyManager(plugin);
 
-        List<String> worldBlacklist = plugin.getConfiguration().getStringList("General.Worlds-Blacklist");
+        List<String> worldBlacklist = plugin.config().getStringList("General.Worlds-Blacklist");
         if (!worldBlacklist.isEmpty()) {
             if (s instanceof Player) {
                 if (worldBlacklist.contains(((Player)s).getWorld().getName())) {
                     if (!s.hasPermission("bankplus.worlds.blacklist.bypass")) {
-                        MessageManager.cannotUseBankHere(s, plugin);
+                        messMan.cannotUseBankHere(s);
                         return false;
                     }
                 }
@@ -40,15 +42,19 @@ public class Commands implements CommandExecutor {
         }
 
         if (args.length == 0) {
-            if (!(s instanceof Player)) {
-                MessageManager.notPlayer(s, plugin);
+            if (!s.hasPermission("bankplus.use")) {
+                messMan.noPermission(s);
                 return false;
             }
-            if (plugin.getConfiguration().getBoolean("Gui.Enabled")) {
+            if (!(s instanceof Player)) {
+                messMan.notPlayer(s);
+                return false;
+            }
+            if (plugin.config().getBoolean("Gui.Enabled")) {
                 new GuiBank(plugin).openGui((Player) s);
                 MethodUtils.playSound("PERSONAL", (Player) s, plugin);
             } else {
-                MessageManager.personalBalance((Player) s, plugin);
+                messMan.personalBalance((Player) s);
             }
         }
 
@@ -56,63 +62,63 @@ public class Commands implements CommandExecutor {
             switch (args[0]) {
                 case "reload":
                     if (!s.hasPermission("bankplus.reload")) {
-                        MessageManager.noPermission(s, plugin);
+                        messMan.noPermission(s);
                         return false;
                     }
                     plugin.reloadConfigs();
-                    MessageManager.reloadMessage(s, plugin);
+                    messMan.reloadMessage(s);
                     break;
 
                 case "help":
                     if (!s.hasPermission("bankplus.help")) {
-                        MessageManager.noPermission(s, plugin);
+                        messMan.noPermission(s);
                         return false;
                     }
-                    for (String helpMessage : plugin.getMessages().getStringList("Help-Message"))
-                        s.sendMessage(ChatUtils.c(helpMessage));
+                    for (String helpMessage : plugin.messages().getStringList("Help-Message"))
+                        s.sendMessage(ChatUtils.color(helpMessage));
                     break;
 
                 case "view":
                     if (!s.hasPermission("bankplus.view")) {
-                        MessageManager.noPermission(s, plugin);
+                        messMan.noPermission(s);
                         return false;
                     }
-                    MessageManager.specifyPlayer(s, plugin);
+                    messMan.specifyPlayer(s);
                     break;
 
                 case "withdraw":
                 case "deposit":
                     if (!(s.hasPermission("bankplus.deposit") || s.hasPermission("bankplus.withdraw"))) {
-                        MessageManager.noPermission(s, plugin);
+                        messMan.noPermission(s);
                         return false;
                     }
                     if (!(s instanceof Player)) {
-                        MessageManager.notPlayer(s, plugin);
+                        messMan.notPlayer(s);
                         return false;
                     }
-                    MessageManager.specifyNumber(s, plugin);
+                    messMan.specifyNumber(s);
                     break;
 
                 case "set":
                 case "add":
                 case "remove":
                     if (!(s.hasPermission("bankplus.remove") || s.hasPermission("bankplus.add") || s.hasPermission("bankplus.set"))) {
-                        MessageManager.noPermission(s, plugin);
+                        messMan.noPermission(s);
                         return false;
                     }
-                    MessageManager.specifyPlayer(s, plugin);
+                    messMan.specifyPlayer(s);
                     break;
 
                 case "interest":
                     if (!s.hasPermission("bankplus.interest.restart")) {
-                        MessageManager.noPermission(s, plugin);
+                        messMan.noPermission(s);
                         return false;
                     }
-                    MessageManager.interestUsage(s, plugin);
+                    messMan.interestUsage(s);
                     break;
 
                 default:
-                    MessageManager.unknownCommand(s, plugin);
+                    messMan.unknownCommand(s);
                     break;
             }
         }
@@ -121,7 +127,7 @@ public class Commands implements CommandExecutor {
             switch (args[0]) {
                 case "view":
                     if (!s.hasPermission("bankplus.view")) {
-                        MessageManager.noPermission(s, plugin);
+                        messMan.noPermission(s);
                         return false;
                     }
                     if (s instanceof Player) {
@@ -129,19 +135,19 @@ public class Commands implements CommandExecutor {
                     }
                     if (Bukkit.getPlayerExact(args[1]) == null) {
                         OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
-                        MessageManager.bankOthers(s, plugin, p);
+                        messMan.bankOthers(s, p);
                         return false;
                     }
-                    MessageManager.bankOthers(s, plugin, Bukkit.getPlayerExact(args[1]));
+                    messMan.bankOthers(s, Bukkit.getPlayerExact(args[1]));
                     break;
 
                 case "withdraw": {
                     if (!s.hasPermission("bankplus.withdraw")) {
-                        MessageManager.noPermission(s, plugin);
+                        messMan.noPermission(s);
                         return false;
                     }
                     if (!(s instanceof Player)) {
-                        MessageManager.notPlayer(s, plugin);
+                        messMan.notPlayer(s);
                         return false;
                     }
                     long amount;
@@ -161,7 +167,7 @@ public class Commands implements CommandExecutor {
                                 amount = Long.parseLong(args[1]);
                                 MethodUtils.withdraw((Player) s, amount, plugin);
                             } catch (NumberFormatException e) {
-                                MessageManager.invalidNumber(s, plugin);
+                                messMan.invalidNumber(s);
                             }
                     }
                 }
@@ -169,11 +175,11 @@ public class Commands implements CommandExecutor {
 
                 case "deposit": {
                     if (!s.hasPermission("bankplus.deposit")) {
-                        MessageManager.noPermission(s, plugin);
+                        messMan.noPermission(s);
                         return false;
                     }
                     if (!(s instanceof Player)) {
-                        MessageManager.notPlayer(s, plugin);
+                        messMan.notPlayer(s);
                         return false;
                     }
                     long amount;
@@ -193,7 +199,7 @@ public class Commands implements CommandExecutor {
                                 amount = Long.parseLong(args[1]);
                                 MethodUtils.deposit((Player) s, amount, plugin);
                             } catch (NumberFormatException ex) {
-                                MessageManager.invalidNumber(s, plugin);
+                                messMan.invalidNumber(s);
                             }
                     }
                 }
@@ -203,34 +209,34 @@ public class Commands implements CommandExecutor {
                 case "add":
                 case "remove":
                     if (!(s.hasPermission("bankplus.set") || s.hasPermission("bankplus.add") || s.hasPermission("bankplus.remove"))) {
-                        MessageManager.noPermission(s, plugin);
+                        messMan.noPermission(s);
                         return false;
                     }
-                    MessageManager.specifyNumber(s, plugin);
+                    messMan.specifyNumber(s);
                     break;
 
                 case "interest":
                     if (args[1].equalsIgnoreCase("restart")) {
                         if (!s.hasPermission("bankplus.interest.restart")) {
-                            MessageManager.noPermission(s, plugin);
+                            messMan.noPermission(s);
                             return false;
                         }
-                        if (!plugin.getConfiguration().getBoolean("Interest.Enabled")) {
-                            MessageManager.interestIsDisabled(s, plugin);
+                        if (!plugin.config().getBoolean("Interest.Enabled")) {
+                            messMan.interestIsDisabled(s);
                             return false;
                         }
                         try {
-                            plugin.getPlayers().set("Interest-Cooldown", plugin.getConfiguration().getLong("Interest.Delay"));
-                            MessageManager.interestRestarted(s, plugin);
-                            plugin.savePlayers();
+                            final long delay = plugin.config().getLong("Interest.Delay");
+                            Interest.interestCooldown.set(0, delay);
+                            messMan.interestRestarted(s);
                         } catch (Error e) {
-                            MessageManager.internalError(s, plugin);
+                            messMan.internalError(s);
                         }
                     }
                     break;
 
                 default:
-                    MessageManager.unknownCommand(s, plugin);
+                    messMan.unknownCommand(s);
                     break;
             }
         }
@@ -239,63 +245,63 @@ public class Commands implements CommandExecutor {
             switch (args[0]) {
                 case "set":
                     if (!s.hasPermission("bankplus.set")) {
-                        MessageManager.noPermission(s, plugin);
+                        messMan.noPermission(s);
                         return false;
                     }
                     try {
                         long amount = Long.parseLong(args[2]);
                         if(Bukkit.getPlayerExact(args[1]) == null) {
                             economy.setPlayerBankBalance(Bukkit.getOfflinePlayer(args[1]), amount);
-                            MessageManager.setMessage(s, Bukkit.getOfflinePlayer(args[1]), amount, plugin);
+                            messMan.setMessage(s, Bukkit.getOfflinePlayer(args[1]), amount);
                             return false;
                         }
                         economy.setPlayerBankBalance(Bukkit.getPlayerExact(args[1]), amount);
-                        MessageManager.setMessage(s, Bukkit.getPlayerExact(args[1]), amount, plugin);
+                        messMan.setMessage(s, Bukkit.getPlayerExact(args[1]), amount);
                     } catch (NumberFormatException ex) {
-                        MessageManager.invalidNumber(s, plugin);
+                        messMan.invalidNumber(s);
                     }
                     break;
 
                 case "add":
                     if (!s.hasPermission("bankplus.add")) {
-                        MessageManager.noPermission(s, plugin);
+                        messMan.noPermission(s);
                         return false;
                     }
                     try {
                         long amount = Long.parseLong(args[2]);
                         if(Bukkit.getPlayerExact(args[1]) == null) {
                             economy.addPlayerBankBalance(Bukkit.getOfflinePlayer(args[1]), amount);
-                            MessageManager.addMessage(s, Bukkit.getOfflinePlayer(args[1]), amount, plugin);
+                            messMan.addMessage(s, Bukkit.getOfflinePlayer(args[1]), amount);
                             return false;
                         }
                         economy.addPlayerBankBalance(Bukkit.getPlayerExact(args[1]), amount);
-                        MessageManager.addMessage(s, Bukkit.getPlayerExact(args[1]), amount, plugin);
+                        messMan.addMessage(s, Bukkit.getPlayerExact(args[1]), amount);
                     } catch (NumberFormatException ex) {
-                        MessageManager.invalidNumber(s, plugin);
+                        messMan.invalidNumber(s);
                     }
                     break;
 
                 case "remove":
                     if (!s.hasPermission("bankplus.remove")) {
-                        MessageManager.noPermission(s, plugin);
+                        messMan.noPermission(s);
                         return false;
                     }
                     try {
                         long amount = Long.parseLong(args[2]);
                         if(Bukkit.getPlayerExact(args[1]) == null) {
                             economy.removePlayerBankBalance(Bukkit.getOfflinePlayer(args[1]), amount);
-                            MessageManager.removeMessage(s, Bukkit.getOfflinePlayer(args[1]), amount, plugin);
+                            messMan.removeMessage(s, Bukkit.getOfflinePlayer(args[1]), amount);
                             return false;
                         }
                         economy.removePlayerBankBalance(Bukkit.getPlayerExact(args[1]), amount);
-                        MessageManager.removeMessage(s, Bukkit.getPlayerExact(args[1]), amount, plugin);
+                        messMan.removeMessage(s, Bukkit.getPlayerExact(args[1]), amount);
                     } catch (NumberFormatException ex) {
-                        MessageManager.invalidNumber(s, plugin);
+                        messMan.invalidNumber(s);
                     }
                     break;
 
                 default:
-                    MessageManager.unknownCommand(s, plugin);
+                    messMan.unknownCommand(s);
                     break;
             }
         }

@@ -13,12 +13,12 @@ import java.util.Locale;
 public class MethodUtils {
 
     public static String formatTime(int cooldown, BankPlus plugin) {
-        String minute = plugin.getConfiguration().getString("Placeholders.Time.Minute");
-        String minutes = plugin.getConfiguration().getString("Placeholders.Time.Minutes");
-        String hour = plugin.getConfiguration().getString("Placeholders.Time.Hour");
-        String hours = plugin.getConfiguration().getString("Placeholders.Time.Hours");
-        String day = plugin.getConfiguration().getString("Placeholders.Time.Day");
-        String days = plugin.getConfiguration().getString("Placeholders.Time.Days");
+        String minute = plugin.config().getString("Placeholders.Time.Minute");
+        String minutes = plugin.config().getString("Placeholders.Time.Minutes");
+        String hour = plugin.config().getString("Placeholders.Time.Hour");
+        String hours = plugin.config().getString("Placeholders.Time.Hours");
+        String day = plugin.config().getString("Placeholders.Time.Day");
+        String days = plugin.config().getString("Placeholders.Time.Days");
         if (cooldown < 60) {
             if (cooldown == 1) {
                 return cooldown + minute;
@@ -45,11 +45,11 @@ public class MethodUtils {
 
     public static String formatLong(long balance, BankPlus plugin) {
 
-        String k = plugin.getConfiguration().getString("Placeholders.Money.Thousands");
-        String m = plugin.getConfiguration().getString("Placeholders.Money.Millions");
-        String b = plugin.getConfiguration().getString("Placeholders.Money.Billions");
-        String t = plugin.getConfiguration().getString("Placeholders.Money.Trillions");
-        String q = plugin.getConfiguration().getString("Placeholders.Money.Quadrillions");
+        String k = plugin.config().getString("Placeholders.Money.Thousands");
+        String m = plugin.config().getString("Placeholders.Money.Millions");
+        String b = plugin.config().getString("Placeholders.Money.Billions");
+        String t = plugin.config().getString("Placeholders.Money.Trillions");
+        String q = plugin.config().getString("Placeholders.Money.Quadrillions");
 
         if (balance < 1000L) {
             return "" + balance;
@@ -74,11 +74,11 @@ public class MethodUtils {
 
     public static String format(double balance, BankPlus plugin) {
 
-        final String k = plugin.getConfiguration().getString("Placeholders.Money.Thousands");
-        final String m = plugin.getConfiguration().getString("Placeholders.Money.Millions");
-        final String b = plugin.getConfiguration().getString("Placeholders.Money.Billions");
-        final String t = plugin.getConfiguration().getString("Placeholders.Money.Trillions");
-        final String q = plugin.getConfiguration().getString("Placeholders.Money.Quadrillions");
+        final String k = plugin.config().getString("Placeholders.Money.Thousands");
+        final String m = plugin.config().getString("Placeholders.Money.Millions");
+        final String b = plugin.config().getString("Placeholders.Money.Billions");
+        final String t = plugin.config().getString("Placeholders.Money.Trillions");
+        final String q = plugin.config().getString("Placeholders.Money.Quadrillions");
 
         if (balance < 1000L) {
             return formatString(balance);
@@ -115,69 +115,69 @@ public class MethodUtils {
 
     public static void sendTitle(String path, Player p, BankPlus plugin) {
         try {
-            String[] pathSlitted = plugin.getMessages().getString(path).split(",");
+            String[] pathSlitted = plugin.messages().getString(path).split(",");
             String title1 = pathSlitted[0];
             String title2 = pathSlitted[1];
-            p.sendTitle(ChatUtils.c(title1), ChatUtils.c(title2));
+            p.sendTitle(ChatUtils.color(title1), ChatUtils.color(title2));
         } catch (NullPointerException | IllegalArgumentException e) {
-            plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cInvalid Title at: &f" + path));
+            plugin.getServer().getConsoleSender().sendMessage(ChatUtils.color("&a&lBank&9&lPlus &cInvalid Title at: &f" + path));
         }
     }
 
     public static void playSound(String sound, Player p, BankPlus plugin) {
         switch (sound) {
             case "WITHDRAW":
-                if (plugin.getConfiguration().getBoolean("General.Withdraw-Sound.Enabled")) {
+                if (plugin.config().getBoolean("General.Withdraw-Sound.Enabled")) {
                     try {
-                        String[] pathSlitted = plugin.getConfiguration().getString("General.Withdraw-Sound.Sound").split(",");
+                        String[] pathSlitted = plugin.config().getString("General.Withdraw-Sound.Sound").split(",");
                         String soundType = pathSlitted[0];
                         int volume = Integer.parseInt(pathSlitted[1]);
                         int pitch = Integer.parseInt(pathSlitted[2]);
                         p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
                     } catch (NullPointerException | IllegalArgumentException exception) {
-                        plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.Withdraw-Sound.Sound"));
+                        plugin.getServer().getConsoleSender().sendMessage(ChatUtils.color("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.Withdraw-Sound.Sound"));
                     }
                 }
                 break;
 
             case "DEPOSIT":
-                if (plugin.getConfiguration().getBoolean("General.Deposit-Sound.Enabled")) {
+                if (plugin.config().getBoolean("General.Deposit-Sound.Enabled")) {
                     try {
-                        String[] pathSlitted = plugin.getConfiguration().getString("General.Deposit-Sound.Sound").split(",");
+                        String[] pathSlitted = plugin.config().getString("General.Deposit-Sound.Sound").split(",");
                         String soundType = pathSlitted[0];
                         int volume = Integer.parseInt(pathSlitted[1]);
                         int pitch = Integer.parseInt(pathSlitted[2]);
                         p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
                     } catch (NullPointerException | IllegalArgumentException exception) {
-                        plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.Deposit-Sound.Sound"));
+                        plugin.getServer().getConsoleSender().sendMessage(ChatUtils.color("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.Deposit-Sound.Sound"));
                     }
                 }
                 break;
 
             case "VIEW":
-                if (plugin.getConfiguration().getBoolean("General.View-Sound.Enabled")) {
+                if (plugin.config().getBoolean("General.View-Sound.Enabled")) {
                     try {
-                        String[] pathSlitted = plugin.getConfiguration().getString("General.View-Sound.Sound").split(",");
+                        String[] pathSlitted = plugin.config().getString("General.View-Sound.Sound").split(",");
                         String soundType = pathSlitted[0];
                         int volume = Integer.parseInt(pathSlitted[1]);
                         int pitch = Integer.parseInt(pathSlitted[2]);
                         p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
                     } catch (NullPointerException | IllegalArgumentException exception) {
-                        plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.View-Sound.Sound"));
+                        plugin.getServer().getConsoleSender().sendMessage(ChatUtils.color("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.View-Sound.Sound"));
                     }
                 }
                 break;
 
             case "PERSONAL":
-                if (plugin.getConfiguration().getBoolean("General.Personal-Sound.Enabled")) {
+                if (plugin.config().getBoolean("General.Personal-Sound.Enabled")) {
                     try {
-                        String[] pathSlitted = plugin.getConfiguration().getString("General.Personal-Sound.Sound").split(",");
+                        String[] pathSlitted = plugin.config().getString("General.Personal-Sound.Sound").split(",");
                         String soundType = pathSlitted[0];
                         int volume = Integer.parseInt(pathSlitted[1]);
                         int pitch = Integer.parseInt(pathSlitted[2]);
                         p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
                     } catch (NullPointerException | IllegalArgumentException exception) {
-                        plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.Personal-Sound.Sound"));
+                        plugin.getServer().getConsoleSender().sendMessage(ChatUtils.color("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.Personal-Sound.Sound"));
                     }
                 }
                 break;
@@ -189,11 +189,12 @@ public class MethodUtils {
     }
 
     public static void withdraw(Player p, long amount, BankPlus plugin) {
-        EconomyManager economy = new EconomyManager(plugin);
-        long bankBalance = economy.getBankBalance(p);
-        long maxWithdrawAmount = plugin.getConfiguration().getLong("General.Max-Withdrawn-Amount");
+        final EconomyManager economy = new EconomyManager(plugin);
+        final MessageManager messMan = new MessageManager(plugin);
+        final long bankBalance = economy.getBankBalance(p);
+        final long maxWithdrawAmount = plugin.config().getLong("General.Max-Withdrawn-Amount");
         if (bankBalance <= 0) {
-            MessageManager.insufficientMoneyWithdraw(p, plugin);
+            messMan.insufficientMoneyWithdraw(p);
             return;
         }
         if (maxWithdrawAmount != 0) {
@@ -203,65 +204,66 @@ public class MethodUtils {
         }
         if (bankBalance - amount <= 0) {
             economy.withdraw(p, bankBalance);
-            MessageManager.successWithdraw(p, bankBalance, plugin);
+            messMan.successWithdraw(p, bankBalance);
             MethodUtils.playSound("WITHDRAW", p, plugin);
             return;
         }
         economy.withdraw(p, amount);
-        MessageManager.successWithdraw(p, amount, plugin);
+        messMan.successWithdraw(p, amount);
         MethodUtils.playSound("WITHDRAW", p, plugin);
     }
 
     public static void deposit(Player p, long amount, BankPlus plugin) {
-        EconomyManager economy = new EconomyManager(plugin);
-        long bankBalance = economy.getBankBalance(p);
-        long money = (long) plugin.getEconomy().getBalance(p);
-        long maxDepositAmount = plugin.getConfiguration().getLong("General.Max-Deposit-Amount");
-        long maxBankCapacity = plugin.getConfiguration().getLong("General.Max-Bank-Capacity");
+        final EconomyManager economy = new EconomyManager(plugin);
+        final MessageManager messMan = new MessageManager(plugin);
+        final long bankBalance = economy.getBankBalance(p);
+        final long money = (long) plugin.getEconomy().getBalance(p);
+        final long maxDepositAmount = plugin.config().getLong("General.Max-Deposit-Amount");
+        final long maxBankCapacity = plugin.config().getLong("General.Max-Bank-Capacity");
         if (money <= 0) {
-            MessageManager.insufficientMoneyDeposit(p, plugin);
+            messMan.insufficientMoneyDeposit(p);
             return;
         }
         if (money < amount) {
             economy.deposit(p, money);
-            MessageManager.successDeposit(p, money, plugin);
+            messMan.successDeposit(p, money);
             MethodUtils.playSound("DEPOSIT", p, plugin);
             return;
         }
         if (maxBankCapacity != 0) {
             if (bankBalance >= maxBankCapacity) {
-                MessageManager.cannotDepositMore(p, plugin);
+                messMan.cannotDepositMore(p);
                 return;
             }
             if (bankBalance + amount >= maxBankCapacity) {
                 economy.deposit(p, maxBankCapacity - bankBalance);
-                MessageManager.successDeposit(p, maxBankCapacity - bankBalance, plugin);
+                messMan.successDeposit(p, maxBankCapacity - bankBalance);
             } else {
                 if (maxDepositAmount != 0) {
                     if (amount >= maxDepositAmount) {
                         economy.deposit(p, maxDepositAmount);
-                        MessageManager.successDeposit(p, maxDepositAmount, plugin);
+                        messMan.successDeposit(p, maxDepositAmount);
                     } else {
                         economy.deposit(p, amount);
-                        MessageManager.successDeposit(p, amount, plugin);
+                        messMan.successDeposit(p, amount);
                     }
                 } else {
                     economy.deposit(p, amount);
-                    MessageManager.successDeposit(p, amount, plugin);
+                    messMan.successDeposit(p, amount);
                 }
             }
         } else {
             if (maxDepositAmount != 0) {
                 if (amount >= maxDepositAmount) {
                     economy.deposit(p, maxDepositAmount);
-                    MessageManager.successDeposit(p, maxDepositAmount, plugin);
+                    messMan.successDeposit(p, maxDepositAmount);
                 } else {
                     economy.deposit(p, amount);
-                    MessageManager.successDeposit(p, amount, plugin);
+                    messMan.successDeposit(p, amount);
                 }
             } else {
                 economy.deposit(p, amount);
-                MessageManager.successDeposit(p, amount, plugin);
+                messMan.successDeposit(p, amount);
             }
         }
         MethodUtils.playSound("DEPOSIT", p, plugin);

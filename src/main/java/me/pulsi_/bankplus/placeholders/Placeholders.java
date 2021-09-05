@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.placeholders;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.utils.MethodUtils;
 import org.bukkit.entity.Player;
@@ -40,19 +41,18 @@ public class Placeholders extends PlaceholderExpansion {
 
     @Override
     public String onPlaceholderRequest(Player p, String identifier) {
-        if (p == null) {
+        if (p == null)
             return "Player not online";
-        }
 
-        long balance = new EconomyManager(plugin).getBankBalance(p);
-        int cooldown = Integer.parseInt(plugin.getPlayers().getString("Interest-Cooldown"));
+        final long balance = new EconomyManager(plugin).getBankBalance(p);
+        final long cooldown = Interest.interestCooldown.get(0);
 
         switch (identifier) {
             case "balance": return MethodUtils.formatCommas(balance);
             case "balance_long": return "" + balance;
             case "balance_formatted": return MethodUtils.format(balance, plugin);
             case "balance_formatted_long": return MethodUtils.formatLong(balance, plugin);
-            case "interest_cooldown": return MethodUtils.formatTime(cooldown, plugin);
+            case "interest_cooldown": return MethodUtils.formatTime((int) cooldown, plugin);
         }
         return null;
     }

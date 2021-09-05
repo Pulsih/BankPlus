@@ -18,67 +18,80 @@ public final class BankPlus extends JavaPlugin {
     private ConfigManager configManager;
     private Interest interest;
 
+    boolean isPlaceholderAPIHooked = false;
+
     @Override
     public void onEnable() {
 
-        if (Bukkit.getPluginManager().getPlugin("Vault") != null) {
-            if (setupEconomy()) {
-                if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-                    new Placeholders(this).register();
-                } else {
-                    getServer().getConsoleSender().sendMessage("");
-                    getServer().getConsoleSender().sendMessage(ChatUtils.c("&cCannot setup Placeholders, PlaceholderAPI is not installed!"));
-                    getServer().getConsoleSender().sendMessage("");
-                }
-                this.configManager = new ConfigManager(this);
-                configManager.createConfigs();
-                DataManager.registerEvents(this);
-                DataManager.setupCommands(this);
-                new bStats(this, 11612);
-                DataManager.startupMessage(this);
-                this.interest = new Interest(this);
-                interest.startsInterest();
-            } else {
-                getServer().getConsoleSender().sendMessage("");
-                getServer().getConsoleSender().sendMessage(ChatUtils.c("&cCannot load &a&lBank&9&lPlus&c, No economy plugin found!"));
-                getServer().getConsoleSender().sendMessage(ChatUtils.c("&cPlease download it if you want to use this plugin!"));
-                getServer().getConsoleSender().sendMessage("");
-                getServer().getPluginManager().disablePlugin(this);
-                return;
-            }
-        } else {
-            getServer().getConsoleSender().sendMessage("");
-            getServer().getConsoleSender().sendMessage(ChatUtils.c("&cCannot load &a&lBank&9&lPlus&c, Vault is not installed!"));
-            getServer().getConsoleSender().sendMessage(ChatUtils.c("&cPlease download it if you want to use this plugin!"));
-            getServer().getConsoleSender().sendMessage("");
+        if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
+            ChatUtils.consoleMessage("");
+            ChatUtils.consoleMessage("&cCannot load &a&lBank&9&lPlus&c, Vault is not installed!");
+            ChatUtils.consoleMessage("&cPlease download it in order to use this plugin!");
+            ChatUtils.consoleMessage("");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+        if (!setupEconomy()) {
+            ChatUtils.consoleMessage("");
+            ChatUtils.consoleMessage("&cCannot load &a&lBank&9&lPlus&c, No economy plugin found!");
+            ChatUtils.consoleMessage("&cPlease download an economy plugin to use BankPlus!");
+            ChatUtils.consoleMessage("");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            ChatUtils.consoleMessage("&a&lBank&9&lPlus &8| &fDetected PlaceholderAPI!");
+            new Placeholders(this).register();
+            isPlaceholderAPIHooked = true;
+        }
+
+        this.configManager = new ConfigManager(this);
+        configManager.createConfigs();
+
+        DataManager.registerEvents(this);
+        DataManager.setupCommands(this);
+        DataManager.startupMessage(this);
+
+        new bStats(this, 11612);
+
+        this.interest = new Interest(this);
+        if (config().getBoolean("Interest.Enabled"))
+            interest.startsInterest();
     }
 
     @Override
     public void onDisable() {
         DataManager.shutdownMessage(this);
+        if (config().getBoolean("Interest.Enabled"))
+            interest.saveInterest();
     }
 
     public Economy getEconomy() {
         return econ;
     }
-    public FileConfiguration getConfiguration() {
+
+    public FileConfiguration config() {
         return configManager.getConfiguration();
     }
-    public FileConfiguration getMessages() {
+    public FileConfiguration messages() {
         return configManager.getMessages();
     }
-    public FileConfiguration getPlayers() {
+    public FileConfiguration players() {
         return configManager.getPlayers();
     }
+
     public void reloadConfigs() {
         configManager.reloadConfigs();
     }
     public void savePlayers() {
         configManager.savePlayers();
     }
+
+    public boolean isPlaceholderAPIHooked() {
+        return isPlaceholderAPIHooked;
+    }
+
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
             return false;

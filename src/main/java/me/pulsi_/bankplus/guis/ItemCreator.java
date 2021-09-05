@@ -6,8 +6,6 @@ import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.HeadUtils;
 import me.pulsi_.bankplus.utils.MethodUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.configuration.ConfigurationSection;
@@ -16,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,84 +23,86 @@ public class ItemCreator {
 
     private static final ItemStack barrier = new ItemStack(Material.BARRIER);
     
-    public static ItemStack createItemStack(ConfigurationSection c, Player p, BankPlus plugin) {
+    public static ItemStack createItemStack(ConfigurationSection c, Player p) {
 
-        EconomyManager economy = new EconomyManager(plugin);
-        int cooldown = Integer.parseInt(plugin.getPlayers().getString("Interest-Cooldown"));
+        final BankPlus plugin = JavaPlugin.getPlugin(BankPlus.class);
+        final EconomyManager economy = new EconomyManager(plugin);
+        final int cooldown = plugin.players().getInt("Interest-Cooldown");
 
         ItemStack item;
-        if (c.getString("Material").contains("HEAD-%PLAYER%")) {
+        final String material = c.getString("Material");
+        if (material.contains("HEAD-%PLAYER%")) {
             try {
                 item = HeadUtils.getNameHead(p.getName(), new ItemStack(Material.PLAYER_HEAD));
             } catch (NoSuchFieldError er) {
                 item = HeadUtils.getNameHead(p.getName(), new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()));
-            } catch (NullPointerException | IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 item = barrier;
             }
-        } else if (c.getString("Material").startsWith("HEAD[")) {
-            String player = c.getString("Material").replace("HEAD[", "").replace("]", "");
+            return item;
+        }
+        if (material.startsWith("HEAD[")) {
+            final String player = c.getString("Material").replace("HEAD[", "").replace("]", "");
             try {
                 item = HeadUtils.getNameHead(player, new ItemStack(Material.PLAYER_HEAD));
             } catch (NoSuchFieldError er) {
                 item = HeadUtils.getNameHead(player, new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()));
-            } catch (NullPointerException | IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 item = barrier;
             }
-        } else if (c.getString("Material").startsWith("HEAD-<")) {
-            String textureValue = c.getString("Material").replace("HEAD-<", "").replace(">", "");
+            return item;
+        }
+        if (material.startsWith("HEAD-<")) {
+            final String textureValue = c.getString("Material").replace("HEAD-<", "").replace(">", "");
             try {
                 item = HeadUtils.getValueHead(new ItemStack(Material.PLAYER_HEAD), textureValue);
             } catch (NoSuchFieldError er) {
                 item = HeadUtils.getValueHead(new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()), textureValue);
-            } catch (NullPointerException | IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 item = barrier;
             }
-        } else {
-            try {
-                if (c.getString("Material").contains(":")) {
-                    String[] itemData = c.getString("Material").split(":");
-                    item = new ItemStack(Material.valueOf(itemData[0]), 1, Byte.parseByte(itemData[1]));
-                } else {
-                    item = new ItemStack(Material.valueOf(c.getString("Material")));
-                }
-            } catch (NullPointerException | IllegalArgumentException e) {
-                item = barrier;
+            return item;
+        }
+
+        try {
+            if (material.contains(":")) {
+                String[] itemData = material.split(":");
+                item = new ItemStack(Material.valueOf(itemData[0]), 1, Byte.parseByte(itemData[1]));
+            } else {
+                item = new ItemStack(Material.valueOf(material));
             }
+        } catch (IllegalArgumentException e) {
+            item = barrier;
         }
 
         ItemMeta itemMeta = item.getItemMeta();
 
-        try {
-            String displayName = c.getString("DisplayName")
+
+        final String displayName = c.getString("DisplayName");
+        if (displayName == null) {
+            itemMeta.setDisplayName(ChatUtils.color("&c&l*CANNOT FIND DISPLAYNAME*"));
+        } else {
+            if (plugin.isPlaceholderAPIHooked()) {
+                itemMeta.setDisplayName(ChatUtils.color(PlaceholderAPI.setPlaceholders(p, displayName)));
+            } else {
+                itemMeta.setDisplayName(ChatUtils.color(displayName));
+            }
+        }
+
+        List<String> lore = new ArrayList<>();
+        for (String lines : c.getStringList("Lore")) {
+            lore.add(ChatUtils.color(lines
                     .replace("%player_name%", p.getName())
                     .replace("%balance%", MethodUtils.formatCommas(economy.getBankBalance(p)))
                     .replace("%balance_formatted%", MethodUtils.format(economy.getBankBalance(p), plugin))
                     .replace("%balance_formatted_long%", MethodUtils.formatLong(economy.getBankBalance(p), plugin))
-                    .replace("%interest_cooldown%", MethodUtils.formatTime(cooldown, plugin));
-            if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-                itemMeta.setDisplayName(ChatUtils.c(PlaceholderAPI.setPlaceholders(p, displayName)));
-            } else {
-                itemMeta.setDisplayName(ChatUtils.c(displayName));
-            }
-        } catch (NullPointerException exception) {
-            itemMeta.setDisplayName(ChatUtils.c("&c&l*CANNOT FIND DISPLAYNAME*"));
+                    .replace("%interest_cooldown%", MethodUtils.formatTime(cooldown, plugin))
+            ));
         }
-
-        List<String> lore = new ArrayList<>();
-        if (c.getStringList("Lore") != null) {
-            for (String lines : c.getStringList("Lore")) {
-                lore.add(ChatColor.translateAlternateColorCodes('&', lines)
-                        .replace("%player_name%", p.getName())
-                        .replace("%balance%", MethodUtils.formatCommas(economy.getBankBalance(p)))
-                        .replace("%balance_formatted%", MethodUtils.format(economy.getBankBalance(p), plugin))
-                        .replace("%balance_formatted_long%", MethodUtils.formatLong(economy.getBankBalance(p), plugin))
-                        .replace("%interest_cooldown%", MethodUtils.formatTime(cooldown, plugin)));
-            }
-            if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-                itemMeta.setLore(PlaceholderAPI.setPlaceholders(p, lore));
-            } else {
-                itemMeta.setLore(lore);
-            }
+        if (plugin.isPlaceholderAPIHooked()) {
+            itemMeta.setLore(PlaceholderAPI.setPlaceholders(p, lore));
+        } else {
+            itemMeta.setLore(lore);
         }
 
         if (c.getBoolean("Glowing")) {
@@ -113,29 +114,31 @@ public class ItemCreator {
         return item;
     }
 
-    public static ItemStack guiFiller(BankPlus plugin) {
-
+    public static ItemStack guiFiller() {
+        BankPlus plugin = JavaPlugin.getPlugin(BankPlus.class);
         ItemStack filler;
-            try {
-                if (plugin.getConfiguration().getString("Gui.Filler.Material").contains(":")) {
-                    String[] itemData = plugin.getConfiguration().getString("Gui.Filler.Material").split(":");
-                    filler = new ItemStack(Material.valueOf(itemData[0]), 1, Byte.parseByte(itemData[1]));
-                } else {
-                    filler = new ItemStack(Material.valueOf(plugin.getConfiguration().getString("Gui.Filler.Material")));
-                }
-            } catch (NullPointerException | IllegalArgumentException exception) {
-                filler = barrier;
+        try {
+            final String material = plugin.config().getString("Gui.Filler.Material");
+            if (material.contains(":")) {
+                String[] itemData = material.split(":");
+                filler = new ItemStack(Material.valueOf(itemData[0]), 1, Byte.parseByte(itemData[1]));
+            } else {
+                filler = new ItemStack(Material.valueOf(material));
             }
+        } catch (IllegalArgumentException e) {
+            filler = barrier;
+        }
 
         ItemMeta fillerMeta = filler.getItemMeta();
 
-        try {
-            fillerMeta.setDisplayName(ChatUtils.c(plugin.getConfiguration().getString("Gui.Filler.DisplayName")));
-        } catch (NullPointerException exception) {
-            fillerMeta.setDisplayName(ChatUtils.c("&c&l*CANNOT FIND DISPLAYNAME*"));
+        final String displayName = plugin.config().getString("Gui.Filler.DisplayName");
+        if (displayName == null) {
+            fillerMeta.setDisplayName(ChatUtils.color("&c&l*CANNOT FIND DISPLAYNAME*"));
+        } else {
+            fillerMeta.setDisplayName(ChatUtils.color(displayName));
         }
 
-        if (plugin.getConfiguration().getBoolean("Gui.Filler.Glowing")) {
+        if (plugin.config().getBoolean("Gui.Filler.Glowing")) {
             fillerMeta.addEnchant(Enchantment.DURABILITY, 1, false);
             filler.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
@@ -145,17 +148,16 @@ public class ItemCreator {
     }
 
     public static ItemMeta setLore(ConfigurationSection c, ItemStack i, Player p) {
-        ItemMeta itemMeta = i.getItemMeta();
+        final BankPlus plugin = JavaPlugin.getPlugin(BankPlus.class);
+        final ItemMeta itemMeta = i.getItemMeta();
+
         List<String> lore = new ArrayList<>();
-        if (c.getStringList("Lore") != null) {
-            for (String lines : c.getStringList("Lore")) {
-                lore.add(ChatColor.translateAlternateColorCodes('&', lines));
-            }
-            if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-                itemMeta.setLore(PlaceholderAPI.setPlaceholders(p, lore));
-            } else {
-                itemMeta.setLore(lore);
-            }
+        for (String lines : c.getStringList("Lore"))
+            lore.add(ChatUtils.color(lines));
+        if (plugin.isPlaceholderAPIHooked()) {
+            itemMeta.setLore(PlaceholderAPI.setPlaceholders(p, lore));
+        } else {
+            itemMeta.setLore(lore);
         }
         return itemMeta;
     }

@@ -7,6 +7,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public class GuiBank {
 
@@ -15,71 +16,69 @@ public class GuiBank {
         this.plugin = plugin;
     }
 
-    public void openGui(Player p) {
-
-        int lines = guiLines(plugin.getConfiguration().getInt("Gui.Lines"));
-        String title;
-        try {
-            title = plugin.getConfiguration().getString("Gui.Title");
-        } catch (NullPointerException | IllegalArgumentException e) {
-            title = "&c&l*CANNOT FIND TITLE*";
-        }
-
-        Inventory guiBank = Bukkit.createInventory(null, lines, ChatUtils.c(title));
-
-        ConfigurationSection c = plugin.getConfiguration().getConfigurationSection("Gui.Items");
-        for (String items : c.getKeys(false)) {
-            try {
-                guiBank.setItem(c.getConfigurationSection(items).getInt("Slot") - 1, ItemCreator.createItemStack(c.getConfigurationSection(items), p, plugin));
-            } catch (ArrayIndexOutOfBoundsException ex) {
-                plugin.getServer().getConsoleSender().sendMessage(ChatUtils.c("&a&lBank&9&lPlus &aSome items go arent set properly! Please fix it in the config!"));
-                guiBank.addItem(ItemCreator.createItemStack(c.getConfigurationSection(items), p, plugin));
-            }
-        }
-
-        if (plugin.getConfiguration().getBoolean("Gui.Filler.Enabled")) {
-            for (int i = 0; i < lines; i++) {
-                if (guiBank.getItem(i) == null)
-                    guiBank.setItem(i, ItemCreator.guiFiller(plugin));
-            }
-        }
-
-        p.openInventory(guiBank);
-    }
-
-    public int guiLines(int number) {
-        int lines;
-        switch (number) {
-            case 1:
-                lines = 9;
-                break;
-            case 2:
-                lines = 18;
-                break;
-            case 3:
-                lines = 27;
-                break;
-            default:
-                lines = 36;
-                break;
-            case 5:
-                lines = 45;
-                break;
-            case 6:
-                lines = 54;
-                break;
-        }
-        return lines;
-    }
-
-    public static void updateLore(Player p, String title, BankPlus plugin) {
+    public static void updateLore(Player p, String title) {
+        final BankPlus plugin = JavaPlugin.getPlugin(BankPlus.class);
         if (!p.getOpenInventory().getTitle().equals(title)) return;
-        ConfigurationSection c = plugin.getConfiguration().getConfigurationSection("Gui.Items");
-        for (String items : c.getKeys(false)) {
-            try {
-                ItemStack i = p.getOpenInventory().getItem(c.getConfigurationSection(items).getInt("Slot") - 1);
-                i.setItemMeta(ItemCreator.setLore(c.getConfigurationSection(items), i, p));
-            } catch (NullPointerException | IllegalArgumentException | ArrayIndexOutOfBoundsException ignored) {}
+
+        final ConfigurationSection c = plugin.config().getConfigurationSection("Gui.Items");
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            for (String items : c.getKeys(false)) {
+                try {
+                    ItemStack i = p.getOpenInventory().getItem(c.getConfigurationSection(items).getInt("Slot") - 1);
+                    i.setItemMeta(ItemCreator.setLore(c.getConfigurationSection(items), i, p));
+                } catch (NullPointerException | IllegalArgumentException | ArrayIndexOutOfBoundsException ignored) {
+                }
+            }
+        });
+    }
+
+    public final Inventory getBank(Player p) {
+
+        final int lines = guiLines(plugin.config().getInt("Gui.Lines"));
+        
+        final String s = plugin.config().getString("Gui.Title");
+        String title;
+        if (s == null) {
+            title = "&c&l*CANNOT FIND TITLE*";
+        } else {
+            title = s;
         }
+
+        Inventory inv = Bukkit.createInventory(null, lines, ChatUtils.color(title));
+
+        final ConfigurationSection c = plugin.config().getConfigurationSection("Gui.Items");
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            for (String items : c.getKeys(false)) {
+                try {
+                    inv.setItem(c.getConfigurationSection(items).getInt("Slot") - 1, ItemCreator.createItemStack(c.getConfigurationSection(items), p));
+                } catch (ArrayIndexOutOfBoundsException ex) {
+                    ChatUtils.consoleMessage("&a&lBank&9&lPlus &aSome items go arent set properly! Please fix it in the config!");
+                    inv.addItem(ItemCreator.createItemStack(c.getConfigurationSection(items), p));
+                }
+            }
+
+            if (plugin.config().getBoolean("Gui.Filler.Enabled")) {
+                for (int i = 0; i < lines; i++)
+                    if (inv.getItem(i) == null)
+                        inv.setItem(i, ItemCreator.guiFiller());
+            }
+        });
+
+        return inv;
+    }
+
+    private int guiLines(final int number) {
+        switch (number) {
+            case 1: return 9;
+            case 2: return 18;
+            case 3: return 27;
+            default: return 36;
+            case 5: return 45;
+            case 6: return 54;
+        }
+    }
+
+    public void openGui(Player p) {
+        p.openInventory(getBank(p));
     }
 }

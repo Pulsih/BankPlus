@@ -23,9 +23,6 @@ Interest:
 General:
   # The amount that a player will receive when joining for the first time
   Join-Start-Amount: 500
-  # Will use players UUIDs for store moneys,
-  # otherwise, it will use players Names
-  Use-UUID: true
   # The max amount that a player can deposit, use 0 to disable.
   Max-Bank-Capacity: 500000000
   # The max amount to withdraw per time, use 0 to disable.
@@ -90,7 +87,7 @@ Gui:
   Enabled: true
   Title: "&a&lGui Bank"
   Lines: 4
-  Update-Delay: 1 #In seconds, put 0 to disable
+  Update-Delay: 3 #In seconds, put 0 to disable
   Filler:
     Enabled: true
     Material: "WHITE_STAINED_GLASS_PANE"

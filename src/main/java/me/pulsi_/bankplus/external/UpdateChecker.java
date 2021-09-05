@@ -37,7 +37,7 @@ public class UpdateChecker implements Listener {
         if (!plugin.getConfig().getBoolean("Update-Checker")) return;
         if (!e.getPlayer().isOp() || !e.getPlayer().hasPermission("bankplus.notify")) return;
         if (isUpToDate) return;
-        final TextComponent update = new TextComponent(ChatUtils.c("&a&lBank&9&lPlus &aNew update available! &7(CLICK HERE)"));
+        final TextComponent update = new TextComponent(ChatUtils.color("&a&lBank&9&lPlus &aNew update available! &7(CLICK HERE)"));
         update.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.spigotmc.org/resources/%E2%9C%A8-bankplus-%E2%9C%A8-easy-and-lightweight-bank-plugin.93130/"));
         update.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click here to download it!").color(ChatColor.GRAY).create()));
         Bukkit.getScheduler().runTaskLater(plugin, () -> {

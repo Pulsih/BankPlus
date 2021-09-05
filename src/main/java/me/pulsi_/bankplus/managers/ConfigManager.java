@@ -1,12 +1,13 @@
 package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.BankPlus;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.IllegalPluginAccessException;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class ConfigManager {
@@ -24,18 +25,12 @@ public class ConfigManager {
         messagesFile = new File(plugin.getDataFolder(), "messages.yml");
         playersFile = new File(plugin.getDataFolder(), "players.yml");
 
-        if (!configFile.exists()) {
-            configFile.getParentFile().mkdir();
+        if (!configFile.exists())
             plugin.saveResource("config.yml", false);
-        }
-        if (!messagesFile.exists()) {
-            messagesFile.getParentFile().mkdir();
+        if (!messagesFile.exists())
             plugin.saveResource("messages.yml", false);
-        }
-        if (!playersFile.exists()) {
-            playersFile.getParentFile().mkdir();
+        if (!playersFile.exists())
             plugin.saveResource("players.yml", false);
-        }
 
         config = new YamlConfiguration();
         messages = new YamlConfiguration();
@@ -45,11 +40,7 @@ public class ConfigManager {
             config.load(configFile);
             messages.load(messagesFile);
             players.load(playersFile);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InvalidConfigurationException e) {
+        } catch (IOException | InvalidConfigurationException e) {
             e.printStackTrace();
         }
     }
@@ -72,10 +63,19 @@ public class ConfigManager {
 
     public void savePlayers() {
         try {
-            players.save(playersFile);
-        } catch (IOException e) {
-            e.printStackTrace();
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                try {
+                    players.save(playersFile);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (IllegalPluginAccessException e) {
+            try {
+                players.save(playersFile);
+            } catch (IOException ex) {
+                e.printStackTrace();
+            }
         }
-        players = YamlConfiguration.loadConfiguration(playersFile);
     }
 }
