@@ -28,7 +28,7 @@ public class DataManager {
     public static void startupMessage(BankPlus plugin) {
         plugin.getServer().getConsoleSender().sendMessage("");
         plugin.getServer().getConsoleSender().sendMessage(ChatUtils.color("&a&lBank&9&lPlus &2Plugin Enabled!"));
-        plugin.getServer().getConsoleSender().sendMessage(ChatUtils.color("&aRunning on version &f%v%").replace("%v%",plugin.getDescription().getVersion()));
+        plugin.getServer().getConsoleSender().sendMessage(ChatUtils.color("&aRunning on version &f" + plugin.getDescription().getVersion()));
         plugin.getServer().getConsoleSender().sendMessage(ChatUtils.color("&aMade by &fPulsi_"));
         plugin.getServer().getConsoleSender().sendMessage("");
     }

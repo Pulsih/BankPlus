@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.interest;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.managers.ConfigValues;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.MethodUtils;
@@ -22,7 +23,7 @@ public class Interest {
 
     public void startsInterest() {
         final long interestSave = plugin.players().getLong("Interest-Save");
-        final long delay = plugin.config().getLong("Interest.Delay");
+        final long delay = ConfigValues.getInterestDelay();
         if (interestSave <= 0) {
             interestCooldown.add(delay);
         } else {
@@ -44,6 +45,7 @@ public class Interest {
 
     public void saveInterest() {
         final long interestSave = interestCooldown.get(0);
+        if (interestSave <= 0) return;
         plugin.players().set("Interest-Save", interestSave);
         plugin.savePlayers();
     }

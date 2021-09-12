@@ -14,15 +14,14 @@ Interest:
   Delay: 5
   # The max amount that you can receive with interest.
   Max-Amount: 500000
-  # Choose if give the interest to offline players too
-  # This option is not recommended if having a server
-  # with too many players, in these cases, it could
-  # cause lag.
+  # Choose if giving interest to offline players too.
   Give-To-Offline-Players: false
 
 General:
   # The amount that a player will receive when joining for the first time
   Join-Start-Amount: 500
+  # Store player's money using UUIDs, otherwise the plugin will use names.
+  Use-UUIDs: true
   # The max amount that a player can deposit, use 0 to disable.
   Max-Bank-Capacity: 500000000
   # The max amount to withdraw per time, use 0 to disable.

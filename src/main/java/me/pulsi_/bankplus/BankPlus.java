@@ -3,9 +3,11 @@ package me.pulsi_.bankplus;
 import me.pulsi_.bankplus.external.bStats;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.managers.ConfigManager;
+import me.pulsi_.bankplus.managers.ConfigValues;
 import me.pulsi_.bankplus.managers.DataManager;
 import me.pulsi_.bankplus.placeholders.Placeholders;
 import me.pulsi_.bankplus.utils.ChatUtils;
+import me.pulsi_.bankplus.utils.ListUtils;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -18,7 +20,7 @@ public final class BankPlus extends JavaPlugin {
     private ConfigManager configManager;
     private Interest interest;
 
-    boolean isPlaceholderAPIHooked = false;
+    private boolean isPlaceholderAPIHooked = false;
 
     @Override
     public void onEnable() {
@@ -41,7 +43,7 @@ public final class BankPlus extends JavaPlugin {
         }
 
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            ChatUtils.consoleMessage("&a&lBank&9&lPlus &8| &fDetected PlaceholderAPI!");
+            ChatUtils.consoleMessage("&a&lBank&9&lPlus &fDetected PlaceholderAPI!");
             new Placeholders(this).register();
             isPlaceholderAPIHooked = true;
         }
@@ -53,17 +55,23 @@ public final class BankPlus extends JavaPlugin {
         DataManager.setupCommands(this);
         DataManager.startupMessage(this);
 
+        ConfigValues.setupValues();
+
         new bStats(this, 11612);
 
         this.interest = new Interest(this);
-        if (config().getBoolean("Interest.Enabled"))
+        if (ConfigValues.isInterestEnabled())
             interest.startsInterest();
+
+        ListUtils.PLAYERCHAT_DEBUG.add("DISABLED");
+        ListUtils.GUIBANK_DEBUG.add("DISABLED");
+        ListUtils.INTEREST_DEBUG.add("DISABLED");
     }
 
     @Override
     public void onDisable() {
         DataManager.shutdownMessage(this);
-        if (config().getBoolean("Interest.Enabled"))
+        if (ConfigValues.isInterestEnabled())
             interest.saveInterest();
     }
 
@@ -101,6 +109,6 @@ public final class BankPlus extends JavaPlugin {
             return false;
         }
         econ = rsp.getProvider();
-        return econ != null;
+        return true;
     }
 }

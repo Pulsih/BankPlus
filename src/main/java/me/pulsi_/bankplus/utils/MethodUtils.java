@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.managers.ConfigValues;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.managers.MessageManager;
 import org.bukkit.Sound;
@@ -12,93 +13,46 @@ import java.util.Locale;
 
 public class MethodUtils {
 
-    public static String formatTime(int cooldown, BankPlus plugin) {
-        String minute = plugin.config().getString("Placeholders.Time.Minute");
-        String minutes = plugin.config().getString("Placeholders.Time.Minutes");
-        String hour = plugin.config().getString("Placeholders.Time.Hour");
-        String hours = plugin.config().getString("Placeholders.Time.Hours");
-        String day = plugin.config().getString("Placeholders.Time.Day");
-        String days = plugin.config().getString("Placeholders.Time.Days");
+    public static String formatTime(int cooldown) {
         if (cooldown < 60) {
             if (cooldown == 1) {
-                return cooldown + minute;
+                return cooldown + ConfigValues.getMinute();
             } else {
-                return cooldown + minutes;
+                return cooldown + ConfigValues.getMinutes();
             }
         }
-        if (cooldown >= 60 && cooldown < 1440) {
-            if (cooldown == 60 && cooldown < 120) {
-                return cooldown / 60 + hour;
+        if (cooldown < 1440) {
+            if (cooldown == 60) {
+                return cooldown / 60 + ConfigValues.getHour();
             } else {
-                return cooldown / 60 + hours;
+                return cooldown / 60 + ConfigValues.getHours();
             }
         }
-        if (cooldown >= 1440) {
-            if (cooldown == 1440 && cooldown < 2880) {
-                return cooldown / 1440 + day;
-            } else {
-                return cooldown / 1440 + days;
-            }
+        if (cooldown == 1440) {
+            return cooldown / 1440 + ConfigValues.getDay();
+        } else {
+            return cooldown / 1440 + ConfigValues.getDays();
         }
-        return null;
     }
 
-    public static String formatLong(long balance, BankPlus plugin) {
-
-        String k = plugin.config().getString("Placeholders.Money.Thousands");
-        String m = plugin.config().getString("Placeholders.Money.Millions");
-        String b = plugin.config().getString("Placeholders.Money.Billions");
-        String t = plugin.config().getString("Placeholders.Money.Trillions");
-        String q = plugin.config().getString("Placeholders.Money.Quadrillions");
-
-        if (balance < 1000L) {
-            return "" + balance;
-        }
-        if (balance >= 1000L && balance < 1000000L) {
-            return Math.round(balance / 1000L) + k;
-        }
-        if (balance >= 1000000L && balance < 1000000000L) {
-            return Math.round(balance / 1000000L) + m;
-        }
-        if (balance >= 1000000000L && balance < 1000000000000L) {
-            return Math.round(balance / 1000000000L) + b;
-        }
-        if (balance >= 1000000000000L && balance < 1000000000000000L) {
-            return Math.round(balance / 1000000000000L) + t;
-        }
-        if (balance >= 1000000000000000L && balance < 1000000000000000000L) {
-            return Math.round(balance / 1000000000000000L) + q;
-        }
-        return null;
+    public static String formatLong(long balance) {
+        if (balance < 1000L) return "" + balance;
+        if (balance < 1000000L) return Math.round(balance / 1000L) + ConfigValues.getK();
+        if (balance < 1000000000L) return Math.round(balance / 1000000L) + ConfigValues.getM();
+        if (balance < 1000000000000L) return Math.round(balance / 1000000000L) + ConfigValues.getB();
+        if (balance < 1000000000000000L) return Math.round(balance / 1000000000000L) + ConfigValues.getT();
+        if (balance < 1000000000000000000L) return Math.round(balance / 1000000000000000L) + ConfigValues.getQ();
+        return "0";
     }
 
-    public static String format(double balance, BankPlus plugin) {
-
-        final String k = plugin.config().getString("Placeholders.Money.Thousands");
-        final String m = plugin.config().getString("Placeholders.Money.Millions");
-        final String b = plugin.config().getString("Placeholders.Money.Billions");
-        final String t = plugin.config().getString("Placeholders.Money.Trillions");
-        final String q = plugin.config().getString("Placeholders.Money.Quadrillions");
-
-        if (balance < 1000L) {
-            return formatString(balance);
-        }
-        if (balance >= 1000L && balance < 1000000L) {
-            return formatString(Double.parseDouble(String.valueOf(balance)) / 1000L) + k;
-        }
-        if (balance >= 1000000L && balance < 1000000000L) {
-            return formatString(Double.parseDouble(String.valueOf(balance)) / 1000000L) + m;
-        }
-        if (balance >= 1000000000L && balance < 1000000000000L) {
-            return formatString(Double.parseDouble(String.valueOf(balance)) / 1000000000L) + b;
-        }
-        if (balance >= 1000000000000L && balance < 1000000000000000L) {
-            return formatString(Double.parseDouble(String.valueOf(balance)) / 1000000000000L) + t;
-        }
-        if (balance >= 1000000000000000L && balance < 1000000000000000000L) {
-            return formatString(Double.parseDouble(String.valueOf(balance)) / 1000000000000000L) + q;
-        }
-        return null;
+    public static String format(double balance) {
+        if (balance < 1000L) return formatString(balance);
+        if (balance >= 1000L && balance < 1000000L) return formatString(balance / 1000L) + ConfigValues.getK();
+        if (balance >= 1000000L && balance < 1000000000L) return formatString(balance / 1000000L) + ConfigValues.getM();
+        if (balance >= 1000000000L && balance < 1000000000000L) return formatString(balance / 1000000000L) + ConfigValues.getB();
+        if (balance >= 1000000000000L && balance < 1000000000000000L) return formatString(balance / 1000000000000L) + ConfigValues.getT();
+        if (balance >= 1000000000000000L && balance < 1000000000000000000L) return formatString(balance / 1000000000000000L) + ConfigValues.getQ();
+        return "0";
     }
 
     private static String formatString(double balance) {
@@ -127,9 +81,9 @@ public class MethodUtils {
     public static void playSound(String sound, Player p, BankPlus plugin) {
         switch (sound) {
             case "WITHDRAW":
-                if (plugin.config().getBoolean("General.Withdraw-Sound.Enabled")) {
+                if (ConfigValues.isWithdrawSoundEnabled()) {
                     try {
-                        String[] pathSlitted = plugin.config().getString("General.Withdraw-Sound.Sound").split(",");
+                        String[] pathSlitted = ConfigValues.getWithdrawSound().split(",");
                         String soundType = pathSlitted[0];
                         int volume = Integer.parseInt(pathSlitted[1]);
                         int pitch = Integer.parseInt(pathSlitted[2]);
@@ -141,9 +95,9 @@ public class MethodUtils {
                 break;
 
             case "DEPOSIT":
-                if (plugin.config().getBoolean("General.Deposit-Sound.Enabled")) {
+                if (ConfigValues.isDepositSoundEnabled()) {
                     try {
-                        String[] pathSlitted = plugin.config().getString("General.Deposit-Sound.Sound").split(",");
+                        String[] pathSlitted = ConfigValues.getDepositSound().split(",");
                         String soundType = pathSlitted[0];
                         int volume = Integer.parseInt(pathSlitted[1]);
                         int pitch = Integer.parseInt(pathSlitted[2]);
@@ -155,9 +109,9 @@ public class MethodUtils {
                 break;
 
             case "VIEW":
-                if (plugin.config().getBoolean("General.View-Sound.Enabled")) {
+                if (ConfigValues.isViewSoundEnabled()) {
                     try {
-                        String[] pathSlitted = plugin.config().getString("General.View-Sound.Sound").split(",");
+                        String[] pathSlitted = ConfigValues.getViewSound().split(",");
                         String soundType = pathSlitted[0];
                         int volume = Integer.parseInt(pathSlitted[1]);
                         int pitch = Integer.parseInt(pathSlitted[2]);
@@ -169,9 +123,9 @@ public class MethodUtils {
                 break;
 
             case "PERSONAL":
-                if (plugin.config().getBoolean("General.Personal-Sound.Enabled")) {
+                if (ConfigValues.isPersonalSoundEnabled()) {
                     try {
-                        String[] pathSlitted = plugin.config().getString("General.Personal-Sound.Sound").split(",");
+                        String[] pathSlitted = ConfigValues.getPersonalSound().split(",");
                         String soundType = pathSlitted[0];
                         int volume = Integer.parseInt(pathSlitted[1]);
                         int pitch = Integer.parseInt(pathSlitted[2]);
@@ -192,7 +146,7 @@ public class MethodUtils {
         final EconomyManager economy = new EconomyManager(plugin);
         final MessageManager messMan = new MessageManager(plugin);
         final long bankBalance = economy.getBankBalance(p);
-        final long maxWithdrawAmount = plugin.config().getLong("General.Max-Withdrawn-Amount");
+        final long maxWithdrawAmount = ConfigValues.getMaxWithdrawAmount();
         if (bankBalance <= 0) {
             messMan.insufficientMoneyWithdraw(p);
             return;
@@ -218,8 +172,8 @@ public class MethodUtils {
         final MessageManager messMan = new MessageManager(plugin);
         final long bankBalance = economy.getBankBalance(p);
         final long money = (long) plugin.getEconomy().getBalance(p);
-        final long maxDepositAmount = plugin.config().getLong("General.Max-Deposit-Amount");
-        final long maxBankCapacity = plugin.config().getLong("General.Max-Bank-Capacity");
+        final long maxDepositAmount = ConfigValues.getMaxDepositAmount();
+        final long maxBankCapacity = ConfigValues.getMaxBankCapacity();
         if (money <= 0) {
             messMan.insufficientMoneyDeposit(p);
             return;

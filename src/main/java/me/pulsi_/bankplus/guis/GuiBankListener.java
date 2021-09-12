@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.guis;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.managers.EconomyManager;
+import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.MethodUtils;
 import me.pulsi_.bankplus.utils.SetUtils;
@@ -17,8 +18,8 @@ import org.bukkit.scheduler.BukkitTask;
 
 public class GuiBankListener implements Listener {
 
-    public BukkitTask runnable;
-    private BankPlus plugin;
+    private static BukkitTask runnable;
+    private final BankPlus plugin;
     public GuiBankListener(BankPlus plugin) {
         this.plugin = plugin;
     }
@@ -27,8 +28,9 @@ public class GuiBankListener implements Listener {
     public void guiListener(InventoryClickEvent e) {
 
         Player p = (Player) e.getWhoClicked();
-        EconomyManager economy = new EconomyManager(plugin);
-        String title = ChatUtils.color(plugin.config().getString("Gui.Title"));
+        final EconomyManager economy = new EconomyManager(plugin);
+        final MessageManager messMan = new MessageManager(plugin);
+        final String title = ChatUtils.color(plugin.config().getString("Gui.Title"));
 
         if (e.getCurrentItem() == null || !e.getView().getTitle().equals(title)) return;
         e.setCancelled(true);
@@ -49,6 +51,7 @@ public class GuiBankListener implements Listener {
                             SetUtils.playerWithdrawing.add(p.getUniqueId());
                             if (plugin.messages().getBoolean("Title-Custom-Amount.Enabled"))
                                 MethodUtils.sendTitle("Title-Custom-Amount.Title-Withdraw", p, plugin);
+                            messMan.chatWithdraw(p);
                             p.closeInventory();
                             break;
 
@@ -79,6 +82,7 @@ public class GuiBankListener implements Listener {
                             SetUtils.playerDepositing.add(p.getUniqueId());
                             if (plugin.messages().getBoolean("Title-Custom-Amount.Enabled"))
                                 MethodUtils.sendTitle("Title-Custom-Amount.Title-Deposit", p, plugin);
+                            messMan.chatDeposit(p);
                             p.closeInventory();
                             break;
 
@@ -114,7 +118,7 @@ public class GuiBankListener implements Listener {
         if (!e.getView().getTitle().equals(title) || plugin.config().getInt("Gui.Update-Delay") == 0) return;
 
         final int delay = plugin.config().getInt("Gui.Update-Delay");
-        runnable = Bukkit.getScheduler().runTaskTimer(plugin, () -> GuiBank.updateLore(p, title),0, delay * 20L);
+        runnable = Bukkit.getScheduler().runTaskTimer(plugin, () -> new GuiBank(plugin).updateLore(p, title),0, delay * 20L);
     }
 
     @EventHandler

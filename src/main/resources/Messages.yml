@@ -36,6 +36,8 @@ Bank-Others: "&a&lBank&9&lPlus &f%player_name% &ahas &f%amount_formatted% Money 
 Set-Message: "&a&lBank&9&lPlus &aYou have set &f%player_name%'s &abank balance to &f%amount_formatted%&a!"
 Add-Message: "&a&lBank&9&lPlus &aYou have added &f%amount_formatted% Money &ato &f%player_name%'s &abank balance!"
 Remove-Message: "&a&lBank&9&lPlus &aYou have removed &f%amount_formatted% Money &ato &f%player_name%'s &abank balance!"
+Chat-Deposit: "&a&lBank&9&lPlus &aType an amount in chat to deposit, type 'exit' to exit"
+Chat-Withdraw: "&a&lBank&9&lPlus &aType an amount in chat to withdraw, type 'exit' to exit"
 Title-Custom-Amount:
   Enabled: true
   Title-Deposit: "&fType in &achat &fan, amount to &adeposit"

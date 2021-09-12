@@ -16,20 +16,16 @@ public class GuiBank {
         this.plugin = plugin;
     }
 
-    public static void updateLore(Player p, String title) {
+    public void updateLore(Player p, String title) {
         final BankPlus plugin = JavaPlugin.getPlugin(BankPlus.class);
         if (!p.getOpenInventory().getTitle().equals(title)) return;
 
         final ConfigurationSection c = plugin.config().getConfigurationSection("Gui.Items");
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            for (String items : c.getKeys(false)) {
-                try {
-                    ItemStack i = p.getOpenInventory().getItem(c.getConfigurationSection(items).getInt("Slot") - 1);
-                    i.setItemMeta(ItemCreator.setLore(c.getConfigurationSection(items), i, p));
-                } catch (NullPointerException | IllegalArgumentException | ArrayIndexOutOfBoundsException ignored) {
-                }
-            }
-        });
+        for (String items : c.getKeys(false)) {
+            final ItemStack i = p.getOpenInventory().getItem(c.getConfigurationSection(items).getInt("Slot") - 1);
+            if (i != null && i.hasItemMeta())
+                i.setItemMeta(ItemCreator.setLore(c.getConfigurationSection(items), i, p));
+        }
     }
 
     public final Inventory getBank(Player p) {

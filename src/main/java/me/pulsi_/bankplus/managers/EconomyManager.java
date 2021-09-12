@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 
 public class EconomyManager {
 
-    private BankPlus plugin;
+    private final BankPlus plugin;
     public EconomyManager(BankPlus plugin) {
         this.plugin = plugin;
     }

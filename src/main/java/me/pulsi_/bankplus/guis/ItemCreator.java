@@ -2,6 +2,8 @@ package me.pulsi_.bankplus.guis;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.interest.Interest;
+import me.pulsi_.bankplus.managers.ConfigValues;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.HeadUtils;
@@ -27,7 +29,7 @@ public class ItemCreator {
 
         final BankPlus plugin = JavaPlugin.getPlugin(BankPlus.class);
         final EconomyManager economy = new EconomyManager(plugin);
-        final int cooldown = plugin.players().getInt("Interest-Cooldown");
+        final long cooldown = Interest.interestCooldown.get(0);
 
         ItemStack item;
         final String material = c.getString("Material");
@@ -39,9 +41,7 @@ public class ItemCreator {
             } catch (IllegalArgumentException e) {
                 item = barrier;
             }
-            return item;
-        }
-        if (material.startsWith("HEAD[")) {
+        } else if (material.startsWith("HEAD[")) {
             final String player = c.getString("Material").replace("HEAD[", "").replace("]", "");
             try {
                 item = HeadUtils.getNameHead(player, new ItemStack(Material.PLAYER_HEAD));
@@ -50,9 +50,7 @@ public class ItemCreator {
             } catch (IllegalArgumentException e) {
                 item = barrier;
             }
-            return item;
-        }
-        if (material.startsWith("HEAD-<")) {
+        } else if (material.startsWith("HEAD-<")) {
             final String textureValue = c.getString("Material").replace("HEAD-<", "").replace(">", "");
             try {
                 item = HeadUtils.getValueHead(new ItemStack(Material.PLAYER_HEAD), textureValue);
@@ -61,18 +59,17 @@ public class ItemCreator {
             } catch (IllegalArgumentException e) {
                 item = barrier;
             }
-            return item;
-        }
-
-        try {
-            if (material.contains(":")) {
-                String[] itemData = material.split(":");
-                item = new ItemStack(Material.valueOf(itemData[0]), 1, Byte.parseByte(itemData[1]));
-            } else {
-                item = new ItemStack(Material.valueOf(material));
+        } else {
+            try {
+                if (material.contains(":")) {
+                    String[] itemData = material.split(":");
+                    item = new ItemStack(Material.valueOf(itemData[0]), 1, Byte.parseByte(itemData[1]));
+                } else {
+                    item = new ItemStack(Material.valueOf(material));
+                }
+            } catch (IllegalArgumentException e) {
+                item = barrier;
             }
-        } catch (IllegalArgumentException e) {
-            item = barrier;
         }
 
         ItemMeta itemMeta = item.getItemMeta();
@@ -94,9 +91,9 @@ public class ItemCreator {
             lore.add(ChatUtils.color(lines
                     .replace("%player_name%", p.getName())
                     .replace("%balance%", MethodUtils.formatCommas(economy.getBankBalance(p)))
-                    .replace("%balance_formatted%", MethodUtils.format(economy.getBankBalance(p), plugin))
-                    .replace("%balance_formatted_long%", MethodUtils.formatLong(economy.getBankBalance(p), plugin))
-                    .replace("%interest_cooldown%", MethodUtils.formatTime(cooldown, plugin))
+                    .replace("%balance_formatted%", MethodUtils.format(economy.getBankBalance(p)))
+                    .replace("%balance_formatted_long%", MethodUtils.formatLong(economy.getBankBalance(p)))
+                    .replace("%interest_cooldown%", MethodUtils.formatTime((int) cooldown))
             ));
         }
         if (plugin.isPlaceholderAPIHooked()) {
@@ -115,10 +112,9 @@ public class ItemCreator {
     }
 
     public static ItemStack guiFiller() {
-        BankPlus plugin = JavaPlugin.getPlugin(BankPlus.class);
         ItemStack filler;
         try {
-            final String material = plugin.config().getString("Gui.Filler.Material");
+            final String material = ConfigValues.getGuiFillerMaterial();
             if (material.contains(":")) {
                 String[] itemData = material.split(":");
                 filler = new ItemStack(Material.valueOf(itemData[0]), 1, Byte.parseByte(itemData[1]));
@@ -131,14 +127,14 @@ public class ItemCreator {
 
         ItemMeta fillerMeta = filler.getItemMeta();
 
-        final String displayName = plugin.config().getString("Gui.Filler.DisplayName");
+        final String displayName = ConfigValues.getGuiFillerDisplayname();
         if (displayName == null) {
             fillerMeta.setDisplayName(ChatUtils.color("&c&l*CANNOT FIND DISPLAYNAME*"));
         } else {
             fillerMeta.setDisplayName(ChatUtils.color(displayName));
         }
 
-        if (plugin.config().getBoolean("Gui.Filler.Glowing")) {
+        if (ConfigValues.isGuiFillerGlowing()) {
             fillerMeta.addEnchant(Enchantment.DURABILITY, 1, false);
             filler.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }

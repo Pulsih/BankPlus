@@ -25,12 +25,9 @@ public class ConfigManager {
         messagesFile = new File(plugin.getDataFolder(), "messages.yml");
         playersFile = new File(plugin.getDataFolder(), "players.yml");
 
-        if (!configFile.exists())
-            plugin.saveResource("config.yml", false);
-        if (!messagesFile.exists())
-            plugin.saveResource("messages.yml", false);
-        if (!playersFile.exists())
-            plugin.saveResource("players.yml", false);
+        if (!configFile.exists()) plugin.saveResource("config.yml", false);
+        if (!messagesFile.exists()) plugin.saveResource("messages.yml", false);
+        if (!playersFile.exists()) plugin.saveResource("players.yml", false);
 
         config = new YamlConfiguration();
         messages = new YamlConfiguration();
@@ -63,19 +60,7 @@ public class ConfigManager {
 
     public void savePlayers() {
         try {
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                try {
-                    players.save(playersFile);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (IllegalPluginAccessException e) {
-            try {
-                players.save(playersFile);
-            } catch (IOException ex) {
-                e.printStackTrace();
-            }
-        }
+            players.save(playersFile);
+        } catch (IOException ignored) {}
     }
 }

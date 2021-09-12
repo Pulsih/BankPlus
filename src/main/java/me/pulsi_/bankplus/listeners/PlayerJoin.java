@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.managers.ConfigValues;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.MapUtils;
@@ -14,7 +15,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 public class PlayerJoin implements Listener {
 
-    private BankPlus plugin;
+    private final BankPlus plugin;
     public PlayerJoin(BankPlus plugin) {
         this.plugin = plugin;
     }
@@ -23,17 +24,18 @@ public class PlayerJoin implements Listener {
     public void onJoin(PlayerJoinEvent e) {
 
         final Player p = e.getPlayer();
-        final long startAmount = plugin.config().getLong("General.Join-Start-Amount");
+        final long startAmount = ConfigValues.getStartAmount();
         final String name = plugin.players().getString("Players." + p.getUniqueId() + ".Name");
         final String sBalance = plugin.players().getString("Players." + p.getUniqueId() + ".Money");
         final String sOfflineInterest = plugin.players().getString("Players." + p.getUniqueId() + ".Offline-Interest");
-        final boolean isSendingOfflineInterestMessage = plugin.config().getBoolean("General.Offline-Interest-Earned-Message.Enabled");
+        final boolean isSendingOfflineInterestMessage = ConfigValues.isNotifyOfflineInterest();
 
         if (name == null) {
             plugin.players().set("Players." + p.getUniqueId() + ".Name", p.getName());
             plugin.savePlayers();
         }
         if (sBalance == null) {
+            ChatUtils.color("&a&lBank&9&lPlus &2Successfully registered &f" + p.getName() + "&a's account!");
             plugin.players().set("Players." + p.getUniqueId() + ".Money", startAmount);
             plugin.savePlayers();
         }
@@ -45,25 +47,22 @@ public class PlayerJoin implements Listener {
 
         if (isSendingOfflineInterestMessage) {
             final EconomyManager economy = new EconomyManager(plugin);
-            final long delay = plugin.config().getLong("General.Offline-Interest-Earned-Message.Delay");
+            final long delay = ConfigValues.getNotifyOfflineInterestDelay();
             final long offlineInterest = economy.getOfflineInterest(p);
-            final String message = ChatUtils.color(plugin.config().getString("General.Offline-Interest-Earned-Message.Message"));
+            final String message = ChatUtils.color(ConfigValues.getNotifyOfflineInterestMessage());
             if (delay != 0) {
                 Bukkit.getScheduler().runTaskLater(plugin, () -> p.sendMessage(message
                         .replace("%amount%", MethodUtils.formatCommas(offlineInterest))
-                        .replace("%amount_formatted%", MethodUtils.format(offlineInterest, plugin))
-                        .replace("%amount_formatted_long%", MethodUtils.formatLong(offlineInterest, plugin))), delay * 20L);
+                        .replace("%amount_formatted%", MethodUtils.format(offlineInterest))
+                        .replace("%amount_formatted_long%", MethodUtils.formatLong(offlineInterest))), delay * 20L);
             } else {
                 p.sendMessage(message
                         .replace("%amount%", MethodUtils.formatCommas(offlineInterest))
-                        .replace("%amount_formatted%", MethodUtils.format(offlineInterest, plugin))
-                        .replace("%amount_formatted_long%", MethodUtils.formatLong(offlineInterest, plugin)));
+                        .replace("%amount_formatted%", MethodUtils.format(offlineInterest))
+                        .replace("%amount_formatted_long%", MethodUtils.formatLong(offlineInterest)));
             }
             if (offlineInterest != 0)
                 economy.setOfflineInterest(p, 0);
         }
-
-        long balance = Long.parseLong(sBalance);
-        MapUtils.BALANCE.put(p.getUniqueId(), balance);
     }
 }

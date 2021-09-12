@@ -9,9 +9,19 @@ import org.bukkit.entity.Player;
 
 public class MessageManager {
 
-    private BankPlus plugin;
+    private final BankPlus plugin;
     public MessageManager(BankPlus plugin) {
         this.plugin = plugin;
+    }
+
+    public void chatWithdraw(Player p) {
+        if (plugin.messages().getString("Chat-Withdraw") == null) return;
+        p.sendMessage(ChatUtils.color(plugin.messages().getString("Chat-Withdraw")));
+    }
+
+    public void chatDeposit(Player p) {
+        if (plugin.messages().getString("Chat-Deposit") == null) return;
+        p.sendMessage(ChatUtils.color(plugin.messages().getString("Chat-Deposit")));
     }
 
     public void cannotDepositMore(Player p) {
@@ -30,8 +40,8 @@ public class MessageManager {
         p.sendMessage(ChatUtils.color(plugin.messages().getString("Personal-Bank")
                 .replace("%amount%", MethodUtils.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(new EconomyManager(plugin).getBankBalance(p), plugin))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(new EconomyManager(plugin).getBankBalance(p), plugin))
+                .replace("%amount_formatted%", MethodUtils.format(new EconomyManager(plugin).getBankBalance(p)))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(new EconomyManager(plugin).getBankBalance(p)))
         ));
     }
 
@@ -40,8 +50,8 @@ public class MessageManager {
         p.sendMessage(ChatUtils.color(plugin.messages().getString("Success-Withdraw")
                 .replace("%amount%", MethodUtils.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))
+                .replace("%amount_formatted%", MethodUtils.format(amount))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
         ));
     }
 
@@ -50,8 +60,8 @@ public class MessageManager {
         p.sendMessage(ChatUtils.color(plugin.messages().getString("Success-Deposit")
                 .replace("%amount%", MethodUtils.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))
+                .replace("%amount_formatted%", MethodUtils.format(amount))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
         ));
     }
 
@@ -62,8 +72,8 @@ public class MessageManager {
                 .replace("%player_name%", p.getName())
                 .replace("%amount%", MethodUtils.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))
+                .replace("%amount_formatted%", MethodUtils.format(amount))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
         ));
     }
 
@@ -74,8 +84,8 @@ public class MessageManager {
                 .replace("%player_name%", p.getName())
                 .replace("%amount%", MethodUtils.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))
+                .replace("%amount_formatted%", MethodUtils.format(amount))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
         ));
     }
 
@@ -85,8 +95,8 @@ public class MessageManager {
                 .replace("%player_name%", p.getName())
                 .replace("%amount%", MethodUtils.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))
+                .replace("%amount_formatted%", MethodUtils.format(amount))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
         ));
     }
     public void setMessage(CommandSender s, OfflinePlayer p, long amount) {
@@ -95,8 +105,8 @@ public class MessageManager {
                 .replace("%player_name%", p.getName())
                 .replace("%amount%", MethodUtils.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))
+                .replace("%amount_formatted%", MethodUtils.format(amount))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
         ));
     }
 
@@ -106,8 +116,8 @@ public class MessageManager {
                 .replace("%player_name%", p.getName())
                 .replace("%amount%", MethodUtils.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))
+                .replace("%amount_formatted%", MethodUtils.format(amount))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
         ));
     }
     public void addMessage(CommandSender s, OfflinePlayer p, long amount) {
@@ -116,8 +126,8 @@ public class MessageManager {
                 .replace("%player_name%", p.getName())
                 .replace("%amount%", MethodUtils.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))
+                .replace("%amount_formatted%", MethodUtils.format(amount))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
         ));
     }
 
@@ -127,8 +137,8 @@ public class MessageManager {
                 .replace("%player_name%", p.getName())
                 .replace("%amount%", MethodUtils.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))
+                .replace("%amount_formatted%", MethodUtils.format(amount))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
         ));
     }
     public void removeMessage(CommandSender s, OfflinePlayer p, long amount) {
@@ -137,8 +147,8 @@ public class MessageManager {
                 .replace("%player_name%", p.getName())
                 .replace("%amount%", MethodUtils.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))
+                .replace("%amount_formatted%", MethodUtils.format(amount))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
         ));
     }
 
@@ -156,8 +166,8 @@ public class MessageManager {
             p.sendMessage(ChatUtils.color(plugin.messages().getString("Interest-Broadcast.Message")
                     .replace("%amount%", MethodUtils.formatCommas(amount))
                     .replace("%amount_long%", "" + amount)
-                    .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
-                    .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))
+                    .replace("%amount_formatted%", MethodUtils.format(amount))
+                    .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
             ));
         }
     }
@@ -167,8 +177,8 @@ public class MessageManager {
         p.sendMessage(ChatUtils.color(plugin.messages().getString("Interest-Broadcast.Message")
                 .replace("%amount%", MethodUtils.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(amount, plugin))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount, plugin))
+                .replace("%amount_formatted%", MethodUtils.format(amount))
+                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
         ));
     }
 

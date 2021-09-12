@@ -3,9 +3,11 @@ package me.pulsi_.bankplus.commands;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.guis.GuiBank;
 import me.pulsi_.bankplus.interest.Interest;
+import me.pulsi_.bankplus.managers.ConfigValues;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
+import me.pulsi_.bankplus.utils.ListUtils;
 import me.pulsi_.bankplus.utils.MethodUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -14,11 +16,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.List;
-
 public class Commands implements CommandExecutor {
 
-    private BankPlus plugin;
+    private final BankPlus plugin;
     public Commands(BankPlus plugin) {
         this.plugin = plugin;
     }
@@ -29,15 +29,11 @@ public class Commands implements CommandExecutor {
         final MessageManager messMan = new MessageManager(plugin);
         final EconomyManager economy = new EconomyManager(plugin);
 
-        List<String> worldBlacklist = plugin.config().getStringList("General.Worlds-Blacklist");
-        if (!worldBlacklist.isEmpty()) {
-            if (s instanceof Player) {
-                if (worldBlacklist.contains(((Player)s).getWorld().getName())) {
-                    if (!s.hasPermission("bankplus.worlds.blacklist.bypass")) {
-                        messMan.cannotUseBankHere(s);
-                        return false;
-                    }
-                }
+        if (!ConfigValues.getWorldsBlacklist().isEmpty() && s instanceof Player) {
+            Player p = (Player) s;
+            if (ConfigValues.getWorldsBlacklist().contains(p.getWorld().getName()) && !p.hasPermission("bankplus.worlds.blacklist.bypass")) {
+                messMan.cannotUseBankHere(s);
+                return false;
             }
         }
 
@@ -50,7 +46,7 @@ public class Commands implements CommandExecutor {
                 messMan.notPlayer(s);
                 return false;
             }
-            if (plugin.config().getBoolean("Gui.Enabled")) {
+            if (ConfigValues.isGuiEnabled()) {
                 new GuiBank(plugin).openGui((Player) s);
                 MethodUtils.playSound("PERSONAL", (Player) s, plugin);
             } else {
@@ -66,6 +62,7 @@ public class Commands implements CommandExecutor {
                         return false;
                     }
                     plugin.reloadConfigs();
+                    ConfigValues.setupValues();
                     messMan.reloadMessage(s);
                     break;
 
@@ -115,6 +112,10 @@ public class Commands implements CommandExecutor {
                         return false;
                     }
                     messMan.interestUsage(s);
+                    break;
+
+                case "debug":
+                    s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &aAvailable options: &7playerchat, guibank, interest."));
                     break;
 
                 default:
@@ -231,6 +232,36 @@ public class Commands implements CommandExecutor {
                             messMan.interestRestarted(s);
                         } catch (Error e) {
                             messMan.internalError(s);
+                        }
+                    }
+                    break;
+
+                case "debug":
+                    if (args[1].equalsIgnoreCase("playerchat")) {
+                        if (ListUtils.PLAYERCHAT_DEBUG.get(0).equals("DISABLED")) {
+                            s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Enabled the debug mode for PlayerChat"));
+                            ListUtils.PLAYERCHAT_DEBUG.set(0, "ENABLED");
+                        } else {
+                            ListUtils.PLAYERCHAT_DEBUG.set(0, "DISABLED");
+                            s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Disabled the debug mode for PlayerChat"));
+                        }
+                    }
+                    if (args[1].equalsIgnoreCase("guibank")) {
+                        if (ListUtils.GUIBANK_DEBUG.get(0).equals("DISABLED")) {
+                            s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Enabled the debug mode for GuiBank"));
+                            ListUtils.GUIBANK_DEBUG.set(0, "ENABLED");
+                        } else {
+                            ListUtils.GUIBANK_DEBUG.set(0, "DISABLED");
+                            s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Disabled the debug mode for GuiBank"));
+                        }
+                    }
+                    if (args[1].equalsIgnoreCase("interest")) {
+                        if (ListUtils.INTEREST_DEBUG.get(0).equals("DISABLED")) {
+                            s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Enabled the debug mode for Interest"));
+                            ListUtils.INTEREST_DEBUG.set(0, "ENABLED");
+                        } else {
+                            ListUtils.INTEREST_DEBUG.set(0, "DISABLED");
+                            s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Disabled the debug mode for Interest"));
                         }
                     }
                     break;

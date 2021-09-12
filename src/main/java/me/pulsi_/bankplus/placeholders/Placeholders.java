@@ -3,8 +3,10 @@ package me.pulsi_.bankplus.placeholders;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.interest.Interest;
+import me.pulsi_.bankplus.managers.ConfigValues;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.utils.MethodUtils;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 public class Placeholders extends PlaceholderExpansion {
@@ -45,14 +47,26 @@ public class Placeholders extends PlaceholderExpansion {
             return "Player not online";
 
         final long balance = new EconomyManager(plugin).getBankBalance(p);
-        final long cooldown = Interest.interestCooldown.get(0);
 
         switch (identifier) {
             case "balance": return MethodUtils.formatCommas(balance);
             case "balance_long": return "" + balance;
-            case "balance_formatted": return MethodUtils.format(balance, plugin);
-            case "balance_formatted_long": return MethodUtils.formatLong(balance, plugin);
-            case "interest_cooldown": return MethodUtils.formatTime((int) cooldown, plugin);
+            case "balance_formatted": return MethodUtils.format(balance);
+            case "balance_formatted_long": return MethodUtils.formatLong(balance);
+            case "interest_cooldown": {
+                String interest;
+                if (ConfigValues.isInterestEnabled()) {
+                    final long cooldown = Interest.interestCooldown.get(0);
+                    if (cooldown <= 0) {
+                        interest = "0";
+                    } else {
+                        interest = MethodUtils.formatTime((int) cooldown);
+                    }
+                } else {
+                    interest = ChatColor.RED + "Interest is disabled.";
+                }
+                return interest;
+            }
         }
         return null;
     }
