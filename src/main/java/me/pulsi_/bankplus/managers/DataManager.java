@@ -7,14 +7,12 @@ import me.pulsi_.bankplus.listeners.PlayerJoin;
 import me.pulsi_.bankplus.listeners.PlayerChat;
 import me.pulsi_.bankplus.external.UpdateChecker;
 import me.pulsi_.bankplus.guis.GuiBankListener;
-import me.pulsi_.bankplus.listeners.PlayerQuit;
 import me.pulsi_.bankplus.utils.ChatUtils;
 
 public class DataManager {
 
     public static void registerEvents(BankPlus plugin) {
         plugin.getServer().getPluginManager().registerEvents(new PlayerJoin(plugin), plugin);
-        plugin.getServer().getPluginManager().registerEvents(new PlayerQuit(plugin), plugin);
         plugin.getServer().getPluginManager().registerEvents(new GuiBankListener(plugin), plugin);
         plugin.getServer().getPluginManager().registerEvents(new UpdateChecker(plugin), plugin);
         plugin.getServer().getPluginManager().registerEvents(new PlayerChat(plugin), plugin);

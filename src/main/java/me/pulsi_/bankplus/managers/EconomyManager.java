@@ -1,7 +1,6 @@
 package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.utils.MapUtils;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
@@ -11,19 +10,43 @@ public class EconomyManager {
     public EconomyManager(BankPlus plugin) {
         this.plugin = plugin;
     }
-    
+
     public final long getBankBalance(Player p) {
-        return MapUtils.BALANCE.get(p.getUniqueId());
+        long amount;
+        if (ConfigValues.isStoringUUIDs()) {
+            amount = plugin.players().getLong("Players." + p.getUniqueId() + ".Money");
+        } else {
+            amount = plugin.players().getLong("Players." + p.getName() + ".Money");
+        }
+        return amount;
     }
     public final long getBankBalance(OfflinePlayer p) {
-        return plugin.players().getLong("Players." + p.getUniqueId() + ".Money");
+        long amount;
+        if (ConfigValues.isStoringUUIDs()) {
+            amount = plugin.players().getLong("Players." + p.getUniqueId() + ".Money");
+        } else {
+            amount = plugin.players().getLong("Players." + p.getName() + ".Money");
+        }
+        return amount;
     }
 
     public final long getOfflineInterest(Player p) {
-        return plugin.players().getLong("Players." + p.getUniqueId() + ".Offline-Interest");
+        long amount;
+        if (ConfigValues.isStoringUUIDs()) {
+            amount = plugin.players().getLong("Players." + p.getUniqueId() + ".Offline-Interest");
+        } else {
+            amount = plugin.players().getLong("Players." + p.getName() + ".Offline-Interest");
+        }
+        return amount;
     }
     public final long getOfflineInterest(OfflinePlayer p) {
-        return plugin.players().getLong("Players." + p.getUniqueId() + ".Offline-Interest");
+        long amount;
+        if (ConfigValues.isStoringUUIDs()) {
+            amount = plugin.players().getLong("Players." + p.getUniqueId() + ".Offline-Interest");
+        } else {
+            amount = plugin.players().getLong("Players." + p.getName() + ".Offline-Interest");
+        }
+        return amount;
     }
 
     public final void withdraw(Player p, long withdraw) {
@@ -74,15 +97,23 @@ public class EconomyManager {
 
     public final void saveBalance(Player p) {
         final long balance = getBankBalance(p);
-        plugin.players().set("Players." + p.getUniqueId() + ".Money", balance);
-        plugin.savePlayers();
+        setValue(p, balance);
     }
 
     private void setValue(Player p, long amount) {
-        MapUtils.BALANCE.put(p.getUniqueId(), amount);
+        if (ConfigValues.isStoringUUIDs()) {
+            plugin.players().set("Players." + p.getUniqueId() + ".Money", amount);
+        } else {
+            plugin.players().set("Players." + p.getName() + ".Money", amount);
+        }
+        plugin.savePlayers();
     }
     private void setValue(OfflinePlayer p, long amount) {
-        plugin.players().set("Players." + p.getUniqueId() + ".Money", amount);
+        if (ConfigValues.isStoringUUIDs()) {
+            plugin.players().set("Players." + p.getUniqueId() + ".Money", amount);
+        } else {
+            plugin.players().set("Players." + p.getName() + ".Money", amount);
+        }
         plugin.savePlayers();
     }
 }

@@ -43,7 +43,6 @@ public final class BankPlus extends JavaPlugin {
         }
 
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            ChatUtils.consoleMessage("&a&lBank&9&lPlus &fDetected PlaceholderAPI!");
             new Placeholders(this).register();
             isPlaceholderAPIHooked = true;
         }

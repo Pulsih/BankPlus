@@ -23,11 +23,16 @@ public class ConfigValues {
     private static String guiFillerMaterial;
     private static String guiFillerDisplayname;
     private static boolean isGuiFillerGlowing;
+    private static boolean isGuiFillerEnabled;
 
     private static String withdrawSound;
     private static String depositSound;
     private static String viewSound;
     private static String personalSound;
+
+    private static String guiTitle;
+    private static int guiUpdateDelay;
+    private static int guiLines;
 
     private static String notifyOfflineInterestMessage;
     private static long interestDelay;
@@ -36,11 +41,19 @@ public class ConfigValues {
     private static long maxBankCapacity;
     private static long startAmount;
     private static long notifyOfflineInterestDelay;
+    private static long interestMaxAmount;
+    private static double interestMoneyGiven;
     private static List<String> worldsBlacklist;
     private static boolean isGuiEnabled;
     private static boolean isReopeningBankAfterChat;
     private static boolean isInterestEnabled;
     private static boolean isNotifyOfflineInterest;
+    private static boolean isStoringUUIDs;
+    private static boolean isInterestBroadcastEnabled;
+    private static boolean isGivingInterestToOfflinePlayers;
+    private static boolean isOfflineInterestEarnedMessageEnabled;
+    private static boolean isTitleCustomAmountEnabled;
+    private static boolean isUpdateCheckerEnabled;
 
     private static boolean isWithdrawSoundEnabled;
     private static boolean isDepositSoundEnabled;
@@ -66,11 +79,16 @@ public class ConfigValues {
         guiFillerMaterial = plugin.config().getString("Gui.Filler.Material");
         guiFillerDisplayname = plugin.config().getString("Gui.Filler.DisplayName");
         isGuiFillerGlowing = plugin.config().getBoolean("Gui.Filler.Glowing");
+        isGuiFillerEnabled = plugin.config().getBoolean("Gui.Filler.Enabled");
 
         withdrawSound = plugin.config().getString("General.Withdraw-Sound.Sound");
         depositSound = plugin.config().getString("General.Deposit-Sound.Sound");
         viewSound = plugin.config().getString("General.View-Sound.Sound");
         personalSound = plugin.config().getString("General.Personal-Sound.Sound");
+
+        guiTitle = plugin.config().getString("Gui.Title");
+        guiUpdateDelay = plugin.config().getInt("Gui.Update-Delay");
+        guiLines = plugin.config().getInt("Gui.Lines");
 
         notifyOfflineInterestMessage = plugin.config().getString("General.Offline-Interest-Earned-Message.Message");
         interestDelay = plugin.config().getLong("Interest.Delay");
@@ -79,11 +97,19 @@ public class ConfigValues {
         maxBankCapacity = plugin.config().getLong("General.Max-Bank-Capacity");
         startAmount = plugin.config().getLong("General.Join-Start-Amount");
         notifyOfflineInterestDelay = plugin.config().getLong("General.Offline-Interest-Earned-Message.Delay");
+        interestMaxAmount = plugin.config().getLong("Interest.Max-Amount");
+        interestMoneyGiven = plugin.config().getDouble("Interest.Money-Given");
         worldsBlacklist = plugin.config().getStringList("General.Worlds-Blacklist");
         isGuiEnabled = plugin.config().getBoolean("Gui.Enabled");
         isReopeningBankAfterChat = plugin.config().getBoolean("General.Reopen-Bank-After-Chat");
         isInterestEnabled = plugin.config().getBoolean("Interest.Enabled");
         isNotifyOfflineInterest = plugin.config().getBoolean("General.Offline-Interest-Earned-Message.Enabled");
+        isStoringUUIDs = plugin.config().getBoolean("General.Use-UUIDs");
+        isInterestBroadcastEnabled = plugin.messages().getBoolean("Interest-Broadcast.Enabled");
+        isGivingInterestToOfflinePlayers = plugin.config().getBoolean("Interest.Give-To-Offline-Players");
+        isOfflineInterestEarnedMessageEnabled = plugin.config().getBoolean("General.Offline-Interest-Earned-Message.Enabled");
+        isTitleCustomAmountEnabled = plugin.messages().getBoolean("Title-Custom-Amount.Enabled");
+        isUpdateCheckerEnabled = plugin.getConfig().getBoolean("Update-Checker");
 
         isWithdrawSoundEnabled = plugin.config().getBoolean("General.Withdraw-Sound.Enabled");
         isDepositSoundEnabled = plugin.config().getBoolean("General.Deposit-Sound.Enabled");
@@ -138,6 +164,9 @@ public class ConfigValues {
     public static boolean isGuiFillerGlowing() {
         return isGuiFillerGlowing;
     }
+    public static boolean isGuiFillerEnabled() {
+        return isGuiFillerEnabled;
+    }
 
     // Config Sounds
     public static String getWithdrawSound() {
@@ -151,6 +180,17 @@ public class ConfigValues {
     }
     public static String getPersonalSound() {
         return personalSound;
+    }
+
+    // Gui Values
+    public static String getGuiTitle() {
+        return guiTitle;
+    }
+    public static int getGuiUpdateDelay() {
+        return guiUpdateDelay;
+    }
+    public static int getGuiLines() {
+        return guiLines;
     }
 
     // Config Values
@@ -175,6 +215,12 @@ public class ConfigValues {
     public static long getNotifyOfflineInterestDelay() {
         return notifyOfflineInterestDelay;
     }
+    public static long getInterestMaxAmount() {
+        return interestMaxAmount;
+    }
+    public static double getInterestMoneyGiven() {
+        return interestMoneyGiven;
+    }
     public static List<String> getWorldsBlacklist() {
         return worldsBlacklist;
     }
@@ -189,6 +235,24 @@ public class ConfigValues {
     }
     public static boolean isNotifyOfflineInterest() {
         return isNotifyOfflineInterest;
+    }
+    public static boolean isStoringUUIDs() {
+        return isStoringUUIDs;
+    }
+    public static boolean isInterestBroadcastEnabled() {
+        return isInterestBroadcastEnabled;
+    }
+    public static boolean isGivingInterestToOfflinePlayers() {
+        return isGivingInterestToOfflinePlayers;
+    }
+    public static boolean isOfflineInterestEarnedMessageEnabled() {
+        return isOfflineInterestEarnedMessageEnabled;
+    }
+    public static boolean isTitleCustomAmountEnabled() {
+        return isTitleCustomAmountEnabled;
+    }
+    public static boolean isUpdateCheckerEnabled() {
+        return isUpdateCheckerEnabled;
     }
 
     // Config Booleans Sounds

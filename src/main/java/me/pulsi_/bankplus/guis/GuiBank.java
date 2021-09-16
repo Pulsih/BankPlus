@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.guis;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.managers.ConfigValues;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
@@ -30,9 +31,9 @@ public class GuiBank {
 
     public final Inventory getBank(Player p) {
 
-        final int lines = guiLines(plugin.config().getInt("Gui.Lines"));
+        final int lines = guiLines(ConfigValues.getGuiLines());
         
-        final String s = plugin.config().getString("Gui.Title");
+        final String s = ConfigValues.getGuiTitle();
         String title;
         if (s == null) {
             title = "&c&l*CANNOT FIND TITLE*";
@@ -53,7 +54,7 @@ public class GuiBank {
                 }
             }
 
-            if (plugin.config().getBoolean("Gui.Filler.Enabled")) {
+            if (ConfigValues.isGuiFillerEnabled()) {
                 for (int i = 0; i < lines; i++)
                     if (inv.getItem(i) == null)
                         inv.setItem(i, ItemCreator.guiFiller());

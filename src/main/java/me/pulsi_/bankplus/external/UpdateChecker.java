@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.external;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.managers.ConfigValues;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -20,7 +21,7 @@ import java.net.URL;
 public class UpdateChecker implements Listener {
 
     private final boolean isUpToDate;
-    private BankPlus plugin;
+    private final BankPlus plugin;
     public UpdateChecker(BankPlus plugin) {
         boolean isUpdated;
         this.plugin = plugin;
@@ -34,8 +35,7 @@ public class UpdateChecker implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
-        if (!plugin.getConfig().getBoolean("Update-Checker")) return;
-        if (!e.getPlayer().isOp() || !e.getPlayer().hasPermission("bankplus.notify")) return;
+        if (!ConfigValues.isUpdateCheckerEnabled() || (!e.getPlayer().isOp() && !e.getPlayer().hasPermission("bankplus.notify"))) return;
         if (isUpToDate) return;
         final TextComponent update = new TextComponent(ChatUtils.color("&a&lBank&9&lPlus &aNew update available! &7(CLICK HERE)"));
         update.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.spigotmc.org/resources/%E2%9C%A8-bankplus-%E2%9C%A8-easy-and-lightweight-bank-plugin.93130/"));
@@ -47,7 +47,7 @@ public class UpdateChecker implements Listener {
         }, 80);
     }
 
-    private final boolean isPluginUpdated() throws IOException {
+    private boolean isPluginUpdated() throws IOException {
         final String currentVersion = new BufferedReader(new InputStreamReader(new URL("https://api.spigotmc.org/legacy/update.php?resource=93130").openConnection().getInputStream())).readLine();
         return plugin.getDescription().getVersion().equals(currentVersion);
     }

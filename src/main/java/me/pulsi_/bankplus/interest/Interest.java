@@ -4,6 +4,8 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.managers.ConfigValues;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.managers.MessageManager;
+import me.pulsi_.bankplus.utils.ChatUtils;
+import me.pulsi_.bankplus.utils.ListUtils;
 import me.pulsi_.bankplus.utils.MethodUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -33,13 +35,19 @@ public class Interest {
         }
 
         Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            debug("&aBANKPLUS &8-> &3INTEREST &8: &fDefault interest delay is: " + delay);
             final long count = interestCooldown.get(0);
+            debug("&aBANKPLUS &8-> &3INTEREST &8: &fInterest count: " + count);
             if (count <= 1) {
+                debug("&aBANKPLUS &8-> &3INTEREST &8: &fCount has terminated, giving interest...");
                 giveInterestToEveryone();
+                debug("&aBANKPLUS &8-> &3INTEREST &8: &fResetting interest delay...");
                 interestCooldown.set(0, delay);
                 return;
             }
-            interestCooldown.set(0, count - 1);
+            final long nextCount = count - 1;
+            debug("&aBANKPLUS &8-> &3INTEREST &8: &f1 Minute passed: COUNT FROM " + count + " TO " + nextCount);
+            interestCooldown.set(0, nextCount);
         }, 0, MethodUtils.ticksInMinutes(1));
     }
 
@@ -51,9 +59,9 @@ public class Interest {
     }
 
     public void giveInterestToEveryone() {
-        double moneyPercentage = plugin.config().getDouble("Interest.Money-Given");
-        long maxAmount = plugin.config().getLong("Interest.Max-Amount");
-        if (plugin.config().getBoolean("Interest.Give-To-Offline-Players")) {
+        double moneyPercentage = ConfigValues.getInterestMoneyGiven();
+        long maxAmount = ConfigValues.getInterestMaxAmount();
+        if (ConfigValues.isGivingInterestToOfflinePlayers()) {
             for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
                 giveInterestOffline(p, moneyPercentage, maxAmount);
             }
@@ -69,55 +77,55 @@ public class Interest {
         final MessageManager messMan = new MessageManager(plugin);
         final long bankBalance = economy.getBankBalance(p);
         final long interestMoney = (long)(bankBalance * moneyPercentage);
-        long maxBankCapacity = plugin.config().getLong("General.Max-Bank-Capacity");
+        long maxBankCapacity = ConfigValues.getMaxBankCapacity();
 
         if (maxBankCapacity != 0) {
             if (bankBalance + interestMoney >= maxBankCapacity) {
                 economy.setPlayerBankBalance(p, maxBankCapacity);
-                if (plugin.messages().getBoolean("Interest-Broadcast.Enabled"))
+                if (ConfigValues.isInterestBroadcastEnabled())
                     messMan.interestBroadcastMessageMax(p, maxBankCapacity - bankBalance);
             } else {
-                if (bankBalance != 0) {
-                    if (interestMoney == 0) {
-                        economy.addPlayerBankBalance(p, 1);
-                        if (plugin.messages().getBoolean("Interest-Broadcast.Enabled"))
-                            messMan.interestBroadcastMessageMax(p, 1);
-                    } else {
-                        if (interestMoney >= maxAmount) {
-                            economy.addPlayerBankBalance(p, maxAmount);
-                            if (plugin.messages().getBoolean("Interest-Broadcast.Enabled"))
-                                messMan.interestBroadcastMessageMax(p, maxAmount);
-                            return;
-                        }
-                        economy.addPlayerBankBalance(p, interestMoney);
-                        if (plugin.messages().getBoolean("Interest-Broadcast.Enabled"))
-                            messMan.interestBroadcastMessageMax(p, interestMoney);
-                    }
-                } else {
-                    if (plugin.messages().getBoolean("Interest-Broadcast.Enabled"))
+                if (bankBalance == 0) {
+                    if (ConfigValues.isInterestBroadcastEnabled())
                         messMan.noMoneyInterest(p);
+                    return;
                 }
-            }
-        } else {
-            if (bankBalance != 0) {
                 if (interestMoney == 0) {
                     economy.addPlayerBankBalance(p, 1);
-                    if (plugin.messages().getBoolean("Interest-Broadcast.Enabled"))
+                    if (ConfigValues.isInterestBroadcastEnabled())
                         messMan.interestBroadcastMessageMax(p, 1);
                 } else {
                     if (interestMoney >= maxAmount) {
                         economy.addPlayerBankBalance(p, maxAmount);
-                        if (plugin.messages().getBoolean("Interest-Broadcast.Enabled"))
+                        if (ConfigValues.isInterestBroadcastEnabled())
                             messMan.interestBroadcastMessageMax(p, maxAmount);
                         return;
                     }
                     economy.addPlayerBankBalance(p, interestMoney);
-                    if (plugin.messages().getBoolean("Interest-Broadcast.Enabled"))
+                    if (ConfigValues.isInterestBroadcastEnabled())
                         messMan.interestBroadcastMessageMax(p, interestMoney);
                 }
-            } else {
-                if (plugin.messages().getBoolean("Interest-Broadcast.Enabled"))
+            }
+        } else {
+            if (bankBalance == 0) {
+                if (ConfigValues.isInterestBroadcastEnabled())
                     messMan.noMoneyInterest(p);
+                return;
+            }
+            if (interestMoney == 0) {
+                economy.addPlayerBankBalance(p, 1);
+                if (ConfigValues.isInterestBroadcastEnabled())
+                    messMan.interestBroadcastMessageMax(p, 1);
+            } else {
+                if (interestMoney >= maxAmount) {
+                    economy.addPlayerBankBalance(p, maxAmount);
+                    if (ConfigValues.isInterestBroadcastEnabled())
+                        messMan.interestBroadcastMessageMax(p, maxAmount);
+                    return;
+                }
+                economy.addPlayerBankBalance(p, interestMoney);
+                if (ConfigValues.isInterestBroadcastEnabled())
+                    messMan.interestBroadcastMessageMax(p, interestMoney);
             }
         }
     }
@@ -167,9 +175,14 @@ public class Interest {
     }
 
     private void addOfflineInterest(OfflinePlayer p, long amount) {
-        if (!plugin.config().getBoolean("General.Offline-Interest-Earned-Message.Enabled")) return;
+        if (!ConfigValues.isOfflineInterestEarnedMessageEnabled()) return;
         EconomyManager economy = new EconomyManager(plugin);
         final long offlineInterest = economy.getOfflineInterest(p);
         economy.setOfflineInterest(p, offlineInterest + amount);
+    }
+
+    private void debug(String message) {
+        if (ListUtils.INTEREST_DEBUG.get(0).equals("ENABLED"))
+            ChatUtils.consoleMessage(message);
     }
 }
