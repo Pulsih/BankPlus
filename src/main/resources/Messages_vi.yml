@@ -1,0 +1,53 @@
+# Messages File BankPlus
+#
+# Made by Pulsi_
+
+# Placeholders
+# %amount% -> Raw Number
+# %amount_formatted% -> Number Formatted
+# %amount_formatted_long% -> Number formatted without "."
+# %player_name% -> Returns the player name based on the action
+
+# System
+Reload: "&6&lNgân Hàng &b> &aĐã tải lại plugins!"
+Error: "&6&lNgân Hàng &b> &cĐã xuất hiện lỗi..."
+Unknown-Command: "&6&lNgân Hàng &b> &cLệnh không tồn tại hoặc sai!"
+Interest-Restarted: "&6&lNgân Hàng &b> &aTiền hoa hồng đang được tính lại!"
+Interest-Disabled: "&6&lNgân Hàng &b> &cTiền hoa hồng đã bị tắt! Vui lòng bật nó ở Config"
+Interest-Usage: "&6&lNgân Hàng &b> &aDùng: /bank interest restart"
+
+# Error
+Specify-Number: "&6&lNgân Hàng &b> &cHãy nhập con số chỉ định!"
+Specify-Player: "&6&lNgân Hàng &b> &cHãy nhập tên người chơi chỉ định!"
+Not-Player: "&6&lNgân Hàng &b> &cBan khong phai nguoi choi!"
+Insufficient-Money-Withdraw: "&6&lNgân Hàng &b> &cBạn không đủ tiền rút!"
+Insufficient-Money-Deposit: "&6&lNgân Hàng &b> &cBạn không đủ tiền đóng!"
+No-Permission: "&6&lNgân Hàng &b> &cBạn không có quyền!"
+Cannot-Deposit-Anymore: "&6&lNgân Hàng &b> &cBạn không thể đóng thêm tiền!"
+
+# Plugin
+Cannot-Use-Bank-Here: "&6&lNgân Hàng &b> &cNgân hàng bị cấm trong thế giới này!"
+Personal-Bank: "&6&lNgân Hàng &b> &aBạn có &f%amount_formatted% Money &atrong ngân hàng."
+Success-Withdraw: "&6&lNgân Hàng&b&l &aĐã rút thành công &f%amount_formatted% Money&a!"
+Success-Deposit: "&6&lNgân Hàng&b&l &aĐá nộp thành công &f%amount_formatted% Money&a!"
+Bank-Others: "&6&lNgân Hàng &b> &f%player_name% &acó &f%amount_formatted% Money &atrong ngân hàng"
+Set-Message: "&6&lNgân Hàng &b> &aBạn đặt số tiền trong ngân hàng của &f%player_name% &athành &f%amount_formatted%&a!"
+Add-Message: "&6&lNgân Hàng &b> &aBạn đã thêm &f%amount_formatted% Money &avào ngân hàng của &f%player_name%!"
+Remove-Message: "&6&lNgân Hàng &b> &aBạn đã lấy &f%amount_formatted% Money &atừ ngân hàng của &f%player_name%!"
+Chat-Deposit: "&6&lNgân Hàng &b> &aGõ số lượng bạn muốn nộp tiền, gõ 'exit' để thoát"
+Chat-Withdraw: "&6&lNgân Hàng &b> &aGõ số lượng bạn muốn rút tiền, gõ 'exit' để thoát"
+Title-Custom-Amount:
+  Enabled: true
+  Title-Deposit: "&fTGõ trong &achat &f, số tiền &anộp"
+  Title-Withdraw: "&fGõ trong &achat &f, số tiền &arút"
+Interest-Broadcast:
+  Enabled: true
+  Message: "&6&lNgân Hàng &b> &aBạn kiếm được &f%amount_formatted% Money &atừ tiền hoa hồng!"
+  No-Money: "&6&lNgân Hàng &b> &aBạn không kiếm được đồng nào từ tiền hoa hồng."
+Help-Message:
+  - "&6&lNgân Hàng&b&l  &aHelp page"
+  - "&a/bank deposit <amount> &7Nộp tiền vào ngân hàng."
+  - "&a/bank withdraw <amount> &7Rút tiền khỏi ngân hàng."
+  - "&a/bank view <player> &7Xem ngân hàng người khác."
+  - "&7Plugin made by Pulsi_"
+  - "&aRate 5 Star!"
