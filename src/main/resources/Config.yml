@@ -97,6 +97,7 @@ Gui:
     # and not only for make the bank work
     Withdraw:
       Material: "EMERALD"
+      Amount: 1
       DisplayName: "&aWithdraw"
       Slot: 11
       Lore:
@@ -113,6 +114,7 @@ Gui:
 
     WithdrawHalf:
       Material: "EMERALD"
+      Amount: 2
       DisplayName: "&aWithdraw"
       Slot: 12
       Lore:
@@ -126,6 +128,7 @@ Gui:
 
     WithdrawAll:
       Material: "EMERALD"
+      Amount: 3
       DisplayName: "&aWithdraw"
       Slot: 21
       Lore:
@@ -136,8 +139,10 @@ Gui:
       Action:
         Action-Type: "Withdraw"
         Amount: "ALL"
+
     WithdrawCustom:
       Material: "EMERALD"
+      Amount: 4
       Slot: 20
       DisplayName: "&aWithdraw"
       Lore:
@@ -178,6 +183,7 @@ Gui:
 
     Deposit:
       Material: "EMERALD"
+      Amount: 1
       Slot: 17
       DisplayName: "&aDeposit"
       Lore:
@@ -191,6 +197,7 @@ Gui:
 
     DepositHalf:
       Material: "EMERALD"
+      Amount: 2
       Slot: 16
       DisplayName: "&aDeposit"
       Lore:
@@ -204,6 +211,7 @@ Gui:
 
     DepositAll:
       Material: "EMERALD"
+      Amount: 3
       Slot: 25
       DisplayName: "&aDeposit"
       Lore:
@@ -217,6 +225,7 @@ Gui:
 
     DepositCustom:
       Material: "EMERALD"
+      Amount: 4
       Slot: 26
       DisplayName: "&aDeposit"
       Lore:
