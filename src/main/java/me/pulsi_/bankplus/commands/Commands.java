@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.commands;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.guis.GuiBank;
+import me.pulsi_.bankplus.guis.GuiBankHolder;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.managers.ConfigValues;
 import me.pulsi_.bankplus.managers.EconomyManager;
@@ -47,7 +47,7 @@ public class Commands implements CommandExecutor {
                 return false;
             }
             if (ConfigValues.isGuiEnabled()) {
-                new GuiBank(plugin).openGui((Player) s);
+                GuiBankHolder.getEnchanterHolder().openBank((Player) s);
                 MethodUtils.playSound("PERSONAL", (Player) s, plugin);
             } else {
                 messMan.personalBalance((Player) s);

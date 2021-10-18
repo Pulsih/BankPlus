@@ -16,12 +16,14 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
 public class GuiBankListener implements Listener {
 
-    private static BukkitTask runnable;
     private final BankPlus plugin;
+    private static BukkitTask runnable;
     public GuiBankListener(BankPlus plugin) {
         this.plugin = plugin;
     }
@@ -30,11 +32,9 @@ public class GuiBankListener implements Listener {
     public void guiListener(InventoryClickEvent e) {
 
         Player p = (Player) e.getWhoClicked();
-        final EconomyManager economy = new EconomyManager(plugin);
         final MessageManager messMan = new MessageManager(plugin);
-        final String title = ChatUtils.color(ConfigValues.getGuiTitle());
 
-        if (e.getCurrentItem() == null || !e.getView().getTitle().equals(title)) return;
+        if (!(p.getOpenInventory().getTopInventory().getHolder() instanceof GuiBankHolder)) return;
         debug("&aBANKPLUS &8-> &3GUIBANK &8: &fEvent cancelled");
         e.setCancelled(true);
 
@@ -44,12 +44,12 @@ public class GuiBankListener implements Listener {
             if (e.getSlot() + 1 != items.getInt("Slot") || items.getString("Action.Action-Type") == null) continue;
             debug("&aBANKPLUS &8-> &3GUIBANK &8: &fThe clicked slot was containing an action, waiting...");
 
-            final String actionType = items.getString("Action.Action-Type");
-            final String actionAmount = items.getString("Action.Amount");
+            final String actionType = items.getString("Action.Action-Type").toLowerCase();
+            final String actionAmount = items.getString("Action.Amount").toLowerCase();
 
             long amount;
             switch (actionType) {
-                case "Withdraw":
+                case "withdraw":
                     debug("&aBANKPLUS &8-> &3GUIBANK &8: &fAction Type: Withdraw");
                     switch (actionAmount) {
                         case "CUSTOM":
@@ -63,13 +63,13 @@ public class GuiBankListener implements Listener {
 
                         case "ALL":
                             debug("&aBANKPLUS &8-> &3GUIBANK &8: &fWithdraw amount: ALL, Processing...");
-                            amount = economy.getBankBalance(p);
+                            amount = EconomyManager.getBankBalance(p);
                             MethodUtils.withdraw(p, amount, plugin);
                             break;
 
                         case "HALF":
                             debug("&aBANKPLUS &8-> &3GUIBANK &8: &fWithdraw amount: HALF, Processing...");
-                            amount = economy.getBankBalance(p) / 2;
+                            amount = EconomyManager.getBankBalance(p) / 2;
                             MethodUtils.withdraw(p, amount, plugin);
                             break;
 
@@ -86,7 +86,7 @@ public class GuiBankListener implements Listener {
                     }
                     break;
 
-                case "Deposit":
+                case "deposit":
                     debug("&aBANKPLUS &8-> &3GUIBANK &8: &fAction Type: Deposit");
                     switch (actionAmount) {
                         case "CUSTOM":
@@ -129,23 +129,30 @@ public class GuiBankListener implements Listener {
 
     @EventHandler
     public void updateGui(InventoryOpenEvent e) {
-        final Player p = (Player) e.getPlayer();
-        final String title = ChatUtils.color(ConfigValues.getGuiTitle());
-        final int delay = ConfigValues.getGuiUpdateDelay();
-
-        if (!e.getView().getTitle().equals(title) || delay == 0) return;
-        runnable = Bukkit.getScheduler().runTaskTimer(plugin, () -> new GuiBank(plugin).updateLore(p, title),0, delay * 20L);
+        Player p = (Player) e.getPlayer();
+        int delay = ConfigValues.getGuiUpdateDelay();
+        if (delay != 0) runnable = Bukkit.getScheduler().runTaskTimer(plugin, () -> updateLore(p),0, delay * 20L);
     }
 
     @EventHandler
     public void closeGUI(InventoryCloseEvent e) {
-        final String title = ChatUtils.color(ConfigValues.getGuiTitle());
-        if (runnable != null && e.getView().getTitle().equals(title))
-            runnable.cancel();
+        if (runnable != null) runnable.cancel();
     }
 
     private void debug(String message) {
-        if (ListUtils.GUIBANK_DEBUG.get(0).equals("ENABLED"))
-            ChatUtils.consoleMessage(message);
+        if (ListUtils.GUIBANK_DEBUG.get(0).equals("ENABLED")) ChatUtils.consoleMessage(message);
+    }
+
+
+    private void updateLore(Player p) {
+        Inventory inventory = p.getOpenInventory().getTopInventory();
+        if (!(inventory.getHolder() instanceof GuiBankHolder)) return;
+
+        ConfigurationSection c = plugin.config().getConfigurationSection("Gui.Items");
+        for (String items : c.getKeys(false)) {
+            ItemStack i = inventory.getItem(c.getConfigurationSection(items).getInt("Slot") - 1);
+            if (i != null && i.hasItemMeta())
+                i.setItemMeta(ItemUtils.setLore(c.getConfigurationSection(items), i, p));
+        }
     }
 }
