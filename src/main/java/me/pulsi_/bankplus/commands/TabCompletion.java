@@ -16,6 +16,7 @@ public class TabCompletion implements TabCompleter {
         if (s.hasPermission("bankplus.withdraw")) args1.add("withdraw");
         if (s.hasPermission("bankplus.deposit")) args1.add("deposit");
         if (s.hasPermission("bankplus.view")) args1.add("view");
+        if (s.hasPermission("bankplus.balance")) args1.add("balance");
         if (s.hasPermission("bankplus.help")) args1.add("help");
         if (s.hasPermission("bankplus.reload")) args1.add("reload");
         if (s.hasPermission("bankplus.debug")) args1.add("debug");

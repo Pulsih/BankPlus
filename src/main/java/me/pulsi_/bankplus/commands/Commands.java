@@ -83,6 +83,15 @@ public class Commands implements CommandExecutor {
                     messMan.specifyPlayer(s);
                     break;
 
+                case "bal":
+                case "balance":
+                    if (!s.hasPermission("bankplus.balance")) {
+                        messMan.noPermission(s);
+                        return false;
+                    }
+                    messMan.personalBalance((Player) s);
+                    break;
+
                 case "withdraw":
                 case "deposit":
                     if (!(s.hasPermission("bankplus.deposit") || s.hasPermission("bankplus.withdraw"))) {
