@@ -52,7 +52,7 @@ public class GuiBankListener implements Listener {
                 case "withdraw":
                     debug("&aBANKPLUS &8-> &3GUIBANK &8: &fAction Type: Withdraw");
                     switch (actionAmount) {
-                        case "CUSTOM":
+                        case "custom":
                             debug("&aBANKPLUS &8-> &3GUIBANK &8: &fWithdraw amount: CUSTOM, Processing...");
                             SetUtils.playerWithdrawing.add(p.getUniqueId());
                             if (ConfigValues.isTitleCustomAmountEnabled())
@@ -61,13 +61,13 @@ public class GuiBankListener implements Listener {
                             p.closeInventory();
                             break;
 
-                        case "ALL":
+                        case "all":
                             debug("&aBANKPLUS &8-> &3GUIBANK &8: &fWithdraw amount: ALL, Processing...");
                             amount = EconomyManager.getBankBalance(p);
                             MethodUtils.withdraw(p, amount, plugin);
                             break;
 
-                        case "HALF":
+                        case "half":
                             debug("&aBANKPLUS &8-> &3GUIBANK &8: &fWithdraw amount: HALF, Processing...");
                             amount = EconomyManager.getBankBalance(p) / 2;
                             MethodUtils.withdraw(p, amount, plugin);
@@ -89,7 +89,7 @@ public class GuiBankListener implements Listener {
                 case "deposit":
                     debug("&aBANKPLUS &8-> &3GUIBANK &8: &fAction Type: Deposit");
                     switch (actionAmount) {
-                        case "CUSTOM":
+                        case "custom":
                             debug("&aBANKPLUS &8-> &3GUIBANK &8: &fDeposit amount: CUSTOM, Processing...");
                             SetUtils.playerDepositing.add(p.getUniqueId());
                             if (ConfigValues.isTitleCustomAmountEnabled())
@@ -98,13 +98,13 @@ public class GuiBankListener implements Listener {
                             p.closeInventory();
                             break;
 
-                        case "ALL":
+                        case "all":
                             debug("&aBANKPLUS &8-> &3GUIBANK &8: &fDeposit amount: ALL, Processing...");
                             amount = (long) plugin.getEconomy().getBalance(p);
                             MethodUtils.deposit(p, amount, plugin);
                             break;
 
-                        case "HALF":
+                        case "half":
                             debug("&aBANKPLUS &8-> &3GUIBANK &8: &fDeposit amount: HALF, Processing...");
                             amount = (long) (plugin.getEconomy().getBalance(p) / 2);
                             MethodUtils.deposit(p, amount, plugin);
