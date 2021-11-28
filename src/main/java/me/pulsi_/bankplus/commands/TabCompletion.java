@@ -23,6 +23,7 @@ public class TabCompletion implements TabCompleter {
         if (s.hasPermission("bankplus.set")) args1.add("set");
         if (s.hasPermission("bankplus.add")) args1.add("add");
         if (s.hasPermission("bankplus.remove")) args1.add("remove");
+        if (s.hasPermission("bankplus.open")) args1.add("open");
         if (s.hasPermission("bankplus.interest.restart")) args1.add("interest");
 
         List<String> debugArgs = new ArrayList<>();
@@ -47,9 +48,8 @@ public class TabCompletion implements TabCompleter {
         List<String> debugResult = new ArrayList<>();
         if (args.length == 2) {
             for (String a : debugArgs) {
-                if (args[0].equalsIgnoreCase("debug") && a.toLowerCase().startsWith(args[1].toLowerCase())) {
+                if (args[0].equalsIgnoreCase("debug") && a.toLowerCase().startsWith(args[1].toLowerCase()))
                     debugResult.add(a);
-                }
             }
             return debugResult;
         }

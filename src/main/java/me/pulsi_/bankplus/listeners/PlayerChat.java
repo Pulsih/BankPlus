@@ -6,7 +6,7 @@ import me.pulsi_.bankplus.guis.GuiBankHolder;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.ListUtils;
-import me.pulsi_.bankplus.utils.MethodUtils;
+import me.pulsi_.bankplus.utils.Methods;
 import me.pulsi_.bankplus.utils.SetUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -41,7 +41,7 @@ public class PlayerChat implements Listener {
                 return;
             }
             try {
-                MethodUtils.deposit(p, Long.parseLong(mess), plugin);
+                Methods.deposit(p, Long.parseLong(mess), plugin);
                 debug("&aBANKPLUS &8-> &3PLAYERCHAT &8: &fDeposited " + Long.parseLong(mess) + " money for " + p.getName());
                 reopenBank(p);
             } catch (NumberFormatException ex) {
@@ -70,7 +70,7 @@ public class PlayerChat implements Listener {
                 return;
             }
             try {
-                MethodUtils.withdraw(p, Long.parseLong(mess), plugin);
+                Methods.withdraw(p, Long.parseLong(mess), plugin);
                 debug("&aBANKPLUS &8-> &3PLAYERCHAT &8: &fWithdrew " + Long.parseLong(mess) + " money for " + p.getName());
                 reopenBank(p);
             } catch (NumberFormatException ex) {

@@ -7,7 +7,7 @@ import me.pulsi_.bankplus.managers.ConfigValues;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.HeadUtils;
-import me.pulsi_.bankplus.utils.MethodUtils;
+import me.pulsi_.bankplus.utils.Methods;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.configuration.ConfigurationSection;
@@ -161,10 +161,10 @@ public class ItemUtils {
         for (String lines : c.getStringList("Lore")) {
             lore.add(ChatUtils.color(lines
                     .replace("%player_name%", p.getName())
-                    .replace("%balance%", MethodUtils.formatCommas(EconomyManager.getBankBalance(p)))
-                    .replace("%balance_formatted%", MethodUtils.format(EconomyManager.getBankBalance(p)))
-                    .replace("%balance_formatted_long%", MethodUtils.formatLong(EconomyManager.getBankBalance(p)))
-                    .replace("%interest_cooldown%", MethodUtils.formatTime((int) cooldown))
+                    .replace("%balance%", Methods.formatCommas(EconomyManager.getBankBalance(p)))
+                    .replace("%balance_formatted%", Methods.format(EconomyManager.getBankBalance(p)))
+                    .replace("%balance_formatted_long%", Methods.formatLong(EconomyManager.getBankBalance(p)))
+                    .replace("%interest_cooldown%", Methods.formatTime((int) cooldown))
             ));
         }
         if (isPlaceholderApiHooked) {

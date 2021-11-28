@@ -6,7 +6,7 @@ import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.ListUtils;
-import me.pulsi_.bankplus.utils.MethodUtils;
+import me.pulsi_.bankplus.utils.Methods;
 import me.pulsi_.bankplus.utils.SetUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
@@ -56,7 +56,7 @@ public class GuiBankListener implements Listener {
                             debug("&aBANKPLUS &8-> &3GUIBANK &8: &fWithdraw amount: CUSTOM, Processing...");
                             SetUtils.playerWithdrawing.add(p.getUniqueId());
                             if (ConfigValues.isTitleCustomAmountEnabled())
-                                MethodUtils.sendTitle("Title-Custom-Amount.Title-Withdraw", p, plugin);
+                                Methods.sendTitle("Title-Custom-Amount.Title-Withdraw", p, plugin);
                             messMan.chatWithdraw(p);
                             p.closeInventory();
                             break;
@@ -64,20 +64,20 @@ public class GuiBankListener implements Listener {
                         case "all":
                             debug("&aBANKPLUS &8-> &3GUIBANK &8: &fWithdraw amount: ALL, Processing...");
                             amount = EconomyManager.getBankBalance(p);
-                            MethodUtils.withdraw(p, amount, plugin);
+                            Methods.withdraw(p, amount, plugin);
                             break;
 
                         case "half":
                             debug("&aBANKPLUS &8-> &3GUIBANK &8: &fWithdraw amount: HALF, Processing...");
                             amount = EconomyManager.getBankBalance(p) / 2;
-                            MethodUtils.withdraw(p, amount, plugin);
+                            Methods.withdraw(p, amount, plugin);
                             break;
 
                         default:
                             try {
                                 amount = Long.parseLong(actionAmount);
                                 debug("&aBANKPLUS &8-> &3GUIBANK &8: &fWithdraw amount: " + amount + ", Processing...");
-                                MethodUtils.withdraw(p, amount, plugin);
+                                Methods.withdraw(p, amount, plugin);
                             } catch (NumberFormatException ex) {
                                 debug("&aBANKPLUS &8-> &3GUIBANK &8: &cError! The Withdraw amount was containing an invalid number!");
                                 ChatUtils.consoleMessage("&a&lBank&9&lPlus &cInvalid number in the withdraw amount!");
@@ -93,7 +93,7 @@ public class GuiBankListener implements Listener {
                             debug("&aBANKPLUS &8-> &3GUIBANK &8: &fDeposit amount: CUSTOM, Processing...");
                             SetUtils.playerDepositing.add(p.getUniqueId());
                             if (ConfigValues.isTitleCustomAmountEnabled())
-                                MethodUtils.sendTitle("Title-Custom-Amount.Title-Deposit", p, plugin);
+                                Methods.sendTitle("Title-Custom-Amount.Title-Deposit", p, plugin);
                             messMan.chatDeposit(p);
                             p.closeInventory();
                             break;
@@ -101,20 +101,20 @@ public class GuiBankListener implements Listener {
                         case "all":
                             debug("&aBANKPLUS &8-> &3GUIBANK &8: &fDeposit amount: ALL, Processing...");
                             amount = (long) plugin.getEconomy().getBalance(p);
-                            MethodUtils.deposit(p, amount, plugin);
+                            Methods.deposit(p, amount, plugin);
                             break;
 
                         case "half":
                             debug("&aBANKPLUS &8-> &3GUIBANK &8: &fDeposit amount: HALF, Processing...");
                             amount = (long) (plugin.getEconomy().getBalance(p) / 2);
-                            MethodUtils.deposit(p, amount, plugin);
+                            Methods.deposit(p, amount, plugin);
                             break;
 
                         default:
                             try {
                                 amount = Long.parseLong(actionAmount);
                                 debug("&aBANKPLUS &8-> &3GUIBANK &8: &fDeposit amount: " + amount + ", Processing...");
-                                MethodUtils.deposit(p, amount, plugin);
+                                Methods.deposit(p, amount, plugin);
                                 break;
                             } catch (NumberFormatException ex) {
                                 debug("&aBANKPLUS &8-> &3GUIBANK &8: &cError! The Deposit amount was containing an invalid number!");

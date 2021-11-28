@@ -2,7 +2,7 @@ package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.utils.ChatUtils;
-import me.pulsi_.bankplus.utils.MethodUtils;
+import me.pulsi_.bankplus.utils.Methods;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 public class MessageManager {
 
     private final BankPlus plugin;
+
     public MessageManager(BankPlus plugin) {
         this.plugin = plugin;
     }
@@ -36,56 +37,66 @@ public class MessageManager {
 
     public void personalBalance(Player p) {
         if (plugin.messages().getString("Personal-Bank") == null) return;
-        final long amount = new EconomyManager(plugin).getBankBalance(p);
+        final long amount = EconomyManager.getBankBalance(p);
         p.sendMessage(ChatUtils.color(plugin.messages().getString("Personal-Bank")
-                .replace("%amount%", MethodUtils.formatCommas(amount))
+                .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(new EconomyManager(plugin).getBankBalance(p)))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(new EconomyManager(plugin).getBankBalance(p)))
+                .replace("%amount_formatted%", Methods.format(EconomyManager.getBankBalance(p)))
+                .replace("%amount_formatted_long%", Methods.formatLong(EconomyManager.getBankBalance(p)))
         ));
+    }
+
+    public void cannotUseNegativeNumber(Player p) {
+        if (plugin.messages().getString("Cannot-Use-Negative-Number") == null) return;
+        p.sendMessage(ChatUtils.color(plugin.messages().getString("Cannot-Use-Negative-Number")));
+    }
+
+    public void cannotUseNegativeNumber(CommandSender s) {
+        if (plugin.messages().getString("Cannot-Use-Negative-Number") == null) return;
+        s.sendMessage(ChatUtils.color(plugin.messages().getString("Cannot-Use-Negative-Number")));
     }
 
     public void successWithdraw(Player p, long amount) {
         if (plugin.messages().getString("Success-Withdraw") == null) return;
         p.sendMessage(ChatUtils.color(plugin.messages().getString("Success-Withdraw")
-                .replace("%amount%", MethodUtils.formatCommas(amount))
+                .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(amount))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
+                .replace("%amount_formatted%", Methods.format(amount))
+                .replace("%amount_formatted_long%", Methods.formatLong(amount))
         ));
     }
 
     public void successDeposit(Player p, long amount) {
         if (plugin.messages().getString("Success-Deposit") == null) return;
         p.sendMessage(ChatUtils.color(plugin.messages().getString("Success-Deposit")
-                .replace("%amount%", MethodUtils.formatCommas(amount))
+                .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(amount))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
+                .replace("%amount_formatted%", Methods.format(amount))
+                .replace("%amount_formatted_long%", Methods.formatLong(amount))
         ));
     }
 
     public void bankOthers(CommandSender s, Player p) {
         if (plugin.messages().getString("Bank-Others") == null) return;
-        final long amount = new EconomyManager(plugin).getBankBalance(p);
+        final long amount = EconomyManager.getBankBalance(p);
         s.sendMessage(ChatUtils.color(plugin.messages().getString("Bank-Others")
                 .replace("%player_name%", p.getName())
-                .replace("%amount%", MethodUtils.formatCommas(amount))
+                .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(amount))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
+                .replace("%amount_formatted%", Methods.format(amount))
+                .replace("%amount_formatted_long%", Methods.formatLong(amount))
         ));
     }
 
     public void bankOthers(CommandSender s, OfflinePlayer p) {
         if (plugin.messages().getString("Bank-Others") == null) return;
-        final long amount = new EconomyManager(plugin).getBankBalance(p);
+        final long amount = EconomyManager.getBankBalance(p);
         s.sendMessage(ChatUtils.color(plugin.messages().getString("Bank-Others")
                 .replace("%player_name%", p.getName())
-                .replace("%amount%", MethodUtils.formatCommas(amount))
+                .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(amount))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
+                .replace("%amount_formatted%", Methods.format(amount))
+                .replace("%amount_formatted_long%", Methods.formatLong(amount))
         ));
     }
 
@@ -93,20 +104,21 @@ public class MessageManager {
         if (plugin.messages().getString("Set-Message") == null) return;
         s.sendMessage(ChatUtils.color(plugin.messages().getString("Set-Message")
                 .replace("%player_name%", p.getName())
-                .replace("%amount%", MethodUtils.formatCommas(amount))
+                .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(amount))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
+                .replace("%amount_formatted%", Methods.format(amount))
+                .replace("%amount_formatted_long%", Methods.formatLong(amount))
         ));
     }
+
     public void setMessage(CommandSender s, OfflinePlayer p, long amount) {
         if (plugin.messages().getString("Set-Message") == null) return;
         s.sendMessage(ChatUtils.color(plugin.messages().getString("Set-Message")
                 .replace("%player_name%", p.getName())
-                .replace("%amount%", MethodUtils.formatCommas(amount))
+                .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(amount))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
+                .replace("%amount_formatted%", Methods.format(amount))
+                .replace("%amount_formatted_long%", Methods.formatLong(amount))
         ));
     }
 
@@ -114,20 +126,21 @@ public class MessageManager {
         if (plugin.messages().getString("Add-Message") == null) return;
         s.sendMessage(ChatUtils.color(plugin.messages().getString("Add-Message")
                 .replace("%player_name%", p.getName())
-                .replace("%amount%", MethodUtils.formatCommas(amount))
+                .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(amount))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
+                .replace("%amount_formatted%", Methods.format(amount))
+                .replace("%amount_formatted_long%", Methods.formatLong(amount))
         ));
     }
+
     public void addMessage(CommandSender s, OfflinePlayer p, long amount) {
         if (plugin.messages().getString("Add-Message") == null) return;
         s.sendMessage(ChatUtils.color(plugin.messages().getString("Add-Message")
                 .replace("%player_name%", p.getName())
-                .replace("%amount%", MethodUtils.formatCommas(amount))
+                .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(amount))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
+                .replace("%amount_formatted%", Methods.format(amount))
+                .replace("%amount_formatted_long%", Methods.formatLong(amount))
         ));
     }
 
@@ -135,20 +148,21 @@ public class MessageManager {
         if (plugin.messages().getString("Remove-Message") == null) return;
         s.sendMessage(ChatUtils.color(plugin.messages().getString("Remove-Message")
                 .replace("%player_name%", p.getName())
-                .replace("%amount%", MethodUtils.formatCommas(amount))
+                .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(amount))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
+                .replace("%amount_formatted%", Methods.format(amount))
+                .replace("%amount_formatted_long%", Methods.formatLong(amount))
         ));
     }
+
     public void removeMessage(CommandSender s, OfflinePlayer p, long amount) {
         if (plugin.messages().getString("Remove-Message") == null) return;
         s.sendMessage(ChatUtils.color(plugin.messages().getString("Remove-Message")
                 .replace("%player_name%", p.getName())
-                .replace("%amount%", MethodUtils.formatCommas(amount))
+                .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(amount))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
+                .replace("%amount_formatted%", Methods.format(amount))
+                .replace("%amount_formatted_long%", Methods.formatLong(amount))
         ));
     }
 
@@ -164,10 +178,10 @@ public class MessageManager {
             ));
         } else {
             p.sendMessage(ChatUtils.color(plugin.messages().getString("Interest-Broadcast.Message")
-                    .replace("%amount%", MethodUtils.formatCommas(amount))
+                    .replace("%amount%", Methods.formatCommas(amount))
                     .replace("%amount_long%", "" + amount)
-                    .replace("%amount_formatted%", MethodUtils.format(amount))
-                    .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
+                    .replace("%amount_formatted%", Methods.format(amount))
+                    .replace("%amount_formatted_long%", Methods.formatLong(amount))
             ));
         }
     }
@@ -175,10 +189,10 @@ public class MessageManager {
     public void interestBroadcastMessageMax(Player p, long amount) {
         if (plugin.messages().getString("Interest-Broadcast.Message") == null) return;
         p.sendMessage(ChatUtils.color(plugin.messages().getString("Interest-Broadcast.Message")
-                .replace("%amount%", MethodUtils.formatCommas(amount))
+                .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
-                .replace("%amount_formatted%", MethodUtils.format(amount))
-                .replace("%amount_formatted_long%", MethodUtils.formatLong(amount))
+                .replace("%amount_formatted%", Methods.format(amount))
+                .replace("%amount_formatted_long%", Methods.formatLong(amount))
         ));
     }
 

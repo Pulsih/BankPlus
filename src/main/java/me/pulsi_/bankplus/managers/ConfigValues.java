@@ -61,7 +61,7 @@ public class ConfigValues {
     private static boolean isPersonalSoundEnabled;
 
     public static void setupValues() {
-        final BankPlus plugin = JavaPlugin.getPlugin(BankPlus.class);
+        BankPlus plugin = JavaPlugin.getPlugin(BankPlus.class);
 
         minute = plugin.config().getString("Placeholders.Time.Minute");
         minutes = plugin.config().getString("Placeholders.Time.Minutes");

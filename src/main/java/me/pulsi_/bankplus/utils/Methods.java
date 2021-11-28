@@ -11,7 +11,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-public class MethodUtils {
+public class Methods {
 
     public static String formatTime(int cooldown) {
         if (cooldown < 60) {
@@ -21,6 +21,7 @@ public class MethodUtils {
                 return cooldown + ConfigValues.getMinutes();
             }
         }
+
         if (cooldown < 1440) {
             if (cooldown == 60) {
                 return cooldown / 60 + ConfigValues.getHour();
@@ -28,6 +29,7 @@ public class MethodUtils {
                 return cooldown / 60 + ConfigValues.getHours();
             }
         }
+
         if (cooldown == 1440) {
             return cooldown / 1440 + ConfigValues.getDay();
         } else {
@@ -68,13 +70,16 @@ public class MethodUtils {
     }
 
     public static void sendTitle(String path, Player p, BankPlus plugin) {
-        try {
-            String[] pathSlitted = plugin.messages().getString(path).split(",");
-            String title1 = pathSlitted[0];
-            String title2 = pathSlitted[1];
+        String title = plugin.messages().getString(path);
+        if (title == null) return;
+
+        if (title.contains(",")) {
+            String[] titles = plugin.messages().getString(path).split(",");
+            String title1 = titles[0];
+            String title2 = titles[1];
             p.sendTitle(ChatUtils.color(title1), ChatUtils.color(title2));
-        } catch (NullPointerException | IllegalArgumentException e) {
-            plugin.getServer().getConsoleSender().sendMessage(ChatUtils.color("&a&lBank&9&lPlus &cInvalid Title at: &f" + path));
+        } else {
+            p.sendTitle(ChatUtils.color(title), ChatUtils.color("&f"));
         }
     }
 
@@ -143,83 +148,94 @@ public class MethodUtils {
     }
 
     public static void withdraw(Player p, long amount, BankPlus plugin) {
-        final EconomyManager economy = new EconomyManager(plugin);
-        final MessageManager messMan = new MessageManager(plugin);
-        final long bankBalance = economy.getBankBalance(p);
-        final long maxWithdrawAmount = ConfigValues.getMaxWithdrawAmount();
+        MessageManager messMan = new MessageManager(plugin);
+        long bankBalance = EconomyManager.getBankBalance(p);
+        long maxWithdrawAmount = ConfigValues.getMaxWithdrawAmount();
+
+        if (amount < 0) {
+            messMan.cannotUseNegativeNumber(p);
+            return;
+        }
+
         if (bankBalance <= 0) {
             messMan.insufficientMoneyWithdraw(p);
             return;
         }
-        if (maxWithdrawAmount != 0) {
-            if (amount >= maxWithdrawAmount) {
-                amount = maxWithdrawAmount;
-            }
-        }
+
+        if (maxWithdrawAmount != 0 && amount >= maxWithdrawAmount) amount = maxWithdrawAmount;
+
         if (bankBalance - amount <= 0) {
-            economy.withdraw(p, bankBalance);
+            EconomyManager.withdraw(p, bankBalance);
             messMan.successWithdraw(p, bankBalance);
-            MethodUtils.playSound("WITHDRAW", p, plugin);
+            Methods.playSound("WITHDRAW", p, plugin);
             return;
         }
-        economy.withdraw(p, amount);
+
+        EconomyManager.withdraw(p, amount);
         messMan.successWithdraw(p, amount);
-        MethodUtils.playSound("WITHDRAW", p, plugin);
+        Methods.playSound("WITHDRAW", p, plugin);
     }
 
     public static void deposit(Player p, long amount, BankPlus plugin) {
-        final EconomyManager economy = new EconomyManager(plugin);
-        final MessageManager messMan = new MessageManager(plugin);
-        final long bankBalance = economy.getBankBalance(p);
-        final long money = (long) plugin.getEconomy().getBalance(p);
-        final long maxDepositAmount = ConfigValues.getMaxDepositAmount();
-        final long maxBankCapacity = ConfigValues.getMaxBankCapacity();
+        MessageManager messMan = new MessageManager(plugin);
+        long bankBalance = EconomyManager.getBankBalance(p);
+        long money = (long) plugin.getEconomy().getBalance(p);
+        long maxDepositAmount = ConfigValues.getMaxDepositAmount();
+        long maxBankCapacity = ConfigValues.getMaxBankCapacity();
+
+        if (amount < 0) {
+            messMan.cannotUseNegativeNumber(p);
+            return;
+        }
+
         if (money <= 0) {
             messMan.insufficientMoneyDeposit(p);
             return;
         }
+
         if (money < amount) {
-            economy.deposit(p, money);
+            EconomyManager.deposit(p, money);
             messMan.successDeposit(p, money);
-            MethodUtils.playSound("DEPOSIT", p, plugin);
+            Methods.playSound("DEPOSIT", p, plugin);
             return;
         }
+
         if (maxBankCapacity != 0) {
             if (bankBalance >= maxBankCapacity) {
                 messMan.cannotDepositMore(p);
                 return;
             }
             if (bankBalance + amount >= maxBankCapacity) {
-                economy.deposit(p, maxBankCapacity - bankBalance);
+                EconomyManager.deposit(p, maxBankCapacity - bankBalance);
                 messMan.successDeposit(p, maxBankCapacity - bankBalance);
             } else {
                 if (maxDepositAmount != 0) {
                     if (amount >= maxDepositAmount) {
-                        economy.deposit(p, maxDepositAmount);
+                        EconomyManager.deposit(p, maxDepositAmount);
                         messMan.successDeposit(p, maxDepositAmount);
                     } else {
-                        economy.deposit(p, amount);
+                        EconomyManager.deposit(p, amount);
                         messMan.successDeposit(p, amount);
                     }
                 } else {
-                    economy.deposit(p, amount);
+                    EconomyManager.deposit(p, amount);
                     messMan.successDeposit(p, amount);
                 }
             }
         } else {
             if (maxDepositAmount != 0) {
                 if (amount >= maxDepositAmount) {
-                    economy.deposit(p, maxDepositAmount);
+                    EconomyManager.deposit(p, maxDepositAmount);
                     messMan.successDeposit(p, maxDepositAmount);
                 } else {
-                    economy.deposit(p, amount);
+                    EconomyManager.deposit(p, amount);
                     messMan.successDeposit(p, amount);
                 }
             } else {
-                economy.deposit(p, amount);
+                EconomyManager.deposit(p, amount);
                 messMan.successDeposit(p, amount);
             }
         }
-        MethodUtils.playSound("DEPOSIT", p, plugin);
+        Methods.playSound("DEPOSIT", p, plugin);
     }
 }

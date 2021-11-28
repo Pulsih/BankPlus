@@ -8,7 +8,7 @@ import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.ListUtils;
-import me.pulsi_.bankplus.utils.MethodUtils;
+import me.pulsi_.bankplus.utils.Methods;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -19,6 +19,7 @@ import org.bukkit.entity.Player;
 public class Commands implements CommandExecutor {
 
     private final BankPlus plugin;
+
     public Commands(BankPlus plugin) {
         this.plugin = plugin;
     }
@@ -26,8 +27,7 @@ public class Commands implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender s, Command command, String label, String[] args) {
 
-        final MessageManager messMan = new MessageManager(plugin);
-        final EconomyManager economy = new EconomyManager(plugin);
+        MessageManager messMan = new MessageManager(plugin);
 
         if (!ConfigValues.getWorldsBlacklist().isEmpty() && s instanceof Player) {
             Player p = (Player) s;
@@ -46,304 +46,324 @@ public class Commands implements CommandExecutor {
                 messMan.notPlayer(s);
                 return false;
             }
+            Player p = (Player) s;
             if (ConfigValues.isGuiEnabled()) {
-                GuiBankHolder.getEnchanterHolder().openBank((Player) s);
-                MethodUtils.playSound("PERSONAL", (Player) s, plugin);
+                GuiBankHolder.getEnchanterHolder().openBank(p);
+                Methods.playSound("PERSONAL", p, plugin);
             } else {
+                messMan.personalBalance(p);
+            }
+        }
+
+        switch (args[0]) {
+            case "open": {
+                if (!s.hasPermission("bankplus.open")) {
+                    messMan.noPermission(s);
+                    return false;
+                }
+                if (args[1] == null) {
+                    messMan.specifyNumber(s);
+                    return false;
+                }
+                Player p = Bukkit.getPlayerExact(args[1]);
+                if (p == null) {
+                    messMan.cannotFindPlayer(s);
+                    return false;
+                }
+
+                GuiBankHolder.getEnchanterHolder().openBank(p);
+                s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7You have forced &a" + p.getName() + " &7to open their bank."));
+            }
+            break;
+
+            case "reload": {
+                if (!s.hasPermission("bankplus.reload")) {
+                    messMan.noPermission(s);
+                    return false;
+                }
+                plugin.reloadConfigs();
+                ConfigValues.setupValues();
+                messMan.reloadMessage(s);
+            }
+            break;
+
+            case "help": {
+                if (!s.hasPermission("bankplus.help")) {
+                    messMan.noPermission(s);
+                    return false;
+                }
+                for (String helpMessage : plugin.messages().getStringList("Help-Message"))
+                    s.sendMessage(ChatUtils.color(helpMessage));
+            }
+            break;
+
+            case "view": {
+                if (!s.hasPermission("bankplus.view")) {
+                    messMan.noPermission(s);
+                    return false;
+                }
+                if (args.length == 1) {
+                    messMan.specifyPlayer(s);
+                    return false;
+                } else {
+                    if (s instanceof Player) {
+                        Methods.playSound("VIEW", (Player) s, plugin);
+                    }
+                    Player p = Bukkit.getPlayerExact(args[1]);
+                    if (p == null) {
+                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
+                        messMan.bankOthers(s, offlinePlayer);
+                        return false;
+                    }
+                    messMan.bankOthers(s, p);
+                }
+            }
+            break;
+
+            case "bal":
+            case "balance": {
+                if (!s.hasPermission("bankplus.balance")) {
+                    messMan.noPermission(s);
+                    return false;
+                }
+                if (!(s instanceof Player)) {
+                    messMan.notPlayer(s);
+                    return false;
+                }
                 messMan.personalBalance((Player) s);
             }
-        }
+            break;
 
-        if (args.length == 1) {
-            switch (args[0]) {
-                case "reload":
-                    if (!s.hasPermission("bankplus.reload")) {
-                        messMan.noPermission(s);
-                        return false;
-                    }
-                    plugin.reloadConfigs();
-                    ConfigValues.setupValues();
-                    messMan.reloadMessage(s);
-                    break;
-
-                case "help":
-                    if (!s.hasPermission("bankplus.help")) {
-                        messMan.noPermission(s);
-                        return false;
-                    }
-                    for (String helpMessage : plugin.messages().getStringList("Help-Message"))
-                        s.sendMessage(ChatUtils.color(helpMessage));
-                    break;
-
-                case "view":
-                    if (!s.hasPermission("bankplus.view")) {
-                        messMan.noPermission(s);
-                        return false;
-                    }
-                    messMan.specifyPlayer(s);
-                    break;
-
-                case "bal":
-                case "balance":
-                    if (!s.hasPermission("bankplus.balance")) {
-                        messMan.noPermission(s);
-                        return false;
-                    }
-                    messMan.personalBalance((Player) s);
-                    break;
-
-                case "withdraw":
-                case "deposit":
-                    if (!(s.hasPermission("bankplus.deposit") || s.hasPermission("bankplus.withdraw"))) {
-                        messMan.noPermission(s);
-                        return false;
-                    }
-                    if (!(s instanceof Player)) {
-                        messMan.notPlayer(s);
-                        return false;
-                    }
-                    messMan.specifyNumber(s);
-                    break;
-
-                case "set":
-                case "add":
-                case "remove":
-                    if (!(s.hasPermission("bankplus.remove") || s.hasPermission("bankplus.add") || s.hasPermission("bankplus.set"))) {
-                        messMan.noPermission(s);
-                        return false;
-                    }
-                    messMan.specifyPlayer(s);
-                    break;
-
-                case "interest":
-                    if (!s.hasPermission("bankplus.interest.restart")) {
-                        messMan.noPermission(s);
-                        return false;
-                    }
-                    messMan.interestUsage(s);
-                    break;
-
-                case "debug":
-                    s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &aAvailable options: &7playerchat, guibank, interest."));
-                    break;
-
-                default:
-                    messMan.unknownCommand(s);
-                    break;
-            }
-        }
-
-        if (args.length == 2) {
-            switch (args[0]) {
-                case "view":
-                    if (!s.hasPermission("bankplus.view")) {
-                        messMan.noPermission(s);
-                        return false;
-                    }
-                    if (s instanceof Player) {
-                        MethodUtils.playSound("VIEW", (Player) s, plugin);
-                    }
-                    if (Bukkit.getPlayerExact(args[1]) == null) {
-                        OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
-                        messMan.bankOthers(s, p);
-                        return false;
-                    }
-                    messMan.bankOthers(s, Bukkit.getPlayerExact(args[1]));
-                    break;
-
-                case "withdraw": {
-                    if (!s.hasPermission("bankplus.withdraw")) {
-                        messMan.noPermission(s);
-                        return false;
-                    }
-                    if (!(s instanceof Player)) {
-                        messMan.notPlayer(s);
-                        return false;
-                    }
-                    long amount;
-                    switch (args[1]) {
-                        case "all":
-                            amount = economy.getBankBalance((Player) s);
-                            MethodUtils.withdraw((Player) s, amount, plugin);
-                            break;
-
-                        case "half":
-                            amount = economy.getBankBalance((Player) s) / 2;
-                            MethodUtils.withdraw((Player) s, amount, plugin);
-                            break;
-
-                        default:
-                            try {
-                                amount = Long.parseLong(args[1]);
-                                MethodUtils.withdraw((Player) s, amount, plugin);
-                            } catch (NumberFormatException e) {
-                                messMan.invalidNumber(s);
-                            }
-                    }
+            case "withdraw": {
+                if (!s.hasPermission("bankplus.withdraw")) {
+                    messMan.noPermission(s);
+                    return false;
                 }
-                break;
-
-                case "deposit": {
-                    if (!s.hasPermission("bankplus.deposit")) {
-                        messMan.noPermission(s);
-                        return false;
-                    }
-                    if (!(s instanceof Player)) {
-                        messMan.notPlayer(s);
-                        return false;
-                    }
-                    long amount;
-                    switch (args[1]) {
-                        case "all":
-                            amount = (long) plugin.getEconomy().getBalance((Player) s);
-                            MethodUtils.deposit((Player) s, amount, plugin);
-                            break;
-
-                        case "half":
-                            amount = (long) (plugin.getEconomy().getBalance((Player) s) / 2);
-                            MethodUtils.deposit((Player) s, amount, plugin);
-                            break;
-
-                        default:
-                            try {
-                                amount = Long.parseLong(args[1]);
-                                MethodUtils.deposit((Player) s, amount, plugin);
-                            } catch (NumberFormatException ex) {
-                                messMan.invalidNumber(s);
-                            }
-                    }
+                if (!(s instanceof Player)) {
+                    messMan.notPlayer(s);
+                    return false;
                 }
-                break;
-
-                case "set":
-                case "add":
-                case "remove":
-                    if (!(s.hasPermission("bankplus.set") || s.hasPermission("bankplus.add") || s.hasPermission("bankplus.remove"))) {
-                        messMan.noPermission(s);
-                        return false;
-                    }
+                if (args[1] == null) {
                     messMan.specifyNumber(s);
-                    break;
+                    return false;
+                }
 
-                case "interest":
-                    if (args[1].equalsIgnoreCase("restart")) {
-                        if (!s.hasPermission("bankplus.interest.restart")) {
-                            messMan.noPermission(s);
-                            return false;
-                        }
-                        if (!plugin.config().getBoolean("Interest.Enabled")) {
-                            messMan.interestIsDisabled(s);
-                            return false;
-                        }
+                long amount;
+                switch (args[1]) {
+                    case "all":
+                        amount = EconomyManager.getBankBalance((Player) s);
+                        Methods.withdraw((Player) s, amount, plugin);
+                        break;
+
+                    case "half":
+                        amount = EconomyManager.getBankBalance((Player) s) / 2;
+                        Methods.withdraw((Player) s, amount, plugin);
+                        break;
+
+                    default:
                         try {
-                            final long delay = plugin.config().getLong("Interest.Delay");
-                            Interest.interestCooldown.set(0, delay);
-                            messMan.interestRestarted(s);
-                        } catch (Error e) {
-                            messMan.internalError(s);
+                            amount = Long.parseLong(args[1]);
+                            Methods.withdraw((Player) s, amount, plugin);
+                        } catch (NumberFormatException e) {
+                            messMan.invalidNumber(s);
                         }
-                    }
-                    break;
-
-                case "debug":
-                    if (args[1].equalsIgnoreCase("playerchat")) {
-                        if (ListUtils.PLAYERCHAT_DEBUG.get(0).equals("DISABLED")) {
-                            s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Enabled the debug mode for PlayerChat"));
-                            ListUtils.PLAYERCHAT_DEBUG.set(0, "ENABLED");
-                        } else {
-                            ListUtils.PLAYERCHAT_DEBUG.set(0, "DISABLED");
-                            s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Disabled the debug mode for PlayerChat"));
-                        }
-                    }
-                    if (args[1].equalsIgnoreCase("guibank")) {
-                        if (ListUtils.GUIBANK_DEBUG.get(0).equals("DISABLED")) {
-                            s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Enabled the debug mode for GuiBank"));
-                            ListUtils.GUIBANK_DEBUG.set(0, "ENABLED");
-                        } else {
-                            ListUtils.GUIBANK_DEBUG.set(0, "DISABLED");
-                            s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Disabled the debug mode for GuiBank"));
-                        }
-                    }
-                    if (args[1].equalsIgnoreCase("interest")) {
-                        if (ListUtils.INTEREST_DEBUG.get(0).equals("DISABLED")) {
-                            s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Enabled the debug mode for Interest"));
-                            ListUtils.INTEREST_DEBUG.set(0, "ENABLED");
-                        } else {
-                            ListUtils.INTEREST_DEBUG.set(0, "DISABLED");
-                            s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Disabled the debug mode for Interest"));
-                        }
-                    }
-                    break;
-
-                default:
-                    messMan.unknownCommand(s);
-                    break;
+                }
             }
-        }
+            break;
 
-        if (args.length == 3) {
-            switch (args[0]) {
-                case "set":
-                    if (!s.hasPermission("bankplus.set")) {
-                        messMan.noPermission(s);
-                        return false;
-                    }
-                    try {
-                        long amount = Long.parseLong(args[2]);
-                        if(Bukkit.getPlayerExact(args[1]) == null) {
-                            economy.setPlayerBankBalance(Bukkit.getOfflinePlayer(args[1]), amount);
-                            messMan.setMessage(s, Bukkit.getOfflinePlayer(args[1]), amount);
-                            return false;
+            case "deposit": {
+                if (!s.hasPermission("bankplus.deposit")) {
+                    messMan.noPermission(s);
+                    return false;
+                }
+                if (!(s instanceof Player)) {
+                    messMan.notPlayer(s);
+                    return false;
+                }
+
+                long amount;
+                switch (args[1]) {
+                    case "all":
+                        amount = (long) plugin.getEconomy().getBalance((Player) s);
+                        Methods.deposit((Player) s, amount, plugin);
+                        break;
+
+                    case "half":
+                        amount = (long) (plugin.getEconomy().getBalance((Player) s) / 2);
+                        Methods.deposit((Player) s, amount, plugin);
+                        break;
+
+                    default:
+                        try {
+                            amount = Long.parseLong(args[1]);
+                            Methods.deposit((Player) s, amount, plugin);
+                        } catch (NumberFormatException ex) {
+                            messMan.invalidNumber(s);
                         }
-                        economy.setPlayerBankBalance(Bukkit.getPlayerExact(args[1]), amount);
-                        messMan.setMessage(s, Bukkit.getPlayerExact(args[1]), amount);
-                    } catch (NumberFormatException ex) {
-                        messMan.invalidNumber(s);
-                    }
-                    break;
-
-                case "add":
-                    if (!s.hasPermission("bankplus.add")) {
-                        messMan.noPermission(s);
-                        return false;
-                    }
-                    try {
-                        long amount = Long.parseLong(args[2]);
-                        if(Bukkit.getPlayerExact(args[1]) == null) {
-                            economy.addPlayerBankBalance(Bukkit.getOfflinePlayer(args[1]), amount);
-                            messMan.addMessage(s, Bukkit.getOfflinePlayer(args[1]), amount);
-                            return false;
-                        }
-                        economy.addPlayerBankBalance(Bukkit.getPlayerExact(args[1]), amount);
-                        messMan.addMessage(s, Bukkit.getPlayerExact(args[1]), amount);
-                    } catch (NumberFormatException ex) {
-                        messMan.invalidNumber(s);
-                    }
-                    break;
-
-                case "remove":
-                    if (!s.hasPermission("bankplus.remove")) {
-                        messMan.noPermission(s);
-                        return false;
-                    }
-                    try {
-                        long amount = Long.parseLong(args[2]);
-                        if(Bukkit.getPlayerExact(args[1]) == null) {
-                            economy.removePlayerBankBalance(Bukkit.getOfflinePlayer(args[1]), amount);
-                            messMan.removeMessage(s, Bukkit.getOfflinePlayer(args[1]), amount);
-                            return false;
-                        }
-                        economy.removePlayerBankBalance(Bukkit.getPlayerExact(args[1]), amount);
-                        messMan.removeMessage(s, Bukkit.getPlayerExact(args[1]), amount);
-                    } catch (NumberFormatException ex) {
-                        messMan.invalidNumber(s);
-                    }
-                    break;
-
-                default:
-                    messMan.unknownCommand(s);
-                    break;
+                }
             }
+            break;
+
+            case "set": {
+                if (!s.hasPermission("bankplus.set")) {
+                    messMan.noPermission(s);
+                    return false;
+                }
+                if (args[1] == null) {
+                    messMan.specifyPlayer(s);
+                    return false;
+                }
+                if (args[2] == null) {
+                    messMan.specifyNumber(s);
+                    return false;
+                }
+
+                try {
+                    long amount = Long.parseLong(args[2]);
+                    Player p = Bukkit.getPlayerExact(args[1]);
+                    if (p == null) {
+                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
+                        EconomyManager.setPlayerBankBalance(offlinePlayer, amount);
+                        messMan.setMessage(s, offlinePlayer, amount);
+                        return false;
+                    }
+                    EconomyManager.setPlayerBankBalance(p, amount);
+                    messMan.setMessage(s, p, amount);
+                } catch (NumberFormatException e) {
+                    messMan.invalidNumber(s);
+                }
+            }
+            break;
+
+            case "add": {
+                if (!s.hasPermission("bankplus.add")) {
+                    messMan.noPermission(s);
+                    return false;
+                }
+                if (args[1] == null) {
+                    messMan.specifyPlayer(s);
+                    return false;
+                }
+                if (args[2] == null) {
+                    messMan.specifyNumber(s);
+                    return false;
+                }
+
+                try {
+                    long amount = Long.parseLong(args[2]);
+                    Player p = Bukkit.getPlayerExact(args[1]);
+                    if (p == null) {
+                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
+                        EconomyManager.addPlayerBankBalance(offlinePlayer, amount);
+                        messMan.setMessage(s, offlinePlayer, amount);
+                        return false;
+                    }
+                    EconomyManager.addPlayerBankBalance(p, amount);
+                    messMan.setMessage(s, p, amount);
+                } catch (NumberFormatException e) {
+                    messMan.invalidNumber(s);
+                }
+            }
+            break;
+
+            case "remove": {
+                if (!s.hasPermission("bankplus.remove")) {
+                    messMan.noPermission(s);
+                    return false;
+                }
+                if (args[1] == null) {
+                    messMan.specifyPlayer(s);
+                    return false;
+                }
+                if (args[2] == null) {
+                    messMan.specifyNumber(s);
+                    return false;
+                }
+
+                try {
+                    long amount = Long.parseLong(args[2]);
+                    Player p = Bukkit.getPlayerExact(args[1]);
+                    if (p == null) {
+                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
+                        EconomyManager.removePlayerBankBalance(offlinePlayer, amount);
+                        messMan.setMessage(s, offlinePlayer, amount);
+                        return false;
+                    }
+                    EconomyManager.removePlayerBankBalance(p, amount);
+                    messMan.setMessage(s, p, amount);
+                } catch (NumberFormatException e) {
+                    messMan.invalidNumber(s);
+                }
+            }
+            break;
+
+            case "interest": {
+                if (!s.hasPermission("bankplus.interest.restart")) {
+                    messMan.noPermission(s);
+                    return false;
+                }
+                if (args[1] == null) {
+                    messMan.interestUsage(s);
+                    return false;
+                }
+                if (!args[1].equalsIgnoreCase("restart")) return false;
+
+                if (!ConfigValues.isInterestEnabled()) {
+                    messMan.interestIsDisabled(s);
+                    return false;
+                }
+                try {
+                    long delay = plugin.config().getLong("Interest.Delay");
+                    Interest.interestCooldown.set(0, delay);
+                    messMan.interestRestarted(s);
+                } catch (Error e) {
+                    messMan.internalError(s);
+                }
+            }
+            break;
+
+            case "debug":
+                if (!s.hasPermission("bankplus.debug")) {
+                    messMan.noPermission(s);
+                    return false;
+                }
+                if (args[1] == null) {
+                    s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &aAvailable options: &7playerchat, guibank, interest."));
+                    return false;
+                }
+
+                if (args[1].equalsIgnoreCase("playerchat")) {
+                    if (ListUtils.PLAYERCHAT_DEBUG.get(0).equals("DISABLED")) {
+                        s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Enabled the debug mode for PlayerChat"));
+                        ListUtils.PLAYERCHAT_DEBUG.set(0, "ENABLED");
+                    } else {
+                        ListUtils.PLAYERCHAT_DEBUG.set(0, "DISABLED");
+                        s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Disabled the debug mode for PlayerChat"));
+                    }
+                }
+                if (args[1].equalsIgnoreCase("guibank")) {
+                    if (ListUtils.GUIBANK_DEBUG.get(0).equals("DISABLED")) {
+                        s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Enabled the debug mode for GuiBank"));
+                        ListUtils.GUIBANK_DEBUG.set(0, "ENABLED");
+                    } else {
+                        ListUtils.GUIBANK_DEBUG.set(0, "DISABLED");
+                        s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Disabled the debug mode for GuiBank"));
+                    }
+                }
+                if (args[1].equalsIgnoreCase("interest")) {
+                    if (ListUtils.INTEREST_DEBUG.get(0).equals("DISABLED")) {
+                        s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Enabled the debug mode for Interest"));
+                        ListUtils.INTEREST_DEBUG.set(0, "ENABLED");
+                    } else {
+                        ListUtils.INTEREST_DEBUG.set(0, "DISABLED");
+                        s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Disabled the debug mode for Interest"));
+                    }
+                }
+                break;
+
+            default:
+                messMan.unknownCommand(s);
+                break;
         }
         return true;
     }

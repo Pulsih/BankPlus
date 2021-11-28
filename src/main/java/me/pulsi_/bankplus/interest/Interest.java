@@ -6,7 +6,7 @@ import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.ListUtils;
-import me.pulsi_.bankplus.utils.MethodUtils;
+import me.pulsi_.bankplus.utils.Methods;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -48,7 +48,7 @@ public class Interest {
             final long nextCount = count - 1;
             debug("&aBANKPLUS &8-> &3INTEREST &8: &f1 Minute passed: COUNT FROM " + count + " TO " + nextCount);
             interestCooldown.set(0, nextCount);
-        }, 0, MethodUtils.ticksInMinutes(1));
+        }, 0, Methods.ticksInMinutes(1));
     }
 
     public void saveInterest() {

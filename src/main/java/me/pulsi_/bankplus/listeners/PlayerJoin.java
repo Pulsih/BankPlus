@@ -4,7 +4,7 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.managers.ConfigValues;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
-import me.pulsi_.bankplus.utils.MethodUtils;
+import me.pulsi_.bankplus.utils.Methods;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -67,14 +67,14 @@ public class PlayerJoin implements Listener {
             final String message = ChatUtils.color(ConfigValues.getNotifyOfflineInterestMessage());
             if (delay != 0) {
                 Bukkit.getScheduler().runTaskLater(plugin, () -> p.sendMessage(message
-                        .replace("%amount%", MethodUtils.formatCommas(offlineInterest))
-                        .replace("%amount_formatted%", MethodUtils.format(offlineInterest))
-                        .replace("%amount_formatted_long%", MethodUtils.formatLong(offlineInterest))), delay * 20L);
+                        .replace("%amount%", Methods.formatCommas(offlineInterest))
+                        .replace("%amount_formatted%", Methods.format(offlineInterest))
+                        .replace("%amount_formatted_long%", Methods.formatLong(offlineInterest))), delay * 20L);
             } else {
                 p.sendMessage(message
-                        .replace("%amount%", MethodUtils.formatCommas(offlineInterest))
-                        .replace("%amount_formatted%", MethodUtils.format(offlineInterest))
-                        .replace("%amount_formatted_long%", MethodUtils.formatLong(offlineInterest)));
+                        .replace("%amount%", Methods.formatCommas(offlineInterest))
+                        .replace("%amount_formatted%", Methods.format(offlineInterest))
+                        .replace("%amount_formatted_long%", Methods.formatLong(offlineInterest)));
             }
             if (offlineInterest != 0)
                 economy.setOfflineInterest(p, 0);
