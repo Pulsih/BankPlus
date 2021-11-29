@@ -1,6 +1,5 @@
 package me.pulsi_.bankplus.listeners;
 
-import me.pulsi_.bankplus.managers.ConfigValues;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.guis.GuiBankHolder;
 import me.pulsi_.bankplus.managers.MessageManager;
@@ -8,6 +7,7 @@ import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.ListUtils;
 import me.pulsi_.bankplus.utils.Methods;
 import me.pulsi_.bankplus.utils.SetUtils;
+import me.pulsi_.bankplus.values.configs.ConfigValues;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;

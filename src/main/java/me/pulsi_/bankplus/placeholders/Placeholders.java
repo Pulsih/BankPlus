@@ -3,9 +3,9 @@ package me.pulsi_.bankplus.placeholders;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.interest.Interest;
-import me.pulsi_.bankplus.managers.ConfigValues;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.utils.Methods;
+import me.pulsi_.bankplus.values.configs.ConfigValues;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 

@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.values.configs.ConfigValues;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 

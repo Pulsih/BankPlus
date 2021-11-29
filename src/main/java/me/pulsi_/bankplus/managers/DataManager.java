@@ -3,10 +3,10 @@ package me.pulsi_.bankplus.managers;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.commands.Commands;
 import me.pulsi_.bankplus.commands.TabCompletion;
-import me.pulsi_.bankplus.listeners.PlayerJoin;
-import me.pulsi_.bankplus.listeners.PlayerChat;
 import me.pulsi_.bankplus.external.UpdateChecker;
 import me.pulsi_.bankplus.guis.GuiBankListener;
+import me.pulsi_.bankplus.listeners.PlayerChat;
+import me.pulsi_.bankplus.listeners.PlayerJoin;
 import me.pulsi_.bankplus.utils.ChatUtils;
 
 public class DataManager {

@@ -1,13 +1,12 @@
 package me.pulsi_.bankplus.guis;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.managers.ConfigValues;
 import me.pulsi_.bankplus.managers.EconomyManager;
-import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.ListUtils;
 import me.pulsi_.bankplus.utils.Methods;
 import me.pulsi_.bankplus.utils.SetUtils;
+import me.pulsi_.bankplus.values.configs.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -32,7 +31,6 @@ public class GuiBankListener implements Listener {
     public void guiListener(InventoryClickEvent e) {
 
         Player p = (Player) e.getWhoClicked();
-        final MessageManager messMan = new MessageManager(plugin);
 
         if (!(p.getOpenInventory().getTopInventory().getHolder() instanceof GuiBankHolder)) return;
         debug("&aBANKPLUS &8-> &3GUIBANK &8: &fEvent cancelled");
