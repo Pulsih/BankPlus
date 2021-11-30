@@ -7,7 +7,7 @@ import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.HeadUtils;
 import me.pulsi_.bankplus.utils.Methods;
-import me.pulsi_.bankplus.values.configs.ConfigValues;
+import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.configuration.ConfigurationSection;
@@ -27,10 +27,10 @@ public class ItemUtils {
     
     public static ItemStack createItemStack(ConfigurationSection c, Player p) {
 
-        final BankPlus plugin = JavaPlugin.getPlugin(BankPlus.class);
+        BankPlus plugin = JavaPlugin.getPlugin(BankPlus.class);
 
         long cooldown = 0;
-        if (ConfigValues.isInterestEnabled()) cooldown = Interest.interestCooldown.get(0);
+        if (Values.CONFIG.isInterestEnabled()) cooldown = Interest.interestCooldown.get(0);
 
         String material = c.getString("Material");
         ItemStack item = getItem(material, c, p);
@@ -53,7 +53,7 @@ public class ItemUtils {
     public static ItemStack guiFiller() {
         ItemStack filler;
         try {
-            final String material = ConfigValues.getGuiFillerMaterial();
+            final String material = Values.CONFIG.getGuiFillerMaterial();
             if (material.contains(":")) {
                 String[] itemData = material.split(":");
                 filler = new ItemStack(Material.valueOf(itemData[0]), 1, Byte.parseByte(itemData[1]));
@@ -66,14 +66,14 @@ public class ItemUtils {
 
         ItemMeta fillerMeta = filler.getItemMeta();
 
-        final String displayName = ConfigValues.getGuiFillerDisplayname();
+        String displayName = Values.CONFIG.getGuiFillerDisplayname();
         if (displayName == null) {
             fillerMeta.setDisplayName(ChatUtils.color("&c&l*CANNOT FIND DISPLAYNAME*"));
         } else {
             fillerMeta.setDisplayName(ChatUtils.color(displayName));
         }
 
-        if (ConfigValues.isGuiFillerGlowing()) {
+        if (Values.CONFIG.isGuiFillerGlowing()) {
             fillerMeta.addEnchant(Enchantment.DURABILITY, 1, false);
             filler.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
@@ -83,12 +83,13 @@ public class ItemUtils {
     }
 
     public static ItemMeta setLore(ConfigurationSection c, ItemStack i, Player p) {
-        final BankPlus plugin = JavaPlugin.getPlugin(BankPlus.class);
-        final ItemMeta itemMeta = i.getItemMeta();
+        BankPlus plugin = JavaPlugin.getPlugin(BankPlus.class);
+        ItemMeta itemMeta = i.getItemMeta();
 
         List<String> lore = new ArrayList<>();
         for (String lines : c.getStringList("Lore"))
             lore.add(ChatUtils.color(lines));
+
         if (plugin.isPlaceholderAPIHooked()) {
             itemMeta.setLore(PlaceholderAPI.setPlaceholders(p, lore));
         } else {
@@ -161,9 +162,9 @@ public class ItemUtils {
         for (String lines : c.getStringList("Lore")) {
             lore.add(ChatUtils.color(lines
                     .replace("%player_name%", p.getName())
-                    .replace("%balance%", Methods.formatCommas(EconomyManager.getBankBalance(p)))
-                    .replace("%balance_formatted%", Methods.format(EconomyManager.getBankBalance(p)))
-                    .replace("%balance_formatted_long%", Methods.formatLong(EconomyManager.getBankBalance(p)))
+                    .replace("%balance%", Methods.formatCommas(EconomyManager.getInstance().getBankBalance(p)))
+                    .replace("%balance_formatted%", Methods.format(EconomyManager.getInstance().getBankBalance(p)))
+                    .replace("%balance_formatted_long%", Methods.formatLong(EconomyManager.getInstance().getBankBalance(p)))
                     .replace("%interest_cooldown%", Methods.formatTime((int) cooldown))
             ));
         }

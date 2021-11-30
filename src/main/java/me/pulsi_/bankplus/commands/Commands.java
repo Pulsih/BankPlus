@@ -6,7 +6,6 @@ import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
-import me.pulsi_.bankplus.utils.ListUtils;
 import me.pulsi_.bankplus.utils.Methods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -51,6 +50,7 @@ public class Commands implements CommandExecutor {
             } else {
                 MessageManager.personalBalance(p);
             }
+            return false;
         }
 
         switch (args[0]) {
@@ -59,10 +59,11 @@ public class Commands implements CommandExecutor {
                     MessageManager.noPermission(s);
                     return false;
                 }
-                if (args[1] == null) {
+                if (args.length == 1) {
                     MessageManager.specifyNumber(s);
                     return false;
                 }
+
                 Player p = Bukkit.getPlayerExact(args[1]);
                 if (p == null) {
                     MessageManager.cannotFindPlayer(s);
@@ -142,7 +143,7 @@ public class Commands implements CommandExecutor {
                     MessageManager.notPlayer(s);
                     return false;
                 }
-                if (args[1] == null) {
+                if (args.length == 1) {
                     MessageManager.specifyNumber(s);
                     return false;
                 }
@@ -150,12 +151,12 @@ public class Commands implements CommandExecutor {
                 long amount;
                 switch (args[1]) {
                     case "all":
-                        amount = EconomyManager.getBankBalance((Player) s);
+                        amount = EconomyManager.getInstance().getBankBalance((Player) s);
                         Methods.withdraw((Player) s, amount, plugin);
                         break;
 
                     case "half":
-                        amount = EconomyManager.getBankBalance((Player) s) / 2;
+                        amount = EconomyManager.getInstance().getBankBalance((Player) s) / 2;
                         Methods.withdraw((Player) s, amount, plugin);
                         break;
 
@@ -177,6 +178,10 @@ public class Commands implements CommandExecutor {
                 }
                 if (!(s instanceof Player)) {
                     MessageManager.notPlayer(s);
+                    return false;
+                }
+                if (args.length == 1) {
+                    MessageManager.specifyNumber(s);
                     return false;
                 }
 
@@ -208,12 +213,12 @@ public class Commands implements CommandExecutor {
                     MessageManager.noPermission(s);
                     return false;
                 }
-                if (args[1] == null) {
+                if (args.length == 1) {
                     MessageManager.specifyPlayer(s);
                     return false;
                 }
-                if (args[2] == null) {
-                    MessageManager.specifyNumber(s);
+                if (args.length == 2) {
+                    MessageManager.specifyPlayer(s);
                     return false;
                 }
 
@@ -222,11 +227,11 @@ public class Commands implements CommandExecutor {
                     Player p = Bukkit.getPlayerExact(args[1]);
                     if (p == null) {
                         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
-                        EconomyManager.setPlayerBankBalance(offlinePlayer, amount);
+                        EconomyManager.getInstance().setPlayerBankBalance(offlinePlayer, amount);
                         MessageManager.setMessage(s, offlinePlayer, amount);
                         return false;
                     }
-                    EconomyManager.setPlayerBankBalance(p, amount);
+                    EconomyManager.getInstance().setPlayerBankBalance(p, amount);
                     MessageManager.setMessage(s, p, amount);
                 } catch (NumberFormatException e) {
                     MessageManager.invalidNumber(s);
@@ -239,12 +244,12 @@ public class Commands implements CommandExecutor {
                     MessageManager.noPermission(s);
                     return false;
                 }
-                if (args[1] == null) {
+                if (args.length == 1) {
                     MessageManager.specifyPlayer(s);
                     return false;
                 }
-                if (args[2] == null) {
-                    MessageManager.specifyNumber(s);
+                if (args.length == 2) {
+                    MessageManager.specifyPlayer(s);
                     return false;
                 }
 
@@ -253,11 +258,11 @@ public class Commands implements CommandExecutor {
                     Player p = Bukkit.getPlayerExact(args[1]);
                     if (p == null) {
                         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
-                        EconomyManager.addPlayerBankBalance(offlinePlayer, amount);
+                        EconomyManager.getInstance().addPlayerBankBalance(offlinePlayer, amount);
                         MessageManager.setMessage(s, offlinePlayer, amount);
                         return false;
                     }
-                    EconomyManager.addPlayerBankBalance(p, amount);
+                    EconomyManager.getInstance().addPlayerBankBalance(p, amount);
                     MessageManager.setMessage(s, p, amount);
                 } catch (NumberFormatException e) {
                     MessageManager.invalidNumber(s);
@@ -270,12 +275,12 @@ public class Commands implements CommandExecutor {
                     MessageManager.noPermission(s);
                     return false;
                 }
-                if (args[1] == null) {
+                if (args.length == 1) {
                     MessageManager.specifyPlayer(s);
                     return false;
                 }
-                if (args[2] == null) {
-                    MessageManager.specifyNumber(s);
+                if (args.length == 2) {
+                    MessageManager.specifyPlayer(s);
                     return false;
                 }
 
@@ -284,11 +289,11 @@ public class Commands implements CommandExecutor {
                     Player p = Bukkit.getPlayerExact(args[1]);
                     if (p == null) {
                         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
-                        EconomyManager.removePlayerBankBalance(offlinePlayer, amount);
+                        EconomyManager.getInstance().removePlayerBankBalance(offlinePlayer, amount);
                         MessageManager.setMessage(s, offlinePlayer, amount);
                         return false;
                     }
-                    EconomyManager.removePlayerBankBalance(p, amount);
+                    EconomyManager.getInstance().removePlayerBankBalance(p, amount);
                     MessageManager.setMessage(s, p, amount);
                 } catch (NumberFormatException e) {
                     MessageManager.invalidNumber(s);
@@ -301,7 +306,7 @@ public class Commands implements CommandExecutor {
                     MessageManager.noPermission(s);
                     return false;
                 }
-                if (args[1] == null) {
+                if (args.length == 1) {
                     MessageManager.interestUsage(s);
                     return false;
                 }
@@ -320,45 +325,6 @@ public class Commands implements CommandExecutor {
                 }
             }
             break;
-
-            case "debug":
-                if (!s.hasPermission("bankplus.debug")) {
-                    MessageManager.noPermission(s);
-                    return false;
-                }
-                if (args[1] == null) {
-                    s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &aAvailable options: &7playerchat, guibank, interest."));
-                    return false;
-                }
-
-                if (args[1].equalsIgnoreCase("playerchat")) {
-                    if (ListUtils.PLAYERCHAT_DEBUG.get(0).equals("DISABLED")) {
-                        s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Enabled the debug mode for PlayerChat"));
-                        ListUtils.PLAYERCHAT_DEBUG.set(0, "ENABLED");
-                    } else {
-                        ListUtils.PLAYERCHAT_DEBUG.set(0, "DISABLED");
-                        s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Disabled the debug mode for PlayerChat"));
-                    }
-                }
-                if (args[1].equalsIgnoreCase("guibank")) {
-                    if (ListUtils.GUIBANK_DEBUG.get(0).equals("DISABLED")) {
-                        s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Enabled the debug mode for GuiBank"));
-                        ListUtils.GUIBANK_DEBUG.set(0, "ENABLED");
-                    } else {
-                        ListUtils.GUIBANK_DEBUG.set(0, "DISABLED");
-                        s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Disabled the debug mode for GuiBank"));
-                    }
-                }
-                if (args[1].equalsIgnoreCase("interest")) {
-                    if (ListUtils.INTEREST_DEBUG.get(0).equals("DISABLED")) {
-                        s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Enabled the debug mode for Interest"));
-                        ListUtils.INTEREST_DEBUG.set(0, "ENABLED");
-                    } else {
-                        ListUtils.INTEREST_DEBUG.set(0, "DISABLED");
-                        s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7Disabled the debug mode for Interest"));
-                    }
-                }
-                break;
 
             default:
                 MessageManager.unknownCommand(s);

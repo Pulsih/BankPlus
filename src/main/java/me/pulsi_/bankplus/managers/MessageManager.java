@@ -32,7 +32,7 @@ public class MessageManager {
     public static void personalBalance(Player p) {
         String message = Values.MESSAGES.getPersonalBank();
         if (message == null) return;
-        long amount = EconomyManager.getBankBalance(p);
+        long amount = EconomyManager.getInstance().getBankBalance(p);
         p.sendMessage(ChatUtils.color(message
                 .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
@@ -43,7 +43,9 @@ public class MessageManager {
 
     public static void minimumAmountAlert(Player p) {
         String message = Values.MESSAGES.getMinimumAmount();
-        if (message != null) p.sendMessage(ChatUtils.color(message));
+        if (message != null) p.sendMessage(ChatUtils.color(message
+                .replace("%minimum%", "" + Values.CONFIG.getMinimumAmount())
+        ));
     }
     
     public static void cannotUseNegativeNumber(Player p) {
@@ -57,8 +59,8 @@ public class MessageManager {
     }
 
     public static void successWithdraw(Player p, long amount) {
-        if (plugin.messages().getString("Success-Withdraw") == null) return;
-        p.sendMessage(ChatUtils.color(plugin.messages().getString("Success-Withdraw")
+        String message = Values.MESSAGES.getSuccessWithdraw();
+        if (message != null) p.sendMessage(ChatUtils.color(message
                 .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
                 .replace("%amount_formatted%", Methods.format(amount))
@@ -67,8 +69,8 @@ public class MessageManager {
     }
 
     public static void successDeposit(Player p, long amount) {
-        if (plugin.messages().getString("Success-Deposit") == null) return;
-        p.sendMessage(ChatUtils.color(plugin.messages().getString("Success-Deposit")
+        String message = Values.MESSAGES.getSuccessDeposit();
+        if (message != null) p.sendMessage(ChatUtils.color(message
                 .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
                 .replace("%amount_formatted%", Methods.format(amount))
@@ -77,9 +79,10 @@ public class MessageManager {
     }
 
     public static void bankOthers(CommandSender s, Player p) {
-        if (plugin.messages().getString("Bank-Others") == null) return;
-        final long amount = EconomyManager.getBankBalance(p);
-        s.sendMessage(ChatUtils.color(plugin.messages().getString("Bank-Others")
+        String message = Values.MESSAGES.getBankOthers();
+        if (message == null) return;
+        long amount = EconomyManager.getInstance().getBankBalance(p);
+        s.sendMessage(ChatUtils.color(message
                 .replace("%player_name%", p.getName())
                 .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
@@ -89,9 +92,10 @@ public class MessageManager {
     }
 
     public static void bankOthers(CommandSender s, OfflinePlayer p) {
-        if (plugin.messages().getString("Bank-Others") == null) return;
-        final long amount = EconomyManager.getBankBalance(p);
-        s.sendMessage(ChatUtils.color(plugin.messages().getString("Bank-Others")
+        String message = Values.MESSAGES.getBankOthers();
+        if (message == null) return;
+        long amount = EconomyManager.getInstance().getBankBalance(p);
+        s.sendMessage(ChatUtils.color(message
                 .replace("%player_name%", p.getName())
                 .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
@@ -101,8 +105,8 @@ public class MessageManager {
     }
 
     public static void setMessage(CommandSender s, Player p, long amount) {
-        if (plugin.messages().getString("Set-Message") == null) return;
-        s.sendMessage(ChatUtils.color(plugin.messages().getString("Set-Message")
+        String message = Values.MESSAGES.getSetMessage();
+        if (message != null) s.sendMessage(ChatUtils.color(message
                 .replace("%player_name%", p.getName())
                 .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
@@ -112,8 +116,8 @@ public class MessageManager {
     }
 
     public static void setMessage(CommandSender s, OfflinePlayer p, long amount) {
-        if (plugin.messages().getString("Set-Message") == null) return;
-        s.sendMessage(ChatUtils.color(plugin.messages().getString("Set-Message")
+        String message = Values.MESSAGES.getSetMessage();
+        if (message != null) s.sendMessage(ChatUtils.color(message
                 .replace("%player_name%", p.getName())
                 .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
@@ -123,8 +127,8 @@ public class MessageManager {
     }
 
     public static void addMessage(CommandSender s, Player p, long amount) {
-        if (plugin.messages().getString("Add-Message") == null) return;
-        s.sendMessage(ChatUtils.color(plugin.messages().getString("Add-Message")
+        String message = Values.MESSAGES.getAddMessage();
+        if (message != null) s.sendMessage(ChatUtils.color(message
                 .replace("%player_name%", p.getName())
                 .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
@@ -134,8 +138,8 @@ public class MessageManager {
     }
 
     public static void addMessage(CommandSender s, OfflinePlayer p, long amount) {
-        if (plugin.messages().getString("Add-Message") == null) return;
-        s.sendMessage(ChatUtils.color(plugin.messages().getString("Add-Message")
+        String message = Values.MESSAGES.getAddMessage();
+        if (message != null) s.sendMessage(ChatUtils.color(message
                 .replace("%player_name%", p.getName())
                 .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
@@ -145,8 +149,8 @@ public class MessageManager {
     }
 
     public static void removeMessage(CommandSender s, Player p, long amount) {
-        if (plugin.messages().getString("Remove-Message") == null) return;
-        s.sendMessage(ChatUtils.color(plugin.messages().getString("Remove-Message")
+        String message = Values.MESSAGES.getRemoveMessage();
+        if (message != null) s.sendMessage(ChatUtils.color(message
                 .replace("%player_name%", p.getName())
                 .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
@@ -156,8 +160,8 @@ public class MessageManager {
     }
 
     public static void removeMessage(CommandSender s, OfflinePlayer p, long amount) {
-        if (plugin.messages().getString("Remove-Message") == null) return;
-        s.sendMessage(ChatUtils.color(plugin.messages().getString("Remove-Message")
+        String message = Values.MESSAGES.getRemoveMessage();
+        if (message != null) s.sendMessage(ChatUtils.color(message
                 .replace("%player_name%", p.getName())
                 .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
@@ -167,17 +171,18 @@ public class MessageManager {
     }
 
     public static void interestBroadcastMessage(Player p, long bankBalance, double finalMoneyPercentage) {
-        if (plugin.messages().getString("Interest-Broadcast.Message") == null) return;
-        final long amount = (long) (bankBalance * finalMoneyPercentage);
+        String message = Values.MESSAGES.getInterestBroadcastMessage();
+        if (message == null) return;
+        long amount = (long) (bankBalance * finalMoneyPercentage);
         if (amount == 0) {
-            p.sendMessage(ChatUtils.color(plugin.messages().getString("Interest-Broadcast.Message")
+            p.sendMessage(ChatUtils.color(message
                     .replace("%amount%", "1")
                     .replace("%amount_long%", "1")
                     .replace("%amount_formatted%", "1")
                     .replace("%amount_formatted_long%", "1")
             ));
         } else {
-            p.sendMessage(ChatUtils.color(plugin.messages().getString("Interest-Broadcast.Message")
+            p.sendMessage(ChatUtils.color(message
                     .replace("%amount%", Methods.formatCommas(amount))
                     .replace("%amount_long%", "" + amount)
                     .replace("%amount_formatted%", Methods.format(amount))
@@ -187,8 +192,8 @@ public class MessageManager {
     }
 
     public static void interestBroadcastMessageMax(Player p, long amount) {
-        if (plugin.messages().getString("Interest-Broadcast.Message") == null) return;
-        p.sendMessage(ChatUtils.color(plugin.messages().getString("Interest-Broadcast.Message")
+        String message = Values.MESSAGES.getInterestBroadcastMessage();
+        if (message != null) p.sendMessage(ChatUtils.color(message
                 .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
                 .replace("%amount_formatted%", Methods.format(amount))
@@ -197,13 +202,13 @@ public class MessageManager {
     }
 
     public static void insufficientMoneyWithdraw(Player p) {
-        if (plugin.messages().getString("Insufficient-Money-Withdraw") == null) return;
-        p.sendMessage(ChatUtils.color(plugin.messages().getString("Insufficient-Money-Withdraw")));
+        String message = Values.MESSAGES.getInsufficientMoneyWithdraw();
+        if (message != null) p.sendMessage(ChatUtils.color(message));
     }
 
     public static void insufficientMoneyDeposit(Player p) {
-        if (plugin.messages().getString("Insufficient-Money-Deposit") == null) return;
-        p.sendMessage(ChatUtils.color(plugin.messages().getString("Insufficient-Money-Deposit")));
+        String message = Values.MESSAGES.getInsufficientMoneyDeposit();
+        if (message != null) p.sendMessage(ChatUtils.color(message));
     }
 
     public static void noPermission(CommandSender s) {
@@ -212,57 +217,58 @@ public class MessageManager {
     }
 
     public static void cannotFindPlayer(CommandSender s) {
-        if (plugin.messages().getString("Cannot-Find-Player") == null) return;
-        s.sendMessage(ChatUtils.color(plugin.messages().getString("Cannot-Find-Player")));
+        String message = Values.MESSAGES.getCannotFindPlayer();
+        if (message != null) s.sendMessage(ChatUtils.color(message));
     }
 
     public static void notPlayer(CommandSender s) {
-        if (plugin.messages().getString("Not-Player") == null) return;
-        s.sendMessage(ChatUtils.color(plugin.messages().getString("Not-Player")));
+        String message = Values.MESSAGES.getNotPlayer();
+        if (message != null) s.sendMessage(ChatUtils.color(message));
     }
 
     public static void invalidNumber(CommandSender s) {
-        s.sendMessage(ChatUtils.color(plugin.messages().getString("Invalid-Number")));
+        String message = Values.MESSAGES.getInvalidNumber();
+        if (message != null) s.sendMessage(ChatUtils.color(message));
     }
 
     public static void invalidNumber(Player p) {
-        if (plugin.messages().getString("Invalid-Number") == null) return;
-        p.sendMessage(ChatUtils.color(plugin.messages().getString("Invalid-Number")));
+        String message = Values.MESSAGES.getInvalidNumber();
+        if (message != null) p.sendMessage(ChatUtils.color(message));
     }
 
     public static void specifyNumber(CommandSender s) {
-        if (plugin.messages().getString("Specify-Number") == null) return;
-        s.sendMessage(ChatUtils.color(plugin.messages().getString("Specify-Number")));
+        String message = Values.MESSAGES.getSpecifyNumber();
+        if (message != null) s.sendMessage(ChatUtils.color(message));
     }
 
     public static void specifyPlayer(CommandSender s) {
-        if (plugin.messages().getString("Specify-Player") == null) return;
-        s.sendMessage(ChatUtils.color(plugin.messages().getString("Specify-Player")));
+        String message = Values.MESSAGES.getSpecifyPlayer();
+        if (message != null) s.sendMessage(ChatUtils.color(message));
     }
 
     public static void unknownCommand(CommandSender s) {
-        if (plugin.messages().getString("Unknown-Command") == null) return;
-        s.sendMessage(ChatUtils.color(plugin.messages().getString("Unknown-Command")));
+        String message = Values.MESSAGES.getUnknownCommand();
+        if (message != null) s.sendMessage(ChatUtils.color(message));
     }
 
     public static void interestIsDisabled(CommandSender s) {
-        if (plugin.messages().getString("Interest-Disabled") == null) return;
-        s.sendMessage(ChatUtils.color(plugin.messages().getString("Interest-Disabled")));
+        String message = Values.MESSAGES.getInterestDisabled();
+        if (message != null) s.sendMessage(ChatUtils.color(message));
     }
 
     public static void internalError(CommandSender s) {
-        if (plugin.messages().getString("Error") == null) return;
-        s.sendMessage(ChatUtils.color(plugin.messages().getString("Error")));
+        String message = Values.MESSAGES.getError();
+        if (message != null) s.sendMessage(ChatUtils.color(message));
     }
 
     public static void interestUsage(CommandSender s) {
-        if (plugin.messages().getString("Interest-Usage") == null) return;
-        s.sendMessage(ChatUtils.color(plugin.messages().getString("Interest-Usage")));
+        String message = Values.MESSAGES.getInterestUsage();
+        if (message != null) s.sendMessage(ChatUtils.color(message));
     }
 
     public static void interestRestarted(CommandSender s) {
-        if (plugin.messages().getString("Interest-Restarted") == null) return;
-        s.sendMessage(ChatUtils.color(plugin.messages().getString("Interest-Restarted")));
+        String message = Values.MESSAGES.getInterestRestarted();
+        if (message != null) s.sendMessage(ChatUtils.color(message));
     }
 
     public static void reloadMessage(CommandSender s) {

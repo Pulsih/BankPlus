@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.values.configs;
 
 import me.pulsi_.bankplus.BankPlus;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class ConfigValues {
     private String guiTitle;
     private int guiUpdateDelay;
     private int guiLines;
+    private ConfigurationSection guiItems;
 
     private String notifyOfflineInterestMessage;
     private long interestDelay;
@@ -94,6 +96,7 @@ public class ConfigValues {
         guiTitle = plugin.config().getString("Gui.Title");
         guiUpdateDelay = plugin.config().getInt("Gui.Update-Delay");
         guiLines = plugin.config().getInt("Gui.Lines");
+        guiItems = plugin.config().getConfigurationSection("Gui.Items");
 
         notifyOfflineInterestMessage = plugin.config().getString("General.Offline-Interest-Earned-Message.Message");
         interestDelay = plugin.config().getLong("Interest.Delay");
@@ -197,6 +200,9 @@ public class ConfigValues {
     }
     public int getGuiLines() {
         return guiLines;
+    }
+    public ConfigurationSection getGuiItems() {
+        return guiItems;
     }
 
     // Config Values

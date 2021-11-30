@@ -27,7 +27,7 @@ Insufficient-Money-Deposit: "&a&lBank&9&lPlus &cYou don't have sufficient money 
 No-Permission: "&a&lBank&9&lPlus &cYou don't have the permission!"
 Cannot-Deposit-Anymore: "&a&lBank&9&lPlus &cYou can't deposit anymore money!"
 Cannot-Use-Bank-Here: "&a&lBank&9&lPlus &cSorry, the bank is disabled in this world!"
-Cannot-Use-Negative-Numer: "&a&lBank&9&lPlus &cYou can't use a negative number!"
+Cannot-Use-Negative-Number: "&a&lBank&9&lPlus &cYou can't use a negative number!"
 Minimum-Number: "&a&lBank&9&lPlus &cPlease use an higher number for this action! ( min: %minimum% )"
 
 # Plugin

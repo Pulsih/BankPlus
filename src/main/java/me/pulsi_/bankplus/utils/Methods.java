@@ -149,7 +149,7 @@ public class Methods {
     }
 
     public static void withdraw(Player p, long amount, BankPlus plugin) {
-        long bankBalance = EconomyManager.getBankBalance(p);
+        long bankBalance = EconomyManager.getInstance().getBankBalance(p);
         long maxWithdrawAmount = Values.CONFIG.getMaxWithdrawAmount();
 
         if (amount < 0) {
@@ -170,19 +170,19 @@ public class Methods {
         if (maxWithdrawAmount != 0 && amount >= maxWithdrawAmount) amount = maxWithdrawAmount;
 
         if (bankBalance - amount <= 0) {
-            EconomyManager.withdraw(p, bankBalance);
+            EconomyManager.getInstance().withdraw(p, bankBalance);
             MessageManager.successWithdraw(p, bankBalance);
             Methods.playSound("WITHDRAW", p, plugin);
             return;
         }
 
-        EconomyManager.withdraw(p, amount);
+        EconomyManager.getInstance().withdraw(p, amount);
         MessageManager.successWithdraw(p, amount);
         Methods.playSound("WITHDRAW", p, plugin);
     }
 
     public static void deposit(Player p, long amount, BankPlus plugin) {
-        long bankBalance = EconomyManager.getBankBalance(p);
+        long bankBalance = EconomyManager.getInstance().getBankBalance(p);
         long money = (long) plugin.getEconomy().getBalance(p);
         long maxDepositAmount = Values.CONFIG.getMaxDepositAmount();
         long maxBankCapacity = Values.CONFIG.getMaxBankCapacity();
@@ -203,7 +203,7 @@ public class Methods {
         }
 
         if (money < amount) {
-            EconomyManager.deposit(p, money);
+            EconomyManager.getInstance().deposit(p, money);
             MessageManager.successDeposit(p, money);
             Methods.playSound("DEPOSIT", p, plugin);
             return;
@@ -215,33 +215,33 @@ public class Methods {
                 return;
             }
             if (bankBalance + amount >= maxBankCapacity) {
-                EconomyManager.deposit(p, maxBankCapacity - bankBalance);
+                EconomyManager.getInstance().deposit(p, maxBankCapacity - bankBalance);
                 MessageManager.successDeposit(p, maxBankCapacity - bankBalance);
             } else {
                 if (maxDepositAmount != 0) {
                     if (amount >= maxDepositAmount) {
-                        EconomyManager.deposit(p, maxDepositAmount);
+                        EconomyManager.getInstance().deposit(p, maxDepositAmount);
                         MessageManager.successDeposit(p, maxDepositAmount);
                     } else {
-                        EconomyManager.deposit(p, amount);
+                        EconomyManager.getInstance().deposit(p, amount);
                         MessageManager.successDeposit(p, amount);
                     }
                 } else {
-                    EconomyManager.deposit(p, amount);
+                    EconomyManager.getInstance().deposit(p, amount);
                     MessageManager.successDeposit(p, amount);
                 }
             }
         } else {
             if (maxDepositAmount != 0) {
                 if (amount >= maxDepositAmount) {
-                    EconomyManager.deposit(p, maxDepositAmount);
+                    EconomyManager.getInstance().deposit(p, maxDepositAmount);
                     MessageManager.successDeposit(p, maxDepositAmount);
                 } else {
-                    EconomyManager.deposit(p, amount);
+                    EconomyManager.getInstance().deposit(p, amount);
                     MessageManager.successDeposit(p, amount);
                 }
             } else {
-                EconomyManager.deposit(p, amount);
+                EconomyManager.getInstance().deposit(p, amount);
                 MessageManager.successDeposit(p, amount);
             }
         }
