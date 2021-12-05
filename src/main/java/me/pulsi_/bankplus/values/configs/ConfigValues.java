@@ -1,67 +1,74 @@
-package me.pulsi_.bankplus.managers;
+package me.pulsi_.bankplus.values.configs;
 
 import me.pulsi_.bankplus.BankPlus;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
 
 public class ConfigValues {
 
-    private static String minute;
-    private static String minutes;
-    private static String hour;
-    private static String hours;
-    private static String day;
-    private static String days;
+    private String minute;
+    private String minutes;
+    private String hour;
+    private String hours;
+    private String day;
+    private String days;
 
-    private static String k;
-    private static String m;
-    private static String b;
-    private static String t;
-    private static String q;
+    private String k;
+    private String m;
+    private String b;
+    private String t;
+    private String q;
 
-    private static String guiFillerMaterial;
-    private static String guiFillerDisplayname;
-    private static boolean isGuiFillerGlowing;
-    private static boolean isGuiFillerEnabled;
+    private String guiFillerMaterial;
+    private String guiFillerDisplayname;
+    private boolean isGuiFillerGlowing;
+    private boolean isGuiFillerEnabled;
 
-    private static String withdrawSound;
-    private static String depositSound;
-    private static String viewSound;
-    private static String personalSound;
+    private String withdrawSound;
+    private String depositSound;
+    private String viewSound;
+    private String personalSound;
 
-    private static String guiTitle;
-    private static int guiUpdateDelay;
-    private static int guiLines;
+    private String guiTitle;
+    private int guiUpdateDelay;
+    private int guiLines;
+    private ConfigurationSection guiItems;
 
-    private static String notifyOfflineInterestMessage;
-    private static long interestDelay;
-    private static long maxWithdrawAmount;
-    private static long maxDepositAmount;
-    private static long maxBankCapacity;
-    private static long startAmount;
-    private static long notifyOfflineInterestDelay;
-    private static long interestMaxAmount;
-    private static double interestMoneyGiven;
-    private static List<String> worldsBlacklist;
-    private static boolean isGuiEnabled;
-    private static boolean isReopeningBankAfterChat;
-    private static boolean isInterestEnabled;
-    private static boolean isNotifyOfflineInterest;
-    private static boolean isStoringUUIDs;
-    private static boolean isInterestBroadcastEnabled;
-    private static boolean isGivingInterestToOfflinePlayers;
-    private static boolean isOfflineInterestEarnedMessageEnabled;
-    private static boolean isTitleCustomAmountEnabled;
-    private static boolean isUpdateCheckerEnabled;
+    private String notifyOfflineInterestMessage;
+    private long interestDelay;
+    private long maxWithdrawAmount;
+    private long maxDepositAmount;
+    private long minimumAmount;
+    private long maxBankCapacity;
+    private long startAmount;
+    private long notifyOfflineInterestDelay;
+    private long interestMaxAmount;
+    private double interestMoneyGiven;
+    private List<String> worldsBlacklist;
+    private boolean isGuiEnabled;
+    private boolean isReopeningBankAfterChat;
+    private boolean isInterestEnabled;
+    private boolean isNotifyOfflineInterest;
+    private boolean isStoringUUIDs;
+    private boolean isInterestBroadcastEnabled;
+    private boolean isGivingInterestToOfflinePlayers;
+    private boolean isOfflineInterestEarnedMessageEnabled;
+    private boolean isTitleCustomAmountEnabled;
+    private boolean isUpdateCheckerEnabled;
 
-    private static boolean isWithdrawSoundEnabled;
-    private static boolean isDepositSoundEnabled;
-    private static boolean isViewSoundEnabled;
-    private static boolean isPersonalSoundEnabled;
+    private boolean isWithdrawSoundEnabled;
+    private boolean isDepositSoundEnabled;
+    private boolean isViewSoundEnabled;
+    private boolean isPersonalSoundEnabled;
 
-    public static void setupValues() {
-        final BankPlus plugin = JavaPlugin.getPlugin(BankPlus.class);
+    public static ConfigValues getInstance() {
+        return new ConfigValues();
+    }
+
+    public void setupValues() {
+        BankPlus plugin = JavaPlugin.getPlugin(BankPlus.class);
 
         minute = plugin.config().getString("Placeholders.Time.Minute");
         minutes = plugin.config().getString("Placeholders.Time.Minutes");
@@ -89,11 +96,13 @@ public class ConfigValues {
         guiTitle = plugin.config().getString("Gui.Title");
         guiUpdateDelay = plugin.config().getInt("Gui.Update-Delay");
         guiLines = plugin.config().getInt("Gui.Lines");
+        guiItems = plugin.config().getConfigurationSection("Gui.Items");
 
         notifyOfflineInterestMessage = plugin.config().getString("General.Offline-Interest-Earned-Message.Message");
         interestDelay = plugin.config().getLong("Interest.Delay");
         maxWithdrawAmount = plugin.config().getLong("General.Max-Withdrawn-Amount");
         maxDepositAmount = plugin.config().getLong("General.Max-Deposit-Amount");
+        minimumAmount = plugin.config().getLong("General.Minimum-Amount");
         maxBankCapacity = plugin.config().getLong("General.Max-Bank-Capacity");
         startAmount = plugin.config().getLong("General.Join-Start-Amount");
         notifyOfflineInterestDelay = plugin.config().getLong("General.Offline-Interest-Earned-Message.Delay");
@@ -118,154 +127,160 @@ public class ConfigValues {
     }
 
     // Interest Placeholders
-    public static String getMinute() {
+    public String getMinute() {
         return minute;
     }
-    public static String getMinutes() {
+    public String getMinutes() {
         return minutes;
     }
-    public static String getHour() {
+    public String getHour() {
         return hour;
     }
-    public static String getHours() {
+    public String getHours() {
         return hours;
     }
-    public static String getDay() {
+    public String getDay() {
         return day;
     }
-    public static String getDays() {
+    public String getDays() {
         return days;
     }
 
     // Money Placeholders
-    public static String getK() {
+    public String getK() {
         return k;
     }
-    public static String getM() {
+    public String getM() {
         return m;
     }
-    public static String getB() {
+    public String getB() {
         return b;
     }
-    public static String getT() {
+    public String getT() {
         return t;
     }
-    public static String getQ() {
+    public String getQ() {
         return q;
     }
 
     // Gui Filler Values
-    public static String getGuiFillerMaterial() {
+    public String getGuiFillerMaterial() {
         return guiFillerMaterial;
     }
-    public static String getGuiFillerDisplayname() {
+    public String getGuiFillerDisplayname() {
         return guiFillerDisplayname;
     }
-    public static boolean isGuiFillerGlowing() {
+    public boolean isGuiFillerGlowing() {
         return isGuiFillerGlowing;
     }
-    public static boolean isGuiFillerEnabled() {
+    public boolean isGuiFillerEnabled() {
         return isGuiFillerEnabled;
     }
 
     // Config Sounds
-    public static String getWithdrawSound() {
+    public String getWithdrawSound() {
         return withdrawSound;
     }
-    public static String getDepositSound() {
+    public String getDepositSound() {
         return depositSound;
     }
-    public static String getViewSound() {
+    public String getViewSound() {
         return viewSound;
     }
-    public static String getPersonalSound() {
+    public String getPersonalSound() {
         return personalSound;
     }
 
     // Gui Values
-    public static String getGuiTitle() {
+    public String getGuiTitle() {
         return guiTitle;
     }
-    public static int getGuiUpdateDelay() {
+    public int getGuiUpdateDelay() {
         return guiUpdateDelay;
     }
-    public static int getGuiLines() {
+    public int getGuiLines() {
         return guiLines;
+    }
+    public ConfigurationSection getGuiItems() {
+        return guiItems;
     }
 
     // Config Values
-    public static String getNotifyOfflineInterestMessage() {
+    public String getNotifyOfflineInterestMessage() {
         return notifyOfflineInterestMessage;
     }
-    public static long getInterestDelay() {
+    public long getInterestDelay() {
         return interestDelay;
     }
-    public static long getMaxWithdrawAmount() {
+    public long getMaxWithdrawAmount() {
         return maxWithdrawAmount;
     }
-    public static long getMaxDepositAmount() {
+    public long getMaxDepositAmount() {
         return maxDepositAmount;
     }
-    public static long getMaxBankCapacity() {
+    public long getMinimumAmount() {
+        return minimumAmount;
+    }
+    public long getMaxBankCapacity() {
         return maxBankCapacity;
     }
-    public static long getStartAmount() {
+    public long getStartAmount() {
         return startAmount;
     }
-    public static long getNotifyOfflineInterestDelay() {
+    public long getNotifyOfflineInterestDelay() {
         return notifyOfflineInterestDelay;
     }
-    public static long getInterestMaxAmount() {
+    public long getInterestMaxAmount() {
         return interestMaxAmount;
     }
-    public static double getInterestMoneyGiven() {
+    public double getInterestMoneyGiven() {
         return interestMoneyGiven;
     }
-    public static List<String> getWorldsBlacklist() {
+    public List<String> getWorldsBlacklist() {
         return worldsBlacklist;
     }
-    public static boolean isGuiEnabled() {
+    public boolean isGuiEnabled() {
         return isGuiEnabled;
     }
-    public static boolean isReopeningBankAfterChat() {
+    public boolean isReopeningBankAfterChat() {
         return isReopeningBankAfterChat;
     }
-    public static boolean isInterestEnabled() {
+    public boolean isInterestEnabled() {
         return isInterestEnabled;
     }
-    public static boolean isNotifyOfflineInterest() {
+    public boolean isNotifyOfflineInterest() {
         return isNotifyOfflineInterest;
     }
-    public static boolean isStoringUUIDs() {
+    public boolean isStoringUUIDs() {
         return isStoringUUIDs;
     }
-    public static boolean isInterestBroadcastEnabled() {
+    public boolean isInterestBroadcastEnabled() {
         return isInterestBroadcastEnabled;
     }
-    public static boolean isGivingInterestToOfflinePlayers() {
+    public boolean isGivingInterestToOfflinePlayers() {
         return isGivingInterestToOfflinePlayers;
     }
-    public static boolean isOfflineInterestEarnedMessageEnabled() {
+    public boolean isOfflineInterestEarnedMessageEnabled() {
         return isOfflineInterestEarnedMessageEnabled;
     }
-    public static boolean isTitleCustomAmountEnabled() {
+    public boolean isTitleCustomAmountEnabled() {
         return isTitleCustomAmountEnabled;
     }
-    public static boolean isUpdateCheckerEnabled() {
+    public boolean isUpdateCheckerEnabled() {
         return isUpdateCheckerEnabled;
     }
 
     // Config Booleans Sounds
-    public static boolean isWithdrawSoundEnabled() {
+    public boolean isWithdrawSoundEnabled() {
         return isWithdrawSoundEnabled;
     }
-    public static boolean isDepositSoundEnabled() {
+    public boolean isDepositSoundEnabled() {
         return isDepositSoundEnabled;
     }
-    public static boolean isViewSoundEnabled() {
+    public boolean isViewSoundEnabled() {
         return isViewSoundEnabled;
     }
-    public static boolean isPersonalSoundEnabled() {
+    public boolean isPersonalSoundEnabled() {
         return isPersonalSoundEnabled;
     }
 }

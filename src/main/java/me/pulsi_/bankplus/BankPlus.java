@@ -3,11 +3,11 @@ package me.pulsi_.bankplus;
 import me.pulsi_.bankplus.external.bStats;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.managers.ConfigManager;
-import me.pulsi_.bankplus.managers.ConfigValues;
 import me.pulsi_.bankplus.managers.DataManager;
 import me.pulsi_.bankplus.placeholders.Placeholders;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.ListUtils;
+import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -54,12 +54,13 @@ public final class BankPlus extends JavaPlugin {
         DataManager.setupCommands(this);
         DataManager.startupMessage(this);
 
-        ConfigValues.setupValues();
+        Values.CONFIG.setupValues();
+        Values.MESSAGES.setupValues();
 
         new bStats(this, 11612);
 
         this.interest = new Interest(this);
-        if (ConfigValues.isInterestEnabled())
+        if (Values.CONFIG.isInterestEnabled())
             interest.startsInterest();
 
         ListUtils.PLAYERCHAT_DEBUG.add("DISABLED");
@@ -70,7 +71,7 @@ public final class BankPlus extends JavaPlugin {
     @Override
     public void onDisable() {
         DataManager.shutdownMessage(this);
-        if (ConfigValues.isInterestEnabled())
+        if (Values.CONFIG.isInterestEnabled())
             interest.saveInterest();
     }
 
@@ -100,13 +101,9 @@ public final class BankPlus extends JavaPlugin {
     }
 
     private boolean setupEconomy() {
-        if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            return false;
-        }
+        if (getServer().getPluginManager().getPlugin("Vault") == null) return false;
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-        if (rsp == null) {
-            return false;
-        }
+        if (rsp == null) return false;
         econ = rsp.getProvider();
         return true;
     }

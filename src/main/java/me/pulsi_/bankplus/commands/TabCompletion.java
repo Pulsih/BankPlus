@@ -19,18 +19,11 @@ public class TabCompletion implements TabCompleter {
         if (s.hasPermission("bankplus.balance")) args1.add("balance");
         if (s.hasPermission("bankplus.help")) args1.add("help");
         if (s.hasPermission("bankplus.reload")) args1.add("reload");
-        if (s.hasPermission("bankplus.debug")) args1.add("debug");
         if (s.hasPermission("bankplus.set")) args1.add("set");
         if (s.hasPermission("bankplus.add")) args1.add("add");
         if (s.hasPermission("bankplus.remove")) args1.add("remove");
+        if (s.hasPermission("bankplus.open")) args1.add("open");
         if (s.hasPermission("bankplus.interest.restart")) args1.add("interest");
-
-        List<String> debugArgs = new ArrayList<>();
-        if (s.hasPermission("bankplus.debug")) {
-            debugArgs.add("playerchat");
-            debugArgs.add("guibank");
-            debugArgs.add("interest");
-        }
 
         List<String> args2 = new ArrayList<>();
         if (s.hasPermission("bankplus.interest.restart")) args2.add("restart");
@@ -42,16 +35,6 @@ public class TabCompletion implements TabCompleter {
                     resultArgs1.add(a);
             }
             return resultArgs1;
-        }
-
-        List<String> debugResult = new ArrayList<>();
-        if (args.length == 2) {
-            for (String a : debugArgs) {
-                if (args[0].equalsIgnoreCase("debug") && a.toLowerCase().startsWith(args[1].toLowerCase())) {
-                    debugResult.add(a);
-                }
-            }
-            return debugResult;
         }
 
         List<String> resultArgs2 = new ArrayList<>();

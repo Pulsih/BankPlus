@@ -8,29 +8,42 @@ Interest:
   # Interest will give players that has money in bank
   # a % of the amount every <num> of minutes etc..
   Enabled: true
+
   # 5% of the bank amount
   Money-Given: 0.05
+
   # 5 Minutes | DO NOT USE NUMBERS WITH DECIMALS!
   Delay: 5
+
   # The max amount that you can receive with interest.
   Max-Amount: 500000
+
   # Choose if giving interest to offline players too.
   Give-To-Offline-Players: false
 
 General:
   # The amount that a player will receive when joining for the first time
   Join-Start-Amount: 500
+
   # Store player's money using UUIDs, otherwise the plugin will use names.
   Use-UUIDs: true
+
   # The max amount that a player can deposit, use 0 to disable.
   Max-Bank-Capacity: 500000000
+
   # The max amount to withdraw per time, use 0 to disable.
   Max-Withdrawn-Amount: 0
+
   # The max amount to deposit per time, use 0 to disable.
   Max-Deposit-Amount: 0
+
+  # The minimum amount that a player needs to put to withdraw / deposit, put 0 to disable.
+  Minimum-Amount: 0
+
   # Enabling this option, will reopen the inventory after
   # typing the custom amount in the chat to deposit / withdraw
   Reopen-Bank-After-Chat: true
+
   # Worlds where the bank won't work
   Worlds-Blacklist:
     - "noBankWorld"
@@ -46,12 +59,15 @@ General:
   Withdraw-Sound:
     Enabled: true
     Sound: "ENTITY_PLAYER_LEVEL_UP,5,1" #Sound Type, Volume, Pitch
+
   Deposit-Sound:
     Enabled: true
     Sound: "ENTITY_ORB_PICKUP,5,1"
+
   View-Sound:
     Enabled: true
     Sound: "ENTITY_ORB_PICKUP,5,1"
+
   Personal-Sound:
     Enabled: true
     Sound: "ENTITY_ORB_PICKUP,5,1"
@@ -63,6 +79,7 @@ Placeholders:
     Billions: "B"
     Trillions: "T"
     Quadrillions: "Q"
+
   Time:
     Minute: " Minute"
     Minutes: " Minutes"

@@ -1,8 +1,8 @@
 package me.pulsi_.bankplus.guis;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.managers.ConfigValues;
 import me.pulsi_.bankplus.utils.ChatUtils;
+import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -23,11 +23,11 @@ public class GuiBankHolder implements InventoryHolder {
 
     public void openBank(Player p) {
         GuiBankHolder gui = getEnchanterHolder();
-        gui.buildEnchanter(p);
+        gui.buildBank(p);
         p.openInventory(gui.getInventory());
     }
 
-    private void buildEnchanter(Player p) {
+    private void buildBank(Player p) {
         ConfigurationSection c = plugin.config().getConfigurationSection("Gui.Items");
         Bukkit.getScheduler().runTaskAsynchronously(JavaPlugin.getPlugin(BankPlus.class), () -> {
             for (String items : c.getKeys(false)) {
@@ -39,7 +39,7 @@ public class GuiBankHolder implements InventoryHolder {
                     guiBank.addItem(ItemUtils.createItemStack(c.getConfigurationSection(items), p));
                 }
             }
-            if (ConfigValues.isGuiFillerEnabled())
+            if (Values.CONFIG.isGuiFillerEnabled())
                 for (int i = 0; i < guiLines(lines); i++)
                     if (guiBank.getItem(i) == null) guiBank.setItem(i, ItemUtils.guiFiller());
         });
@@ -63,7 +63,7 @@ public class GuiBankHolder implements InventoryHolder {
     }
 
     public static GuiBankHolder getEnchanterHolder() {
-        return new GuiBankHolder(ConfigValues.getGuiLines(), ConfigValues.getGuiTitle());
+        return new GuiBankHolder(Values.CONFIG.getGuiLines(), Values.CONFIG.getGuiTitle());
     }
 
     @Override

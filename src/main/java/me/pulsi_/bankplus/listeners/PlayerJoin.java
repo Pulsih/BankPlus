@@ -1,10 +1,10 @@
 package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.managers.ConfigValues;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
-import me.pulsi_.bankplus.utils.MethodUtils;
+import me.pulsi_.bankplus.utils.Methods;
+import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,6 +14,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 public class PlayerJoin implements Listener {
 
     private final BankPlus plugin;
+
     public PlayerJoin(BankPlus plugin) {
         this.plugin = plugin;
     }
@@ -21,14 +22,14 @@ public class PlayerJoin implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
 
-        final Player p = e.getPlayer();
-        final long startAmount = ConfigValues.getStartAmount();
-        final boolean isSendingOfflineInterestMessage = ConfigValues.isNotifyOfflineInterest();
+        Player p = e.getPlayer();
+        long startAmount = Values.CONFIG.getStartAmount();
+        boolean isSendingOfflineInterestMessage = Values.CONFIG.isNotifyOfflineInterest();
 
-        if (ConfigValues.isStoringUUIDs()) {
-            final String name = plugin.players().getString("Players." + p.getUniqueId() + ".Name");
-            final String sBalance = plugin.players().getString("Players." + p.getUniqueId() + ".Money");
-            final String sOfflineInterest = plugin.players().getString("Players." + p.getUniqueId() + ".Offline-Interest");
+        if (Values.CONFIG.isStoringUUIDs()) {
+            String name = plugin.players().getString("Players." + p.getUniqueId() + ".Name");
+            String sBalance = plugin.players().getString("Players." + p.getUniqueId() + ".Money");
+            String sOfflineInterest = plugin.players().getString("Players." + p.getUniqueId() + ".Offline-Interest");
 
             if (name == null) {
                 plugin.players().set("Players." + p.getUniqueId() + ".Name", p.getName());
@@ -45,8 +46,8 @@ public class PlayerJoin implements Listener {
                     plugin.savePlayers();
                 }
         } else {
-            final String sBalance = plugin.players().getString("Players." + p.getName() + ".Money");
-            final String sOfflineInterest = plugin.players().getString("Players." + p.getName() + ".Offline-Interest");
+            String sBalance = plugin.players().getString("Players." + p.getName() + ".Money");
+            String sOfflineInterest = plugin.players().getString("Players." + p.getName() + ".Offline-Interest");
 
             if (sBalance == null) {
                 ChatUtils.consoleMessage("&a&lBank&9&lPlus &2Successfully registered &f" + p.getName() + "&a's account!");
@@ -61,23 +62,24 @@ public class PlayerJoin implements Listener {
         }
 
         if (isSendingOfflineInterestMessage) {
-            final EconomyManager economy = new EconomyManager(plugin);
-            final long delay = ConfigValues.getNotifyOfflineInterestDelay();
-            final long offlineInterest = economy.getOfflineInterest(p);
-            final String message = ChatUtils.color(ConfigValues.getNotifyOfflineInterestMessage());
+            long delay = Values.CONFIG.getNotifyOfflineInterestDelay();
+            long offlineInterest = EconomyManager.getInstance().getOfflineInterest(p);
+            String message = ChatUtils.color(Values.CONFIG.getNotifyOfflineInterestMessage());
+
             if (delay != 0) {
                 Bukkit.getScheduler().runTaskLater(plugin, () -> p.sendMessage(message
-                        .replace("%amount%", MethodUtils.formatCommas(offlineInterest))
-                        .replace("%amount_formatted%", MethodUtils.format(offlineInterest))
-                        .replace("%amount_formatted_long%", MethodUtils.formatLong(offlineInterest))), delay * 20L);
+                        .replace("%amount%", Methods.formatCommas(offlineInterest))
+                        .replace("%amount_formatted%", Methods.format(offlineInterest))
+                        .replace("%amount_formatted_long%", Methods.formatLong(offlineInterest))
+                ), delay * 20L);
             } else {
                 p.sendMessage(message
-                        .replace("%amount%", MethodUtils.formatCommas(offlineInterest))
-                        .replace("%amount_formatted%", MethodUtils.format(offlineInterest))
-                        .replace("%amount_formatted_long%", MethodUtils.formatLong(offlineInterest)));
+                        .replace("%amount%", Methods.formatCommas(offlineInterest))
+                        .replace("%amount_formatted%", Methods.format(offlineInterest))
+                        .replace("%amount_formatted_long%", Methods.formatLong(offlineInterest))
+                );
             }
-            if (offlineInterest != 0)
-                economy.setOfflineInterest(p, 0);
+            if (offlineInterest != 0) EconomyManager.getInstance().setOfflineInterest(p, 0);
         }
     }
 }
