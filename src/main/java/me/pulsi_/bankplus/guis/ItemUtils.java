@@ -86,9 +86,17 @@ public class ItemUtils {
         BankPlus plugin = JavaPlugin.getPlugin(BankPlus.class);
         ItemMeta itemMeta = i.getItemMeta();
 
+        long cooldown = 0;
+        if (Values.CONFIG.isInterestEnabled()) cooldown = Interest.interestCooldown.get(0);
+
         List<String> lore = new ArrayList<>();
         for (String lines : c.getStringList("Lore"))
-            lore.add(ChatUtils.color(lines));
+            lore.add(ChatUtils.color(lines
+                    .replace("%player_name%", p.getName())
+                    .replace("%balance%", Methods.formatCommas(EconomyManager.getInstance().getBankBalance(p)))
+                    .replace("%balance_formatted%", Methods.format(EconomyManager.getInstance().getBankBalance(p)))
+                    .replace("%balance_formatted_long%", Methods.formatLong(EconomyManager.getInstance().getBankBalance(p)))
+                    .replace("%interest_cooldown%", Methods.formatTime((int) cooldown))));
 
         if (plugin.isPlaceholderAPIHooked()) {
             itemMeta.setLore(PlaceholderAPI.setPlaceholders(p, lore));
@@ -159,6 +167,7 @@ public class ItemUtils {
 
     private static void setLore(ConfigurationSection c, boolean isPlaceholderApiHooked, ItemMeta meta, Player p, long cooldown) {
         List<String> lore = new ArrayList<>();
+
         for (String lines : c.getStringList("Lore")) {
             lore.add(ChatUtils.color(lines
                     .replace("%player_name%", p.getName())

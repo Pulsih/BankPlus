@@ -62,8 +62,11 @@ public class PlayerJoin implements Listener {
         }
 
         if (isSendingOfflineInterestMessage) {
-            long delay = Values.CONFIG.getNotifyOfflineInterestDelay();
             long offlineInterest = EconomyManager.getInstance().getOfflineInterest(p);
+
+            if (offlineInterest == 0) return;
+
+            long delay = Values.CONFIG.getNotifyOfflineInterestDelay();
             String message = ChatUtils.color(Values.CONFIG.getNotifyOfflineInterestMessage());
 
             if (delay != 0) {
@@ -79,7 +82,7 @@ public class PlayerJoin implements Listener {
                         .replace("%amount_formatted_long%", Methods.formatLong(offlineInterest))
                 );
             }
-            if (offlineInterest != 0) EconomyManager.getInstance().setOfflineInterest(p, 0);
+            EconomyManager.getInstance().setOfflineInterest(p, 0);
         }
     }
 }
