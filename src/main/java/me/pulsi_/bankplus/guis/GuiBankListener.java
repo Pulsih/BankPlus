@@ -19,10 +19,14 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 public class GuiBankListener implements Listener {
 
     private final BankPlus plugin;
-    private static BukkitTask runnable;
+    private static Map<UUID, BukkitTask> runnables = new HashMap<>();
     public GuiBankListener(BankPlus plugin) {
         this.plugin = plugin;
     }
@@ -115,12 +119,16 @@ public class GuiBankListener implements Listener {
     public void updateGui(InventoryOpenEvent e) {
         Player p = (Player) e.getPlayer();
         int delay = Values.CONFIG.getGuiUpdateDelay();
-        if (delay != 0) runnable = Bukkit.getScheduler().runTaskTimer(plugin, () -> updateLore(p),0, delay * 20L);
+        if (delay != 0) {
+            runnables.put(p.getUniqueId(), Bukkit.getScheduler().runTaskTimer(plugin, () -> updateLore(p),0, delay * 20L));
+        }
     }
 
     @EventHandler
     public void closeGUI(InventoryCloseEvent e) {
-        if (runnable != null) runnable.cancel();
+        if (runnables.containsKey(e.getPlayer().getUniqueId())) {
+            runnables.remove(e.getPlayer().getUniqueId()).cancel();
+        }
     }
 
     private void updateLore(Player p) {
