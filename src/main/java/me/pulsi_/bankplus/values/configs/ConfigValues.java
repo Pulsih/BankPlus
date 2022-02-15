@@ -37,7 +37,7 @@ public class ConfigValues {
     private ConfigurationSection guiItems;
 
     private String notifyOfflineInterestMessage;
-    private long interestDelay;
+    private int interestDelay;
     private long maxWithdrawAmount;
     private long maxDepositAmount;
     private long minimumAmount;
@@ -99,7 +99,7 @@ public class ConfigValues {
         guiItems = plugin.config().getConfigurationSection("Gui.Items");
 
         notifyOfflineInterestMessage = plugin.config().getString("General.Offline-Interest-Earned-Message.Message");
-        interestDelay = plugin.config().getLong("Interest.Delay");
+        interestDelay = plugin.config().getInt("Interest.Delay");
         maxWithdrawAmount = plugin.config().getLong("General.Max-Withdrawn-Amount");
         maxDepositAmount = plugin.config().getLong("General.Max-Deposit-Amount");
         minimumAmount = plugin.config().getLong("General.Minimum-Amount");
@@ -209,7 +209,7 @@ public class ConfigValues {
     public String getNotifyOfflineInterestMessage() {
         return notifyOfflineInterestMessage;
     }
-    public long getInterestDelay() {
+    public int getInterestDelay() {
         return interestDelay;
     }
     public long getMaxWithdrawAmount() {

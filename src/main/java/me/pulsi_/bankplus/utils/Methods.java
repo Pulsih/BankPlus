@@ -70,77 +70,120 @@ public class Methods {
         return formatter.format(amount);
     }
 
-    public static void sendTitle(String path, Player p, BankPlus plugin) {
-        String title = plugin.messages().getString(path);
-        if (title == null) return;
+    public static void customWithdraw(Player p) {
+        SetUtils.playerWithdrawing.add(p);
+        if (Values.CONFIG.isTitleCustomAmountEnabled())
+            Methods.sendTitle("Title-Custom-Amount.Title-Withdraw", p);
+        MessageManager.chatWithdraw(p);
+        p.closeInventory();
+    }
 
+    public static void customDeposit(Player p) {
+        SetUtils.playerDepositing.add(p);
+        if (Values.CONFIG.isTitleCustomAmountEnabled())
+            Methods.sendTitle("Title-Custom-Amount.Title-Deposit", p);
+        MessageManager.chatDeposit(p);
+        p.closeInventory();
+    }
+
+    public static void sendTitle(String path, Player p) {
+        String title = BankPlus.getInstance().messages().getString(path);
+        if (title == null) return;
         if (title.contains(",")) {
-            String[] titles = plugin.messages().getString(path).split(",");
+            String[] titles = title.split(",");
             String title1 = titles[0];
             String title2 = titles[1];
             p.sendTitle(ChatUtils.color(title1), ChatUtils.color(title2));
         } else {
-            p.sendTitle(ChatUtils.color(title), ChatUtils.color("&f"));
+            p.sendTitle(ChatUtils.color(title), "");
         }
     }
 
-    public static void playSound(String sound, Player p, BankPlus plugin) {
+    public static void playSound(String sound, Player p) {
         switch (sound) {
-            case "WITHDRAW":
-                if (Values.CONFIG.isWithdrawSoundEnabled()) {
-                    try {
-                        String[] pathSlitted = Values.CONFIG.getWithdrawSound().split(",");
-                        String soundType = pathSlitted[0];
-                        int volume = Integer.parseInt(pathSlitted[1]);
-                        int pitch = Integer.parseInt(pathSlitted[2]);
-                        p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
-                    } catch (NullPointerException | IllegalArgumentException exception) {
-                        plugin.getServer().getConsoleSender().sendMessage(ChatUtils.color("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.Withdraw-Sound.Sound"));
-                    }
+            case "WITHDRAW": {
+                if (!Values.CONFIG.isWithdrawSoundEnabled()) return;
+                String withdrawSound = Values.CONFIG.getWithdrawSound();
+                if (withdrawSound == null) {
+                    BPLogger.warn("You are missing a string! &8(&ePath: General.Withdraw-Sound.Sound in config.yml&8)");
+                    return;
                 }
-                break;
+                String[] pathSlitted = withdrawSound.split(",");
 
-            case "DEPOSIT":
-                if (Values.CONFIG.isDepositSoundEnabled()) {
-                    try {
-                        String[] pathSlitted = Values.CONFIG.getDepositSound().split(",");
-                        String soundType = pathSlitted[0];
-                        int volume = Integer.parseInt(pathSlitted[1]);
-                        int pitch = Integer.parseInt(pathSlitted[2]);
-                        p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
-                    } catch (NullPointerException | IllegalArgumentException exception) {
-                        plugin.getServer().getConsoleSender().sendMessage(ChatUtils.color("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.Deposit-Sound.Sound"));
-                    }
+                String soundType = pathSlitted[0];
+                int volume = Integer.parseInt(pathSlitted[1]);
+                int pitch = Integer.parseInt(pathSlitted[2]);
+                try {
+                    p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
+                } catch (IllegalArgumentException e) {
+                    BPLogger.warn("Invalid SoundType (NO ERROR): " + e.getMessage());
+                    BPLogger.warn("Please change it in the config! &8(&aPath: General.Withdraw-Sound.Sound&8)");
                 }
-                break;
+            }
+            break;
 
-            case "VIEW":
-                if (Values.CONFIG.isViewSoundEnabled()) {
-                    try {
-                        String[] pathSlitted = Values.CONFIG.getViewSound().split(",");
-                        String soundType = pathSlitted[0];
-                        int volume = Integer.parseInt(pathSlitted[1]);
-                        int pitch = Integer.parseInt(pathSlitted[2]);
-                        p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
-                    } catch (NullPointerException | IllegalArgumentException exception) {
-                        plugin.getServer().getConsoleSender().sendMessage(ChatUtils.color("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.View-Sound.Sound"));
-                    }
+            case "DEPOSIT": {
+                if (!Values.CONFIG.isDepositSoundEnabled()) return;
+                String depositSound = Values.CONFIG.getDepositSound();
+                if (depositSound == null) {
+                    BPLogger.warn("You are missing a string! &8(&ePath: General.Deposit-Sound.Sound in config.yml&8)");
+                    return;
                 }
-                break;
+                String[] pathSlitted = depositSound.split(",");
 
-            case "PERSONAL":
-                if (Values.CONFIG.isPersonalSoundEnabled()) {
-                    try {
-                        String[] pathSlitted = Values.CONFIG.getPersonalSound().split(",");
-                        String soundType = pathSlitted[0];
-                        int volume = Integer.parseInt(pathSlitted[1]);
-                        int pitch = Integer.parseInt(pathSlitted[2]);
-                        p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
-                    } catch (NullPointerException | IllegalArgumentException exception) {
-                        plugin.getServer().getConsoleSender().sendMessage(ChatUtils.color("&a&lBank&9&lPlus &cInvalid SoundType at: &fGeneral.Personal-Sound.Sound"));
-                    }
+                String soundType = pathSlitted[0];
+                int volume = Integer.parseInt(pathSlitted[1]);
+                int pitch = Integer.parseInt(pathSlitted[2]);
+                try {
+                    p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
+                } catch (IllegalArgumentException e) {
+                    BPLogger.warn("Invalid SoundType (NO ERROR): " + e.getMessage());
+                    BPLogger.warn("Please change it in the config! &8(&aPath: General.Deposit-Sound.Sound&8)");
                 }
-                break;
+            }
+            break;
+
+            case "VIEW": {
+                if (!Values.CONFIG.isViewSoundEnabled()) return;
+                String viewSound = Values.CONFIG.getViewSound();
+                if (viewSound == null) {
+                    BPLogger.warn("You are missing a string! &8(&ePath: General.View-Sound.Sound in config.yml&8)");
+                    return;
+                }
+                String[] pathSlitted = viewSound.split(",");
+
+                String soundType = pathSlitted[0];
+                int volume = Integer.parseInt(pathSlitted[1]);
+                int pitch = Integer.parseInt(pathSlitted[2]);
+                try {
+                    p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
+                } catch (IllegalArgumentException e) {
+                    BPLogger.warn("Invalid SoundType (NO ERROR): " + e.getMessage());
+                    BPLogger.warn("Please change it in the config! &8(&aPath: General.View-Sound.Sound&8)");
+                }
+            }
+            break;
+
+            case "PERSONAL": {
+                if (!Values.CONFIG.isPersonalSoundEnabled()) return;
+                String personalSound = Values.CONFIG.getViewSound();
+                if (personalSound == null) {
+                    BPLogger.warn("You are missing a string! &8(&ePath: General.Personal-Sound.Sound in config.yml&8)");
+                    return;
+                }
+                String[] pathSlitted = personalSound.split(",");
+
+                String soundType = pathSlitted[0];
+                int volume = Integer.parseInt(pathSlitted[1]);
+                int pitch = Integer.parseInt(pathSlitted[2]);
+                try {
+                    p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
+                } catch (IllegalArgumentException e) {
+                    BPLogger.warn("Invalid SoundType (NO ERROR): " + e.getMessage());
+                    BPLogger.warn("Please change it in the config! &8(&aPath: General.Personal-Sound.Sound&8)");
+                }
+            }
+            break;
         }
     }
 
@@ -148,7 +191,7 @@ public class Methods {
         return delay * 1200;
     }
 
-    public static void withdraw(Player p, long amount, BankPlus plugin) {
+    public static void withdraw(Player p, long amount) {
         long bankBalance = EconomyManager.getInstance().getBankBalance(p);
         long maxWithdrawAmount = Values.CONFIG.getMaxWithdrawAmount();
 
@@ -172,18 +215,18 @@ public class Methods {
         if (bankBalance - amount <= 0) {
             EconomyManager.getInstance().withdraw(p, bankBalance);
             MessageManager.successWithdraw(p, bankBalance);
-            Methods.playSound("WITHDRAW", p, plugin);
+            Methods.playSound("WITHDRAW", p);
             return;
         }
 
         EconomyManager.getInstance().withdraw(p, amount);
         MessageManager.successWithdraw(p, amount);
-        Methods.playSound("WITHDRAW", p, plugin);
+        Methods.playSound("WITHDRAW", p);
     }
 
-    public static void deposit(Player p, long amount, BankPlus plugin) {
+    public static void deposit(Player p, long amount) {
         long bankBalance = EconomyManager.getInstance().getBankBalance(p);
-        long money = (long) plugin.getEconomy().getBalance(p);
+        long money = (long) BankPlus.getEconomy().getBalance(p);
         long maxDepositAmount = Values.CONFIG.getMaxDepositAmount();
         long maxBankCapacity = Values.CONFIG.getMaxBankCapacity();
 
@@ -205,7 +248,7 @@ public class Methods {
         if (money < amount) {
             EconomyManager.getInstance().deposit(p, money);
             MessageManager.successDeposit(p, money);
-            Methods.playSound("DEPOSIT", p, plugin);
+            Methods.playSound("DEPOSIT", p);
             return;
         }
 
@@ -245,6 +288,6 @@ public class Methods {
                 MessageManager.successDeposit(p, amount);
             }
         }
-        Methods.playSound("DEPOSIT", p, plugin);
+        Methods.playSound("DEPOSIT", p);
     }
 }

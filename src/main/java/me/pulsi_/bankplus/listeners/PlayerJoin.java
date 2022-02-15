@@ -26,44 +26,44 @@ public class PlayerJoin implements Listener {
         long startAmount = Values.CONFIG.getStartAmount();
         boolean isSendingOfflineInterestMessage = Values.CONFIG.isNotifyOfflineInterest();
 
+        String uuid = "" + p.getUniqueId();
+        String pName = p.getName();
+        
         if (Values.CONFIG.isStoringUUIDs()) {
-            String name = plugin.players().getString("Players." + p.getUniqueId() + ".Name");
-            String sBalance = plugin.players().getString("Players." + p.getUniqueId() + ".Money");
-            String sOfflineInterest = plugin.players().getString("Players." + p.getUniqueId() + ".Offline-Interest");
-
+            String name = plugin.players().getString("Players." + uuid + ".Name");
+            String sBalance = plugin.players().getString("Players." + uuid + ".Money");
+            String sOfflineInterest = plugin.players().getString("Players." + uuid + ".Offline-Interest");
+            
             if (name == null) {
-                plugin.players().set("Players." + p.getUniqueId() + ".Name", p.getName());
+                plugin.players().set("Players." + uuid + ".Name", pName);
                 plugin.savePlayers();
             }
             if (sBalance == null) {
-                ChatUtils.consoleMessage("&a&lBank&9&lPlus &2Successfully registered &f" + p.getName() + "&a's account!");
-                plugin.players().set("Players." + p.getUniqueId() + ".Money", startAmount);
+                ChatUtils.log("&a&lBank&9&lPlus &2Successfully registered &f" + pName + "&a's account!");
+                plugin.players().set("Players." + uuid + ".Money", startAmount);
                 plugin.savePlayers();
             }
-            if (isSendingOfflineInterestMessage)
-                if (sOfflineInterest == null) {
-                    plugin.players().set("Players." + p.getUniqueId() + ".Offline-Interest", 0);
-                    plugin.savePlayers();
-                }
+            if (isSendingOfflineInterestMessage && sOfflineInterest == null) {
+                plugin.players().set("Players." + uuid + ".Offline-Interest", 0);
+                plugin.savePlayers();
+            }
         } else {
-            String sBalance = plugin.players().getString("Players." + p.getName() + ".Money");
-            String sOfflineInterest = plugin.players().getString("Players." + p.getName() + ".Offline-Interest");
+            String sBalance = plugin.players().getString("Players." + pName + ".Money");
+            String sOfflineInterest = plugin.players().getString("Players." + pName + ".Offline-Interest");
 
             if (sBalance == null) {
-                ChatUtils.consoleMessage("&a&lBank&9&lPlus &2Successfully registered &f" + p.getName() + "&a's account!");
-                plugin.players().set("Players." + p.getName() + ".Money", startAmount);
+                ChatUtils.log("&a&lBank&9&lPlus &2Successfully registered &f" + pName + "&a's account!");
+                plugin.players().set("Players." + pName + ".Money", startAmount);
                 plugin.savePlayers();
             }
-            if (isSendingOfflineInterestMessage)
-                if (sOfflineInterest == null) {
-                    plugin.players().set("Players." + p.getName() + ".Offline-Interest", 0);
-                    plugin.savePlayers();
-                }
+            if (isSendingOfflineInterestMessage && sOfflineInterest == null) {
+                plugin.players().set("Players." + pName + ".Offline-Interest", 0);
+                plugin.savePlayers();
+            }
         }
 
         if (isSendingOfflineInterestMessage) {
             long offlineInterest = EconomyManager.getInstance().getOfflineInterest(p);
-
             if (offlineInterest == 0) return;
 
             long delay = Values.CONFIG.getNotifyOfflineInterestDelay();

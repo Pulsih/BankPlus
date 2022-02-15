@@ -35,9 +35,7 @@ public class ConfigManager {
             config.load(configFile);
             messages.load(messagesFile);
             players.load(playersFile);
-        } catch (IOException | InvalidConfigurationException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException | InvalidConfigurationException e) { /* suppress the error */ }
     }
 
     public FileConfiguration getConfiguration() {
@@ -59,6 +57,6 @@ public class ConfigManager {
     public void savePlayers() {
         try {
             players.save(playersFile);
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) { /* suppress the error */ }
     }
 }

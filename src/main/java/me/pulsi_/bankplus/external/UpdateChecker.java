@@ -9,6 +9,7 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -36,16 +37,19 @@ public class UpdateChecker implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
-        if ((!Values.CONFIG.isUpdateCheckerEnabled() || (!e.getPlayer().isOp() && !e.getPlayer().hasPermission("bankplus.notify"))) || isUpToDate) return;
+        Player p = e.getPlayer();
+        if (!Values.CONFIG.isUpdateCheckerEnabled() || (!p.isOp() && !p.hasPermission("bankplus.notify")) || isUpToDate) return;
 
-        TextComponent update = new TextComponent(ChatUtils.color("&a&lBank&9&lPlus &aNew update available! &7(CLICK HERE)"));
-        update.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.spigotmc.org/resources/%E2%9C%A8-bankplus-%E2%9C%A8-easy-and-lightweight-bank-plugin.93130/"));
-        update.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click here to download it!").color(ChatColor.GRAY).create()));
+        TextComponent update = new TextComponent(ChatUtils.color("&a&lBank&9&lPlus &aNew update available! "));
+        TextComponent updateButton = new TextComponent(ChatUtils.color("&a&l[CLICK HERE]"));
+        updateButton.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.spigotmc.org/resources/%E2%9C%A8-bankplus-%E2%9C%A8-easy-and-lightweight-bank-plugin.93130/"));
+        updateButton.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click here to download it!").color(ChatColor.GRAY).create()));
+        update.addExtra(updateButton);
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            e.getPlayer().sendMessage("");
-            e.getPlayer().spigot().sendMessage(update);
-            e.getPlayer().sendMessage("");
+            p.sendMessage("");
+            p.spigot().sendMessage(update);
+            p.sendMessage("");
         }, 80);
     }
 

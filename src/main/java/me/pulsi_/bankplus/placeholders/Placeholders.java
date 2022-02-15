@@ -11,12 +11,6 @@ import org.bukkit.entity.Player;
 
 public class Placeholders extends PlaceholderExpansion {
 
-    private final BankPlus plugin;
-
-    public Placeholders(BankPlus plugin) {
-        this.plugin = plugin;
-    }
-
     @Override
     public boolean persist() {
         return true;
@@ -29,7 +23,7 @@ public class Placeholders extends PlaceholderExpansion {
 
     @Override
     public String getAuthor() {
-        return plugin.getDescription().getAuthors().toString();
+        return BankPlus.getInstance().getDescription().getAuthors().toString();
     }
 
     @Override
@@ -39,7 +33,7 @@ public class Placeholders extends PlaceholderExpansion {
 
     @Override
     public String getVersion() {
-        return plugin.getDescription().getVersion();
+        return BankPlus.getInstance().getDescription().getVersion();
     }
 
     @Override
@@ -60,11 +54,11 @@ public class Placeholders extends PlaceholderExpansion {
             case "interest_cooldown": {
                 String interest;
                 if (Values.CONFIG.isInterestEnabled()) {
-                    long cooldown = Interest.interestCooldown.get(0);
+                    int cooldown = Interest.getInterestCount();
                     if (cooldown <= 0) {
                         interest = "0";
                     } else {
-                        interest = Methods.formatTime((int) cooldown);
+                        interest = Methods.formatTime(cooldown);
                     }
                 } else {
                     interest = ChatColor.RED + "Interest is disabled.";

@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.commands;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.guis.GuiBankHolder;
 import me.pulsi_.bankplus.interest.Interest;
+import me.pulsi_.bankplus.managers.DataManager;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
@@ -45,8 +46,8 @@ public class Commands implements CommandExecutor {
             }
             Player p = (Player) s;
             if (Values.CONFIG.isGuiEnabled()) {
-                GuiBankHolder.getEnchanterHolder().openBank(p);
-                Methods.playSound("PERSONAL", p, plugin);
+                GuiBankHolder.openBank(p);
+                Methods.playSound("PERSONAL", p);
             } else {
                 MessageManager.personalBalance(p);
             }
@@ -54,6 +55,44 @@ public class Commands implements CommandExecutor {
         }
 
         switch (args[0]) {
+            case "customwithdraw": {
+                if (!s.hasPermission("bankplus.customwithdraw")) {
+                    MessageManager.noPermission(s);
+                    return false;
+                }
+                if (args.length == 1) {
+                    MessageManager.specifyPlayer(s);
+                    return false;
+                }
+                Player p = Bukkit.getPlayerExact(args[1]);
+                if (p == null) {
+                    MessageManager.cannotFindPlayer(s);
+                    return false;
+                }
+
+                Methods.customWithdraw(p);
+            }
+            break;
+
+            case "customdeposit": {
+                if (!s.hasPermission("bankplus.customdeposit")) {
+                    MessageManager.noPermission(s);
+                    return false;
+                }
+                if (args.length == 1) {
+                    MessageManager.specifyPlayer(s);
+                    return false;
+                }
+                Player p = Bukkit.getPlayerExact(args[1]);
+                if (p == null) {
+                    MessageManager.cannotFindPlayer(s);
+                    return false;
+                }
+
+                Methods.customDeposit(p);
+            }
+            break;
+
             case "open": {
                 if (!s.hasPermission("bankplus.open")) {
                     MessageManager.noPermission(s);
@@ -70,7 +109,7 @@ public class Commands implements CommandExecutor {
                     return false;
                 }
 
-                GuiBankHolder.getEnchanterHolder().openBank(p);
+                GuiBankHolder.openBank(p);
                 s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7You have forced &a" + p.getName() + " &7to open their bank."));
             }
             break;
@@ -80,9 +119,7 @@ public class Commands implements CommandExecutor {
                     MessageManager.noPermission(s);
                     return false;
                 }
-                plugin.reloadConfigs();
-                Values.CONFIG.setupValues();
-                Values.MESSAGES.setupValues();
+                DataManager.reloadPlugin();
                 MessageManager.reloadMessage(s);
             }
             break;
@@ -107,7 +144,7 @@ public class Commands implements CommandExecutor {
                     return false;
                 } else {
                     if (s instanceof Player) {
-                        Methods.playSound("VIEW", (Player) s, plugin);
+                        Methods.playSound("VIEW", (Player) s);
                     }
                     Player p = Bukkit.getPlayerExact(args[1]);
                     if (p == null) {
@@ -152,18 +189,18 @@ public class Commands implements CommandExecutor {
                 switch (args[1]) {
                     case "all":
                         amount = EconomyManager.getInstance().getBankBalance((Player) s);
-                        Methods.withdraw((Player) s, amount, plugin);
+                        Methods.withdraw((Player) s, amount);
                         break;
 
                     case "half":
                         amount = EconomyManager.getInstance().getBankBalance((Player) s) / 2;
-                        Methods.withdraw((Player) s, amount, plugin);
+                        Methods.withdraw((Player) s, amount);
                         break;
 
                     default:
                         try {
                             amount = Long.parseLong(args[1]);
-                            Methods.withdraw((Player) s, amount, plugin);
+                            Methods.withdraw((Player) s, amount);
                         } catch (NumberFormatException e) {
                             MessageManager.invalidNumber(s);
                         }
@@ -188,19 +225,19 @@ public class Commands implements CommandExecutor {
                 long amount;
                 switch (args[1]) {
                     case "all":
-                        amount = (long) plugin.getEconomy().getBalance((Player) s);
-                        Methods.deposit((Player) s, amount, plugin);
+                        amount = (long) BankPlus.getEconomy().getBalance((Player) s);
+                        Methods.deposit((Player) s, amount);
                         break;
 
                     case "half":
-                        amount = (long) (plugin.getEconomy().getBalance((Player) s) / 2);
-                        Methods.deposit((Player) s, amount, plugin);
+                        amount = (long) (BankPlus.getEconomy().getBalance((Player) s) / 2);
+                        Methods.deposit((Player) s, amount);
                         break;
 
                     default:
                         try {
                             amount = Long.parseLong(args[1]);
-                            Methods.deposit((Player) s, amount, plugin);
+                            Methods.deposit((Player) s, amount);
                         } catch (NumberFormatException ex) {
                             MessageManager.invalidNumber(s);
                         }
@@ -301,24 +338,17 @@ public class Commands implements CommandExecutor {
             }
             break;
 
-            case "interest": {
-                if (!s.hasPermission("bankplus.interest.restart")) {
+            case "restartInterest": {
+                if (!s.hasPermission("bankplus.restart-interest")) {
                     MessageManager.noPermission(s);
                     return false;
                 }
-                if (args.length == 1) {
-                    MessageManager.interestUsage(s);
-                    return false;
-                }
-                if (!args[1].equalsIgnoreCase("restart")) return false;
-
                 if (!Values.CONFIG.isInterestEnabled()) {
                     MessageManager.interestIsDisabled(s);
                     return false;
                 }
                 try {
-                    long delay = plugin.config().getLong("Interest.Delay");
-                    Interest.interestCooldown.set(0, delay);
+                    Interest.setInterestCount(Values.CONFIG.getInterestDelay());
                     MessageManager.interestRestarted(s);
                 } catch (Error e) {
                     MessageManager.internalError(s);
