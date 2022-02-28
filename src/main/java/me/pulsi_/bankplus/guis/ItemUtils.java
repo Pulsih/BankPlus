@@ -123,9 +123,11 @@ public class ItemUtils {
         for (String lines : c.getStringList("Lore")) lore.add(ChatUtils.color(lines));
 
         if (BankPlus.getInstance().isPlaceholderAPIHooked()) {
-            if (PlaceholderAPI.containsPlaceholders(displayName))
-                meta.setDisplayName(PlaceholderAPI.setPlaceholders(p, displayName));
+            meta.setDisplayName(PlaceholderAPI.setPlaceholders(p, displayName));
             meta.setLore(PlaceholderAPI.setPlaceholders(p, lore));
+        } else {
+            meta.setDisplayName(displayName);
+            meta.setLore(lore);
         }
 
         i.setItemMeta(meta);
