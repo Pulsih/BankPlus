@@ -1,4 +1,4 @@
-package me.pulsi_.bankplus.guis;
+package me.pulsi_.bankplus.gui;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.managers.EconomyManager;
@@ -12,14 +12,14 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 
-public class GuiBankListener implements Listener {
+public class GuiListener implements Listener {
 
     @EventHandler
     public void guiListener(InventoryClickEvent e) {
 
         Player p = (Player) e.getWhoClicked();
 
-        if (!(p.getOpenInventory().getTopInventory().getHolder() instanceof GuiBankHolder)) return;
+        if (!(p.getOpenInventory().getTopInventory().getHolder() instanceof GuiHolder)) return;
         e.setCancelled(true);
 
         for (String key : Values.CONFIG.getGuiItems().getKeys(false)) {
@@ -93,6 +93,6 @@ public class GuiBankListener implements Listener {
     @EventHandler
     public void closeGUI(InventoryCloseEvent e) {
         Player p = (Player) e.getPlayer();
-        if (GuiBankHolder.tasks.containsKey(p)) GuiBankHolder.tasks.remove(p).cancel();
+        if (GuiHolder.tasks.containsKey(p)) GuiHolder.tasks.remove(p).cancel();
     }
 }

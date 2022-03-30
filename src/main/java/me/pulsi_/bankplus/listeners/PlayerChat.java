@@ -1,6 +1,6 @@
 package me.pulsi_.bankplus.listeners;
 
-import me.pulsi_.bankplus.guis.GuiBankHolder;
+import me.pulsi_.bankplus.gui.GuiHolder;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.Methods;
 import me.pulsi_.bankplus.utils.SetUtils;
@@ -56,6 +56,6 @@ public class PlayerChat implements Listener {
     }
 
     private void reopenBank(Player p) {
-        if (Values.CONFIG.isReopeningBankAfterChat()) GuiBankHolder.openBank(p);
+        if (Values.CONFIG.isReopeningBankAfterChat()) GuiHolder.openBank(p);
     }
 }

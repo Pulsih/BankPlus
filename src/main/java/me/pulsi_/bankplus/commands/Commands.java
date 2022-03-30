@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.commands;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.guis.GuiBankHolder;
+import me.pulsi_.bankplus.gui.GuiHolder;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.managers.DataManager;
 import me.pulsi_.bankplus.managers.EconomyManager;
@@ -46,7 +46,7 @@ public class Commands implements CommandExecutor {
             }
             Player p = (Player) s;
             if (Values.CONFIG.isGuiEnabled()) {
-                GuiBankHolder.openBank(p);
+                GuiHolder.openBank(p);
                 Methods.playSound("PERSONAL", p);
             } else {
                 MessageManager.personalBalance(p);
@@ -109,7 +109,7 @@ public class Commands implements CommandExecutor {
                     return false;
                 }
 
-                GuiBankHolder.openBank(p);
+                GuiHolder.openBank(p);
                 s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7You have forced &a" + p.getName() + " &7to open their bank."));
             }
             break;

@@ -26,27 +26,23 @@ public class PlayerJoin implements Listener {
         long startAmount = Values.CONFIG.getStartAmount();
         boolean isSendingOfflineInterestMessage = Values.CONFIG.isNotifyOfflineInterest();
 
-        String uuid = "" + p.getUniqueId();
+        String uuid = p.getUniqueId().toString();
         String pName = p.getName();
-        
+
         if (Values.CONFIG.isStoringUUIDs()) {
             String name = plugin.players().getString("Players." + uuid + ".Name");
             String sBalance = plugin.players().getString("Players." + uuid + ".Money");
             String sOfflineInterest = plugin.players().getString("Players." + uuid + ".Offline-Interest");
-            
-            if (name == null) {
-                plugin.players().set("Players." + uuid + ".Name", pName);
-                plugin.savePlayers();
-            }
+
             if (sBalance == null) {
                 ChatUtils.log("&a&lBank&9&lPlus &2Successfully registered &f" + pName + "&a's account!");
                 plugin.players().set("Players." + uuid + ".Money", startAmount);
-                plugin.savePlayers();
             }
-            if (isSendingOfflineInterestMessage && sOfflineInterest == null) {
+            if (isSendingOfflineInterestMessage && sOfflineInterest == null)
                 plugin.players().set("Players." + uuid + ".Offline-Interest", 0);
-                plugin.savePlayers();
-            }
+            if (name == null) plugin.players().set("Players." + uuid + ".Name", pName);
+
+            plugin.savePlayers();
         } else {
             String sBalance = plugin.players().getString("Players." + pName + ".Money");
             String sOfflineInterest = plugin.players().getString("Players." + pName + ".Offline-Interest");
@@ -54,35 +50,34 @@ public class PlayerJoin implements Listener {
             if (sBalance == null) {
                 ChatUtils.log("&a&lBank&9&lPlus &2Successfully registered &f" + pName + "&a's account!");
                 plugin.players().set("Players." + pName + ".Money", startAmount);
-                plugin.savePlayers();
             }
-            if (isSendingOfflineInterestMessage && sOfflineInterest == null) {
+            if (isSendingOfflineInterestMessage && sOfflineInterest == null)
                 plugin.players().set("Players." + pName + ".Offline-Interest", 0);
-                plugin.savePlayers();
-            }
+
+            plugin.savePlayers();
+
         }
 
-        if (isSendingOfflineInterestMessage) {
-            long offlineInterest = EconomyManager.getInstance().getOfflineInterest(p);
-            if (offlineInterest == 0) return;
+        if (!isSendingOfflineInterestMessage) return;
+        long offlineInterest = EconomyManager.getInstance().getOfflineInterest(p);
+        if (offlineInterest == 0) return;
 
-            long delay = Values.CONFIG.getNotifyOfflineInterestDelay();
-            String message = ChatUtils.color(Values.CONFIG.getNotifyOfflineInterestMessage());
+        long delay = Values.CONFIG.getNotifyOfflineInterestDelay();
+        String message = ChatUtils.color(Values.CONFIG.getNotifyOfflineInterestMessage());
 
-            if (delay != 0) {
-                Bukkit.getScheduler().runTaskLater(plugin, () -> p.sendMessage(message
-                        .replace("%amount%", Methods.formatCommas(offlineInterest))
-                        .replace("%amount_formatted%", Methods.format(offlineInterest))
-                        .replace("%amount_formatted_long%", Methods.formatLong(offlineInterest))
-                ), delay * 20L);
-            } else {
-                p.sendMessage(message
-                        .replace("%amount%", Methods.formatCommas(offlineInterest))
-                        .replace("%amount_formatted%", Methods.format(offlineInterest))
-                        .replace("%amount_formatted_long%", Methods.formatLong(offlineInterest))
-                );
-            }
-            EconomyManager.getInstance().setOfflineInterest(p, 0);
+        if (delay != 0) {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> p.sendMessage(message
+                    .replace("%amount%", Methods.formatCommas(offlineInterest))
+                    .replace("%amount_formatted%", Methods.format(offlineInterest))
+                    .replace("%amount_formatted_long%", Methods.formatLong(offlineInterest))
+            ), delay * 20L);
+        } else {
+            p.sendMessage(message
+                    .replace("%amount%", Methods.formatCommas(offlineInterest))
+                    .replace("%amount_formatted%", Methods.format(offlineInterest))
+                    .replace("%amount_formatted_long%", Methods.formatLong(offlineInterest))
+            );
         }
+        EconomyManager.getInstance().setOfflineInterest(p, 0);
     }
 }

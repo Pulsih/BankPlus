@@ -1,8 +1,10 @@
 # Messages File BankPlus
-#
 # Made by Pulsi_
-
-# Placeholders
+#
+# Local Placeholders
+# These placeholders will work only in some of these messages, do
+# not use it for gui or any other things because they won't work!
+#
 # %amount% -> Number Formatted with commas
 # %amount_long% -> Raw Number
 # %amount_formatted% -> Number Formatted

@@ -1,14 +1,13 @@
 # Configuration File BankPlus
-#
 # Made by Pulsi_
 
 Update-Checker: true
 
 Interest:
-  # Interest will give players that has money in bank
-  # a % of the amount every <num> of minutes etc..
+  # Interest will give players that has money in
+  # their bank a % of the amount every x minutes.
   #
-  # To restart the interest cooldown type /bank restartInterest
+  # To restart the interest type /bank restartInterest.
   Enabled: true
 
   # 5% of the bank amount
@@ -42,8 +41,8 @@ General:
   # The minimum amount that a player needs to put to withdraw / deposit, put 0 to disable.
   Minimum-Amount: 0
 
-  # Enabling this option, will reopen the inventory after
-  # typing the custom amount in the chat to deposit / withdraw
+  # Enabling this option, it will reopen the bank after
+  # typing in chat when depositing / withdraw money.
   Reopen-Bank-After-Chat: true
 
   # Worlds where the bank won't work

@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'me.pulsi_'
-version = '4.2'
+version = '4.3'
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
@@ -31,7 +31,7 @@ repositories {
 dependencies {
     compileOnly 'com.destroystokyo.paper:paper-api:1.13.2-R0.1-SNAPSHOT'
     compileOnly "com.github.MilkBowl:VaultAPI:1.7"
-    compileOnly 'me.clip:placeholderapi:2.10.9'
+    compileOnly 'me.clip:placeholderapi:2.11.1'
 }
 
 processResources {

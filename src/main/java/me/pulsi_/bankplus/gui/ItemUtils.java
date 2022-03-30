@@ -1,7 +1,5 @@
-package me.pulsi_.bankplus.guis;
+package me.pulsi_.bankplus.gui;
 
-import me.clip.placeholderapi.PlaceholderAPI;
-import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.HeadUtils;
 import me.pulsi_.bankplus.values.Values;
@@ -24,11 +22,8 @@ public class ItemUtils {
     public static ItemStack createItemStack(ConfigurationSection c) {
         String material = c.getString("Material");
         ItemStack item = getItem(material, c);
-        ItemMeta meta = item.getItemMeta();
-
         setDisplayname(c, item);
         setLore(c, item);
-
         return item;
     }
 
@@ -60,6 +55,13 @@ public class ItemUtils {
         } catch (IllegalArgumentException e) {
             item = UNKNOWN_MATERIAL;
         }
+
+        setDisplayname(c, item);
+        setLore(c, item);
+
+        int amount = c.getInt("Amount");
+        if (amount > 1) item.setAmount(amount);
+
         return item;
     }
 
@@ -113,22 +115,6 @@ public class ItemUtils {
         if (amount > 1) item.setAmount(amount);
 
         return item;
-    }
-
-    public static void setPlaceholders(ConfigurationSection c, ItemStack i, Player p) {
-        ItemMeta meta = i.getItemMeta();
-
-        String displayName = c.getString("DisplayName");
-        List<String> lore = new ArrayList<>();
-        for (String lines : c.getStringList("Lore")) lore.add(ChatUtils.color(lines));
-
-        if (BankPlus.getInstance().isPlaceholderAPIHooked()) {
-            if (PlaceholderAPI.containsPlaceholders(displayName))
-                meta.setDisplayName(PlaceholderAPI.setPlaceholders(p, displayName));
-            meta.setLore(PlaceholderAPI.setPlaceholders(p, lore));
-        }
-
-        i.setItemMeta(meta);
     }
 
     public static void setLore(ConfigurationSection c, ItemStack i) {

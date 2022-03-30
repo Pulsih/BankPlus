@@ -1,11 +1,12 @@
 package me.pulsi_.bankplus;
 
 import me.pulsi_.bankplus.external.bStats;
-import me.pulsi_.bankplus.guis.GuiBankHolder;
+import me.pulsi_.bankplus.gui.GuiHolder;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.managers.ConfigManager;
 import me.pulsi_.bankplus.managers.DataManager;
 import me.pulsi_.bankplus.placeholders.Placeholders;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.Economy;
@@ -48,11 +49,6 @@ public final class BankPlus extends JavaPlugin {
         }
         setupPermissions();
 
-        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            new Placeholders().register();
-            isPlaceholderAPIHooked = true;
-        }
-
         this.configManager = new ConfigManager(this);
         configManager.createConfigs();
 
@@ -61,7 +57,13 @@ public final class BankPlus extends JavaPlugin {
         new bStats(this, 11612);
         if (Values.CONFIG.isInterestEnabled()) Interest.startsInterest();
 
-        GuiBankHolder.buildBank();
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new Placeholders().register();
+            isPlaceholderAPIHooked = true;
+            BPLogger.info("Hooked into PlaceholderAPI!");
+        }
+
+        GuiHolder.loadBank();
     }
 
     @Override

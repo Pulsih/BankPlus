@@ -191,7 +191,7 @@ public class MessageManager {
         }
     }
 
-    public static void interestBroadcastMessageMax(Player p, long amount) {
+    public static void interestBroadcastMessage(Player p, long amount) {
         String message = Values.MESSAGES.getInterestBroadcastMessage();
         if (message != null) p.sendMessage(ChatUtils.color(message
                 .replace("%amount%", Methods.formatCommas(amount))
