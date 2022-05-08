@@ -40,7 +40,7 @@ public class UpdateChecker implements Listener {
         Player p = e.getPlayer();
         if (!Values.CONFIG.isUpdateCheckerEnabled() || (!p.isOp() && !p.hasPermission("bankplus.notify")) || isUpToDate) return;
 
-        TextComponent text = new TextComponent(ChatUtils.color("&a&lBank&9&lPlus &aNew text available! "));
+        TextComponent text = new TextComponent(ChatUtils.color("&a&lBank&9&lPlus &aNew update available! "));
         TextComponent button = new TextComponent(ChatUtils.color("&a&l[CLICK HERE]"));
         button.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.spigotmc.org/resources/%E2%9C%A8-bankplus-%E2%9C%A8-easy-and-lightweight-bank-plugin.93130/"));
         button.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click here to download it!").color(ChatColor.GRAY).create()));
