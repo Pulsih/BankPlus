@@ -3,8 +3,12 @@ package me.pulsi_.bankplus.values.configs;
 import me.pulsi_.bankplus.BankPlus;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.List;
+
 public class MessagesValues {
 
+    private List<String> helpMessage;
+    private String prefix;
     private String chatWithdraw;
     private String chatDeposit;
     private String cannotUseBankHere;
@@ -22,18 +26,18 @@ public class MessagesValues {
     private String addMessage;
     private String removeMessage;
     private String interestBroadcastMessage;
-    private String insufficientMoneyWithdraw;
-    private String insufficientMoneyDeposit;
-    private String cannotFindPlayer;
+    private String insufficientMoney;
     private String notPlayer;
     private String invalidNumber;
     private String specifyNumber;
     private String specifyPlayer;
     private String unknownCommand;
     private String interestDisabled;
-    private String error;
-    private String interestUsage;
     private String interestRestarted;
+    private String paymentSent;
+    private String paymentReceived;
+    private String invalidPlayer;
+    private String bankFull;
 
     public static MessagesValues getInstance() {
         return new MessagesValues();
@@ -42,6 +46,8 @@ public class MessagesValues {
     public void setupValues() {
         BankPlus plugin = JavaPlugin.getPlugin(BankPlus.class);
 
+        helpMessage = plugin.messages().getStringList("Help-Message");
+        prefix = plugin.messages().getString("Prefix");
         chatWithdraw = plugin.messages().getString("Chat-Withdraw");
         chatDeposit = plugin.messages().getString("Chat-Deposit");
         cannotUseBankHere = plugin.messages().getString("Cannot-Use-Bank-Here");
@@ -59,18 +65,26 @@ public class MessagesValues {
         addMessage = plugin.messages().getString("Add-Message");
         removeMessage = plugin.messages().getString("Remove-Message");
         interestBroadcastMessage = plugin.messages().getString("Interest-Broadcast.Message");
-        insufficientMoneyWithdraw = plugin.messages().getString("Insufficient-Money-Withdraw");
-        insufficientMoneyDeposit = plugin.messages().getString("Insufficient-Money-Deposit");
-        cannotFindPlayer = plugin.messages().getString("Cannot-Find-Player");
+        insufficientMoney = plugin.messages().getString("Insufficient-Money");
         notPlayer = plugin.messages().getString("Not-Player");
         invalidNumber = plugin.messages().getString("Invalid-Number");
         specifyNumber = plugin.messages().getString("Specify-Number");
         specifyPlayer = plugin.messages().getString("Specify-Player");
         unknownCommand = plugin.messages().getString("Unknown-Command");
         interestDisabled = plugin.messages().getString("Interest-Disabled");
-        error = plugin.messages().getString("Error");
-        interestUsage = plugin.messages().getString("Interest-Usage");
         interestRestarted = plugin.messages().getString("Interest-Restarted");
+        paymentSent = plugin.messages().getString("Payment-Sent");
+        paymentReceived = plugin.messages().getString("Payment-Received");
+        invalidPlayer = plugin.messages().getString("Invalid-Player");
+        bankFull = plugin.messages().getString("Bank-Full");
+    }
+
+    public List<String> getHelpMessage() {
+        return helpMessage;
+    }
+
+    public String getPrefix() {
+        return prefix;
     }
 
     public String getChatWithdraw() {
@@ -141,16 +155,8 @@ public class MessagesValues {
         return interestBroadcastMessage;
     }
 
-    public String getInsufficientMoneyWithdraw() {
-        return insufficientMoneyWithdraw;
-    }
-
-    public String getInsufficientMoneyDeposit() {
-        return insufficientMoneyDeposit;
-    }
-
-    public String getCannotFindPlayer() {
-        return cannotFindPlayer;
+    public String getInsufficientMoney() {
+        return insufficientMoney;
     }
 
     public String getNotPlayer() {
@@ -177,15 +183,23 @@ public class MessagesValues {
         return interestDisabled;
     }
 
-    public String getError() {
-        return error;
-    }
-
-    public String getInterestUsage() {
-        return interestUsage;
-    }
-
     public String getInterestRestarted() {
         return interestRestarted;
+    }
+
+    public String getPaymentSent() {
+        return paymentSent;
+    }
+
+    public String getPaymentReceived() {
+        return paymentReceived;
+    }
+
+    public String getInvalidPlayer() {
+        return invalidPlayer;
+    }
+
+    public String getBankFull() {
+        return bankFull;
     }
 }

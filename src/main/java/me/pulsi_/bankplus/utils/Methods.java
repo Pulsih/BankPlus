@@ -206,12 +206,11 @@ public class Methods {
         }
 
         if (bankBalance <= 0) {
-            MessageManager.insufficientMoneyWithdraw(p);
+            MessageManager.insufficientMoney(p);
             return;
         }
 
         if (maxWithdrawAmount != 0 && amount >= maxWithdrawAmount) amount = maxWithdrawAmount;
-
         if (bankBalance - amount <= 0) {
             EconomyManager.getInstance().withdraw(p, bankBalance);
             MessageManager.successWithdraw(p, bankBalance);
@@ -241,7 +240,7 @@ public class Methods {
         }
 
         if (money <= 0) {
-            MessageManager.insufficientMoneyDeposit(p);
+            MessageManager.insufficientMoney(p);
             return;
         }
 
@@ -289,5 +288,43 @@ public class Methods {
             }
         }
         Methods.playSound("DEPOSIT", p);
+    }
+
+    public static void pay(Player p1, Player p2, long amount) {
+        long bankBalance = EconomyManager.getInstance().getBankBalance(p1);
+        long maxBankCapacity = Values.CONFIG.getMaxBankCapacity();
+
+        if (bankBalance < amount) {
+            MessageManager.insufficientMoney(p1);
+            return;
+        }
+
+        if (maxBankCapacity == 0) {
+            EconomyManager.getInstance().removePlayerBankBalance(p1, amount);
+            MessageManager.paymentSent(p1, p2, amount);
+            EconomyManager.getInstance().addPlayerBankBalance(p2, amount);
+            MessageManager.paymentReceived(p2, p1, amount);
+            return;
+        }
+
+        long targetMoney = EconomyManager.getInstance().getBankBalance(p2);
+        if (targetMoney >= maxBankCapacity) {
+            MessageManager.bankFull(p1, p2);
+            return;
+        }
+
+        long moneyLeft = maxBankCapacity - targetMoney;
+        if (amount >= moneyLeft) {
+            EconomyManager.getInstance().removePlayerBankBalance(p1, moneyLeft);
+            MessageManager.paymentSent(p1, p2, moneyLeft);
+            EconomyManager.getInstance().addPlayerBankBalance(p2, moneyLeft);
+            MessageManager.paymentReceived(p2, p1, moneyLeft);
+            return;
+        }
+
+        EconomyManager.getInstance().removePlayerBankBalance(p1, amount);
+        MessageManager.paymentSent(p1, p2, amount);
+        EconomyManager.getInstance().addPlayerBankBalance(p2, amount);
+        MessageManager.paymentReceived(p2, p1, amount);
     }
 }

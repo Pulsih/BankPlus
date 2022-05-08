@@ -18,12 +18,6 @@ import org.bukkit.entity.Player;
 
 public class Commands implements CommandExecutor {
 
-    private final BankPlus plugin;
-
-    public Commands(BankPlus plugin) {
-        this.plugin = plugin;
-    }
-
     @Override
     public boolean onCommand(CommandSender s, Command command, String label, String[] args) {
 
@@ -36,17 +30,15 @@ public class Commands implements CommandExecutor {
         }
 
         if (args.length == 0) {
-            if (!s.hasPermission("bankplus.use")) {
-                MessageManager.noPermission(s);
-                return false;
-            }
+            if (!hasPermission(s, "bankplus.use")) return false;
             if (!(s instanceof Player)) {
-                MessageManager.notPlayer(s);
+                MessageManager.helpMessage(s);
                 return false;
             }
+
             Player p = (Player) s;
             if (Values.CONFIG.isGuiEnabled()) {
-                GuiHolder.openBank(p);
+                new GuiHolder().openBank(p);
                 Methods.playSound("PERSONAL", p);
             } else {
                 MessageManager.personalBalance(p);
@@ -54,19 +46,18 @@ public class Commands implements CommandExecutor {
             return false;
         }
 
-        switch (args[0]) {
+        switch (args[0].toLowerCase()) {
             case "customwithdraw": {
-                if (!s.hasPermission("bankplus.customwithdraw")) {
-                    MessageManager.noPermission(s);
-                    return false;
-                }
+                if (!hasPermission(s, "bankplus.customwithdraw")) return false;
+
                 if (args.length == 1) {
                     MessageManager.specifyPlayer(s);
                     return false;
                 }
+
                 Player p = Bukkit.getPlayerExact(args[1]);
                 if (p == null) {
-                    MessageManager.cannotFindPlayer(s);
+                    MessageManager.invalidPlayer(s);
                     return false;
                 }
 
@@ -75,17 +66,16 @@ public class Commands implements CommandExecutor {
             break;
 
             case "customdeposit": {
-                if (!s.hasPermission("bankplus.customdeposit")) {
-                    MessageManager.noPermission(s);
-                    return false;
-                }
+                if (!hasPermission(s, "bankplus.customdeposit")) return false;
+
                 if (args.length == 1) {
                     MessageManager.specifyPlayer(s);
                     return false;
                 }
+
                 Player p = Bukkit.getPlayerExact(args[1]);
                 if (p == null) {
-                    MessageManager.cannotFindPlayer(s);
+                    MessageManager.invalidPlayer(s);
                     return false;
                 }
 
@@ -94,92 +84,98 @@ public class Commands implements CommandExecutor {
             break;
 
             case "open": {
-                if (!s.hasPermission("bankplus.open")) {
-                    MessageManager.noPermission(s);
-                    return false;
-                }
+                if (!hasPermission(s, "bankplus.open")) return false;
+
                 if (args.length == 1) {
-                    MessageManager.specifyNumber(s);
+                    MessageManager.specifyPlayer(s);
                     return false;
                 }
 
                 Player p = Bukkit.getPlayerExact(args[1]);
                 if (p == null) {
-                    MessageManager.cannotFindPlayer(s);
+                    MessageManager.invalidPlayer(s);
                     return false;
                 }
 
-                GuiHolder.openBank(p);
+                new GuiHolder().openBank(p);
                 s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7You have forced &a" + p.getName() + " &7to open their bank."));
             }
             break;
 
-            case "reload": {
-                if (!s.hasPermission("bankplus.reload")) {
-                    MessageManager.noPermission(s);
+            case "pay": {
+                if (!hasPermission(s, "bankplus.pay")) return false;
+                if (!isPlayer(s)) return false;
+
+                if (args.length == 1) {
+                    MessageManager.specifyPlayer(s);
                     return false;
                 }
+
+                Player p = (Player) s;
+                Player target = Bukkit.getPlayerExact(args[1]);
+                if (target == null || target.equals(p)) {
+                    MessageManager.invalidPlayer(s);
+                    return false;
+                }
+
+                if (args.length == 2) {
+                    MessageManager.specifyNumber(s);
+                    return false;
+                }
+
+                String num = args[2];
+                if (isInvalidNumber(num, s)) return false;
+                long amount = Long.parseLong(num);
+
+                Methods.pay(p, target, amount);
+            }
+            break;
+
+            case "reload": {
+                if (!hasPermission(s, "bankplus.reload")) return false;
+
                 DataManager.reloadPlugin();
                 MessageManager.reloadMessage(s);
             }
             break;
 
-            case "help": {
-                if (!s.hasPermission("bankplus.help")) {
-                    MessageManager.noPermission(s);
-                    return false;
-                }
-                for (String helpMessage : plugin.messages().getStringList("Help-Message"))
-                    s.sendMessage(ChatUtils.color(helpMessage));
-            }
-            break;
+            case "help":
+                if (hasPermission(s, "bankplus.help")) MessageManager.helpMessage(s);
+                break;
 
             case "view": {
-                if (!s.hasPermission("bankplus.view")) {
-                    MessageManager.noPermission(s);
-                    return false;
-                }
+                if (!hasPermission(s, "bankplus.view")) return false;
+
                 if (args.length == 1) {
                     MessageManager.specifyPlayer(s);
                     return false;
-                } else {
-                    if (s instanceof Player) {
-                        Methods.playSound("VIEW", (Player) s);
-                    }
-                    Player p = Bukkit.getPlayerExact(args[1]);
-                    if (p == null) {
-                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
-                        MessageManager.bankOthers(s, offlinePlayer);
-                        return false;
-                    }
-                    MessageManager.bankOthers(s, p);
                 }
+
+                if (s instanceof Player) Methods.playSound("VIEW", (Player) s);
+                Player p = Bukkit.getPlayerExact(args[1]);
+                if (p == null) {
+                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
+                    MessageManager.bankOthers(s, offlinePlayer);
+                    return true;
+                }
+                MessageManager.bankOthers(s, p);
             }
             break;
 
             case "bal":
             case "balance": {
-                if (!s.hasPermission("bankplus.balance")) {
-                    MessageManager.noPermission(s);
-                    return false;
-                }
-                if (!(s instanceof Player)) {
-                    MessageManager.notPlayer(s);
-                    return false;
-                }
+                if (!hasPermission(s, "bankplus.balance")) return false;
+                if (!isPlayer(s)) return false;
+
                 MessageManager.personalBalance((Player) s);
             }
             break;
 
             case "withdraw": {
-                if (!s.hasPermission("bankplus.withdraw")) {
-                    MessageManager.noPermission(s);
-                    return false;
-                }
-                if (!(s instanceof Player)) {
-                    MessageManager.notPlayer(s);
-                    return false;
-                }
+                if (!hasPermission(s, "bankplus.withdraw")) return false;
+                if (!isPlayer(s)) return false;
+
+                Player p = (Player) s;
                 if (args.length == 1) {
                     MessageManager.specifyNumber(s);
                     return false;
@@ -188,35 +184,29 @@ public class Commands implements CommandExecutor {
                 long amount;
                 switch (args[1]) {
                     case "all":
-                        amount = EconomyManager.getInstance().getBankBalance((Player) s);
-                        Methods.withdraw((Player) s, amount);
+                        amount = EconomyManager.getInstance().getBankBalance(p);
+                        Methods.withdraw(p, amount);
                         break;
 
                     case "half":
-                        amount = EconomyManager.getInstance().getBankBalance((Player) s) / 2;
-                        Methods.withdraw((Player) s, amount);
+                        amount = EconomyManager.getInstance().getBankBalance(p) / 2;
+                        Methods.withdraw(p, amount);
                         break;
 
                     default:
-                        try {
-                            amount = Long.parseLong(args[1]);
-                            Methods.withdraw((Player) s, amount);
-                        } catch (NumberFormatException e) {
-                            MessageManager.invalidNumber(s);
-                        }
+                        String num = args[2];
+                        if (isInvalidNumber(num, s)) return false;
+                        amount = Long.parseLong(num);
+                        Methods.withdraw(p, amount);
                 }
             }
             break;
 
             case "deposit": {
-                if (!s.hasPermission("bankplus.deposit")) {
-                    MessageManager.noPermission(s);
-                    return false;
-                }
-                if (!(s instanceof Player)) {
-                    MessageManager.notPlayer(s);
-                    return false;
-                }
+                if (!hasPermission(s, "bankplus.deposit")) return false;
+                if (!isPlayer(s)) return false;
+
+                Player p = (Player) s;
                 if (args.length == 1) {
                     MessageManager.specifyNumber(s);
                     return false;
@@ -225,134 +215,117 @@ public class Commands implements CommandExecutor {
                 long amount;
                 switch (args[1]) {
                     case "all":
-                        amount = (long) BankPlus.getEconomy().getBalance((Player) s);
-                        Methods.deposit((Player) s, amount);
+                        amount = (long) BankPlus.getEconomy().getBalance(p);
+                        Methods.deposit(p, amount);
                         break;
 
                     case "half":
-                        amount = (long) (BankPlus.getEconomy().getBalance((Player) s) / 2);
-                        Methods.deposit((Player) s, amount);
+                        amount = (long) (BankPlus.getEconomy().getBalance(p) / 2);
+                        Methods.deposit(p, amount);
                         break;
 
                     default:
-                        try {
-                            amount = Long.parseLong(args[1]);
-                            Methods.deposit((Player) s, amount);
-                        } catch (NumberFormatException ex) {
-                            MessageManager.invalidNumber(s);
-                        }
+                        String num = args[2];
+                        if (isInvalidNumber(num, s)) return false;
+                        amount = Long.parseLong(num);
+                        Methods.deposit(p, amount);
                 }
             }
             break;
 
             case "set": {
-                if (!s.hasPermission("bankplus.set")) {
-                    MessageManager.noPermission(s);
-                    return false;
-                }
+                if (!hasPermission(s, "bankplus.set")) return false;
+
                 if (args.length == 1) {
                     MessageManager.specifyPlayer(s);
                     return false;
                 }
                 if (args.length == 2) {
-                    MessageManager.specifyPlayer(s);
+                    MessageManager.specifyNumber(s);
                     return false;
                 }
 
-                try {
-                    long amount = Long.parseLong(args[2]);
-                    Player p = Bukkit.getPlayerExact(args[1]);
-                    if (p == null) {
-                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
-                        EconomyManager.getInstance().setPlayerBankBalance(offlinePlayer, amount);
-                        MessageManager.setMessage(s, offlinePlayer, amount);
-                        return false;
-                    }
-                    EconomyManager.getInstance().setPlayerBankBalance(p, amount);
-                    MessageManager.setMessage(s, p, amount);
-                } catch (NumberFormatException e) {
-                    MessageManager.invalidNumber(s);
+                String num = args[2];
+                if (isInvalidNumber(num, s)) return false;
+                long amount = Long.parseLong(num);
+
+                Player p = Bukkit.getPlayerExact(args[1]);
+                if (p == null) {
+                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
+                    EconomyManager.getInstance().setPlayerBankBalance(offlinePlayer, amount);
+                    MessageManager.setMessage(s, offlinePlayer, amount);
+                    return false;
                 }
+                EconomyManager.getInstance().setPlayerBankBalance(p, amount);
+                MessageManager.setMessage(s, p, amount);
             }
             break;
 
             case "add": {
-                if (!s.hasPermission("bankplus.add")) {
-                    MessageManager.noPermission(s);
-                    return false;
-                }
+                if (!hasPermission(s, "bankplus.add")) return false;
+
                 if (args.length == 1) {
                     MessageManager.specifyPlayer(s);
                     return false;
                 }
                 if (args.length == 2) {
-                    MessageManager.specifyPlayer(s);
+                    MessageManager.specifyNumber(s);
                     return false;
                 }
 
-                try {
-                    long amount = Long.parseLong(args[2]);
-                    Player p = Bukkit.getPlayerExact(args[1]);
-                    if (p == null) {
-                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
-                        EconomyManager.getInstance().addPlayerBankBalance(offlinePlayer, amount);
-                        MessageManager.setMessage(s, offlinePlayer, amount);
-                        return false;
-                    }
-                    EconomyManager.getInstance().addPlayerBankBalance(p, amount);
-                    MessageManager.setMessage(s, p, amount);
-                } catch (NumberFormatException e) {
-                    MessageManager.invalidNumber(s);
+                String num = args[2];
+                if (isInvalidNumber(num, s)) return false;
+                long amount = Long.parseLong(num);
+
+                Player p = Bukkit.getPlayerExact(args[1]);
+                if (p == null) {
+                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
+                    EconomyManager.getInstance().addPlayerBankBalance(offlinePlayer, amount);
+                    MessageManager.addMessage(s, offlinePlayer, amount);
+                    return false;
                 }
+                EconomyManager.getInstance().addPlayerBankBalance(p, amount);
+                MessageManager.addMessage(s, p, amount);
             }
             break;
 
             case "remove": {
-                if (!s.hasPermission("bankplus.remove")) {
-                    MessageManager.noPermission(s);
-                    return false;
-                }
+                if (!hasPermission(s, "bankplus.remove")) return false;
+
                 if (args.length == 1) {
                     MessageManager.specifyPlayer(s);
                     return false;
                 }
                 if (args.length == 2) {
-                    MessageManager.specifyPlayer(s);
+                    MessageManager.specifyNumber(s);
                     return false;
                 }
 
-                try {
-                    long amount = Long.parseLong(args[2]);
-                    Player p = Bukkit.getPlayerExact(args[1]);
-                    if (p == null) {
-                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
-                        EconomyManager.getInstance().removePlayerBankBalance(offlinePlayer, amount);
-                        MessageManager.setMessage(s, offlinePlayer, amount);
-                        return false;
-                    }
-                    EconomyManager.getInstance().removePlayerBankBalance(p, amount);
-                    MessageManager.setMessage(s, p, amount);
-                } catch (NumberFormatException e) {
-                    MessageManager.invalidNumber(s);
+                String num = args[2];
+                if (isInvalidNumber(num, s)) return false;
+                long amount = Long.parseLong(num);
+
+                Player p = Bukkit.getPlayerExact(args[1]);
+                if (p == null) {
+                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
+                    EconomyManager.getInstance().removePlayerBankBalance(offlinePlayer, amount);
+                    MessageManager.removeMessage(s, offlinePlayer, amount);
+                    return false;
                 }
+                EconomyManager.getInstance().removePlayerBankBalance(p, amount);
+                MessageManager.removeMessage(s, p, amount);
             }
             break;
 
             case "restartInterest": {
-                if (!s.hasPermission("bankplus.restart-interest")) {
-                    MessageManager.noPermission(s);
-                    return false;
-                }
+                if (!hasPermission(s, "bankplus.restart-interest")) return false;
+
                 if (!Values.CONFIG.isInterestEnabled()) {
                     MessageManager.interestIsDisabled(s);
                     return false;
                 }
-                try {
-                    Interest.setInterestCount(Values.CONFIG.getInterestDelay());
-                    MessageManager.interestRestarted(s);
-                } catch (Error e) {
-                    MessageManager.internalError(s);
-                }
+                Interest.setInterestCount(Values.CONFIG.getInterestDelay());
+                MessageManager.interestRestarted(s);
             }
             break;
 
@@ -361,5 +334,31 @@ public class Commands implements CommandExecutor {
                 break;
         }
         return true;
+    }
+
+    private boolean isInvalidNumber(String number, CommandSender s) {
+        try {
+            long num = Long.parseLong(number);
+            if (num < 0) {
+                MessageManager.cannotUseNegativeNumber(s);
+                return true;
+            }
+        } catch (NumberFormatException e) {
+            MessageManager.invalidNumber(s);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean hasPermission(CommandSender s, String permission) {
+        if (s.hasPermission(permission)) return true;
+        MessageManager.noPermission(s);
+        return false;
+    }
+
+    private boolean isPlayer(CommandSender s) {
+        if (s instanceof Player) return true;
+        MessageManager.notPlayer(s);
+        return false;
     }
 }

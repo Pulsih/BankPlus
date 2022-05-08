@@ -23,10 +23,11 @@ public class GuiHolder implements InventoryHolder {
     public static final Map<Player, BukkitTask> tasks = new HashMap<>();
     private static Inventory guiBank;
 
-    public static void openBank(Player p) {
+    public void openBank(Player p) {
         GuiHolder holder = new GuiHolder();
+        holder.loadBank();
         p.openInventory(holder.getInventory());
-        placeHeads(p);
+        holder.placeHeads(p);
 
         int delay = Values.CONFIG.getGuiUpdateDelay();
         if (delay != 0) {
@@ -36,7 +37,7 @@ public class GuiHolder implements InventoryHolder {
         }
     }
 
-    public static void loadBank() {
+    public void loadBank() {
         guiBank = Bukkit.createInventory(new GuiHolder(), guiLines(Values.CONFIG.getGuiLines()), ChatUtils.color(Values.CONFIG.getGuiTitle()));
 
         ConfigurationSection itemsConfiguration = Values.CONFIG.getGuiItems();
@@ -55,10 +56,7 @@ public class GuiHolder implements InventoryHolder {
                 if (guiBank.getItem(i) == null) guiBank.setItem(i, ItemUtils.getGuiFiller());
     }
 
-    private static void placeHeads(Player p) {
-        Inventory bank = p.getOpenInventory().getTopInventory();
-        if (!(bank.getHolder() instanceof GuiHolder)) return;
-
+    private void placeHeads(Player p) {
         ConfigurationSection c = Values.CONFIG.getGuiItems();
         for (String items : c.getKeys(false)) {
             ConfigurationSection itemsList = c.getConfigurationSection(items);
@@ -67,14 +65,14 @@ public class GuiHolder implements InventoryHolder {
             if (material == null || !material.startsWith("HEAD")) continue;
 
             try {
-                bank.setItem(itemsList.getInt("Slot") - 1, ItemUtils.getHead(itemsList, p));
+                guiBank.setItem(itemsList.getInt("Slot") - 1, ItemUtils.getHead(itemsList, p));
             } catch (ArrayIndexOutOfBoundsException e) {
-                bank.addItem(ItemUtils.getHead(itemsList, p));
+                guiBank.addItem(ItemUtils.getHead(itemsList, p));
             }
         }
     }
 
-    private static void updateLore(Player p) {
+    private void updateLore(Player p) {
         Inventory bank = p.getOpenInventory().getTopInventory();
         if (!(bank.getHolder() instanceof GuiHolder)) return;
 
@@ -83,15 +81,15 @@ public class GuiHolder implements InventoryHolder {
             ConfigurationSection itemsList = c.getConfigurationSection(items);
 
             ItemStack i = bank.getItem(itemsList.getInt("Slot") - 1);
-            if (i != null) setPlaceholders(itemsList, i, p);
+            if (i != null) setLore(itemsList, i, p);
         }
     }
 
-    public static void setPlaceholders(ConfigurationSection c, ItemStack i, Player p) {
+    private void setLore(ConfigurationSection c, ItemStack i, Player p) {
         ItemMeta meta = i.getItemMeta();
 
         String displayName = c.getString("DisplayName");
-        if (displayName == null) displayName = ChatUtils.color("&c&l*CANNOT FIND DISPLAYNAME*");
+        if (displayName == null) displayName = "&c&l*CANNOT FIND DISPLAYNAME*";
 
         List<String> lore = new ArrayList<>();
         for (String lines : c.getStringList("Lore")) lore.add(ChatUtils.color(lines));
@@ -99,12 +97,15 @@ public class GuiHolder implements InventoryHolder {
         if (BankPlus.getInstance().isPlaceholderAPIHooked()) {
             meta.setDisplayName(PlaceholderAPI.setPlaceholders(p, ChatUtils.color(displayName)));
             meta.setLore(PlaceholderAPI.setPlaceholders(p, lore));
+        } else {
+            meta.setDisplayName(ChatUtils.color(displayName));
+            meta.setLore(lore);
         }
 
         i.setItemMeta(meta);
     }
 
-    private static int guiLines(int number) {
+    private int guiLines(int number) {
         switch (number) {
             case 1:
                 return 9;

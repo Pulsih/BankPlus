@@ -1,6 +1,7 @@
-package me.pulsi_.bankplus.gui;
+package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.gui.GuiHolder;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.Methods;

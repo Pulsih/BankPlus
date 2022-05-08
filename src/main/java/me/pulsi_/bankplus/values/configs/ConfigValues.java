@@ -47,6 +47,7 @@ public class ConfigValues {
     private long interestMaxAmount;
     private double interestMoneyGiven;
     private List<String> worldsBlacklist;
+    private List<String> exitCommands;
     private boolean isGuiEnabled;
     private boolean isReopeningBankAfterChat;
     private boolean isInterestEnabled;
@@ -109,6 +110,7 @@ public class ConfigValues {
         interestMaxAmount = plugin.config().getLong("Interest.Max-Amount");
         interestMoneyGiven = plugin.config().getDouble("Interest.Money-Given");
         worldsBlacklist = plugin.config().getStringList("General.Worlds-Blacklist");
+        exitCommands = plugin.config().getStringList("General.Chat-Exit-Commands");
         isGuiEnabled = plugin.config().getBoolean("Gui.Enabled");
         isReopeningBankAfterChat = plugin.config().getBoolean("General.Reopen-Bank-After-Chat");
         isInterestEnabled = plugin.config().getBoolean("Interest.Enabled");
@@ -238,6 +240,9 @@ public class ConfigValues {
     }
     public List<String> getWorldsBlacklist() {
         return worldsBlacklist;
+    }
+    public List<String> getExitCommands() {
+        return exitCommands;
     }
     public boolean isGuiEnabled() {
         return isGuiEnabled;

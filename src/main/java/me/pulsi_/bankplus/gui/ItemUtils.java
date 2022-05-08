@@ -22,8 +22,6 @@ public class ItemUtils {
     public static ItemStack createItemStack(ConfigurationSection c) {
         String material = c.getString("Material");
         ItemStack item = getItem(material, c);
-        setDisplayname(c, item);
-        setLore(c, item);
         return item;
     }
 
@@ -55,12 +53,6 @@ public class ItemUtils {
         } catch (IllegalArgumentException e) {
             item = UNKNOWN_MATERIAL;
         }
-
-        setDisplayname(c, item);
-        setLore(c, item);
-
-        int amount = c.getInt("Amount");
-        if (amount > 1) item.setAmount(amount);
 
         return item;
     }

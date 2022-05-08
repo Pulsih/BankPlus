@@ -5,6 +5,7 @@ import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.Methods;
 import me.pulsi_.bankplus.utils.SetUtils;
 import me.pulsi_.bankplus.values.Values;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,15 +21,16 @@ public class PlayerChat implements Listener {
         Player p = e.getPlayer();
         String mess = ChatColor.stripColor(e.getMessage());
 
-        if (mess.equalsIgnoreCase("exit")) {
-            e.setCancelled(true);
-            SetUtils.playerDepositing.remove(p);
-            SetUtils.playerWithdrawing.remove(p);
-            reopenBank(p);
-            return;
-        }
-
         if (SetUtils.playerDepositing.contains(p)) {
+
+            if (mess.equalsIgnoreCase("exit")) {
+                e.setCancelled(true);
+                SetUtils.playerDepositing.remove(p);
+                executeExitCommands(p);
+                reopenBank(p);
+                return;
+            }
+
             try {
                 Methods.deposit(p, Long.parseLong(mess));
                 reopenBank(p);
@@ -42,6 +44,15 @@ public class PlayerChat implements Listener {
         }
 
         if (SetUtils.playerWithdrawing.contains(p)) {
+
+            if (mess.equalsIgnoreCase("exit")) {
+                e.setCancelled(true);
+                SetUtils.playerWithdrawing.remove(p);
+                executeExitCommands(p);
+                reopenBank(p);
+                return;
+            }
+
             try {
                 Methods.withdraw(p, Long.parseLong(mess));
                 reopenBank(p);
@@ -56,6 +67,19 @@ public class PlayerChat implements Listener {
     }
 
     private void reopenBank(Player p) {
-        if (Values.CONFIG.isReopeningBankAfterChat()) GuiHolder.openBank(p);
+        if (Values.CONFIG.isReopeningBankAfterChat()) new GuiHolder().openBank(p);
+    }
+
+    private void executeExitCommands(Player p) {
+        for (String cmd : Values.CONFIG.getExitCommands()) {
+            if (cmd.startsWith("[CONSOLE]")) {
+                String s = cmd.replace("[CONSOLE] ", "").replace("%player%", p.getName());
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), s);
+            }
+            if (cmd.startsWith("[PLAYER]")) {
+                String s = cmd.replace("[PLAYER] ", "");
+                p.chat("/" + s);
+            }
+        }
     }
 }

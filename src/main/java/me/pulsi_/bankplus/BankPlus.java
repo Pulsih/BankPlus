@@ -20,7 +20,6 @@ public final class BankPlus extends JavaPlugin {
 
     private static BankPlus instance;
     private ConfigManager configManager;
-    private Interest interest;
 
     private static Economy econ = null;
     private static Permission perms = null;
@@ -62,8 +61,6 @@ public final class BankPlus extends JavaPlugin {
             isPlaceholderAPIHooked = true;
             BPLogger.info("Hooked into PlaceholderAPI!");
         }
-
-        GuiHolder.loadBank();
     }
 
     @Override

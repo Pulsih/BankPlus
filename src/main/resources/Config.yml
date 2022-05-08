@@ -1,7 +1,11 @@
 # Configuration File BankPlus
 # Made by Pulsi_
 
+# Check for new updates of the plugin.
 Update-Checker: true
+
+# DO NOT TOUCH THIS
+Config-Version:
 
 Interest:
   # Interest will give players that has money in
@@ -45,12 +49,22 @@ General:
   # typing in chat when depositing / withdraw money.
   Reopen-Bank-After-Chat: true
 
+  # These commands will be executed when typing "exit"
+  # in chat while using the custom withdraw / deposit.
+  #
+  # [] Means no commands will be executed.
+  # Remove [] and the comments to use the commands, you
+  # can put as many commands as you want.
+  Chat-Exit-Commands: []
+    #- "[CONSOLE] tell %player% You closed the bank!"
+    #- "[PLAYER] say I closed the bank!"
+
   # Worlds where the bank won't work
   Worlds-Blacklist:
     - "noBankWorld"
 
-  # Send an alert message to remember the player
-  # how much interest has earned while being offline
+  # Send an alert message to show the player how
+  # much money has earned while being offline.
   Offline-Interest-Earned-Message:
     Enabled: true
     # 2 Seconds, put 0 to disable the delay

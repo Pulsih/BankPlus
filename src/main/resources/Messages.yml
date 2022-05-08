@@ -11,47 +11,54 @@
 # %amount_formatted_long% -> Number formatted without "."
 # %player_name% -> Player name
 
+# The main plugin prefix that will
+# be shown before every message.
+# To remove it put: ""
+Prefix: "&a&lBank&9&lPlus"
+
 # System
-Reload: "&a&lBank&9&lPlus &aPlugin reloaded!"
-Error: "&a&lBank&9&lPlus &cSome errors occurred..."
-Unknown-Command: "&a&lBank&9&lPlus &cUnknown Command!"
-Interest-Restarted: "&a&lBank&9&lPlus &aInterest Restarted!"
-Interest-Disabled: "&a&lBank&9&lPlus &cYou can't use Interest, please enabled it in the config!"
-Interest-Usage: "&a&lBank&9&lPlus &aUsage: /bank interest restart"
+Reload: "&aPlugin reloaded!"
+Unknown-Command: "&cUnknown Command!"
+Interest-Restarted: "&aInterest Restarted!"
+Interest-Disabled: "&cYou can't use Interest, please enabled it in the config!"
 
 # Error
-Specify-Number: "&a&lBank&9&lPlus &cPlease specify a number!"
-Specify-Player: "&a&lBank&9&lPlus &cPlease specify a player!"
-Not-Player: "&a&lBank&9&lPlus &cYou are not a player!"
-Invalid-Number: "&a&lBank&9&lPlus &cPlease choose a valid number!"
-Insufficient-Money-Withdraw: "&a&lBank&9&lPlus &cYou don't have sufficient money to withdraw!"
-Insufficient-Money-Deposit: "&a&lBank&9&lPlus &cYou don't have sufficient money to deposit!"
-No-Permission: "&a&lBank&9&lPlus &cYou don't have the permission!"
-Cannot-Deposit-Anymore: "&a&lBank&9&lPlus &cYou can't deposit anymore money!"
-Cannot-Use-Bank-Here: "&a&lBank&9&lPlus &cSorry, the bank is disabled in this world!"
-Cannot-Use-Negative-Number: "&a&lBank&9&lPlus &cYou can't use a negative number!"
-Minimum-Number: "&a&lBank&9&lPlus &cPlease use an higher number for this action! ( min: %minimum% )"
+Specify-Number: "&cPlease specify a number!"
+Specify-Player: "&cPlease specify a player!"
+Not-Player: "&cYou are not a player!"
+Invalid-Player: "&cPlease choose a valid player!"
+Invalid-Number: "&cPlease choose a valid number!"
+Insufficient-Money: "&cYou don't have sufficient money!"
+No-Permission: "&cYou don't have the permission!"
+Cannot-Deposit-Anymore: "&cYou can't deposit anymore money!"
+Cannot-Use-Bank-Here: "&cSorry, the bank is disabled in this world!"
+Cannot-Use-Negative-Number: "&cYou can't use a negative number!"
+Bank-Full: "&cThe bank of %player% is full!"
+Minimum-Number: "&cPlease use an higher number for this action! ( min: %minimum% )"
 
 # Plugin
-Personal-Bank: "&a&lBank&9&lPlus &aYou have &f%amount_formatted% Money &ain your bank."
-Success-Withdraw: "&a&lBank&9&lPlus &aSuccessfully withdrew &f%amount_formatted% Money&a!"
-Success-Deposit: "&a&lBank&9&lPlus &aSuccessfully deposited &f%amount_formatted% Money&a!"
-Bank-Others: "&a&lBank&9&lPlus &f%player_name% &ahas &f%amount_formatted% Money &ain their bank!"
-Set-Message: "&a&lBank&9&lPlus &aYou have set &f%player_name%'s &abank balance to &f%amount_formatted%&a!"
-Add-Message: "&a&lBank&9&lPlus &aYou have added &f%amount_formatted% Money &ato &f%player_name%'s &abank balance!"
-Remove-Message: "&a&lBank&9&lPlus &aYou have removed &f%amount_formatted% Money &ato &f%player_name%'s &abank balance!"
-Chat-Deposit: "&a&lBank&9&lPlus &aType an amount in chat to deposit, type 'exit' to exit"
-Chat-Withdraw: "&a&lBank&9&lPlus &aType an amount in chat to withdraw, type 'exit' to exit"
+Personal-Bank: "&aYou have &f%amount_formatted% &amoney in your bank."
+Success-Withdraw: "&aSuccessfully withdrew &f%amount_formatted% &amoney!"
+Success-Deposit: "&aSuccessfully deposited &f%amount_formatted% &amoney!"
+Bank-Others: "&f%player_name% &ahas &f%amount_formatted% Money &ain their bank!"
+Set-Message: "&aYou have set &f%player_name%'s &abank balance to &f%amount_formatted%&a!"
+Add-Message: "&aYou have added &f%amount_formatted% Money &ato &f%player_name%'s &abank balance!"
+Remove-Message: "&aYou have removed &f%amount_formatted% &amoney to &f%player_name%'s &abank balance!"
+Pay-Message: "&aYou have added &f%amount_formatted% Money &ato &f%player_name%'s &abank balance!"
+Chat-Deposit: "&aType an amount in chat to deposit, type 'exit' to exit"
+Chat-Withdraw: "&aType an amount in chat to withdraw, type 'exit' to exit"
+Payment-Sent: "&aYou have successfully sent &f%player% %amount_formatted% &amoney!"
+Payment-Received: "&aYou have received &f%amount_formatted% &amoney from &f%player%!"
 Title-Custom-Amount:
   Enabled: true
   Title-Deposit: "&fType in &achat &fan, amount to &adeposit"
   Title-Withdraw: "&fType in &achat &fan, amount to &awithdraw"
 Interest-Broadcast:
   Enabled: true
-  Message: "&a&lBank&9&lPlus &aYou have earned &f%amount_formatted% Money &ain interest!"
-  No-Money: "&a&lBank&9&lPlus &aSadly, you received 0 money from interest."
+  Message: "&aYou have earned &f%amount_formatted% Money &ain interest!"
+  No-Money: "&aSadly, you received 0 money from interest."
 Help-Message:
-  - "&a&lBank&9&lPlus &aHelp page"
+  - "&aHelp page"
   - "&a/bank deposit <amount> &7Deposit an amount of Money."
   - "&a/bank withdraw <amount> &7Withdraw an amount of Money."
   - "&a/bank view <player> &7View the balance of a player."

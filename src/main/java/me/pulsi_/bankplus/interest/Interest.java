@@ -59,7 +59,7 @@ public class Interest {
             if (p.hasPermission("bankplus.receive.interest"))
                 giveInterest(p, moneyPercentage, maxAmount);
 
-        if (Values.CONFIG.isGivingInterestToOfflinePlayers()) return;
+        if (!Values.CONFIG.isGivingInterestToOfflinePlayers()) return;
         String wName = Bukkit.getWorlds().get(0).getName();
         for (OfflinePlayer p : Bukkit.getOfflinePlayers())
             if (BankPlus.getPermissions().playerHas(wName, p, "bankplus.receive.interest"))

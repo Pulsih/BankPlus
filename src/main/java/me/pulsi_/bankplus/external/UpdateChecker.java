@@ -40,15 +40,15 @@ public class UpdateChecker implements Listener {
         Player p = e.getPlayer();
         if (!Values.CONFIG.isUpdateCheckerEnabled() || (!p.isOp() && !p.hasPermission("bankplus.notify")) || isUpToDate) return;
 
-        TextComponent update = new TextComponent(ChatUtils.color("&a&lBank&9&lPlus &aNew update available! "));
-        TextComponent updateButton = new TextComponent(ChatUtils.color("&a&l[CLICK HERE]"));
-        updateButton.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.spigotmc.org/resources/%E2%9C%A8-bankplus-%E2%9C%A8-easy-and-lightweight-bank-plugin.93130/"));
-        updateButton.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click here to download it!").color(ChatColor.GRAY).create()));
-        update.addExtra(updateButton);
+        TextComponent text = new TextComponent(ChatUtils.color("&a&lBank&9&lPlus &aNew text available! "));
+        TextComponent button = new TextComponent(ChatUtils.color("&a&l[CLICK HERE]"));
+        button.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.spigotmc.org/resources/%E2%9C%A8-bankplus-%E2%9C%A8-easy-and-lightweight-bank-plugin.93130/"));
+        button.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click here to download it!").color(ChatColor.GRAY).create()));
+        text.addExtra(button);
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             p.sendMessage("");
-            p.spigot().sendMessage(update);
+            p.spigot().sendMessage(text);
             p.sendMessage("");
         }, 80);
     }

@@ -5,7 +5,7 @@ import me.pulsi_.bankplus.commands.Commands;
 import me.pulsi_.bankplus.commands.TabCompletion;
 import me.pulsi_.bankplus.external.UpdateChecker;
 import me.pulsi_.bankplus.gui.GuiHolder;
-import me.pulsi_.bankplus.gui.GuiListener;
+import me.pulsi_.bankplus.listeners.GuiListener;
 import me.pulsi_.bankplus.listeners.PlayerChat;
 import me.pulsi_.bankplus.listeners.PlayerJoin;
 import me.pulsi_.bankplus.utils.ChatUtils;
@@ -48,7 +48,7 @@ public class DataManager {
         BankPlus.getInstance().reloadConfigs();
         Values.CONFIG.setupValues();
         Values.MESSAGES.setupValues();
-        GuiHolder.loadBank();
+        new GuiHolder().loadBank();
     }
 
     private static void registerEvents() {
@@ -63,7 +63,7 @@ public class DataManager {
 
     private static void setupCommands() {
         BankPlus plugin = BankPlus.getInstance();
-        plugin.getCommand("bankplus").setExecutor(new Commands(plugin));
+        plugin.getCommand("bankplus").setExecutor(new Commands());
         plugin.getCommand("bankplus").setTabCompleter(new TabCompletion());
     }
 }

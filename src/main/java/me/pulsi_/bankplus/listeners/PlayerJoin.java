@@ -60,17 +60,18 @@ public class PlayerJoin implements Listener {
 
         if (!isSendingOfflineInterestMessage) return;
         long offlineInterest = EconomyManager.getInstance().getOfflineInterest(p);
-        if (offlineInterest == 0) return;
+        if (offlineInterest <= 0) return;
 
         long delay = Values.CONFIG.getNotifyOfflineInterestDelay();
         String message = ChatUtils.color(Values.CONFIG.getNotifyOfflineInterestMessage());
 
         if (delay != 0) {
-            Bukkit.getScheduler().runTaskLater(plugin, () -> p.sendMessage(message
+            Bukkit.getScheduler().runTaskLater(plugin, () ->
+                    p.sendMessage(message
                     .replace("%amount%", Methods.formatCommas(offlineInterest))
                     .replace("%amount_formatted%", Methods.format(offlineInterest))
                     .replace("%amount_formatted_long%", Methods.formatLong(offlineInterest))
-            ), delay * 20L);
+                    ), delay * 20L);
         } else {
             p.sendMessage(message
                     .replace("%amount%", Methods.formatCommas(offlineInterest))
