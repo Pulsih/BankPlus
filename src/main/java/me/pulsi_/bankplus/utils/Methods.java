@@ -195,15 +195,7 @@ public class Methods {
         long bankBalance = EconomyManager.getInstance().getBankBalance(p);
         long maxWithdrawAmount = Values.CONFIG.getMaxWithdrawAmount();
 
-        if (amount < 0) {
-            MessageManager.cannotUseNegativeNumber(p);
-            return;
-        }
-
-        if (amount < Values.CONFIG.getMinimumAmount()) {
-            MessageManager.minimumAmountAlert(p);
-            return;
-        }
+        if (!hasMoney(bankBalance, amount, p)) return;
 
         if (bankBalance <= 0) {
             MessageManager.insufficientMoney(p);
@@ -211,12 +203,9 @@ public class Methods {
         }
 
         if (maxWithdrawAmount != 0 && amount >= maxWithdrawAmount) amount = maxWithdrawAmount;
-        if (bankBalance - amount <= 0) {
-            EconomyManager.getInstance().withdraw(p, bankBalance);
-            MessageManager.successWithdraw(p, bankBalance);
-            Methods.playSound("WITHDRAW", p);
-            return;
-        }
+
+        long newBalance = bankBalance - amount;
+        if (newBalance <= 0) amount = bankBalance;
 
         EconomyManager.getInstance().withdraw(p, amount);
         MessageManager.successWithdraw(p, amount);
@@ -229,65 +218,41 @@ public class Methods {
         long maxDepositAmount = Values.CONFIG.getMaxDepositAmount();
         long maxBankCapacity = Values.CONFIG.getMaxBankCapacity();
 
-        if (amount < 0) {
-            MessageManager.cannotUseNegativeNumber(p);
-            return;
-        }
+        if (!hasMoney(money, amount, p)) return;
 
-        if (amount < Values.CONFIG.getMinimumAmount()) {
-            MessageManager.minimumAmountAlert(p);
-            return;
-        }
+        if (money < amount) amount = money;
 
-        if (money <= 0) {
-            MessageManager.insufficientMoney(p);
-            return;
-        }
+        if (maxDepositAmount != 0 && amount >= maxDepositAmount) amount = maxDepositAmount;
 
-        if (money < amount) {
-            EconomyManager.getInstance().deposit(p, money);
-            MessageManager.successDeposit(p, money);
-            Methods.playSound("DEPOSIT", p);
-            return;
-        }
-
-        if (maxBankCapacity != 0) {
+        long newBalance = bankBalance + amount;
+        if (maxBankCapacity != 0 && newBalance >= maxBankCapacity) {
             if (bankBalance >= maxBankCapacity) {
                 MessageManager.cannotDepositMore(p);
                 return;
             }
-            if (bankBalance + amount >= maxBankCapacity) {
-                EconomyManager.getInstance().deposit(p, maxBankCapacity - bankBalance);
-                MessageManager.successDeposit(p, maxBankCapacity - bankBalance);
-            } else {
-                if (maxDepositAmount != 0) {
-                    if (amount >= maxDepositAmount) {
-                        EconomyManager.getInstance().deposit(p, maxDepositAmount);
-                        MessageManager.successDeposit(p, maxDepositAmount);
-                    } else {
-                        EconomyManager.getInstance().deposit(p, amount);
-                        MessageManager.successDeposit(p, amount);
-                    }
-                } else {
-                    EconomyManager.getInstance().deposit(p, amount);
-                    MessageManager.successDeposit(p, amount);
-                }
-            }
-        } else {
-            if (maxDepositAmount != 0) {
-                if (amount >= maxDepositAmount) {
-                    EconomyManager.getInstance().deposit(p, maxDepositAmount);
-                    MessageManager.successDeposit(p, maxDepositAmount);
-                } else {
-                    EconomyManager.getInstance().deposit(p, amount);
-                    MessageManager.successDeposit(p, amount);
-                }
-            } else {
-                EconomyManager.getInstance().deposit(p, amount);
-                MessageManager.successDeposit(p, amount);
-            }
+            amount = maxBankCapacity - bankBalance;
         }
+
+        EconomyManager.getInstance().deposit(p, amount);
+        MessageManager.successDeposit(p, amount);
         Methods.playSound("DEPOSIT", p);
+    }
+
+    private static boolean hasMoney(long money, long amount, Player p) {
+        if (amount < 0) {
+            MessageManager.cannotUseNegativeNumber(p);
+            return false;
+        }
+        if (amount < Values.CONFIG.getMinimumAmount()) {
+            MessageManager.minimumAmountAlert(p);
+            return false;
+        }
+        if (money <= 0) {
+            MessageManager.insufficientMoney(p);
+            return false;
+        }
+
+        return true;
     }
 
     public static void pay(Player p1, Player p2, long amount) {

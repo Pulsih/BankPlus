@@ -194,7 +194,7 @@ public class Commands implements CommandExecutor {
                         break;
 
                     default:
-                        String num = args[2];
+                        String num = args[1];
                         if (isInvalidNumber(num, s)) return false;
                         amount = Long.parseLong(num);
                         Methods.withdraw(p, amount);
@@ -225,7 +225,7 @@ public class Commands implements CommandExecutor {
                         break;
 
                     default:
-                        String num = args[2];
+                        String num = args[1];
                         if (isInvalidNumber(num, s)) return false;
                         amount = Long.parseLong(num);
                         Methods.deposit(p, amount);
@@ -317,7 +317,7 @@ public class Commands implements CommandExecutor {
             }
             break;
 
-            case "restartInterest": {
+            case "restartinterest": {
                 if (!hasPermission(s, "bankplus.restart-interest")) return false;
 
                 if (!Values.CONFIG.isInterestEnabled()) {
@@ -326,6 +326,28 @@ public class Commands implements CommandExecutor {
                 }
                 Interest.setInterestCount(Values.CONFIG.getInterestDelay());
                 MessageManager.interestRestarted(s);
+            }
+            break;
+
+            case "giveinterest": {
+                if (!hasPermission(s, "bankplus.give-interest")) return false;
+
+                if (!Values.CONFIG.isInterestEnabled()) {
+                    MessageManager.interestIsDisabled(s);
+                    return false;
+                }
+                Interest.giveInterestToEveryone();
+            }
+            break;
+
+            case "interest": {
+                if (!hasPermission(s, "bankplus.interest")) return false;
+
+                if (!Values.CONFIG.isInterestEnabled()) {
+                    MessageManager.interestIsDisabled(s);
+                    return false;
+                }
+                MessageManager.interestTime(s);
             }
             break;
 

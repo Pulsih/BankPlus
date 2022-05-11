@@ -7,6 +7,8 @@ import java.util.List;
 
 public class MessagesValues {
 
+    private boolean alertMissingMessage;
+    private boolean alertMissingMessagePathNull;
     private List<String> helpMessage;
     private String prefix;
     private String chatWithdraw;
@@ -38,6 +40,7 @@ public class MessagesValues {
     private String paymentReceived;
     private String invalidPlayer;
     private String bankFull;
+    private String interestTime;
 
     public static MessagesValues getInstance() {
         return new MessagesValues();
@@ -46,6 +49,8 @@ public class MessagesValues {
     public void setupValues() {
         BankPlus plugin = JavaPlugin.getPlugin(BankPlus.class);
 
+        alertMissingMessage = plugin.messages().getBoolean("Alert-Missing-Message");
+        alertMissingMessagePathNull = plugin.messages().getString("Alert-Missing-Message") == null;
         helpMessage = plugin.messages().getStringList("Help-Message");
         prefix = plugin.messages().getString("Prefix");
         chatWithdraw = plugin.messages().getString("Chat-Withdraw");
@@ -77,6 +82,15 @@ public class MessagesValues {
         paymentReceived = plugin.messages().getString("Payment-Received");
         invalidPlayer = plugin.messages().getString("Invalid-Player");
         bankFull = plugin.messages().getString("Bank-Full");
+        interestTime = plugin.messages().getString("Interest-Time");
+    }
+
+    public boolean isAlertMissingMessage() {
+        return alertMissingMessage;
+    }
+
+    public boolean isAlertMissingMessagePathNull() {
+        return alertMissingMessagePathNull;
     }
 
     public List<String> getHelpMessage() {
@@ -201,5 +215,9 @@ public class MessagesValues {
 
     public String getBankFull() {
         return bankFull;
+    }
+
+    public String getInterestTime() {
+        return interestTime;
     }
 }

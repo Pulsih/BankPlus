@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.interest;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.managers.MessageManager;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.Methods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -55,15 +56,21 @@ public class Interest {
         double moneyPercentage = Values.CONFIG.getInterestMoneyGiven();
         long maxAmount = Values.CONFIG.getInterestMaxAmount();
 
-        for (Player p : Bukkit.getOnlinePlayers())
-            if (p.hasPermission("bankplus.receive.interest"))
-                giveInterest(p, moneyPercentage, maxAmount);
+        BPLogger.info("The interest has been given!");
+
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (p.hasPermission("bankplus.receive.interest")) giveInterest(p, moneyPercentage, maxAmount);
+        }
 
         if (!Values.CONFIG.isGivingInterestToOfflinePlayers()) return;
-        String wName = Bukkit.getWorlds().get(0).getName();
-        for (OfflinePlayer p : Bukkit.getOfflinePlayers())
-            if (BankPlus.getPermissions().playerHas(wName, p, "bankplus.receive.interest"))
-                giveInterest(p, moneyPercentage, maxAmount);
+
+        Bukkit.getScheduler().runTaskAsynchronously(BankPlus.getInstance(), () -> {
+            String wName = Bukkit.getWorlds().get(0).getName();
+            for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
+                if (!p.isOnline() && BankPlus.getPermissions().playerHas(wName, p, "bankplus.receive.interest"))
+                    giveInterest(p, moneyPercentage, maxAmount);
+            }
+        });
     }
 
     private static void giveInterest(Player p, double moneyPercentage, long maxAmount) {
@@ -102,7 +109,7 @@ public class Interest {
 
         if (bankBalance == 0) return;
         if (maxBankCapacity != 0 && (bankBalance + interestMoney >= maxBankCapacity)) {
-            EconomyManager.getInstance().setPlayerBankBalance(p, maxBankCapacity);
+            EconomyManager.getInstance().addPlayerBankBalance(p, maxBankCapacity - bankBalance);
             addOfflineInterest(p, maxBankCapacity - bankBalance);
             return;
         }

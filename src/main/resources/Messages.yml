@@ -11,6 +11,10 @@
 # %amount_formatted_long% -> Number formatted without "."
 # %player_name% -> Player name
 
+# Enable or disable to send to a player an
+# alert message when a message is missing.
+Alert-Missing-Message: true
+
 # The main plugin prefix that will
 # be shown before every message.
 # To remove it put: ""
@@ -49,6 +53,7 @@ Chat-Deposit: "&aType an amount in chat to deposit, type 'exit' to exit"
 Chat-Withdraw: "&aType an amount in chat to withdraw, type 'exit' to exit"
 Payment-Sent: "&aYou have successfully sent &f%player% %amount_formatted% &amoney!"
 Payment-Received: "&aYou have received &f%amount_formatted% &amoney from &f%player%!"
+Interest-Time: "&aWait more &f%time% &ato get the interest."
 Title-Custom-Amount:
   Enabled: true
   Title-Deposit: "&fType in &achat &fan, amount to &adeposit"
