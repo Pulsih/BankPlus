@@ -4,17 +4,23 @@
 # Check for new updates of the plugin.
 Update-Checker: true
 
-# DO NOT TOUCH THIS
-Config-Version:
-
+# Interest will give players that has money in
+# their bank a % of the amount every x minutes.
+#
+# To restart the interest type /bank restartInterest.
 Interest:
-  # Interest will give players that has money in
-  # their bank a % of the amount every x minutes.
-  #
-  # To restart the interest type /bank restartInterest.
+  # Enable or disable the interest feature.
   Enabled: true
 
-  # 5% of the bank amount
+  AFK-Settings:
+    # If a player is AFK, it won't receive the interest.
+    Ignore-AFK-Players: false
+
+    # The time, in minutes, that will pass
+    # before marking a player as AFK
+    AFK-Time: 5
+
+  # 5% of the bank amount ( it will add: balance x Money-Given )
   Money-Given: 0.05
 
   # 5 Minutes | DO NOT USE NUMBERS WITH DECIMALS!

@@ -24,12 +24,12 @@ public class GuiListener implements Listener {
         e.setCancelled(true);
 
         for (String key : Values.CONFIG.getGuiItems().getKeys(false)) {
-            ConfigurationSection items = BankPlus.getInstance().config().getConfigurationSection("Gui.Items." + key);
+            ConfigurationSection item = BankPlus.getCm().getConfig("config").getConfigurationSection("Gui.Items." + key);
 
-            if (e.getSlot() + 1 != items.getInt("Slot") || items.getString("Action.Action-Type") == null) continue;
+            if (e.getSlot() + 1 != item.getInt("Slot") || item.getString("Action.Action-Type") == null) continue;
 
-            String actionType = items.getString("Action.Action-Type").toLowerCase();
-            String actionAmount = items.getString("Action.Amount").toLowerCase();
+            String actionType = item.getString("Action.Action-Type").toLowerCase();
+            String actionAmount = item.getString("Action.Amount").toLowerCase();
 
             long amount;
             switch (actionType) {
@@ -40,12 +40,12 @@ public class GuiListener implements Listener {
                             break;
 
                         case "all":
-                            amount = EconomyManager.getInstance().getBankBalance(p);
+                            amount = EconomyManager.getBankBalance(p);
                             Methods.withdraw(p, amount);
                             break;
 
                         case "half":
-                            amount = EconomyManager.getInstance().getBankBalance(p) / 2;
+                            amount = EconomyManager.getBankBalance(p) / 2;
                             Methods.withdraw(p, amount);
                             break;
 

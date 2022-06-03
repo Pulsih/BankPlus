@@ -1,10 +1,11 @@
 package me.pulsi_.bankplus;
 
 import me.pulsi_.bankplus.external.bStats;
-import me.pulsi_.bankplus.gui.GuiHolder;
 import me.pulsi_.bankplus.interest.Interest;
+import me.pulsi_.bankplus.managers.AFKManager;
 import me.pulsi_.bankplus.managers.ConfigManager;
 import me.pulsi_.bankplus.managers.DataManager;
+import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.placeholders.Placeholders;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.ChatUtils;
@@ -12,14 +13,14 @@ import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class BankPlus extends JavaPlugin {
 
     private static BankPlus instance;
-    private ConfigManager configManager;
+    private static ConfigManager cm;
 
     private static Economy econ = null;
     private static Permission perms = null;
@@ -48,24 +49,29 @@ public final class BankPlus extends JavaPlugin {
         }
         setupPermissions();
 
-        this.configManager = new ConfigManager(this);
-        configManager.createConfigs();
+        cm = new ConfigManager(this);
+        cm.createConfigs();
 
         DataManager.setupPlugin();
 
         new bStats(this, 11612);
-        if (Values.CONFIG.isInterestEnabled()) Interest.startsInterest();
 
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            BPLogger.info("Hooked into PlaceholderAPI!");
             new Placeholders().register();
             isPlaceholderAPIHooked = true;
-            BPLogger.info("Hooked into PlaceholderAPI!");
         }
+
+        if (Values.CONFIG.isInterestEnabled()) Interest.startsInterest();
+        if (Values.CONFIG.isIgnoringAfkPlayers()) AFKManager.startCountdown();
     }
 
     @Override
     public void onDisable() {
         instance = this;
+
+        for (Player p : Bukkit.getOnlinePlayers())
+            EconomyManager.saveBankBalance(p);
 
         DataManager.shutdownPlugin();
         if (Values.CONFIG.isInterestEnabled()) Interest.saveInterest();
@@ -79,28 +85,12 @@ public final class BankPlus extends JavaPlugin {
         return perms;
     }
 
-    public FileConfiguration config() {
-        return configManager.getConfiguration();
-    }
-
-    public FileConfiguration messages() {
-        return configManager.getMessages();
-    }
-
-    public FileConfiguration players() {
-        return configManager.getPlayers();
-    }
-
-    public void reloadConfigs() {
-        configManager.reloadConfigs();
-    }
-
-    public void savePlayers() {
-        configManager.savePlayers();
-    }
-
     public boolean isPlaceholderAPIHooked() {
         return isPlaceholderAPIHooked;
+    }
+
+    public static ConfigManager getCm() {
+        return cm;
     }
 
     private boolean setupEconomy() {

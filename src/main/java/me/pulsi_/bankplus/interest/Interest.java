@@ -1,9 +1,9 @@
 package me.pulsi_.bankplus.interest;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.managers.AFKManager;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.managers.MessageManager;
-import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.Methods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -14,21 +14,27 @@ public class Interest {
 
     private static int interestCount;
 
+    public static boolean isInterestActive = false;
+
     public static void startsInterest() {
-        int interestSave = BankPlus.getInstance().players().getInt("Interest-Save");
+        int interestSave = BankPlus.getCm().getConfig("players").getInt("Interest-Save");
         interestCount = Values.CONFIG.getInterestDelay();
 
         if (interestSave <= 0) {
             loopInterest(interestCount + 1);
         } else {
             loopInterest(interestSave + 1);
-            BankPlus.getInstance().players().set("Interest-Save", null);
-            BankPlus.getInstance().savePlayers();
+            BankPlus.getCm().getConfig("players").set("Interest-Save", null);
+            BankPlus.getCm().savePlayers();
         }
     }
 
     public static void loopInterest(int cooldown) {
-        if (!Values.CONFIG.isInterestEnabled()) return;
+        if (!Values.CONFIG.isInterestEnabled()) {
+            isInterestActive = false;
+            return;
+        }
+        isInterestActive = true;
 
         if (cooldown <= 1) {
             interestCount = Values.CONFIG.getInterestDelay();
@@ -40,8 +46,8 @@ public class Interest {
     }
 
     public static void saveInterest() {
-        BankPlus.getInstance().players().set("Interest-Save", interestCount);
-        BankPlus.getInstance().savePlayers();
+        BankPlus.getCm().getConfig("players").set("Interest-Save", interestCount);
+        BankPlus.getCm().savePlayers();
     }
 
     public static int getInterestCount() {
@@ -56,80 +62,77 @@ public class Interest {
         double moneyPercentage = Values.CONFIG.getInterestMoneyGiven();
         long maxAmount = Values.CONFIG.getInterestMaxAmount();
 
-        BPLogger.info("The interest has been given!");
-
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            if (p.hasPermission("bankplus.receive.interest")) giveInterest(p, moneyPercentage, maxAmount);
-        }
+        for (Player p : Bukkit.getOnlinePlayers())
+            if (p.hasPermission("bankplus.receive.interest"))
+                if (Values.CONFIG.isIgnoringAfkPlayers() && !AFKManager.isAFK(p))
+                    giveInterest(p, moneyPercentage, maxAmount);
 
         if (!Values.CONFIG.isGivingInterestToOfflinePlayers()) return;
-
         Bukkit.getScheduler().runTaskAsynchronously(BankPlus.getInstance(), () -> {
             String wName = Bukkit.getWorlds().get(0).getName();
-            for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
+            for (OfflinePlayer p : Bukkit.getOfflinePlayers())
                 if (!p.isOnline() && BankPlus.getPermissions().playerHas(wName, p, "bankplus.receive.interest"))
                     giveInterest(p, moneyPercentage, maxAmount);
-            }
         });
     }
 
     private static void giveInterest(Player p, double moneyPercentage, long maxAmount) {
-        long bankBalance = EconomyManager.getInstance().getBankBalance(p);
+        long bankBalance = EconomyManager.getBankBalance(p);
         long interestMoney = (long) (bankBalance * moneyPercentage);
         long maxBankCapacity = Values.CONFIG.getMaxBankCapacity();
 
         if (bankBalance == 0) {
-            if (Values.CONFIG.isInterestBroadcastEnabled()) MessageManager.noMoneyInterest(p);
+            if (Values.MESSAGES.isInterestBroadcastEnabled()) MessageManager.noMoneyInterest(p);
             return;
         }
         if (maxBankCapacity != 0 && (bankBalance + interestMoney >= maxBankCapacity)) {
-            EconomyManager.getInstance().setPlayerBankBalance(p, maxBankCapacity);
-            if (Values.CONFIG.isInterestBroadcastEnabled())
+            EconomyManager.setPlayerBankBalance(p, maxBankCapacity);
+            if (Values.MESSAGES.isInterestBroadcastEnabled())
                 MessageManager.interestBroadcastMessage(p, maxBankCapacity - bankBalance);
             return;
         }
         if (interestMoney == 0) {
-            EconomyManager.getInstance().addPlayerBankBalance(p, 1);
-            if (Values.CONFIG.isInterestBroadcastEnabled()) MessageManager.interestBroadcastMessage(p, 1);
+            EconomyManager.addPlayerBankBalance(p, 1);
+            if (Values.MESSAGES.isInterestBroadcastEnabled()) MessageManager.interestBroadcastMessage(p, 1);
             return;
         }
         if (interestMoney >= maxAmount) {
-            EconomyManager.getInstance().addPlayerBankBalance(p, maxAmount);
-            if (Values.CONFIG.isInterestBroadcastEnabled()) MessageManager.interestBroadcastMessage(p, maxAmount);
+            EconomyManager.addPlayerBankBalance(p, maxAmount);
+            if (Values.MESSAGES.isInterestBroadcastEnabled()) MessageManager.interestBroadcastMessage(p, maxAmount);
             return;
         }
-        EconomyManager.getInstance().addPlayerBankBalance(p, interestMoney);
-        if (Values.CONFIG.isInterestBroadcastEnabled()) MessageManager.interestBroadcastMessage(p, interestMoney);
+        EconomyManager.addPlayerBankBalance(p, interestMoney);
+        if (Values.MESSAGES.isInterestBroadcastEnabled()) MessageManager.interestBroadcastMessage(p, interestMoney);
     }
 
     private static void giveInterest(OfflinePlayer p, double moneyPercentage, long maxAmount) {
-        long bankBalance = EconomyManager.getInstance().getBankBalance(p);
+        long bankBalance = EconomyManager.getBankBalance(p);
         long interestMoney = (long) (bankBalance * moneyPercentage);
         long maxBankCapacity = Values.CONFIG.getMaxBankCapacity();
 
         if (bankBalance == 0) return;
         if (maxBankCapacity != 0 && (bankBalance + interestMoney >= maxBankCapacity)) {
-            EconomyManager.getInstance().addPlayerBankBalance(p, maxBankCapacity - bankBalance);
+            EconomyManager.addPlayerBankBalance(p, maxBankCapacity - bankBalance);
             addOfflineInterest(p, maxBankCapacity - bankBalance);
             return;
         }
         if (interestMoney == 0) {
-            EconomyManager.getInstance().addPlayerBankBalance(p, 1);
+            EconomyManager.addPlayerBankBalance(p, 1);
             addOfflineInterest(p, 1);
             return;
         }
         if (interestMoney >= maxAmount) {
-            EconomyManager.getInstance().addPlayerBankBalance(p, maxAmount);
+            EconomyManager.addPlayerBankBalance(p, maxAmount);
             addOfflineInterest(p, maxAmount);
             return;
         }
-        EconomyManager.getInstance().addPlayerBankBalance(p, interestMoney);
+        EconomyManager.addPlayerBankBalance(p, interestMoney);
         addOfflineInterest(p, interestMoney);
     }
 
     private static void addOfflineInterest(OfflinePlayer p, long amount) {
         if (!Values.CONFIG.isOfflineInterestEarnedMessageEnabled()) return;
-        long offlineInterest = EconomyManager.getInstance().getOfflineInterest(p);
-        EconomyManager.getInstance().setOfflineInterest(p, offlineInterest + amount);
+        long offlineInterest = EconomyManager.getOfflineInterest(p);
+        EconomyManager.setOfflineInterest(p, offlineInterest + amount);
     }
 }

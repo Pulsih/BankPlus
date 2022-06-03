@@ -72,7 +72,7 @@ public class Methods {
 
     public static void customWithdraw(Player p) {
         SetUtils.playerWithdrawing.add(p);
-        if (Values.CONFIG.isTitleCustomAmountEnabled())
+        if (Values.MESSAGES.isTitleCustomAmountEnabled())
             Methods.sendTitle("Title-Custom-Amount.Title-Withdraw", p);
         MessageManager.chatWithdraw(p);
         p.closeInventory();
@@ -80,14 +80,14 @@ public class Methods {
 
     public static void customDeposit(Player p) {
         SetUtils.playerDepositing.add(p);
-        if (Values.CONFIG.isTitleCustomAmountEnabled())
+        if (Values.MESSAGES.isTitleCustomAmountEnabled())
             Methods.sendTitle("Title-Custom-Amount.Title-Deposit", p);
         MessageManager.chatDeposit(p);
         p.closeInventory();
     }
 
     public static void sendTitle(String path, Player p) {
-        String title = BankPlus.getInstance().messages().getString(path);
+        String title = BankPlus.getCm().getConfig("messages").getString(path);
         if (title == null) return;
         if (title.contains(",")) {
             String[] titles = title.split(",");
@@ -166,7 +166,7 @@ public class Methods {
 
             case "PERSONAL": {
                 if (!Values.CONFIG.isPersonalSoundEnabled()) return;
-                String personalSound = Values.CONFIG.getViewSound();
+                String personalSound = Values.CONFIG.getPersonalSound();
                 if (personalSound == null) {
                     BPLogger.warn("You are missing a string! &8(&ePath: General.Personal-Sound.Sound in config.yml&8)");
                     return;
@@ -191,8 +191,12 @@ public class Methods {
         return delay * 1200;
     }
 
+    public static long millisecondsInMinutes(int delay) {
+        return delay * 60000L;
+    }
+
     public static void withdraw(Player p, long amount) {
-        long bankBalance = EconomyManager.getInstance().getBankBalance(p);
+        long bankBalance = EconomyManager.getBankBalance(p);
         long maxWithdrawAmount = Values.CONFIG.getMaxWithdrawAmount();
 
         if (!hasMoney(bankBalance, amount, p)) return;
@@ -207,13 +211,13 @@ public class Methods {
         long newBalance = bankBalance - amount;
         if (newBalance <= 0) amount = bankBalance;
 
-        EconomyManager.getInstance().withdraw(p, amount);
+        EconomyManager.withdraw(p, amount);
         MessageManager.successWithdraw(p, amount);
         Methods.playSound("WITHDRAW", p);
     }
 
     public static void deposit(Player p, long amount) {
-        long bankBalance = EconomyManager.getInstance().getBankBalance(p);
+        long bankBalance = EconomyManager.getBankBalance(p);
         long money = (long) BankPlus.getEconomy().getBalance(p);
         long maxDepositAmount = Values.CONFIG.getMaxDepositAmount();
         long maxBankCapacity = Values.CONFIG.getMaxBankCapacity();
@@ -233,7 +237,7 @@ public class Methods {
             amount = maxBankCapacity - bankBalance;
         }
 
-        EconomyManager.getInstance().deposit(p, amount);
+        EconomyManager.deposit(p, amount);
         MessageManager.successDeposit(p, amount);
         Methods.playSound("DEPOSIT", p);
     }
@@ -256,7 +260,7 @@ public class Methods {
     }
 
     public static void pay(Player p1, Player p2, long amount) {
-        long bankBalance = EconomyManager.getInstance().getBankBalance(p1);
+        long bankBalance = EconomyManager.getBankBalance(p1);
         long maxBankCapacity = Values.CONFIG.getMaxBankCapacity();
 
         if (bankBalance < amount) {
@@ -265,14 +269,14 @@ public class Methods {
         }
 
         if (maxBankCapacity == 0) {
-            EconomyManager.getInstance().removePlayerBankBalance(p1, amount);
+            EconomyManager.removePlayerBankBalance(p1, amount);
             MessageManager.paymentSent(p1, p2, amount);
-            EconomyManager.getInstance().addPlayerBankBalance(p2, amount);
+            EconomyManager.addPlayerBankBalance(p2, amount);
             MessageManager.paymentReceived(p2, p1, amount);
             return;
         }
 
-        long targetMoney = EconomyManager.getInstance().getBankBalance(p2);
+        long targetMoney = EconomyManager.getBankBalance(p2);
         if (targetMoney >= maxBankCapacity) {
             MessageManager.bankFull(p1, p2);
             return;
@@ -280,16 +284,16 @@ public class Methods {
 
         long moneyLeft = maxBankCapacity - targetMoney;
         if (amount >= moneyLeft) {
-            EconomyManager.getInstance().removePlayerBankBalance(p1, moneyLeft);
+            EconomyManager.removePlayerBankBalance(p1, moneyLeft);
             MessageManager.paymentSent(p1, p2, moneyLeft);
-            EconomyManager.getInstance().addPlayerBankBalance(p2, moneyLeft);
+            EconomyManager.addPlayerBankBalance(p2, moneyLeft);
             MessageManager.paymentReceived(p2, p1, moneyLeft);
             return;
         }
 
-        EconomyManager.getInstance().removePlayerBankBalance(p1, amount);
+        EconomyManager.removePlayerBankBalance(p1, amount);
         MessageManager.paymentSent(p1, p2, amount);
-        EconomyManager.getInstance().addPlayerBankBalance(p2, amount);
+        EconomyManager.addPlayerBankBalance(p2, amount);
         MessageManager.paymentReceived(p2, p1, amount);
     }
 }

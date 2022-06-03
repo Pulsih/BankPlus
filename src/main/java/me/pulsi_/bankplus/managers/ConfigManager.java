@@ -1,6 +1,8 @@
 package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.utils.BPLogger;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -35,28 +37,59 @@ public class ConfigManager {
             config.load(configFile);
             messages.load(messagesFile);
             players.load(playersFile);
-        } catch (IOException | InvalidConfigurationException e) { /* suppress the error */ }
+        } catch (IOException | InvalidConfigurationException e) {
+            BPLogger.error(e.getMessage());
+        }
     }
 
-    public FileConfiguration getConfiguration() {
-        return config;
-    }
-    public FileConfiguration getMessages() {
-        return messages;
-    }
-    public FileConfiguration getPlayers() {
-        return players;
+    public FileConfiguration getConfig(String type) {
+        switch (type) {
+            case "config":
+                return config;
+            case "messages":
+                return messages;
+            case "players":
+                return players;
+            default:
+                return null;
+        }
     }
 
-    public void reloadConfigs() {
-        config = YamlConfiguration.loadConfiguration(configFile);
-        messages = YamlConfiguration.loadConfiguration(messagesFile);
-        players = YamlConfiguration.loadConfiguration(playersFile);
+    public void reloadConfig(String type) {
+        switch (type) {
+            case "config":
+                try {
+                    config.load(configFile);
+                } catch (IOException | InvalidConfigurationException e) {
+                    BPLogger.error(e.getMessage());
+                }
+                break;
+
+            case "messages":
+                try {
+                    messages.load(messagesFile);
+                } catch (IOException | InvalidConfigurationException e) {
+                    BPLogger.error(e.getMessage());
+                }
+                break;
+
+            case "players":
+                try {
+                    players.load(playersFile);
+                } catch (IOException | InvalidConfigurationException e) {
+                    BPLogger.error(e.getMessage());
+                }
+                break;
+        }
     }
 
     public void savePlayers() {
-        try {
-            players.save(playersFile);
-        } catch (IOException ignored) { /* suppress the error */ }
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            try {
+                players.save(playersFile);
+            } catch (IOException e) {
+                BPLogger.error(e.getMessage());
+            }
+        });
     }
 }

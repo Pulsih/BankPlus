@@ -184,12 +184,12 @@ public class Commands implements CommandExecutor {
                 long amount;
                 switch (args[1]) {
                     case "all":
-                        amount = EconomyManager.getInstance().getBankBalance(p);
+                        amount = EconomyManager.getBankBalance(p);
                         Methods.withdraw(p, amount);
                         break;
 
                     case "half":
-                        amount = EconomyManager.getInstance().getBankBalance(p) / 2;
+                        amount = EconomyManager.getBankBalance(p) / 2;
                         Methods.withdraw(p, amount);
                         break;
 
@@ -252,11 +252,11 @@ public class Commands implements CommandExecutor {
                 Player p = Bukkit.getPlayerExact(args[1]);
                 if (p == null) {
                     OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
-                    EconomyManager.getInstance().setPlayerBankBalance(offlinePlayer, amount);
+                    EconomyManager.setPlayerBankBalance(offlinePlayer, amount);
                     MessageManager.setMessage(s, offlinePlayer, amount);
                     return false;
                 }
-                EconomyManager.getInstance().setPlayerBankBalance(p, amount);
+                EconomyManager.setPlayerBankBalance(p, amount);
                 MessageManager.setMessage(s, p, amount);
             }
             break;
@@ -280,11 +280,11 @@ public class Commands implements CommandExecutor {
                 Player p = Bukkit.getPlayerExact(args[1]);
                 if (p == null) {
                     OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
-                    EconomyManager.getInstance().addPlayerBankBalance(offlinePlayer, amount);
+                    EconomyManager.addPlayerBankBalance(offlinePlayer, amount);
                     MessageManager.addMessage(s, offlinePlayer, amount);
                     return false;
                 }
-                EconomyManager.getInstance().addPlayerBankBalance(p, amount);
+                EconomyManager.addPlayerBankBalance(p, amount);
                 MessageManager.addMessage(s, p, amount);
             }
             break;
@@ -308,11 +308,11 @@ public class Commands implements CommandExecutor {
                 Player p = Bukkit.getPlayerExact(args[1]);
                 if (p == null) {
                     OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
-                    EconomyManager.getInstance().removePlayerBankBalance(offlinePlayer, amount);
+                    EconomyManager.removePlayerBankBalance(offlinePlayer, amount);
                     MessageManager.removeMessage(s, offlinePlayer, amount);
                     return false;
                 }
-                EconomyManager.getInstance().removePlayerBankBalance(p, amount);
+                EconomyManager.removePlayerBankBalance(p, amount);
                 MessageManager.removeMessage(s, p, amount);
             }
             break;
@@ -324,7 +324,10 @@ public class Commands implements CommandExecutor {
                     MessageManager.interestIsDisabled(s);
                     return false;
                 }
-                Interest.setInterestCount(Values.CONFIG.getInterestDelay());
+                if (!Interest.isInterestActive)
+                    Interest.loopInterest(Values.CONFIG.getInterestDelay());
+                else
+                    Interest.setInterestCount(Values.CONFIG.getInterestDelay());
                 MessageManager.interestRestarted(s);
             }
             break;

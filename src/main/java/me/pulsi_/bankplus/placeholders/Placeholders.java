@@ -40,7 +40,7 @@ public class Placeholders extends PlaceholderExpansion {
     public String onPlaceholderRequest(Player p, String identifier) {
         if (p == null) return "Player not online";
 
-        long balance = EconomyManager.getInstance().getBankBalance(p);
+        long balance = EconomyManager.getBankBalance(p);
 
         switch (identifier) {
             case "balance":

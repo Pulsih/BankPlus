@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.values.configs;
 
 import me.pulsi_.bankplus.BankPlus;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.List;
 
@@ -41,48 +41,52 @@ public class MessagesValues {
     private String invalidPlayer;
     private String bankFull;
     private String interestTime;
+    private boolean isTitleCustomAmountEnabled;
+    private boolean isInterestBroadcastEnabled;
 
     public static MessagesValues getInstance() {
         return new MessagesValues();
     }
 
     public void setupValues() {
-        BankPlus plugin = JavaPlugin.getPlugin(BankPlus.class);
+        FileConfiguration messages = BankPlus.getCm().getConfig("messages");
 
-        alertMissingMessage = plugin.messages().getBoolean("Alert-Missing-Message");
-        alertMissingMessagePathNull = plugin.messages().getString("Alert-Missing-Message") == null;
-        helpMessage = plugin.messages().getStringList("Help-Message");
-        prefix = plugin.messages().getString("Prefix");
-        chatWithdraw = plugin.messages().getString("Chat-Withdraw");
-        chatDeposit = plugin.messages().getString("Chat-Deposit");
-        cannotUseBankHere = plugin.messages().getString("Cannot-Use-Bank-Here");
-        noPermission = plugin.messages().getString("No-Permission");
-        minimumAmount = plugin.messages().getString("Minimum-Number");
-        reloadMessage = plugin.messages().getString("Reload");
-        cannotUseNegativeNumber = plugin.messages().getString("Cannot-Use-Negative-Number");
-        cannotDepositAnymore = plugin.messages().getString("Cannot-Deposit-Anymore");
-        noMoneyInterest = plugin.messages().getString("Interest-Broadcast.No-Money");
-        personalBank = plugin.messages().getString("Personal-Bank");
-        successWithdraw = plugin.messages().getString("Success-Withdraw");
-        successDeposit = plugin.messages().getString("Success-Deposit");
-        bankOthers = plugin.messages().getString("Bank-Others");
-        setMessage = plugin.messages().getString("Set-Message");
-        addMessage = plugin.messages().getString("Add-Message");
-        removeMessage = plugin.messages().getString("Remove-Message");
-        interestBroadcastMessage = plugin.messages().getString("Interest-Broadcast.Message");
-        insufficientMoney = plugin.messages().getString("Insufficient-Money");
-        notPlayer = plugin.messages().getString("Not-Player");
-        invalidNumber = plugin.messages().getString("Invalid-Number");
-        specifyNumber = plugin.messages().getString("Specify-Number");
-        specifyPlayer = plugin.messages().getString("Specify-Player");
-        unknownCommand = plugin.messages().getString("Unknown-Command");
-        interestDisabled = plugin.messages().getString("Interest-Disabled");
-        interestRestarted = plugin.messages().getString("Interest-Restarted");
-        paymentSent = plugin.messages().getString("Payment-Sent");
-        paymentReceived = plugin.messages().getString("Payment-Received");
-        invalidPlayer = plugin.messages().getString("Invalid-Player");
-        bankFull = plugin.messages().getString("Bank-Full");
-        interestTime = plugin.messages().getString("Interest-Time");
+        alertMissingMessage = messages.getBoolean("Alert-Missing-Message");
+        alertMissingMessagePathNull = messages.getString("Alert-Missing-Message") == null;
+        helpMessage = messages.getStringList("Help-Message");
+        prefix = messages.getString("Prefix");
+        chatWithdraw = messages.getString("Chat-Withdraw");
+        chatDeposit = messages.getString("Chat-Deposit");
+        cannotUseBankHere = messages.getString("Cannot-Use-Bank-Here");
+        noPermission = messages.getString("No-Permission");
+        minimumAmount = messages.getString("Minimum-Number");
+        reloadMessage = messages.getString("Reload");
+        cannotUseNegativeNumber = messages.getString("Cannot-Use-Negative-Number");
+        cannotDepositAnymore = messages.getString("Cannot-Deposit-Anymore");
+        noMoneyInterest = messages.getString("Interest-Broadcast.No-Money");
+        personalBank = messages.getString("Personal-Bank");
+        successWithdraw = messages.getString("Success-Withdraw");
+        successDeposit = messages.getString("Success-Deposit");
+        bankOthers = messages.getString("Bank-Others");
+        setMessage = messages.getString("Set-Message");
+        addMessage = messages.getString("Add-Message");
+        removeMessage = messages.getString("Remove-Message");
+        interestBroadcastMessage = messages.getString("Interest-Broadcast.Message");
+        insufficientMoney = messages.getString("Insufficient-Money");
+        notPlayer = messages.getString("Not-Player");
+        invalidNumber = messages.getString("Invalid-Number");
+        specifyNumber = messages.getString("Specify-Number");
+        specifyPlayer = messages.getString("Specify-Player");
+        unknownCommand = messages.getString("Unknown-Command");
+        interestDisabled = messages.getString("Interest-Disabled");
+        interestRestarted = messages.getString("Interest-Restarted");
+        paymentSent = messages.getString("Payment-Sent");
+        paymentReceived = messages.getString("Payment-Received");
+        invalidPlayer = messages.getString("Invalid-Player");
+        bankFull = messages.getString("Bank-Full");
+        interestTime = messages.getString("Interest-Time");
+        isTitleCustomAmountEnabled = messages.getBoolean("Title-Custom-Amount.Enabled");
+        isInterestBroadcastEnabled = messages.getBoolean("Interest-Broadcast.Enabled");
     }
 
     public boolean isAlertMissingMessage() {
@@ -219,5 +223,13 @@ public class MessagesValues {
 
     public String getInterestTime() {
         return interestTime;
+    }
+
+    public boolean isTitleCustomAmountEnabled() {
+        return isTitleCustomAmountEnabled;
+    }
+
+    public boolean isInterestBroadcastEnabled() {
+        return isInterestBroadcastEnabled;
     }
 }

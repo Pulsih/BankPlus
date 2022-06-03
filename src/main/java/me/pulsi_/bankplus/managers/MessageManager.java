@@ -13,7 +13,7 @@ public class MessageManager {
     public static void personalBalance(Player p) {
         String message = Values.MESSAGES.getPersonalBank();
         if (isMessageNull(p, message)) return;
-        long amount = EconomyManager.getInstance().getBankBalance(p);
+        long amount = EconomyManager.getBankBalance(p);
         p.sendMessage(ChatUtils.color(addPrefix(message)
                 .replace("%amount%", Methods.formatCommas(amount))
                 .replace("%amount_long%", "" + amount)
@@ -57,7 +57,7 @@ public class MessageManager {
     public static void bankOthers(CommandSender s, Player p) {
         String message = Values.MESSAGES.getBankOthers();
         if (isMessageNull(s, message)) return;
-        long amount = EconomyManager.getInstance().getBankBalance(p);
+        long amount = EconomyManager.getBankBalance(p);
         s.sendMessage(ChatUtils.color(addPrefix(message)
                 .replace("%player_name%", p.getName())
                 .replace("%amount%", Methods.formatCommas(amount))
@@ -70,7 +70,7 @@ public class MessageManager {
     public static void bankOthers(CommandSender s, OfflinePlayer p) {
         String message = Values.MESSAGES.getBankOthers();
         if (isMessageNull(s, message)) return;
-        long amount = EconomyManager.getInstance().getBankBalance(p);
+        long amount = EconomyManager.getBankBalance(p);
         s.sendMessage(ChatUtils.color(addPrefix(message)
                 .replace("%player_name%", p.getName())
                 .replace("%amount%", Methods.formatCommas(amount))

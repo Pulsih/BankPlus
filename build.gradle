@@ -5,10 +5,7 @@ plugins {
 }
 
 group = 'me.pulsi_'
-version = '4.8'
-
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+version = '4.9'
 
 repositories {
     mavenCentral()

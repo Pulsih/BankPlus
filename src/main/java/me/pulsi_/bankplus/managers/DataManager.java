@@ -5,9 +5,7 @@ import me.pulsi_.bankplus.commands.Commands;
 import me.pulsi_.bankplus.commands.TabCompletion;
 import me.pulsi_.bankplus.external.UpdateChecker;
 import me.pulsi_.bankplus.gui.GuiHolder;
-import me.pulsi_.bankplus.listeners.GuiListener;
-import me.pulsi_.bankplus.listeners.PlayerChat;
-import me.pulsi_.bankplus.listeners.PlayerJoin;
+import me.pulsi_.bankplus.listeners.*;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.plugin.PluginManager;
@@ -45,20 +43,25 @@ public class DataManager {
     }
 
     public static void reloadPlugin() {
-        BankPlus.getInstance().reloadConfigs();
+        BankPlus.getCm().reloadConfig("config");
+        BankPlus.getCm().reloadConfig("messages");
         Values.CONFIG.setupValues();
         Values.MESSAGES.setupValues();
         new GuiHolder().loadBank();
+
+        if (!AFKManager.isPlayerCountdownActive) AFKManager.startCountdown();
     }
 
     private static void registerEvents() {
         BankPlus plugin = BankPlus.getInstance();
         PluginManager plManager = plugin.getServer().getPluginManager();
 
-        plManager.registerEvents(new PlayerJoin(plugin), plugin);
+        plManager.registerEvents(new PlayerJoin(), plugin);
+        plManager.registerEvents(new PlayerQuit(), plugin);
         plManager.registerEvents(new GuiListener(), plugin);
         plManager.registerEvents(new UpdateChecker(plugin), plugin);
         plManager.registerEvents(new PlayerChat(), plugin);
+        plManager.registerEvents(new AFKListener(), plugin);
     }
 
     private static void setupCommands() {
