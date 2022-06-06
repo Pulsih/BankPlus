@@ -14,6 +14,8 @@ public class AFKListener implements Listener {
 
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
+        if (!Values.CONFIG.isIgnoringAfkPlayers()) return;
+
         Player p = e.getPlayer();
         long time = System.currentTimeMillis() + Methods.millisecondsInMinutes(Values.CONFIG.getAfkPlayersTime());
         AFKManager.afkCooldown.put(p.getUniqueId(), time);
@@ -21,6 +23,8 @@ public class AFKListener implements Listener {
 
     @EventHandler
     public void onInteract(PlayerInteractEvent e) {
+        if (!Values.CONFIG.isIgnoringAfkPlayers()) return;
+
         Player p = e.getPlayer();
         long time = System.currentTimeMillis() + Methods.millisecondsInMinutes(Values.CONFIG.getAfkPlayersTime());
         AFKManager.afkCooldown.put(p.getUniqueId(), time);
@@ -28,6 +32,8 @@ public class AFKListener implements Listener {
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
+        if (!Values.CONFIG.isIgnoringAfkPlayers()) return;
+
         Player p = e.getPlayer();
         long time = System.currentTimeMillis() + Methods.millisecondsInMinutes(Values.CONFIG.getAfkPlayersTime());
         AFKManager.afkCooldown.put(p.getUniqueId(), time);

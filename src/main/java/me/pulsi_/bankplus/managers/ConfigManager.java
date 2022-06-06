@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.IllegalPluginAccessException;
 
 import java.io.File;
 import java.io.IOException;
@@ -84,12 +85,20 @@ public class ConfigManager {
     }
 
     public void savePlayers() {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        try {
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                try {
+                    players.save(playersFile);
+                } catch (IOException e) {
+                    BPLogger.error(e.getMessage());
+                }
+            });
+        } catch (IllegalPluginAccessException ex) {
             try {
                 players.save(playersFile);
             } catch (IOException e) {
                 BPLogger.error(e.getMessage());
             }
-        });
+        }
     }
 }

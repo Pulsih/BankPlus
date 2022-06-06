@@ -62,10 +62,15 @@ public class Interest {
         double moneyPercentage = Values.CONFIG.getInterestMoneyGiven();
         long maxAmount = Values.CONFIG.getInterestMaxAmount();
 
-        for (Player p : Bukkit.getOnlinePlayers())
-            if (p.hasPermission("bankplus.receive.interest"))
-                if (Values.CONFIG.isIgnoringAfkPlayers() && !AFKManager.isAFK(p))
-                    giveInterest(p, moneyPercentage, maxAmount);
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (!p.hasPermission("bankplus.receive.interest")) continue;
+
+            if (Values.CONFIG.isIgnoringAfkPlayers()) {
+                if (!AFKManager.isAFK(p)) giveInterest(p, moneyPercentage, maxAmount);
+            } else {
+                giveInterest(p, moneyPercentage, maxAmount);
+            }
+        }
 
         if (!Values.CONFIG.isGivingInterestToOfflinePlayers()) return;
         Bukkit.getScheduler().runTaskAsynchronously(BankPlus.getInstance(), () -> {
