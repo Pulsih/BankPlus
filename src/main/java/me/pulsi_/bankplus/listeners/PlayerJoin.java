@@ -12,6 +12,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 public class PlayerJoin implements Listener {
@@ -27,8 +28,6 @@ public class PlayerJoin implements Listener {
             registerPlayer(p, uuid.toString());
         else
             registerPlayer(p, name);
-
-        EconomyManager.playerMoney.put(uuid, EconomyManager.getBankBalance(p));
         offlineInterestMessage(p);
     }
 
@@ -41,39 +40,34 @@ public class PlayerJoin implements Listener {
 
         if (sBalance == null) {
             ChatUtils.log("&a&lBank&9&lPlus &2Successfully registered &f" + p.getName() + "&a's account!");
-            players.set("Players." + identifier + ".Money", Values.CONFIG.getStartAmount());
+            players.set("Players." + identifier + ".Money", Values.CONFIG.getStartAmount().toString());
             hasChanges = true;
         }
         if (Values.CONFIG.isNotifyOfflineInterest() && sOfflineInterest == null) {
-            players.set("Players." + identifier + ".Offline-Interest", 0);
+            players.set("Players." + identifier + ".Offline-Interest", String.valueOf(0));
             hasChanges = true;
         }
-
         if (hasChanges) BankPlus.getCm().savePlayers();
+
+        EconomyManager.loadBankBalance(p);
     }
 
     private void offlineInterestMessage(Player p) {
         if (!Values.CONFIG.isNotifyOfflineInterest()) return;
-        long offlineInterest = EconomyManager.getOfflineInterest(p);
-        if (offlineInterest <= 0) return;
+        BigDecimal offlineInterest = EconomyManager.getOfflineInterest(p);
+        if (offlineInterest.doubleValue() <= 0) return;
 
         long delay = Values.CONFIG.getNotifyOfflineInterestDelay();
-        String message = ChatUtils.color(Values.CONFIG.getNotifyOfflineInterestMessage());
+        String message = ChatUtils.color(Values.CONFIG.getNotifyOfflineInterestMessage()
+                .replace("%amount%", Methods.formatCommas(offlineInterest))
+                .replace("%amount_formatted%", Methods.format(offlineInterest))
+                .replace("%amount_formatted_long%", Methods.formatLong(offlineInterest)));
 
-        if (delay != 0) {
-            Bukkit.getScheduler().runTaskLater(BankPlus.getInstance(), () ->
-                    p.sendMessage(message
-                            .replace("%amount%", Methods.formatCommas(offlineInterest))
-                            .replace("%amount_formatted%", Methods.format(offlineInterest))
-                            .replace("%amount_formatted_long%", Methods.formatLong(offlineInterest))
-                    ), delay * 20L);
-        } else {
-            p.sendMessage(message
-                    .replace("%amount%", Methods.formatCommas(offlineInterest))
-                    .replace("%amount_formatted%", Methods.format(offlineInterest))
-                    .replace("%amount_formatted_long%", Methods.formatLong(offlineInterest))
-            );
-        }
-        EconomyManager.setOfflineInterest(p, 0);
+        if (delay != 0)
+            Bukkit.getScheduler().runTaskLater(BankPlus.getInstance(), () -> p.sendMessage(message), delay * 20L);
+        else
+            p.sendMessage(message);
+
+        EconomyManager.setOfflineInterest(p, new BigDecimal(0));
     }
 }

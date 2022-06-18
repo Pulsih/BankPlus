@@ -9,6 +9,8 @@ import me.pulsi_.bankplus.values.Values;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import java.math.BigDecimal;
+
 public class Placeholders extends PlaceholderExpansion {
 
     @Override
@@ -40,7 +42,10 @@ public class Placeholders extends PlaceholderExpansion {
     public String onPlaceholderRequest(Player p, String identifier) {
         if (p == null) return "Player not online";
 
-        long balance = EconomyManager.getBankBalance(p);
+        BigDecimal balance = EconomyManager.getBankBalance(p);
+
+        double moneyPercentage = Values.CONFIG.getInterestMoneyGiven();
+        BigDecimal interestMoney = balance.multiply(BigDecimal.valueOf(moneyPercentage));
 
         switch (identifier) {
             case "balance":
@@ -51,18 +56,22 @@ public class Placeholders extends PlaceholderExpansion {
                 return Methods.format(balance);
             case "balance_formatted_long":
                 return Methods.formatLong(balance);
+            case "next_interest":
+                return Methods.formatCommas(interestMoney);
+            case "next_interest_long":
+                return "" + interestMoney;
+            case "next_interest_formatted":
+                return Methods.format(interestMoney);
+            case "next_interest_formatted_long":
+                return Methods.formatLong(interestMoney);
+
             case "interest_cooldown": {
                 String interest;
-                if (Values.CONFIG.isInterestEnabled()) {
-                    int cooldown = Interest.getInterestCount();
-                    if (cooldown <= 0) {
-                        interest = "0";
-                    } else {
-                        interest = Methods.formatTime(cooldown);
-                    }
-                } else {
+                if (Values.CONFIG.isInterestEnabled())
+                    interest = Methods.formatTime(Interest.getInterestCooldownMillis());
+                else
                     interest = ChatColor.RED + "Interest is disabled.";
-                }
+
                 return interest;
             }
         }

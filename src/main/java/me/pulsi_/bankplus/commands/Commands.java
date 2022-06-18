@@ -16,6 +16,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.math.BigDecimal;
+
 public class Commands implements CommandExecutor {
 
     @Override
@@ -125,7 +127,7 @@ public class Commands implements CommandExecutor {
 
                 String num = args[2];
                 if (isInvalidNumber(num, s)) return false;
-                long amount = Long.parseLong(num);
+                BigDecimal amount = new BigDecimal(num);
 
                 Methods.pay(p, target, amount);
             }
@@ -181,7 +183,7 @@ public class Commands implements CommandExecutor {
                     return false;
                 }
 
-                long amount;
+                BigDecimal amount;
                 switch (args[1]) {
                     case "all":
                         amount = EconomyManager.getBankBalance(p);
@@ -189,14 +191,14 @@ public class Commands implements CommandExecutor {
                         break;
 
                     case "half":
-                        amount = EconomyManager.getBankBalance(p) / 2;
+                        amount = EconomyManager.getBankBalance(p).divide(BigDecimal.valueOf(2));
                         Methods.withdraw(p, amount);
                         break;
 
                     default:
                         String num = args[1];
                         if (isInvalidNumber(num, s)) return false;
-                        amount = Long.parseLong(num);
+                        amount = new BigDecimal(num);
                         Methods.withdraw(p, amount);
                 }
             }
@@ -212,22 +214,22 @@ public class Commands implements CommandExecutor {
                     return false;
                 }
 
-                long amount;
+                BigDecimal amount;
                 switch (args[1]) {
                     case "all":
-                        amount = (long) BankPlus.getEconomy().getBalance(p);
+                        amount = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p));
                         Methods.deposit(p, amount);
                         break;
 
                     case "half":
-                        amount = (long) (BankPlus.getEconomy().getBalance(p) / 2);
+                        amount = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p) / 2);
                         Methods.deposit(p, amount);
                         break;
 
                     default:
                         String num = args[1];
                         if (isInvalidNumber(num, s)) return false;
-                        amount = Long.parseLong(num);
+                        amount = new BigDecimal(num);
                         Methods.deposit(p, amount);
                 }
             }
@@ -247,7 +249,7 @@ public class Commands implements CommandExecutor {
 
                 String num = args[2];
                 if (isInvalidNumber(num, s)) return false;
-                long amount = Long.parseLong(num);
+                BigDecimal amount = new BigDecimal(num);
 
                 Player p = Bukkit.getPlayerExact(args[1]);
                 if (p == null) {
@@ -275,14 +277,14 @@ public class Commands implements CommandExecutor {
 
                 String num = args[2];
                 if (isInvalidNumber(num, s)) return false;
-                long amount = Long.parseLong(num);
+                BigDecimal amount = new BigDecimal(num);
 
                 Player p = Bukkit.getPlayerExact(args[1]);
                 if (p == null) {
                     OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
                     EconomyManager.addPlayerBankBalance(offlinePlayer, amount);
                     MessageManager.addMessage(s, offlinePlayer, amount);
-                    return false;
+                    return true;
                 }
                 EconomyManager.addPlayerBankBalance(p, amount);
                 MessageManager.addMessage(s, p, amount);
@@ -303,14 +305,20 @@ public class Commands implements CommandExecutor {
 
                 String num = args[2];
                 if (isInvalidNumber(num, s)) return false;
-                long amount = Long.parseLong(num);
+                BigDecimal amount = new BigDecimal(num);
 
                 Player p = Bukkit.getPlayerExact(args[1]);
                 if (p == null) {
                     OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
                     EconomyManager.removePlayerBankBalance(offlinePlayer, amount);
                     MessageManager.removeMessage(s, offlinePlayer, amount);
-                    return false;
+                    return true;
+                }
+
+                if (EconomyManager.getBankBalance(p).subtract(amount).doubleValue() <= 0) {
+                    MessageManager.removeMessage(s, p, EconomyManager.getBankBalance(p));
+                    EconomyManager.setPlayerBankBalance(p, new BigDecimal(0));
+                    return true;
                 }
                 EconomyManager.removePlayerBankBalance(p, amount);
                 MessageManager.removeMessage(s, p, amount);
@@ -363,8 +371,8 @@ public class Commands implements CommandExecutor {
 
     private boolean isInvalidNumber(String number, CommandSender s) {
         try {
-            long num = Long.parseLong(number);
-            if (num < 0) {
+            BigDecimal num = new BigDecimal(number);
+            if (num.doubleValue() < 0) {
                 MessageManager.cannotUseNegativeNumber(s);
                 return true;
             }

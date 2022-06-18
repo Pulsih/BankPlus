@@ -13,6 +13,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChatEvent;
 
+import java.math.BigDecimal;
+
 public class PlayerChat implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -23,7 +25,7 @@ public class PlayerChat implements Listener {
 
         if (SetUtils.playerDepositing.contains(p)) {
 
-            if (mess.equalsIgnoreCase("exit")) {
+            if (mess.equalsIgnoreCase(Values.CONFIG.getExitMessage())) {
                 e.setCancelled(true);
                 SetUtils.playerDepositing.remove(p);
                 executeExitCommands(p);
@@ -32,7 +34,7 @@ public class PlayerChat implements Listener {
             }
 
             try {
-                Methods.deposit(p, Long.parseLong(mess));
+                Methods.deposit(p, new BigDecimal(mess));
                 reopenBank(p);
             } catch (NumberFormatException ex) {
                 e.setCancelled(true);
@@ -45,7 +47,7 @@ public class PlayerChat implements Listener {
 
         if (SetUtils.playerWithdrawing.contains(p)) {
 
-            if (mess.equalsIgnoreCase("exit")) {
+            if (mess.equalsIgnoreCase(Values.CONFIG.getExitMessage())) {
                 e.setCancelled(true);
                 SetUtils.playerWithdrawing.remove(p);
                 executeExitCommands(p);
@@ -54,7 +56,7 @@ public class PlayerChat implements Listener {
             }
 
             try {
-                Methods.withdraw(p, Long.parseLong(mess));
+                Methods.withdraw(p, new BigDecimal(mess));
                 reopenBank(p);
             } catch (NumberFormatException ex) {
                 e.setCancelled(true);

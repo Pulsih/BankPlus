@@ -89,6 +89,12 @@ public class ConfigManager {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
                     players.save(playersFile);
+                } catch (NullPointerException e) {
+                    try {
+                        players.save(playersFile);
+                    } catch (IOException ex) {
+                        BPLogger.error(ex.getMessage());
+                    }
                 } catch (IOException e) {
                     BPLogger.error(e.getMessage());
                 }

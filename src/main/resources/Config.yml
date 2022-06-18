@@ -55,6 +55,10 @@ General:
   # typing in chat when depositing / withdraw money.
   Reopen-Bank-After-Chat: true
 
+  # The message that a player has to type
+  # to stop typing the custom amount.
+  Chat-Exit-Message: "exit"
+
   # These commands will be executed when typing "exit"
   # in chat while using the custom withdraw / deposit.
   #
@@ -100,14 +104,33 @@ Placeholders:
     Billions: "B"
     Trillions: "T"
     Quadrillions: "Q"
+    Quintillions: "QQ"
 
   Time:
-    Minute: " Minute"
-    Minutes: " Minutes"
-    Hour: " Hour"
-    Hours: " Hours"
-    Day: " Day"
-    Days: " Days"
+    Second: "Second"
+    Seconds: "Seconds"
+    Minute: "Minute"
+    Minutes: "Minutes"
+    Hour: "Hour"
+    Hours: "Hours"
+    Day: "Day"
+    Days: "Days"
+    Interest-Time:
+      Only-Seconds: "%seconds% %seconds_placeholder%"
+      Only-Minutes: "%minutes% %minutes_placeholder%"
+      Only-Hours: "%hours% %hours_placeholder%"
+      Only-Days: "%days% %days_placeholder%"
+      Seconds-Minutes: "%seconds% %seconds_placeholder% and %minutes% %minutes_placeholder%"
+      Seconds-Hours: "%seconds% %seconds_placeholder% and %hours% %hours_placeholder%"
+      Seconds-Days: "%seconds% %seconds_placeholder% and %days% %days_placeholder%"
+      Seconds-Minutes-Hours: "%seconds% %seconds_placeholder%, %minutes% %minutes_placeholder% and %hours% %hours_placeholder%"
+      Seconds-Hours-Days: "%seconds% %seconds_placeholder%, %hours% %hours_placeholder% and %days% %days_placeholder%"
+      Seconds-Minutes-Days: "%seconds% %seconds_placeholder%, %minutes% %minutes_placeholder% and %days% %days_placeholder%"
+      Seconds-Minutes-Hours-Days: "%seconds% %seconds_placeholder%, %minutes% %minutes_placeholder%, %hours% %hours_placeholder% and %days% %days_placeholder%"
+      Minutes-Hours: "%minutes% %minutes_placeholder% and %hours% %hours_placeholder%"
+      Minutes-Days: "%minutes% %minutes_placeholder% and %days% %days_placeholder%"
+      Minutes-Hours-Days: "%minutes% %minutes_placeholder%, %hours% %hours_placeholder% and %days% %days_placeholder%"
+      Hours-Days: "%hours% %hours_placeholder% and %days% %days_placeholder%"
 
 Gui:
   # Now the gui supports custom heads, use https://minecraft-heads.com/custom-heads/search?searchword=
@@ -202,6 +225,7 @@ Gui:
         - "&7Balance: &a%bankplus_balance_formatted%"
         - ""
         - "&7Wait &a%bankplus_interest_cooldown% &7to get interest!"
+        - "&7Expected money from the next interest: &a%bankplus_next_interest_formatted%"
         - ""
       Glowing: true
 

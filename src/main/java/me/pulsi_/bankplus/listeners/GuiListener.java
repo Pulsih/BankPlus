@@ -13,6 +13,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 
+import java.math.BigDecimal;
+
 public class GuiListener implements Listener {
 
     @EventHandler
@@ -31,7 +33,7 @@ public class GuiListener implements Listener {
             String actionType = item.getString("Action.Action-Type").toLowerCase();
             String actionAmount = item.getString("Action.Amount").toLowerCase();
 
-            long amount;
+            BigDecimal amount;
             switch (actionType) {
                 case "withdraw":
                     switch (actionAmount) {
@@ -45,13 +47,13 @@ public class GuiListener implements Listener {
                             break;
 
                         case "half":
-                            amount = EconomyManager.getBankBalance(p) / 2;
+                            amount = EconomyManager.getBankBalance(p).divide(BigDecimal.valueOf(2));
                             Methods.withdraw(p, amount);
                             break;
 
                         default:
                             try {
-                                amount = Long.parseLong(actionAmount);
+                                amount = new BigDecimal(actionAmount);
                                 Methods.withdraw(p, amount);
                             } catch (NumberFormatException ex) {
                                 ChatUtils.log("&a&lBank&9&lPlus &cInvalid number in the withdraw amount!");
@@ -67,18 +69,18 @@ public class GuiListener implements Listener {
                             break;
 
                         case "all":
-                            amount = (long) BankPlus.getEconomy().getBalance(p);
+                            amount = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p));
                             Methods.deposit(p, amount);
                             break;
 
                         case "half":
-                            amount = (long) (BankPlus.getEconomy().getBalance(p) / 2);
+                            amount = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p) / 2);
                             Methods.deposit(p, amount);
                             break;
 
                         default:
                             try {
-                                amount = Long.parseLong(actionAmount);
+                                amount = new BigDecimal(actionAmount);
                                 Methods.deposit(p, amount);
                                 break;
                             } catch (NumberFormatException ex) {
