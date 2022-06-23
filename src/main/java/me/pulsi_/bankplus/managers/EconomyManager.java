@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -37,10 +38,8 @@ public class EconomyManager {
 
     public static void saveBankBalance(Player p) {
         FileConfiguration players = BankPlus.getCm().getConfig("players");
-        if (Values.CONFIG.isStoringUUIDs())
-            players.set("Players." + p.getUniqueId() + ".Money", getBankBalance(p).toString());
-        else
-            players.set("Players." + p.getName() + ".Money", getBankBalance(p).toString());
+        if (Values.CONFIG.isStoringUUIDs()) players.set("Players." + p.getUniqueId() + ".Money", format(getBankBalance(p)));
+        else players.set("Players." + p.getName() + ".Money", format(getBankBalance(p)));
         BankPlus.getCm().savePlayers();
     }
 
@@ -53,16 +52,12 @@ public class EconomyManager {
         FileConfiguration players = BankPlus.getCm().getConfig("players");
 
         String path;
-        if (Values.CONFIG.isStoringUUIDs())
-            path = players.getString("Players." + p.getUniqueId() + ".Money");
-        else
-            path = players.getString("Players." + p.getName() + ".Money");
+        if (Values.CONFIG.isStoringUUIDs()) path = players.getString("Players." + p.getUniqueId() + ".Money");
+        else path = players.getString("Players." + p.getName() + ".Money");
 
         BigDecimal balance;
-        if (path == null)
-            balance = new BigDecimal(0);
-        else
-            balance = new BigDecimal(path);
+        if (path == null) balance = new BigDecimal(0);
+        else balance = new BigDecimal(path);
 
         return balance;
     }
@@ -71,16 +66,12 @@ public class EconomyManager {
         FileConfiguration players = BankPlus.getCm().getConfig("players");
 
         String path;
-        if (Values.CONFIG.isStoringUUIDs())
-            path = players.getString("Players." + p.getUniqueId() + ".Offline-Interest");
-        else
-            path = players.getString("Players." + p.getName() + ".Offline-Interest");
+        if (Values.CONFIG.isStoringUUIDs()) path = players.getString("Players." + p.getUniqueId() + ".Offline-Interest");
+        else path = players.getString("Players." + p.getName() + ".Offline-Interest");
 
         BigDecimal offlineInterest;
-        if (path == null)
-            offlineInterest = new BigDecimal(0);
-        else
-            offlineInterest = new BigDecimal(path);
+        if (path == null) offlineInterest = new BigDecimal(0);
+        else offlineInterest = new BigDecimal(path);
 
         return offlineInterest;
     }
@@ -89,16 +80,12 @@ public class EconomyManager {
         FileConfiguration players = BankPlus.getCm().getConfig("players");
 
         String path;
-        if (Values.CONFIG.isStoringUUIDs())
-            path = players.getString("Players." + p.getUniqueId() + ".Offline-Interest");
-        else
-            path = players.getString("Players." + p.getName() + ".Offline-Interest");
+        if (Values.CONFIG.isStoringUUIDs()) path = players.getString("Players." + p.getUniqueId() + ".Offline-Interest");
+        else path = players.getString("Players." + p.getName() + ".Offline-Interest");
 
         BigDecimal offlineInterest;
-        if (path == null)
-            offlineInterest = new BigDecimal(0);
-        else
-            offlineInterest = new BigDecimal(path);
+        if (path == null) offlineInterest = new BigDecimal(0);
+        else offlineInterest = new BigDecimal(path);
 
         return offlineInterest;
     }
@@ -144,18 +131,14 @@ public class EconomyManager {
     }
 
     public static void setOfflineInterest(Player p, BigDecimal amount) {
-        if (Values.CONFIG.isStoringUUIDs())
-            BankPlus.getCm().getConfig("players").set("Players." + p.getUniqueId() + ".Offline-Interest", amount.toString());
-        else
-            BankPlus.getCm().getConfig("players").set("Players." + p.getName() + ".Offline-Interest", amount.toString());
+        if (Values.CONFIG.isStoringUUIDs()) BankPlus.getCm().getConfig("players").set("Players." + p.getUniqueId() + ".Offline-Interest", format(amount));
+        else BankPlus.getCm().getConfig("players").set("Players." + p.getName() + ".Offline-Interest", format(amount));
         BankPlus.getCm().savePlayers();
     }
 
     public static void setOfflineInterest(OfflinePlayer p, BigDecimal amount) {
-        if (Values.CONFIG.isStoringUUIDs())
-            BankPlus.getCm().getConfig("players").set("Players." + p.getUniqueId() + ".Offline-Interest", amount.toString());
-        else
-            BankPlus.getCm().getConfig("players").set("Players." + p.getName() + ".Offline-Interest", amount.toString());
+        if (Values.CONFIG.isStoringUUIDs()) BankPlus.getCm().getConfig("players").set("Players." + p.getUniqueId() + ".Offline-Interest", format(amount));
+        else BankPlus.getCm().getConfig("players").set("Players." + p.getName() + ".Offline-Interest", format(amount));
         BankPlus.getCm().savePlayers();
     }
 
@@ -165,10 +148,20 @@ public class EconomyManager {
 
     private static void setValue(OfflinePlayer p, BigDecimal amount) {
         FileConfiguration players = BankPlus.getCm().getConfig("players");
-        if (Values.CONFIG.isStoringUUIDs())
-            players.set("Players." + p.getUniqueId() + ".Money", amount.toString());
-        else
-            players.set("Players." + p.getName() + ".Money", amount.toString());
+        if (Values.CONFIG.isStoringUUIDs()) players.set("Players." + p.getUniqueId() + ".Money", format(amount));
+        else players.set("Players." + p.getName() + ".Money", format(amount));
         BankPlus.getCm().savePlayers();
+    }
+
+    private static String format(BigDecimal bal) {
+        String balance = bal.toString();
+        if (balance.contains(".")) {
+            String decimals = balance.split("\\.")[1];
+            if (decimals.length() > Values.CONFIG.getMaxDecimalsAmount()) {
+                String correctedDecimals = decimals.substring(0, Values.CONFIG.getMaxDecimalsAmount());
+                balance = balance.split("\\.")[0] + "." + correctedDecimals;
+            }
+        }
+        return balance;
     }
 }

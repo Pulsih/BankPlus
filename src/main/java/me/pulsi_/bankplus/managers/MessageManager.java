@@ -182,9 +182,12 @@ public class MessageManager {
 
     public static void interestTime(CommandSender s) {
         String message = Values.MESSAGES.getInterestTime();
-        if (isMessageNull(s, message)) return;
+        if (!isMessageNull(s, message)) s.sendMessage(addPrefix(message.replace("%time%", Methods.formatTime(Interest.getInterestCooldownMillis()))));
+    }
 
-        s.sendMessage(addPrefix(message.replace("%time%", Methods.formatTime(Interest.getInterestCooldownMillis()))));
+    public static void interestTimeMillis(CommandSender s) {
+        String message = Values.MESSAGES.getInterestTime();
+        if (!isMessageNull(s, message)) s.sendMessage(addPrefix(message.replace("%time%", String.valueOf(Interest.getInterestCooldownMillis()))));
     }
 
     public static void helpMessage(CommandSender s) {
@@ -194,6 +197,11 @@ public class MessageManager {
     public static void bankFull(Player p, Player target) {
         String message = Values.MESSAGES.getBankFull();
         if (!isMessageNull(p, message)) p.sendMessage(addPrefix(message.replace("%player%", target.getName())));
+    }
+
+    public static void interestBankFull(Player p) {
+        String message = Values.MESSAGES.getInterestBankFull();
+        if (!isMessageNull(p, message)) p.sendMessage(addPrefix(message));
     }
 
     public static void invalidPlayer(CommandSender s) {
@@ -283,10 +291,10 @@ public class MessageManager {
 
     public static void cannotUseBankHere(Player p) {
         String message = Values.MESSAGES.getCannotUseBankHere();
-        if (isMessageNull(p, message)) p.sendMessage(addPrefix(message));
+        if (!isMessageNull(p, message)) p.sendMessage(addPrefix(message));
     }
 
-    private static String addPrefix(String mess) {
+    public static String addPrefix(String mess) {
         String prefix = Values.MESSAGES.getPrefix();
         if (prefix != null) return ChatUtils.color(mess.replace("%prefix%", prefix));
         return ChatUtils.color(mess);
@@ -296,12 +304,12 @@ public class MessageManager {
         if (message != null) return false;
         if (Values.MESSAGES.isAlertMissingMessagePathNull()) {
             s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &cWarning! This message is missing in the messages file! " +
-                    "Check in the spigot page for any config updates or check your config for any missing parts!"));
+                    "Reload the server to make the file automatically replace the missing parts!"));
             return true;
         }
         if (Values.MESSAGES.isAlertMissingMessage()) {
             s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &cWarning! This message is missing in the messages file! " +
-                    "Check in the spigot page for any config updates or check your config for any missing parts!"));
+                    "Reload the server to make the file automatically replace the missing parts!"));
         }
         return true;
     }
@@ -310,12 +318,12 @@ public class MessageManager {
         if (message != null) return false;
         if (Values.MESSAGES.isAlertMissingMessagePathNull()) {
             p.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &cWarning! This message is missing in the messages file! " +
-                    "Check in the spigot page for any config updates or check your config for any missing parts!"));
+                    "Reload the server to make the file automatically replace the missing parts!"));
             return true;
         }
         if (Values.MESSAGES.isAlertMissingMessage()) {
             p.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &cWarning! This message is missing in the messages file! " +
-                    "Check in the spigot page for any config updates or check your config for any missing parts!"));
+                    "Reload the server to make the file automatically replace the missing parts!"));
         }
         return true;
     }

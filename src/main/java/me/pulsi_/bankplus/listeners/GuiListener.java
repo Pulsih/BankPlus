@@ -22,11 +22,11 @@ public class GuiListener implements Listener {
 
         Player p = (Player) e.getWhoClicked();
 
-        if (!(p.getOpenInventory().getTopInventory().getHolder() instanceof GuiHolder)) return;
+        if (e.getClickedInventory() == null || e.getClickedInventory().getHolder() == null || !(e.getClickedInventory().getHolder() instanceof GuiHolder)) return;
         e.setCancelled(true);
 
-        for (String key : Values.CONFIG.getGuiItems().getKeys(false)) {
-            ConfigurationSection item = BankPlus.getCm().getConfig("config").getConfigurationSection("Gui.Items." + key);
+        for (String key : Values.BANK.getGuiItems().getKeys(false)) {
+            ConfigurationSection item = BankPlus.getCm().getConfig("bank").getConfigurationSection("Items." + key);
 
             if (e.getSlot() + 1 != item.getInt("Slot") || item.getString("Action.Action-Type") == null) continue;
 

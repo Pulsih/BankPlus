@@ -5,6 +5,7 @@ import me.pulsi_.bankplus.commands.Commands;
 import me.pulsi_.bankplus.commands.TabCompletion;
 import me.pulsi_.bankplus.external.UpdateChecker;
 import me.pulsi_.bankplus.gui.GuiHolder;
+import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.listeners.*;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.values.Values;
@@ -19,10 +20,12 @@ public class DataManager {
         ChatUtils.log("");
         ChatUtils.log("  &a&lBank&9&lPlus &2Enabling plugin...");
         ChatUtils.log("  &aRunning on version &f" + BankPlus.getInstance().getDescription().getVersion() + "&a!");
+        ChatUtils.log("  &aDetected server version: &f" + BankPlus.getInstance().getServerVersion());
 
         time = System.currentTimeMillis();
         Values.CONFIG.setupValues();
         Values.MESSAGES.setupValues();
+        Values.BANK.setupValues();
         ChatUtils.log("  &aLoaded config files! &8(&3" + (System.currentTimeMillis() - time) + "ms&8)");
 
         time = System.currentTimeMillis();
@@ -45,11 +48,14 @@ public class DataManager {
     public static void reloadPlugin() {
         BankPlus.getCm().reloadConfig("config");
         BankPlus.getCm().reloadConfig("messages");
+        BankPlus.getCm().reloadConfig("bank");
         Values.CONFIG.setupValues();
         Values.MESSAGES.setupValues();
-        new GuiHolder().loadBank();
+        Values.BANK.setupValues();
 
+        if (Values.BANK.isGuiEnabled()) new GuiHolder().loadBank();
         if (!AFKManager.isPlayerCountdownActive) AFKManager.startCountdown();
+        if (!Interest.isInterestActive) Interest.startsInterest();
     }
 
     private static void registerEvents() {

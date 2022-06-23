@@ -17,7 +17,7 @@ public class AFKListener implements Listener {
         if (!Values.CONFIG.isIgnoringAfkPlayers()) return;
 
         Player p = e.getPlayer();
-        long time = System.currentTimeMillis() + Methods.millisecondsInMinutes(Values.CONFIG.getAfkPlayersTime());
+        long time = System.currentTimeMillis() + Methods.minutesInMilliseconds(Values.CONFIG.getAfkPlayersTime());
         AFKManager.afkCooldown.put(p.getUniqueId(), time);
     }
 
@@ -26,7 +26,7 @@ public class AFKListener implements Listener {
         if (!Values.CONFIG.isIgnoringAfkPlayers()) return;
 
         Player p = e.getPlayer();
-        long time = System.currentTimeMillis() + Methods.millisecondsInMinutes(Values.CONFIG.getAfkPlayersTime());
+        long time = System.currentTimeMillis() + Methods.minutesInMilliseconds(Values.CONFIG.getAfkPlayersTime());
         AFKManager.afkCooldown.put(p.getUniqueId(), time);
     }
 
@@ -35,7 +35,7 @@ public class AFKListener implements Listener {
         if (!Values.CONFIG.isIgnoringAfkPlayers()) return;
 
         Player p = e.getPlayer();
-        long time = System.currentTimeMillis() + Methods.millisecondsInMinutes(Values.CONFIG.getAfkPlayersTime());
+        long time = System.currentTimeMillis() + Methods.minutesInMilliseconds(Values.CONFIG.getAfkPlayersTime());
         AFKManager.afkCooldown.put(p.getUniqueId(), time);
     }
 }

@@ -1,7 +1,8 @@
 package me.pulsi_.bankplus.values.configs;
 
 import me.pulsi_.bankplus.BankPlus;
-import org.bukkit.configuration.ConfigurationSection;
+import me.pulsi_.bankplus.interest.Interest;
+import me.pulsi_.bankplus.utils.Methods;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.math.BigDecimal;
@@ -39,20 +40,12 @@ public class ConfigValues {
     private String t;
     private String q;
     private String qq;
-    private String guiFillerMaterial;
-    private String guiFillerDisplayname;
-    private boolean isGuiFillerGlowing;
-    private boolean isGuiFillerEnabled;
     private String withdrawSound;
     private String depositSound;
     private String viewSound;
     private String personalSound;
-    private String guiTitle;
-    private int guiUpdateDelay;
-    private int guiLines;
-    private ConfigurationSection guiItems;
     private String notifyOfflineInterestMessage;
-    private int interestDelay;
+    private String interestDelay;
     private BigDecimal maxWithdrawAmount;
     private BigDecimal maxDepositAmount;
     private BigDecimal minimumAmount;
@@ -63,7 +56,6 @@ public class ConfigValues {
     private double interestMoneyGiven;
     private List<String> worldsBlacklist;
     private List<String> exitCommands;
-    private boolean isGuiEnabled;
     private boolean isReopeningBankAfterChat;
     private boolean isInterestEnabled;
     private boolean isNotifyOfflineInterest;
@@ -77,6 +69,7 @@ public class ConfigValues {
     private boolean isPersonalSoundEnabled;
     private boolean isIgnoringAfkPlayers;
     private int afkPlayersTime;
+    private int maxDecimalsAmount;
 
     public static ConfigValues getInstance() {
         return new ConfigValues();
@@ -115,20 +108,12 @@ public class ConfigValues {
         t = config.getString("Placeholders.Money.Trillions");
         q = config.getString("Placeholders.Money.Quadrillions");
         qq = config.getString("Placeholders.Money.Quintillions");
-        guiFillerMaterial = config.getString("Gui.Filler.Material");
-        guiFillerDisplayname = config.getString("Gui.Filler.DisplayName");
-        isGuiFillerGlowing = config.getBoolean("Gui.Filler.Glowing");
-        isGuiFillerEnabled = config.getBoolean("Gui.Filler.Enabled");
         withdrawSound = config.getString("General.Withdraw-Sound.Sound");
         depositSound = config.getString("General.Deposit-Sound.Sound");
         viewSound = config.getString("General.View-Sound.Sound");
         personalSound = config.getString("General.Personal-Sound.Sound");
-        guiTitle = config.getString("Gui.Title");
-        guiUpdateDelay = config.getInt("Gui.Update-Delay");
-        guiLines = config.getInt("Gui.Lines");
-        guiItems = config.getConfigurationSection("Gui.Items");
         notifyOfflineInterestMessage = config.getString("General.Offline-Interest-Earned-Message.Message");
-        interestDelay = config.getInt("Interest.Delay");
+        interestDelay = config.getString("Interest.Delay");
         maxWithdrawAmount = BigDecimal.valueOf(config.getDouble("General.Max-Withdrawn-Amount"));
         maxDepositAmount = BigDecimal.valueOf(config.getDouble("General.Max-Deposit-Amount"));
         minimumAmount = BigDecimal.valueOf(config.getDouble("General.Minimum-Amount"));
@@ -139,7 +124,6 @@ public class ConfigValues {
         interestMoneyGiven = config.getDouble("Interest.Money-Given");
         worldsBlacklist = config.getStringList("General.Worlds-Blacklist");
         exitCommands = config.getStringList("General.Chat-Exit-Commands");
-        isGuiEnabled = config.getBoolean("Gui.Enabled");
         isReopeningBankAfterChat = config.getBoolean("General.Reopen-Bank-After-Chat");
         isInterestEnabled = config.getBoolean("Interest.Enabled");
         isNotifyOfflineInterest = config.getBoolean("General.Offline-Interest-Earned-Message.Enabled");
@@ -153,6 +137,7 @@ public class ConfigValues {
         isPersonalSoundEnabled = config.getBoolean("General.Personal-Sound.Enabled");
         isIgnoringAfkPlayers = config.getBoolean("Interest.AFK-Settings.Ignore-AFK-Players");
         afkPlayersTime = config.getInt("Interest.AFK-Settings.AFK-Time");
+        maxDecimalsAmount = config.getInt("General.Max-Decimals-Amount");
     }
 
     public String getExitMessage() {
@@ -298,22 +283,6 @@ public class ConfigValues {
         return qq;
     }
 
-    public String getGuiFillerMaterial() {
-        return guiFillerMaterial;
-    }
-
-    public String getGuiFillerDisplayname() {
-        return guiFillerDisplayname;
-    }
-
-    public boolean isGuiFillerGlowing() {
-        return isGuiFillerGlowing;
-    }
-
-    public boolean isGuiFillerEnabled() {
-        return isGuiFillerEnabled;
-    }
-
     public String getWithdrawSound() {
         return withdrawSound;
     }
@@ -330,28 +299,31 @@ public class ConfigValues {
         return personalSound;
     }
 
-    public String getGuiTitle() {
-        return guiTitle;
-    }
-
-    public int getGuiUpdateDelay() {
-        return guiUpdateDelay;
-    }
-
-    public int getGuiLines() {
-        return guiLines;
-    }
-
-    public ConfigurationSection getGuiItems() {
-        return guiItems;
-    }
-
     public String getNotifyOfflineInterestMessage() {
         return notifyOfflineInterestMessage;
     }
 
-    public int getInterestDelay() {
-        return interestDelay;
+    public long getInterestDelay() {
+        if (!interestDelay.contains(" ")) return Methods.minutesInMilliseconds(Integer.parseInt(interestDelay));
+
+        int delay;
+        try {
+            delay = Integer.parseInt(interestDelay.split(" ")[0]);
+        } catch (NumberFormatException e) {
+            return Methods.minutesInMilliseconds(5);
+        }
+
+        String delayType = interestDelay.split(" ")[1];
+        switch (delayType) {
+            case "s":
+                return Methods.secondsInMilliseconds(delay);
+            default:
+                return Methods.minutesInMilliseconds(delay);
+            case "h":
+                return Methods.hoursInMilliseconds(delay);
+            case "d":
+                return Methods.daysInMilliseconds(delay);
+        }
     }
 
     public BigDecimal getMaxWithdrawAmount() {
@@ -394,15 +366,12 @@ public class ConfigValues {
         return exitCommands;
     }
 
-    public boolean isGuiEnabled() {
-        return isGuiEnabled;
-    }
-
     public boolean isReopeningBankAfterChat() {
         return isReopeningBankAfterChat;
     }
 
     public boolean isInterestEnabled() {
+        Interest.isInterestActive = isInterestEnabled;
         return isInterestEnabled;
     }
 
@@ -448,5 +417,9 @@ public class ConfigValues {
 
     public int getAfkPlayersTime() {
         return afkPlayersTime;
+    }
+
+    public int getMaxDecimalsAmount() {
+        return maxDecimalsAmount;
     }
 }

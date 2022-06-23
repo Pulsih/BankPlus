@@ -29,7 +29,7 @@ public class GuiHolder implements InventoryHolder {
         p.openInventory(holder.getInventory());
         holder.placeHeads(p);
 
-        int delay = Values.CONFIG.getGuiUpdateDelay();
+        int delay = Values.BANK.getGuiUpdateDelay();
         if (delay != 0) {
             tasks.put(p, Bukkit.getScheduler().runTaskTimer(BankPlus.getInstance(), () -> updateLore(p), 0, delay * 20L));
         } else {
@@ -38,9 +38,9 @@ public class GuiHolder implements InventoryHolder {
     }
 
     public void loadBank() {
-        guiBank = Bukkit.createInventory(new GuiHolder(), guiLines(Values.CONFIG.getGuiLines()), ChatUtils.color(Values.CONFIG.getGuiTitle()));
+        guiBank = Bukkit.createInventory(new GuiHolder(), guiLines(Values.BANK.getGuiLines()), ChatUtils.color(Values.BANK.getGuiTitle()));
 
-        ConfigurationSection itemsConfiguration = Values.CONFIG.getGuiItems();
+        ConfigurationSection itemsConfiguration = Values.BANK.getGuiItems();
         for (String items : itemsConfiguration.getKeys(false)) {
             ConfigurationSection itemsList = itemsConfiguration.getConfigurationSection(items);
 
@@ -51,13 +51,13 @@ public class GuiHolder implements InventoryHolder {
             }
         }
 
-        if (Values.CONFIG.isGuiFillerEnabled())
-            for (int i = 0; i < guiLines(Values.CONFIG.getGuiLines()); i++)
+        if (Values.BANK.isGuiFillerEnabled())
+            for (int i = 0; i < guiLines(Values.BANK.getGuiLines()); i++)
                 if (guiBank.getItem(i) == null) guiBank.setItem(i, ItemUtils.getGuiFiller());
     }
 
     private void placeHeads(Player p) {
-        ConfigurationSection c = Values.CONFIG.getGuiItems();
+        ConfigurationSection c = Values.BANK.getGuiItems();
         for (String items : c.getKeys(false)) {
             ConfigurationSection itemsList = c.getConfigurationSection(items);
 
@@ -76,7 +76,7 @@ public class GuiHolder implements InventoryHolder {
         Inventory bank = p.getOpenInventory().getTopInventory();
         if (!(bank.getHolder() instanceof GuiHolder)) return;
 
-        ConfigurationSection c = Values.CONFIG.getGuiItems();
+        ConfigurationSection c = Values.BANK.getGuiItems();
         for (String items : c.getKeys(false)) {
             ConfigurationSection itemsList = c.getConfigurationSection(items);
 

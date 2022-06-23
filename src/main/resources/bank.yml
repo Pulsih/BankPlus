@@ -1,0 +1,164 @@
+# Now the gui supports custom heads, use https://minecraft-heads.com/custom-heads/search?searchword=
+# to search custom values heads and use the following format:
+# HEAD-<textureValue>
+#
+# You can also take a head from a player name or use
+# your head with:
+# HEAD-%PLAYER% The head of the player which is opening the gui
+# HEAD[player-name] The head of the selected player
+#
+# If you want to know more about this: https://github.com/Pulsih/BankPlus/wiki
+Enabled: true
+Title: "&a&lGui Bank"
+Lines: 4
+Update-Delay: 1 #In seconds, put 0 to disable
+Filler:
+  Enabled: true
+  Material: "WHITE_STAINED_GLASS_PANE"
+  DisplayName: "&6"
+  Glowing: false
+Items:
+  # You can add as many items as you want
+  # and not only for make the bank work
+  Withdraw:
+    Material: "EMERALD"
+    Amount: 1
+    DisplayName: "&aWithdraw"
+    Slot: 11
+    Lore:
+      - ""
+      - "&7Withdraw &a500$ &7from your bank"
+      - ""
+    Glowing: true
+    Action:
+      # You can choose a number or:
+      # "ALL" -> All money
+      # "HALF" -> Half of the money
+      Action-Type: "Withdraw"
+      Amount: "500"
+
+  WithdrawHalf:
+    Material: "EMERALD"
+    Amount: 2
+    DisplayName: "&aWithdraw"
+    Slot: 12
+    Lore:
+      - ""
+      - "&7Withdraw &aHalf &7of the money from your bank"
+      - ""
+    Glowing: true
+    Action:
+      Action-Type: "Withdraw"
+      Amount: "HALF"
+
+  WithdrawAll:
+    Material: "EMERALD"
+    Amount: 3
+    DisplayName: "&aWithdraw"
+    Slot: 21
+    Lore:
+      - ""
+      - "&7Withdraw &aAll &7of the money from your bank"
+      - ""
+    Glowing: true
+    Action:
+      Action-Type: "Withdraw"
+      Amount: "ALL"
+
+  WithdrawCustom:
+    Material: "EMERALD"
+    Amount: 4
+    Slot: 20
+    DisplayName: "&aWithdraw"
+    Lore:
+      - ""
+      - "&7Withdraw a &acustom &7amount of money to your bank"
+      - ""
+    Glowing: true
+    Action:
+      Action-Type: "Withdraw"
+      Amount: "CUSTOM"
+
+  Personal-Info:
+    Material: "HEAD-%PLAYER%"
+    DisplayName: "&aPersonal"
+    Slot: 14
+    Lore:
+      - ""
+      - "&7Account Name: &f%player_name%"
+      - "&7Balance: &a%bankplus_balance_formatted%"
+      - ""
+      - "&7Wait &a%bankplus_interest_cooldown% &7to get interest!"
+      - "&7Expected money from the next interest: &a%bankplus_next_interest_formatted%"
+      - ""
+    Glowing: true
+
+  How-Does-It-Work:
+    Material: "HEAD-<eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzU3NDcwMTBkODRhYTU2NDgzYjc1ZjYyNDNkOTRmMzRjNTM0NjAzNTg0YjJjYzY4YTQ1YmYzNjU4NDAxMDVmZCJ9fX0=>"
+    DisplayName: "&aHow Does It Work?"
+    Slot: 23
+    Lore:
+      - ""
+      - "&7This is a bank, you can &adeposit &7all your"
+      - "&7money here to keep them &asafe&7, your money"
+      - "&7kept in the bank will &aincrease &7thanks to"
+      - "&7the &a&ninterest&7, which gives you a percentage of"
+      - "&7your money in the &abank&7!"
+      - ""
+    Glowing: true
+
+  Deposit:
+    Material: "EMERALD"
+    Amount: 1
+    Slot: 17
+    DisplayName: "&aDeposit"
+    Lore:
+      - ""
+      - "&7Deposit &a500$ &7to your bank"
+      - ""
+    Glowing: true
+    Action:
+      Action-Type: "Deposit"
+      Amount: "500"
+
+  DepositHalf:
+    Material: "EMERALD"
+    Amount: 2
+    Slot: 16
+    DisplayName: "&aDeposit"
+    Lore:
+      - ""
+      - "&7Deposit &aHalf &7of money to your bank"
+      - ""
+    Glowing: true
+    Action:
+      Action-Type: "Deposit"
+      Amount: "HALF"
+
+  DepositAll:
+    Material: "EMERALD"
+    Amount: 3
+    Slot: 25
+    DisplayName: "&aDeposit"
+    Lore:
+      - ""
+      - "&7Deposit &aAll &7of money to your bank"
+      - ""
+    Glowing: true
+    Action:
+      Action-Type: "Deposit"
+      Amount: "ALL"
+
+  DepositCustom:
+    Material: "EMERALD"
+    Amount: 4
+    Slot: 26
+    DisplayName: "&aDeposit"
+    Lore:
+      - ""
+      - "&7Deposit a &acustom &7amount of money to your bank"
+      - ""
+    Glowing: true
+    Action:
+      Action-Type: "Deposit"
+      Amount: "CUSTOM"

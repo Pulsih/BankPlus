@@ -49,7 +49,8 @@ public class Methods {
 
         long days = seconds / 86400;
         long newHours = hours - (24 * days);
-        if (newSeconds == 0 && newMinutes == 0 && newHours == 0) return placeDays(Values.CONFIG.getInterestTimeOnlyDays(), days);
+        if (newSeconds == 0 && newMinutes == 0 && newHours == 0)
+            return placeDays(Values.CONFIG.getInterestTimeOnlyDays(), days);
         if (newSeconds == 0 && newMinutes == 0) {
             String hoursPlaced = placeHours(Values.CONFIG.getInterestTimeHoursDays(), newHours);
             return placeDays(hoursPlaced, days);
@@ -87,53 +88,55 @@ public class Methods {
 
     private static String placeSeconds(String message, long seconds) {
         String time = message.replace("%seconds%", String.valueOf(seconds));
-        if (seconds == 1)
-            return time.replace("%seconds_placeholder%", Values.CONFIG.getSecond());
-        else
-            return time.replace("%seconds_placeholder%", Values.CONFIG.getSeconds());
+        if (seconds == 1) return time.replace("%seconds_placeholder%", Values.CONFIG.getSecond());
+        else return time.replace("%seconds_placeholder%", Values.CONFIG.getSeconds());
     }
 
     private static String placeMinutes(String message, long minutes) {
         String time = message.replace("%minutes%", String.valueOf(minutes));
-        if (minutes == 1)
-            return time.replace("%minutes_placeholder%", Values.CONFIG.getMinute());
-        else
-            return time.replace("%minutes_placeholder%", Values.CONFIG.getMinutes());
+        if (minutes == 1) return time.replace("%minutes_placeholder%", Values.CONFIG.getMinute());
+        else return time.replace("%minutes_placeholder%", Values.CONFIG.getMinutes());
     }
 
     private static String placeHours(String message, long hours) {
         String time = message.replace("%hours%", String.valueOf(hours));
-        if (hours == 1)
-            return time.replace("%hours_placeholder%", Values.CONFIG.getHour());
-        else
-            return time.replace("%hours_placeholder%", Values.CONFIG.getHours());
+        if (hours == 1) return time.replace("%hours_placeholder%", Values.CONFIG.getHour());
+        else return time.replace("%hours_placeholder%", Values.CONFIG.getHours());
     }
 
     private static String placeDays(String message, long days) {
         String time = message.replace("%days%", String.valueOf(days));
-        if (days == 1)
-            return time.replace("%days_placeholder%", Values.CONFIG.getDay());
-        else
-            return time.replace("%days_placeholder%", Values.CONFIG.getDays());
+        if (days == 1) return time.replace("%days_placeholder%", Values.CONFIG.getDay());
+        else return time.replace("%days_placeholder%", Values.CONFIG.getDays());
     }
 
     public static String formatLong(BigDecimal balance) {
         if (balance.doubleValue() < 1000L) return "" + balance;
-        if (balance.doubleValue() < 1000000L) return Math.round(balance.divide(BigDecimal.valueOf(1000L)).doubleValue()) + Values.CONFIG.getK();
-        if (balance.doubleValue() < 1000000000L) return Math.round(balance.divide(BigDecimal.valueOf(1000000L)).doubleValue()) + Values.CONFIG.getM();
-        if (balance.doubleValue() < 1000000000000L) return Math.round(balance.divide(BigDecimal.valueOf(1000000000L)).doubleValue()) + Values.CONFIG.getB();
-        if (balance.doubleValue() < 1000000000000000L) return Math.round(balance.divide(BigDecimal.valueOf(1000000000000L)).doubleValue()) + Values.CONFIG.getT();
-        if (balance.doubleValue() < 1000000000000000000L) return Math.round(balance.divide(BigDecimal.valueOf(1000000000000000L)).doubleValue()) + Values.CONFIG.getQ();
+        if (balance.doubleValue() < 1000000L)
+            return Math.round(balance.divide(BigDecimal.valueOf(1000L)).doubleValue()) + Values.CONFIG.getK();
+        if (balance.doubleValue() < 1000000000L)
+            return Math.round(balance.divide(BigDecimal.valueOf(1000000L)).doubleValue()) + Values.CONFIG.getM();
+        if (balance.doubleValue() < 1000000000000L)
+            return Math.round(balance.divide(BigDecimal.valueOf(1000000000L)).doubleValue()) + Values.CONFIG.getB();
+        if (balance.doubleValue() < 1000000000000000L)
+            return Math.round(balance.divide(BigDecimal.valueOf(1000000000000L)).doubleValue()) + Values.CONFIG.getT();
+        if (balance.doubleValue() < 1000000000000000000L)
+            return Math.round(balance.divide(BigDecimal.valueOf(1000000000000000L)).doubleValue()) + Values.CONFIG.getQ();
         return Math.round(balance.divide(BigDecimal.valueOf(1000000000000000000L)).doubleValue()) + Values.CONFIG.getQq();
     }
 
     public static String format(BigDecimal balance) {
         if (balance.doubleValue() < 1000L) return setMaxDigits(balance, 2);
-        if (balance.doubleValue() < 1000000L) return setMaxDigits(balance.divide(BigDecimal.valueOf(1000L)), 2) + Values.CONFIG.getK();
-        if (balance.doubleValue() < 1000000000L) return setMaxDigits(balance.divide(BigDecimal.valueOf(1000000L)), 2) + Values.CONFIG.getM();
-        if (balance.doubleValue() < 1000000000000L) return setMaxDigits(balance.divide(BigDecimal.valueOf(1000000000L)), 2) + Values.CONFIG.getB();
-        if (balance.doubleValue() < 1000000000000000L) return setMaxDigits(balance.divide(BigDecimal.valueOf(1000000000000L)), 2) + Values.CONFIG.getT();
-        if (balance.doubleValue() < 1000000000000000000L) return setMaxDigits(balance.divide(BigDecimal.valueOf(1000000000000000L)), 2) + Values.CONFIG.getQ();
+        if (balance.doubleValue() < 1000000L)
+            return setMaxDigits(balance.divide(BigDecimal.valueOf(1000L)), 2) + Values.CONFIG.getK();
+        if (balance.doubleValue() < 1000000000L)
+            return setMaxDigits(balance.divide(BigDecimal.valueOf(1000000L)), 2) + Values.CONFIG.getM();
+        if (balance.doubleValue() < 1000000000000L)
+            return setMaxDigits(balance.divide(BigDecimal.valueOf(1000000000L)), 2) + Values.CONFIG.getB();
+        if (balance.doubleValue() < 1000000000000000L)
+            return setMaxDigits(balance.divide(BigDecimal.valueOf(1000000000000L)), 2) + Values.CONFIG.getT();
+        if (balance.doubleValue() < 1000000000000000000L)
+            return setMaxDigits(balance.divide(BigDecimal.valueOf(1000000000000000L)), 2) + Values.CONFIG.getQ();
         return setMaxDigits(balance.divide(BigDecimal.valueOf(1000000000000000000L)), 2) + Values.CONFIG.getQq();
     }
 
@@ -168,14 +171,14 @@ public class Methods {
     public static void sendTitle(String path, Player p) {
         String title = BankPlus.getCm().getConfig("messages").getString(path);
         if (title == null) return;
-        if (title.contains(",")) {
-            String[] titles = title.split(",");
+
+        String newTitle = MessageManager.addPrefix(title);
+        if (newTitle.contains(",")) {
+            String[] titles = newTitle.split(",");
             String title1 = titles[0];
             String title2 = titles[1];
             p.sendTitle(ChatUtils.color(title1), ChatUtils.color(title2));
-        } else {
-            p.sendTitle(ChatUtils.color(title), "");
-        }
+        } else p.sendTitle(ChatUtils.color(newTitle), "");
     }
 
     public static void playSound(String input, Player p) {
@@ -222,28 +225,58 @@ public class Methods {
             }
             break;
 
-            default: return;
+            default:
+                return;
         }
 
+        if (!sound.contains(",")) {
+            BPLogger.warn("The format of the sound \"" + sound + "\" is wrong! ");
+            BPLogger.warn("Please correct it in the config!");
+            return;
+        }
         String[] pathSlitted = sound.split(",");
-        String soundType = pathSlitted[0];
-        int volume = Integer.parseInt(pathSlitted[1]);
-        int pitch = Integer.parseInt(pathSlitted[2]);
+        String soundType;
+        int volume, pitch;
+
+        try {
+            soundType = pathSlitted[0];
+            volume = Integer.parseInt(pathSlitted[1]);
+            pitch = Integer.parseInt(pathSlitted[2]);
+        } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
+            BPLogger.warn("The format of the sound \"" + sound + "\" is wrong! ");
+            BPLogger.warn("Please correct it in the config!");
+            return;
+        }
 
         try {
             p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
         } catch (IllegalArgumentException e) {
-            BPLogger.warn("Invalid SoundType: " + e.getMessage());
+            BPLogger.warn("\"" + sound + "\" is an invalid sound type for your server version!");
             BPLogger.warn("Please change it in the config!");
         }
     }
 
-    public static int ticksInMinutes(int delay) {
-        return delay * 1200;
+    public static String getSoundBasedOnServerVersion() {
+        if (isLegacyServer())
+            return "ORB_PICKUP,5,1";
+        else
+            return "ENTITY_EXPERIENCE_ORB_PICKUP,5,1";
     }
 
-    public static long millisecondsInMinutes(int delay) {
-        return delay * 60000L;
+    public static long secondsInMilliseconds(int seconds) {
+        return seconds * 1000L;
+    }
+
+    public static long minutesInMilliseconds(int minutes) {
+        return minutes * secondsInMilliseconds(60);
+    }
+
+    public static long hoursInMilliseconds(int hours) {
+        return hours * minutesInMilliseconds(60);
+    }
+
+    public static long daysInMilliseconds(int days) {
+        return days * hoursInMilliseconds(24);
     }
 
     public static void withdraw(Player p, BigDecimal amount) {
@@ -257,7 +290,8 @@ public class Methods {
             return;
         }
 
-        if (maxWithdrawAmount.doubleValue() != 0 && amount.doubleValue() >= maxWithdrawAmount.doubleValue()) amount = maxWithdrawAmount;
+        if (maxWithdrawAmount.doubleValue() != 0 && amount.doubleValue() >= maxWithdrawAmount.doubleValue())
+            amount = maxWithdrawAmount;
 
         BigDecimal newBalance = bankBalance.subtract(amount);
         if (newBalance.doubleValue() <= 0) amount = bankBalance;
@@ -277,7 +311,8 @@ public class Methods {
 
         if (money.doubleValue() <= amount.doubleValue()) amount = money;
 
-        if (maxDepositAmount.doubleValue() != 0 && amount.doubleValue() >= maxDepositAmount.doubleValue()) amount = maxDepositAmount;
+        if (maxDepositAmount.doubleValue() != 0 && amount.doubleValue() >= maxDepositAmount.doubleValue())
+            amount = maxDepositAmount;
 
         BigDecimal newBalance = bankBalance.add(amount);
         if (maxBankCapacity.doubleValue() != 0 && newBalance.doubleValue() >= maxBankCapacity.doubleValue()) {
@@ -345,5 +380,10 @@ public class Methods {
         MessageManager.paymentSent(p1, p2, amount);
         EconomyManager.addPlayerBankBalance(p2, amount);
         MessageManager.paymentReceived(p2, p1, amount);
+    }
+
+    public static boolean isLegacyServer() {
+        String v = BankPlus.getInstance().getServerVersion();
+        return v.contains("1.7") || v.contains("1.8");
     }
 }

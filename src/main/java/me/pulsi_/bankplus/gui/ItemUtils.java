@@ -60,7 +60,7 @@ public class ItemUtils {
     public static ItemStack getGuiFiller() {
         ItemStack filler;
         try {
-            final String material = Values.CONFIG.getGuiFillerMaterial();
+            final String material = Values.BANK.getGuiFillerMaterial();
             if (material.contains(":")) {
                 String[] itemData = material.split(":");
                 filler = new ItemStack(Material.valueOf(itemData[0]), 1, Byte.parseByte(itemData[1]));
@@ -72,14 +72,14 @@ public class ItemUtils {
         }
 
         ItemMeta fillerMeta = filler.getItemMeta();
-        String displayName = Values.CONFIG.getGuiFillerDisplayname();
+        String displayName = Values.BANK.getGuiFillerDisplayname();
         if (displayName == null) {
             fillerMeta.setDisplayName(ChatUtils.color("&c&l*CANNOT FIND DISPLAYNAME*"));
         } else {
             fillerMeta.setDisplayName(ChatUtils.color(displayName));
         }
 
-        if (Values.CONFIG.isGuiFillerGlowing()) {
+        if (Values.BANK.isGuiFillerGlowing()) {
             fillerMeta.addEnchant(Enchantment.DURABILITY, 1, false);
             filler.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }

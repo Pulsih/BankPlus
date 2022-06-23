@@ -26,6 +26,7 @@ public final class BankPlus extends JavaPlugin {
     private static Permission perms = null;
 
     private boolean isPlaceholderAPIHooked = false;
+    private String serverVersion;
 
     @Override
     public void onEnable() {
@@ -47,6 +48,8 @@ public final class BankPlus extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+        serverVersion = getServer().getVersion();
+
         setupPermissions();
 
         cm = new ConfigManager(this);
@@ -87,6 +90,10 @@ public final class BankPlus extends JavaPlugin {
 
     public boolean isPlaceholderAPIHooked() {
         return isPlaceholderAPIHooked;
+    }
+
+    public String getServerVersion() {
+        return serverVersion;
     }
 
     public static ConfigManager getCm() {

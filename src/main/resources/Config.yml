@@ -1,5 +1,5 @@
-# Configuration File BankPlus
-# Made by Pulsi_
+# Configuration File of BankPlus
+# Made by Pulsi_, Version v5.2
 
 # Check for new updates of the plugin.
 Update-Checker: true
@@ -14,33 +14,43 @@ Interest:
 
   AFK-Settings:
     # If a player is AFK, it won't receive the interest.
-    Ignore-AFK-Players: false
+    Ignore-AFK-Players: true
 
     # The time, in minutes, that will pass
     # before marking a player as AFK
     AFK-Time: 5
 
-  # 5% of the bank amount ( it will add: balance x Money-Given )
-  Money-Given: 0.05
+  # ( it will add: balance x Money-Given )
+  Money-Given: 0.02
 
-  # 5 Minutes | DO NOT USE NUMBERS WITH DECIMALS!
-  Delay: 5
+  # This is the interest cooldown.
+  # You can choose the delay between:
+  #   seconds (time s), minutes (time m)
+  #   hours (time h), days (time d)
+  # If no time will be specified, it will
+  # automatically choose the minutes.
+  Delay: 1 h
 
   # The max amount that you can receive with interest.
-  Max-Amount: 500000
+  Max-Amount: 5000
 
-  # Choose if giving interest to offline players too.
+  # Choose if also giving interest to offline players.
   Give-To-Offline-Players: false
 
 General:
-  # The amount that a player will receive when joining for the first time
+  # The amount that a player will receive
+  # when joining for the first time
   Join-Start-Amount: 500
 
-  # Store player's money using UUIDs, otherwise the plugin will use names.
+  # Store player's money using UUIDs,
+  # otherwise the plugin will use names.
   Use-UUIDs: true
 
   # The max amount that a player can deposit, use 0 to disable.
   Max-Bank-Capacity: 500000000
+
+  # The max amount of decimals that a player balance can have.
+  Max-Decimals-Amount: 2
 
   # The max amount to withdraw per time, use 0 to disable.
   Max-Withdrawn-Amount: 0
@@ -48,7 +58,8 @@ General:
   # The max amount to deposit per time, use 0 to disable.
   Max-Deposit-Amount: 0
 
-  # The minimum amount that a player needs to put to withdraw / deposit, put 0 to disable.
+  # The minimum amount that a player needs to
+  # put to withdraw / deposit, put 0 to disable.
   Minimum-Amount: 0
 
   # Enabling this option, it will reopen the bank after
@@ -57,244 +68,78 @@ General:
 
   # The message that a player has to type
   # to stop typing the custom amount.
-  Chat-Exit-Message: "exit"
+  Chat-Exit-Message: exit
 
-  # These commands will be executed when typing "exit"
+  # These commands will be executed when leaving from typing
   # in chat while using the custom withdraw / deposit.
-  #
-  # [] Means no commands will be executed.
-  # Remove [] and the comments to use the commands, you
-  # can put as many commands as you want.
-  Chat-Exit-Commands: []
-    #- "[CONSOLE] tell %player% You closed the bank!"
-    #- "[PLAYER] say I closed the bank!"
+  # You can put as many commands as you want.
+  Chat-Exit-Commands: '[]'
+  # - "[CONSOLE] tell %player% You closed the bank!"
+  # - "[PLAYER] say I closed the bank!"
 
   # Worlds where the bank won't work
-  Worlds-Blacklist:
-    - "noBankWorld"
+  Worlds-Blacklist: true
 
   # Send an alert message to show the player how
   # much money has earned while being offline.
   Offline-Interest-Earned-Message:
-    Enabled: true
-    # 2 Seconds, put 0 to disable the delay
+    Enabled: false
+    # In seconds, put 0 to disable the delay.
     Delay: 2
-    Message: "&a&lBank&9&lPlus &aYou have earned &f%amount% money &awhile being offline!"
+    Message: '&a&lBank&9&lPlus &aYou have earned &f%amount% money &awhile being offline!'
 
   Withdraw-Sound:
     Enabled: true
-    Sound: "ENTITY_PLAYER_LEVEL_UP,5,1" #Sound Type, Volume, Pitch
+    # Sound-Type,Volume,Pitch.
+    Sound: ENTITY_EXPERIENCE_ORB_PICKUP,5,1
 
   Deposit-Sound:
     Enabled: true
-    Sound: "ENTITY_ORB_PICKUP,5,1"
+    Sound: ENTITY_EXPERIENCE_ORB_PICKUP,5,1
 
   View-Sound:
     Enabled: true
-    Sound: "ENTITY_ORB_PICKUP,5,1"
+    Sound: ENTITY_EXPERIENCE_ORB_PICKUP,5,1
 
   Personal-Sound:
     Enabled: true
-    Sound: "ENTITY_ORB_PICKUP,5,1"
+    Sound: ENTITY_EXPERIENCE_ORB_PICKUP,5,1
 
 Placeholders:
   Money:
-    Thousands: "K"
-    Millions: "M"
-    Billions: "B"
-    Trillions: "T"
-    Quadrillions: "Q"
-    Quintillions: "QQ"
+    Thousands: K
+    Millions: M
+    Billions: B
+    Trillions: T
+    Quadrillions: Q
+    Quintillions: QQ
 
   Time:
-    Second: "Second"
-    Seconds: "Seconds"
-    Minute: "Minute"
-    Minutes: "Minutes"
-    Hour: "Hour"
-    Hours: "Hours"
-    Day: "Day"
-    Days: "Days"
+    Second: Second
+    Seconds: Seconds
+    Minute: Minute
+    Minutes: Minutes
+    Hour: Hours
+    Day: Days
+    Days: Days
     Interest-Time:
-      Only-Seconds: "%seconds% %seconds_placeholder%"
-      Only-Minutes: "%minutes% %minutes_placeholder%"
-      Only-Hours: "%hours% %hours_placeholder%"
-      Only-Days: "%days% %days_placeholder%"
-      Seconds-Minutes: "%seconds% %seconds_placeholder% and %minutes% %minutes_placeholder%"
-      Seconds-Hours: "%seconds% %seconds_placeholder% and %hours% %hours_placeholder%"
-      Seconds-Days: "%seconds% %seconds_placeholder% and %days% %days_placeholder%"
-      Seconds-Minutes-Hours: "%seconds% %seconds_placeholder%, %minutes% %minutes_placeholder% and %hours% %hours_placeholder%"
-      Seconds-Hours-Days: "%seconds% %seconds_placeholder%, %hours% %hours_placeholder% and %days% %days_placeholder%"
-      Seconds-Minutes-Days: "%seconds% %seconds_placeholder%, %minutes% %minutes_placeholder% and %days% %days_placeholder%"
-      Seconds-Minutes-Hours-Days: "%seconds% %seconds_placeholder%, %minutes% %minutes_placeholder%, %hours% %hours_placeholder% and %days% %days_placeholder%"
-      Minutes-Hours: "%minutes% %minutes_placeholder% and %hours% %hours_placeholder%"
-      Minutes-Days: "%minutes% %minutes_placeholder% and %days% %days_placeholder%"
-      Minutes-Hours-Days: "%minutes% %minutes_placeholder%, %hours% %hours_placeholder% and %days% %days_placeholder%"
-      Hours-Days: "%hours% %hours_placeholder% and %days% %days_placeholder%"
-
-Gui:
-  # Now the gui supports custom heads, use https://minecraft-heads.com/custom-heads/search?searchword=
-  # to search custom values heads and use the following format:
-  # HEAD-<textureValue>
-  #
-  # You can also take a head from a player name or use
-  # your head with:
-  # HEAD-%PLAYER% The head of the player which is opening the gui
-  # HEAD[player-name] The head of the selected player
-  #
-  # If you want to know more about this: https://github.com/Pulsih/BankPlus/wiki
-
-  Enabled: true
-  Title: "&a&lGui Bank"
-  Lines: 4
-  Update-Delay: 1 #In seconds, put 0 to disable
-  Filler:
-    Enabled: true
-    Material: "WHITE_STAINED_GLASS_PANE"
-    DisplayName: "&6"
-    Glowing: false
-  Items:
-    # You can add as many items as you want
-    # and not only for make the bank work
-    Withdraw:
-      Material: "EMERALD"
-      Amount: 1
-      DisplayName: "&aWithdraw"
-      Slot: 11
-      Lore:
-        - ""
-        - "&7Withdraw &a500$ &7from your bank"
-        - ""
-      Glowing: true
-      Action:
-        # You can choose a number or:
-        # "ALL" -> All money
-        # "HALF" -> Half of the money
-        Action-Type: "Withdraw"
-        Amount: "500"
-
-    WithdrawHalf:
-      Material: "EMERALD"
-      Amount: 2
-      DisplayName: "&aWithdraw"
-      Slot: 12
-      Lore:
-        - ""
-        - "&7Withdraw &aHalf &7of the money from your bank"
-        - ""
-      Glowing: true
-      Action:
-        Action-Type: "Withdraw"
-        Amount: "HALF"
-
-    WithdrawAll:
-      Material: "EMERALD"
-      Amount: 3
-      DisplayName: "&aWithdraw"
-      Slot: 21
-      Lore:
-        - ""
-        - "&7Withdraw &aAll &7of the money from your bank"
-        - ""
-      Glowing: true
-      Action:
-        Action-Type: "Withdraw"
-        Amount: "ALL"
-
-    WithdrawCustom:
-      Material: "EMERALD"
-      Amount: 4
-      Slot: 20
-      DisplayName: "&aWithdraw"
-      Lore:
-        - ""
-        - "&7Withdraw a &acustom &7amount of money to your bank"
-        - ""
-      Glowing: true
-      Action:
-        Action-Type: "Withdraw"
-        Amount: "CUSTOM"
-
-    Personal-Info:
-      Material: "HEAD-%PLAYER%"
-      DisplayName: "&aPersonal"
-      Slot: 14
-      Lore:
-        - ""
-        - "&7Account Name: &f%player_name%"
-        - "&7Balance: &a%bankplus_balance_formatted%"
-        - ""
-        - "&7Wait &a%bankplus_interest_cooldown% &7to get interest!"
-        - "&7Expected money from the next interest: &a%bankplus_next_interest_formatted%"
-        - ""
-      Glowing: true
-
-    How-Does-It-Work:
-      Material: "HEAD-<eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzU3NDcwMTBkODRhYTU2NDgzYjc1ZjYyNDNkOTRmMzRjNTM0NjAzNTg0YjJjYzY4YTQ1YmYzNjU4NDAxMDVmZCJ9fX0=>"
-      DisplayName: "&aHow Does It Work?"
-      Slot: 23
-      Lore:
-        - ""
-        - "&7This is a bank, you can &adeposit &7all your"
-        - "&7money here to keep them &asafe&7, your money"
-        - "&7kept in the bank will &aincrease &7thanks to"
-        - "&7the &a&ninterest&7, which gives you a percentage of"
-        - "&7your money in the &abank&7!"
-        - ""
-      Glowing: true
-
-    Deposit:
-      Material: "EMERALD"
-      Amount: 1
-      Slot: 17
-      DisplayName: "&aDeposit"
-      Lore:
-        - ""
-        - "&7Deposit &a500$ &7to your bank"
-        - ""
-      Glowing: true
-      Action:
-        Action-Type: "Deposit"
-        Amount: "500"
-
-    DepositHalf:
-      Material: "EMERALD"
-      Amount: 2
-      Slot: 16
-      DisplayName: "&aDeposit"
-      Lore:
-        - ""
-        - "&7Deposit &aHalf &7of money to your bank"
-        - ""
-      Glowing: true
-      Action:
-        Action-Type: "Deposit"
-        Amount: "HALF"
-
-    DepositAll:
-      Material: "EMERALD"
-      Amount: 3
-      Slot: 25
-      DisplayName: "&aDeposit"
-      Lore:
-        - ""
-        - "&7Deposit &aAll &7of money to your bank"
-        - ""
-      Glowing: true
-      Action:
-        Action-Type: "Deposit"
-        Amount: "ALL"
-
-    DepositCustom:
-      Material: "EMERALD"
-      Amount: 4
-      Slot: 26
-      DisplayName: "&aDeposit"
-      Lore:
-        - ""
-        - "&7Deposit a &acustom &7amount of money to your bank"
-        - ""
-      Glowing: true
-      Action:
-        Action-Type: "Deposit"
-        Amount: "CUSTOM"
+      Only-Seconds: '%seconds% %seconds_placeholder%'
+      Only-Minutes: '%minutes% %minutes_placeholder%'
+      Only-Hours: '%hours% %hours_placeholder%'
+      Only-Days: '%days% %days_placeholder%'
+      Seconds-Minutes: '%seconds% %seconds_placeholder% and %minutes% %minutes_placeholder%'
+      Seconds-Hours: '%seconds% %seconds_placeholder% and %hours% %hours_placeholder%'
+      Seconds-Days: '%seconds% %seconds_placeholder% and %days% %days_placeholder%'
+      Seconds-Minutes-Hours: '%seconds% %seconds_placeholder%, %minutes% %minutes_placeholder%
+        and %hours% %hours_placeholder%'
+      Seconds-Hours-Days: '%seconds% %seconds_placeholder%, %hours% %hours_placeholder%
+        and %days% %days_placeholder%'
+      Seconds-Minutes-Days: '%seconds% %seconds_placeholder%, %minutes% %minutes_placeholder%
+        and %days% %days_placeholder%'
+      Seconds-Minutes-Hours-Days: '%seconds% %seconds_placeholder%, %minutes% %minutes_placeholder%,
+        %hours% %hours_placeholder% and %days% %days_placeholder%'
+      Minutes-Hours: '%minutes% %minutes_placeholder% and %hours% %hours_placeholder%'
+      Minutes-Days: '%minutes% %minutes_placeholder% and %days% %days_placeholder%'
+      Minutes-Hours-Days: '%minutes% %minutes_placeholder%, %hours% %hours_placeholder%
+        and %days% %days_placeholder%'
+      Hours-Days: '%hours% %hours_placeholder% and %days% %days_placeholder%'

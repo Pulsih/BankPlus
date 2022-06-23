@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.managers.ConfigManager;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.Methods;
@@ -50,6 +51,7 @@ public class PlayerJoin implements Listener {
         if (hasChanges) BankPlus.getCm().savePlayers();
 
         EconomyManager.loadBankBalance(p);
+        notifyAdminGuiPositionChanging(p);
     }
 
     private void offlineInterestMessage(Player p) {
@@ -69,5 +71,14 @@ public class PlayerJoin implements Listener {
             p.sendMessage(message);
 
         EconomyManager.setOfflineInterest(p, new BigDecimal(0));
+    }
+
+    private void notifyAdminGuiPositionChanging(Player p) {
+        if (!ConfigManager.guiHasMovedFile || !p.isOp() && !p.hasPermission("bankplus.notify")) return;
+        Bukkit.getScheduler().runTaskLater(BankPlus.getInstance(), () ->
+                p.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &aHi &f" + p.getName() + "&a! I'm here to notify you that the &fposition &aof the gui has changed from " +
+                "the version &fv5.2&a. I already managed to move the gui settings from the file &f\"config.yml\" &ato &f\"bank.yml\"&a!"))
+                , 80L);
+        ConfigManager.guiHasMovedFile = false;
     }
 }

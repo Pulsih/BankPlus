@@ -41,6 +41,7 @@ public class MessagesValues {
     private String invalidPlayer;
     private String bankFull;
     private String interestTime;
+    private String interestBankFull;
     private boolean isTitleCustomAmountEnabled;
     private boolean isInterestBroadcastEnabled;
 
@@ -85,6 +86,7 @@ public class MessagesValues {
         invalidPlayer = messages.getString("Invalid-Player");
         bankFull = messages.getString("Bank-Full");
         interestTime = messages.getString("Interest-Time");
+        interestBankFull = messages.getString("Interest-Broadcast.Bank-Full");
         isTitleCustomAmountEnabled = messages.getBoolean("Title-Custom-Amount.Enabled");
         isInterestBroadcastEnabled = messages.getBoolean("Interest-Broadcast.Enabled");
     }
@@ -223,6 +225,10 @@ public class MessagesValues {
 
     public String getInterestTime() {
         return interestTime;
+    }
+
+    public String getInterestBankFull() {
+        return interestBankFull;
     }
 
     public boolean isTitleCustomAmountEnabled() {

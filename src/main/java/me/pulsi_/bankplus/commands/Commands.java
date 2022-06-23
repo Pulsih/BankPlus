@@ -39,7 +39,7 @@ public class Commands implements CommandExecutor {
             }
 
             Player p = (Player) s;
-            if (Values.CONFIG.isGuiEnabled()) {
+            if (Values.BANK.isGuiEnabled()) {
                 new GuiHolder().openBank(p);
                 Methods.playSound("PERSONAL", p);
             } else {
@@ -332,10 +332,8 @@ public class Commands implements CommandExecutor {
                     MessageManager.interestIsDisabled(s);
                     return false;
                 }
-                if (!Interest.isInterestActive)
-                    Interest.loopInterest(Values.CONFIG.getInterestDelay());
-                else
-                    Interest.setInterestCount(Values.CONFIG.getInterestDelay());
+                if (!Interest.isInterestActive) Interest.loopInterest();
+                else Interest.restartInterest();
                 MessageManager.interestRestarted(s);
             }
             break;
@@ -353,6 +351,17 @@ public class Commands implements CommandExecutor {
 
             case "interest": {
                 if (!hasPermission(s, "bankplus.interest")) return false;
+
+                if (!Values.CONFIG.isInterestEnabled()) {
+                    MessageManager.interestIsDisabled(s);
+                    return false;
+                }
+                MessageManager.interestTime(s);
+            }
+            break;
+
+            case "interestmillis": {
+                if (!hasPermission(s, "bankplus.interestmillis")) return false;
 
                 if (!Values.CONFIG.isInterestEnabled()) {
                     MessageManager.interestIsDisabled(s);
