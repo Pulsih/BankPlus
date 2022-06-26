@@ -44,8 +44,6 @@ public class Placeholders extends PlaceholderExpansion {
     public String onPlaceholderRequest(Player p, String identifier) {
         if (p == null) return "Player not online";
 
-        BPLogger.info(identifier);
-
         BigDecimal balance = EconomyManager.getBankBalance(p);
         double moneyPercentage = Values.CONFIG.getInterestMoneyGiven();
         BigDecimal interestMoney = balance.multiply(BigDecimal.valueOf(moneyPercentage));
