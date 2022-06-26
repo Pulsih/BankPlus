@@ -1,5 +1,5 @@
 name: BankPlus
-version: 5.2
+version: 5.3
 main: me.pulsi_.bankplus.BankPlus
 api-version: 1.13
 depend:
@@ -14,3 +14,6 @@ description: The best bank plugin of Spigot!
 commands:
   bankplus:
     aliases: [bankp, bank, bp]
+
+  banktop:
+    aliases: [btop]

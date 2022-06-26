@@ -1,11 +1,16 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.managers.MessageManager;
+import me.pulsi_.bankplus.managers.TaskManager;
 import me.pulsi_.bankplus.values.Values;
+import org.bukkit.Bukkit;
 import org.bukkit.Sound;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -15,75 +20,82 @@ import java.util.Locale;
 public class Methods {
 
     public static String formatTime(long milliseconds) {
-        long seconds = milliseconds / 1000;
+        try {
+            long seconds = milliseconds / 1000;
 
-        if (seconds <= 0) return placeSeconds(Values.CONFIG.getInterestTimeOnlySeconds(), 0);
-        if (seconds < 60) return placeSeconds(Values.CONFIG.getInterestTimeOnlySeconds(), seconds);
+            if (seconds <= 0) return placeSeconds(Values.CONFIG.getInterestTimeOnlySeconds(), 0);
+            if (seconds < 60) return placeSeconds(Values.CONFIG.getInterestTimeOnlySeconds(), seconds);
 
-        long minutes = seconds / 60;
-        long newSeconds = seconds - (60 * minutes);
-        if (seconds < 3600) {
-            if (seconds % 60 == 0) return placeMinutes(Values.CONFIG.getInterestTimeOnlyMinutes(), minutes);
+            long minutes = seconds / 60;
+            long newSeconds = seconds - (60 * minutes);
+            if (seconds < 3600) {
+                if (seconds % 60 == 0) return placeMinutes(Values.CONFIG.getInterestTimeOnlyMinutes(), minutes);
 
-            String secondsPlaced = placeSeconds(Values.CONFIG.getInterestTimeSecondsMinutes(), newSeconds);
-            return placeMinutes(secondsPlaced, minutes);
-        }
+                String secondsPlaced = placeSeconds(Values.CONFIG.getInterestTimeSecondsMinutes(), newSeconds);
+                return placeMinutes(secondsPlaced, minutes);
+            }
 
-        long hours = seconds / 3600;
-        long newMinutes = minutes - (60 * hours);
-        if (seconds < 86400) {
-            if (newSeconds == 0 && newMinutes == 0) return placeHours(Values.CONFIG.getInterestTimeOnlyHours(), hours);
-            if (newSeconds == 0) {
-                String minutesPlaced = placeMinutes(Values.CONFIG.getInterestTimeMinutesHours(), newMinutes);
+            long hours = seconds / 3600;
+            long newMinutes = minutes - (60 * hours);
+            if (seconds < 86400) {
+                if (newSeconds == 0 && newMinutes == 0)
+                    return placeHours(Values.CONFIG.getInterestTimeOnlyHours(), hours);
+                if (newSeconds == 0) {
+                    String minutesPlaced = placeMinutes(Values.CONFIG.getInterestTimeMinutesHours(), newMinutes);
+                    return placeHours(minutesPlaced, hours);
+                }
+                if (newMinutes == 0) {
+                    String secondsPlaced = placeSeconds(Values.CONFIG.getInterestTimeSecondsHours(), newSeconds);
+                    return placeHours(secondsPlaced, hours);
+                }
+
+                String secondsPlaced = placeSeconds(Values.CONFIG.getInterestTimeSecondsMinutesHours(), newSeconds);
+                String minutesPlaced = placeMinutes(secondsPlaced, newMinutes);
                 return placeHours(minutesPlaced, hours);
             }
-            if (newMinutes == 0) {
-                String secondsPlaced = placeSeconds(Values.CONFIG.getInterestTimeSecondsHours(), newSeconds);
-                return placeHours(secondsPlaced, hours);
+
+            long days = seconds / 86400;
+            long newHours = hours - (24 * days);
+            if (newSeconds == 0 && newMinutes == 0 && newHours == 0)
+                return placeDays(Values.CONFIG.getInterestTimeOnlyDays(), days);
+            if (newSeconds == 0 && newMinutes == 0) {
+                String hoursPlaced = placeHours(Values.CONFIG.getInterestTimeHoursDays(), newHours);
+                return placeDays(hoursPlaced, days);
+            }
+            if (newSeconds == 0 && newHours == 0) {
+                String minutesPlaced = placeMinutes(Values.CONFIG.getInterestTimeMinutesDays(), newMinutes);
+                return placeDays(minutesPlaced, days);
+            }
+            if (newMinutes == 0 && newHours == 0) {
+                String secondsPlaced = placeMinutes(Values.CONFIG.getInterestTimeSecondsDays(), newSeconds);
+                return placeDays(secondsPlaced, days);
             }
 
-            String secondsPlaced = placeSeconds(Values.CONFIG.getInterestTimeSecondsMinutesHours(), newSeconds);
+            if (newSeconds == 0) {
+                String minutesPlaced = placeMinutes(Values.CONFIG.getInterestTimeMinutesHoursDays(), newMinutes);
+                String hoursPlaced = placeHours(minutesPlaced, newHours);
+                return placeDays(hoursPlaced, days);
+            }
+            if (newMinutes == 0) {
+                String secondsPlaced = placeSeconds(Values.CONFIG.getInterestTimeSecondsHoursDays(), newSeconds);
+                String hoursPlaced = placeHours(secondsPlaced, newHours);
+                return placeDays(hoursPlaced, days);
+            }
+            if (newHours == 0) {
+                String secondsPlaced = placeSeconds(Values.CONFIG.getInterestTimeSecondsMinutesDays(), newSeconds);
+                String minutesPlaced = placeMinutes(secondsPlaced, newMinutes);
+                return placeDays(minutesPlaced, days);
+            }
+
+            String secondsPlaced = placeSeconds(Values.CONFIG.getInterestTimeSecondsMinutesHoursDays(), newSeconds);
             String minutesPlaced = placeMinutes(secondsPlaced, newMinutes);
-            return placeHours(minutesPlaced, hours);
-        }
-
-        long days = seconds / 86400;
-        long newHours = hours - (24 * days);
-        if (newSeconds == 0 && newMinutes == 0 && newHours == 0)
-            return placeDays(Values.CONFIG.getInterestTimeOnlyDays(), days);
-        if (newSeconds == 0 && newMinutes == 0) {
-            String hoursPlaced = placeHours(Values.CONFIG.getInterestTimeHoursDays(), newHours);
-            return placeDays(hoursPlaced, days);
-        }
-        if (newSeconds == 0 && newHours == 0) {
-            String minutesPlaced = placeMinutes(Values.CONFIG.getInterestTimeMinutesDays(), newMinutes);
-            return placeDays(minutesPlaced, days);
-        }
-        if (newMinutes == 0 && newHours == 0) {
-            String secondsPlaced = placeMinutes(Values.CONFIG.getInterestTimeSecondsDays(), newSeconds);
-            return placeDays(secondsPlaced, days);
-        }
-
-        if (newSeconds == 0) {
-            String minutesPlaced = placeMinutes(Values.CONFIG.getInterestTimeMinutesHoursDays(), newMinutes);
             String hoursPlaced = placeHours(minutesPlaced, newHours);
             return placeDays(hoursPlaced, days);
+        } catch (NullPointerException e) {
+            if (!Interest.isInterestActive) Interest.loopInterest();
+            else Interest.restartInterest();
+            return "";
         }
-        if (newMinutes == 0) {
-            String secondsPlaced = placeSeconds(Values.CONFIG.getInterestTimeSecondsHoursDays(), newSeconds);
-            String hoursPlaced = placeHours(secondsPlaced, newHours);
-            return placeDays(hoursPlaced, days);
-        }
-        if (newHours == 0) {
-            String secondsPlaced = placeSeconds(Values.CONFIG.getInterestTimeSecondsMinutesDays(), newSeconds);
-            String minutesPlaced = placeMinutes(secondsPlaced, newMinutes);
-            return placeDays(minutesPlaced, days);
-        }
-
-        String secondsPlaced = placeSeconds(Values.CONFIG.getInterestTimeSecondsMinutesHoursDays(), newSeconds);
-        String minutesPlaced = placeMinutes(secondsPlaced, newMinutes);
-        String hoursPlaced = placeHours(minutesPlaced, newHours);
-        return placeDays(hoursPlaced, days);
     }
 
     private static String placeSeconds(String message, long seconds) {
@@ -108,6 +120,43 @@ public class Methods {
         String time = message.replace("%days%", String.valueOf(days));
         if (days == 1) return time.replace("%days_placeholder%", Values.CONFIG.getDay());
         else return time.replace("%days_placeholder%", Values.CONFIG.getDays());
+    }
+
+    public static boolean isInvalidNumber(String number, CommandSender s) {
+        try {
+            BigDecimal num = new BigDecimal(number);
+            if (num.doubleValue() < 0) {
+                MessageManager.cannotUseNegativeNumber(s);
+                return true;
+            }
+        } catch (NumberFormatException e) {
+            MessageManager.invalidNumber(s);
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isPlayer(CommandSender s) {
+        if (s instanceof Player) return true;
+        MessageManager.notPlayer(s);
+        return false;
+    }
+
+    public static boolean hasPermission(CommandSender s, String permission) {
+        if (s.hasPermission(permission)) return true;
+        MessageManager.noPermission(s);
+        return false;
+    }
+
+    public static void startSavingAllPlayerBalancesTask() {
+        BukkitTask task = TaskManager.getSavingTask();
+        if (task != null) task.cancel();
+        if (Values.CONFIG.getSaveBalancedDelay() > 0) {
+            TaskManager.setSavingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.getInstance(), () -> {
+                for (Player p : Bukkit.getOnlinePlayers()) EconomyManager.saveBankBalance(p);
+                if (Values.CONFIG.isSaveBalancesBroadcast()) BPLogger.info("All player balances have been saved!");
+            }, Values.CONFIG.getSaveBalancedDelay() * 1200L, Values.CONFIG.getSaveBalancedDelay() * 1200L));
+        }
     }
 
     public static String formatLong(BigDecimal balance) {
@@ -257,10 +306,8 @@ public class Methods {
     }
 
     public static String getSoundBasedOnServerVersion() {
-        if (isLegacyServer())
-            return "ORB_PICKUP,5,1";
-        else
-            return "ENTITY_EXPERIENCE_ORB_PICKUP,5,1";
+        if (isLegacyServer()) return "ORB_PICKUP,5,1";
+        else return "ENTITY_EXPERIENCE_ORB_PICKUP,5,1";
     }
 
     public static long secondsInMilliseconds(int seconds) {
@@ -296,7 +343,8 @@ public class Methods {
         BigDecimal newBalance = bankBalance.subtract(amount);
         if (newBalance.doubleValue() <= 0) amount = bankBalance;
 
-        EconomyManager.withdraw(p, amount);
+        EconomyManager.removePlayerBankBalance(p, amount);
+        BankPlus.getEconomy().depositPlayer(p, amount.doubleValue());
         MessageManager.successWithdraw(p, amount);
         Methods.playSound("WITHDRAW", p);
     }
@@ -323,7 +371,8 @@ public class Methods {
             amount = maxBankCapacity.subtract(bankBalance);
         }
 
-        EconomyManager.deposit(p, amount);
+        EconomyManager.addPlayerBankBalance(p, amount);
+        BankPlus.getEconomy().withdrawPlayer(p, amount.doubleValue());
         MessageManager.successDeposit(p, amount);
         Methods.playSound("DEPOSIT", p);
     }

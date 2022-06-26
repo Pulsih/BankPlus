@@ -4,6 +4,7 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.managers.AFKManager;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.managers.MessageManager;
+import me.pulsi_.bankplus.managers.TaskManager;
 import me.pulsi_.bankplus.utils.Methods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -17,7 +18,6 @@ public class Interest {
 
     private static long cooldown = 0;
     public static boolean isInterestActive = false;
-    private static BukkitTask task = null;
 
     public static void startsInterest() {
         long interestSave = BankPlus.getCm().getConfig("players").getLong("Interest-Save");
@@ -36,7 +36,7 @@ public class Interest {
     public static void loopInterest() {
         if (!Values.CONFIG.isInterestEnabled()) return;
         if (getInterestCooldownMillis() <= 1) giveInterestToEveryone();
-        task = Bukkit.getScheduler().runTaskLater(BankPlus.getInstance(), Interest::loopInterest, 5L);
+        TaskManager.setInterestTask(Bukkit.getScheduler().runTaskLater(BankPlus.getInstance(), Interest::loopInterest, 5L));
     }
 
     public static void saveInterest() {
@@ -44,11 +44,16 @@ public class Interest {
         BankPlus.getCm().savePlayers();
     }
 
+    public static void setCooldown(long cooldown) {
+        Interest.cooldown = cooldown;
+    }
+
     public static long getInterestCooldownMillis() {
         return cooldown - System.currentTimeMillis();
     }
 
     public static void restartInterest() {
+        BukkitTask task = TaskManager.getInterestTask();
         if (task != null) task.cancel();
         startsInterest();
     }

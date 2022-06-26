@@ -2,13 +2,11 @@ package me.pulsi_.bankplus;
 
 import me.pulsi_.bankplus.external.bStats;
 import me.pulsi_.bankplus.interest.Interest;
-import me.pulsi_.bankplus.managers.AFKManager;
-import me.pulsi_.bankplus.managers.ConfigManager;
-import me.pulsi_.bankplus.managers.DataManager;
-import me.pulsi_.bankplus.managers.EconomyManager;
+import me.pulsi_.bankplus.managers.*;
 import me.pulsi_.bankplus.placeholders.Placeholders;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.ChatUtils;
+import me.pulsi_.bankplus.utils.Methods;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
@@ -67,17 +65,20 @@ public final class BankPlus extends JavaPlugin {
 
         if (Values.CONFIG.isInterestEnabled()) Interest.startsInterest();
         if (Values.CONFIG.isIgnoringAfkPlayers()) AFKManager.startCountdown();
+        if (Values.CONFIG.isBanktopEnabled()) {
+            BankTopManager.updateBankTop();
+            BankTopManager.startUpdateTask();
+        }
+        Methods.startSavingAllPlayerBalancesTask();
     }
 
     @Override
     public void onDisable() {
+
         instance = this;
-
-        for (Player p : Bukkit.getOnlinePlayers())
-            EconomyManager.saveBankBalance(p);
-
-        DataManager.shutdownPlugin();
         if (Values.CONFIG.isInterestEnabled()) Interest.saveInterest();
+        for (Player p : Bukkit.getOnlinePlayers()) EconomyManager.saveBankBalance(p);
+        DataManager.shutdownPlugin();
     }
 
     public static Economy getEconomy() {

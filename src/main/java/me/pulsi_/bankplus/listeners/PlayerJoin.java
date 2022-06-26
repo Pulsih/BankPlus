@@ -25,10 +25,8 @@ public class PlayerJoin implements Listener {
         UUID uuid = p.getUniqueId();
         String name = p.getName();
 
-        if (Values.CONFIG.isStoringUUIDs())
-            registerPlayer(p, uuid.toString());
-        else
-            registerPlayer(p, name);
+        if (Values.CONFIG.isStoringUUIDs()) registerPlayer(p, uuid.toString());
+        else registerPlayer(p, name);
         offlineInterestMessage(p);
     }
 
@@ -37,6 +35,7 @@ public class PlayerJoin implements Listener {
 
         FileConfiguration players = BankPlus.getCm().getConfig("players");
         String sBalance = players.getString("Players." + identifier + ".Money");
+        String sName = players.getString("Players." + identifier + ".Account-Name");
         String sOfflineInterest = players.getString("Players." + identifier + ".Offline-Interest");
 
         if (sBalance == null) {
@@ -46,6 +45,10 @@ public class PlayerJoin implements Listener {
         }
         if (Values.CONFIG.isNotifyOfflineInterest() && sOfflineInterest == null) {
             players.set("Players." + identifier + ".Offline-Interest", String.valueOf(0));
+            hasChanges = true;
+        }
+        if (sName == null) {
+            players.set("Players." + identifier + ".Account-Name", p.getName());
             hasChanges = true;
         }
         if (hasChanges) BankPlus.getCm().savePlayers();

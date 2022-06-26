@@ -398,6 +398,19 @@ public class ConfigManager {
         validatePath(config, newConfig, "General.Use-UUIDs", true);
         addSpace(newConfig, "General");
 
+        addCommentsUnder(newConfig, "General",
+                "In minutes, the delay to save all players balances. It is used",
+                "to prevent players from losing their money if the server crashes.",
+                "Put 0 to disable this option.");
+        validatePath(config, newConfig, "General.Save-Delay", 10);
+        addSpace(newConfig, "General");
+
+        addCommentsUnder(newConfig, "General",
+                "Choose if sending a message to the console",
+                "when the plugin save all balances. (Only console)");
+        validatePath(config, newConfig, "General.Save-Broadcast", true);
+        addSpace(newConfig, "General");
+
         addCommentUnder(newConfig, "General", "The max amount that a player can deposit, use 0 to disable.");
         validatePath(config, newConfig, "General.Max-Bank-Capacity", 500000000);
         addSpace(newConfig, "General");
@@ -472,6 +485,58 @@ public class ConfigManager {
 
         validatePath(config, newConfig, "General.Personal-Sound.Enabled", true);
         validatePath(config, newConfig, "General.Personal-Sound.Sound", Methods.getSoundBasedOnServerVersion());
+        addSpace(newConfig);
+
+        addCommentUnder(newConfig, "BankTop", "Enable or not the feature.");
+        validatePath(config, newConfig, "BankTop.Enabled", true);
+        addSpace(newConfig, "BankTop");
+
+        addCommentUnder(newConfig, "BankTop", "The size of the banktop.");
+        validatePath(config, newConfig, "BankTop.Size", 10);
+        addSpace(newConfig, "BankTop");
+
+        addCommentUnder(newConfig, "BankTop", "In ticks, the delay before the top will update.");
+        validatePath(config, newConfig, "BankTop.Update-Delay", 12000);
+        addSpace(newConfig, "BankTop");
+
+        addCommentsUnder(newConfig, "BankTop.Update-Broadcast",
+                "Choose if sending a message to the console",
+                "when the plugin save all balances.");
+        validatePath(config, newConfig, "BankTop.Update-Broadcast.Enabled", true);
+        addSpace(newConfig, "BankTop.Update-Broadcast");
+
+        addCommentUnder(newConfig, "BankTop.Update-Broadcast", "Choose if the alert will be sent only to the console.");
+        validatePath(config, newConfig, "BankTop.Update-Broadcast.Only-Console", false);
+        addSpace(newConfig, "BankTop.Update-Broadcast");
+
+        addCommentUnder(newConfig, "BankTop.Update-Broadcast", "The message that will be sent when updating.");
+        validatePath(config, newConfig, "BankTop.Update-Broadcast.Message", "%prefix% &aThe BankTop has been updated!");
+        addSpace(newConfig, "BankTop");
+
+        addCommentsUnder(newConfig, "BankTop",
+                "The format that will be used to",
+                "display the money in the banktop.",
+                "You can choose between:",
+                "  default_amount, amount_long,",
+                "  amount_formatted, amount_formatted_long");
+        validatePath(config, newConfig, "BankTop.Money-Format", "amount_formatted");
+        addSpace(newConfig, "BankTop");
+
+        addCommentUnder(newConfig, "BankTop", "The message to display the banktop.");
+        List<String> banktopFormat = new ArrayList<>();
+        banktopFormat.add("&8&m---------&8[&a &lBank&9&lPlus &aBankTop &8]&m---------");
+        banktopFormat.add("&61# &6%bankplus_banktop_name_1%&8: &a%bankplus_banktop_money_1%");
+        banktopFormat.add("&22# &2%bankplus_banktop_name_2%&8: &a%bankplus_banktop_money_2%");
+        banktopFormat.add("&a3# &a%bankplus_banktop_name_3%&8: &a%bankplus_banktop_money_3%");
+        banktopFormat.add("&74# &7%bankplus_banktop_name_4%&8: &a%bankplus_banktop_money_4%");
+        banktopFormat.add("&75# &7%bankplus_banktop_name_5%&8: &a%bankplus_banktop_money_5%");
+        banktopFormat.add("&76# &7%bankplus_banktop_name_6%&8: &a%bankplus_banktop_money_6%");
+        banktopFormat.add("&77# &7%bankplus_banktop_name_7%&8: &a%bankplus_banktop_money_7%");
+        banktopFormat.add("&78# &7%bankplus_banktop_name_8%&8: &a%bankplus_banktop_money_8%");
+        banktopFormat.add("&79# &7%bankplus_banktop_name_9%&8: &a%bankplus_banktop_money_9%");
+        banktopFormat.add("&710# &7%bankplus_banktop_name_10%&8: &a%bankplus_banktop_money_10%");
+        banktopFormat.add("  &7&o(( The BankTop will update every 10m ))");
+        validatePath(config, newConfig, "BankTop.Format", banktopFormat);
         addSpace(newConfig);
 
         validatePath(config, newConfig, "Placeholders.Money.Thousands", "K");

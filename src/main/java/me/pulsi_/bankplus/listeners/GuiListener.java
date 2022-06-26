@@ -33,7 +33,6 @@ public class GuiListener implements Listener {
             String actionType = item.getString("Action.Action-Type").toLowerCase();
             String actionAmount = item.getString("Action.Amount").toLowerCase();
 
-            BigDecimal amount;
             switch (actionType) {
                 case "withdraw":
                     switch (actionAmount) {
@@ -42,19 +41,16 @@ public class GuiListener implements Listener {
                             break;
 
                         case "all":
-                            amount = EconomyManager.getBankBalance(p);
-                            Methods.withdraw(p, amount);
+                            Methods.withdraw(p, EconomyManager.getBankBalance(p));
                             break;
 
                         case "half":
-                            amount = EconomyManager.getBankBalance(p).divide(BigDecimal.valueOf(2));
-                            Methods.withdraw(p, amount);
+                            Methods.withdraw(p, EconomyManager.getBankBalance(p).divide(BigDecimal.valueOf(2)));
                             break;
 
                         default:
                             try {
-                                amount = new BigDecimal(actionAmount);
-                                Methods.withdraw(p, amount);
+                                Methods.withdraw(p, new BigDecimal(actionAmount));
                             } catch (NumberFormatException ex) {
                                 ChatUtils.log("&a&lBank&9&lPlus &cInvalid number in the withdraw amount!");
                             }
@@ -63,26 +59,23 @@ public class GuiListener implements Listener {
                     break;
 
                 case "deposit":
+                    double bal = BankPlus.getEconomy().getBalance(p);
                     switch (actionAmount) {
                         case "custom":
                             Methods.customDeposit(p);
                             break;
 
                         case "all":
-                            amount = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p));
-                            Methods.deposit(p, amount);
+                            Methods.deposit(p, BigDecimal.valueOf(bal));
                             break;
 
                         case "half":
-                            amount = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p) / 2);
-                            Methods.deposit(p, amount);
+                            Methods.deposit(p, BigDecimal.valueOf(bal / 2));
                             break;
 
                         default:
                             try {
-                                amount = new BigDecimal(actionAmount);
-                                Methods.deposit(p, amount);
-                                break;
+                                Methods.deposit(p, new BigDecimal(actionAmount));
                             } catch (NumberFormatException ex) {
                                 ChatUtils.log("&a&lBank&9&lPlus &cInvalid number in the deposit amount!");
                             }

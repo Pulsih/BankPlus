@@ -15,7 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ItemUtils {
+public class ItemCreator {
 
     private static final ItemStack UNKNOWN_MATERIAL = new ItemStack(Material.BARRIER);
 

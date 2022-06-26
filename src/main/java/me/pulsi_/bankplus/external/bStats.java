@@ -32,8 +32,7 @@ public class bStats {
      * Creates a new Metrics instance.
      *
      * @param plugin Your plugin instance.
-     * @param serviceId The id of the service. It can be found at <a
-     *     href="https://bstats.org/what-is-my-plugin-id">What is my plugin id?</a>
+     * @param serviceId The id of the service. It can be found at <ahref="https://bstats.org/what-is-my-plugin-id">What is my plugin id?</a>
      */
     public bStats(BankPlus plugin, int serviceId) {
         this.plugin = plugin;

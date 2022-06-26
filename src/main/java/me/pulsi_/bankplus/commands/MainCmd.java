@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.commands;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.gui.GuiHolder;
 import me.pulsi_.bankplus.interest.Interest;
+import me.pulsi_.bankplus.managers.BankTopManager;
 import me.pulsi_.bankplus.managers.DataManager;
 import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.managers.MessageManager;
@@ -14,11 +15,14 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Commands implements CommandExecutor {
+public class MainCmd implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender s, Command command, String label, String[] args) {
@@ -32,7 +36,7 @@ public class Commands implements CommandExecutor {
         }
 
         if (args.length == 0) {
-            if (!hasPermission(s, "bankplus.use")) return false;
+            if (!Methods.hasPermission(s, "bankplus.use")) return false;
             if (!(s instanceof Player)) {
                 MessageManager.helpMessage(s);
                 return false;
@@ -50,7 +54,7 @@ public class Commands implements CommandExecutor {
 
         switch (args[0].toLowerCase()) {
             case "customwithdraw": {
-                if (!hasPermission(s, "bankplus.customwithdraw")) return false;
+                if (!Methods.hasPermission(s, "bankplus.customwithdraw")) return false;
 
                 if (args.length == 1) {
                     MessageManager.specifyPlayer(s);
@@ -68,7 +72,7 @@ public class Commands implements CommandExecutor {
             break;
 
             case "customdeposit": {
-                if (!hasPermission(s, "bankplus.customdeposit")) return false;
+                if (!Methods.hasPermission(s, "bankplus.customdeposit")) return false;
 
                 if (args.length == 1) {
                     MessageManager.specifyPlayer(s);
@@ -86,7 +90,7 @@ public class Commands implements CommandExecutor {
             break;
 
             case "open": {
-                if (!hasPermission(s, "bankplus.open")) return false;
+                if (!Methods.hasPermission(s, "bankplus.open")) return false;
 
                 if (args.length == 1) {
                     MessageManager.specifyPlayer(s);
@@ -105,8 +109,8 @@ public class Commands implements CommandExecutor {
             break;
 
             case "pay": {
-                if (!hasPermission(s, "bankplus.pay")) return false;
-                if (!isPlayer(s)) return false;
+                if (!Methods.hasPermission(s, "bankplus.pay")) return false;
+                if (!Methods.isPlayer(s)) return false;
 
                 if (args.length == 1) {
                     MessageManager.specifyPlayer(s);
@@ -126,7 +130,7 @@ public class Commands implements CommandExecutor {
                 }
 
                 String num = args[2];
-                if (isInvalidNumber(num, s)) return false;
+                if (Methods.isInvalidNumber(num, s)) return false;
                 BigDecimal amount = new BigDecimal(num);
 
                 Methods.pay(p, target, amount);
@@ -134,7 +138,7 @@ public class Commands implements CommandExecutor {
             break;
 
             case "reload": {
-                if (!hasPermission(s, "bankplus.reload")) return false;
+                if (!Methods.hasPermission(s, "bankplus.reload")) return false;
 
                 DataManager.reloadPlugin();
                 MessageManager.reloadMessage(s);
@@ -142,11 +146,11 @@ public class Commands implements CommandExecutor {
             break;
 
             case "help":
-                if (hasPermission(s, "bankplus.help")) MessageManager.helpMessage(s);
+                if (Methods.hasPermission(s, "bankplus.help")) MessageManager.helpMessage(s);
                 break;
 
             case "view": {
-                if (!hasPermission(s, "bankplus.view")) return false;
+                if (!Methods.hasPermission(s, "bankplus.view")) return false;
 
                 if (args.length == 1) {
                     MessageManager.specifyPlayer(s);
@@ -166,16 +170,16 @@ public class Commands implements CommandExecutor {
 
             case "bal":
             case "balance": {
-                if (!hasPermission(s, "bankplus.balance")) return false;
-                if (!isPlayer(s)) return false;
+                if (!Methods.hasPermission(s, "bankplus.balance")) return false;
+                if (!Methods.isPlayer(s)) return false;
 
                 MessageManager.personalBalance((Player) s);
             }
             break;
 
             case "withdraw": {
-                if (!hasPermission(s, "bankplus.withdraw")) return false;
-                if (!isPlayer(s)) return false;
+                if (!Methods.hasPermission(s, "bankplus.withdraw")) return false;
+                if (!Methods.isPlayer(s)) return false;
 
                 Player p = (Player) s;
                 if (args.length == 1) {
@@ -197,7 +201,7 @@ public class Commands implements CommandExecutor {
 
                     default:
                         String num = args[1];
-                        if (isInvalidNumber(num, s)) return false;
+                        if (Methods.isInvalidNumber(num, s)) return false;
                         amount = new BigDecimal(num);
                         Methods.withdraw(p, amount);
                 }
@@ -205,8 +209,8 @@ public class Commands implements CommandExecutor {
             break;
 
             case "deposit": {
-                if (!hasPermission(s, "bankplus.deposit")) return false;
-                if (!isPlayer(s)) return false;
+                if (!Methods.hasPermission(s, "bankplus.deposit")) return false;
+                if (!Methods.isPlayer(s)) return false;
 
                 Player p = (Player) s;
                 if (args.length == 1) {
@@ -228,7 +232,7 @@ public class Commands implements CommandExecutor {
 
                     default:
                         String num = args[1];
-                        if (isInvalidNumber(num, s)) return false;
+                        if (Methods.isInvalidNumber(num, s)) return false;
                         amount = new BigDecimal(num);
                         Methods.deposit(p, amount);
                 }
@@ -236,7 +240,7 @@ public class Commands implements CommandExecutor {
             break;
 
             case "set": {
-                if (!hasPermission(s, "bankplus.set")) return false;
+                if (!Methods.hasPermission(s, "bankplus.set")) return false;
 
                 if (args.length == 1) {
                     MessageManager.specifyPlayer(s);
@@ -248,7 +252,7 @@ public class Commands implements CommandExecutor {
                 }
 
                 String num = args[2];
-                if (isInvalidNumber(num, s)) return false;
+                if (Methods.isInvalidNumber(num, s)) return false;
                 BigDecimal amount = new BigDecimal(num);
 
                 Player p = Bukkit.getPlayerExact(args[1]);
@@ -264,7 +268,7 @@ public class Commands implements CommandExecutor {
             break;
 
             case "add": {
-                if (!hasPermission(s, "bankplus.add")) return false;
+                if (!Methods.hasPermission(s, "bankplus.add")) return false;
 
                 if (args.length == 1) {
                     MessageManager.specifyPlayer(s);
@@ -276,7 +280,7 @@ public class Commands implements CommandExecutor {
                 }
 
                 String num = args[2];
-                if (isInvalidNumber(num, s)) return false;
+                if (Methods.isInvalidNumber(num, s)) return false;
                 BigDecimal amount = new BigDecimal(num);
 
                 Player p = Bukkit.getPlayerExact(args[1]);
@@ -292,7 +296,7 @@ public class Commands implements CommandExecutor {
             break;
 
             case "remove": {
-                if (!hasPermission(s, "bankplus.remove")) return false;
+                if (!Methods.hasPermission(s, "bankplus.remove")) return false;
 
                 if (args.length == 1) {
                     MessageManager.specifyPlayer(s);
@@ -304,7 +308,7 @@ public class Commands implements CommandExecutor {
                 }
 
                 String num = args[2];
-                if (isInvalidNumber(num, s)) return false;
+                if (Methods.isInvalidNumber(num, s)) return false;
                 BigDecimal amount = new BigDecimal(num);
 
                 Player p = Bukkit.getPlayerExact(args[1]);
@@ -326,7 +330,7 @@ public class Commands implements CommandExecutor {
             break;
 
             case "restartinterest": {
-                if (!hasPermission(s, "bankplus.restart-interest")) return false;
+                if (!Methods.hasPermission(s, "bankplus.restart-interest")) return false;
 
                 if (!Values.CONFIG.isInterestEnabled()) {
                     MessageManager.interestIsDisabled(s);
@@ -339,7 +343,7 @@ public class Commands implements CommandExecutor {
             break;
 
             case "giveinterest": {
-                if (!hasPermission(s, "bankplus.give-interest")) return false;
+                if (!Methods.hasPermission(s, "bankplus.give-interest")) return false;
 
                 if (!Values.CONFIG.isInterestEnabled()) {
                     MessageManager.interestIsDisabled(s);
@@ -350,7 +354,7 @@ public class Commands implements CommandExecutor {
             break;
 
             case "interest": {
-                if (!hasPermission(s, "bankplus.interest")) return false;
+                if (!Methods.hasPermission(s, "bankplus.interest")) return false;
 
                 if (!Values.CONFIG.isInterestEnabled()) {
                     MessageManager.interestIsDisabled(s);
@@ -361,13 +365,27 @@ public class Commands implements CommandExecutor {
             break;
 
             case "interestmillis": {
-                if (!hasPermission(s, "bankplus.interestmillis")) return false;
+                if (!Methods.hasPermission(s, "bankplus.interestmillis")) return false;
 
                 if (!Values.CONFIG.isInterestEnabled()) {
                     MessageManager.interestIsDisabled(s);
                     return false;
                 }
                 MessageManager.interestTime(s);
+            }
+            break;
+
+            case "saveallbankbalances": {
+                if (!Methods.hasPermission(s, "bankplus.saveallbankbalances")) return false;
+                for (Player p : Bukkit.getOnlinePlayers()) EconomyManager.saveBankBalance(p);
+                s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &aSuccessfully saved all player balances to the file!"));
+            }
+            break;
+
+            case "updatebanktop": {
+                if (!Methods.hasPermission(s, "bankplus.updatebanktop")) return false;
+                BankTopManager.updateBankTop();
+                s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &aSuccessfully updated the banktop!"));
             }
             break;
 
@@ -378,29 +396,39 @@ public class Commands implements CommandExecutor {
         return true;
     }
 
-    private boolean isInvalidNumber(String number, CommandSender s) {
-        try {
-            BigDecimal num = new BigDecimal(number);
-            if (num.doubleValue() < 0) {
-                MessageManager.cannotUseNegativeNumber(s);
-                return true;
-            }
-        } catch (NumberFormatException e) {
-            MessageManager.invalidNumber(s);
-            return true;
+    @Override
+    public List<String> onTabComplete(CommandSender s, Command command, String alias, String[] args) {
+
+        List<String> listOfArgs = new ArrayList<>();
+        if (s.hasPermission("bankplus.add")) listOfArgs.add("add");
+        if (s.hasPermission("bankplus.balance")) {
+            listOfArgs.add("balance");
+            listOfArgs.add("bal");
         }
-        return false;
-    }
+        if (s.hasPermission("bankplus.deposit")) listOfArgs.add("deposit");
+        if (s.hasPermission("bankplus.give-interest")) listOfArgs.add("giveInterest");
+        if (s.hasPermission("bankplus.help")) listOfArgs.add("help");
+        if (s.hasPermission("bankplus.interest")) listOfArgs.add("interest");
+        if (s.hasPermission("bankplus.interestmillis")) listOfArgs.add("interestMillis");
+        if (s.hasPermission("bankplus.open")) listOfArgs.add("open");
+        if (s.hasPermission("bankplus.pay")) listOfArgs.add("pay");
+        if (s.hasPermission("bankplus.reload")) listOfArgs.add("reload");
+        if (s.hasPermission("bankplus.remove")) listOfArgs.add("remove");
+        if (s.hasPermission("bankplus.restart-interest")) listOfArgs.add("restartInterest");
+        if (s.hasPermission("bankplus.saveallbankbalances")) listOfArgs.add("saveAllBankBalances");
+        if (s.hasPermission("bankplus.set")) listOfArgs.add("set");
+        if (s.hasPermission("bankplus.updatebanktop")) listOfArgs.add("updateBankTop");
+        if (s.hasPermission("bankplus.view")) listOfArgs.add("view");
+        if (s.hasPermission("bankplus.withdraw")) listOfArgs.add("withdraw");
 
-    private boolean hasPermission(CommandSender s, String permission) {
-        if (s.hasPermission(permission)) return true;
-        MessageManager.noPermission(s);
-        return false;
-    }
+        List<String> args1 = new ArrayList<>();
+        if (args.length == 1) {
+            for (String arg : listOfArgs) {
+                if (arg.startsWith(args[0].toLowerCase())) args1.add(arg);
+            }
+            return args1;
+        }
 
-    private boolean isPlayer(CommandSender s) {
-        if (s instanceof Player) return true;
-        MessageManager.notPlayer(s);
-        return false;
+        return null;
     }
 }

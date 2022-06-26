@@ -1,37 +1,39 @@
 package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class EconomyManager {
 
     public static Map<UUID, BigDecimal> playerMoney = new HashMap<>();
+
+    public static List<BigDecimal> getAllPlayerBankBalances() {
+        List<BigDecimal> balances = new ArrayList<>();
+        FileConfiguration players = BankPlus.getCm().getConfig("players");
+        for (String identifier : players.getConfigurationSection("Players").getKeys(false)) {
+            String balance = players.getString("Players." + identifier + ".Money");
+            if (balance != null) balances.add(new BigDecimal(balance));
+        }
+        return balances;
+    }
 
     public static void loadBankBalance(Player p) {
         if (playerMoney.containsKey(p.getUniqueId())) return;
         FileConfiguration players = BankPlus.getCm().getConfig("players");
 
         String path;
-        if (Values.CONFIG.isStoringUUIDs())
-            path = players.getString("Players." + p.getUniqueId() + ".Money");
-        else
-            path = players.getString("Players." + p.getName() + ".Money");
+        if (Values.CONFIG.isStoringUUIDs()) path = players.getString("Players." + p.getUniqueId() + ".Money");
+        else path = players.getString("Players." + p.getName() + ".Money");
 
         BigDecimal amount;
-        if (path == null)
-            amount = new BigDecimal(0);
-        else
-            amount = new BigDecimal(path);
+        if (path == null) amount = new BigDecimal(0);
+        else amount = new BigDecimal(path);
 
         playerMoney.put(p.getUniqueId(), amount);
     }
@@ -88,18 +90,6 @@ public class EconomyManager {
         else offlineInterest = new BigDecimal(path);
 
         return offlineInterest;
-    }
-
-    public static void withdraw(Player p, BigDecimal amount) {
-        BigDecimal bankMoney = getBankBalance(p);
-        BankPlus.getEconomy().depositPlayer(p, Double.parseDouble(String.valueOf(amount)));
-        setValue(p, bankMoney.subtract(amount).round(new MathContext(4)));
-    }
-
-    public static void deposit(Player p, BigDecimal amount) {
-        BigDecimal bankMoney = getBankBalance(p);
-        BankPlus.getEconomy().withdrawPlayer(p, Double.parseDouble(String.valueOf(amount)));
-        setValue(p, bankMoney.add(amount));
     }
 
     public static void setPlayerBankBalance(Player p, BigDecimal amount) {

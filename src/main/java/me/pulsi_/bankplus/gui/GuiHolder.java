@@ -45,15 +45,15 @@ public class GuiHolder implements InventoryHolder {
             ConfigurationSection itemsList = itemsConfiguration.getConfigurationSection(items);
 
             try {
-                guiBank.setItem(itemsList.getInt("Slot") - 1, ItemUtils.createItemStack(itemsList));
+                guiBank.setItem(itemsList.getInt("Slot") - 1, ItemCreator.createItemStack(itemsList));
             } catch (ArrayIndexOutOfBoundsException ex) {
-                guiBank.addItem(ItemUtils.createItemStack(itemsList));
+                guiBank.addItem(ItemCreator.createItemStack(itemsList));
             }
         }
 
         if (Values.BANK.isGuiFillerEnabled())
             for (int i = 0; i < guiLines(Values.BANK.getGuiLines()); i++)
-                if (guiBank.getItem(i) == null) guiBank.setItem(i, ItemUtils.getGuiFiller());
+                if (guiBank.getItem(i) == null) guiBank.setItem(i, ItemCreator.getGuiFiller());
     }
 
     private void placeHeads(Player p) {
@@ -65,9 +65,9 @@ public class GuiHolder implements InventoryHolder {
             if (material == null || !material.startsWith("HEAD")) continue;
 
             try {
-                guiBank.setItem(itemsList.getInt("Slot") - 1, ItemUtils.getHead(itemsList, p));
+                guiBank.setItem(itemsList.getInt("Slot") - 1, ItemCreator.getHead(itemsList, p));
             } catch (ArrayIndexOutOfBoundsException e) {
-                guiBank.addItem(ItemUtils.getHead(itemsList, p));
+                guiBank.addItem(ItemCreator.getHead(itemsList, p));
             }
         }
     }

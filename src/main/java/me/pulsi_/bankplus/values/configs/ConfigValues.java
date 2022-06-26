@@ -70,6 +70,16 @@ public class ConfigValues {
     private boolean isIgnoringAfkPlayers;
     private int afkPlayersTime;
     private int maxDecimalsAmount;
+    private long saveBalancedDelay;
+    private boolean banktopEnabled;
+    private long updateBankTopDelay;
+    private int bankTopSize;
+    private String bankTopMoneyFormat;
+    private List<String> bankTopFormat;
+    private boolean banktopUpdateBroadcastEnabled;
+    private boolean banktopUpdateBroadcastOnlyConsole;
+    private String banktopUpdateBroadcastMessage;
+    private boolean saveBalancesBroadcast;
 
     public static ConfigValues getInstance() {
         return new ConfigValues();
@@ -138,6 +148,16 @@ public class ConfigValues {
         isIgnoringAfkPlayers = config.getBoolean("Interest.AFK-Settings.Ignore-AFK-Players");
         afkPlayersTime = config.getInt("Interest.AFK-Settings.AFK-Time");
         maxDecimalsAmount = config.getInt("General.Max-Decimals-Amount");
+        saveBalancedDelay = config.getLong("General.Save-Delay");
+        banktopEnabled = config.getBoolean("BankTop.Enabled");
+        updateBankTopDelay = config.getLong("BankTop.Update-Delay");
+        bankTopSize = config.getInt("BankTop.Size");
+        bankTopMoneyFormat = config.getString("BankTop.Money-Format");
+        bankTopFormat = config.getStringList("BankTop.Format");
+        banktopUpdateBroadcastEnabled = config.getBoolean("BankTop.Update-Broadcast.Enabled");
+        banktopUpdateBroadcastOnlyConsole = config.getBoolean("BankTop.Update-Broadcast.Only-Console");
+        banktopUpdateBroadcastMessage = config.getString("BankTop.Update-Broadcast.Message");
+        saveBalancesBroadcast = config.getBoolean("General.Save-Broadcast");
     }
 
     public String getExitMessage() {
@@ -421,5 +441,45 @@ public class ConfigValues {
 
     public int getMaxDecimalsAmount() {
         return maxDecimalsAmount;
+    }
+
+    public int getBankTopSize() {
+        return bankTopSize;
+    }
+
+    public List<String> getBankTopFormat() {
+        return bankTopFormat;
+    }
+
+    public long getSaveBalancedDelay() {
+        return saveBalancedDelay;
+    }
+
+    public long getUpdateBankTopDelay() {
+        return updateBankTopDelay;
+    }
+
+    public String getBankTopMoneyFormat() {
+        return bankTopMoneyFormat;
+    }
+
+    public boolean isBanktopEnabled() {
+        return banktopEnabled;
+    }
+
+    public String getBanktopUpdateBroadcastMessage() {
+        return banktopUpdateBroadcastMessage;
+    }
+
+    public boolean isBanktopUpdateBroadcastEnabled() {
+        return banktopUpdateBroadcastEnabled;
+    }
+
+    public boolean isBanktopUpdateBroadcastOnlyConsole() {
+        return banktopUpdateBroadcastOnlyConsole;
+    }
+
+    public boolean isSaveBalancesBroadcast() {
+        return saveBalancesBroadcast;
     }
 }

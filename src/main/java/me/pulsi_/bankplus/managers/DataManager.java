@@ -1,13 +1,14 @@
 package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.commands.Commands;
-import me.pulsi_.bankplus.commands.TabCompletion;
+import me.pulsi_.bankplus.commands.BankTopCmd;
+import me.pulsi_.bankplus.commands.MainCmd;
 import me.pulsi_.bankplus.external.UpdateChecker;
 import me.pulsi_.bankplus.gui.GuiHolder;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.listeners.*;
 import me.pulsi_.bankplus.utils.ChatUtils;
+import me.pulsi_.bankplus.utils.Methods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.plugin.PluginManager;
 
@@ -56,6 +57,8 @@ public class DataManager {
         if (Values.BANK.isGuiEnabled()) new GuiHolder().loadBank();
         if (!AFKManager.isPlayerCountdownActive) AFKManager.startCountdown();
         if (!Interest.isInterestActive) Interest.startsInterest();
+        if (Values.CONFIG.isBanktopEnabled()) BankTopManager.startUpdateTask();
+        Methods.startSavingAllPlayerBalancesTask();
     }
 
     private static void registerEvents() {
@@ -72,7 +75,8 @@ public class DataManager {
 
     private static void setupCommands() {
         BankPlus plugin = BankPlus.getInstance();
-        plugin.getCommand("bankplus").setExecutor(new Commands());
-        plugin.getCommand("bankplus").setTabCompleter(new TabCompletion());
+        plugin.getCommand("bankplus").setExecutor(new MainCmd());
+        plugin.getCommand("bankplus").setTabCompleter(new MainCmd());
+        plugin.getCommand("banktop").setExecutor(new BankTopCmd());
     }
 }
