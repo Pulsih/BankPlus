@@ -19,6 +19,7 @@ public class BankTopManager {
 
     public static void updateBankTop() {
         bankTopBalances = new ArrayList<>();
+        bankTopNames = new ArrayList<>();
         List<BigDecimal> balances = EconomyManager.getAllPlayerBankBalances();
         if (balances.isEmpty()) return;
 
@@ -28,7 +29,6 @@ public class BankTopManager {
             for (int i = 0; i < Values.CONFIG.getBankTopSize(); i++) bankTopBalances.add(balances.get(i));
         } else bankTopBalances.addAll(balances);
 
-        bankTopNames = new ArrayList<>();
         FileConfiguration players = BankPlus.getCm().getConfig("players");
         for (BigDecimal bankTopBalance : bankTopBalances) {
             String topMoney = bankTopBalance.toString();
@@ -59,12 +59,20 @@ public class BankTopManager {
     }
 
     public static BigDecimal getBankTopBalancePlayer(int position) {
-        if (position > bankTopBalances.size()) return new BigDecimal(0);
-        return bankTopBalances.get(position - 1);
+        if (position <= 0) return new BigDecimal(0);
+        if (position - 1 >= bankTopBalances.size()) return new BigDecimal(0);
+        try {
+            return bankTopBalances.get(position - 1);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return new BigDecimal(0);
+        }
     }
 
     public static String getBankTopNamePlayer(int position) {
-        if (position > bankTopBalances.size()) return "Not found yet.";
-        return bankTopNames.get(position - 1);
+        if (position <= 0) return "Invalid number.";
+        if (position - 1 >= bankTopNames.size()) return "Not found yet.";
+        String name = bankTopNames.get(position - 1);
+        if (name == null) return "Not found yet.";
+        return name;
     }
 }

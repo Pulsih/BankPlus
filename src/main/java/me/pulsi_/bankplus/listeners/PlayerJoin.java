@@ -40,7 +40,7 @@ public class PlayerJoin implements Listener {
 
         if (sBalance == null) {
             ChatUtils.log("&a&lBank&9&lPlus &2Successfully registered &f" + p.getName() + "&a's account!");
-            players.set("Players." + identifier + ".Money", Values.CONFIG.getStartAmount().toString());
+            players.set("Players." + identifier + ".Money", EconomyManager.format(Values.CONFIG.getStartAmount()));
             hasChanges = true;
         }
         if (Values.CONFIG.isNotifyOfflineInterest() && sOfflineInterest == null) {

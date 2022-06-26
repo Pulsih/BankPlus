@@ -65,6 +65,8 @@ public final class BankPlus extends JavaPlugin {
 
         if (Values.CONFIG.isInterestEnabled()) Interest.startsInterest();
         if (Values.CONFIG.isIgnoringAfkPlayers()) AFKManager.startCountdown();
+        EconomyManager.validateAllAccounts();
+        getCm().reloadConfig("players");
         if (Values.CONFIG.isBanktopEnabled()) {
             BankTopManager.updateBankTop();
             BankTopManager.startUpdateTask();

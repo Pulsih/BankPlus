@@ -440,7 +440,7 @@ public class ConfigValues {
     }
 
     public int getMaxDecimalsAmount() {
-        return maxDecimalsAmount;
+        return Math.max(maxDecimalsAmount, 1);
     }
 
     public int getBankTopSize() {

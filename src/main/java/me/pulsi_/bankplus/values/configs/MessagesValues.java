@@ -42,6 +42,7 @@ public class MessagesValues {
     private String bankFull;
     private String interestTime;
     private String interestBankFull;
+    private String banktopDisabled;
     private boolean isTitleCustomAmountEnabled;
     private boolean isInterestBroadcastEnabled;
 
@@ -89,6 +90,7 @@ public class MessagesValues {
         interestBankFull = messages.getString("Interest-Broadcast.Bank-Full");
         isTitleCustomAmountEnabled = messages.getBoolean("Title-Custom-Amount.Enabled");
         isInterestBroadcastEnabled = messages.getBoolean("Interest-Broadcast.Enabled");
+        banktopDisabled = messages.getString("BankTop-Disabled");
     }
 
     public boolean isAlertMissingMessage() {
@@ -229,6 +231,10 @@ public class MessagesValues {
 
     public String getInterestBankFull() {
         return interestBankFull;
+    }
+
+    public String getBanktopDisabled() {
+        return banktopDisabled;
     }
 
     public boolean isTitleCustomAmountEnabled() {

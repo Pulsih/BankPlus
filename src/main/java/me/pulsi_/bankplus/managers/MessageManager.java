@@ -204,6 +204,11 @@ public class MessageManager {
         if (!isMessageNull(p, message)) p.sendMessage(addPrefix(message));
     }
 
+    public static void banktopDisabled(CommandSender s) {
+        String message = Values.MESSAGES.getBanktopDisabled();
+        if (!isMessageNull(s, message)) s.sendMessage(addPrefix(message));
+    }
+
     public static void invalidPlayer(CommandSender s) {
         String message = Values.MESSAGES.getInvalidPlayer();
         if (!isMessageNull(s, message)) s.sendMessage(addPrefix(message));

@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.commands;
 
 import me.pulsi_.bankplus.managers.BankTopManager;
+import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.Methods;
@@ -16,6 +17,7 @@ public class BankTopCmd implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender s, Command command, String label, String[] args) {
+        if (!Values.CONFIG.isBanktopEnabled()) MessageManager.banktopDisabled(s);
         if (!Methods.hasPermission(s, "bankplus.banktop")) return false;
 
         List<String> format = Values.CONFIG.getBankTopFormat();

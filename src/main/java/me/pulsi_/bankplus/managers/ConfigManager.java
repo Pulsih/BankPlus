@@ -265,6 +265,7 @@ public class ConfigManager {
         validatePath(messages, newMessages, "Unknown-Command", "%prefix% &cUnknown Command!");
         validatePath(messages, newMessages, "Interest-Restarted", "%prefix% &aInterest Restarted!");
         validatePath(messages, newMessages, "Interest-Disabled", "%prefix% &cThe interest is disabled!");
+        validatePath(messages, newMessages, "BankTop-Disabled", "%prefix% &cThe banktop is disabled!");
         addSpace(newMessages);
 
         addComment(newMessages, "Errors");
