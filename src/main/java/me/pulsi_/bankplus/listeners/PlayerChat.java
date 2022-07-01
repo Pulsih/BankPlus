@@ -1,7 +1,9 @@
 package me.pulsi_.bankplus.listeners;
 
+import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.gui.GuiHolder;
 import me.pulsi_.bankplus.managers.MessageManager;
+import me.pulsi_.bankplus.utils.BPDebugger;
 import me.pulsi_.bankplus.utils.Methods;
 import me.pulsi_.bankplus.utils.SetUtils;
 import me.pulsi_.bankplus.values.Values;
@@ -11,61 +13,56 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import java.math.BigDecimal;
 
 public class PlayerChat implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onChat(PlayerChatEvent e) {
-
+    public void onChat(AsyncPlayerChatEvent e) {
         Player p = e.getPlayer();
-        String mess = ChatColor.stripColor(e.getMessage());
+        if (!isTyping(p)) return;
+        BPDebugger.debugChat(e);
 
-        if (SetUtils.playerDepositing.contains(p)) {
+        String message = ChatColor.stripColor(e.getMessage());
+        if (hasTypedExit(message, p, e)) return;
 
-            if (mess.equalsIgnoreCase(Values.CONFIG.getExitMessage())) {
-                e.setCancelled(true);
-                SetUtils.playerDepositing.remove(p);
-                executeExitCommands(p);
-                reopenBank(p);
-                return;
-            }
-
-            try {
-                Methods.deposit(p, new BigDecimal(mess));
-                reopenBank(p);
-            } catch (NumberFormatException ex) {
-                e.setCancelled(true);
-                MessageManager.invalidNumber(p);
-                return;
-            }
+        BigDecimal amount;
+        try {
+            amount = new BigDecimal(message);
+        } catch (NumberFormatException ex) {
             e.setCancelled(true);
-            SetUtils.playerDepositing.remove(p);
+            MessageManager.invalidNumber(p);
+            return;
         }
 
-        if (SetUtils.playerWithdrawing.contains(p)) {
-
-            if (mess.equalsIgnoreCase(Values.CONFIG.getExitMessage())) {
-                e.setCancelled(true);
-                SetUtils.playerWithdrawing.remove(p);
-                executeExitCommands(p);
-                reopenBank(p);
-                return;
-            }
-
-            try {
-                Methods.withdraw(p, new BigDecimal(mess));
-                reopenBank(p);
-            } catch (NumberFormatException ex) {
-                e.setCancelled(true);
-                MessageManager.invalidNumber(p);
-                return;
-            }
-            e.setCancelled(true);
-            SetUtils.playerWithdrawing.remove(p);
+        if (Methods.isDepositing(p)) {
+            SetUtils.removeFromDepositingPlayers(p);
+            Methods.withdraw(p, amount);
         }
+        if (Methods.isWithdrawing(p)) {
+            SetUtils.removeFromWithdrawingPlayers(p);
+            Methods.withdraw(p, amount);
+        }
+        e.setCancelled(true);
+        reopenBank(p);
+    }
+
+    private boolean hasTypedExit(String message, Player p, AsyncPlayerChatEvent e) {
+        if (isTyping(p) && !message.equalsIgnoreCase(Values.CONFIG.getExitMessage())) return false;
+        e.setCancelled(true);
+        Bukkit.getScheduler().runTask(BankPlus.getInstance(), () -> {
+            SetUtils.playerDepositing.remove(p.getUniqueId());
+            SetUtils.playerWithdrawing.remove(p.getUniqueId());
+            executeExitCommands(p);
+            reopenBank(p);
+        });
+        return true;
+    }
+
+    private boolean isTyping(Player p) {
+        return Methods.isDepositing(p) || Methods.isWithdrawing(p);
     }
 
     private void reopenBank(Player p) {

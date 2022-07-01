@@ -2,7 +2,7 @@ package me.pulsi_.bankplus.gui;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.utils.ChatUtils;
+import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
@@ -38,7 +38,7 @@ public class GuiHolder implements InventoryHolder {
     }
 
     public void loadBank() {
-        guiBank = Bukkit.createInventory(new GuiHolder(), guiLines(Values.BANK.getGuiLines()), ChatUtils.color(Values.BANK.getGuiTitle()));
+        guiBank = Bukkit.createInventory(new GuiHolder(), guiLines(Values.BANK.getGuiLines()), BPChat.color(Values.BANK.getGuiTitle()));
 
         ConfigurationSection itemsConfiguration = Values.BANK.getGuiItems();
         for (String items : itemsConfiguration.getKeys(false)) {
@@ -92,13 +92,13 @@ public class GuiHolder implements InventoryHolder {
         if (displayName == null) displayName = "&c&l*CANNOT FIND DISPLAYNAME*";
 
         List<String> lore = new ArrayList<>();
-        for (String lines : c.getStringList("Lore")) lore.add(ChatUtils.color(lines));
+        for (String lines : c.getStringList("Lore")) lore.add(BPChat.color(lines));
 
         if (BankPlus.getInstance().isPlaceholderAPIHooked()) {
-            meta.setDisplayName(PlaceholderAPI.setPlaceholders(p, ChatUtils.color(displayName)));
+            meta.setDisplayName(PlaceholderAPI.setPlaceholders(p, BPChat.color(displayName)));
             meta.setLore(PlaceholderAPI.setPlaceholders(p, lore));
         } else {
-            meta.setDisplayName(ChatUtils.color(displayName));
+            meta.setDisplayName(BPChat.color(displayName));
             meta.setLore(lore);
         }
 

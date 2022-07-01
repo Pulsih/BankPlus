@@ -17,35 +17,30 @@ import java.math.BigDecimal;
 public class Interest {
 
     private static long cooldown = 0;
-    public static boolean isInterestActive = false;
+    public static boolean wasDisabled = false;
 
-    public static void startsInterest() {
+    public static void startInterest() {
         long interestSave = BankPlus.getCm().getConfig("players").getLong("Interest-Save");
 
-        if (interestSave <= 0) {
+        if (interestSave <= 0)
             cooldown = System.currentTimeMillis() + (Values.CONFIG.getInterestDelay() + Methods.secondsInMilliseconds(1));
-            loopInterest();
-        } else {
+        else {
             cooldown = System.currentTimeMillis() + (interestSave + Methods.secondsInMilliseconds(1));
-            loopInterest();
             BankPlus.getCm().getConfig("players").set("Interest-Save", null);
             BankPlus.getCm().savePlayers();
         }
+        loopInterest();
     }
 
-    public static void loopInterest() {
-        if (!Values.CONFIG.isInterestEnabled()) return;
+    private static void loopInterest() {
+        if (!isInterestActive()) return;
         if (getInterestCooldownMillis() <= 1) giveInterestToEveryone();
-        TaskManager.setInterestTask(Bukkit.getScheduler().runTaskLater(BankPlus.getInstance(), Interest::loopInterest, 5L));
+        TaskManager.setInterestTask(Bukkit.getScheduler().runTaskLater(BankPlus.getInstance(), Interest::loopInterest, 10L));
     }
 
     public static void saveInterest() {
-        BankPlus.getCm().getConfig("players").set("Interest-Save", cooldown);
+        BankPlus.getCm().getConfig("players").set("Interest-Save", getInterestCooldownMillis());
         BankPlus.getCm().savePlayers();
-    }
-
-    public static void setCooldown(long cooldown) {
-        Interest.cooldown = cooldown;
     }
 
     public static long getInterestCooldownMillis() {
@@ -55,7 +50,7 @@ public class Interest {
     public static void restartInterest() {
         BukkitTask task = TaskManager.getInterestTask();
         if (task != null) task.cancel();
-        startsInterest();
+        startInterest();
     }
 
     public static void giveInterestToEveryone() {
@@ -63,7 +58,6 @@ public class Interest {
 
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (!p.hasPermission("bankplus.receive.interest")) continue;
-
             if (Values.CONFIG.isIgnoringAfkPlayers()) {
                 if (!AFKManager.isAFK(p)) giveInterest(p);
                 continue;
@@ -75,7 +69,7 @@ public class Interest {
         Bukkit.getScheduler().runTaskAsynchronously(BankPlus.getInstance(), () -> {
             String wName = Bukkit.getWorlds().get(0).getName();
             for (OfflinePlayer p : Bukkit.getOfflinePlayers())
-                if (!p.isOnline() && BankPlus.getPermissions().playerHas(wName, p, "bankplus.receive.interest"))
+                if (!p.isOnline() && BankPlus.getPermissions().playerHas(wName, p, Values.CONFIG.getInterestOfflinePermission()))
                     giveInterest(p);
         });
     }
@@ -119,7 +113,7 @@ public class Interest {
             BigDecimal newAmount = maxBankCapacity.subtract(bankBalance);
             if (newAmount.doubleValue() <= 0) return;
             EconomyManager.addPlayerBankBalance(p, newAmount);
-            addOfflineInterest(p, maxBankCapacity.subtract(bankBalance));
+            addOfflineInterest(p, newAmount);
             return;
         }
         EconomyManager.addPlayerBankBalance(p, interestMoney);
@@ -130,5 +124,17 @@ public class Interest {
         if (!Values.CONFIG.isOfflineInterestEarnedMessageEnabled()) return;
         BigDecimal offlineInterest = EconomyManager.getOfflineInterest(p);
         EconomyManager.setOfflineInterest(p, offlineInterest.add(amount));
+    }
+
+    private static boolean isInterestActive() {
+        if (!Values.CONFIG.isInterestEnabled()) {
+            BukkitTask task = TaskManager.getInterestTask();
+            if (task != null) task.cancel();
+            wasDisabled = true;
+            cooldown = -1;
+            return false;
+        }
+        wasDisabled = false;
+        return true;
     }
 }

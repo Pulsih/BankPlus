@@ -3,7 +3,8 @@ package me.pulsi_.bankplus.listeners;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.managers.ConfigManager;
 import me.pulsi_.bankplus.managers.EconomyManager;
-import me.pulsi_.bankplus.utils.ChatUtils;
+import me.pulsi_.bankplus.utils.BPChat;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.Methods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -31,20 +32,19 @@ public class PlayerJoin implements Listener {
     }
 
     private void registerPlayer(Player p, String identifier) {
-        boolean hasChanges = false;
-
         FileConfiguration players = BankPlus.getCm().getConfig("players");
         String sBalance = players.getString("Players." + identifier + ".Money");
-        String sName = players.getString("Players." + identifier + ".Account-Name");
         String sOfflineInterest = players.getString("Players." + identifier + ".Offline-Interest");
+        String sName = players.getString("Players." + identifier + ".Account-Name");
+        boolean hasChanges = false;
 
         if (sBalance == null) {
-            ChatUtils.log("&a&lBank&9&lPlus &2Successfully registered &f" + p.getName() + "&a's account!");
-            players.set("Players." + identifier + ".Money", EconomyManager.format(Values.CONFIG.getStartAmount()));
+            BPLogger.info("&2Successfully registered &f" + p.getName() + "&a's account!");
+            players.set("Players." + identifier + ".Money", Methods.formatBigDouble(Values.CONFIG.getStartAmount()));
             hasChanges = true;
         }
         if (Values.CONFIG.isNotifyOfflineInterest() && sOfflineInterest == null) {
-            players.set("Players." + identifier + ".Offline-Interest", String.valueOf(0));
+            players.set("Players." + identifier + ".Offline-Interest", Methods.formatBigDouble(BigDecimal.valueOf(0)));
             hasChanges = true;
         }
         if (sName == null) {
@@ -63,7 +63,7 @@ public class PlayerJoin implements Listener {
         if (offlineInterest.doubleValue() <= 0) return;
 
         long delay = Values.CONFIG.getNotifyOfflineInterestDelay();
-        String message = ChatUtils.color(Values.CONFIG.getNotifyOfflineInterestMessage()
+        String message = BPChat.color(Values.CONFIG.getNotifyOfflineInterestMessage()
                 .replace("%amount%", Methods.formatCommas(offlineInterest))
                 .replace("%amount_formatted%", Methods.format(offlineInterest))
                 .replace("%amount_formatted_long%", Methods.formatLong(offlineInterest)));
@@ -79,7 +79,7 @@ public class PlayerJoin implements Listener {
     private void notifyAdminGuiPositionChanging(Player p) {
         if (!ConfigManager.guiHasMovedFile || !p.isOp() && !p.hasPermission("bankplus.notify")) return;
         Bukkit.getScheduler().runTaskLater(BankPlus.getInstance(), () ->
-                p.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &aHi &f" + p.getName() + "&a! I'm here to notify you that the &fposition &aof the gui has changed from " +
+                p.sendMessage(BPChat.color("&a&lBank&9&lPlus &aHi &f" + p.getName() + "&a! I'm here to notify you that the &fposition &aof the gui has changed from " +
                 "the version &fv5.2&a. I already managed to move the gui settings from the file &f\"config.yml\" &ato &f\"bank.yml\"&a!"))
                 , 80L);
         ConfigManager.guiHasMovedFile = false;

@@ -5,7 +5,6 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.managers.BankTopManager;
 import me.pulsi_.bankplus.managers.EconomyManager;
-import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.Methods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.ChatColor;

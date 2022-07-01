@@ -3,7 +3,8 @@ package me.pulsi_.bankplus.listeners;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.gui.GuiHolder;
 import me.pulsi_.bankplus.managers.EconomyManager;
-import me.pulsi_.bankplus.utils.ChatUtils;
+import me.pulsi_.bankplus.utils.BPDebugger;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.Methods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.configuration.ConfigurationSection;
@@ -23,6 +24,7 @@ public class GuiListener implements Listener {
         Player p = (Player) e.getWhoClicked();
 
         if (e.getClickedInventory() == null || e.getClickedInventory().getHolder() == null || !(e.getClickedInventory().getHolder() instanceof GuiHolder)) return;
+        BPDebugger.debugGui(e);
         e.setCancelled(true);
 
         for (String key : Values.BANK.getGuiItems().getKeys(false)) {
@@ -52,7 +54,7 @@ public class GuiListener implements Listener {
                             try {
                                 Methods.withdraw(p, new BigDecimal(actionAmount));
                             } catch (NumberFormatException ex) {
-                                ChatUtils.log("&a&lBank&9&lPlus &cInvalid number in the withdraw amount!");
+                                BPLogger.error("Invalid withdraw number! (Item-Path: " + item + ", Action-Type: " + actionType + ", Action-Number: " + actionAmount + ")");
                             }
                             break;
                     }
@@ -77,7 +79,7 @@ public class GuiListener implements Listener {
                             try {
                                 Methods.deposit(p, new BigDecimal(actionAmount));
                             } catch (NumberFormatException ex) {
-                                ChatUtils.log("&a&lBank&9&lPlus &cInvalid number in the deposit amount!");
+                                BPLogger.error("Invalid deposit number! (Item-Path: " + item + ", Action-Type: " + actionType + ", Action-Number: " + actionAmount + ")");
                             }
                             break;
                     }

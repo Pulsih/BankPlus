@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.interest.Interest;
-import me.pulsi_.bankplus.utils.ChatUtils;
+import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.Methods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.OfflinePlayer;
@@ -301,19 +301,19 @@ public class MessageManager {
 
     public static String addPrefix(String mess) {
         String prefix = Values.MESSAGES.getPrefix();
-        if (prefix != null) return ChatUtils.color(mess.replace("%prefix%", prefix));
-        return ChatUtils.color(mess);
+        if (prefix != null) return BPChat.color(mess.replace("%prefix%", prefix));
+        return BPChat.color(mess);
     }
 
     private static boolean isMessageNull(CommandSender s, String message) {
         if (message != null) return false;
         if (Values.MESSAGES.isAlertMissingMessagePathNull()) {
-            s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &cWarning! This message is missing in the messages file! " +
+            s.sendMessage(BPChat.color("&a&lBank&9&lPlus &cWarning! This message is missing in the messages file! " +
                     "Reload the server to make the file automatically replace the missing parts!"));
             return true;
         }
         if (Values.MESSAGES.isAlertMissingMessage()) {
-            s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &cWarning! This message is missing in the messages file! " +
+            s.sendMessage(BPChat.color("&a&lBank&9&lPlus &cWarning! This message is missing in the messages file! " +
                     "Reload the server to make the file automatically replace the missing parts!"));
         }
         return true;
@@ -322,12 +322,12 @@ public class MessageManager {
     private static boolean isMessageNull(Player p, String message) {
         if (message != null) return false;
         if (Values.MESSAGES.isAlertMissingMessagePathNull()) {
-            p.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &cWarning! This message is missing in the messages file! " +
+            p.sendMessage(BPChat.color("&a&lBank&9&lPlus &cWarning! This message is missing in the messages file! " +
                     "Reload the server to make the file automatically replace the missing parts!"));
             return true;
         }
         if (Values.MESSAGES.isAlertMissingMessage()) {
-            p.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &cWarning! This message is missing in the messages file! " +
+            p.sendMessage(BPChat.color("&a&lBank&9&lPlus &cWarning! This message is missing in the messages file! " +
                     "Reload the server to make the file automatically replace the missing parts!"));
         }
         return true;

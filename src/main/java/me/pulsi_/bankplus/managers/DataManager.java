@@ -4,10 +4,11 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.commands.BankTopCmd;
 import me.pulsi_.bankplus.commands.MainCmd;
 import me.pulsi_.bankplus.external.UpdateChecker;
+import me.pulsi_.bankplus.external.bStats;
 import me.pulsi_.bankplus.gui.GuiHolder;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.listeners.*;
-import me.pulsi_.bankplus.utils.ChatUtils;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.Methods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.plugin.PluginManager;
@@ -18,32 +19,34 @@ public class DataManager {
         long startTime = System.currentTimeMillis();
         long time;
 
-        ChatUtils.log("");
-        ChatUtils.log("  &a&lBank&9&lPlus &2Enabling plugin...");
-        ChatUtils.log("  &aRunning on version &f" + BankPlus.getInstance().getDescription().getVersion() + "&a!");
-        ChatUtils.log("  &aDetected server version: &f" + BankPlus.getInstance().getServerVersion());
+        BPLogger.log("");
+        BPLogger.log("  &a&lBank&9&lPlus &2Enabling plugin...");
+        BPLogger.log("  &aRunning on version &f" + BankPlus.getInstance().getDescription().getVersion() + "&a!");
+        BPLogger.log("  &aDetected server version: &f" + BankPlus.getInstance().getServerVersion());
 
         time = System.currentTimeMillis();
+        new bStats(BankPlus.getInstance());
+        BankPlus.getCm().createConfigs();
         Values.CONFIG.setupValues();
         Values.MESSAGES.setupValues();
         Values.BANK.setupValues();
-        ChatUtils.log("  &aLoaded config files! &8(&3" + (System.currentTimeMillis() - time) + "ms&8)");
+        BPLogger.log("  &aLoaded config files! &8(&3" + (System.currentTimeMillis() - time) + "ms&8)");
 
         time = System.currentTimeMillis();
         registerEvents();
-        ChatUtils.log("  &aRegistered events! &8(&3" + (System.currentTimeMillis() - time) + "ms&8)");
+        BPLogger.log("  &aRegistered events! &8(&3" + (System.currentTimeMillis() - time) + "ms&8)");
 
         time = System.currentTimeMillis();
         setupCommands();
-        ChatUtils.log("  &aLoaded plugin command! &8(&3" + (System.currentTimeMillis() - time) + "ms&8)");
-        ChatUtils.log("  &aDone! &8(&3" + (System.currentTimeMillis() - startTime) + " total ms&8)");
-        ChatUtils.log("");
+        BPLogger.log("  &aLoaded plugin command! &8(&3" + (System.currentTimeMillis() - time) + "ms&8)");
+        BPLogger.log("  &aDone! &8(&3" + (System.currentTimeMillis() - startTime) + " total ms&8)");
+        BPLogger.log("");
     }
 
     public static void shutdownPlugin() {
-        ChatUtils.log("");
-        ChatUtils.log("&a&lBank&9&lPlus &cDisabling Plugin!");
-        ChatUtils.log("");
+        BPLogger.log("");
+        BPLogger.log("&a&lBank&9&lPlus &cDisabling Plugin!");
+        BPLogger.log("");
     }
 
     public static void reloadPlugin() {
@@ -56,9 +59,9 @@ public class DataManager {
 
         if (Values.BANK.isGuiEnabled()) new GuiHolder().loadBank();
         if (!AFKManager.isPlayerCountdownActive) AFKManager.startCountdown();
-        if (!Interest.isInterestActive) Interest.startsInterest();
+        if (Values.CONFIG.isInterestEnabled() && Interest.wasDisabled) Interest.startInterest();
         if (Values.CONFIG.isBanktopEnabled()) BankTopManager.startUpdateTask();
-        Methods.startSavingAllPlayerBalancesTask();
+        Methods.startSavingBalancesTask();
     }
 
     private static void registerEvents() {

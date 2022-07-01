@@ -1,11 +1,9 @@
 package me.pulsi_.bankplus;
 
-import me.pulsi_.bankplus.external.bStats;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.managers.*;
 import me.pulsi_.bankplus.placeholders.Placeholders;
 import me.pulsi_.bankplus.utils.BPLogger;
-import me.pulsi_.bankplus.utils.ChatUtils;
 import me.pulsi_.bankplus.utils.Methods;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.Economy;
@@ -24,6 +22,7 @@ public final class BankPlus extends JavaPlugin {
     private static Permission perms = null;
 
     private boolean isPlaceholderAPIHooked = false;
+    private boolean isEssentialsXHooked = false;
     private String serverVersion;
 
     @Override
@@ -31,47 +30,43 @@ public final class BankPlus extends JavaPlugin {
 
         instance = this;
         if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
-            ChatUtils.log("");
-            ChatUtils.log("&cCannot load &a&lBank&9&lPlus&c, Vault is not installed!");
-            ChatUtils.log("&cPlease download it in order to use this plugin!");
-            ChatUtils.log("");
+            BPLogger.log("");
+            BPLogger.log("&cCannot load &a&lBank&9&lPlus&c, Vault is not installed!");
+            BPLogger.log("&cPlease download it in order to use this plugin!");
+            BPLogger.log("");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
         if (!setupEconomy()) {
-            ChatUtils.log("");
-            ChatUtils.log("&cCannot load &a&lBank&9&lPlus&c, No economy plugin found!");
-            ChatUtils.log("&cPlease download an economy plugin to use BankPlus!");
-            ChatUtils.log("");
+            BPLogger.log("");
+            BPLogger.log("&cCannot load &a&lBank&9&lPlus&c, No economy plugin found!");
+            BPLogger.log("&cPlease download an economy plugin to use BankPlus!");
+            BPLogger.log("");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
         serverVersion = getServer().getVersion();
-
+        cm = new ConfigManager(this);
         setupPermissions();
 
-        cm = new ConfigManager(this);
-        cm.createConfigs();
-
         DataManager.setupPlugin();
-
-        new bStats(this, 11612);
-
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             BPLogger.info("Hooked into PlaceholderAPI!");
             new Placeholders().register();
             isPlaceholderAPIHooked = true;
         }
+        if (Bukkit.getPluginManager().getPlugin("Essentials") != null) {
+            BPLogger.info("Hooked into Essentials!");
+            isEssentialsXHooked = true;
+        }
 
-        if (Values.CONFIG.isInterestEnabled()) Interest.startsInterest();
+        if (Values.CONFIG.isInterestEnabled()) Interest.startInterest();
         if (Values.CONFIG.isIgnoringAfkPlayers()) AFKManager.startCountdown();
-        EconomyManager.validateAllAccounts();
-        getCm().reloadConfig("players");
         if (Values.CONFIG.isBanktopEnabled()) {
             BankTopManager.updateBankTop();
             BankTopManager.startUpdateTask();
         }
-        Methods.startSavingAllPlayerBalancesTask();
+        Methods.startSavingBalancesTask();
     }
 
     @Override
@@ -93,6 +88,10 @@ public final class BankPlus extends JavaPlugin {
 
     public boolean isPlaceholderAPIHooked() {
         return isPlaceholderAPIHooked;
+    }
+
+    public boolean isEssentialsXHooked() {
+        return isEssentialsXHooked;
     }
 
     public String getServerVersion() {

@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'me.pulsi_'
-version = '5.4'
+version = '5.5'
 
 repositories {
     mavenCentral()
@@ -18,6 +18,10 @@ repositories {
         url = 'https://oss.sonatype.org/content/groups/public/'
     }
     maven {
+        name "essentialsx-releases"
+        url "https://repo.essentialsx.net/releases/"
+    }
+    maven {
         url 'https://jitpack.io'
     }
     maven {
@@ -27,6 +31,7 @@ repositories {
 
 dependencies {
     compileOnly 'com.destroystokyo.paper:paper-api:1.13.2-R0.1-SNAPSHOT'
+    compileOnly 'net.essentialsx:EssentialsX:2.19.4'
     compileOnly 'com.github.MilkBowl:VaultAPI:1.7'
     compileOnly 'me.clip:placeholderapi:2.11.1'
 }

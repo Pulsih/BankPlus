@@ -46,6 +46,7 @@ public class ConfigValues {
     private String personalSound;
     private String notifyOfflineInterestMessage;
     private String interestDelay;
+    private String interestOfflinePermission;
     private BigDecimal maxWithdrawAmount;
     private BigDecimal maxDepositAmount;
     private BigDecimal minimumAmount;
@@ -68,6 +69,7 @@ public class ConfigValues {
     private boolean isViewSoundEnabled;
     private boolean isPersonalSoundEnabled;
     private boolean isIgnoringAfkPlayers;
+    private boolean useEssentialsXAFK;
     private int afkPlayersTime;
     private int maxDecimalsAmount;
     private long saveBalancedDelay;
@@ -124,6 +126,7 @@ public class ConfigValues {
         personalSound = config.getString("General.Personal-Sound.Sound");
         notifyOfflineInterestMessage = config.getString("General.Offline-Interest-Earned-Message.Message");
         interestDelay = config.getString("Interest.Delay");
+        interestOfflinePermission = config.getString("Interest.Offline-Permission");
         maxWithdrawAmount = BigDecimal.valueOf(config.getDouble("General.Max-Withdrawn-Amount"));
         maxDepositAmount = BigDecimal.valueOf(config.getDouble("General.Max-Deposit-Amount"));
         minimumAmount = BigDecimal.valueOf(config.getDouble("General.Minimum-Amount"));
@@ -146,6 +149,7 @@ public class ConfigValues {
         isViewSoundEnabled = config.getBoolean("General.View-Sound.Enabled");
         isPersonalSoundEnabled = config.getBoolean("General.Personal-Sound.Enabled");
         isIgnoringAfkPlayers = config.getBoolean("Interest.AFK-Settings.Ignore-AFK-Players");
+        useEssentialsXAFK = config.getBoolean("Interest.AFK-Settings.Use-EssentialsX-AFK");
         afkPlayersTime = config.getInt("Interest.AFK-Settings.AFK-Time");
         maxDecimalsAmount = config.getInt("General.Max-Decimals-Amount");
         saveBalancedDelay = config.getLong("General.Save-Delay");
@@ -166,34 +170,42 @@ public class ConfigValues {
     }
 
     public String getSecond() {
+        if (second == null) return "Second";
         return second;
     }
 
     public String getSeconds() {
+        if (seconds == null) return "Seconds";
         return seconds;
     }
 
     public String getMinute() {
+        if (minute == null) return "Minute";
         return minute;
     }
 
     public String getMinutes() {
+        if (minutes == null) return "Minutes";
         return minutes;
     }
 
     public String getHour() {
+        if (hour == null) return "Hour";
         return hour;
     }
 
     public String getHours() {
+        if (hours == null) return "Hours";
         return hours;
     }
 
     public String getDay() {
+        if (day == null) return "Day";
         return day;
     }
 
     public String getDays() {
+        if (days == null) return "Days";
         return days;
     }
 
@@ -346,6 +358,10 @@ public class ConfigValues {
         }
     }
 
+    public String getInterestOfflinePermission() {
+        return interestOfflinePermission;
+    }
+
     public BigDecimal getMaxWithdrawAmount() {
         return maxWithdrawAmount;
     }
@@ -391,7 +407,6 @@ public class ConfigValues {
     }
 
     public boolean isInterestEnabled() {
-        Interest.isInterestActive = isInterestEnabled;
         return isInterestEnabled;
     }
 
@@ -433,6 +448,11 @@ public class ConfigValues {
 
     public boolean isIgnoringAfkPlayers() {
         return isIgnoringAfkPlayers;
+    }
+
+    public boolean isUseEssentialsXAFK() {
+        if (!BankPlus.getInstance().isEssentialsXHooked()) return false;
+        return useEssentialsXAFK;
     }
 
     public int getAfkPlayersTime() {

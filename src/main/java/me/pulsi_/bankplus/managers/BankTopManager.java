@@ -1,7 +1,8 @@
 package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.utils.ChatUtils;
+import me.pulsi_.bankplus.utils.BPChat;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -25,8 +26,10 @@ public class BankTopManager {
 
         Collections.sort(balances);
         Collections.reverse(balances);
-        if (balances.size() >= Values.CONFIG.getBankTopSize()) {
-            for (int i = 0; i < Values.CONFIG.getBankTopSize(); i++) bankTopBalances.add(balances.get(i));
+
+        int banktopSize = Values.CONFIG.getBankTopSize();
+        if (balances.size() >= banktopSize) {
+            for (int i = 0; i < banktopSize; i++) bankTopBalances.add(balances.get(i));
         } else bankTopBalances.addAll(balances);
 
         FileConfiguration players = BankPlus.getCm().getConfig("players");
@@ -36,19 +39,17 @@ public class BankTopManager {
             for (String identifier : players.getConfigurationSection("Players").getKeys(false)) {
                 String money = players.getString("Players." + identifier + ".Money");
 
-                if (topMoney.equals(money)) {
-                    String name = players.getString("Players." + identifier + ".Account-Name");
-                    if (!bankTopNames.contains(name)) {
-                        bankTopNames.add(name);
-                        break;
-                    }
-                }
+                if (!topMoney.equals(money)) continue;
+                String name = players.getString("Players." + identifier + ".Account-Name");
+                if (name == null || bankTopNames.contains(name)) continue;
+                bankTopNames.add(name);
+                break;
             }
         }
 
         if (!Values.CONFIG.isBanktopUpdateBroadcastEnabled()) return;
         String message = MessageManager.addPrefix(Values.CONFIG.getBanktopUpdateBroadcastMessage());
-        if (Values.CONFIG.isBanktopUpdateBroadcastOnlyConsole()) ChatUtils.log(message);
+        if (Values.CONFIG.isBanktopUpdateBroadcastOnlyConsole()) BPLogger.log(message);
         else Bukkit.broadcastMessage(message);
     }
 

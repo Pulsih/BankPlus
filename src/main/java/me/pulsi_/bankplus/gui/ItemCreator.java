@@ -1,6 +1,6 @@
 package me.pulsi_.bankplus.gui;
 
-import me.pulsi_.bankplus.utils.ChatUtils;
+import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.HeadUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Material;
@@ -27,6 +27,7 @@ public class ItemCreator {
 
     public static ItemStack getHead(ConfigurationSection c, Player p) {
         String material = c.getString("Material");
+        if (material == null) return null;
         ItemStack item = null;
         try {
             if (material.contains("HEAD-%PLAYER%")) {
@@ -74,9 +75,9 @@ public class ItemCreator {
         ItemMeta fillerMeta = filler.getItemMeta();
         String displayName = Values.BANK.getGuiFillerDisplayname();
         if (displayName == null) {
-            fillerMeta.setDisplayName(ChatUtils.color("&c&l*CANNOT FIND DISPLAYNAME*"));
+            fillerMeta.setDisplayName(BPChat.color("&c&l*CANNOT FIND DISPLAYNAME*"));
         } else {
-            fillerMeta.setDisplayName(ChatUtils.color(displayName));
+            fillerMeta.setDisplayName(BPChat.color(displayName));
         }
 
         if (Values.BANK.isGuiFillerGlowing()) {
@@ -111,7 +112,7 @@ public class ItemCreator {
 
     public static void setLore(ConfigurationSection c, ItemStack i) {
         List<String> lore = new ArrayList<>();
-        for (String lines : c.getStringList("Lore")) lore.add(ChatUtils.color(lines));
+        for (String lines : c.getStringList("Lore")) lore.add(BPChat.color(lines));
 
         ItemMeta meta = i.getItemMeta();
         meta.setLore(lore);
@@ -129,9 +130,9 @@ public class ItemCreator {
         ItemMeta meta = i.getItemMeta();
 
         if (displayName == null) {
-            meta.setDisplayName(ChatUtils.color("&c&l*CANNOT FIND DISPLAYNAME*"));
+            meta.setDisplayName(BPChat.color("&c&l*CANNOT FIND DISPLAYNAME*"));
         } else {
-            meta.setDisplayName(ChatUtils.color(displayName));
+            meta.setDisplayName(BPChat.color(displayName));
         }
         i.setItemMeta(meta);
     }

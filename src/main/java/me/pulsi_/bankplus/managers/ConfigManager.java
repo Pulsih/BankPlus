@@ -55,7 +55,7 @@ public class ConfigManager {
 
         buildConfig();
         buildMessages();
-        recreateGuiBank(bankFile, guiSettings);
+        recreateFile(bankFile, guiSettings);
     }
 
     public FileConfiguration getConfig(String type) {
@@ -109,28 +109,50 @@ public class ConfigManager {
         }
     }
 
-    public void savePlayers() {
-        try {
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+    public void saveConfig(String type) {
+        switch (type) {
+            case "config":
+                try {
+                    config.save(configFile);
+                } catch (IOException e) {
+                    BPLogger.warn(e.getMessage());
+                }
+                break;
+
+            case "messages":
+                try {
+                    messages.save(messagesFile);
+                } catch (IOException e) {
+                    BPLogger.warn(e.getMessage());
+                }
+                break;
+
+            case "players":
                 try {
                     players.save(playersFile);
-                } catch (NullPointerException e) {
-                    try {
-                        players.save(playersFile);
-                    } catch (IOException ex) {
-                        BPLogger.error(ex.getMessage());
-                    }
                 } catch (IOException e) {
-                    BPLogger.error(e.getMessage());
+                    BPLogger.warn(e.getMessage());
                 }
-            });
-        } catch (IllegalPluginAccessException ex) {
-            try {
-                players.save(playersFile);
-            } catch (IOException e) {
-                BPLogger.error(e.getMessage());
-            }
+                break;
+
+            case "bank":
+                try {
+                    bank.save(bankFile);
+                } catch (IOException e) {
+                    BPLogger.warn(e.getMessage());
+                }
+                break;
         }
+    }
+
+    public void savePlayers() {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            try {
+                saveConfig("players");
+            } catch (IllegalPluginAccessException | NullPointerException e) {
+                Bukkit.getScheduler().runTask(BankPlus.getInstance(), () -> saveConfig("players"));
+            }
+        });
     }
 
     private String getFileAsString(File file) {
@@ -177,7 +199,6 @@ public class ConfigManager {
 
     private void loadGuiForBankFileFromConfigForOlderVersions() {
         List<String> lines = new ArrayList<>();
-
         try {
             Scanner scanner = new Scanner(configFile);
             while (scanner.hasNextLine()) lines.add(scanner.nextLine());
@@ -203,7 +224,7 @@ public class ConfigManager {
         guiSettings = config.toString();
     }
 
-    public void recreateGuiBank(File file) {
+    public void recreateFile(File file) {
         String configuration = getFileAsString(file);
         if (configuration == null) return;
         try {
@@ -216,7 +237,7 @@ public class ConfigManager {
         }
     }
 
-    public void recreateGuiBank(File file, String configuration) {
+    public void recreateFile(File file, String configuration) {
         if (configuration == null) return;
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(file));
@@ -327,7 +348,7 @@ public class ConfigManager {
         } catch (IOException e) {
             BPLogger.error(e.getMessage());
         }
-        recreateGuiBank(newMessagesFile);
+        recreateFile(newMessagesFile);
         reloadConfig("messages");
     }
 
@@ -347,8 +368,8 @@ public class ConfigManager {
         addSpace(newConfig);
 
         addComments(newConfig,
-                "Interest will give players that has money in",
-                "their bank a % of the amount every x minutes.",
+                "Interest will increase players bank balance",
+                "by giving a % of their bank money.",
                 "",
                 "To restart the interest type /bank restartInterest.");
         addCommentUnder(newConfig, "Interest", "Enable or disable the interest feature.");
@@ -360,13 +381,19 @@ public class ConfigManager {
         addSpace(newConfig, "Interest.AFK-Settings");
 
         addCommentsUnder(newConfig, "Interest.AFK-Settings",
+                "Choose if using the EssentialsX AFK.",
+                "(You will need to install EssentialsX)");
+        validatePath(config, newConfig, "Interest.AFK-Settings.Use-EssentialsX-AFK", false);
+        addSpace(newConfig, "Interest.AFK-Settings");
+
+        addCommentsUnder(newConfig, "Interest.AFK-Settings",
                 "The time, in minutes, that will pass",
                 "before marking a player as AFK");
         validatePath(config, newConfig, "Interest.AFK-Settings.AFK-Time", 5);
         addSpace(newConfig, "Interest.AFK-Settings");
 
         addCommentUnder(newConfig, "Interest", "( it will add: balance x Money-Given )");
-        validatePath(config, newConfig, "Interest.Money-Given", 0.05);
+        validatePath(config, newConfig, "Interest.Money-Given", "0.05");
         addSpace(newConfig, "Interest");
 
         addCommentsUnder(newConfig, "Interest",
@@ -374,8 +401,8 @@ public class ConfigManager {
                 "You can choose the delay between:",
                 "  seconds (time s), minutes (time m)",
                 "  hours (time h), days (time d)",
-                "If no time will be specified, it will",
-                "automatically choose the minutes.");
+                "If no time will be specified, it",
+                "will automatically choose minutes.");
         validatePath(config, newConfig, "Interest.Delay", "5 m");
         addSpace(newConfig, "Interest");
 
@@ -386,6 +413,10 @@ public class ConfigManager {
         addCommentUnder(newConfig, "Interest", "Choose if also giving interest to offline players.");
         validatePath(config, newConfig, "Interest.Give-To-Offline-Players", false);
         addSpace(newConfig, "Interest");
+
+        addCommentUnder(newConfig, "Interest", "The permission for offline players to receive interest.");
+        validatePath(config, newConfig, "Interest.Offline-Permission", "bankplus.receive.interest");
+        addSpace(newConfig);
 
         addCommentsUnder(newConfig, "General",
                 "The amount that a player will receive",
@@ -449,7 +480,7 @@ public class ConfigManager {
         addCommentsUnder(newConfig, "General",
                 "These commands will be executed when leaving from typing",
                 "in chat while using the custom withdraw / deposit." +
-                "",
+                        "",
                 "You can put as many commands as you want.");
         validatePath(config, newConfig, "General.Chat-Exit-Commands", "[]");
         addCommentsUnder(newConfig, "General",
@@ -553,7 +584,7 @@ public class ConfigManager {
         validatePath(config, newConfig, "Placeholders.Time.Minute", "Minute");
         validatePath(config, newConfig, "Placeholders.Time.Minutes", "Minutes");
         validatePath(config, newConfig, "Placeholders.Time.Hour", "Hour");
-        validatePath(config, newConfig, "Placeholders.Time.Hour", "Hours");
+        validatePath(config, newConfig, "Placeholders.Time.Hours", "Hours");
         validatePath(config, newConfig, "Placeholders.Time.Day", "Days");
         validatePath(config, newConfig, "Placeholders.Time.Days", "Days");
         validatePath(config, newConfig, "Placeholders.Time.Interest-Time.Only-Seconds", "%seconds% %seconds_placeholder%");
@@ -577,7 +608,7 @@ public class ConfigManager {
         } catch (IOException e) {
             BPLogger.error(e.getMessage());
         }
-        recreateGuiBank(newConfigFile);
+        recreateFile(newConfigFile);
         reloadConfig("config");
     }
 
@@ -616,12 +647,6 @@ public class ConfigManager {
     }
 
     private void validatePath(FileConfiguration from, FileConfiguration to, String path, Object valuePath) {
-        Object value = from.get(path);
-        if (value == null) to.set(path, valuePath);
-        else to.set(path, value);
-    }
-
-    private void validatePath(FileConfiguration from, FileConfiguration to, String path, String valuePath) {
         Object value = from.get(path);
         if (value == null) to.set(path, valuePath);
         else to.set(path, value);

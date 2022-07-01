@@ -3,11 +3,9 @@ package me.pulsi_.bankplus.commands;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.gui.GuiHolder;
 import me.pulsi_.bankplus.interest.Interest;
-import me.pulsi_.bankplus.managers.BankTopManager;
-import me.pulsi_.bankplus.managers.DataManager;
-import me.pulsi_.bankplus.managers.EconomyManager;
-import me.pulsi_.bankplus.managers.MessageManager;
-import me.pulsi_.bankplus.utils.ChatUtils;
+import me.pulsi_.bankplus.managers.*;
+import me.pulsi_.bankplus.utils.BPChat;
+import me.pulsi_.bankplus.utils.BPDebugger;
 import me.pulsi_.bankplus.utils.Methods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -104,7 +102,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                 }
 
                 new GuiHolder().openBank(p);
-                s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &7You have forced &a" + p.getName() + " &7to open their bank."));
+                s.sendMessage(BPChat.color("&a&lBank&9&lPlus &7You have forced &a" + p.getName() + " &7to open their bank."));
             }
             break;
 
@@ -336,8 +334,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                     MessageManager.interestIsDisabled(s);
                     return false;
                 }
-                if (!Interest.isInterestActive) Interest.loopInterest();
-                else Interest.restartInterest();
+                Interest.restartInterest();
                 MessageManager.interestRestarted(s);
             }
             break;
@@ -378,14 +375,47 @@ public class MainCmd implements CommandExecutor, TabCompleter {
             case "saveallbankbalances": {
                 if (!Methods.hasPermission(s, "bankplus.saveallbankbalances")) return false;
                 for (Player p : Bukkit.getOnlinePlayers()) EconomyManager.saveBankBalance(p);
-                s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &aSuccessfully saved all player balances to the file!"));
+                s.sendMessage(BPChat.color("&a&lBank&9&lPlus &aSuccessfully saved all player balances to the file!"));
             }
             break;
 
             case "updatebanktop": {
                 if (!Methods.hasPermission(s, "bankplus.updatebanktop")) return false;
                 BankTopManager.updateBankTop();
-                s.sendMessage(ChatUtils.color("&a&lBank&9&lPlus &aSuccessfully updated the banktop!"));
+                s.sendMessage(BPChat.color("&a&lBank&9&lPlus &aSuccessfully updated the banktop!"));
+            }
+            break;
+
+            case "validateallaccounts": {
+                if (!Methods.hasPermission(s, "bankplus.validateallaccounts")) return false;
+                s.sendMessage(BPChat.color("&a&lBank&9&lPlus &aStarted validation task... Check the console for more info!"));
+                AccountManager.validateAllAccounts();
+            }
+            break;
+
+            case "debug": {
+                if (!Methods.hasPermission(s, "bankplus.debug")) return false;
+                if (args.length == 1) {
+                    s.sendMessage(BPChat.color("&a&lBank&9&lPlus &aChoose a valid option: CHAT, INTEREST, GUI."));
+                    return false;
+                }
+                switch (args[1].toLowerCase()) {
+                    case "chat":
+                        BPDebugger.toggleChatDebugger(s);
+                        break;
+
+                    case "gui":
+                        BPDebugger.toggleGuiDebugger(s);
+                        break;
+
+                    case "interest":
+                        BPDebugger.debugInterest();
+                        if (s instanceof Player) s.sendMessage(BPChat.color("&a&lBank&9&lPlus &aDone! Check the console for the debug report!"));
+                        break;
+
+                    default:
+                        s.sendMessage(BPChat.color("&a&lBank&9&lPlus &aChoose a valid option: CHAT, INTEREST, GUI."));
+                }
             }
             break;
 
@@ -399,34 +429,48 @@ public class MainCmd implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender s, Command command, String alias, String[] args) {
 
-        List<String> listOfArgs = new ArrayList<>();
-        if (s.hasPermission("bankplus.add")) listOfArgs.add("add");
-        if (s.hasPermission("bankplus.balance")) {
-            listOfArgs.add("balance");
-            listOfArgs.add("bal");
-        }
-        if (s.hasPermission("bankplus.deposit")) listOfArgs.add("deposit");
-        if (s.hasPermission("bankplus.give-interest")) listOfArgs.add("giveInterest");
-        if (s.hasPermission("bankplus.help")) listOfArgs.add("help");
-        if (s.hasPermission("bankplus.interest")) listOfArgs.add("interest");
-        if (s.hasPermission("bankplus.interestmillis")) listOfArgs.add("interestMillis");
-        if (s.hasPermission("bankplus.open")) listOfArgs.add("open");
-        if (s.hasPermission("bankplus.pay")) listOfArgs.add("pay");
-        if (s.hasPermission("bankplus.reload")) listOfArgs.add("reload");
-        if (s.hasPermission("bankplus.remove")) listOfArgs.add("remove");
-        if (s.hasPermission("bankplus.restart-interest")) listOfArgs.add("restartInterest");
-        if (s.hasPermission("bankplus.saveallbankbalances")) listOfArgs.add("saveAllBankBalances");
-        if (s.hasPermission("bankplus.set")) listOfArgs.add("set");
-        if (s.hasPermission("bankplus.updatebanktop")) listOfArgs.add("updateBankTop");
-        if (s.hasPermission("bankplus.view")) listOfArgs.add("view");
-        if (s.hasPermission("bankplus.withdraw")) listOfArgs.add("withdraw");
-
-        List<String> args1 = new ArrayList<>();
         if (args.length == 1) {
-            for (String arg : listOfArgs) {
-                if (arg.startsWith(args[0].toLowerCase())) args1.add(arg);
+            List<String> args1 = new ArrayList<>();
+            List<String> listOfArgs = new ArrayList<>();
+            if (s.hasPermission("bankplus.add")) listOfArgs.add("add");
+            if (s.hasPermission("bankplus.balance")) {
+                listOfArgs.add("balance");
+                listOfArgs.add("bal");
             }
+            if (s.hasPermission("bankplus.debug")) listOfArgs.add("debug");
+            if (s.hasPermission("bankplus.deposit")) listOfArgs.add("deposit");
+            if (s.hasPermission("bankplus.give-interest")) listOfArgs.add("giveInterest");
+            if (s.hasPermission("bankplus.help")) listOfArgs.add("help");
+            if (s.hasPermission("bankplus.interest")) listOfArgs.add("interest");
+            if (s.hasPermission("bankplus.interestmillis")) listOfArgs.add("interestMillis");
+            if (s.hasPermission("bankplus.open")) listOfArgs.add("open");
+            if (s.hasPermission("bankplus.pay")) listOfArgs.add("pay");
+            if (s.hasPermission("bankplus.reload")) listOfArgs.add("reload");
+            if (s.hasPermission("bankplus.remove")) listOfArgs.add("remove");
+            if (s.hasPermission("bankplus.restart-interest")) listOfArgs.add("restartInterest");
+            if (s.hasPermission("bankplus.saveallbankbalances")) listOfArgs.add("saveAllBankBalances");
+            if (s.hasPermission("bankplus.set")) listOfArgs.add("set");
+            if (s.hasPermission("bankplus.updatebanktop")) listOfArgs.add("updateBankTop");
+            if (s.hasPermission("bankplus.validateallaccounts")) listOfArgs.add("validateAllAccounts");
+            if (s.hasPermission("bankplus.view")) listOfArgs.add("view");
+            if (s.hasPermission("bankplus.withdraw")) listOfArgs.add("withdraw");
+
+            for (String arg : listOfArgs) if (arg.startsWith(args[0].toLowerCase())) args1.add(arg);
             return args1;
+        }
+
+        if (args.length == 2 && args[0].equalsIgnoreCase("debug")) {
+            List<String> args2 = new ArrayList<>();
+            List<String> listOfArgs = new ArrayList<>();
+            if (s.hasPermission("bankplus.debug")) {
+                listOfArgs.add("CHAT");
+                listOfArgs.add("GUI");
+                listOfArgs.add("INTEREST");
+            }
+            for (String arg : listOfArgs) {
+                if (arg.toLowerCase().startsWith(args[1].toLowerCase())) args2.add(arg);
+            }
+            return args2;
         }
 
         return null;

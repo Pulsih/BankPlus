@@ -3,7 +3,7 @@ package me.pulsi_.bankplus.commands;
 import me.pulsi_.bankplus.managers.BankTopManager;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.BPLogger;
-import me.pulsi_.bankplus.utils.ChatUtils;
+import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.Methods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.command.Command;
@@ -17,11 +17,14 @@ public class BankTopCmd implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender s, Command command, String label, String[] args) {
-        if (!Values.CONFIG.isBanktopEnabled()) MessageManager.banktopDisabled(s);
+        if (!Values.CONFIG.isBanktopEnabled()) {
+            MessageManager.banktopDisabled(s);
+            return false;
+        }
         if (!Methods.hasPermission(s, "bankplus.banktop")) return false;
 
         List<String> format = Values.CONFIG.getBankTopFormat();
-        for (String line : format) s.sendMessage(ChatUtils.color(placeName(placeMoney(line))));
+        for (String line : format) s.sendMessage(BPChat.color(placeName(placeMoney(line))));
         return true;
     }
 
