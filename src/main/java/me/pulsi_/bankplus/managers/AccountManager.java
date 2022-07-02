@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class AccountManager {
         if (size >= maxValidationPerTask) {
             int tasks = size / maxValidationPerTask;
             if (size % maxValidationPerTask != 0) tasks++;
-            BPLogger.info("Started validation task! &8(&9Tasks amount: &f" + tasks + "&9, Accounts to validate: &f" + size + "&8)");
+            BPLogger.info("Started validation task! &8(&9Tasks amount: &a" + tasks + "&9, Accounts to validate: &a" + size + "&8)");
             validateAccountInTasks(identifiers, 0, time);
         } else {
             for (String identifier : identifiers) validateAccount(identifier);
@@ -41,20 +42,22 @@ public class AccountManager {
 
     public static void validateAccount(String identifier) {
         FileConfiguration players = BankPlus.getCm().getConfig("players");
-
-        OfflinePlayer p;
+        OfflinePlayer p = null;
+        boolean isUUID;
         try {
             UUID uuid = UUID.fromString(identifier);
             p = Bukkit.getOfflinePlayer(uuid);
-        } catch (IllegalArgumentException e) {
-            p = Bukkit.getOfflinePlayer(identifier);
+            isUUID = true;
+        } catch (IllegalArgumentException ignored) {
+            isUUID = false;
         }
 
         String sBalance = players.getString("Players." + identifier + ".Money");
         String sOfflineInterest = players.getString("Players." + identifier + ".Offline-Interest");
         String sName = players.getString("Players." + identifier + ".Account-Name");
 
-        if (sBalance == null) players.set("Players." + p.getUniqueId() + ".Money", Methods.formatBigDouble(Values.CONFIG.getStartAmount()));
+        BigDecimal balance;
+        if (sBalance == null) balance = Values.CONFIG.getStartAmount();
         else {
             BigDecimal bal;
             try {
@@ -63,11 +66,12 @@ public class AccountManager {
                 bal = new BigDecimal(0);
             }
             if (bal.doubleValue() < 0) bal = new BigDecimal(0);
-            players.set("Players." + p.getUniqueId() + ".Money", Methods.formatBigDouble(bal));
+            balance = bal;
         }
+        players.set("Players." + identifier + ".Money", Methods.formatBigDouble(balance));
 
         if (Values.CONFIG.isNotifyOfflineInterest()) {
-            if (sOfflineInterest == null) players.set("Players." + p.getUniqueId() + ".Offline-Interest", Methods.formatBigDouble(new BigDecimal(0)));
+            if (sOfflineInterest == null) players.set("Players." + identifier + ".Offline-Interest", Methods.formatBigDouble(new BigDecimal(0)));
             else {
                 BigDecimal bal;
                 try {
@@ -76,11 +80,18 @@ public class AccountManager {
                     bal = new BigDecimal(0);
                 }
                 if (bal.doubleValue() < 0) bal = new BigDecimal(0);
-                players.set("Players." + p.getUniqueId() + ".Offline-Interest", Methods.formatBigDouble(bal));
+                players.set("Players." + identifier + ".Offline-Interest", Methods.formatBigDouble(bal));
             }
         }
 
-        if (sName == null) players.set("Players." + identifier + ".Account-Name", p.getName());
+        String name;
+        if (isUUID) name = p.getName();
+        else name = identifier;
+        if (sName == null) players.set("Players." + identifier + ".Account-Name", name);
+
+        if (name == null) return;
+        Player player = Bukkit.getPlayerExact(name);
+        if (player != null && player.isOnline()) EconomyManager.setPlayerBankBalance(player, balance);
     }
 
     public static void validateAccountInTasks(List<String> identifiers, int point, long time) {

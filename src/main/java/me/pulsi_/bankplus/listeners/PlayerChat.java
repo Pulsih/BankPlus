@@ -39,7 +39,7 @@ public class PlayerChat implements Listener {
 
         if (Methods.isDepositing(p)) {
             SetUtils.removeFromDepositingPlayers(p);
-            Methods.withdraw(p, amount);
+            Methods.deposit(p, amount);
         }
         if (Methods.isWithdrawing(p)) {
             SetUtils.removeFromWithdrawingPlayers(p);
@@ -52,12 +52,10 @@ public class PlayerChat implements Listener {
     private boolean hasTypedExit(String message, Player p, AsyncPlayerChatEvent e) {
         if (isTyping(p) && !message.equalsIgnoreCase(Values.CONFIG.getExitMessage())) return false;
         e.setCancelled(true);
-        Bukkit.getScheduler().runTask(BankPlus.getInstance(), () -> {
-            SetUtils.playerDepositing.remove(p.getUniqueId());
-            SetUtils.playerWithdrawing.remove(p.getUniqueId());
-            executeExitCommands(p);
-            reopenBank(p);
-        });
+        SetUtils.playerDepositing.remove(p.getUniqueId());
+        SetUtils.playerWithdrawing.remove(p.getUniqueId());
+        executeExitCommands(p);
+        reopenBank(p);
         return true;
     }
 
@@ -66,7 +64,9 @@ public class PlayerChat implements Listener {
     }
 
     private void reopenBank(Player p) {
-        if (Values.CONFIG.isReopeningBankAfterChat()) new GuiHolder().openBank(p);
+        Bukkit.getScheduler().runTask(BankPlus.getInstance(), () -> {
+            if (Values.CONFIG.isReopeningBankAfterChat()) new GuiHolder().openBank(p);
+        });
     }
 
     private void executeExitCommands(Player p) {

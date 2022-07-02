@@ -13,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.inventory.Inventory;
 
 import java.math.BigDecimal;
 
@@ -22,68 +23,73 @@ public class GuiListener implements Listener {
     public void guiListener(InventoryClickEvent e) {
 
         Player p = (Player) e.getWhoClicked();
+        Inventory inv = e.getClickedInventory();
 
-        if (e.getClickedInventory() == null || e.getClickedInventory().getHolder() == null || !(e.getClickedInventory().getHolder() instanceof GuiHolder)) return;
+        if (inv == null || inv.getHolder() == null || !(inv.getHolder() instanceof GuiHolder)) return;
         BPDebugger.debugGui(e);
         e.setCancelled(true);
 
         for (String key : Values.BANK.getGuiItems().getKeys(false)) {
             ConfigurationSection item = BankPlus.getCm().getConfig("bank").getConfigurationSection("Items." + key);
+            if (item == null) continue;
 
-            if (e.getSlot() + 1 != item.getInt("Slot") || item.getString("Action.Action-Type") == null) continue;
+            String actionType = item.getString("Action.Action-Type");
+            String actionAmount = item.getString("Action.Amount");
+            if (e.getSlot() + 1 != item.getInt("Slot") || actionType == null || actionAmount == null) continue;
 
-            String actionType = item.getString("Action.Action-Type").toLowerCase();
-            String actionAmount = item.getString("Action.Amount").toLowerCase();
+            actionType = actionType.toLowerCase();
+            actionAmount = actionAmount.toLowerCase();
 
-            switch (actionType) {
-                case "withdraw":
-                    switch (actionAmount) {
-                        case "custom":
+            switch (actionAmount) {
+                case "custom":
+                    switch (actionType) {
+                        case "withdraw":
                             Methods.customWithdraw(p);
                             break;
-
-                        case "all":
-                            Methods.withdraw(p, EconomyManager.getBankBalance(p));
-                            break;
-
-                        case "half":
-                            Methods.withdraw(p, EconomyManager.getBankBalance(p).divide(BigDecimal.valueOf(2)));
-                            break;
-
-                        default:
-                            try {
-                                Methods.withdraw(p, new BigDecimal(actionAmount));
-                            } catch (NumberFormatException ex) {
-                                BPLogger.error("Invalid withdraw number! (Item-Path: " + item + ", Action-Type: " + actionType + ", Action-Number: " + actionAmount + ")");
-                            }
-                            break;
-                    }
-                    break;
-
-                case "deposit":
-                    double bal = BankPlus.getEconomy().getBalance(p);
-                    switch (actionAmount) {
-                        case "custom":
+                        case "deposit":
                             Methods.customDeposit(p);
                             break;
+                    }
+                    break;
 
-                        case "all":
-                            Methods.deposit(p, BigDecimal.valueOf(bal));
+                case "all":
+                    switch (actionType) {
+                        case "withdraw":
+                            Methods.withdraw(p, EconomyManager.getBankBalance(p));
                             break;
-
-                        case "half":
-                            Methods.deposit(p, BigDecimal.valueOf(bal / 2));
-                            break;
-
-                        default:
-                            try {
-                                Methods.deposit(p, new BigDecimal(actionAmount));
-                            } catch (NumberFormatException ex) {
-                                BPLogger.error("Invalid deposit number! (Item-Path: " + item + ", Action-Type: " + actionType + ", Action-Number: " + actionAmount + ")");
-                            }
+                        case "deposit":
+                            Methods.deposit(p, BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p)));
                             break;
                     }
                     break;
+
+                case "half":
+                    switch (actionType) {
+                        case "withdraw":
+                            Methods.withdraw(p, EconomyManager.getBankBalance(p).divide(BigDecimal.valueOf(2)));
+                            break;
+                        case "deposit":
+                            Methods.deposit(p, BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p) / 2));
+                            break;
+                    }
+                    break;
+
+                default:
+                    BigDecimal amount;
+                    try {
+                        amount = new BigDecimal(actionAmount);
+                    } catch (NumberFormatException ex) {
+                        BPLogger.error("Invalid withdraw number! (Item-Path: " + item + ", Action-Type: " + actionType + ", Action-Number: " + actionAmount + ")");
+                        return;
+                    }
+                    switch (actionType) {
+                        case "withdraw":
+                            Methods.withdraw(p, amount);
+                            break;
+                        case "deposit":
+                            Methods.deposit(p, amount);
+                            break;
+                    }
             }
         }
     }

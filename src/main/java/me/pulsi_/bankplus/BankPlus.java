@@ -9,9 +9,10 @@ import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.ArrayList;
 
 public final class BankPlus extends JavaPlugin {
 
@@ -21,8 +22,7 @@ public final class BankPlus extends JavaPlugin {
     private static Economy econ = null;
     private static Permission perms = null;
 
-    private boolean isPlaceholderAPIHooked = false;
-    private boolean isEssentialsXHooked = false;
+    private boolean isPlaceholderAPIHooked = false, isEssentialsXHooked = false;
     private String serverVersion;
 
     @Override
@@ -73,8 +73,8 @@ public final class BankPlus extends JavaPlugin {
     public void onDisable() {
 
         instance = this;
+        EconomyManager.saveBankBalance(new ArrayList<>(Bukkit.getOnlinePlayers()));
         if (Values.CONFIG.isInterestEnabled()) Interest.saveInterest();
-        for (Player p : Bukkit.getOnlinePlayers()) EconomyManager.saveBankBalance(p);
         DataManager.shutdownPlugin();
     }
 

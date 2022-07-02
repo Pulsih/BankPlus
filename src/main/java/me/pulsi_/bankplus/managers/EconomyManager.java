@@ -40,27 +40,39 @@ public class EconomyManager {
         if (playerMoney.containsKey(p.getUniqueId())) return;
         FileConfiguration players = BankPlus.getCm().getConfig("players");
 
-        String path;
-        if (Values.CONFIG.isStoringUUIDs()) path = players.getString("Players." + p.getUniqueId() + ".Money");
-        else path = players.getString("Players." + p.getName() + ".Money");
+        String bal;
+        if (Values.CONFIG.isStoringUUIDs()) bal = players.getString("Players." + p.getUniqueId() + ".Money");
+        else bal = players.getString("Players." + p.getName() + ".Money");
 
         BigDecimal amount;
-        if (path == null) amount = new BigDecimal(0);
+        if (bal == null) amount = new BigDecimal(0);
         else {
             try {
-                amount = new BigDecimal(path);
+                amount = new BigDecimal(bal);
             } catch (NumberFormatException e) {
                 amount = new BigDecimal(0);
             }
         }
-
         EconomyManager.setPlayerBankBalance(p, amount);
     }
 
     public static void saveBankBalance(Player p) {
         FileConfiguration players = BankPlus.getCm().getConfig("players");
-        if (Values.CONFIG.isStoringUUIDs()) players.set("Players." + p.getUniqueId() + ".Money", Methods.formatBigDouble(getBankBalance(p)));
-        else players.set("Players." + p.getName() + ".Money", Methods.formatBigDouble(getBankBalance(p)));
+        String path;
+        if (Values.CONFIG.isStoringUUIDs()) path = "Players." + p.getUniqueId() + ".Money";
+        else path = "Players." + p.getName() + ".Money";
+        players.set(path, Methods.formatBigDouble(getBankBalance(p)));
+        BankPlus.getCm().savePlayers();
+    }
+
+    public static void saveBankBalance(List<Player> listOfPlayers) {
+        FileConfiguration players = BankPlus.getCm().getConfig("players");
+        for (Player p : listOfPlayers) {
+            String path;
+            if (Values.CONFIG.isStoringUUIDs()) path = "Players." + p.getUniqueId() + ".Money";
+            else path = "Players." + p.getName() + ".Money";
+            players.set(path, Methods.formatBigDouble(getBankBalance(p)));
+        }
         BankPlus.getCm().savePlayers();
     }
 
@@ -72,13 +84,13 @@ public class EconomyManager {
     public static BigDecimal getBankBalance(OfflinePlayer p) {
         FileConfiguration players = BankPlus.getCm().getConfig("players");
 
-        String path;
-        if (Values.CONFIG.isStoringUUIDs()) path = players.getString("Players." + p.getUniqueId() + ".Money");
-        else path = players.getString("Players." + p.getName() + ".Money");
+        String bal;
+        if (Values.CONFIG.isStoringUUIDs()) bal = players.getString("Players." + p.getUniqueId() + ".Money");
+        else bal = players.getString("Players." + p.getName() + ".Money");
 
         BigDecimal balance;
-        if (path == null) balance = new BigDecimal(0);
-        else balance = new BigDecimal(path);
+        if (bal == null) balance = new BigDecimal(0);
+        else balance = new BigDecimal(bal);
 
         return balance;
     }
@@ -86,14 +98,14 @@ public class EconomyManager {
     public static BigDecimal getOfflineInterest(Player p) {
         FileConfiguration players = BankPlus.getCm().getConfig("players");
 
-        String path;
+        String s;
         if (Values.CONFIG.isStoringUUIDs())
-            path = players.getString("Players." + p.getUniqueId() + ".Offline-Interest");
-        else path = players.getString("Players." + p.getName() + ".Offline-Interest");
+            s = players.getString("Players." + p.getUniqueId() + ".Offline-Interest");
+        else s = players.getString("Players." + p.getName() + ".Offline-Interest");
 
         BigDecimal offlineInterest;
-        if (path == null) offlineInterest = new BigDecimal(0);
-        else offlineInterest = new BigDecimal(path);
+        if (s == null) offlineInterest = new BigDecimal(0);
+        else offlineInterest = new BigDecimal(s);
 
         return offlineInterest;
     }
@@ -101,14 +113,13 @@ public class EconomyManager {
     public static BigDecimal getOfflineInterest(OfflinePlayer p) {
         FileConfiguration players = BankPlus.getCm().getConfig("players");
 
-        String path;
-        if (Values.CONFIG.isStoringUUIDs())
-            path = players.getString("Players." + p.getUniqueId() + ".Offline-Interest");
-        else path = players.getString("Players." + p.getName() + ".Offline-Interest");
+        String s;
+        if (Values.CONFIG.isStoringUUIDs()) s = players.getString("Players." + p.getUniqueId() + ".Offline-Interest");
+        else s = players.getString("Players." + p.getName() + ".Offline-Interest");
 
         BigDecimal offlineInterest;
-        if (path == null) offlineInterest = new BigDecimal(0);
-        else offlineInterest = new BigDecimal(path);
+        if (s == null) offlineInterest = new BigDecimal(0);
+        else offlineInterest = new BigDecimal(s);
 
         return offlineInterest;
     }
@@ -144,14 +155,16 @@ public class EconomyManager {
     public static void setOfflineInterest(Player p, BigDecimal amount) {
         if (Values.CONFIG.isStoringUUIDs())
             BankPlus.getCm().getConfig("players").set("Players." + p.getUniqueId() + ".Offline-Interest", Methods.formatBigDouble(amount));
-        else BankPlus.getCm().getConfig("players").set("Players." + p.getName() + ".Offline-Interest", Methods.formatBigDouble(amount));
+        else
+            BankPlus.getCm().getConfig("players").set("Players." + p.getName() + ".Offline-Interest", Methods.formatBigDouble(amount));
         BankPlus.getCm().savePlayers();
     }
 
     public static void setOfflineInterest(OfflinePlayer p, BigDecimal amount) {
         if (Values.CONFIG.isStoringUUIDs())
             BankPlus.getCm().getConfig("players").set("Players." + p.getUniqueId() + ".Offline-Interest", Methods.formatBigDouble(amount));
-        else BankPlus.getCm().getConfig("players").set("Players." + p.getName() + ".Offline-Interest", Methods.formatBigDouble(amount));
+        else
+            BankPlus.getCm().getConfig("players").set("Players." + p.getName() + ".Offline-Interest", Methods.formatBigDouble(amount));
         BankPlus.getCm().savePlayers();
     }
 
@@ -162,8 +175,10 @@ public class EconomyManager {
 
     private static void setValue(OfflinePlayer p, BigDecimal amount) {
         FileConfiguration players = BankPlus.getCm().getConfig("players");
-        if (Values.CONFIG.isStoringUUIDs()) players.set("Players." + p.getUniqueId() + ".Money", Methods.formatBigDouble(amount));
-        else players.set("Players." + p.getName() + ".Money", Methods.formatBigDouble(amount));
+        String path;
+        if (Values.CONFIG.isStoringUUIDs()) path = "Players." + p.getUniqueId() + ".Money";
+        else path = "Players." + p.getName() + ".Money";
+        players.set(path, Methods.formatBigDouble(amount));
         BankPlus.getCm().savePlayers();
     }
 }

@@ -112,6 +112,10 @@ public class BPDebugger {
         BPLogger.log("");
         BPLogger.log("                       &aBank&9Plus&dDebugger&9: &aGUI");
         BPLogger.info("PlayerName: &a" + p.getName() + " &9(UUID: &a" + p.getUniqueId() + "&9)");
+        BigDecimal mainBalance = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p));
+        BigDecimal bankBalance = EconomyManager.getBankBalance(p);
+        BPLogger.info("PlayerMainBalance: &a" + mainBalance);
+        BPLogger.info("PlayerBankBalance: &a" + bankBalance);
         BPLogger.info("ClickedSlot: &a" + slot);
 
         String itemPath = null, actionType = null, actionNumber = null;
