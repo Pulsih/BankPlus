@@ -146,13 +146,11 @@ public class ConfigManager {
     }
 
     public void savePlayers() {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            try {
-                saveConfig("players");
-            } catch (IllegalPluginAccessException | NullPointerException e) {
-                Bukkit.getScheduler().runTask(BankPlus.getInstance(), () -> saveConfig("players"));
-            }
-        });
+        try {
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> saveConfig("players"));
+        } catch (Exception e) {
+            saveConfig("players");
+        }
     }
 
     private String getFileAsString(File file) {
@@ -393,7 +391,7 @@ public class ConfigManager {
         addSpace(newConfig, "Interest.AFK-Settings");
 
         addCommentUnder(newConfig, "Interest", "( it will add: balance x Money-Given )");
-        validatePath(config, newConfig, "Interest.Money-Given", "0.05");
+        validatePath(config, newConfig, "Interest.Money-Given", 0.05);
         addSpace(newConfig, "Interest");
 
         addCommentsUnder(newConfig, "Interest",

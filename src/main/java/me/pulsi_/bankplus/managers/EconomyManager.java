@@ -46,7 +46,13 @@ public class EconomyManager {
 
         BigDecimal amount;
         if (path == null) amount = new BigDecimal(0);
-        else amount = new BigDecimal(path);
+        else {
+            try {
+                amount = new BigDecimal(path);
+            } catch (NumberFormatException e) {
+                amount = new BigDecimal(0);
+            }
+        }
 
         EconomyManager.setPlayerBankBalance(p, amount);
     }
