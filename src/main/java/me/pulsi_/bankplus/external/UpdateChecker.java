@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,18 +22,26 @@ import java.net.URL;
 
 public class UpdateChecker implements Listener {
 
-    private final boolean isUpToDate;
+    private static boolean isUpToDate;
     private final BankPlus plugin;
 
     public UpdateChecker(BankPlus plugin) {
-        boolean isUpdated;
         this.plugin = plugin;
-        try {
-            isUpdated = isPluginUpdated();
-        } catch (IOException e) {
-            isUpdated = true;
+        isUpToDate = true;
+        if(Values.CONFIG.isUpdateCheckerEnabled()){
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    boolean isUpdated;
+                    try {
+                        isUpdated = isPluginUpdated(); // should not in main thread.
+                    } catch (IOException e) {
+                        isUpdated = true;
+                    }
+                    isUpToDate = isUpdated;
+                }
+            }.runTaskAsynchronously(plugin);
         }
-        this.isUpToDate = isUpdated;
     }
 
     @EventHandler
