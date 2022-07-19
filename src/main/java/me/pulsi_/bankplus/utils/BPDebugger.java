@@ -1,10 +1,14 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
+import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
+import me.pulsi_.bankplus.guis.BanksHolder;
+import me.pulsi_.bankplus.guis.BanksManager;
 import me.pulsi_.bankplus.interest.Interest;
-import me.pulsi_.bankplus.managers.EconomyManager;
 import me.pulsi_.bankplus.managers.TaskManager;
 import me.pulsi_.bankplus.values.Values;
+import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -18,10 +22,10 @@ import java.math.BigDecimal;
 
 public class BPDebugger {
 
-    private static boolean isChatDebuggerEnabled = false, isGuiDebuggerEnabled = false;
+    private static boolean isChatDebuggerEnabled = false, isGuiDebuggerEnabled = false, isDepositDebuggerEnabled = false, isWithdrawDebuggerEnabled = false;
 
     public static void debugChat(AsyncPlayerChatEvent e) {
-        if (!isIsChatDebuggerEnabled()) return;
+        if (!isChatDebuggerEnabled()) return;
         String message = e.getMessage();
         String stripMessage = ChatColor.stripColor(message);
         Player p = e.getPlayer();
@@ -29,8 +33,8 @@ public class BPDebugger {
         BPLogger.log("");
         BPLogger.log("                     &aBank&9Plus&dDebugger&9: &aPLAYER_CHAT");
         BPLogger.info("PlayerName: &a" + p.getName() + " &9(UUID: &a" + p.getUniqueId() + "&9)");
-        if (Methods.isDepositing(p)) BPLogger.info("PlayerStatus: &aIS_DEPOSITING");
-        else if (Methods.isWithdrawing(p)) BPLogger.info("PlayerStatus: &aIS_WITHDRAWING");
+        if (BPMethods.isDepositing(p)) BPLogger.info("PlayerStatus: &aIS_DEPOSITING");
+        else if (BPMethods.isWithdrawing(p)) BPLogger.info("PlayerStatus: &aIS_WITHDRAWING");
         BPLogger.info("PlayerMessage: &a" + message + "&9 (StrippedMessage: &a" + stripMessage + "&9)");
 
         boolean isExitMessage = stripMessage.equalsIgnoreCase(Values.CONFIG.getExitMessage());
@@ -40,18 +44,18 @@ public class BPDebugger {
             return;
         }
 
-        BPLogger.info("MessageIsNumber: &a" + Methods.isValidNumber(message));
-        if (Methods.isValidNumber(message)) {
+        BPLogger.info("MessageIsNumber: &a" + BPMethods.isValidNumber(message));
+        if (BPMethods.isValidNumber(message)) {
             BigDecimal mainBalance = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p));
-            BigDecimal bankBalance = EconomyManager.getBankBalance(p);
+            BigDecimal bankBalance = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() ? MultiEconomyManager.getBankBalance(p) : SingleEconomyManager.getBankBalance(p);
             BigDecimal messageNumber = new BigDecimal(message);
             BPLogger.info("PlayerMainBalance: &a" + mainBalance);
             BPLogger.info("PlayerBankBalance: &a" + bankBalance);
 
             boolean hasEnoughMoneyWithdraw = bankBalance.doubleValue() > 0;
             boolean hasEnoughMoneyDeposit = mainBalance.doubleValue() > 0;
-            if (Methods.isWithdrawing(p)) BPLogger.info("HasEnoughMoneyToWithdraw: &a" + (bankBalance.doubleValue() > 0));
-            else if (Methods.isWithdrawing(p)) BPLogger.info("HasEnoughMoneyToDeposit: &a" + (mainBalance.doubleValue() > 0));
+            if (BPMethods.isWithdrawing(p)) BPLogger.info("HasEnoughMoneyToWithdraw: &a" + (bankBalance.doubleValue() > 0));
+            else if (BPMethods.isWithdrawing(p)) BPLogger.info("HasEnoughMoneyToDeposit: &a" + (mainBalance.doubleValue() > 0));
 
             if (!hasEnoughMoneyWithdraw || !hasEnoughMoneyDeposit) {
                 BPLogger.log("");
@@ -60,14 +64,14 @@ public class BPDebugger {
 
             BigDecimal newMainBalance = null;
             BigDecimal newBankBalance = null;
-            if (Methods.isWithdrawing(p)) {
+            if (BPMethods.isWithdrawing(p)) {
                 if (messageNumber.doubleValue() > bankBalance.doubleValue()) messageNumber = bankBalance;
                 newMainBalance = mainBalance.add(messageNumber);
                 newBankBalance = (bankBalance.subtract(messageNumber)).doubleValue() < 0 ? BigDecimal.valueOf(0) : bankBalance.subtract(messageNumber);
                 if (messageNumber.doubleValue() > bankBalance.doubleValue()) BPLogger.info("The player &ahas not &9enough money to withdraw. (NumberInsertedLimited: &a" + messageNumber + "&9, BankBalance: &a" + bankBalance + "&9)");
                 else BPLogger.info("The player &ahas &9enough money to withdraw. (NumberInsertedLimited: &a" + messageNumber + "&9, BankBalance: &a" + bankBalance + "&9)");
             }
-            else if (Methods.isDepositing(p)) {
+            else if (BPMethods.isDepositing(p)) {
                 if (messageNumber.doubleValue() > mainBalance.doubleValue()) messageNumber = mainBalance;
                 newMainBalance = (mainBalance.subtract(messageNumber)).doubleValue() < 0 ? BigDecimal.valueOf(0) : mainBalance.subtract(messageNumber);
                 newBankBalance = (bankBalance.add(messageNumber)).doubleValue() > Values.CONFIG.getMaxBankCapacity().doubleValue() ? Values.CONFIG.getMaxBankCapacity() : bankBalance.add(messageNumber);
@@ -94,15 +98,15 @@ public class BPDebugger {
 
         BPLogger.info("InterestTask: &a" + task + " &9(IsNull: &a" + (TaskManager.getInterestTask() == null) + "&9)");
         BPLogger.info("ServerMilliseconds: &a" + System.currentTimeMillis() + "ms");
-        BPLogger.info("InterestCooldownMillis: &a" + Interest.getInterestCooldownMillis() + "ms &9(&a" + Methods.formatTime(Interest.getInterestCooldownMillis()) + "&9)");
-        BPLogger.info("InterestDelay: &a" + Values.CONFIG.getInterestDelay() + "ms &9(&a" + Methods.formatTime(Values.CONFIG.getInterestDelay()) + "&9)");
+        BPLogger.info("InterestCooldownMillis: &a" + Interest.getInterestCooldownMillis() + "ms &9(&a" + BPMethods.formatTime(Interest.getInterestCooldownMillis()) + "&9)");
+        BPLogger.info("InterestDelay: &a" + Values.CONFIG.getInterestDelay() + "ms &9(&a" + BPMethods.formatTime(Values.CONFIG.getInterestDelay()) + "&9)");
         BPLogger.info("PlayersWaitingInterest: &a" + Bukkit.getOnlinePlayers().size() + " &9(&a" + Bukkit.getOfflinePlayers().length + " Total&9)");
         BPLogger.info("IsOfflineInterest: &a" + Values.CONFIG.isGivingInterestToOfflinePlayers());
         BPLogger.log("");
     }
 
     public static void debugGui(InventoryClickEvent e) {
-        if (!isIsGuiDebuggerEnabled()) return;
+        if (!isGuiDebuggerEnabled()) return;
 
         HumanEntity entity = e.getWhoClicked();
         if (!(entity instanceof Player)) return;
@@ -113,15 +117,15 @@ public class BPDebugger {
         BPLogger.log("                       &aBank&9Plus&dDebugger&9: &aGUI");
         BPLogger.info("PlayerName: &a" + p.getName() + " &9(UUID: &a" + p.getUniqueId() + "&9)");
         BigDecimal mainBalance = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p));
-        BigDecimal bankBalance = EconomyManager.getBankBalance(p);
+        BigDecimal bankBalance = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() ? MultiEconomyManager.getBankBalance(p) : SingleEconomyManager.getBankBalance(p);
         BPLogger.info("PlayerMainBalance: &a" + mainBalance);
         BPLogger.info("PlayerBankBalance: &a" + bankBalance);
         BPLogger.info("ClickedSlot: &a" + slot);
 
         String itemPath = null, actionType = null, actionNumber = null;
         boolean hasAction = false;
-        for (String key : Values.BANK.getGuiItems().getKeys(false)) {
-            ConfigurationSection item = BankPlus.getCm().getConfig("bank").getConfigurationSection("Items." + key);
+        for (String key : BanksManager.getItems(BanksHolder.openedInventory.get(p)).getKeys(false)) {
+            ConfigurationSection item = BanksManager.getConfig(BanksHolder.openedInventory.get(p)).getConfigurationSection("Items." + key);
             if (item == null || slot != item.getInt("Slot")) continue;
             itemPath = item.toString();
 
@@ -139,9 +143,63 @@ public class BPDebugger {
             return;
         }
         BPLogger.info("ActionType: &a" + actionType);
-        boolean isValidNumber = actionNumber.equalsIgnoreCase("ALL") || actionNumber.equalsIgnoreCase("HALF") || Methods.isValidNumber(actionNumber);
-        BPLogger.info("ActionNumber: &a" + actionNumber + " &9(IsValidNumber: &a" + Methods.isValidNumber(actionNumber) + "&9, IsValidAction: &a" + isValidNumber + "&9)");
+        boolean isValidNumber = actionNumber.equalsIgnoreCase("ALL") || actionNumber.equalsIgnoreCase("HALF") || BPMethods.isValidNumber(actionNumber);
+        BPLogger.info("ActionNumber: &a" + actionNumber + " &9(IsValidNumber: &a" + BPMethods.isValidNumber(actionNumber) + "&9, IsValidAction: &a" + isValidNumber + "&9)");
         BPLogger.log("");
+    }
+
+    public static void debugDeposit(Player p, BigDecimal amount, EconomyResponse response) {
+        if (!isDepositDebuggerEnabled()) return;
+
+        BPLogger.log("");
+        BPLogger.log("                       &aBank&9Plus&dDebugger&9: &aDEPOSIT");
+        BPLogger.info("PlayerName: &a" + p.getName() + " &9(UUID: &a" + p.getUniqueId() + "&9)");
+        BigDecimal mainBalance = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p));
+        BigDecimal bankBalance = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() ? MultiEconomyManager.getBankBalance(p) : SingleEconomyManager.getBankBalance(p);
+        BPLogger.info("PlayerMainBalance: &a" + mainBalance);
+        BPLogger.info("PlayerBankBalance: &a" + bankBalance);
+        BPLogger.info("AmountInserted: &a" + amount);
+
+        EconomyResponse.ResponseType economyResponseType = response.type;
+        BPLogger.info("DepositEconomyResponse: &a" + economyResponseType);
+        if (economyResponseType != EconomyResponse.ResponseType.SUCCESS) {
+            BPLogger.info("&cVault failed withdraw task for " + p.getName());
+            BPLogger.info("Error message: &c" + response.errorMessage);
+        }
+        BPLogger.log("");
+    }
+
+    public static void debugWithdraw(Player p, BigDecimal amount, EconomyResponse response) {
+        if (!isWithdrawDebuggerEnabled()) return;
+
+        BPLogger.log("");
+        BPLogger.log("                       &aBank&9Plus&dDebugger&9: &aWITHDRAW");
+        BPLogger.info("PlayerName: &a" + p.getName() + " &9(UUID: &a" + p.getUniqueId() + "&9)");
+        BigDecimal mainBalance = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p));
+        BigDecimal bankBalance = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() ? MultiEconomyManager.getBankBalance(p) : SingleEconomyManager.getBankBalance(p);
+        BPLogger.info("PlayerMainBalance: &a" + mainBalance);
+        BPLogger.info("PlayerBankBalance: &a" + bankBalance);
+        BPLogger.info("AmountInserted: &a" + amount);
+
+        EconomyResponse.ResponseType economyResponseType = response.type;
+        BPLogger.info("DepositEconomyResponse: &a" + economyResponseType);
+        if (economyResponseType != EconomyResponse.ResponseType.SUCCESS) {
+            BPLogger.info("&cVault failed deposit task for " + p.getName());
+            BPLogger.info("Error message: &c" + response.errorMessage);
+        }
+        BPLogger.log("");
+    }
+
+    public static void toggleDepositDebugger(CommandSender s) {
+        if (isDepositDebuggerEnabled) s.sendMessage(BPChat.color("&a&lBank&9&lPlus &aYou have &cdeactivated &athe DEPOSIT debugger!"));
+        else s.sendMessage(BPChat.color("&a&lBank&9&lPlus &aYou have &2activated &athe DEPOSIT debugger!"));
+        isDepositDebuggerEnabled = !isDepositDebuggerEnabled;
+    }
+
+    public static void toggleWithdrawDebugger(CommandSender s) {
+        if (isWithdrawDebuggerEnabled) s.sendMessage(BPChat.color("&a&lBank&9&lPlus &aYou have &cdeactivated &athe WITHDRAW debugger!"));
+        else s.sendMessage(BPChat.color("&a&lBank&9&lPlus &aYou have &2activated &athe WITHDRAW debugger!"));
+        isWithdrawDebuggerEnabled = !isWithdrawDebuggerEnabled;
     }
 
     public static void toggleChatDebugger(CommandSender s) {
@@ -156,11 +214,19 @@ public class BPDebugger {
         isGuiDebuggerEnabled = !isGuiDebuggerEnabled;
     }
 
-    public static boolean isIsChatDebuggerEnabled() {
+    public static boolean isDepositDebuggerEnabled() {
+        return isDepositDebuggerEnabled;
+    }
+
+    public static boolean isWithdrawDebuggerEnabled() {
+        return isWithdrawDebuggerEnabled;
+    }
+
+    public static boolean isChatDebuggerEnabled() {
         return isChatDebuggerEnabled;
     }
 
-    public static boolean isIsGuiDebuggerEnabled() {
+    public static boolean isGuiDebuggerEnabled() {
         return isGuiDebuggerEnabled;
     }
 }

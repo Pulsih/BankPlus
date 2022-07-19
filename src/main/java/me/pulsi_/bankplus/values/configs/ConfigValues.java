@@ -1,8 +1,9 @@
 package me.pulsi_.bankplus.values.configs;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.interest.Interest;
-import me.pulsi_.bankplus.utils.Methods;
+import me.pulsi_.bankplus.managers.ConfigManager;
+import me.pulsi_.bankplus.utils.BPLogger;
+import me.pulsi_.bankplus.utils.BPMethods;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.math.BigDecimal;
@@ -10,36 +11,13 @@ import java.util.List;
 
 public class ConfigValues {
 
+    private List<String> worldsBlacklist, exitCommands, bankTopFormat;
     private String exitMessage;
-    private String second;
-    private String seconds;
-    private String minute;
-    private String minutes;
-    private String hour;
-    private String hours;
-    private String day;
-    private String days;
-    private String interestTimeOnlySeconds;
-    private String interestTimeOnlyMinutes;
-    private String interestTimeOnlyHours;
-    private String interestTimeOnlyDays;
-    private String interestTimeSecondsMinutes;
-    private String interestTimeMinutesHours;
-    private String interestTimeSecondsHours;
-    private String interestTimeSecondsMinutesHours;
-    private String interestTimeHoursDays;
-    private String interestTimeMinutesDays;
-    private String interestTimeSecondsDays;
-    private String interestTimeMinutesHoursDays;
-    private String interestTimeSecondsHoursDays;
-    private String interestTimeSecondsMinutesHoursDays;
-    private String interestTimeSecondsMinutesDays;
-    private String k;
-    private String m;
-    private String b;
-    private String t;
-    private String q;
-    private String qq;
+    private String second, seconds, minute, minutes, hour, hours, day, days;
+    private String interestTimeOnlySeconds, interestTimeOnlyMinutes, interestTimeOnlyHours, interestTimeOnlyDays, interestTimeSecondsMinutes, interestTimeMinutesHours;
+    private String interestTimeSecondsHours, interestTimeSecondsMinutesHours, interestTimeHoursDays, interestTimeMinutesDays, interestTimeSecondsDays;
+    private String interestTimeMinutesHoursDays, interestTimeSecondsHoursDays, interestTimeSecondsMinutesHoursDays, interestTimeSecondsMinutesDays;
+    private String k, m, b, t, q, qq;
     private String withdrawSound;
     private String depositSound;
     private String viewSound;
@@ -47,16 +25,16 @@ public class ConfigValues {
     private String notifyOfflineInterestMessage;
     private String interestDelay;
     private String interestOfflinePermission;
-    private BigDecimal maxWithdrawAmount;
-    private BigDecimal maxDepositAmount;
-    private BigDecimal minimumAmount;
-    private BigDecimal maxBankCapacity;
-    private BigDecimal startAmount;
+    private String maxDepositAmount;
+    private String maxWithdrawAmount;
+    private String depositTaxes;
+    private String withdrawTaxes;
+    private String minimumAmount;
+    private String maxBankCapacity;
+    private String startAmount;
     private long notifyOfflineInterestDelay;
-    private BigDecimal interestMaxAmount;
-    private double interestMoneyGiven;
-    private List<String> worldsBlacklist;
-    private List<String> exitCommands;
+    private String interestMaxAmount;
+    private String interestMoneyGiven;
     private boolean isReopeningBankAfterChat;
     private boolean isInterestEnabled;
     private boolean isNotifyOfflineInterest;
@@ -77,18 +55,19 @@ public class ConfigValues {
     private long updateBankTopDelay;
     private int bankTopSize;
     private String bankTopMoneyFormat;
-    private List<String> bankTopFormat;
     private boolean banktopUpdateBroadcastEnabled;
     private boolean banktopUpdateBroadcastOnlyConsole;
     private String banktopUpdateBroadcastMessage;
     private boolean saveBalancesBroadcast;
+    private boolean guiModuleEnabled;
+    private String mainGuiName;
 
     public static ConfigValues getInstance() {
         return new ConfigValues();
     }
 
     public void setupValues() {
-        FileConfiguration config = BankPlus.getCm().getConfig("config");
+        FileConfiguration config = BankPlus.getCm().getConfig(ConfigManager.Type.CONFIG);
 
         exitMessage = config.getString("General.Chat-Exit-Message");
         second = config.getString("Placeholders.Time.Second");
@@ -127,14 +106,16 @@ public class ConfigValues {
         notifyOfflineInterestMessage = config.getString("General.Offline-Interest-Earned-Message.Message");
         interestDelay = config.getString("Interest.Delay");
         interestOfflinePermission = config.getString("Interest.Offline-Permission");
-        maxWithdrawAmount = BigDecimal.valueOf(config.getDouble("General.Max-Withdrawn-Amount"));
-        maxDepositAmount = BigDecimal.valueOf(config.getDouble("General.Max-Deposit-Amount"));
-        minimumAmount = BigDecimal.valueOf(config.getDouble("General.Minimum-Amount"));
-        maxBankCapacity = BigDecimal.valueOf(config.getDouble("General.Max-Bank-Capacity"));
-        startAmount = BigDecimal.valueOf(config.getDouble("General.Join-Start-Amount"));
+        maxDepositAmount = config.getString("General.Max-Deposit-Amount");
+        maxWithdrawAmount = config.getString("General.Max-Withdrawn-Amount");
+        depositTaxes = config.getString("General.Deposit-Taxes");
+        withdrawTaxes = config.getString("General.Withdraw-Taxes");
+        minimumAmount = config.getString("General.Minimum-Amount");
+        maxBankCapacity = config.getString("General.Max-Bank-Capacity");
+        startAmount = config.getString("General.Join-Start-Amount");
         notifyOfflineInterestDelay = config.getLong("General.Offline-Interest-Earned-Message.Delay");
-        interestMaxAmount = BigDecimal.valueOf(config.getDouble("Interest.Max-Amount"));
-        interestMoneyGiven = config.getDouble("Interest.Money-Given");
+        interestMaxAmount = config.getString("Interest.Max-Amount");
+        interestMoneyGiven = config.getString("Interest.Money-Given");
         worldsBlacklist = config.getStringList("General.Worlds-Blacklist");
         exitCommands = config.getStringList("General.Chat-Exit-Commands");
         isReopeningBankAfterChat = config.getBoolean("General.Reopen-Bank-After-Chat");
@@ -162,157 +143,128 @@ public class ConfigValues {
         banktopUpdateBroadcastOnlyConsole = config.getBoolean("BankTop.Update-Broadcast.Only-Console");
         banktopUpdateBroadcastMessage = config.getString("BankTop.Update-Broadcast.Message");
         saveBalancesBroadcast = config.getBoolean("General.Save-Broadcast");
+        guiModuleEnabled = config.getBoolean("General.Enable-Guis");
+        mainGuiName = config.getString("General.Main-Gui");
     }
 
     public String getExitMessage() {
-        if (exitMessage == null) return "exit";
-        return exitMessage;
+        return exitMessage == null ? "exit" : exitMessage;
     }
 
     public String getSecond() {
-        if (second == null) return "Second";
-        return second;
+        return second == null ? "Second" : second;
     }
 
     public String getSeconds() {
-        if (seconds == null) return "Seconds";
-        return seconds;
+        return seconds == null ? "Seconds" : seconds;
     }
 
     public String getMinute() {
-        if (minute == null) return "Minute";
-        return minute;
+        return minute == null ? "Minute" : minute;
     }
 
     public String getMinutes() {
-        if (minutes == null) return "Minutes";
-        return minutes;
+        return minutes == null ? "Minutes" : minutes;
     }
 
     public String getHour() {
-        if (hour == null) return "Hour";
-        return hour;
+        return hour == null ? "Hour" : hour;
     }
 
     public String getHours() {
-        if (hours == null) return "Hours";
-        return hours;
+        return hours == null ? "Hours" : hours;
     }
 
     public String getDay() {
-        if (day == null) return "Day";
-        return day;
+        return day == null ? "Day" : day;
     }
 
     public String getDays() {
-        if (days == null) return "Days";
-        return days;
+        return days == null ? "Days" : days;
     }
 
     public String getInterestTimeOnlySeconds() {
-        if (interestTimeOnlySeconds == null) return "";
         return interestTimeOnlySeconds;
     }
 
     public String getInterestTimeOnlyMinutes() {
-        if (interestTimeOnlyMinutes == null) return "";
         return interestTimeOnlyMinutes;
     }
 
     public String getInterestTimeOnlyHours() {
-        if (interestTimeOnlyHours == null) return "";
         return interestTimeOnlyHours;
     }
 
     public String getInterestTimeOnlyDays() {
-        if (interestTimeOnlyDays == null) return "";
         return interestTimeOnlyDays;
     }
 
     public String getInterestTimeSecondsMinutes() {
-        if (interestTimeSecondsMinutes == null) return "";
         return interestTimeSecondsMinutes;
     }
 
     public String getInterestTimeMinutesHours() {
-        if (interestTimeMinutesHours == null) return "";
         return interestTimeMinutesHours;
     }
 
     public String getInterestTimeSecondsHours() {
-        if (interestTimeSecondsHours == null) return "";
         return interestTimeSecondsHours;
     }
 
     public String getInterestTimeSecondsMinutesHours() {
-        if (interestTimeSecondsMinutesHours == null) return "";
         return interestTimeSecondsMinutesHours;
     }
 
     public String getInterestTimeHoursDays() {
-        if (interestTimeHoursDays == null) return "";
         return interestTimeHoursDays;
     }
 
     public String getInterestTimeMinutesDays() {
-        if (interestTimeMinutesDays == null) return "";
         return interestTimeMinutesDays;
     }
 
     public String getInterestTimeSecondsDays() {
-        if (interestTimeSecondsDays == null) return "";
         return interestTimeSecondsDays;
     }
 
-
     public String getInterestTimeMinutesHoursDays() {
-        if (interestTimeMinutesHoursDays == null) return "";
         return interestTimeMinutesHoursDays;
     }
 
     public String getInterestTimeSecondsHoursDays() {
-        if (interestTimeSecondsHoursDays == null) return "";
         return interestTimeSecondsHoursDays;
     }
 
     public String getInterestTimeSecondsMinutesHoursDays() {
-        if (interestTimeSecondsMinutesHoursDays == null) return "";
         return interestTimeSecondsMinutesHoursDays;
     }
 
     public String getInterestTimeSecondsMinutesDays() {
-        if (interestTimeSecondsMinutesDays == null) return "";
         return interestTimeSecondsMinutesDays;
     }
 
     public String getK() {
-        if (k == null) return "K";
-        return k;
+        return k == null ? "K" : k;
     }
 
     public String getM() {
-        if (m == null) return "M";
-        return m;
+        return m == null ? "M" : m;
     }
 
     public String getB() {
-        if (b == null) return "B";
-        return b;
+        return b == null ? "B" : b;
     }
 
     public String getT() {
-        if (t == null) return "T";
-        return t;
+        return t == null ? "T" : t;
     }
 
     public String getQ() {
-        if (q == null) return "Q";
-        return q;
+        return q == null ? "Q" : q;
     }
 
     public String getQq() {
-        if (qq == null) return "QQ";
-        return qq;
+        return qq == null ? "QQ" : qq;
     }
 
     public String getWithdrawSound() {
@@ -336,25 +288,25 @@ public class ConfigValues {
     }
 
     public long getInterestDelay() {
-        if (!interestDelay.contains(" ")) return Methods.minutesInMilliseconds(Integer.parseInt(interestDelay));
+        if (!interestDelay.contains(" ")) return BPMethods.minutesInMilliseconds(Integer.parseInt(interestDelay));
 
         int delay;
         try {
             delay = Integer.parseInt(interestDelay.split(" ")[0]);
         } catch (NumberFormatException e) {
-            return Methods.minutesInMilliseconds(5);
+            return BPMethods.minutesInMilliseconds(5);
         }
 
         String delayType = interestDelay.split(" ")[1];
         switch (delayType) {
             case "s":
-                return Methods.secondsInMilliseconds(delay);
+                return BPMethods.secondsInMilliseconds(delay);
             default:
-                return Methods.minutesInMilliseconds(delay);
+                return BPMethods.minutesInMilliseconds(delay);
             case "h":
-                return Methods.hoursInMilliseconds(delay);
+                return BPMethods.hoursInMilliseconds(delay);
             case "d":
-                return Methods.daysInMilliseconds(delay);
+                return BPMethods.daysInMilliseconds(delay);
         }
     }
 
@@ -362,24 +314,60 @@ public class ConfigValues {
         return interestOfflinePermission;
     }
 
-    public BigDecimal getMaxWithdrawAmount() {
-        return maxWithdrawAmount;
+    public BigDecimal getMaxDepositAmount() {
+        if (!BPMethods.isValidNumber(maxDepositAmount)) {
+            BPLogger.error("Invalid number for the \"MaxDepositAmount\", Please correct it in the config as soon as possible!");
+            return new BigDecimal(0);
+        }
+        return new BigDecimal(maxDepositAmount);
     }
 
-    public BigDecimal getMaxDepositAmount() {
-        return maxDepositAmount;
+    public BigDecimal getMaxWithdrawAmount() {
+        if (!BPMethods.isValidNumber(maxWithdrawAmount)) {
+            BPLogger.error("Invalid number for the \"MaxWithdrawAmount\", Please correct it in the config as soon as possible!");
+            return new BigDecimal(0);
+        }
+        return new BigDecimal(maxWithdrawAmount);
+    }
+
+    public BigDecimal getDepositTaxes() {
+        if (!BPMethods.isValidNumber(depositTaxes)) {
+            BPLogger.error("Invalid number for the \"DepositTaxes\", Please correct it in the config as soon as possible!");
+            return new BigDecimal(0);
+        }
+        return new BigDecimal(depositTaxes.replace("%", ""));
+    }
+
+    public BigDecimal getWithdrawTaxes() {
+        if (!BPMethods.isValidNumber(withdrawTaxes)) {
+            BPLogger.error("Invalid number for the \"WithdrawTaxes\", Please correct it in the config as soon as possible!");
+            return new BigDecimal(0);
+        }
+        return new BigDecimal(withdrawTaxes.replace("%", ""));
     }
 
     public BigDecimal getMinimumAmount() {
-        return minimumAmount;
+        if (!BPMethods.isValidNumber(minimumAmount)) {
+            BPLogger.error("Invalid number for the \"MinimumAmount\", Please correct it in the config as soon as possible!");
+            return new BigDecimal(0);
+        }
+        return new BigDecimal(minimumAmount);
     }
 
     public BigDecimal getMaxBankCapacity() {
-        return maxBankCapacity;
+        if (!BPMethods.isValidNumber(maxBankCapacity)) {
+            BPLogger.error("Invalid number for the \"MaxBankCapacity\", Please correct it in the config as soon as possible!");
+            return new BigDecimal(0);
+        }
+        return new BigDecimal(maxBankCapacity);
     }
 
     public BigDecimal getStartAmount() {
-        return startAmount;
+        if (!BPMethods.isValidNumber(startAmount)) {
+            BPLogger.error("Invalid number for the \"StartAmount\", Please correct it in the config as soon as possible!");
+            return new BigDecimal(0);
+        }
+        return new BigDecimal(startAmount);
     }
 
     public long getNotifyOfflineInterestDelay() {
@@ -387,11 +375,19 @@ public class ConfigValues {
     }
 
     public BigDecimal getInterestMaxAmount() {
-        return interestMaxAmount;
+        if (!BPMethods.isValidNumber(interestMaxAmount)) {
+            BPLogger.error("Invalid number for the \"InterestMaxAmount\", Please correct it in the config as soon as possible!");
+            return new BigDecimal(0);
+        }
+        return new BigDecimal(interestMaxAmount);
     }
 
-    public double getInterestMoneyGiven() {
-        return interestMoneyGiven;
+    public BigDecimal getInterestMoneyGiven() {
+        if (!BPMethods.isValidNumber(interestMoneyGiven)) {
+            BPLogger.error("Invalid number for the \"InterestMoneyGiven\", Please correct it in the config as soon as possible!");
+            return new BigDecimal(0);
+        }
+        return new BigDecimal(interestMoneyGiven.replace("%", ""));
     }
 
     public List<String> getWorldsBlacklist() {
@@ -451,8 +447,7 @@ public class ConfigValues {
     }
 
     public boolean isUseEssentialsXAFK() {
-        if (!BankPlus.getInstance().isEssentialsXHooked()) return false;
-        return useEssentialsXAFK;
+        return BankPlus.getInstance().isEssentialsXHooked() && useEssentialsXAFK;
     }
 
     public int getAfkPlayersTime() {
@@ -501,5 +496,13 @@ public class ConfigValues {
 
     public boolean isSaveBalancesBroadcast() {
         return saveBalancesBroadcast;
+    }
+
+    public boolean isGuiModuleEnabled() {
+        return guiModuleEnabled;
+    }
+
+    public String getMainGuiName() {
+        return mainGuiName == null ? "bank" : mainGuiName;
     }
 }

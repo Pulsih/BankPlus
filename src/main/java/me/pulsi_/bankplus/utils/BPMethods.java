@@ -1,11 +1,15 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.managers.EconomyManager;
+import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
+import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
+import me.pulsi_.bankplus.managers.ConfigManager;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.managers.TaskManager;
 import me.pulsi_.bankplus.values.Values;
+import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -14,12 +18,15 @@ import org.bukkit.scheduler.BukkitTask;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
-public class Methods {
+public class BPMethods {
 
     public static String formatTime(long milliseconds) {
-        if (milliseconds <= -1) return BPChat.color("&cInterest disabled.");
+        if (!Values.CONFIG.isInterestEnabled()) return BPChat.color("&cInterest disabled.");
+
         long seconds = milliseconds / 1000;
         if (seconds <= 0) return placeSeconds(Values.CONFIG.getInterestTimeOnlySeconds(), 0);
         if (seconds < 60) return placeSeconds(Values.CONFIG.getInterestTimeOnlySeconds(), seconds);
@@ -119,19 +126,19 @@ public class Methods {
         try {
             BigDecimal num = new BigDecimal(number);
             if (num.doubleValue() < 0) {
-                MessageManager.cannotUseNegativeNumber(s);
+                MessageManager.send(s, "Cannot-Use-Negative-Number");
                 return true;
             }
+            return false;
         } catch (NumberFormatException e) {
-            MessageManager.invalidNumber(s);
+            MessageManager.send(s, "Invalid-Number");
             return true;
         }
-        return false;
     }
 
     public static boolean isValidNumber(String number) {
         try {
-            new BigDecimal(number);
+            new BigDecimal(number.replace("%", ""));
             return true;
         } catch (NumberFormatException e) {
             return false;
@@ -148,13 +155,13 @@ public class Methods {
 
     public static boolean isPlayer(CommandSender s) {
         if (s instanceof Player) return true;
-        MessageManager.notPlayer(s);
+        MessageManager.send(s, "Not-Player");
         return false;
     }
 
     public static boolean hasPermission(CommandSender s, String permission) {
         if (s.hasPermission(permission)) return true;
-        MessageManager.noPermission(s);
+        MessageManager.send(s, "No-Permission", "%permission%$" + permission);
         return false;
     }
 
@@ -180,7 +187,8 @@ public class Methods {
         if (task != null) task.cancel();
         if (Values.CONFIG.getSaveBalancedDelay() <= 0) return;
         TaskManager.setSavingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.getInstance(), () -> {
-            for (Player p : Bukkit.getOnlinePlayers()) EconomyManager.saveBankBalance(p);
+            if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) Bukkit.getOnlinePlayers().forEach(MultiEconomyManager::saveBankBalance);
+            else Bukkit.getOnlinePlayers().forEach(SingleEconomyManager::saveBankBalance);
             if (Values.CONFIG.isSaveBalancesBroadcast()) BPLogger.info("All player balances have been saved!");
         }, Values.CONFIG.getSaveBalancedDelay() * 1200L, Values.CONFIG.getSaveBalancedDelay() * 1200L));
     }
@@ -228,23 +236,25 @@ public class Methods {
     }
 
     public static void customWithdraw(Player p) {
+        if (!hasPermission(p, "bankplus.withdraw")) return;
         SetUtils.playerWithdrawing.add(p.getUniqueId());
         if (Values.MESSAGES.isTitleCustomAmountEnabled())
-            Methods.sendTitle("Title-Custom-Amount.Title-Withdraw", p);
-        MessageManager.chatWithdraw(p);
+            BPMethods.sendTitle("Title-Custom-Transaction.Title-Withdraw", p);
+        MessageManager.send(p, "Chat-Withdraw");
         p.closeInventory();
     }
 
     public static void customDeposit(Player p) {
+        if (!hasPermission(p, "bankplus.deposit")) return;
         SetUtils.playerDepositing.add(p.getUniqueId());
         if (Values.MESSAGES.isTitleCustomAmountEnabled())
-            Methods.sendTitle("Title-Custom-Amount.Title-Deposit", p);
-        MessageManager.chatDeposit(p);
+            BPMethods.sendTitle("Title-Custom-Transaction.Title-Deposit", p);
+        MessageManager.send(p, "Chat-Deposit");
         p.closeInventory();
     }
 
     public static void sendTitle(String path, Player p) {
-        String title = BankPlus.getCm().getConfig("messages").getString(path);
+        String title = BankPlus.getCm().getConfig(ConfigManager.Type.MESSAGES).getString(path);
         if (title == null) return;
 
         String newTitle = MessageManager.addPrefix(title);
@@ -353,108 +363,153 @@ public class Methods {
     }
 
     public static void withdraw(Player p, BigDecimal amount) {
-        BigDecimal bankBalance = EconomyManager.getBankBalance(p);
-        BigDecimal maxWithdrawAmount = Values.CONFIG.getMaxWithdrawAmount();
+        if (!hasPermission(p, "bankplus.withdraw")) return;
 
+        BigDecimal bankBalance = SingleEconomyManager.getBankBalance(p);
         if (!hasMoney(bankBalance, amount, p)) return;
-
         if (bankBalance.doubleValue() <= 0) {
-            MessageManager.insufficientMoney(p);
+            MessageManager.send(p, "Insufficient-Money");
             return;
         }
 
+        BigDecimal maxWithdrawAmount = Values.CONFIG.getMaxWithdrawAmount();
         if (maxWithdrawAmount.doubleValue() != 0 && amount.doubleValue() >= maxWithdrawAmount.doubleValue())
             amount = maxWithdrawAmount;
 
         BigDecimal newBalance = bankBalance.subtract(amount);
         if (newBalance.doubleValue() <= 0) amount = bankBalance;
 
-        EconomyManager.removePlayerBankBalance(p, amount);
-        BankPlus.getEconomy().depositPlayer(p, amount.doubleValue());
-        MessageManager.successWithdraw(p, amount);
-        Methods.playSound("WITHDRAW", p);
+        BigDecimal amountWithTaxes = amount;
+        if (Values.CONFIG.getWithdrawTaxes().doubleValue() > 0) {
+            amountWithTaxes = amount.subtract(amount.multiply(Values.CONFIG.getWithdrawTaxes().divide(BigDecimal.valueOf(100))));
+            amountWithTaxes = new BigDecimal(BPMethods.formatBigDouble(amountWithTaxes));
+        }
+        EconomyResponse withdrawResponse = BankPlus.getEconomy().depositPlayer(p, amountWithTaxes.doubleValue());
+        if (!withdrawResponse.transactionSuccess()) {
+            MessageManager.send(p, "Internal-Error");
+            BPLogger.warn("Warning! (THIS IS NOT A BANKPLUS ERROR!) Vault has failed his transaction task, to" +
+                    " avoid dupe bugs, i also aborted the bankplus withdraw transaction.");
+            return;
+        }
+        BPDebugger.debugWithdraw(p, amount, withdrawResponse);
+        SingleEconomyManager.removeBankBalance(p, amount);
+        MessageManager.send(p, "Success-Withdraw", BPMethods.placeValues(p, amount));
+        BPMethods.playSound("WITHDRAW", p);
     }
 
     public static void deposit(Player p, BigDecimal amount) {
-        BigDecimal bankBalance = EconomyManager.getBankBalance(p);
-        BigDecimal money = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p));
-        BigDecimal maxDepositAmount = Values.CONFIG.getMaxDepositAmount();
-        BigDecimal maxBankCapacity = Values.CONFIG.getMaxBankCapacity();
+        if (!hasPermission(p, "bankplus.deposit")) return;
 
+        BigDecimal money = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p));
         if (!hasMoney(money, amount, p)) return;
 
-        if (money.doubleValue() <= amount.doubleValue()) amount = money;
+        BigDecimal maxDepositAmount = Values.CONFIG.getMaxDepositAmount();
+        BigDecimal maxBankCapacity = Values.CONFIG.getMaxBankCapacity();
+        BigDecimal bankBalance = SingleEconomyManager.getBankBalance(p);
 
+        if (money.doubleValue() <= amount.doubleValue()) amount = money;
         if (maxDepositAmount.doubleValue() != 0 && amount.doubleValue() >= maxDepositAmount.doubleValue())
             amount = maxDepositAmount;
 
         BigDecimal newBalance = bankBalance.add(amount);
         if (maxBankCapacity.doubleValue() != 0 && newBalance.doubleValue() >= maxBankCapacity.doubleValue()) {
             if (bankBalance.doubleValue() >= maxBankCapacity.doubleValue()) {
-                MessageManager.cannotDepositMore(p);
+                MessageManager.send(p, "Cannot-Deposit-Anymore");
                 return;
             }
             amount = maxBankCapacity.subtract(bankBalance);
         }
 
-        EconomyManager.addPlayerBankBalance(p, amount);
-        BankPlus.getEconomy().withdrawPlayer(p, amount.doubleValue());
-        MessageManager.successDeposit(p, amount);
-        Methods.playSound("DEPOSIT", p);
+        BigDecimal amountWithTaxes = amount;
+        if (Values.CONFIG.getDepositTaxes().doubleValue() > 0) {
+            amountWithTaxes = amount.subtract(amount.multiply(Values.CONFIG.getDepositTaxes().divide(BigDecimal.valueOf(100))));
+            amountWithTaxes = new BigDecimal(BPMethods.formatBigDouble(amountWithTaxes));
+        }
+        EconomyResponse depositResponse = BankPlus.getEconomy().withdrawPlayer(p, amount.doubleValue());
+        if (!depositResponse.transactionSuccess()) {
+            MessageManager.send(p, "Internal-Error");
+            BPLogger.warn("Warning! (THIS IS NOT A BANKPLUS ERROR!) Vault has failed his transaction task, to" +
+                    " avoid dupe bugs, i also aborted the bankplus deposit transaction.");
+            return;
+        }
+        BPDebugger.debugDeposit(p, amount, depositResponse);
+        SingleEconomyManager.addBankBalance(p, amountWithTaxes);
+        MessageManager.send(p, "Success-Deposit", BPMethods.placeValues(p, amount));
+        BPMethods.playSound("DEPOSIT", p);
     }
 
     private static boolean hasMoney(BigDecimal money, BigDecimal amount, Player p) {
         if (amount.doubleValue() < 0) {
-            MessageManager.cannotUseNegativeNumber(p);
+            MessageManager.send(p, "Cannot-Use-Negative-Number");
             return false;
         }
         if (amount.doubleValue() < Values.CONFIG.getMinimumAmount().doubleValue()) {
-            MessageManager.minimumAmountAlert(p);
+            MessageManager.send(p, "Minimum-Number");
             return false;
         }
         if (money.doubleValue() <= 0) {
-            MessageManager.insufficientMoney(p);
+            MessageManager.send(p, "Insufficient-Money");
             return false;
         }
         return true;
     }
 
+    public static List<String> placeValues(Player p, BigDecimal amount) {
+        List<String> values = new ArrayList<>();
+        values.add("%player_name%$" + p.getName());
+        values.add("%amount%$" + BPMethods.formatCommas(amount));
+        values.add("%amount_long%$" + amount);
+        values.add("%amount_formatted%$" + BPMethods.format(amount));
+        values.add("%amount_formatted_long%$" + BPMethods.formatLong(amount));
+        return values;
+    }
+
+    public static List<String> placeValues(OfflinePlayer p, BigDecimal amount) {
+        List<String> values = new ArrayList<>();
+        values.add("%player_name%$" + p.getName());
+        values.add("%amount%$" + BPMethods.formatCommas(amount));
+        values.add("%amount_long%$" + amount);
+        values.add("%amount_formatted%$" + BPMethods.format(amount));
+        values.add("%amount_formatted_long%$" + BPMethods.formatLong(amount));
+        return values;
+    }
+
     public static void pay(Player p1, Player p2, BigDecimal amount) {
-        BigDecimal bankBalance = EconomyManager.getBankBalance(p1);
+        BigDecimal bankBalance = SingleEconomyManager.getBankBalance(p1);
         BigDecimal maxBankCapacity = Values.CONFIG.getMaxBankCapacity();
 
         if (bankBalance.doubleValue() < amount.doubleValue()) {
-            MessageManager.insufficientMoney(p1);
+            MessageManager.send(p1, "Insufficient-Money");
             return;
         }
 
         if (maxBankCapacity.doubleValue() == 0) {
-            EconomyManager.removePlayerBankBalance(p1, amount);
-            MessageManager.paymentSent(p1, p2, amount);
-            EconomyManager.addPlayerBankBalance(p2, amount);
-            MessageManager.paymentReceived(p2, p1, amount);
+            SingleEconomyManager.removeBankBalance(p1, amount);
+            MessageManager.send(p1, "Payment-Sent", BPMethods.placeValues(p2, amount));
+            SingleEconomyManager.addBankBalance(p2, amount);
+            MessageManager.send(p2, "Payment-Received", BPMethods.placeValues(p1, amount));
             return;
         }
 
-        BigDecimal targetMoney = EconomyManager.getBankBalance(p2);
+        BigDecimal targetMoney = SingleEconomyManager.getBankBalance(p2);
         if (targetMoney.doubleValue() >= maxBankCapacity.doubleValue()) {
-            MessageManager.bankFull(p1, p2);
+            MessageManager.send(p1, "Bank-Full", placeValues(p2, BigDecimal.valueOf(0)));
             return;
         }
 
         BigDecimal moneyLeft = maxBankCapacity.subtract(targetMoney);
         if (amount.doubleValue() >= moneyLeft.doubleValue()) {
-            EconomyManager.removePlayerBankBalance(p1, moneyLeft);
-            MessageManager.paymentSent(p1, p2, moneyLeft);
-            EconomyManager.addPlayerBankBalance(p2, moneyLeft);
-            MessageManager.paymentReceived(p2, p1, moneyLeft);
+            SingleEconomyManager.removeBankBalance(p1, moneyLeft);
+            MessageManager.send(p1, "Payment-Sent", BPMethods.placeValues(p2, moneyLeft));
+            SingleEconomyManager.addBankBalance(p2, moneyLeft);
+            MessageManager.send(p2, "Payment-Received", BPMethods.placeValues(p1, moneyLeft));
             return;
         }
 
-        EconomyManager.removePlayerBankBalance(p1, amount);
-        MessageManager.paymentSent(p1, p2, amount);
-        EconomyManager.addPlayerBankBalance(p2, amount);
-        MessageManager.paymentReceived(p2, p1, amount);
+        SingleEconomyManager.removeBankBalance(p1, amount);
+        MessageManager.send(p1, "Payment-Sent", BPMethods.placeValues(p2, amount));
+        SingleEconomyManager.addBankBalance(p2, amount);
+        MessageManager.send(p2, "Payment-Received", BPMethods.placeValues(p1, amount));
     }
 
     public static boolean isLegacyServer() {

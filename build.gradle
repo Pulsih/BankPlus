@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'me.pulsi_'
-version = '5.6'
+version = '5.7-Alpha3_Not-Finished'
 
 repositories {
     mavenCentral()
@@ -33,7 +33,7 @@ dependencies {
     compileOnly 'com.destroystokyo.paper:paper-api:1.13.2-R0.1-SNAPSHOT'
     compileOnly 'net.essentialsx:EssentialsX:2.19.4'
     compileOnly 'com.github.MilkBowl:VaultAPI:1.7'
-    compileOnly 'me.clip:placeholderapi:2.11.1'
+    compileOnly 'me.clip:placeholderapi:2.11.2'
 }
 
 processResources {

@@ -14,31 +14,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-
 public class UpdateChecker implements Listener {
-
-    private final boolean isUpToDate;
-    private final BankPlus plugin;
-
-    public UpdateChecker(BankPlus plugin) {
-        boolean isUpdated;
-        this.plugin = plugin;
-        try {
-            isUpdated = isPluginUpdated();
-        } catch (IOException e) {
-            isUpdated = true;
-        }
-        this.isUpToDate = isUpdated;
-    }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
-        if (!Values.CONFIG.isUpdateCheckerEnabled() || (!p.isOp() && !p.hasPermission("bankplus.notify")) || isUpToDate) return;
+        if (!Values.CONFIG.isUpdateCheckerEnabled() || (!p.isOp() && !p.hasPermission("bankplus.notify")) || BankPlus.getInstance().isUpdated()) return;
 
         TextComponent text = new TextComponent(BPChat.color("&a&lBank&9&lPlus &aNew update available! "));
         TextComponent button = new TextComponent(BPChat.color("&a&l[CLICK HERE]"));
@@ -46,15 +27,10 @@ public class UpdateChecker implements Listener {
         button.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click here to download it!").color(ChatColor.GRAY).create()));
         text.addExtra(button);
 
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        Bukkit.getScheduler().runTaskLater(BankPlus.getInstance(), () -> {
             p.sendMessage("");
             p.spigot().sendMessage(text);
             p.sendMessage("");
         }, 80);
-    }
-
-    private boolean isPluginUpdated() throws IOException {
-        final String currentVersion = new BufferedReader(new InputStreamReader(new URL("https://api.spigotmc.org/legacy/update.php?resource=93130").openConnection().getInputStream())).readLine();
-        return plugin.getDescription().getVersion().equals(currentVersion);
     }
 }

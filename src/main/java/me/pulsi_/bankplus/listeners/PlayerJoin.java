@@ -1,11 +1,13 @@
 package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.managers.ConfigManager;
-import me.pulsi_.bankplus.managers.EconomyManager;
+import me.pulsi_.bankplus.account.AccountManager;
+import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
+import me.pulsi_.bankplus.account.economy.OfflineInterestManager;
+import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
+import me.pulsi_.bankplus.guis.BanksManager;
 import me.pulsi_.bankplus.utils.BPChat;
-import me.pulsi_.bankplus.utils.BPLogger;
-import me.pulsi_.bankplus.utils.Methods;
+import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -15,73 +17,82 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 public class PlayerJoin implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
-
         Player p = e.getPlayer();
-        UUID uuid = p.getUniqueId();
-        String name = p.getName();
+        AccountManager.registerPlayer(p);
 
-        if (Values.CONFIG.isStoringUUIDs()) registerPlayer(p, uuid.toString());
-        else registerPlayer(p, name);
+        saveStatistics(p);
         offlineInterestMessage(p);
     }
 
-    private void registerPlayer(Player p, String identifier) {
-        FileConfiguration players = BankPlus.getCm().getConfig("players");
-        String sBalance = players.getString("Players." + identifier + ".Money");
-        String sOfflineInterest = players.getString("Players." + identifier + ".Offline-Interest");
-        String sName = players.getString("Players." + identifier + ".Account-Name");
+    private void saveStatistics(Player p) {
+        FileConfiguration config = AccountManager.getPlayerConfig(p);
+
+        String sOfflineInterest = config.getString("Offline-Interest");
+        String sName = config.getString("Account-Name");
         boolean hasChanges = false;
 
-        if (sBalance == null) {
-            BPLogger.info("&2Successfully registered &f" + p.getName() + "&a's account!");
-            players.set("Players." + identifier + ".Money", Methods.formatBigDouble(Values.CONFIG.getStartAmount()));
-            hasChanges = true;
-        }
         if (Values.CONFIG.isNotifyOfflineInterest() && sOfflineInterest == null) {
-            players.set("Players." + identifier + ".Offline-Interest", Methods.formatBigDouble(BigDecimal.valueOf(0)));
+            config.set("Offline-Interest", BPMethods.formatBigDouble(BigDecimal.valueOf(0)));
             hasChanges = true;
         }
         if (sName == null) {
-            players.set("Players." + identifier + ".Account-Name", p.getName());
+            config.set("Account-Name", p.getName());
             hasChanges = true;
         }
-        if (hasChanges) BankPlus.getCm().savePlayers();
 
-        EconomyManager.loadBankBalance(p);
-        notifyAdminGuiPositionChanging(p);
+        if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+            String sBalance = config.getString("Money");
+            if (sBalance == null) {
+                config.set("Money", BPMethods.formatBigDouble(Values.CONFIG.getStartAmount()));
+                hasChanges = true;
+            }
+            for (String bankName : BanksManager.getBankNames()) {
+                String sLevel = config.getString("Banks." + bankName + ".Level");
+                if (sLevel == null) {
+                    config.set("Banks." + bankName + ".Level", 1);
+                    hasChanges = true;
+                }
+            }
+            if (hasChanges) AccountManager.savePlayerFile(p, true);
+            SingleEconomyManager.loadBankBalance(p);
+        } else {
+            for (String bankName : BanksManager.getBankNames()) {
+                String sBalance = config.getString("Banks." + bankName + ".Money");
+                String sLevel = config.getString("Banks." + bankName + ".Level");
+                if (sBalance == null) {
+                    if (!Values.CONFIG.getMainGuiName().equals(bankName)) config.set("Banks." + bankName + ".Money", "0.00");
+                    else config.set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(Values.CONFIG.getStartAmount()));
+                    hasChanges = true;
+                }
+                if (sLevel == null) {
+                    config.set("Banks." + bankName + ".Level", 1);
+                    hasChanges = true;
+                }
+            }
+            if (hasChanges) AccountManager.savePlayerFile(p, true);
+            MultiEconomyManager.loadBankBalance(p);
+        }
     }
 
     private void offlineInterestMessage(Player p) {
         if (!Values.CONFIG.isNotifyOfflineInterest()) return;
-        BigDecimal offlineInterest = EconomyManager.getOfflineInterest(p);
+        BigDecimal offlineInterest = OfflineInterestManager.getOfflineInterest(p);
         if (offlineInterest.doubleValue() <= 0) return;
 
         long delay = Values.CONFIG.getNotifyOfflineInterestDelay();
         String message = BPChat.color(Values.CONFIG.getNotifyOfflineInterestMessage()
-                .replace("%amount%", Methods.formatCommas(offlineInterest))
-                .replace("%amount_formatted%", Methods.format(offlineInterest))
-                .replace("%amount_formatted_long%", Methods.formatLong(offlineInterest)));
+                .replace("%amount%", BPMethods.formatCommas(offlineInterest))
+                .replace("%amount_formatted%", BPMethods.format(offlineInterest))
+                .replace("%amount_formatted_long%", BPMethods.formatLong(offlineInterest)));
 
-        if (delay != 0)
-            Bukkit.getScheduler().runTaskLater(BankPlus.getInstance(), () -> p.sendMessage(message), delay * 20L);
-        else
-            p.sendMessage(message);
+        if (delay == 0) p.sendMessage(message);
+        else Bukkit.getScheduler().runTaskLater(BankPlus.getInstance(), () -> p.sendMessage(message), delay * 20L);
 
-        EconomyManager.setOfflineInterest(p, new BigDecimal(0));
-    }
-
-    private void notifyAdminGuiPositionChanging(Player p) {
-        if (!ConfigManager.guiHasMovedFile || !p.isOp() && !p.hasPermission("bankplus.notify")) return;
-        Bukkit.getScheduler().runTaskLater(BankPlus.getInstance(), () ->
-                p.sendMessage(BPChat.color("&a&lBank&9&lPlus &aHi &f" + p.getName() + "&a! I'm here to notify you that the &fposition &aof the gui has changed from " +
-                "the version &fv5.2&a. I already managed to move the gui settings from the file &f\"config.yml\" &ato &f\"bank.yml\"&a!"))
-                , 80L);
-        ConfigManager.guiHasMovedFile = false;
+        OfflineInterestManager.setOfflineInterest(p, new BigDecimal(0), true);
     }
 }

@@ -2,9 +2,9 @@ package me.pulsi_.bankplus.commands;
 
 import me.pulsi_.bankplus.managers.BankTopManager;
 import me.pulsi_.bankplus.managers.MessageManager;
-import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPChat;
-import me.pulsi_.bankplus.utils.Methods;
+import me.pulsi_.bankplus.utils.BPLogger;
+import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -18,10 +18,10 @@ public class BankTopCmd implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender s, Command command, String label, String[] args) {
         if (!Values.CONFIG.isBanktopEnabled()) {
-            MessageManager.banktopDisabled(s);
+            MessageManager.send(s, "BankTop-Disabled");
             return false;
         }
-        if (!Methods.hasPermission(s, "bankplus.banktop")) return false;
+        if (!BPMethods.hasPermission(s, "bankplus.banktop")) return false;
 
         List<String> format = Values.CONFIG.getBankTopFormat();
         for (String line : format) s.sendMessage(BPChat.color(placeName(placeMoney(line))));
@@ -52,16 +52,16 @@ public class BankTopCmd implements CommandExecutor {
         BigDecimal money = BankTopManager.getBankTopBalancePlayer(position);
         switch (Values.CONFIG.getBankTopMoneyFormat()) {
             case "default_amount":
-                stringToReplace = Methods.formatCommas(money);
+                stringToReplace = BPMethods.formatCommas(money);
                 break;
             case "amount_long":
                 stringToReplace = String.valueOf(money);
                 break;
             default:
-                stringToReplace = Methods.format(money);
+                stringToReplace = BPMethods.format(money);
                 break;
             case "amount_formatted_long":
-                stringToReplace = Methods.formatLong(money);
+                stringToReplace = BPMethods.formatLong(money);
                 break;
         }
         return message.replace("%bankplus_banktop_money_" + position + "%", stringToReplace);

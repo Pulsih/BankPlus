@@ -1,12 +1,12 @@
 package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.gui.GuiHolder;
-import me.pulsi_.bankplus.managers.EconomyManager;
+import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
+import me.pulsi_.bankplus.guis.BanksHolder;
+import me.pulsi_.bankplus.guis.BanksManager;
 import me.pulsi_.bankplus.utils.BPDebugger;
 import me.pulsi_.bankplus.utils.BPLogger;
-import me.pulsi_.bankplus.utils.Methods;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.utils.BPMethods;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -23,14 +23,22 @@ public class GuiListener implements Listener {
     public void guiListener(InventoryClickEvent e) {
 
         Player p = (Player) e.getWhoClicked();
+        if (!BanksHolder.openedInventory.containsKey(p)) return;
+
+        String identifier = BanksHolder.openedInventory.get(p);
+        if (!BanksHolder.bankGetter.containsKey(identifier)) return;
+
         Inventory inv = e.getClickedInventory();
 
-        if (inv == null || inv.getHolder() == null || !(inv.getHolder() instanceof GuiHolder)) return;
+        if (inv == null || inv.getHolder() == null || !(inv.getHolder() instanceof BanksHolder)) return;
         BPDebugger.debugGui(e);
         e.setCancelled(true);
 
-        for (String key : Values.BANK.getGuiItems().getKeys(false)) {
-            ConfigurationSection item = BankPlus.getCm().getConfig("bank").getConfigurationSection("Items." + key);
+        ConfigurationSection items = BanksManager.getItems(identifier);
+        if (items == null) return;
+
+        for (String key : items.getKeys(false)) {
+            ConfigurationSection item = BanksManager.getConfig(identifier).getConfigurationSection("Items." + key);
             if (item == null) continue;
 
             String actionType = item.getString("Action.Action-Type");
@@ -44,10 +52,10 @@ public class GuiListener implements Listener {
                 case "custom":
                     switch (actionType) {
                         case "withdraw":
-                            Methods.customWithdraw(p);
+                            BPMethods.customWithdraw(p);
                             break;
                         case "deposit":
-                            Methods.customDeposit(p);
+                            BPMethods.customDeposit(p);
                             break;
                     }
                     break;
@@ -55,10 +63,10 @@ public class GuiListener implements Listener {
                 case "all":
                     switch (actionType) {
                         case "withdraw":
-                            Methods.withdraw(p, EconomyManager.getBankBalance(p));
+                            BPMethods.withdraw(p, SingleEconomyManager.getBankBalance(p));
                             break;
                         case "deposit":
-                            Methods.deposit(p, BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p)));
+                            BPMethods.deposit(p, BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p)));
                             break;
                     }
                     break;
@@ -66,10 +74,21 @@ public class GuiListener implements Listener {
                 case "half":
                     switch (actionType) {
                         case "withdraw":
-                            Methods.withdraw(p, EconomyManager.getBankBalance(p).divide(BigDecimal.valueOf(2)));
+                            BPMethods.withdraw(p, SingleEconomyManager.getBankBalance(p).divide(BigDecimal.valueOf(2)));
                             break;
                         case "deposit":
-                            Methods.deposit(p, BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p) / 2));
+                            BPMethods.deposit(p, BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p) / 2));
+                            break;
+                    }
+                    break;
+
+                case "upgrade":
+                    switch (actionType) {
+                        case "withdraw":
+                            BPMethods.withdraw(p, SingleEconomyManager.getBankBalance(p).divide(BigDecimal.valueOf(2)));
+                            break;
+                        case "deposit":
+                            BPMethods.deposit(p, BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p) / 2));
                             break;
                     }
                     break;
@@ -84,10 +103,10 @@ public class GuiListener implements Listener {
                     }
                     switch (actionType) {
                         case "withdraw":
-                            Methods.withdraw(p, amount);
+                            BPMethods.withdraw(p, amount);
                             break;
                         case "deposit":
-                            Methods.deposit(p, amount);
+                            BPMethods.deposit(p, amount);
                             break;
                     }
             }
@@ -97,6 +116,6 @@ public class GuiListener implements Listener {
     @EventHandler
     public void closeGUI(InventoryCloseEvent e) {
         Player p = (Player) e.getPlayer();
-        if (GuiHolder.tasks.containsKey(p)) GuiHolder.tasks.remove(p).cancel();
+        if (BanksHolder.tasks.containsKey(p)) BanksHolder.tasks.remove(p).cancel();
     }
 }

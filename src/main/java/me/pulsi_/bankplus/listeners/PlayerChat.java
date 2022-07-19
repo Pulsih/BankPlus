@@ -1,10 +1,10 @@
 package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.gui.GuiHolder;
+import me.pulsi_.bankplus.guis.BanksHolder;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.BPDebugger;
-import me.pulsi_.bankplus.utils.Methods;
+import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.utils.SetUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -33,17 +33,17 @@ public class PlayerChat implements Listener {
             amount = new BigDecimal(message);
         } catch (NumberFormatException ex) {
             e.setCancelled(true);
-            MessageManager.invalidNumber(p);
+            MessageManager.send(p, "Invalid-Number");
             return;
         }
 
-        if (Methods.isDepositing(p)) {
+        if (BPMethods.isDepositing(p)) {
             SetUtils.removeFromDepositingPlayers(p);
-            Methods.deposit(p, amount);
+            BPMethods.deposit(p, amount);
         }
-        if (Methods.isWithdrawing(p)) {
+        if (BPMethods.isWithdrawing(p)) {
             SetUtils.removeFromWithdrawingPlayers(p);
-            Methods.withdraw(p, amount);
+            BPMethods.withdraw(p, amount);
         }
         e.setCancelled(true);
         reopenBank(p);
@@ -60,25 +60,28 @@ public class PlayerChat implements Listener {
     }
 
     private boolean isTyping(Player p) {
-        return Methods.isDepositing(p) || Methods.isWithdrawing(p);
+        return BPMethods.isDepositing(p) || BPMethods.isWithdrawing(p);
     }
 
     private void reopenBank(Player p) {
         Bukkit.getScheduler().runTask(BankPlus.getInstance(), () -> {
-            if (Values.CONFIG.isReopeningBankAfterChat()) new GuiHolder().openBank(p);
+            String identifier = BanksHolder.openedInventory.getOrDefault(p, Values.CONFIG.getMainGuiName());
+            if (Values.CONFIG.isReopeningBankAfterChat()) new BanksHolder().openBank(p, identifier);
         });
     }
 
     private void executeExitCommands(Player p) {
-        for (String cmd : Values.CONFIG.getExitCommands()) {
-            if (cmd.startsWith("[CONSOLE]")) {
-                String s = cmd.replace("[CONSOLE] ", "").replace("%player%", p.getName());
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), s);
+        Bukkit.getScheduler().runTask(BankPlus.getInstance(), () -> {
+            for (String cmd : Values.CONFIG.getExitCommands()) {
+                if (cmd.startsWith("[CONSOLE]")) {
+                    String s = cmd.replace("[CONSOLE] ", "").replace("%player%", p.getName());
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), s);
+                }
+                if (cmd.startsWith("[PLAYER]")) {
+                    String s = cmd.replace("[PLAYER] ", "");
+                    p.chat("/" + s);
+                }
             }
-            if (cmd.startsWith("[PLAYER]")) {
-                String s = cmd.replace("[PLAYER] ", "");
-                p.chat("/" + s);
-            }
-        }
+        });
     }
 }

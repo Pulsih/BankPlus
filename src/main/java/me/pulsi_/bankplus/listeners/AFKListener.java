@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.managers.AFKManager;
-import me.pulsi_.bankplus.utils.Methods;
+import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,7 +17,7 @@ public class AFKListener implements Listener {
         if (!Values.CONFIG.isIgnoringAfkPlayers() || Values.CONFIG.isUseEssentialsXAFK()) return;
 
         Player p = e.getPlayer();
-        long time = System.currentTimeMillis() + Methods.minutesInMilliseconds(Values.CONFIG.getAfkPlayersTime());
+        long time = System.currentTimeMillis() + BPMethods.minutesInMilliseconds(Values.CONFIG.getAfkPlayersTime());
         AFKManager.afkCooldown.put(p.getUniqueId(), time);
     }
 
@@ -26,7 +26,7 @@ public class AFKListener implements Listener {
         if (!Values.CONFIG.isIgnoringAfkPlayers() || Values.CONFIG.isUseEssentialsXAFK()) return;
 
         Player p = e.getPlayer();
-        long time = System.currentTimeMillis() + Methods.minutesInMilliseconds(Values.CONFIG.getAfkPlayersTime());
+        long time = System.currentTimeMillis() + BPMethods.minutesInMilliseconds(Values.CONFIG.getAfkPlayersTime());
         AFKManager.afkCooldown.put(p.getUniqueId(), time);
     }
 
@@ -35,7 +35,7 @@ public class AFKListener implements Listener {
         if (!Values.CONFIG.isIgnoringAfkPlayers() || Values.CONFIG.isUseEssentialsXAFK()) return;
 
         Player p = e.getPlayer();
-        long time = System.currentTimeMillis() + Methods.minutesInMilliseconds(Values.CONFIG.getAfkPlayersTime());
+        long time = System.currentTimeMillis() + BPMethods.minutesInMilliseconds(Values.CONFIG.getAfkPlayersTime());
         AFKManager.afkCooldown.put(p.getUniqueId(), time);
     }
 }

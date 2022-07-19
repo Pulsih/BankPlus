@@ -1,29 +1,73 @@
-# Now the gui supports custom heads, use https://minecraft-heads.com/custom-heads/search?searchword=
-# to search custom values heads and use the following format:
-# HEAD-<textureValue>
-#
-# You can also take a head from a player name or use
-# your head with:
-# HEAD-%PLAYER% The head of the player which is opening the gui
-# HEAD[player-name] The head of the selected player
-#
-# If you want to know more about this: https://github.com/Pulsih/BankPlus/wiki
-Enabled: true
-Title: "&a&lGui Bank"
+# If you want to know more about bank guis: https://github.com/Pulsih/BankPlus/wiki
+Title: "&a&lBANK"
 Lines: 4
-Update-Delay: 1 #In seconds, put 0 to disable
+Update-Delay: 10 #In ticks, put 0 to disable
 Filler:
   Enabled: true
   Material: "WHITE_STAINED_GLASS_PANE"
-  DisplayName: "&6"
   Glowing: false
+
+# If the settings are not specified and the multiple
+# bank module is enabled, the plugin will use the
+# default item format to show the bank.
+Settings:
+  # The permission needed to open the bank, remove
+  # or put "" to make it accessible to everyone.
+  Permission: "bankplus.use"
+
+  # This is the item that will be showed up in the
+  # banks-gui if the multiple-banks module is enabled.
+  #
+  # You can also use heads and placeholders.
+  BanksGuiItem:
+    # The item showed in the banks gui
+    # if this bank is available.
+    Available:
+      Material: "CHEST"
+      Displayname: "&a&lBANK"
+      Lore:
+        - "&aYour main bank :)"
+        - "&aAvailable: &2YES"
+      Glowing: true
+
+    # The item showed in the banks gui
+    # if this bank is unavailable.
+    Unavailable:
+      Material: "CHEST"
+      Displayname: "&a&lBANK"
+      Lore:
+        - "&aYour main bank :)"
+        - "&aAvailable: &cNO"
+        - "&aNeeded permission: &bbankplus.use"
+      Glowing: true
+
+# These are the bank upgrades, you can upgrade a bank
+# by running the command /bank upgrade <bank> or by
+# using the action in the gui "Upgrade".
+#
+# If the Upgrades section isn't specified, the bank will
+# have no upgrades and will use the default values set
+# in the config.yml
+Upgrades:
+  # This must be a number an indicates the bank level.
+  1: # 1 Is the default level, it can't be lower than 1.
+    Capacity: 50000
+  2:
+    Cost: 5000
+    # If the capacity is not specified, the bank will
+    # have the default capacity set in the config.yml
+    Capacity: 100000
+  3:
+    Cost: 1000
+    Capacity: 200000
+
 Items:
   # You can add as many items as you want
   # and not only for make the bank work
   Withdraw:
     Material: "EMERALD"
     Amount: 1
-    DisplayName: "&aWithdraw"
+    Displayname: "&aWithdraw"
     Slot: 11
     Lore:
       - ""
@@ -40,7 +84,7 @@ Items:
   WithdrawHalf:
     Material: "EMERALD"
     Amount: 2
-    DisplayName: "&aWithdraw"
+    Displayname: "&aWithdraw"
     Slot: 12
     Lore:
       - ""
@@ -54,7 +98,7 @@ Items:
   WithdrawAll:
     Material: "EMERALD"
     Amount: 3
-    DisplayName: "&aWithdraw"
+    Displayname: "&aWithdraw"
     Slot: 21
     Lore:
       - ""
@@ -69,7 +113,7 @@ Items:
     Material: "EMERALD"
     Amount: 4
     Slot: 20
-    DisplayName: "&aWithdraw"
+    Displayname: "&aWithdraw"
     Lore:
       - ""
       - "&7Withdraw a &acustom &7amount of money to your bank"
@@ -81,7 +125,7 @@ Items:
 
   Personal-Info:
     Material: "HEAD-%PLAYER%"
-    DisplayName: "&aPersonal"
+    Displayname: "&aPersonal"
     Slot: 14
     Lore:
       - ""
@@ -91,11 +135,12 @@ Items:
       - "&7Wait &a%bankplus_interest_cooldown% &7to get interest!"
       - "&7Expected money from the next interest: &a%bankplus_next_interest_formatted%"
       - ""
+      - "&7&o(( Taxes on Deposit and Withdraw: 2% ))"
     Glowing: true
 
   How-Does-It-Work:
     Material: "HEAD-<eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzU3NDcwMTBkODRhYTU2NDgzYjc1ZjYyNDNkOTRmMzRjNTM0NjAzNTg0YjJjYzY4YTQ1YmYzNjU4NDAxMDVmZCJ9fX0=>"
-    DisplayName: "&aHow Does It Work?"
+    Displayname: "&aHow Does It Work?"
     Slot: 23
     Lore:
       - ""
@@ -111,7 +156,7 @@ Items:
     Material: "EMERALD"
     Amount: 1
     Slot: 17
-    DisplayName: "&aDeposit"
+    Displayname: "&aDeposit"
     Lore:
       - ""
       - "&7Deposit &a500$ &7to your bank"
@@ -125,7 +170,7 @@ Items:
     Material: "EMERALD"
     Amount: 2
     Slot: 16
-    DisplayName: "&aDeposit"
+    Displayname: "&aDeposit"
     Lore:
       - ""
       - "&7Deposit &aHalf &7of money to your bank"
@@ -139,7 +184,7 @@ Items:
     Material: "EMERALD"
     Amount: 3
     Slot: 25
-    DisplayName: "&aDeposit"
+    Displayname: "&aDeposit"
     Lore:
       - ""
       - "&7Deposit &aAll &7of money to your bank"
@@ -153,7 +198,7 @@ Items:
     Material: "EMERALD"
     Amount: 4
     Slot: 26
-    DisplayName: "&aDeposit"
+    Displayname: "&aDeposit"
     Lore:
       - ""
       - "&7Deposit a &acustom &7amount of money to your bank"
