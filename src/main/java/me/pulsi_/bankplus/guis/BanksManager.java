@@ -2,8 +2,13 @@ package me.pulsi_.bankplus.guis;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.AccountManager;
+import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
+import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
+import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.Values;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -125,7 +130,19 @@ public class BanksManager {
         return (ConfigurationSection) guiValues.get(bankName + ".Upgrades");
     }
 
-    public static BigDecimal getCapacityBasedOnLevel(Player p, String bankName) {
+    public static BigDecimal getCapacity(Player p, String bankName) {
+        if (!hasUpgrades(bankName)) return Values.CONFIG.getMaxBankCapacity();
+
+        FileConfiguration config = AccountManager.getPlayerConfig(p);
+        ConfigurationSection section = getUpgrades(bankName);
+        if (section == null) return Values.CONFIG.getMaxBankCapacity();
+
+        int level = Math.max(config.getInt("Banks." + bankName + ".Level"), 1);
+        String capacity = section.getString(level + ".Capacity");
+        return new BigDecimal(capacity == null ? Values.CONFIG.getMaxBankCapacity().toString() : capacity);
+    }
+
+    public static BigDecimal getCapacity(OfflinePlayer p, String bankName) {
         if (!hasUpgrades(bankName)) return Values.CONFIG.getMaxBankCapacity();
 
         FileConfiguration config = AccountManager.getPlayerConfig(p);
@@ -147,13 +164,65 @@ public class BanksManager {
         return new BigDecimal(cost == null ? "0" : cost);
     }
 
-    public static int getBankLevel(Player p, String bankName) {
+    public static int getLevel(Player p, String bankName) {
         FileConfiguration config = AccountManager.getPlayerConfig(p);
         return Math.max(config.getInt("Banks." + bankName + ".Level"), 1);
     }
 
+    public static boolean hasNextLevel(Player p, String bankName) {
+        ConfigurationSection section = getUpgrades(bankName);
+        if (section == null) return false;
+
+        return section.getConfigurationSection(String.valueOf(getLevel(p, bankName) + 1)) != null;
+    }
+
     public static boolean exist(String bankName) {
         return bankNames.contains(bankName);
+    }
+
+    public static List<String> getAvailableBanks(Player p) {
+        List<String> availableBanks = new ArrayList<>();
+        for (String bankName : getBankNames()) if (isAvailable(p, bankName)) availableBanks.add(bankName);
+        return availableBanks;
+    }
+
+    public static boolean isAvailable(Player p, String bankName) {
+        if (!hasPermission(bankName)) return true;
+        else return p.hasPermission(getPermission(bankName));
+    }
+
+    public static boolean isAvailable(OfflinePlayer p, String bankName) {
+        if (!hasPermission(bankName)) return true;
+        else {
+            String wName = Bukkit.getWorlds().get(0).getName();
+            return BankPlus.getPermissions().playerHas(wName, p, getPermission(bankName));
+        }
+    }
+
+    public static void upgradeBank(Player p, String bankName) {
+        if (!hasNextLevel(p, bankName)) {
+            MessageManager.send(p, "Bank-Max-Level");
+            return;
+        }
+        BigDecimal balance;
+        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+            balance = MultiEconomyManager.getBankBalance(p, bankName);
+        else balance = SingleEconomyManager.getBankBalance(p);
+
+        int level = getLevel(p, bankName);
+        BigDecimal cost = getLevelCost(level + 1, bankName);
+        if (balance.doubleValue() < cost.doubleValue()) {
+            MessageManager.send(p, "Insufficient-Money");
+            return;
+        }
+
+        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+            MultiEconomyManager.removeBankBalance(p, cost, bankName);
+        else SingleEconomyManager.removeBankBalance(p, cost);
+
+        AccountManager.getPlayerConfig(p).set("Banks." + bankName + ".Level", level + 1);
+        AccountManager.savePlayerFile(p, true);
+        MessageManager.send(p, "Bank-Upgraded");
     }
 
     public static List<String> getBankNames() {

@@ -2,9 +2,14 @@ package me.pulsi_.bankplus.account.economy;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.AccountManager;
+import me.pulsi_.bankplus.guis.BanksManager;
 import me.pulsi_.bankplus.managers.BankTopManager;
+import me.pulsi_.bankplus.managers.MessageManager;
+import me.pulsi_.bankplus.utils.BPDebugger;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.values.Values;
+import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -195,5 +200,99 @@ public class SingleEconomyManager {
     private static void set(OfflinePlayer p, BigDecimal amount) {
         AccountManager.getPlayerConfig(p).set("Money", BPMethods.formatBigDouble(amount));
         AccountManager.savePlayerFile(p, true);
+    }
+
+    public static void deposit(Player p, BigDecimal amount) {
+        if (!BPMethods.hasPermission(p, "bankplus.deposit")) return;
+
+        BigDecimal money = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p));
+        if (!BPMethods.hasMoney(money, amount, p) || BPMethods.isBankFull(p)) return;
+
+        BigDecimal maxDepositAmount = Values.CONFIG.getMaxDepositAmount();
+        if (maxDepositAmount.doubleValue() != 0 && amount.doubleValue() >= maxDepositAmount.doubleValue()) amount = maxDepositAmount;
+
+        BigDecimal taxes = new BigDecimal(0);
+        if (Values.CONFIG.getDepositTaxes().doubleValue() > 0)
+            taxes = amount.multiply(Values.CONFIG.getDepositTaxes().divide(BigDecimal.valueOf(100)));
+
+        BigDecimal capacity = BanksManager.getCapacity(p, Values.CONFIG.getMainGuiName());
+        BigDecimal newBankBalance = getBankBalance(p).add(amount);
+        if (capacity.doubleValue() != 0 && newBankBalance.doubleValue() >= capacity.doubleValue()) {
+            BigDecimal moneyToFull = capacity.subtract(getBankBalance(p));
+            amount = moneyToFull.add(taxes);
+            if (money.doubleValue() < amount.doubleValue()) amount = money;
+        }
+
+        EconomyResponse depositResponse = BankPlus.getEconomy().withdrawPlayer(p, amount.doubleValue());
+        BPDebugger.debugDeposit(p, amount, depositResponse);
+        if (BPMethods.hasFailed(p, depositResponse)) return;
+
+        addBankBalance(p, amount.subtract(taxes));
+        MessageManager.send(p, "Success-Deposit", BPMethods.placeValues(p, amount.subtract(taxes), taxes));
+        BPMethods.playSound("DEPOSIT", p);
+    }
+
+    public static void withdraw(Player p, BigDecimal amount) {
+        if (!BPMethods.hasPermission(p, "bankplus.withdraw")) return;
+
+        BigDecimal bankBalance = getBankBalance(p);
+        if (!BPMethods.hasMoney(bankBalance, amount, p)) return;
+
+        BigDecimal maxWithdrawAmount = Values.CONFIG.getMaxWithdrawAmount();
+        if (maxWithdrawAmount.doubleValue() != 0 && amount.doubleValue() >= maxWithdrawAmount.doubleValue())
+            amount = maxWithdrawAmount;
+
+        BigDecimal taxes = new BigDecimal(0);
+        if (Values.CONFIG.getWithdrawTaxes().doubleValue() > 0)
+            taxes = amount.multiply(Values.CONFIG.getWithdrawTaxes().divide(BigDecimal.valueOf(100)));
+
+        BigDecimal newBalance = bankBalance.subtract(amount);
+        if (newBalance.doubleValue() <= 0) amount = bankBalance;
+
+        EconomyResponse withdrawResponse = BankPlus.getEconomy().depositPlayer(p, amount.subtract(taxes).doubleValue());
+        BPDebugger.debugWithdraw(p, amount, withdrawResponse);
+        if (BPMethods.hasFailed(p, withdrawResponse)) return;
+
+        removeBankBalance(p, amount);
+        MessageManager.send(p, "Success-Withdraw", BPMethods.placeValues(p, amount.subtract(taxes), taxes));
+        BPMethods.playSound("WITHDRAW", p);
+    }
+
+    public static void pay(Player p1, Player p2, BigDecimal amount) {
+        BigDecimal bankBalance = getBankBalance(p1);
+        BigDecimal maxBankCapacity = Values.CONFIG.getMaxBankCapacity();
+
+        if (bankBalance.doubleValue() < amount.doubleValue()) {
+            MessageManager.send(p1, "Insufficient-Money");
+            return;
+        }
+
+        if (maxBankCapacity.doubleValue() == 0) {
+            removeBankBalance(p1, amount);
+            MessageManager.send(p1, "Payment-Sent", BPMethods.placeValues(p2, amount));
+            addBankBalance(p2, amount);
+            MessageManager.send(p2, "Payment-Received", BPMethods.placeValues(p1, amount));
+            return;
+        }
+
+        BigDecimal targetMoney = getBankBalance(p2);
+        if (targetMoney.doubleValue() >= maxBankCapacity.doubleValue()) {
+            MessageManager.send(p1, "Bank-Full", BPMethods.placeValues(p2, BigDecimal.valueOf(0)));
+            return;
+        }
+
+        BigDecimal moneyLeft = maxBankCapacity.subtract(targetMoney);
+        if (amount.doubleValue() >= moneyLeft.doubleValue()) {
+            removeBankBalance(p1, moneyLeft);
+            MessageManager.send(p1, "Payment-Sent", BPMethods.placeValues(p2, moneyLeft));
+            addBankBalance(p2, moneyLeft);
+            MessageManager.send(p2, "Payment-Received", BPMethods.placeValues(p1, moneyLeft));
+            return;
+        }
+
+        removeBankBalance(p1, amount);
+        MessageManager.send(p1, "Payment-Sent", BPMethods.placeValues(p2, amount));
+        addBankBalance(p2, amount);
+        MessageManager.send(p2, "Payment-Received", BPMethods.placeValues(p1, amount));
     }
 }

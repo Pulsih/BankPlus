@@ -21,7 +21,7 @@ import java.util.List;
 
 public class BanksListGui {
 
-    private static final HashMap<Integer, String> getBankFromSlot = new HashMap<>();
+    public static HashMap<String, String> getBankFromSlot = new HashMap<>();
     private static final Material DEFAULT_MATERIAL = Material.CHEST;
 
     public static void openMultipleBanksGui(Player p) {
@@ -48,7 +48,6 @@ public class BanksListGui {
             ItemStack filler = ItemCreator.getFiller(Values.MULTIPLE_BANKS.getFillerMaterial(), Values.MULTIPLE_BANKS.isFillerGlowing());
             for (int i = 0; i < multipleBanksGui.getSize(); i++) multipleBanksGui.setItem(i, filler);
         }
-
         BanksHolder.bankGetter.put("MultipleBanksGui", multipleBanksGui);
     }
 
@@ -65,10 +64,8 @@ public class BanksListGui {
             ConfigurationSection section = BanksManager.getBanksGuiItemSection(bankName);
             if (section == null) material = DEFAULT_MATERIAL;
             else {
-                boolean hasPerm = BanksManager.hasPermission(bankName);
-                String perm = BanksManager.getPermission(bankName);
                 try {
-                    if (!hasPerm || p.hasPermission(perm)) {
+                    if (BanksManager.isAvailable(p, bankName)) {
                         material = Material.valueOf(section.getString("Available.Material"));
                         glow = section.getBoolean("Available.Glowing");
                     } else {
@@ -82,6 +79,7 @@ public class BanksListGui {
             bankItem = new ItemStack(material);
             glow(bankItem, glow);
             bank.setItem(slot, bankItem);
+            getBankFromSlot.put(p.getName() + "." + slot, bankName);
             slot++;
         }
     }

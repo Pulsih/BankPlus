@@ -38,8 +38,8 @@ public class MainCmd implements CommandExecutor, TabCompleter {
 
                     DataManager.reloadPlugin();
                     MessageManager.send(s, "Reload");
+                    return true;
                 }
-                break;
 
                 case "help":
                     if (BPMethods.hasPermission(s, "bankplus.help")) MessageManager.send(s, "Help-Message");
@@ -54,8 +54,8 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                     }
                     Interest.restartInterest();
                     MessageManager.send(s, "Interest-Restarted");
+                    return true;
                 }
-                break;
 
                 case "giveinterest": {
                     if (!BPMethods.hasPermission(s, "bankplus.give-interest")) return false;
@@ -65,8 +65,8 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                         return false;
                     }
                     Interest.giveInterestToEveryone();
+                    return true;
                 }
-                break;
 
                 case "interest": {
                     if (!BPMethods.hasPermission(s, "bankplus.interest")) return false;
@@ -76,8 +76,8 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                         return false;
                     }
                     MessageManager.send(s, "Interest-Time", "%time%$" + BPMethods.formatTime(Interest.getInterestCooldownMillis()));
+                    return true;
                 }
-                break;
 
                 case "interestmillis": {
                     if (!BPMethods.hasPermission(s, "bankplus.interestmillis")) return false;
@@ -87,15 +87,15 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                         return false;
                     }
                     MessageManager.send(s, "Interest-Time", "%time%$" + Interest.getInterestCooldownMillis());
+                    return true;
                 }
-                break;
 
                 case "updatebanktop": {
                     if (!BPMethods.hasPermission(s, "bankplus.updatebanktop")) return false;
                     BankTopManager.updateBankTop();
                     MessageManager.send(s, "BankTop-Updated");
+                    return true;
                 }
-                break;
 
                 case "debug": {
                     if (!BPMethods.hasPermission(s, "bankplus.debug")) return false;
@@ -129,8 +129,8 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                         default:
                             s.sendMessage(BPChat.color("&a&lBank&9&lPlus &aChoose a valid option: CHAT, INTEREST, GUI."));
                     }
+                    return true;
                 }
-                break;
             }
         }
 

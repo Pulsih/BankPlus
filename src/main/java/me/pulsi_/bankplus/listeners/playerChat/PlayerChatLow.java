@@ -1,6 +1,8 @@
-package me.pulsi_.bankplus.listeners;
+package me.pulsi_.bankplus.listeners.playerChat;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
+import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.guis.BanksHolder;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.BPDebugger;
@@ -17,16 +19,17 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import java.math.BigDecimal;
 
-public class PlayerChat implements Listener {
+public class PlayerChatLow implements Listener {
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.LOW)
     public void onChat(AsyncPlayerChatEvent e) {
         Player p = e.getPlayer();
         if (!isTyping(p)) return;
         BPDebugger.debugChat(e);
 
+        String identifier = BanksHolder.openedInventory.get(p);
         String message = ChatColor.stripColor(e.getMessage());
-        if (hasTypedExit(message, p, e)) return;
+        if (hasTypedExit(message, p, e, identifier)) return;
 
         BigDecimal amount;
         try {
@@ -36,26 +39,30 @@ public class PlayerChat implements Listener {
             MessageManager.send(p, "Invalid-Number");
             return;
         }
+        e.setCancelled(true);
+
+        boolean isMulti = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled();
 
         if (BPMethods.isDepositing(p)) {
             SetUtils.removeFromDepositingPlayers(p);
-            BPMethods.deposit(p, amount);
+            if (isMulti) MultiEconomyManager.deposit(p, amount, identifier);
+            else SingleEconomyManager.deposit(p, amount);
         }
         if (BPMethods.isWithdrawing(p)) {
             SetUtils.removeFromWithdrawingPlayers(p);
-            BPMethods.withdraw(p, amount);
+            if (isMulti) MultiEconomyManager.withdraw(p, amount, identifier);
+            else SingleEconomyManager.withdraw(p, amount);
         }
-        e.setCancelled(true);
-        reopenBank(p);
+        reopenBank(p, identifier);
     }
 
-    private boolean hasTypedExit(String message, Player p, AsyncPlayerChatEvent e) {
+    private boolean hasTypedExit(String message, Player p, AsyncPlayerChatEvent e, String identifier) {
         if (isTyping(p) && !message.equalsIgnoreCase(Values.CONFIG.getExitMessage())) return false;
         e.setCancelled(true);
         SetUtils.playerDepositing.remove(p.getUniqueId());
         SetUtils.playerWithdrawing.remove(p.getUniqueId());
         executeExitCommands(p);
-        reopenBank(p);
+        reopenBank(p, identifier);
         return true;
     }
 
@@ -63,10 +70,9 @@ public class PlayerChat implements Listener {
         return BPMethods.isDepositing(p) || BPMethods.isWithdrawing(p);
     }
 
-    private void reopenBank(Player p) {
+    private void reopenBank(Player p, String identifier) {
         Bukkit.getScheduler().runTask(BankPlus.getInstance(), () -> {
-            String identifier = BanksHolder.openedInventory.getOrDefault(p, Values.CONFIG.getMainGuiName());
-            if (Values.CONFIG.isReopeningBankAfterChat()) new BanksHolder().openBank(p, identifier);
+            if (Values.CONFIG.isReopeningBankAfterChat()) BanksHolder.openBank(p, identifier);
         });
     }
 

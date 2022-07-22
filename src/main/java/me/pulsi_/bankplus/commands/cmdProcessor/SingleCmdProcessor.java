@@ -1,10 +1,12 @@
 package me.pulsi_.bankplus.commands.cmdProcessor;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.guis.BanksHolder;
 import me.pulsi_.bankplus.guis.BanksManager;
 import me.pulsi_.bankplus.managers.MessageManager;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -14,6 +16,7 @@ import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class SingleCmdProcessor {
@@ -107,11 +110,14 @@ public class SingleCmdProcessor {
             break;
 
             case "pay": {
-                if (!BPMethods.hasPermission(s, "bankplus.pay")) return;
-                if (!BPMethods.isPlayer(s)) return;
+                if (!BPMethods.hasPermission(s, "bankplus.pay") || !BPMethods.isPlayer(s)) return;
 
                 if (args.length == 1) {
                     MessageManager.send(s, "Specify-Player");
+                    return;
+                }
+                if (args.length == 2) {
+                    MessageManager.send(s, "Specify-Number");
                     return;
                 }
 
@@ -122,16 +128,11 @@ public class SingleCmdProcessor {
                     return;
                 }
 
-                if (args.length == 2) {
-                    MessageManager.send(s, "Specify-Number");
-                    return;
-                }
-
                 String num = args[2];
                 if (BPMethods.isInvalidNumber(num, s)) return;
                 BigDecimal amount = new BigDecimal(num);
 
-                BPMethods.pay(p, target, amount);
+                SingleEconomyManager.pay(p, target, amount);
             }
             break;
 
@@ -176,19 +177,19 @@ public class SingleCmdProcessor {
                 switch (args[1]) {
                     case "all":
                         amount = SingleEconomyManager.getBankBalance(p);
-                        BPMethods.withdraw(p, amount);
+                        SingleEconomyManager.withdraw(p, amount);
                         break;
 
                     case "half":
                         amount = SingleEconomyManager.getBankBalance(p).divide(BigDecimal.valueOf(2));
-                        BPMethods.withdraw(p, amount);
+                        SingleEconomyManager.withdraw(p, amount);
                         break;
 
                     default:
                         String num = args[1];
                         if (BPMethods.isInvalidNumber(num, s)) return;
                         amount = new BigDecimal(num);
-                        BPMethods.withdraw(p, amount);
+                        SingleEconomyManager.withdraw(p, amount);
                 }
             }
             break;
@@ -206,19 +207,19 @@ public class SingleCmdProcessor {
                 switch (args[1]) {
                     case "all":
                         amount = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p));
-                        BPMethods.deposit(p, amount);
+                        SingleEconomyManager.deposit(p, amount);
                         break;
 
                     case "half":
                         amount = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p) / 2);
-                        BPMethods.deposit(p, amount);
+                        SingleEconomyManager.deposit(p, amount);
                         break;
 
                     default:
                         String num = args[1];
                         if (BPMethods.isInvalidNumber(num, s)) return;
                         amount = new BigDecimal(num);
-                        BPMethods.deposit(p, amount);
+                        SingleEconomyManager.deposit(p, amount);
                 }
             }
             break;
@@ -240,10 +241,33 @@ public class SingleCmdProcessor {
                 BigDecimal amount = new BigDecimal(num);
 
                 Player p = Bukkit.getPlayerExact(args[1]);
+                String bankName = Values.CONFIG.getMainGuiName();
                 if (p == null) {
-                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
-                    SingleEconomyManager.setBankBalance(offlinePlayer, amount);
-                    MessageManager.send(s, "Set-Message", BPMethods.placeValues(offlinePlayer, amount));
+                    OfflinePlayer oP = Bukkit.getOfflinePlayer(args[1]);
+
+                    BigDecimal capacity = BanksManager.getCapacity(oP, bankName), balance = SingleEconomyManager.getBankBalance(oP);
+                    if (capacity.equals(balance)) {
+                        MessageManager.send(s, "Bank-Full", "%player%$" + oP.getName());
+                        return;
+                    }
+                    if (amount.doubleValue() >= capacity.doubleValue()) {
+                        MessageManager.send(s, "Set-Message", BPMethods.placeValues(oP, capacity));
+                        SingleEconomyManager.setBankBalance(oP, capacity);
+                        return;
+                    }
+                    SingleEconomyManager.setBankBalance(oP, amount);
+                    MessageManager.send(s, "Set-Message", BPMethods.placeValues(oP, amount));
+                    return;
+                }
+
+                BigDecimal capacity = BanksManager.getCapacity(p, bankName), balance = SingleEconomyManager.getBankBalance(p);
+                if (capacity.equals(balance)) {
+                    MessageManager.send(s, "Bank-Full", "%player%$" + p.getName());
+                    return;
+                }
+                if (amount.doubleValue() >= capacity.doubleValue()) {
+                    MessageManager.send(s, "Set-Message", BPMethods.placeValues(p, capacity));
+                    SingleEconomyManager.setBankBalance(p, capacity);
                     return;
                 }
                 SingleEconomyManager.setBankBalance(p, amount);
@@ -268,10 +292,33 @@ public class SingleCmdProcessor {
                 BigDecimal amount = new BigDecimal(num);
 
                 Player p = Bukkit.getPlayerExact(args[1]);
+                String bankName = Values.CONFIG.getMainGuiName();
                 if (p == null) {
-                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
-                    SingleEconomyManager.addBankBalance(offlinePlayer, amount);
-                    MessageManager.send(s, "Set-Message", BPMethods.placeValues(offlinePlayer, amount));
+                    OfflinePlayer oP = Bukkit.getOfflinePlayer(args[1]);
+
+                    BigDecimal capacity = BanksManager.getCapacity(oP, bankName), balance = SingleEconomyManager.getBankBalance(oP);
+                    if (capacity.equals(balance)) {
+                        MessageManager.send(s, "Bank-Full", "%player%$" + oP.getName());
+                        return;
+                    }
+                    if (balance.add(amount).doubleValue() >= capacity.doubleValue()) {
+                        MessageManager.send(s, "Add-Message", BPMethods.placeValues(oP, capacity.subtract(balance)));
+                        SingleEconomyManager.setBankBalance(oP, capacity);
+                        return;
+                    }
+                    SingleEconomyManager.addBankBalance(oP, amount);
+                    MessageManager.send(s, "Add-Message", BPMethods.placeValues(oP, amount));
+                    return;
+                }
+
+                BigDecimal capacity = BanksManager.getCapacity(p, bankName), balance = SingleEconomyManager.getBankBalance(p);
+                if (capacity.equals(balance)) {
+                    MessageManager.send(s, "Bank-Full", "%player%$" + p.getName());
+                    return;
+                }
+                if (balance.add(amount).doubleValue() >= capacity.doubleValue()) {
+                    MessageManager.send(s, "Add-Message", BPMethods.placeValues(p, capacity.subtract(balance)));
+                    SingleEconomyManager.setBankBalance(p, capacity);
                     return;
                 }
                 SingleEconomyManager.addBankBalance(p, amount);
@@ -297,20 +344,30 @@ public class SingleCmdProcessor {
 
                 Player p = Bukkit.getPlayerExact(args[1]);
                 if (p == null) {
-                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
+                    OfflinePlayer oP = Bukkit.getOfflinePlayer(args[1]);
 
-                    if (SingleEconomyManager.getBankBalance(offlinePlayer).subtract(amount).doubleValue() <= 0) {
-                        MessageManager.send(s, "Remove-Message", BPMethods.placeValues(offlinePlayer, SingleEconomyManager.getBankBalance(offlinePlayer)));
-                        SingleEconomyManager.setBankBalance(offlinePlayer, new BigDecimal(0));
+                    BigDecimal balance = SingleEconomyManager.getBankBalance(oP);
+                    if (balance.equals(new BigDecimal(0))) {
+                        MessageManager.send(s, "Bank-Empty", "%player%$" + oP.getName());
                         return;
                     }
-                    SingleEconomyManager.removeBankBalance(offlinePlayer, amount);
-                    MessageManager.send(s, "Remove-Message", BPMethods.placeValues(offlinePlayer, amount));
+                    if (balance.subtract(amount).doubleValue() <= 0) {
+                        MessageManager.send(s, "Remove-Message", BPMethods.placeValues(oP, balance));
+                        SingleEconomyManager.setBankBalance(oP, new BigDecimal(0));
+                        return;
+                    }
+                    SingleEconomyManager.removeBankBalance(oP, amount);
+                    MessageManager.send(s, "Remove-Message", BPMethods.placeValues(oP, amount));
                     return;
                 }
 
-                if (SingleEconomyManager.getBankBalance(p).subtract(amount).doubleValue() <= 0) {
-                    MessageManager.send(s, "Remove-Message", BPMethods.placeValues(p, SingleEconomyManager.getBankBalance(p)));
+                BigDecimal balance = SingleEconomyManager.getBankBalance(p);
+                if (balance.equals(new BigDecimal(0))) {
+                    MessageManager.send(s, "Bank-Empty", "%player%$" + p.getName());
+                    return;
+                }
+                if (balance.subtract(amount).doubleValue() <= 0) {
+                    MessageManager.send(s, "Remove-Message", BPMethods.placeValues(p, balance));
                     SingleEconomyManager.setBankBalance(p, new BigDecimal(0));
                     return;
                 }
@@ -323,6 +380,7 @@ public class SingleCmdProcessor {
                 if (!BPMethods.hasPermission(s, "bankplus.saveallbankbalances")) return;
                 Bukkit.getOnlinePlayers().forEach(SingleEconomyManager::saveBankBalance);
                 MessageManager.send(s, "Balances-Saved");
+                if (Values.CONFIG.isSaveBalancesBroadcast()) BPLogger.info("All player balances have been saved!");
             }
             break;
 
@@ -378,6 +436,22 @@ public class SingleCmdProcessor {
                         }
                         for (String arg : listOfArgs)
                             if (arg.toLowerCase().startsWith(args[1].toLowerCase())) args2.add(arg);
+                        return args2;
+                    }
+
+                    case "deposit": {
+                        if (!s.hasPermission("bankplus.deposit")) return null;
+                        List<String> args2 = new ArrayList<>();
+                        for (String arg : Arrays.asList("1", "2", "3"))
+                            if (arg.startsWith(args[1].toLowerCase())) args2.add(arg);
+                        return args2;
+                    }
+
+                    case "withdraw": {
+                        if (!s.hasPermission("bankplus.withdraw")) return null;
+                        List<String> args2 = new ArrayList<>();
+                        for (String arg : Arrays.asList("1", "2", "3"))
+                            if (arg.startsWith(args[1].toLowerCase())) args2.add(arg);
                         return args2;
                     }
                 }

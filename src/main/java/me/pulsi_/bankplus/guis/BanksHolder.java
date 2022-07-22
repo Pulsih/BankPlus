@@ -35,7 +35,7 @@ public class BanksHolder implements InventoryHolder {
 
     public static void openBank(Player p, String identifier) {
         if (!bankGetter.containsKey(identifier)) {
-            BPLogger.error("Cannot find the \"" + identifier + "\" gui bank identifier.");
+            MessageManager.send(p, "Invalid-Bank");
             return;
         }
         if (tasks.containsKey(p)) tasks.remove(p).cancel();
@@ -44,12 +44,9 @@ public class BanksHolder implements InventoryHolder {
             return;
         }
 
-        if (BanksManager.hasPermission(identifier)) {
-            String permission = BanksManager.getPermission(identifier);
-            if (!p.hasPermission(permission)) {
-                MessageManager.send(p, "No-Bank-Permission", "%permission%$" + permission);
-                return;
-            }
+        if (!BanksManager.isAvailable(p, identifier)) {
+            MessageManager.send(p, "Cannot-Access-Bank");
+            return;
         }
 
         Inventory bank = bankGetter.get(identifier);

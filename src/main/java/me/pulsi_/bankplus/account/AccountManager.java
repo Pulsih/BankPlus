@@ -29,30 +29,33 @@ public class AccountManager {
     public static void checkForFileFixes(Player p) {
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
             if (!BankPlus.wasOnSingleEconomy) return;
+
             FileConfiguration config = getPlayerConfig(p);
+            BigDecimal bal = SingleEconomyManager.getBankBalance(p);
+
             for (String bankName : BanksManager.getBankNames()) {
-                BigDecimal bal = SingleEconomyManager.getBankBalance(p);
                 String sBalance = config.getString("Banks." + bankName + ".Money");
-
-                if (sBalance == null) {
-                    if (!Values.CONFIG.getMainGuiName().equals(bankName)) config.set("Banks." + bankName + ".Money", "0.00");
-                    else config.set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(Values.CONFIG.getStartAmount()));
-                } else {
-                    BigDecimal capacity = BanksManager.getCapacityBasedOnLevel(p, bankName);
-
+                if (Values.CONFIG.getMainGuiName().equals(bankName)) {
+                    config.set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(bal));
+                    continue;
                 }
+                if (sBalance == null) config.set("Banks." + bankName + ".Money", "0.00");
             }
             SingleEconomyManager.unloadBankBalance(p);
+            MultiEconomyManager.loadBankBalance(p);
         } else {
             if (BankPlus.wasOnSingleEconomy) return;
+
             FileConfiguration config = getPlayerConfig(p);
             BigDecimal amount = new BigDecimal(0);
+
             for (String bankName : BanksManager.getBankNames()) {
                 String sBalance = config.getString("Banks." + bankName + ".Money");
                 if (sBalance != null) amount = amount.add(new BigDecimal(sBalance));
             }
-            config.set("Money", BPMethods.formatBigDouble(Values.CONFIG.getStartAmount()));
+            config.set("Money", BPMethods.formatBigDouble(amount));
             MultiEconomyManager.unloadBankBalance(p);
+            SingleEconomyManager.loadBankBalance(p);
         }
         savePlayerFile(p, true);
     }

@@ -9,6 +9,7 @@ import me.pulsi_.bankplus.external.bStats;
 import me.pulsi_.bankplus.guis.BanksHolder;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.listeners.*;
+import me.pulsi_.bankplus.listeners.playerChat.PlayerChatNormal;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
@@ -82,7 +83,7 @@ public class DataManager {
         plManager.registerEvents(new PlayerQuit(), plugin);
         plManager.registerEvents(new GuiListener(), plugin);
         plManager.registerEvents(new UpdateChecker(), plugin);
-        plManager.registerEvents(new PlayerChat(), plugin);
+        plManager.registerEvents(new PlayerChatNormal(), plugin);
         plManager.registerEvents(new AFKListener(), plugin);
     }
 

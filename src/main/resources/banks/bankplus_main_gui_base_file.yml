@@ -27,6 +27,11 @@ Settings:
       Displayname: "&a&lBANK"
       Lore:
         - "&aYour main bank :)"
+        - ""
+        - "&7Bank capacity: &a%bankplus_capacity{bank}%"
+        - "&7Bank level: &a%bankplus_level{bank}%"
+        - "&7Bank money: &a%bankplus_balance_formatted{bank}%"
+        - ""
         - "&aAvailable: &2YES"
       Glowing: true
 
@@ -37,6 +42,11 @@ Settings:
       Displayname: "&a&lBANK"
       Lore:
         - "&aYour main bank :)"
+        - ""
+        - "&7Bank capacity: &a%bankplus_capacity{bank}%"
+        - "&7Bank level: &a%bankplus_level{bank}%"
+        - "&7Bank money: &a%bankplus_balance_formatted{bank}%"
+        - ""
         - "&aAvailable: &cNO"
         - "&aNeeded permission: &bbankplus.use"
       Glowing: true
@@ -51,15 +61,15 @@ Settings:
 Upgrades:
   # This must be a number an indicates the bank level.
   1: # 1 Is the default level, it can't be lower than 1.
-    Capacity: 50000
+    Capacity: "50000"
   2:
-    Cost: 5000
+    Cost: "5000"
     # If the capacity is not specified, the bank will
     # have the default capacity set in the config.yml
-    Capacity: 100000
+    Capacity: "100000"
   3:
-    Cost: 1000
-    Capacity: 200000
+    Cost: "10000"
+    Capacity: "200000"
 
 Items:
   # You can add as many items as you want
@@ -131,6 +141,7 @@ Items:
       - ""
       - "&7Account Name: &f%player_name%"
       - "&7Balance: &a%bankplus_balance_formatted%"
+      - "&7Capacity: &a%bankplus_capacity_formatted%"
       - ""
       - "&7Wait &a%bankplus_interest_cooldown% &7to get interest!"
       - "&7Expected money from the next interest: &a%bankplus_next_interest_formatted%"
@@ -207,3 +218,19 @@ Items:
     Action:
       Action-Type: "Deposit"
       Amount: "CUSTOM"
+
+  Upgrade:
+    Material: "DIAMOND"
+    Amount: 1
+    Slot: 36
+    Displayname: "&aUpgrade Bank"
+    Lore:
+      - ""
+      - "&7Upgrade your bank to the next level!"
+      - ""
+      - "&7Current level: &a%bankplus_level%"
+      - "&7Upgrade Cost: &a%bankplus_next_level_cost%"
+      - ""
+    Glowing: false
+    Action:
+      Action-Type: "Upgrade"

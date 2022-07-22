@@ -60,7 +60,7 @@ public class GuiManager {
 
         if (itemValues.getBoolean("Glowing")) {
             meta.addEnchant(Enchantment.DURABILITY, 1, true);
-            meta.hasItemFlag(ItemFlag.HIDE_ENCHANTS);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
         item.setItemMeta(meta);
     }
