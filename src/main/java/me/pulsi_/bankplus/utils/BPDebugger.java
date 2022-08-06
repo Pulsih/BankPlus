@@ -124,8 +124,8 @@ public class BPDebugger {
 
         String itemPath = null, actionType = null, actionNumber = null;
         boolean hasAction = false;
-        for (String key : BanksManager.getItems(BanksHolder.openedInventory.get(p)).getKeys(false)) {
-            ConfigurationSection item = BanksManager.getConfig(BanksHolder.openedInventory.get(p)).getConfigurationSection("Items." + key);
+        for (String key : BanksManager.getItems(BanksHolder.openedBank.get(p)).getKeys(false)) {
+            ConfigurationSection item = BanksManager.getConfig(BanksHolder.openedBank.get(p)).getConfigurationSection("Items." + key);
             if (item == null || slot != item.getInt("Slot")) continue;
             itemPath = item.toString();
 

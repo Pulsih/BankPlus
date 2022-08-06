@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.guis;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.utils.BPChat;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -10,9 +11,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
@@ -22,27 +21,31 @@ import java.util.List;
 public class BanksListGui {
 
     public static HashMap<String, String> getBankFromSlot = new HashMap<>();
+    public static final String multipleBanksGuiID = "MultipleBanksGui";
+    public static String multipleBanksGuiName;
     private static final Material DEFAULT_MATERIAL = Material.CHEST;
 
     public static void openMultipleBanksGui(Player p) {
-        String identifier = "MultipleBanksGui";
-        Inventory bank = BanksHolder.bankGetter.get(identifier);
-        p.openInventory(bank);
-        placeBanks(p);
+        BPMethods.playSound("PERSONAL", p);
+        Inventory baseBanksListGui = BanksHolder.bankGetter.get(multipleBanksGuiID);
+        Inventory banksListGui = Bukkit.createInventory(new BanksHolder(), baseBanksListGui.getSize(), multipleBanksGuiName);
+        banksListGui.setContents(baseBanksListGui.getContents());
+        placeBanks(banksListGui, p);
+
+        BanksHolder.openedBank.put(p.getUniqueId(), multipleBanksGuiID);
+        p.openInventory(banksListGui);
 
         long delay = Values.MULTIPLE_BANKS.getUpdateDelay();
         if (delay == 0) updateMeta(p);
-        else BanksHolder.tasks.put(p, Bukkit.getScheduler().runTaskTimer(BankPlus.getInstance(), () -> updateMeta(p), 0, delay));
-
-        BanksHolder.openedInventory.put(p, identifier);
-        BPMethods.playSound("PERSONAL", p);
+        else BanksHolder.tasks.put(p.getUniqueId(), Bukkit.getScheduler().runTaskTimer(BankPlus.getInstance(), () -> updateMeta(p), 0, delay));
     }
 
     public static void loadMultipleBanksGui() {
         String title = Values.MULTIPLE_BANKS.getBanksGuiTitle();
         if (title == null) title = "&c&l * TITLE NOT FOUND *";
 
-        Inventory multipleBanksGui = Bukkit.createInventory(new BanksHolder(), Values.MULTIPLE_BANKS.getBanksGuiLines(), BPChat.color(title));
+        multipleBanksGuiName = BPChat.color(title);
+        Inventory multipleBanksGui = Bukkit.createInventory(new BanksHolder(), Values.MULTIPLE_BANKS.getBanksGuiLines(), multipleBanksGuiName);
 
         if (Values.MULTIPLE_BANKS.isFillerEnabled()) {
             ItemStack filler = ItemCreator.getFiller(Values.MULTIPLE_BANKS.getFillerMaterial(), Values.MULTIPLE_BANKS.isFillerGlowing());
@@ -51,10 +54,7 @@ public class BanksListGui {
         BanksHolder.bankGetter.put("MultipleBanksGui", multipleBanksGui);
     }
 
-    private static void placeBanks(Player p) {
-        Inventory bank = p.getOpenInventory().getTopInventory();
-        if (!(bank.getHolder() instanceof BanksHolder)) return;
-
+    private static void placeBanks(Inventory banksListGui, Player p) {
         int slot = 0;
         for (String bankName : BanksManager.getBankNames()) {
             ItemStack bankItem;
@@ -78,7 +78,7 @@ public class BanksListGui {
             }
             bankItem = new ItemStack(material);
             glow(bankItem, glow);
-            bank.setItem(slot, bankItem);
+            banksListGui.setItem(slot, bankItem);
             getBankFromSlot.put(p.getName() + "." + slot, bankName);
             slot++;
         }
@@ -86,41 +86,48 @@ public class BanksListGui {
 
     private static void updateMeta(Player p) {
         Inventory bank = p.getOpenInventory().getTopInventory();
-        if (!(bank.getHolder() instanceof BanksHolder)) return;
+        if (bank.getHolder() == null || !(bank.getHolder() instanceof BanksHolder)) return;
 
         int slot = 0;
         for (String bankName : BanksManager.getBankNames()) {
             ItemStack item = bank.getItem(slot);
             slot++;
             if (item == null) continue;
+            ItemMeta meta = item.getItemMeta();
 
-            String displayname;
-            List<String> lore;
+            String displayname = "&c&l* DISPLAYNAME NOT FOUND *";
+            List<String> lore = new ArrayList<>();
+            int modelData;
 
             ConfigurationSection section = BanksManager.getBanksGuiItemSection(bankName);
-            if (section == null) {
-                displayname = "&c&l* DISPLAYNAME NOT FOUND *";
-                lore = new ArrayList<>();
-            } else {
+            if (section != null) {
                 boolean hasPerm = BanksManager.hasPermission(bankName);
                 String perm = BanksManager.getPermission(bankName);
                 if (!hasPerm || p.hasPermission(perm)) {
                     String dName = section.getString("Available.Displayname");
                     displayname = dName == null ? "&c&l* DISPLAYNAME NOT FOUND *" : dName;
                     lore = section.getStringList("Available.Lore");
+                    modelData = section.getInt("Available.CustomModelData");
                 } else {
                     String dName = section.getString("Unavailable.Displayname");
                     displayname = dName == null ? "&c&l* DISPLAYNAME NOT FOUND *" : dName;
                     lore = section.getStringList("Unavailable.Lore");
+                    modelData = section.getInt("Unavailable.CustomModelData");
+                }
+                if (modelData > 0) {
+                    try {
+                        meta.setCustomModelData(modelData);
+                    } catch (NoSuchMethodError e) {
+                        BPLogger.warn("Cannot set custom model data to the item: \"" + displayname + "\"&e. Custom model data is only available on 1.14.4+ servers!");
+                    }
                 }
             }
-            setMeta(displayname, lore, item, p);
+            setMeta(displayname, lore, meta, p);
+            item.setItemMeta(meta);
         }
     }
 
-    private static void setMeta(String displayname, List<String> lore, ItemStack item, Player p) {
-        ItemMeta meta = item.getItemMeta();
-
+    private static void setMeta(String displayname, List<String> lore, ItemMeta meta, Player p) {
         List<String> newLore = new ArrayList<>();
         for (String lines : lore) newLore.add(BPChat.color(lines));
 
@@ -131,7 +138,6 @@ public class BanksListGui {
             meta.setDisplayName(BPChat.color(displayname));
             meta.setLore(newLore);
         }
-        item.setItemMeta(meta);
     }
 
     private static void glow(ItemStack item, boolean glow) {

@@ -61,9 +61,7 @@ public class AccountManager {
     }
 
     public static void registerPlayer(Player p) {
-        String identifier;
-        if (!Values.CONFIG.isStoringUUIDs()) identifier = p.getName();
-        else identifier = p.getUniqueId().toString();
+        String identifier = Values.CONFIG.isStoringUUIDs() ? p.getUniqueId().toString() : p.getName();
         File file = new File(BankPlus.getInstance().getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
         if (!file.exists()) BPLogger.info("Successfully registered " + p.getName() + "!");
         try {
@@ -76,9 +74,7 @@ public class AccountManager {
 
     public static File getPlayerFile(Player p) {
         if (!playerFile.containsKey(p.getUniqueId())) {
-            String identifier;
-            if (!Values.CONFIG.isStoringUUIDs()) identifier = p.getName();
-            else identifier = p.getUniqueId().toString();
+            String identifier = Values.CONFIG.isStoringUUIDs() ? p.getUniqueId().toString() : p.getName();
             File file = new File(BankPlus.getInstance().getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
             playerFile.put(p.getUniqueId(), file);
         }
@@ -86,9 +82,7 @@ public class AccountManager {
     }
 
     public static File getPlayerFile(OfflinePlayer p) {
-        String identifier;
-        if (!Values.CONFIG.isStoringUUIDs()) identifier = p.getName();
-        else identifier = p.getUniqueId().toString();
+        String identifier = Values.CONFIG.isStoringUUIDs() ? p.getUniqueId().toString() : p.getName();
         return new File(BankPlus.getInstance().getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
     }
 

@@ -7,7 +7,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MessageManager {
 
@@ -142,8 +145,7 @@ public class MessageManager {
     public static void loadMessages() {
         messages.clear();
         FileConfiguration config = BankPlus.getCm().getConfig(ConfigManager.Type.MESSAGES);
-        Set<String> paths = config.getConfigurationSection("").getKeys(false);
-        for (String path : paths) {
+        for (String path : config.getConfigurationSection("").getKeys(false)) {
             List<String> listOfMessages = config.getStringList(path);
             if (listOfMessages.isEmpty()) {
                 String message = config.getString(path);

@@ -57,15 +57,18 @@ public class MultiEconomyManager {
             if (section == null) return balances;
 
             BigDecimal balance = new BigDecimal(0);
-            String sName = config.getString("Account-Name") == null ? "null" : config.getString("Account-Name");
+            String name = config.getString("Account-Name") == null ? "null" : config.getString("Account-Name");
 
             for (String bankName : section.getKeys(false)) {
-                String sBalance = config.getString("Banks." + bankName + ".Money");
-                if (sBalance != null && BPMethods.isValidNumber(sBalance))
-                    balance = balance.add(new BigDecimal(sBalance));
+                String bal = config.getString("Banks." + bankName + ".Money");
+                if (bal != null && BPMethods.isValidNumber(bal))
+                    balance = balance.add(new BigDecimal(bal));
             }
             balances.add(balance);
-            BankTopManager.nameGetter.put(balance, sName);
+
+            HashMap<BigDecimal, String> balanceName = new HashMap<>();
+            balanceName.put(balance, name);
+            BankTopManager.linkedBalanceName.add(balanceName);
         }
         return balances;
     }
@@ -271,7 +274,7 @@ public class MultiEconomyManager {
         if (maxDepositAmount.doubleValue() != 0 && amount.doubleValue() >= maxDepositAmount.doubleValue()) amount = maxDepositAmount;
 
         BigDecimal taxes = new BigDecimal(0);
-        if (Values.CONFIG.getDepositTaxes().doubleValue() > 0)
+        if (Values.CONFIG.getDepositTaxes().doubleValue() > 0 && !p.hasPermission("bankplus.deposit.bypass-taxes"))
             taxes = amount.multiply(Values.CONFIG.getDepositTaxes().divide(BigDecimal.valueOf(100)));
 
         BigDecimal capacity = BanksManager.getCapacity(p, bankName);
@@ -302,7 +305,7 @@ public class MultiEconomyManager {
             amount = maxWithdrawAmount;
 
         BigDecimal taxes = new BigDecimal(0);
-        if (Values.CONFIG.getWithdrawTaxes().doubleValue() > 0)
+        if (Values.CONFIG.getWithdrawTaxes().doubleValue() > 0 && !p.hasPermission("bankplus.withdraw.bypass-taxes"))
             taxes = amount.multiply(Values.CONFIG.getWithdrawTaxes().divide(BigDecimal.valueOf(100)));
 
         BigDecimal newBalance = bankBalance.subtract(amount);

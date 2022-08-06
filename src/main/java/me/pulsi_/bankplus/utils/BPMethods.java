@@ -187,42 +187,36 @@ public class BPMethods {
     public static void startSavingBalancesTask() {
         BukkitTask task = TaskManager.getSavingTask();
         if (task != null) task.cancel();
+
         if (Values.CONFIG.getSaveBalancedDelay() <= 0) return;
         TaskManager.setSavingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.getInstance(), () -> {
-            if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) Bukkit.getOnlinePlayers().forEach(MultiEconomyManager::saveBankBalance);
+            if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                Bukkit.getOnlinePlayers().forEach(MultiEconomyManager::saveBankBalance);
             else Bukkit.getOnlinePlayers().forEach(SingleEconomyManager::saveBankBalance);
             if (Values.CONFIG.isSaveBalancesBroadcast()) BPLogger.info("All player balances have been saved!");
         }, Values.CONFIG.getSaveBalancedDelay() * 1200L, Values.CONFIG.getSaveBalancedDelay() * 1200L));
     }
 
     public static String formatLong(BigDecimal balance) {
-        if (balance.doubleValue() < 1000L) return "" + balance;
-        if (balance.doubleValue() < 1000000L)
-            return Math.round(balance.divide(BigDecimal.valueOf(1000L)).doubleValue()) + Values.CONFIG.getK();
-        if (balance.doubleValue() < 1000000000L)
-            return Math.round(balance.divide(BigDecimal.valueOf(1000000L)).doubleValue()) + Values.CONFIG.getM();
-        if (balance.doubleValue() < 1000000000000L)
-            return Math.round(balance.divide(BigDecimal.valueOf(1000000000L)).doubleValue()) + Values.CONFIG.getB();
-        if (balance.doubleValue() < 1000000000000000L)
-            return Math.round(balance.divide(BigDecimal.valueOf(1000000000000L)).doubleValue()) + Values.CONFIG.getT();
-        if (balance.doubleValue() < 1000000000000000000L)
-            return Math.round(balance.divide(BigDecimal.valueOf(1000000000000000L)).doubleValue()) + Values.CONFIG.getQ();
-        return Math.round(balance.divide(BigDecimal.valueOf(1000000000000000000L)).doubleValue()) + Values.CONFIG.getQq();
+        double bal = balance.doubleValue();
+        if (bal < 1000L) return "" + balance;
+        if (bal < 1000000L) return Math.round(bal / 1000D) + Values.CONFIG.getK();
+        if (bal < 1000000000L) return Math.round(bal / 1000000D) + Values.CONFIG.getM();
+        if (bal < 1000000000000L) return Math.round(bal / 1000000000D) + Values.CONFIG.getB();
+        if (bal < 1000000000000000L) return Math.round(bal / 1000000000000D) + Values.CONFIG.getT();
+        if (bal < 1000000000000000000L) return Math.round(bal / 1000000000000000D) + Values.CONFIG.getQ();
+        return Math.round(bal / 1000000000000000000D) + Values.CONFIG.getQq();
     }
 
     public static String format(BigDecimal balance) {
-        if (balance.doubleValue() < 1000L) return setMaxDigits(balance, 2);
-        if (balance.doubleValue() < 1000000L)
-            return setMaxDigits(balance.divide(BigDecimal.valueOf(1000L)), 2) + Values.CONFIG.getK();
-        if (balance.doubleValue() < 1000000000L)
-            return setMaxDigits(balance.divide(BigDecimal.valueOf(1000000L)), 2) + Values.CONFIG.getM();
-        if (balance.doubleValue() < 1000000000000L)
-            return setMaxDigits(balance.divide(BigDecimal.valueOf(1000000000L)), 2) + Values.CONFIG.getB();
-        if (balance.doubleValue() < 1000000000000000L)
-            return setMaxDigits(balance.divide(BigDecimal.valueOf(1000000000000L)), 2) + Values.CONFIG.getT();
-        if (balance.doubleValue() < 1000000000000000000L)
-            return setMaxDigits(balance.divide(BigDecimal.valueOf(1000000000000000L)), 2) + Values.CONFIG.getQ();
-        return setMaxDigits(balance.divide(BigDecimal.valueOf(1000000000000000000L)), 2) + Values.CONFIG.getQq();
+        double bal = balance.doubleValue();
+        if (bal < 1000L) return setMaxDigits(balance, 2);
+        if (bal < 1000000L) return setMaxDigits(BigDecimal.valueOf(bal / 1000L), 2) + Values.CONFIG.getK();
+        if (bal < 1000000000L) return setMaxDigits(BigDecimal.valueOf(bal / 1000000D), 2) + Values.CONFIG.getM();
+        if (bal < 1000000000000L) return setMaxDigits(BigDecimal.valueOf(bal / 1000000000D), 2) + Values.CONFIG.getB();
+        if (bal < 1000000000000000L) return setMaxDigits(BigDecimal.valueOf(bal / 1000000000000D), 2) + Values.CONFIG.getT();
+        if (bal < 1000000000000000000L) return setMaxDigits(BigDecimal.valueOf(bal / 1000000000000000D), 2) + Values.CONFIG.getQ();
+        return setMaxDigits(BigDecimal.valueOf(bal / 1000000000000000000L), 2) + Values.CONFIG.getQq();
     }
 
     public static String setMaxDigits(BigDecimal balance, int digits) {
@@ -238,43 +232,33 @@ public class BPMethods {
     }
 
     public static void customWithdraw(Player p) {
-        if (!hasPermission(p, "bankplus.withdraw")) return;
-        SetUtils.playerWithdrawing.add(p.getUniqueId());
-        if (Values.MESSAGES.isTitleCustomAmountEnabled())
-            BPMethods.sendTitle("Title-Custom-Transaction.Title-Withdraw", p);
-        MessageManager.send(p, "Chat-Withdraw");
-        p.closeInventory();
-        BanksHolder.openedInventory.put(p, Values.CONFIG.getMainGuiName());
+        customWithdraw(p, Values.CONFIG.getMainGuiName());
     }
 
     public static void customWithdraw(Player p, String identifier) {
         if (!hasPermission(p, "bankplus.withdraw")) return;
-        SetUtils.playerWithdrawing.add(p.getUniqueId());
+
         if (Values.MESSAGES.isTitleCustomAmountEnabled())
             BPMethods.sendTitle("Title-Custom-Transaction.Title-Withdraw", p);
         MessageManager.send(p, "Chat-Withdraw");
+        SetUtils.addPlayerToWithdraw(p);
         p.closeInventory();
-        BanksHolder.openedInventory.put(p, identifier);
+        BanksHolder.openedBank.put(p.getUniqueId(), identifier);
     }
 
     public static void customDeposit(Player p) {
-        if (!hasPermission(p, "bankplus.deposit")) return;
-        SetUtils.playerDepositing.add(p.getUniqueId());
-        if (Values.MESSAGES.isTitleCustomAmountEnabled())
-            BPMethods.sendTitle("Title-Custom-Transaction.Title-Deposit", p);
-        MessageManager.send(p, "Chat-Deposit");
-        p.closeInventory();
-        BanksHolder.openedInventory.put(p, Values.CONFIG.getMainGuiName());
+        customDeposit(p, Values.CONFIG.getMainGuiName());
     }
 
     public static void customDeposit(Player p, String identifier) {
         if (!hasPermission(p, "bankplus.deposit")) return;
-        SetUtils.playerDepositing.add(p.getUniqueId());
+
         if (Values.MESSAGES.isTitleCustomAmountEnabled())
             BPMethods.sendTitle("Title-Custom-Transaction.Title-Deposit", p);
         MessageManager.send(p, "Chat-Deposit");
+        SetUtils.addPlayerToDeposit(p);
         p.closeInventory();
-        BanksHolder.openedInventory.put(p, identifier);
+        BanksHolder.openedBank.put(p.getUniqueId(), identifier);
     }
 
     public static void sendTitle(String path, Player p) {
@@ -366,7 +350,8 @@ public class BPMethods {
     }
 
     public static String getSoundBasedOnServerVersion() {
-        if (isLegacyServer()) return "ORB_PICKUP,5,1";
+        String v = BankPlus.getInstance().getServerVersion();
+        if (v.contains("1.7") || v.contains("1.8")) return "ORB_PICKUP,5,1";
         else return "ENTITY_EXPERIENCE_ORB_PICKUP,5,1";
     }
 
@@ -473,6 +458,7 @@ public class BPMethods {
 
     public static boolean isLegacyServer() {
         String v = BankPlus.getInstance().getServerVersion();
-        return v.contains("1.7") || v.contains("1.8");
+        return v.contains("1.7") || v.contains("1.8") || v.contains("1.9") ||
+                v.contains("1.10") || v.contains("1.11") || v.contains("1.12");
     }
 }

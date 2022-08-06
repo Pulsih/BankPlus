@@ -5,6 +5,7 @@ import me.pulsi_.bankplus.account.AccountManager;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.managers.MessageManager;
+import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -34,7 +35,7 @@ public class BanksManager {
             return;
         }
 
-        guiValues.put(bankName + ".Title", bankConfig.getString("Title"));
+        guiValues.put(bankName + ".Title", bankConfig.getString("Title") == null ? "&c&l* TITLE NOT FOUND *" : bankConfig.getString("Title"));
         guiValues.put(bankName + ".Lines", bankConfig.getInt("Lines"));
         guiValues.put(bankName + ".Update-Delay", bankConfig.getLong("Update-Delay"));
         guiValues.put(bankName + ".Filler.Enabled", bankConfig.getBoolean("Filler.Enabled"));
@@ -64,15 +65,13 @@ public class BanksManager {
     }
 
     public static String getTitle(String bankName) {
-        return (String) guiValues.getOrDefault(bankName + ".Title", "&c&l* TITLE NOT FOUND *");
+        return BPChat.color((String) guiValues.getOrDefault(bankName + ".Title", "&c&l* TITLE NOT FOUND *"));
     }
 
     public static int getLines(String bankName) {
         int lines = (int) guiValues.get(bankName + ".Lines");
-        if (lines < 1) return 9;
+        if (lines < 2) return 9;
         switch (lines) {
-            case 1:
-                return 9;
             case 2:
                 return 18;
             case 3:
@@ -134,11 +133,8 @@ public class BanksManager {
         if (!hasUpgrades(bankName)) return Values.CONFIG.getMaxBankCapacity();
 
         FileConfiguration config = AccountManager.getPlayerConfig(p);
-        ConfigurationSection section = getUpgrades(bankName);
-        if (section == null) return Values.CONFIG.getMaxBankCapacity();
-
         int level = Math.max(config.getInt("Banks." + bankName + ".Level"), 1);
-        String capacity = section.getString(level + ".Capacity");
+        String capacity = getUpgrades(bankName).getString(level + ".Capacity");
         return new BigDecimal(capacity == null ? Values.CONFIG.getMaxBankCapacity().toString() : capacity);
     }
 
@@ -146,27 +142,32 @@ public class BanksManager {
         if (!hasUpgrades(bankName)) return Values.CONFIG.getMaxBankCapacity();
 
         FileConfiguration config = AccountManager.getPlayerConfig(p);
-        ConfigurationSection section = getUpgrades(bankName);
-        if (section == null) return Values.CONFIG.getMaxBankCapacity();
-
         int level = Math.max(config.getInt("Banks." + bankName + ".Level"), 1);
-        String capacity = section.getString(level + ".Capacity");
+        String capacity = getUpgrades(bankName).getString(level + ".Capacity");
         return new BigDecimal(capacity == null ? Values.CONFIG.getMaxBankCapacity().toString() : capacity);
     }
 
     public static BigDecimal getLevelCost(int level, String bankName) {
         if (!hasUpgrades(bankName)) return new BigDecimal(0);
 
-        ConfigurationSection section = getUpgrades(bankName);
-        if (section == null) return new BigDecimal(0);
-
-        String cost = section.getString(level + ".Cost");
+        String cost = getUpgrades(bankName).getString(level + ".Cost");
         return new BigDecimal(cost == null ? "0" : cost);
     }
 
     public static int getLevel(Player p, String bankName) {
         FileConfiguration config = AccountManager.getPlayerConfig(p);
         return Math.max(config.getInt("Banks." + bankName + ".Level"), 1);
+    }
+
+    public static List<String> getLevels(String bankName) {
+        List<String> levels = new ArrayList<>();
+        if (!hasUpgrades(bankName)) {
+            levels.add("1");
+            return levels;
+        }
+
+        levels.addAll(getUpgrades(bankName).getKeys(false));
+        return levels;
     }
 
     public static boolean hasNextLevel(Player p, String bankName) {
@@ -176,11 +177,24 @@ public class BanksManager {
         return section.getConfigurationSection(String.valueOf(getLevel(p, bankName) + 1)) != null;
     }
 
+    public static boolean hasNextLevel(int currentLevel, String bankName) {
+        ConfigurationSection section = getUpgrades(bankName);
+        if (section == null) return false;
+
+        return section.getConfigurationSection(String.valueOf(currentLevel + 1)) != null;
+    }
+
     public static boolean exist(String bankName) {
         return bankNames.contains(bankName);
     }
 
     public static List<String> getAvailableBanks(Player p) {
+        List<String> availableBanks = new ArrayList<>();
+        for (String bankName : getBankNames()) if (isAvailable(p, bankName)) availableBanks.add(bankName);
+        return availableBanks;
+    }
+
+    public static List<String> getAvailableBanks(OfflinePlayer p) {
         List<String> availableBanks = new ArrayList<>();
         for (String bankName : getBankNames()) if (isAvailable(p, bankName)) availableBanks.add(bankName);
         return availableBanks;
@@ -227,5 +241,13 @@ public class BanksManager {
 
     public static List<String> getBankNames() {
         return bankNames;
+    }
+
+    public static void addBankToBankNames(String bankName) {
+        bankNames.add(bankName);
+    }
+
+    public static void clearBankNames() {
+        bankNames.clear();
     }
 }

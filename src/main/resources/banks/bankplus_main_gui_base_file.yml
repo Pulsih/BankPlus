@@ -79,6 +79,11 @@ Items:
     Amount: 1
     Displayname: "&aWithdraw"
     Slot: 11
+    # You can not edit the custom
+    # model data of an item.
+    #
+    # Working only on 1.14.4+
+    #CustomModelData: 10
     Lore:
       - ""
       - "&7Withdraw &a500$ &7from your bank"

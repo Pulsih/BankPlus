@@ -30,6 +30,8 @@ public class SingleEconomyManager {
 
     /**
      * Return a list with all player balances.
+     * Do not call this method many times, it has to make
+     * various calculations to get the final list of balances.
      *
      * @return List of BigDecimal amounts.
      */
@@ -49,20 +51,23 @@ public class SingleEconomyManager {
                 BPLogger.error("An error has occurred while loading a bank file: " + e.getMessage());
             }
 
-            String sBalance = config.getString("Money");
-            if (sBalance == null) continue;
+            String bal = config.getString("Money");
+            if (bal == null) continue;
 
-            String sName = config.getString("Account-Name");
-            if (sName == null) sName = "null";
+            String name = config.getString("Account-Name");
+            if (name == null) name = "null";
 
             BigDecimal balance;
             try {
-                balance = new BigDecimal(sBalance);
+                balance = new BigDecimal(bal);
             } catch (NumberFormatException e) {
                 balance = new BigDecimal(0);
             }
             balances.add(balance);
-            BankTopManager.nameGetter.put(balance, sName);
+
+            HashMap<BigDecimal, String> balanceName = new HashMap<>();
+            balanceName.put(balance, name);
+            BankTopManager.linkedBalanceName.add(balanceName);
         }
         return balances;
     }
@@ -212,7 +217,7 @@ public class SingleEconomyManager {
         if (maxDepositAmount.doubleValue() != 0 && amount.doubleValue() >= maxDepositAmount.doubleValue()) amount = maxDepositAmount;
 
         BigDecimal taxes = new BigDecimal(0);
-        if (Values.CONFIG.getDepositTaxes().doubleValue() > 0)
+        if (Values.CONFIG.getDepositTaxes().doubleValue() > 0 && !p.hasPermission("bankplus.deposit.bypass-taxes"))
             taxes = amount.multiply(Values.CONFIG.getDepositTaxes().divide(BigDecimal.valueOf(100)));
 
         BigDecimal capacity = BanksManager.getCapacity(p, Values.CONFIG.getMainGuiName());
@@ -243,7 +248,7 @@ public class SingleEconomyManager {
             amount = maxWithdrawAmount;
 
         BigDecimal taxes = new BigDecimal(0);
-        if (Values.CONFIG.getWithdrawTaxes().doubleValue() > 0)
+        if (Values.CONFIG.getWithdrawTaxes().doubleValue() > 0 && !p.hasPermission("bankplus.withdraw.bypass-taxes"))
             taxes = amount.multiply(Values.CONFIG.getWithdrawTaxes().divide(BigDecimal.valueOf(100)));
 
         BigDecimal newBalance = bankBalance.subtract(amount);

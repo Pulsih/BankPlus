@@ -7,6 +7,7 @@ import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.guis.BanksManager;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.managers.BankTopManager;
+import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.entity.Player;
@@ -73,13 +74,17 @@ public class Placeholders extends PlaceholderExpansion {
             return level;
         }
 
+        if (identifier.startsWith("banktop_position")) return BankTopManager.getPlayerBankTopPosition(p) + "";
+
         if (identifier.startsWith("next_level_cost")) {
+            if (!BanksManager.hasNextLevel(p, Values.CONFIG.getMainGuiName())) return BPChat.color(Values.CONFIG.getBankUpgradedMax());
             BigDecimal cost = BanksManager.getLevelCost(BanksManager.getLevel(p, Values.CONFIG.getMainGuiName()) + 1, Values.CONFIG.getMainGuiName());
             if (identifier.endsWith("}") && identifier.contains("{")) {
                 if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
                     return "The multiple-banks module is disabled.";
                 String bankName = identifier.substring(identifier.indexOf("{") + 1, identifier.indexOf("}"));
                 if (!BanksManager.exist(bankName)) return "The selected bank does not exist.";
+                if (!BanksManager.hasNextLevel(p, bankName)) return BPChat.color(Values.CONFIG.getBankUpgradedMax());
                 cost = BanksManager.getLevelCost(BanksManager.getLevel(p, bankName) + 1, bankName);
             }
             String formatter = identifier.replace("next_level_cost", "");

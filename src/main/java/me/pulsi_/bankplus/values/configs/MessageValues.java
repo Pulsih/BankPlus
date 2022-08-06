@@ -7,7 +7,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 public class MessageValues {
 
     private boolean isTitleCustomAmountEnabled, isInterestBroadcastEnabled;
-    private String interestMoney, interestNoMoney, interestBankFull;
+    private String interestMoney, interestNoMoney, multiInterestMoney, interestBankFull;
 
     public static MessageValues getInstance() {
         return new MessageValues();
@@ -19,6 +19,7 @@ public class MessageValues {
         isTitleCustomAmountEnabled = messages.getBoolean("Title-Custom-Transaction.Enabled");
         isInterestBroadcastEnabled = messages.getBoolean("Interest-Broadcast.Enabled");
         interestMoney = messages.getString("Interest-Broadcast.Message");
+        multiInterestMoney = messages.getString("Interest-Broadcast.Multi-Message");
         interestNoMoney = messages.getString("Interest-Broadcast.No-Money");
         interestBankFull = messages.getString("Interest-Broadcast.Bank-Full");
     }
@@ -33,6 +34,10 @@ public class MessageValues {
 
     public String getInterestMoney() {
         return interestMoney;
+    }
+
+    public String getMultiInterestMoney() {
+        return multiInterestMoney;
     }
 
     public String getInterestNoMoney() {

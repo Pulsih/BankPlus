@@ -6,20 +6,26 @@ import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 public class BankTopManager {
 
-    public static Map<BigDecimal, String> nameGetter = new HashMap<>();
-    private static List<BigDecimal> bankTopBalances;
-    private static List<String> bankTopNames;
+    public static List<HashMap<BigDecimal, String>> linkedBalanceName = new ArrayList<>();
+    private static final HashMap<Player, Integer> playerBankTopPosition = new HashMap<>();
+    private static final List<BigDecimal> bankTopBalances = new ArrayList<>();
+    private static final List<String> bankTopNames = new ArrayList<>();
 
     public static void updateBankTop() {
-        bankTopBalances = new ArrayList<>();
-        bankTopNames = new ArrayList<>();
+        playerBankTopPosition.clear();
+        bankTopBalances.clear();
+        bankTopNames.clear();
 
         List<BigDecimal> balances;
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) balances = MultiEconomyManager.getAllBankBalances();
@@ -28,15 +34,17 @@ public class BankTopManager {
 
         Collections.sort(balances);
         Collections.reverse(balances);
+        bankTopBalances.addAll(balances);
 
-        int banktopSize = Values.CONFIG.getBankTopSize();
-        if (balances.size() >= banktopSize) {
-            for (int i = 0; i < banktopSize; i++) bankTopBalances.add(balances.get(i));
-        } else bankTopBalances.addAll(balances);
-
-        for (BigDecimal bal : bankTopBalances) {
-            String name = nameGetter.get(bal);
-            bankTopNames.add(name);
+        List<HashMap<BigDecimal, String>> copyOfLinkedBalanceName = new ArrayList<>(linkedBalanceName);
+        for (BigDecimal bal : balances) {
+            for (HashMap<BigDecimal, String> linkedMap : copyOfLinkedBalanceName) {
+                if (linkedMap.containsKey(bal)) {
+                    bankTopNames.add(linkedMap.get(bal));
+                    copyOfLinkedBalanceName.remove(linkedMap);
+                    break;
+                }
+            }
         }
 
         if (!Values.CONFIG.isBanktopUpdateBroadcastEnabled()) return;
@@ -67,5 +75,16 @@ public class BankTopManager {
         String name = bankTopNames.get(position - 1);
         if (name == null) return "Not found yet.";
         return name;
+    }
+
+    public static int getPlayerBankTopPosition(Player p) {
+        if (!playerBankTopPosition.containsKey(p)) {
+            for (int i = 0; i < bankTopNames.size(); i++) {
+                if (!bankTopNames.get(i).equals(p.getName())) continue;
+                playerBankTopPosition.put(p, i + 1);
+                break;
+            }
+        }
+        return playerBankTopPosition.get(p);
     }
 }

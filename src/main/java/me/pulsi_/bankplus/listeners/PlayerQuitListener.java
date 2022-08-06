@@ -10,7 +10,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-public class PlayerQuit implements Listener {
+public class PlayerQuitListener implements Listener {
 
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
@@ -23,8 +23,8 @@ public class PlayerQuit implements Listener {
             SingleEconomyManager.unloadBankBalance(p);
         }
         if (BanksHolder.tasks.containsKey(p)) BanksHolder.tasks.remove(p).cancel();
-        BanksHolder.openedInventory.remove(p);
-        SetUtils.removeFromDepositingPlayers(p);
-        SetUtils.removeFromWithdrawingPlayers(p);
+        BanksHolder.openedBank.remove(p);
+        SetUtils.removePlayerFromDepositing(p);
+        SetUtils.removePlayerFromWithdrawing(p);
     }
 }

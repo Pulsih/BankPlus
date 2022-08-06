@@ -1,4 +1,4 @@
-package me.pulsi_.bankplus.listeners;
+package me.pulsi_.bankplus.listeners.bankListener;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
@@ -6,44 +6,34 @@ import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.guis.BanksHolder;
 import me.pulsi_.bankplus.guis.BanksListGui;
 import me.pulsi_.bankplus.guis.BanksManager;
-import me.pulsi_.bankplus.utils.BPDebugger;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 
 import java.math.BigDecimal;
 
-public class GuiListener implements Listener {
+public class BankClickMethod {
 
-    @EventHandler
-    public void guiListener(InventoryClickEvent e) {
-
+    public static void process(InventoryClickEvent e) {
         Player p = (Player) e.getWhoClicked();
-        if (!BanksHolder.openedInventory.containsKey(p)) return;
-
-        String bankName = BanksHolder.openedInventory.get(p);
-        if (!BanksHolder.bankGetter.containsKey(bankName)) return;
-
-        Inventory inv = e.getClickedInventory();
-
-        if (inv == null || inv.getHolder() == null || !(inv.getHolder() instanceof BanksHolder)) return;
-        BPDebugger.debugGui(e);
+        Inventory bank = e.getClickedInventory();
+        if (bank == null || bank.getHolder() == null || !(bank.getHolder() instanceof BanksHolder)) return;
         e.setCancelled(true);
 
-        if (bankName.equals("MultipleBanksGui")) {
+        String bankName = BanksHolder.openedBank.getOrDefault(p.getUniqueId(), "");
+        if (!BanksHolder.bankGetter.containsKey(bankName)) return;
+
+        if (bankName.equals(BanksListGui.multipleBanksGuiID)) {
             int slot = e.getSlot();
             if (!BanksListGui.getBankFromSlot.containsKey(p.getName() + "." + slot)) return;
+
             BanksHolder.openBank(p, BanksListGui.getBankFromSlot.get(p.getName() + "." + slot));
-            for (int i = 0; i <= BanksManager.getBankNames().size(); i++)
-                BanksListGui.getBankFromSlot.remove(p.getName() + "." + i);
+            for (int i = 0; i < BanksManager.getBankNames().size(); i++) BanksListGui.getBankFromSlot.remove(p.getName() + "." + i);
             return;
         }
 
@@ -142,11 +132,5 @@ public class GuiListener implements Listener {
                     break;
             }
         }
-    }
-
-    @EventHandler
-    public void closeGUI(InventoryCloseEvent e) {
-        Player p = (Player) e.getPlayer();
-        if (BanksHolder.tasks.containsKey(p)) BanksHolder.tasks.remove(p).cancel();
     }
 }

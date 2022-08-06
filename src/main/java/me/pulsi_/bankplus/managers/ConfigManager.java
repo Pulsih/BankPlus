@@ -5,6 +5,7 @@ import me.pulsi_.bankplus.guis.BanksHolder;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -174,16 +175,18 @@ public class ConfigManager {
     }
 
     public void recreateFile(File file) {
-        String configuration = getFileAsString(file);
-        if (configuration == null) return;
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-            writer.write(configuration);
-            writer.flush();
-            writer.close();
-        } catch (IOException e) {
-            BPLogger.error(e.getMessage());
-        }
+        Bukkit.getScheduler().runTaskAsynchronously(BankPlus.getInstance(), () -> {
+            String configuration = getFileAsString(file);
+            if (configuration == null) return;
+            try {
+                BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+                writer.write(configuration);
+                writer.flush();
+                writer.close();
+            } catch (IOException e) {
+                BPLogger.error(e.getMessage());
+            }
+        });
     }
 
     public void buildConfig() {
@@ -203,7 +206,10 @@ public class ConfigManager {
                 "Interest will increase players bank balance",
                 "by giving a % of their bank money.",
                 "",
-                "To restart the interest type /bank restartInterest.");
+                "To restart the interest type /bank restartInterest.",
+                "",
+                "Players must have the \"bankplus.interest\"",
+                "permission to receive the interest.");
         addCommentsUnder(newConfig, "Interest", "Enable or disable the interest feature.");
         validatePath(config, newConfig, "Interest.Enabled", true);
         addSpace(newConfig, "Interest");
@@ -234,7 +240,8 @@ public class ConfigManager {
                 "  seconds (time s), minutes (time m)",
                 "  hours (time h), days (time d)",
                 "If no time will be specified, it",
-                "will automatically choose minutes.");
+                "will automatically choose minutes.",
+                "(You must put the space to specify the time!)");
         validatePath(config, newConfig, "Interest.Delay", "5 m");
         addSpace(newConfig, "Interest");
 
@@ -249,6 +256,15 @@ public class ConfigManager {
         addCommentsUnder(newConfig, "Interest", "The permission for offline players to receive interest.");
         validatePath(config, newConfig, "Interest.Offline-Permission", "bankplus.receive.interest");
         addSpace(newConfig);
+
+        addCommentsUnder(newConfig, "General",
+                "You need to restart the server",
+                "to apply these changes.",
+                "",
+                "Priorities: LOWEST, LOW, NORMAL, HIGH, HIGHEST");
+        validatePath(config, newConfig, "General.Event-Priorities.PlayerChat", "NORMAL");
+        validatePath(config, newConfig, "General.Event-Priorities.BankClick", "NORMAL");
+        addSpace(newConfig, "General");
 
         addCommentsUnder(newConfig, "General",
                 "The amount that a player will receive",
@@ -313,13 +329,19 @@ public class ConfigManager {
 
         addCommentsUnder(newConfig, "General",
                 "The money that a player will loose for taxes",
-                "when depositing, use 0 to disable.");
+                "when depositing, use 0 to disable.",
+                "",
+                "Use the permission \"bankplus.deposit.bypass-taxes\"",
+                "to bypass the deposit taxes.");
         validatePath(config, newConfig, "General.Deposit-Taxes", "0%");
         addSpace(newConfig, "General");
 
         addCommentsUnder(newConfig, "General",
                 "The money that a player will loose for taxes",
-                "when withdrawing, use 0 to disable.");
+                "when withdrawing, use 0 to disable.",
+                "",
+                "Use the permission \"bankplus.withdraw.bypass-taxes\"",
+                "to bypass the deposit taxes.");
         validatePath(config, newConfig, "General.Withdraw-Taxes", "2%");
         addSpace(newConfig, "General");
 
@@ -466,14 +488,20 @@ public class ConfigManager {
         validatePath(config, newConfig, "Placeholders.Time.Interest-Time.Minutes-Days", "%minutes% %minutes_placeholder% and %days% %days_placeholder%");
         validatePath(config, newConfig, "Placeholders.Time.Interest-Time.Minutes-Hours-Days", "%minutes% %minutes_placeholder%, %hours% %hours_placeholder% and %days% %days_placeholder%");
         validatePath(config, newConfig, "Placeholders.Time.Interest-Time.Hours-Days", "%hours% %hours_placeholder% and %days% %days_placeholder%");
+        addSpace(newConfig, "Placeholders");
+
+        validatePath(config, newConfig, "Placeholders.Upgrades.Max-Level", "&cMaxed");
+
+        commentsCount = 0;
+        spacesCount = 0;
 
         try {
             newConfig.save(newConfigFile);
         } catch (IOException e) {
             BPLogger.error(e.getMessage());
         }
-        recreateFile(newConfigFile);
         reloadConfig(Type.CONFIG);
+        recreateFile(newConfigFile);
     }
 
     public void buildMessages() {
@@ -526,6 +554,7 @@ public class ConfigManager {
         validatePath(messagesConfig, newMessagesConfig, "Set-Message", "%prefix% &aYou have set &f%player%'s &abank balance to &f%amount_formatted%&a!");
         validatePath(messagesConfig, newMessagesConfig, "Add-Message", "%prefix% &aYou have added &f%amount_formatted% Money &ato &f%player%'s &abank balance!");
         validatePath(messagesConfig, newMessagesConfig, "Remove-Message", "%prefix% &aYou have removed &f%amount_formatted% &amoney to &f%player%'s &abank balance!");
+        validatePath(messagesConfig, newMessagesConfig, "Set-Level-Message", "%prefix% &aYou have set &f%player%'s &abank level to &f%level%&a!");
         validatePath(messagesConfig, newMessagesConfig, "Pay-Message", "%prefix% &aYou have added &f%amount_formatted% Money &ato &f%player%'s &abank balance!");
         validatePath(messagesConfig, newMessagesConfig, "Chat-Deposit", "%prefix% &aType an amount in chat to deposit, type 'exit' to exit");
         validatePath(messagesConfig, newMessagesConfig, "Chat-Withdraw", "%prefix% &aType an amount in chat to withdraw, type 'exit' to exit");
@@ -547,6 +576,7 @@ public class ConfigManager {
         addComments(newMessagesConfig, "Interest Messages");
         validatePath(messagesConfig, newMessagesConfig, "Interest-Broadcast.Enabled", true);
         validatePath(messagesConfig, newMessagesConfig, "Interest-Broadcast.Message", "%prefix% &aYou have earned &f%amount_formatted% Money &ain interest!");
+        validatePath(messagesConfig, newMessagesConfig, "Interest-Broadcast.Multi-Message", "%prefix% &aYou have earned a total amount of &f%amount_formatted% Money &ain interest!");
         validatePath(messagesConfig, newMessagesConfig, "Interest-Broadcast.No-Money", "%prefix% &aSadly, you received 0 money from interest.");
         validatePath(messagesConfig, newMessagesConfig, "Interest-Broadcast.Bank-Full", "%prefix% &cYou can't earn anymore money from interest because your bank is full!");
         addSpace(newMessagesConfig);
@@ -557,10 +587,10 @@ public class ConfigManager {
         helpMessages.add("&a/bank deposit <amount> &7Deposit an amount of Money.");
         helpMessages.add("&a/bank withdraw <amount> &7Withdraw an amount of Money.");
         helpMessages.add("&a/bank view <player> &7View the balance of a player.");
-        helpMessages.add("&7&o(( For more help type /bank help <command> ))");
         helpMessages.add("&7Plugin made by Pulsi_");
         helpMessages.add("&aRate 5 Star!");
         validatePath(messagesConfig, newMessagesConfig, "Help-Message", helpMessages);
+        addSpace(newMessagesConfig);
 
         addComments(newMessagesConfig, "Errors");
         validatePath(messagesConfig, newMessagesConfig, "Specify-Number", "%prefix% &cPlease specify a number!");
@@ -569,30 +599,34 @@ public class ConfigManager {
         validatePath(messagesConfig, newMessagesConfig, "Invalid-Number", "%prefix% &cPlease choose a valid number!");
         validatePath(messagesConfig, newMessagesConfig, "Invalid-Player", "%prefix% &cPlease choose a valid player!");
         validatePath(messagesConfig, newMessagesConfig, "Invalid-Bank", "%prefix% &cPlease choose a valid bank!");
-        validatePath(messagesConfig, newMessagesConfig, "Not-Player", "%prefix% &cYou are not a player!");
-        validatePath(messagesConfig, newMessagesConfig, "Insufficient-Money", "%prefix% &cYou don't have enough money!");
-        validatePath(messagesConfig, newMessagesConfig, "No-Permission", "%prefix% &cYou don't have the permission! (%permission%)");
+        validatePath(messagesConfig, newMessagesConfig, "Invalid-Bank-Level", "%prefix% &cPlease choose a valid bank level!");
         validatePath(messagesConfig, newMessagesConfig, "Cannot-Deposit-Anymore", "%prefix% &cYou can't deposit anymore money!");
         validatePath(messagesConfig, newMessagesConfig, "Cannot-Use-Bank-Here", "%prefix% &cSorry, the bank is disabled in this world!");
         validatePath(messagesConfig, newMessagesConfig, "Cannot-Use-Negative-Number", "%prefix% &cYou can't use a negative number!");
         validatePath(messagesConfig, newMessagesConfig, "Bank-Full", "%prefix% &cThe bank of %player% is full!");
         validatePath(messagesConfig, newMessagesConfig, "Bank-Empty", "%prefix% &cThe bank of %player% is empty!");
-        validatePath(messagesConfig, newMessagesConfig, "Minimum-Number", "%prefix% &cPlease use an higher number for this action! ( Minimum: 10 )");
-        validatePath(messagesConfig, newMessagesConfig, "Gui-Module-Disabled", "%prefix% &cThe gui module is disabled!");
-        validatePath(messagesConfig, newMessagesConfig, "Internal-Error", "%prefix% &cAn internal error has occurred, try again later!");
         validatePath(messagesConfig, newMessagesConfig, "Cannot-Access-Bank", "%prefix% &cYou can't access to this bank!");
         validatePath(messagesConfig, newMessagesConfig, "Cannot-Access-Bank-Others", "%prefix% &c%player% can't access to this bank!");
         validatePath(messagesConfig, newMessagesConfig, "Bank-Max-Level", "%prefix% &cThe bank is already at the max level!");
+        validatePath(messagesConfig, newMessagesConfig, "Minimum-Number", "%prefix% &cPlease use an higher number for this action! ( Minimum: 10 )");
+        validatePath(messagesConfig, newMessagesConfig, "Not-Player", "%prefix% &cYou are not a player!");
+        validatePath(messagesConfig, newMessagesConfig, "Insufficient-Money", "%prefix% &cYou don't have enough money!");
+        validatePath(messagesConfig, newMessagesConfig, "Gui-Module-Disabled", "%prefix% &cThe gui module is disabled!");
+        validatePath(messagesConfig, newMessagesConfig, "Internal-Error", "%prefix% &cAn internal error has occurred, try again later!");
         validatePath(messagesConfig, newMessagesConfig, "Unknown-Command", "%prefix% &cUnknown Command!");
+        validatePath(messagesConfig, newMessagesConfig, "No-Permission", "%prefix% &cYou don't have the permission! (%permission%)");
         addSpace(newMessagesConfig);
+
+        commentsCount = 0;
+        spacesCount = 0;
 
         try {
             newMessagesConfig.save(newMessagesFile);
         } catch (IOException e) {
             BPLogger.error(e.getMessage());
         }
-        recreateFile(newMessagesFile);
         reloadConfig(Type.MESSAGES);
+        recreateFile(newMessagesFile);
     }
 
     public void buildMultipleBanks() {
@@ -642,7 +676,7 @@ public class ConfigManager {
         validatePath(multipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Lines", 1);
         addSpace(newMultipleBanksConfig, "Banks-Gui");
 
-        addComments(newMultipleBanksConfig, "In ticks.");
+        addCommentsUnder(newMultipleBanksConfig, "Banks-Gui", "In ticks.");
         validatePath(multipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Update-Delay", 20);
         addSpace(newMultipleBanksConfig, "Banks-Gui");
 
@@ -667,13 +701,16 @@ public class ConfigManager {
         validatePath(multipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Next-Page.Glowing", false);
         validatePath(multipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Next-Page.Slot", 9);
 
+        commentsCount = 0;
+        spacesCount = 0;
+
         try {
             newMultipleBanksConfig.save(newMultipleBanksFile);
         } catch (IOException e) {
             BPLogger.error(e.getMessage());
         }
-        recreateFile(newMultipleBanksFile);
         reloadConfig(Type.MULTIPLE_BANKS);
+        recreateFile(newMultipleBanksFile);
     }
 
     private void addSpace(FileConfiguration config) {

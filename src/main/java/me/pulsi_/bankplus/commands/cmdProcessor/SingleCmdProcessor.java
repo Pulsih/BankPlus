@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.commands.cmdProcessor;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
+import me.pulsi_.bankplus.account.AccountManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.guis.BanksHolder;
 import me.pulsi_.bankplus.guis.BanksManager;
@@ -161,6 +161,39 @@ public class SingleCmdProcessor {
 
                 Player p = (Player) s;
                 MessageManager.send(p, "Personal-Bank", BPMethods.placeValues(p, SingleEconomyManager.getBankBalance(p)));
+            }
+            break;
+
+            case "setlevel": {
+                if (!BPMethods.hasPermission(s, "bankplus.setlevel")) return;
+
+                if (args.length == 1) {
+                    MessageManager.send(s, "Specify-Player");
+                    return;
+                }
+                if (args.length == 2) {
+                    MessageManager.send(s, "Specify-Number");
+                    return;
+                }
+
+                String level = args[2], bankName = Values.CONFIG.getMainGuiName();
+                if (BPMethods.isInvalidNumber(level, s)) return;
+                if (!BanksManager.getLevels(bankName).contains(level)) {
+                    MessageManager.send(s, "Invalid-Bank-Level");
+                    return;
+                }
+
+                Player p = Bukkit.getPlayerExact(args[1]);
+                if (p == null) {
+                    OfflinePlayer oP = Bukkit.getOfflinePlayer(args[1]);
+                    AccountManager.getPlayerConfig(oP).set("Banks." + bankName + ".Level", Integer.valueOf(level));
+                    AccountManager.savePlayerFile(oP, true);
+                    MessageManager.send(s, "Set-Level-Message", "%player%$" + oP.getName(), "%level%$" + level);
+                } else {
+                    AccountManager.getPlayerConfig(p).set("Banks." + bankName + ".Level", Integer.valueOf(level));
+                    AccountManager.savePlayerFile(p, true);
+                    MessageManager.send(s, "Set-Level-Message", "%player%$" + p.getName(), "%level%$" + level);
+                }
             }
             break;
 
@@ -407,12 +440,14 @@ public class SingleCmdProcessor {
                 if (s.hasPermission("bankplus.help")) listOfArgs.add("help");
                 if (s.hasPermission("bankplus.interest")) listOfArgs.add("interest");
                 if (s.hasPermission("bankplus.interestmillis")) listOfArgs.add("interestMillis");
+                if (s.hasPermission("bankplus.open")) listOfArgs.add("open");
                 if (s.hasPermission("bankplus.pay")) listOfArgs.add("pay");
                 if (s.hasPermission("bankplus.reload")) listOfArgs.add("reload");
                 if (s.hasPermission("bankplus.remove")) listOfArgs.add("remove");
                 if (s.hasPermission("bankplus.restart-interest")) listOfArgs.add("restartInterest");
                 if (s.hasPermission("bankplus.saveallbankbalances")) listOfArgs.add("saveAllBankBalances");
                 if (s.hasPermission("bankplus.set")) listOfArgs.add("set");
+                if (s.hasPermission("bankplus.setlevel")) listOfArgs.add("setlevel");
                 if (s.hasPermission("bankplus.updatebanktop")) listOfArgs.add("updateBankTop");
                 if (s.hasPermission("bankplus.view")) listOfArgs.add("view");
                 if (s.hasPermission("bankplus.withdraw")) listOfArgs.add("withdraw");
@@ -463,7 +498,15 @@ public class SingleCmdProcessor {
                     case "force-open": {
                         if (!s.hasPermission("bankplus.force-open")) return null;
                         List<String> args3 = new ArrayList<>();
-                        for (String arg : new ArrayList<>(BanksManager.getBankNames())) if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
+                        for (String arg : BanksManager.getBankNames()) if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
+                        return args3;
+                    }
+
+                    case "setlevel": {
+                        if (!s.hasPermission("bankplus.setlevel")) return null;
+                        List<String> args3 = new ArrayList<>();
+                        for (String arg : BanksManager.getLevels(Values.CONFIG.getMainGuiName()))
+                            if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
                         return args3;
                     }
                 }

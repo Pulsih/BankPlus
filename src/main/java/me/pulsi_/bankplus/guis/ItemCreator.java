@@ -62,9 +62,7 @@ public class ItemCreator {
         return item;
     }
 
-    public static ItemStack getHead(ConfigurationSection itemValues, Player p) {
-        String material = itemValues.getString("Material");
-        if (material == null) return null;
+    public static ItemStack getHead(String material, Player p) {
         ItemStack item = null;
         try {
             if (material.equals("HEAD-%PLAYER%")) {

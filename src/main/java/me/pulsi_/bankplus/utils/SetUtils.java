@@ -12,19 +12,19 @@ public class SetUtils {
 
     public static Set<UUID> playerWithdrawing = new HashSet<>();
 
-    public static void addFromDepositingPlayers(Player p) {
+    public static void addPlayerToDeposit(Player p) {
         playerDepositing.add(p.getUniqueId());
     }
 
-    public static void addFromWithdrawingPlayers(Player p) {
+    public static void addPlayerToWithdraw(Player p) {
         playerWithdrawing.add(p.getUniqueId());
     }
 
-    public static void removeFromDepositingPlayers(Player p) {
+    public static void removePlayerFromDepositing(Player p) {
         playerDepositing.remove(p.getUniqueId());
     }
 
-    public static void removeFromWithdrawingPlayers(Player p) {
+    public static void removePlayerFromWithdrawing(Player p) {
         playerWithdrawing.remove(p.getUniqueId());
     }
 }

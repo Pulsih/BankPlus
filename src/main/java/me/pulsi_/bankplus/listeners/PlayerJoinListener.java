@@ -18,7 +18,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 import java.math.BigDecimal;
 
-public class PlayerJoin implements Listener {
+public class PlayerJoinListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {

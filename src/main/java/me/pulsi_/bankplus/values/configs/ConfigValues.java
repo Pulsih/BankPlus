@@ -12,55 +12,22 @@ import java.util.List;
 public class ConfigValues {
 
     private List<String> worldsBlacklist, exitCommands, bankTopFormat;
-    private String exitMessage;
+    private String exitMessage, playerChatPriority, bankClickPriority;
     private String second, seconds, minute, minutes, hour, hours, day, days;
     private String interestTimeOnlySeconds, interestTimeOnlyMinutes, interestTimeOnlyHours, interestTimeOnlyDays, interestTimeSecondsMinutes, interestTimeMinutesHours;
     private String interestTimeSecondsHours, interestTimeSecondsMinutesHours, interestTimeHoursDays, interestTimeMinutesDays, interestTimeSecondsDays;
     private String interestTimeMinutesHoursDays, interestTimeSecondsHoursDays, interestTimeSecondsMinutesHoursDays, interestTimeSecondsMinutesDays;
     private String k, m, b, t, q, qq;
-    private String withdrawSound;
-    private String depositSound;
-    private String viewSound;
-    private String personalSound;
-    private String notifyOfflineInterestMessage;
-    private String interestDelay;
-    private String interestOfflinePermission;
-    private String maxDepositAmount;
-    private String maxWithdrawAmount;
-    private String depositTaxes;
-    private String withdrawTaxes;
-    private String minimumAmount;
-    private String maxBankCapacity;
-    private String startAmount;
-    private long notifyOfflineInterestDelay;
-    private String interestMaxAmount;
-    private String interestMoneyGiven;
-    private boolean isReopeningBankAfterChat;
-    private boolean isInterestEnabled;
-    private boolean isNotifyOfflineInterest;
-    private boolean isStoringUUIDs;
-    private boolean isGivingInterestToOfflinePlayers;
-    private boolean isOfflineInterestEarnedMessageEnabled;
-    private boolean isUpdateCheckerEnabled;
-    private boolean isWithdrawSoundEnabled;
-    private boolean isDepositSoundEnabled;
-    private boolean isViewSoundEnabled;
-    private boolean isPersonalSoundEnabled;
-    private boolean isIgnoringAfkPlayers;
-    private boolean useEssentialsXAFK;
-    private int afkPlayersTime;
-    private int maxDecimalsAmount;
-    private long saveBalancedDelay;
-    private boolean banktopEnabled;
-    private long updateBankTopDelay;
-    private int bankTopSize;
-    private String bankTopMoneyFormat;
-    private boolean banktopUpdateBroadcastEnabled;
-    private boolean banktopUpdateBroadcastOnlyConsole;
-    private String banktopUpdateBroadcastMessage;
-    private boolean saveBalancesBroadcast;
-    private boolean guiModuleEnabled;
-    private String mainGuiName;
+    private String withdrawSound, depositSound, viewSound, personalSound;
+    private String notifyOfflineInterestMessage, interestDelay, interestOfflinePermission;
+    private String maxDepositAmount, maxWithdrawAmount, depositTaxes, withdrawTaxes, minimumAmount, maxBankCapacity, startAmount;
+    private String bankTopMoneyFormat, banktopUpdateBroadcastMessage, interestMaxAmount, interestMoneyGiven, bankUpgradedMax, mainGuiName;
+    private long notifyOfflineInterestDelay, saveBalancedDelay, updateBankTopDelay;
+    private int afkPlayersTime, maxDecimalsAmount, bankTopSize;
+    private boolean isReopeningBankAfterChat, isInterestEnabled, isNotifyOfflineInterest, isStoringUUIDs, isGivingInterestToOfflinePlayers;
+    private boolean isOfflineInterestEarnedMessageEnabled, isUpdateCheckerEnabled, isWithdrawSoundEnabled, isDepositSoundEnabled;
+    private boolean isViewSoundEnabled, isPersonalSoundEnabled, isIgnoringAfkPlayers, useEssentialsXAFK;
+    private boolean banktopEnabled, banktopUpdateBroadcastEnabled, banktopUpdateBroadcastOnlyConsole, saveBalancesBroadcast, guiModuleEnabled;
 
     public static ConfigValues getInstance() {
         return new ConfigValues();
@@ -70,6 +37,8 @@ public class ConfigValues {
         FileConfiguration config = BankPlus.getCm().getConfig(ConfigManager.Type.CONFIG);
 
         exitMessage = config.getString("General.Chat-Exit-Message");
+        playerChatPriority = config.getString("General.Event-Priorities.PlayerChat");
+        bankClickPriority = config.getString("General.Event-Priorities.BankClick");
         second = config.getString("Placeholders.Time.Second");
         seconds = config.getString("Placeholders.Time.Seconds");
         minute = config.getString("Placeholders.Time.Minute");
@@ -116,6 +85,7 @@ public class ConfigValues {
         notifyOfflineInterestDelay = config.getLong("General.Offline-Interest-Earned-Message.Delay");
         interestMaxAmount = config.getString("Interest.Max-Amount");
         interestMoneyGiven = config.getString("Interest.Money-Given");
+        bankUpgradedMax = config.getString("Placeholders.Upgrades.Max-Level");
         worldsBlacklist = config.getStringList("General.Worlds-Blacklist");
         exitCommands = config.getStringList("General.Chat-Exit-Commands");
         isReopeningBankAfterChat = config.getBoolean("General.Reopen-Bank-After-Chat");
@@ -145,6 +115,14 @@ public class ConfigValues {
         saveBalancesBroadcast = config.getBoolean("General.Save-Broadcast");
         guiModuleEnabled = config.getBoolean("General.Enable-Guis");
         mainGuiName = config.getString("General.Main-Gui");
+    }
+
+    public String getPlayerChatPriority() {
+        return playerChatPriority;
+    }
+
+    public String getBankClickPriority() {
+        return bankClickPriority;
     }
 
     public String getExitMessage() {
@@ -388,6 +366,10 @@ public class ConfigValues {
             return new BigDecimal(0);
         }
         return new BigDecimal(interestMoneyGiven.replace("%", ""));
+    }
+
+    public String getBankUpgradedMax() {
+        return bankUpgradedMax == null ? "&cMaxed" : bankUpgradedMax;
     }
 
     public List<String> getWorldsBlacklist() {

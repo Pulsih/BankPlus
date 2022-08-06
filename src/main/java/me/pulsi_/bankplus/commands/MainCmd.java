@@ -32,7 +32,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
         }
 
         if (args.length > 0) {
-            switch (args[0]) {
+            switch (args[0].toLowerCase()) {
                 case "reload": {
                     if (!BPMethods.hasPermission(s, "bankplus.reload")) return false;
 

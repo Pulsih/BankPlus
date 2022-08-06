@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.guis;
 
 import me.pulsi_.bankplus.utils.BPChat;
+import me.pulsi_.bankplus.utils.BPLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
@@ -15,7 +16,7 @@ import java.util.List;
 public class GuiManager {
 
     public static Inventory getGuiBank(String identifier) {
-        Inventory bank = Bukkit.createInventory(new BanksHolder(), BanksManager.getLines(identifier), BPChat.color(BanksManager.getTitle(identifier)));
+        Inventory bank = Bukkit.createInventory(null, BanksManager.getLines(identifier), BanksManager.getTitle(identifier));
 
         ConfigurationSection items = BanksManager.getItems(identifier);
         if (items == null) return bank;
@@ -51,17 +52,27 @@ public class GuiManager {
     private static void setMeta(ConfigurationSection itemValues, ItemStack item) {
         ItemMeta meta = item.getItemMeta();
 
-        String displayName = itemValues.getString("Displayname");
+        String displayname = itemValues.getString("Displayname");
         List<String> lore = new ArrayList<>();
         for (String lines : itemValues.getStringList("Lore")) lore.add(BPChat.color(lines));
 
-        meta.setDisplayName(displayName == null ? "&c&l*CANNOT FIND DISPLAYNAME*" : BPChat.color(displayName));
+        meta.setDisplayName(BPChat.color(displayname == null ? "&c&l*CANNOT FIND DISPLAYNAME*" : displayname));
         meta.setLore(lore);
 
         if (itemValues.getBoolean("Glowing")) {
             meta.addEnchant(Enchantment.DURABILITY, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
+
+        int modelData = itemValues.getInt("CustomModelData");
+        if (modelData > 0) {
+            try {
+                meta.setCustomModelData(modelData);
+            } catch (NoSuchMethodError e) {
+                BPLogger.warn("Cannot set custom model data to the item: \"" + displayname + "\"&e. Custom model data is only available on 1.14.4+ servers!");
+            }
+        }
+
         item.setItemMeta(meta);
     }
 }
