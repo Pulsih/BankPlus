@@ -1,10 +1,10 @@
 package me.pulsi_.bankplus.commands.cmdProcessor;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.AccountManager;
+import me.pulsi_.bankplus.account.BankPlusPlayerFilesUtils;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.guis.BanksHolder;
-import me.pulsi_.bankplus.guis.BanksManager;
+import me.pulsi_.bankplus.banks.BanksHolder;
+import me.pulsi_.bankplus.banks.BanksManager;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
@@ -22,6 +22,11 @@ import java.util.List;
 public class MultiCmdProcessor {
 
     public static void processCmd(CommandSender s, String[] args) {
+
+        BanksHolder banksHolder = new BanksHolder();
+        MultiEconomyManager multiEconomyManager = null;
+        if (s instanceof Player) multiEconomyManager = new MultiEconomyManager((Player) s);
+
         if (args.length == 0) {
             if (!BPMethods.hasPermission(s, "bankplus.use")) return;
             if (!(s instanceof Player)) {
@@ -30,9 +35,9 @@ public class MultiCmdProcessor {
             }
 
             Player p = (Player) s;
-            if (Values.CONFIG.isGuiModuleEnabled()) BanksHolder.openBank(p, "MultipleBanksGui");
+            if (Values.CONFIG.isGuiModuleEnabled()) banksHolder.openBank(p, "MultipleBanksGui");
             else {
-                MessageManager.send(p, "Multiple-Personal-Bank", BPMethods.placeValues(p, MultiEconomyManager.getBankBalance(p)));
+                MessageManager.send(p, "Multiple-Personal-Bank", BPMethods.placeValues(p, multiEconomyManager.getBankBalance()));
                 BPMethods.playSound("PERSONAL", p);
             }
             return;
@@ -58,7 +63,7 @@ public class MultiCmdProcessor {
                 }
 
                 String bankName = args[2];
-                if (!BanksManager.exist(bankName)) {
+                if (!new BanksManager().exist(bankName)) {
                     MessageManager.send(s, "Invalid-Bank");
                     return;
                 }
@@ -86,7 +91,7 @@ public class MultiCmdProcessor {
                 }
 
                 String bankName = args[2];
-                if (!BanksManager.exist(bankName)) {
+                if (!new BanksManager().exist(bankName)) {
                     MessageManager.send(s, "Invalid-Bank");
                     return;
                 }
@@ -115,11 +120,11 @@ public class MultiCmdProcessor {
                 }
                 String identifier = args[2];
 
-                if (!BanksManager.exist(identifier)) {
+                if (!new BanksManager().exist(identifier)) {
                     MessageManager.send(s, "Invalid-Bank");
                     return;
                 }
-                BanksHolder.openBank(p, identifier);
+                banksHolder.openBank(p, identifier);
                 MessageManager.send(s, "Force-Open", "%player%$" + p.getName());
             }
             break;
@@ -131,7 +136,7 @@ public class MultiCmdProcessor {
                     MessageManager.send(s, "Specify-Bank");
                     return;
                 }
-                BanksHolder.openBank((Player) s, args[1]);
+                banksHolder.openBank((Player) s, args[1]);
             }
             break;
 
@@ -158,13 +163,13 @@ public class MultiCmdProcessor {
                     return;
                 }
 
-                String bankName1 = args[2];
-                if (BanksManager.exist(bankName1)) {
+                String fromBank = args[2];
+                if (new BanksManager().exist(fromBank)) {
                     MessageManager.send(s, "Invalid-Bank");
                     return;
                 }
-                String bankName2 = args[3];
-                if (BanksManager.exist(bankName2)) {
+                String toBank = args[3];
+                if (new BanksManager().exist(toBank)) {
                     MessageManager.send(s, "Invalid-Bank");
                     return;
                 }
@@ -173,7 +178,7 @@ public class MultiCmdProcessor {
                 if (BPMethods.isInvalidNumber(num, s)) return;
                 BigDecimal amount = new BigDecimal(num);
 
-                MultiEconomyManager.pay(p, target, amount, bankName1, bankName2);
+                multiEconomyManager.pay(fromBank, target, amount, toBank);
             }
             break;
 
@@ -190,32 +195,32 @@ public class MultiCmdProcessor {
                     Player p = Bukkit.getPlayerExact(args[1]);
                     if (p == null) {
                         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
-                        MessageManager.send(s, "Multiple-Bank-Others", BPMethods.placeValues(offlinePlayer, MultiEconomyManager.getBankBalance(offlinePlayer)));
+                        MessageManager.send(s, "Multiple-Bank-Others", BPMethods.placeValues(offlinePlayer, new MultiEconomyManager(offlinePlayer).getBankBalance()));
                         return;
                     }
-                    MessageManager.send(s, "Multiple-Bank-Others", BPMethods.placeValues(p, MultiEconomyManager.getBankBalance(p)));
+                    MessageManager.send(s, "Multiple-Bank-Others", BPMethods.placeValues(p, new MultiEconomyManager(p).getBankBalance()));
                 } else {
                     String bankName = args[2];
-                    if (BanksManager.exist(bankName)) {
+                    if (new BanksManager().exist(bankName)) {
                         MessageManager.send(s, "Invalid-Bank");
                         return;
                     }
                     if (s instanceof Player) BPMethods.playSound("VIEW", (Player) s);
                     Player p = Bukkit.getPlayerExact(args[1]);
                     if (p == null) {
-                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
-                        if (!BanksManager.isAvailable(p, bankName)) {
-                            MessageManager.send(s, "Cannot-Access-Bank-Others", "%player%$" + p.getName());
+                        OfflinePlayer oP = Bukkit.getOfflinePlayer(args[1]);
+                        if (!new BanksManager(bankName).isAvailable(oP)) {
+                            MessageManager.send(s, "Cannot-Access-Bank-Others", "%player%$" + oP.getName());
                             return;
                         }
-                        MessageManager.send(s, "Bank-Others", BPMethods.placeValues(offlinePlayer, MultiEconomyManager.getBankBalance(offlinePlayer, bankName)));
+                        MessageManager.send(s, "Bank-Others", BPMethods.placeValues(oP, new MultiEconomyManager(oP).getBankBalance(bankName)));
                         return;
                     }
-                    if (!BanksManager.isAvailable(p, bankName)) {
+                    if (!new BanksManager(bankName).isAvailable(p)) {
                         MessageManager.send(s, "Cannot-Access-Bank-Others", "%player%$" + p.getName());
                         return;
                     }
-                    MessageManager.send(s, "Bank-Others", BPMethods.placeValues(p, MultiEconomyManager.getBankBalance(p, bankName)));
+                    MessageManager.send(s, "Bank-Others", BPMethods.placeValues(p, new MultiEconomyManager(p).getBankBalance(bankName)));
                 }
             }
             break;
@@ -226,14 +231,14 @@ public class MultiCmdProcessor {
 
                 Player p = (Player) s;
                 if (args.length == 1)
-                    MessageManager.send(p, "Multiple-Personal-Bank", BPMethods.placeValues(p, MultiEconomyManager.getBankBalance(p)));
+                    MessageManager.send(p, "Multiple-Personal-Bank", BPMethods.placeValues(p, multiEconomyManager.getBankBalance()));
                 else {
                     String bankName = args[1];
-                    if (!BanksManager.exist(bankName)) {
+                    if (!new BanksManager().exist(bankName)) {
                         MessageManager.send(s, "Invalid-Bank");
                         return;
                     }
-                    MessageManager.send(p, "Personal-Bank", BPMethods.placeValues(p, MultiEconomyManager.getBankBalance(p, bankName)));
+                    MessageManager.send(p, "Personal-Bank", BPMethods.placeValues(p, multiEconomyManager.getBankBalance(bankName)));
                 }
             }
             break;
@@ -255,14 +260,16 @@ public class MultiCmdProcessor {
                 }
 
                 String bankName = args[2];
-                if (!BanksManager.exist(bankName)) {
+                BanksManager banksManager = new BanksManager(bankName);
+
+                if (!banksManager.exist(bankName)) {
                     MessageManager.send(s, "Invalid-Bank");
                     return;
                 }
 
                 String level = args[3];
                 if (BPMethods.isInvalidNumber(level, s)) return;
-                if (!BanksManager.getLevels(bankName).contains(level)) {
+                if (!banksManager.getLevels().contains(level)) {
                     MessageManager.send(s, "Invalid-Bank-Level");
                     return;
                 }
@@ -270,12 +277,12 @@ public class MultiCmdProcessor {
                 Player p = Bukkit.getPlayerExact(args[1]);
                 if (p == null) {
                     OfflinePlayer oP = Bukkit.getOfflinePlayer(args[1]);
-                    AccountManager.getPlayerConfig(oP).set("Banks." + bankName + ".Level", Integer.valueOf(level));
-                    AccountManager.savePlayerFile(oP, true);
+                    BankPlusPlayerFilesUtils.getPlayerConfig(oP).set("Banks." + bankName + ".Level", Integer.valueOf(level));
+                    BankPlusPlayerFilesUtils.savePlayerFile(oP, true);
                     MessageManager.send(s, "Set-Level-Message", "%player%$" + oP.getName(), "%level%$" + level);
                 } else {
-                    AccountManager.getPlayerConfig(p).set("Banks." + bankName + ".Level", Integer.valueOf(level));
-                    AccountManager.savePlayerFile(p, true);
+                    BankPlusPlayerFilesUtils.getPlayerConfig(p).set("Banks." + bankName + ".Level", Integer.valueOf(level));
+                    BankPlusPlayerFilesUtils.savePlayerFile(p, true);
                     MessageManager.send(s, "Set-Level-Message", "%player%$" + p.getName(), "%level%$" + level);
                 }
             }
@@ -284,7 +291,6 @@ public class MultiCmdProcessor {
             case "withdraw": {
                 if (!BPMethods.hasPermission(s, "bankplus.withdraw") || !BPMethods.isPlayer(s)) return;
 
-                Player p = (Player) s;
                 if (args.length == 1) {
                     MessageManager.send(s, "Specify-Number");
                     return;
@@ -294,7 +300,7 @@ public class MultiCmdProcessor {
                     return;
                 }
                 String bankName = args[2];
-                if (!BanksManager.exist(bankName)) {
+                if (!new BanksManager().exist(bankName)) {
                     MessageManager.send(s, "Invalid-Bank");
                     return;
                 }
@@ -302,20 +308,20 @@ public class MultiCmdProcessor {
                 BigDecimal amount;
                 switch (args[1]) {
                     case "all":
-                        amount = MultiEconomyManager.getBankBalance(p);
-                        MultiEconomyManager.withdraw(p, amount, bankName);
+                        amount = multiEconomyManager.getBankBalance();
+                        multiEconomyManager.withdraw(amount, bankName);
                         break;
 
                     case "half":
-                        amount = MultiEconomyManager.getBankBalance(p).divide(BigDecimal.valueOf(2));
-                        MultiEconomyManager.withdraw(p, amount, bankName);
+                        amount = multiEconomyManager.getBankBalance().divide(BigDecimal.valueOf(2));
+                        multiEconomyManager.withdraw(amount, bankName);
                         break;
 
                     default:
                         String num = args[1];
                         if (BPMethods.isInvalidNumber(num, s)) return;
                         amount = new BigDecimal(num);
-                        MultiEconomyManager.withdraw(p, amount, bankName);
+                        multiEconomyManager.withdraw(amount, bankName);
                 }
             }
             break;
@@ -333,7 +339,7 @@ public class MultiCmdProcessor {
                     return;
                 }
                 String bankName = args[2];
-                if (!BanksManager.exist(bankName)) {
+                if (!new BanksManager().exist(bankName)) {
                     MessageManager.send(s, "Invalid-Bank");
                     return;
                 }
@@ -341,20 +347,20 @@ public class MultiCmdProcessor {
                 BigDecimal amount;
                 switch (args[1]) {
                     case "all":
-                        amount = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p));
-                        MultiEconomyManager.deposit(p, amount, bankName);
+                        amount = BigDecimal.valueOf(BankPlus.instance().getEconomy().getBalance(p));
+                        multiEconomyManager.deposit(amount, bankName);
                         break;
 
                     case "half":
-                        amount = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p) / 2);
-                        MultiEconomyManager.deposit(p, amount, bankName);
+                        amount = BigDecimal.valueOf(BankPlus.instance().getEconomy().getBalance(p) / 2);
+                        multiEconomyManager.deposit(amount, bankName);
                         break;
 
                     default:
                         String num = args[1];
                         if (BPMethods.isInvalidNumber(num, s)) return;
                         amount = new BigDecimal(num);
-                        MultiEconomyManager.deposit(p, amount, bankName);
+                        multiEconomyManager.deposit(amount, bankName);
                 }
             }
             break;
@@ -376,7 +382,7 @@ public class MultiCmdProcessor {
                 }
 
                 String bankName = args[2];
-                if (!BanksManager.exist(bankName)) {
+                if (!new BanksManager().exist(bankName)) {
                     MessageManager.send(s, "Invalid-Bank");
                     return;
                 }
@@ -384,37 +390,38 @@ public class MultiCmdProcessor {
                 String num = args[3];
                 if (BPMethods.isInvalidNumber(num, s)) return;
                 BigDecimal amount = new BigDecimal(num);
+                BanksManager banksManager = new BanksManager(bankName);
 
                 Player p = Bukkit.getPlayerExact(args[1]);
                 if (p == null) {
                     OfflinePlayer oP = Bukkit.getOfflinePlayer(args[1]);
 
-                    BigDecimal capacity = BanksManager.getCapacity(oP, bankName), balance = MultiEconomyManager.getBankBalance(oP, bankName);
+                    BigDecimal capacity = banksManager.getCapacity(oP), balance = new MultiEconomyManager(oP).getBankBalance(bankName);
                     if (capacity.equals(balance)) {
                         MessageManager.send(s, "Bank-Full", "%player%$" + oP.getName());
                         return;
                     }
                     if (amount.doubleValue() >= capacity.doubleValue()) {
                         MessageManager.send(s, "Set-Message", BPMethods.placeValues(oP, capacity));
-                        MultiEconomyManager.setBankBalance(oP, capacity, bankName);
+                        new MultiEconomyManager(oP).setBankBalance(capacity, bankName);
                         return;
                     }
-                    MultiEconomyManager.setBankBalance(oP, amount, bankName);
+                    new MultiEconomyManager(oP).setBankBalance(amount, bankName);
                     MessageManager.send(s, "Set-Message", BPMethods.placeValues(oP, amount));
                     return;
                 }
 
-                BigDecimal capacity = BanksManager.getCapacity(p, bankName), balance = MultiEconomyManager.getBankBalance(p, bankName);
+                BigDecimal capacity = banksManager.getCapacity(p), balance = new MultiEconomyManager(p).getBankBalance(bankName);
                 if (capacity.equals(balance)) {
                     MessageManager.send(s, "Bank-Full", "%player%$" + p.getName());
                     return;
                 }
                 if (amount.doubleValue() >= capacity.doubleValue()) {
                     MessageManager.send(s, "Set-Message", BPMethods.placeValues(p, capacity));
-                    MultiEconomyManager.setBankBalance(p, capacity, bankName);
+                    new MultiEconomyManager(p).setBankBalance(capacity, bankName);
                     return;
                 }
-                MultiEconomyManager.setBankBalance(p, amount, bankName);
+                new MultiEconomyManager(p).setBankBalance(amount, bankName);
                 MessageManager.send(s, "Set-Message", BPMethods.placeValues(p, amount));
             }
             break;
@@ -436,7 +443,7 @@ public class MultiCmdProcessor {
                 }
 
                 String bankName = args[2];
-                if (!BanksManager.exist(bankName)) {
+                if (!new BanksManager().exist(bankName)) {
                     MessageManager.send(s, "Invalid-Bank");
                     return;
                 }
@@ -444,37 +451,38 @@ public class MultiCmdProcessor {
                 String num = args[3];
                 if (BPMethods.isInvalidNumber(num, s)) return;
                 BigDecimal amount = new BigDecimal(num);
+                BanksManager banksManager = new BanksManager(bankName);
 
                 Player p = Bukkit.getPlayerExact(args[1]);
                 if (p == null) {
                     OfflinePlayer oP = Bukkit.getOfflinePlayer(args[1]);
 
-                    BigDecimal capacity = BanksManager.getCapacity(oP, bankName), balance = MultiEconomyManager.getBankBalance(oP, bankName);
+                    BigDecimal capacity = banksManager.getCapacity(oP), balance = new MultiEconomyManager(oP).getBankBalance(bankName);
                     if (capacity.equals(balance)) {
                         MessageManager.send(s, "Bank-Full", "%player%$" + oP.getName());
                         return;
                     }
                     if (balance.add(amount).doubleValue() >= capacity.doubleValue()) {
                         MessageManager.send(s, "Add-Message", BPMethods.placeValues(oP, capacity.subtract(balance)));
-                        MultiEconomyManager.setBankBalance(oP, capacity, bankName);
+                        new MultiEconomyManager(oP).setBankBalance(capacity, bankName);
                         return;
                     }
-                    MultiEconomyManager.addBankBalance(oP, amount, bankName);
+                    new MultiEconomyManager(oP).addBankBalance(amount, bankName);
                     MessageManager.send(s, "Add-Message", BPMethods.placeValues(oP, amount));
                     return;
                 }
 
-                BigDecimal capacity = BanksManager.getCapacity(p, bankName), balance = MultiEconomyManager.getBankBalance(p, bankName);
+                BigDecimal capacity = banksManager.getCapacity(p), balance = new MultiEconomyManager(p).getBankBalance(bankName);
                 if (capacity.equals(balance)) {
                     MessageManager.send(s, "Bank-Full", "%player%$" + p.getName());
                     return;
                 }
                 if (balance.add(amount).doubleValue() >= capacity.doubleValue()) {
                     MessageManager.send(s, "Add-Message", BPMethods.placeValues(p, capacity.subtract(balance)));
-                    MultiEconomyManager.setBankBalance(p, capacity, bankName);
+                    new MultiEconomyManager(p).setBankBalance(capacity, bankName);
                     return;
                 }
-                MultiEconomyManager.addBankBalance(p, amount, bankName);
+                new MultiEconomyManager(p).addBankBalance(amount, bankName);
                 MessageManager.send(s, "Add-Message", BPMethods.placeValues(p, amount));
             }
             break;
@@ -496,7 +504,7 @@ public class MultiCmdProcessor {
                 }
 
                 String bankName = args[2];
-                if (!BanksManager.exist(bankName)) {
+                if (!new BanksManager().exist(bankName)) {
                     MessageManager.send(s, "Invalid-Bank");
                     return;
                 }
@@ -509,39 +517,39 @@ public class MultiCmdProcessor {
                 if (p == null) {
                     OfflinePlayer oP = Bukkit.getOfflinePlayer(args[1]);
 
-                    BigDecimal balance = MultiEconomyManager.getBankBalance(oP, bankName);
+                    BigDecimal balance = new MultiEconomyManager(oP).getBankBalance(bankName);
                     if (balance.equals(new BigDecimal(0))) {
                         MessageManager.send(s, "Bank-Empty", "%player%$" + oP.getName());
                         return;
                     }
                     if (balance.subtract(amount).doubleValue() <= 0) {
                         MessageManager.send(s, "Remove-Message", BPMethods.placeValues(oP, balance));
-                        MultiEconomyManager.setBankBalance(oP, new BigDecimal(0), bankName);
+                        new MultiEconomyManager(oP).setBankBalance(new BigDecimal(0), bankName);
                         return;
                     }
-                    MultiEconomyManager.removeBankBalance(oP, amount, bankName);
+                    new MultiEconomyManager(oP).removeBankBalance(amount, bankName);
                     MessageManager.send(s, "Remove-Message", BPMethods.placeValues(oP, amount));
                     return;
                 }
 
-                BigDecimal balance = MultiEconomyManager.getBankBalance(p, bankName);
+                BigDecimal balance = new MultiEconomyManager(p).getBankBalance(bankName);
                 if (balance.equals(new BigDecimal(0))) {
                     MessageManager.send(s, "Bank-Empty", "%player%$" + p.getName());
                     return;
                 }
                 if (balance.subtract(amount).doubleValue() <= 0) {
                     MessageManager.send(s, "Remove-Message", BPMethods.placeValues(p, balance));
-                    MultiEconomyManager.setBankBalance(p, new BigDecimal(0), bankName);
+                    new MultiEconomyManager(p).setBankBalance(new BigDecimal(0), bankName);
                     return;
                 }
-                MultiEconomyManager.removeBankBalance(p, amount, bankName);
+                new MultiEconomyManager(p).removeBankBalance(amount, bankName);
                 MessageManager.send(s, "Remove-Message", BPMethods.placeValues(p, amount));
             }
             break;
 
             case "saveallbankbalances": {
                 if (!BPMethods.hasPermission(s, "bankplus.saveallbankbalances")) return;
-                Bukkit.getOnlinePlayers().forEach(MultiEconomyManager::saveBankBalance);
+                Bukkit.getOnlinePlayers().forEach(p -> new MultiEconomyManager(p).saveBankBalance());
                 MessageManager.send(s, "Balances-Saved");
                 if (Values.CONFIG.isSaveBalancesBroadcast()) BPLogger.info("All player balances have been saved!");
             }
@@ -616,7 +624,7 @@ public class MultiCmdProcessor {
                     case "open": {
                         if (!s.hasPermission("bankplus.open")) return null;
                         List<String> args2 = new ArrayList<>();
-                        for (String arg : BanksManager.getBankNames())
+                        for (String arg : BankPlus.instance().getBanks().keySet())
                             if (arg.startsWith(args[1].toLowerCase())) args2.add(arg);
                         return args2;
                     }
@@ -637,7 +645,7 @@ public class MultiCmdProcessor {
                     case "add": {
                         if (!s.hasPermission("bankplus.add")) return null;
                         List<String> args3 = new ArrayList<>();
-                        for (String arg : BanksManager.getBankNames())
+                        for (String arg : BankPlus.instance().getBanks().keySet())
                             if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
                         return args3;
                     }
@@ -646,7 +654,7 @@ public class MultiCmdProcessor {
                     case "balance": {
                         if (!s.hasPermission("bankplus.balance")) return null;
                         List<String> args3 = new ArrayList<>();
-                        for (String arg : BanksManager.getBankNames())
+                        for (String arg : BankPlus.instance().getBanks().keySet())
                             if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
                         return args3;
                     }
@@ -654,7 +662,7 @@ public class MultiCmdProcessor {
                     case "deposit": {
                         if (!s.hasPermission("bankplus.deposit")) return null;
                         List<String> args3 = new ArrayList<>();
-                        for (String arg : BanksManager.getBankNames())
+                        for (String arg : BankPlus.instance().getBanks().keySet())
                             if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
                         return args3;
                     }
@@ -662,7 +670,7 @@ public class MultiCmdProcessor {
                     case "force-open": {
                         if (!s.hasPermission("bankplus.force-open")) return null;
                         List<String> args3 = new ArrayList<>();
-                        for (String arg : BanksManager.getBankNames())
+                        for (String arg : BankPlus.instance().getBanks().keySet())
                             if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
                         return args3;
                     }
@@ -670,7 +678,7 @@ public class MultiCmdProcessor {
                     case "pay": {
                         if (!BPMethods.isPlayer(s) || !s.hasPermission("bankplus.pay")) return null;
                         List<String> args3 = new ArrayList<>();
-                        for (String arg : BanksManager.getBankNames())
+                        for (String arg : BankPlus.instance().getBanks().keySet())
                             if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
                         return args3;
                     }
@@ -678,7 +686,7 @@ public class MultiCmdProcessor {
                     case "remove": {
                         if (!s.hasPermission("bankplus.remove")) return null;
                         List<String> args3 = new ArrayList<>();
-                        for (String arg : BanksManager.getBankNames())
+                        for (String arg : BankPlus.instance().getBanks().keySet())
                             if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
                         return args3;
                     }
@@ -686,7 +694,7 @@ public class MultiCmdProcessor {
                     case "set": {
                         if (!s.hasPermission("bankplus.set")) return null;
                         List<String> args3 = new ArrayList<>();
-                        for (String arg : BanksManager.getBankNames())
+                        for (String arg : BankPlus.instance().getBanks().keySet())
                             if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
                         return args3;
                     }
@@ -694,7 +702,7 @@ public class MultiCmdProcessor {
                     case "setlevel": {
                         if (!s.hasPermission("bankplus.setlevel")) return null;
                         List<String> args3 = new ArrayList<>();
-                        for (String arg : BanksManager.getBankNames())
+                        for (String arg : BankPlus.instance().getBanks().keySet())
                             if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
                         return args3;
                     }
@@ -702,7 +710,7 @@ public class MultiCmdProcessor {
                     case "view": {
                         if (!s.hasPermission("bankplus.view")) return null;
                         List<String> args3 = new ArrayList<>();
-                        for (String arg : BanksManager.getBankNames())
+                        for (String arg : BankPlus.instance().getBanks().keySet())
                             if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
                         return args3;
                     }
@@ -710,7 +718,7 @@ public class MultiCmdProcessor {
                     case "withdraw": {
                         if (!s.hasPermission("bankplus.withdraw")) return null;
                         List<String> args3 = new ArrayList<>();
-                        for (String arg : BanksManager.getBankNames())
+                        for (String arg : BankPlus.instance().getBanks().keySet())
                             if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
                         return args3;
                     }
@@ -723,7 +731,7 @@ public class MultiCmdProcessor {
                     case "pay": {
                         if (!BPMethods.isPlayer(s) || !s.hasPermission("bankplus.pay")) return null;
                         List<String> args4 = new ArrayList<>();
-                        for (String arg : BanksManager.getBankNames())
+                        for (String arg : BankPlus.instance().getBanks().keySet())
                             if (arg.startsWith(args[3].toLowerCase())) args4.add(arg);
                         return args4;
                     }
@@ -731,7 +739,7 @@ public class MultiCmdProcessor {
                     case "setlevel": {
                         if (!s.hasPermission("bankplus.setlevel")) return null;
                         List<String> args4 = new ArrayList<>();
-                        for (String arg : BanksManager.getLevels(args[2]))
+                        for (String arg : new BanksManager(args[2]).getLevels())
                             if (arg.startsWith(args[3].toLowerCase())) args4.add(arg);
                         return args4;
                     }

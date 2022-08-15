@@ -1,8 +1,8 @@
 package me.pulsi_.bankplus.account.economy;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.AccountManager;
-import me.pulsi_.bankplus.guis.BanksManager;
+import me.pulsi_.bankplus.account.BankPlusPlayerFilesUtils;
+import me.pulsi_.bankplus.banks.BanksManager;
 import me.pulsi_.bankplus.managers.BankTopManager;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.BPDebugger;
@@ -31,6 +31,18 @@ public class MultiEconomyManager {
      * The main HashMap that holds all player bank balances.
      */
     public static Map<String, BigDecimal> bankPlayerMoney = new HashMap<>();
+    private final Player p;
+    private final OfflinePlayer oP;
+
+    public MultiEconomyManager(Player player) {
+        this.p = player;
+        this.oP = null;
+    }
+
+    public MultiEconomyManager(OfflinePlayer player) {
+        this.p = null;
+        this.oP = player;
+    }
 
     /**
      * Return a list with all player balances.
@@ -40,7 +52,7 @@ public class MultiEconomyManager {
     public static List<BigDecimal> getAllBankBalances() {
         List<BigDecimal> balances = new ArrayList<>();
 
-        File dataFolder = new File(BankPlus.getInstance().getDataFolder(), "playerdata");
+        File dataFolder = new File(BankPlus.instance().getDataFolder(), "playerdata");
         File[] files = dataFolder.listFiles();
         if (files == null) return balances;
 
@@ -75,74 +87,70 @@ public class MultiEconomyManager {
 
     /**
      * Load the player bank balances.
-     *
-     * @param p The player.
      */
-    public static void loadBankBalance(Player p) {
-        for (String bankName : BanksManager.getBankNames()) {
+    public void loadBankBalance() {
+        if (onNull(p, "Cannot load player bank balance!")) return;
+        for (String bankName : BankPlus.instance().getBanks().keySet()) {
             if (bankPlayerMoney.containsKey(p.getUniqueId() + "." + bankName)) return;
-            String bal = AccountManager.getPlayerConfig(p).getString("Banks." + bankName + ".Money");
+            String bal = BankPlusPlayerFilesUtils.getPlayerConfig(p).getString("Banks." + bankName + ".Money");
             bankPlayerMoney.put(p.getUniqueId() + "." + bankName, bal == null ? new BigDecimal(0) : new BigDecimal(bal));
         }
     }
 
     /**
      * Unload the player bank balances.
-     *
-     * @param p The player.
      */
-    public static void unloadBankBalance(Player p) {
-        FileConfiguration config = AccountManager.getPlayerConfig(p);
+    public void unloadBankBalance() {
+        if (onNull(p, "Cannot unload player bank balance!")) return;
+        FileConfiguration config = BankPlusPlayerFilesUtils.getPlayerConfig(p);
         ConfigurationSection section = config.getConfigurationSection("Banks");
         if (section != null) section.getKeys(false).forEach(key -> bankPlayerMoney.remove(p.getUniqueId() + "." + key));
     }
 
     /**
      * Save the selected bank balance to the player file.
-     *
-     * @param p The player.
      */
-    public static void saveBankBalance(Player p, String bankName) {
-        FileConfiguration players = AccountManager.getPlayerConfig(p);
-        players.set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(getBankBalance(p, bankName)));
-        AccountManager.savePlayerFile(p, true);
+    public void saveBankBalance(String bankName) {
+        if (onNull(p, "Cannot save player bank balance!")) return;
+        FileConfiguration players = BankPlusPlayerFilesUtils.getPlayerConfig(p);
+        players.set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(getBankBalance(bankName)));
+        BankPlusPlayerFilesUtils.savePlayerFile(p, true);
     }
 
     /**
      * Save all bank balances to the player file.
-     *
-     * @param p The player.
      */
-    public static void saveBankBalance(Player p) {
-        for (String bankName : BanksManager.getBankNames()) {
-            FileConfiguration players = AccountManager.getPlayerConfig(p);
-            players.set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(getBankBalance(p, bankName)));
+    public void saveBankBalance() {
+        if (onNull(p, "Cannot save player bank balances!")) return;
+        for (String bankName : BankPlus.instance().getBanks().keySet()) {
+            FileConfiguration players = BankPlusPlayerFilesUtils.getPlayerConfig(p);
+            players.set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(getBankBalance(bankName)));
         }
-        AccountManager.savePlayerFile(p, true);
+        BankPlusPlayerFilesUtils.savePlayerFile(p, true);
     }
 
     /**
      * Get the player bank balance of the selected bank.
      *
-     * @param p        The player.
      * @param bankName The bank.
      * @return BidDecimal amount.
      */
-    public static BigDecimal getBankBalance(Player p, String bankName) {
-        loadBankBalance(p);
+    public BigDecimal getBankBalance(String bankName) {
+        if (onNull(p, "Cannot get player bank balance!")) return null;
+        loadBankBalance();
         return bankPlayerMoney.get(p.getUniqueId() + "." + bankName);
     }
 
     /**
      * Get the total player bank balance of all banks.
      *
-     * @param p The player.
      * @return BidDecimal amount.
      */
-    public static BigDecimal getBankBalance(Player p) {
-        loadBankBalance(p);
+    public BigDecimal getBankBalance() {
+        if (onNull(p, "Cannot get player bank balances!")) return null;
+        loadBankBalance();
         BigDecimal amount = new BigDecimal(0);
-        for (String bankName : BanksManager.getBankNames())
+        for (String bankName : BankPlus.instance().getBanks().keySet())
             amount = amount.add(bankPlayerMoney.get(p.getUniqueId() + "." + bankName));
         return amount;
     }
@@ -150,25 +158,25 @@ public class MultiEconomyManager {
     /**
      * Get the offline player bank balance.
      *
-     * @param p        The player.
      * @param bankName The bank.
      * @return BidDecimal amount.
      */
-    public static BigDecimal getBankBalance(OfflinePlayer p, String bankName) {
-        String bal = AccountManager.getPlayerConfig(p).getString("Banks." + bankName + ".Money");
+    public BigDecimal getOfflineBankBalance(String bankName) {
+        if (offNull(oP, "Cannot get player bank balance!")) return null;
+        String bal = BankPlusPlayerFilesUtils.getPlayerConfig(oP).getString("Banks." + bankName + ".Money");
         return bal == null ? new BigDecimal(0) : new BigDecimal(bal);
     }
 
     /**
      * Get the total offline player bank balance of all banks.
      *
-     * @param p The player.
      * @return BidDecimal amount.
      */
-    public static BigDecimal getBankBalance(OfflinePlayer p) {
+    public BigDecimal getOfflineBankBalance() {
+        if (offNull(oP, "Cannot get player bank balances!")) return null;
         BigDecimal amount = new BigDecimal(0);
-        for (String bankName : BanksManager.getBankNames()) {
-            String bal = AccountManager.getPlayerConfig(p).getString("Banks." + bankName + ".Money");
+        for (String bankName : BankPlus.instance().getBanks().keySet()) {
+            String bal = BankPlusPlayerFilesUtils.getPlayerConfig(oP).getString("Banks." + bankName + ".Money");
             amount = amount.add(new BigDecimal(bal == null ? "0" : bal));
         }
         return amount;
@@ -177,77 +185,76 @@ public class MultiEconomyManager {
     /**
      * Set the player bank balance to the selected amount in the selected bank.
      *
-     * @param p        The player.
      * @param amount   The new bank balance amount.
      * @param bankName The bank.
      */
-    public static void setBankBalance(Player p, BigDecimal amount, String bankName) {
-        set(p, amount, bankName);
+    public void setBankBalance(BigDecimal amount, String bankName) {
+        if (onNull(p, "Cannot set player bank balance!")) return;
+        set(amount, bankName);
     }
 
     /**
      * Set the offline player bank balance to the selected amount in the selected bank.
      *
-     * @param p        The player.
      * @param amount   The new bank balance amount.
      * @param bankName The bank.
      */
-    public static void setBankBalance(OfflinePlayer p, BigDecimal amount, String bankName) {
-        set(p, amount, bankName);
+    public void setOfflineBankBalance(BigDecimal amount, String bankName) {
+        if (offNull(oP, "Cannot set player bank balance!")) return;
+        set(amount, bankName);
     }
 
     /**
      * Add to the player bank balance the selected amount.
      *
-     * @param p        The player.
      * @param amount   The amount.
      * @param bankName The bank.
      */
-    public static void addBankBalance(Player p, BigDecimal amount, String bankName) {
-        set(p, getBankBalance(p, bankName).add(amount), bankName);
+    public void addBankBalance(BigDecimal amount, String bankName) {
+        if (onNull(p, "Cannot add player bank balance!")) return;
+        set(getBankBalance(bankName).add(amount), bankName);
     }
 
     /**
      * Add to the offline player bank balance the selected amount.
      *
-     * @param p        The player.
      * @param amount   The amount.
      * @param bankName The bank.
      */
-    public static void addBankBalance(OfflinePlayer p, BigDecimal amount, String bankName) {
-        set(p, getBankBalance(p, bankName).add(amount), bankName);
+    public void addOfflineBankBalance(BigDecimal amount, String bankName) {
+        if (offNull(oP, "Cannot add player bank balance!")) return;
+        setOffline(getBankBalance(bankName).add(amount), bankName);
     }
 
     /**
      * Remove from the player bank balance the selected amount.
      *
-     * @param p        The player.
      * @param amount   The amount.
      * @param bankName The bank.
      */
-    public static void removeBankBalance(Player p, BigDecimal amount, String bankName) {
-        set(p, getBankBalance(p, bankName).subtract(amount), bankName);
+    public void removeBankBalance(BigDecimal amount, String bankName) {
+        if (onNull(p, "Cannot remove player bank balance!")) return;
+        set(getBankBalance(bankName).subtract(amount), bankName);
     }
 
     /**
      * Remove from the offline player bank balance the selected amount.
      *
-     * @param p        The player.
      * @param amount   The amount.
      * @param bankName The bank.
      */
-    public static void removeBankBalance(OfflinePlayer p, BigDecimal amount, String bankName) {
-        set(p, getBankBalance(p, bankName).subtract(amount), bankName);
+    public void removeOfflineBankBalance(BigDecimal amount, String bankName) {
+        if (offNull(oP, "Cannot remove player bank balance!")) return;
+        setOffline(getBankBalance(bankName).subtract(amount), bankName);
     }
 
     /**
      * Method used to simplify the transaction.
      *
-     * @param p        The player.
      * @param amount   The amount.
      * @param bankName The bank.
      */
-    private static void set(Player p, BigDecimal amount, String bankName) {
+    private void set(BigDecimal amount, String bankName) {
         String amountFormatted = BPMethods.formatBigDouble(amount);
         bankPlayerMoney.put(p.getUniqueId() + "." + bankName, new BigDecimal(amountFormatted));
     }
@@ -255,19 +262,18 @@ public class MultiEconomyManager {
     /**
      * Method used to simplify the transaction.
      *
-     * @param p        The player.
      * @param amount   The amount.
      * @param bankName The bank.
      */
-    private static void set(OfflinePlayer p, BigDecimal amount, String bankName) {
-        AccountManager.getPlayerConfig(p).set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(amount));
-        AccountManager.savePlayerFile(p, true);
+    private void setOffline(BigDecimal amount, String bankName) {
+        BankPlusPlayerFilesUtils.getPlayerConfig(oP).set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(amount));
+        BankPlusPlayerFilesUtils.savePlayerFile(oP, true);
     }
 
-    public static void deposit(Player p, BigDecimal amount, String bankName) {
-        if (!BPMethods.hasPermission(p, "bankplus.deposit")) return;
+    public void deposit(BigDecimal amount, String bankName) {
+        if (onNull(p, "Cannot deposit player bank balance!") || !BPMethods.hasPermission(p, "bankplus.deposit")) return;
 
-        BigDecimal money = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p));
+        BigDecimal money = BigDecimal.valueOf(BankPlus.instance().getEconomy().getBalance(p));
         if (!BPMethods.hasMoney(money, amount, p) || BPMethods.isBankFull(p, bankName)) return;
 
         BigDecimal maxDepositAmount = Values.CONFIG.getMaxDepositAmount();
@@ -277,27 +283,27 @@ public class MultiEconomyManager {
         if (Values.CONFIG.getDepositTaxes().doubleValue() > 0 && !p.hasPermission("bankplus.deposit.bypass-taxes"))
             taxes = amount.multiply(Values.CONFIG.getDepositTaxes().divide(BigDecimal.valueOf(100)));
 
-        BigDecimal capacity = BanksManager.getCapacity(p, bankName);
-        BigDecimal newBankBalance = getBankBalance(p, bankName).add(amount);
+        BigDecimal capacity = new BanksManager(bankName).getCapacity(p);
+        BigDecimal newBankBalance = getBankBalance(bankName).add(amount);
         if (capacity.doubleValue() != 0 && newBankBalance.doubleValue() >= capacity.doubleValue()) {
-            BigDecimal moneyToFull = capacity.subtract(getBankBalance(p, bankName));
+            BigDecimal moneyToFull = capacity.subtract(getBankBalance(bankName));
             amount = moneyToFull.add(taxes);
             if (money.doubleValue() < amount.doubleValue()) amount = money;
         }
 
-        EconomyResponse depositResponse = BankPlus.getEconomy().withdrawPlayer(p, amount.doubleValue());
+        EconomyResponse depositResponse = BankPlus.instance().getEconomy().withdrawPlayer(p, amount.doubleValue());
         BPDebugger.debugDeposit(p, amount, depositResponse);
         if (BPMethods.hasFailed(p, depositResponse)) return;
 
-        addBankBalance(p, amount.subtract(taxes), bankName);
+        addBankBalance(amount.subtract(taxes), bankName);
         MessageManager.send(p, "Success-Deposit", BPMethods.placeValues(p, amount.subtract(taxes), taxes));
         BPMethods.playSound("DEPOSIT", p);
     }
 
-    public static void withdraw(Player p, BigDecimal amount, String bankName) {
-        if (!BPMethods.hasPermission(p, "bankplus.withdraw")) return;
+    public void withdraw(BigDecimal amount, String bankName) {
+        if (onNull(p, "Cannot withdraw player bank balance!") || !BPMethods.hasPermission(p, "bankplus.withdraw")) return;
 
-        BigDecimal bankBalance = getBankBalance(p, bankName);
+        BigDecimal bankBalance = getBankBalance(bankName);
         if (!BPMethods.hasMoney(bankBalance, amount, p)) return;
 
         BigDecimal maxWithdrawAmount = Values.CONFIG.getMaxWithdrawAmount();
@@ -311,50 +317,76 @@ public class MultiEconomyManager {
         BigDecimal newBalance = bankBalance.subtract(amount);
         if (newBalance.doubleValue() <= 0) amount = bankBalance;
 
-        EconomyResponse withdrawResponse = BankPlus.getEconomy().depositPlayer(p, amount.subtract(taxes).doubleValue());
+        EconomyResponse withdrawResponse = BankPlus.instance().getEconomy().depositPlayer(p, amount.subtract(taxes).doubleValue());
         BPDebugger.debugWithdraw(p, amount, withdrawResponse);
         if (BPMethods.hasFailed(p, withdrawResponse)) return;
 
-        removeBankBalance(p, amount, bankName);
+        removeBankBalance(amount, bankName);
         MessageManager.send(p, "Success-Withdraw", BPMethods.placeValues(p, amount.subtract(taxes), taxes));
         BPMethods.playSound("WITHDRAW", p);
     }
 
-    public static void pay(Player p1, Player p2, BigDecimal amount, String bankName1, String bankName2) {
-        BigDecimal bankBalance = getBankBalance(p1, bankName1);
+    /**
+     * Method used to execute the pay transaction.
+     * @param fromBank The bank where the money will be taken.
+     * @param target The player that will receive your money.
+     * @param amount How much money you want to pay.
+     * @param toBank The bank where the money will be added.
+     */
+    public void pay(String fromBank, Player target, BigDecimal amount, String toBank) {
+        if (onNull(p, "Cannot initialize pay transaction!")) return;
+
+        MultiEconomyManager targetManager = new MultiEconomyManager(target);
         BigDecimal maxBankCapacity = Values.CONFIG.getMaxBankCapacity();
+        BigDecimal bankBalance = getBankBalance(fromBank);
 
         if (bankBalance.doubleValue() < amount.doubleValue()) {
-            MessageManager.send(p1, "Insufficient-Money");
+            MessageManager.send(p, "Insufficient-Money");
             return;
         }
 
         if (maxBankCapacity.doubleValue() == 0) {
-            removeBankBalance(p1, amount, bankName1);
-            MessageManager.send(p1, "Payment-Sent", BPMethods.placeValues(p2, amount));
-            addBankBalance(p2, amount, bankName2);
-            MessageManager.send(p2, "Payment-Received", BPMethods.placeValues(p1, amount));
+            removeBankBalance(amount, fromBank);
+            MessageManager.send(p, "Payment-Sent", BPMethods.placeValues(target, amount));
+            targetManager.addBankBalance(amount, toBank);
+            MessageManager.send(target, "Payment-Received", BPMethods.placeValues(p, amount));
             return;
         }
 
-        BigDecimal targetMoney = getBankBalance(p2);
+        BigDecimal targetMoney = targetManager.getBankBalance();
         if (targetMoney.doubleValue() >= maxBankCapacity.doubleValue()) {
-            MessageManager.send(p1, "Bank-Full", BPMethods.placeValues(p2, BigDecimal.valueOf(0)));
+            MessageManager.send(p, "Bank-Full", BPMethods.placeValues(target, BigDecimal.valueOf(0)));
             return;
         }
 
         BigDecimal moneyLeft = maxBankCapacity.subtract(targetMoney);
         if (amount.doubleValue() >= moneyLeft.doubleValue()) {
-            removeBankBalance(p1, moneyLeft, bankName1);
-            MessageManager.send(p1, "Payment-Sent", BPMethods.placeValues(p2, moneyLeft));
-            addBankBalance(p2, moneyLeft, bankName2);
-            MessageManager.send(p2, "Payment-Received", BPMethods.placeValues(p1, moneyLeft));
+            removeBankBalance(moneyLeft, fromBank);
+            MessageManager.send(p, "Payment-Sent", BPMethods.placeValues(target, moneyLeft));
+            targetManager.addBankBalance(moneyLeft, toBank);
+            MessageManager.send(target, "Payment-Received", BPMethods.placeValues(p, moneyLeft));
             return;
         }
 
-        removeBankBalance(p1, amount, bankName1);
-        MessageManager.send(p1, "Payment-Sent", BPMethods.placeValues(p2, amount));
-        addBankBalance(p2, amount, bankName2);
-        MessageManager.send(p2, "Payment-Received", BPMethods.placeValues(p1, amount));
+        removeBankBalance(amount, fromBank);
+        MessageManager.send(p, "Payment-Sent", BPMethods.placeValues(target, amount));
+        targetManager.addBankBalance(amount, toBank);
+        MessageManager.send(target, "Payment-Received", BPMethods.placeValues(p, amount));
+    }
+
+    private boolean onNull(Player p, String tried) {
+        if (p == null) {
+            BPLogger.error(tried + " Called online-player method but the player was null!");
+            return true;
+        }
+        return false;
+    }
+
+    private boolean offNull(OfflinePlayer p, String tried) {
+        if (p == null) {
+            BPLogger.error(tried + " Called offline-player method but the player was null!");
+            return true;
+        }
+        return false;
     }
 }

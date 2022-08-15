@@ -1,10 +1,11 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.account.BankPlusPlayer;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.guis.BanksHolder;
-import me.pulsi_.bankplus.guis.BanksManager;
+import me.pulsi_.bankplus.banks.BanksHolder;
+import me.pulsi_.bankplus.banks.BanksManager;
 import me.pulsi_.bankplus.managers.ConfigManager;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.managers.TaskManager;
@@ -189,10 +190,9 @@ public class BPMethods {
         if (task != null) task.cancel();
 
         if (Values.CONFIG.getSaveBalancedDelay() <= 0) return;
-        TaskManager.setSavingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.getInstance(), () -> {
-            if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
-                Bukkit.getOnlinePlayers().forEach(MultiEconomyManager::saveBankBalance);
-            else Bukkit.getOnlinePlayers().forEach(SingleEconomyManager::saveBankBalance);
+        TaskManager.setSavingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.instance(), () -> {
+            if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) Bukkit.getOnlinePlayers().forEach(p -> new MultiEconomyManager(p).saveBankBalance());
+            else Bukkit.getOnlinePlayers().forEach(p-> new SingleEconomyManager(p).saveBankBalance());
             if (Values.CONFIG.isSaveBalancesBroadcast()) BPLogger.info("All player balances have been saved!");
         }, Values.CONFIG.getSaveBalancedDelay() * 1200L, Values.CONFIG.getSaveBalancedDelay() * 1200L));
     }
@@ -243,7 +243,7 @@ public class BPMethods {
         MessageManager.send(p, "Chat-Withdraw");
         SetUtils.addPlayerToWithdraw(p);
         p.closeInventory();
-        BanksHolder.openedBank.put(p.getUniqueId(), identifier);
+        BankPlus.instance().getPlayers().get(p.getUniqueId()).setOpenedBank(BankPlus.instance().getBanks().get(identifier));
     }
 
     public static void customDeposit(Player p) {
@@ -258,11 +258,11 @@ public class BPMethods {
         MessageManager.send(p, "Chat-Deposit");
         SetUtils.addPlayerToDeposit(p);
         p.closeInventory();
-        BanksHolder.openedBank.put(p.getUniqueId(), identifier);
+        BankPlus.instance().getPlayers().get(p.getUniqueId()).setOpenedBank(BankPlus.instance().getBanks().get(identifier));
     }
 
     public static void sendTitle(String path, Player p) {
-        String title = BankPlus.getCm().getConfig(ConfigManager.Type.MESSAGES).getString(path);
+        String title = BankPlus.instance().getCm().getConfig(ConfigManager.Type.MESSAGES).getString(path);
         if (title == null) return;
 
         String newTitle = MessageManager.addPrefix(title);
@@ -350,7 +350,7 @@ public class BPMethods {
     }
 
     public static String getSoundBasedOnServerVersion() {
-        String v = BankPlus.getInstance().getServerVersion();
+        String v = BankPlus.instance().getServerVersion();
         if (v.contains("1.7") || v.contains("1.8")) return "ORB_PICKUP,5,1";
         else return "ENTITY_EXPERIENCE_ORB_PICKUP,5,1";
     }
@@ -429,8 +429,8 @@ public class BPMethods {
     }
 
     public static boolean isBankFull(Player p, String bankName) {
-        BigDecimal capacity = BanksManager.getCapacity(p, bankName);
-        if (MultiEconomyManager.getBankBalance(p, bankName).doubleValue() >= capacity.doubleValue()) {
+        BigDecimal capacity = new BanksManager(bankName).getCapacity(p);
+        if (new MultiEconomyManager(p).getBankBalance(bankName).doubleValue() >= capacity.doubleValue()) {
             MessageManager.send(p, "Cannot-Deposit-Anymore");
             return true;
         }
@@ -438,8 +438,8 @@ public class BPMethods {
     }
 
     public static boolean isBankFull(Player p) {
-        BigDecimal capacity = BanksManager.getCapacity(p, Values.CONFIG.getMainGuiName());
-        if (SingleEconomyManager.getBankBalance(p).doubleValue() >= capacity.doubleValue()) {
+        BigDecimal capacity = new BanksManager(Values.CONFIG.getMainGuiName()).getCapacity(p);
+        if (new SingleEconomyManager(p).getBankBalance().doubleValue() >= capacity.doubleValue()) {
             MessageManager.send(p, "Cannot-Deposit-Anymore");
             return true;
         }
@@ -457,7 +457,7 @@ public class BPMethods {
     }
 
     public static boolean isLegacyServer() {
-        String v = BankPlus.getInstance().getServerVersion();
+        String v = BankPlus.instance().getServerVersion();
         return v.contains("1.7") || v.contains("1.8") || v.contains("1.9") ||
                 v.contains("1.10") || v.contains("1.11") || v.contains("1.12");
     }

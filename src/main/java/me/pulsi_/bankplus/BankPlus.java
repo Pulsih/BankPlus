@@ -1,7 +1,9 @@
 package me.pulsi_.bankplus;
 
+import me.pulsi_.bankplus.account.BankPlusPlayer;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
+import me.pulsi_.bankplus.banks.Bank;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.managers.ConfigManager;
 import me.pulsi_.bankplus.managers.DataManager;
@@ -20,23 +22,27 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.UUID;
 
 public final class BankPlus extends JavaPlugin {
 
     public static boolean wasOnSingleEconomy;
 
-    private static BankPlus instance;
-    private static ConfigManager cm;
+    private final HashMap<String, Bank> banks = new HashMap<>();
+    private final HashMap<UUID, BankPlusPlayer> players = new HashMap<>();
 
-    private static Economy econ = null;
-    private static Permission perms = null;
+    private static BankPlus instance;
+    private Economy econ = null;
+    private Permission perms = null;
+
+    private ConfigManager cm;
 
     private boolean isPlaceholderAPIHooked = false, isEssentialsXHooked = false, isUpdated = false;
     private String serverVersion;
 
     @Override
     public void onEnable() {
-
         instance = this;
         if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
             BPLogger.log("");
@@ -54,11 +60,12 @@ public final class BankPlus extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+
         serverVersion = getServer().getVersion();
         cm = new ConfigManager(this);
         setupPermissions();
-
         DataManager.setupPlugin();
+
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             BPLogger.info("Hooked into PlaceholderAPI!");
             new Placeholders().register();
@@ -73,24 +80,32 @@ public final class BankPlus extends JavaPlugin {
         wasOnSingleEconomy = !Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled();
 
         VersionUtils.moveBankFileToBanksFolder();
-        VersionUtils.changePlayerStoragePosition(new ArrayList<>(), 0);
+        VersionUtils.changePlayerStoragePosition(0);
     }
 
     @Override
     public void onDisable() {
 
         instance = this;
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) Bukkit.getOnlinePlayers().forEach(MultiEconomyManager::saveBankBalance);
-        else Bukkit.getOnlinePlayers().forEach(SingleEconomyManager::saveBankBalance);
+        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) Bukkit.getOnlinePlayers().forEach(p -> new MultiEconomyManager(p).saveBankBalance());
+        else Bukkit.getOnlinePlayers().forEach(p -> new SingleEconomyManager(p).saveBankBalance());
         if (Values.CONFIG.isInterestEnabled()) Interest.saveInterest();
         DataManager.shutdownPlugin();
     }
 
-    public static Economy getEconomy() {
+    public HashMap<String, Bank> getBanks() {
+        return banks;
+    }
+
+    public HashMap<UUID, BankPlusPlayer> getPlayers() {
+        return players;
+    }
+
+    public Economy getEconomy() {
         return econ;
     }
 
-    public static Permission getPermissions() {
+    public Permission getPermissions() {
         return perms;
     }
 
@@ -110,7 +125,7 @@ public final class BankPlus extends JavaPlugin {
         return serverVersion;
     }
 
-    public static ConfigManager getCm() {
+    public ConfigManager getCm() {
         return cm;
     }
 
@@ -127,7 +142,7 @@ public final class BankPlus extends JavaPlugin {
         perms = rsp.getProvider();
     }
 
-    public static BankPlus getInstance() {
+    public static BankPlus instance() {
         return instance;
     }
 

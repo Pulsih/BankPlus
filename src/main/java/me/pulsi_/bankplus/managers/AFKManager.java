@@ -33,6 +33,6 @@ public class AFKManager {
             else afkPlayers.remove(p);
         }
 
-        Bukkit.getScheduler().runTaskLater(BankPlus.getInstance(), AFKManager::startCountdown, 20L);
+        Bukkit.getScheduler().runTaskLater(BankPlus.instance(), AFKManager::startCountdown, 20L);
     }
 }

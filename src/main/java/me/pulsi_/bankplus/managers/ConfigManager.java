@@ -1,7 +1,8 @@
 package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.guis.BanksHolder;
+import me.pulsi_.bankplus.banks.BanksHolder;
+import me.pulsi_.bankplus.banks.BanksManager;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
@@ -58,11 +59,7 @@ public class ConfigManager {
         buildMessages();
         buildMultipleBanks();
 
-        Values.CONFIG.setupValues();
-        Values.MESSAGES.setupValues();
-        Values.MULTIPLE_BANKS.setupValues();
-        MessageManager.loadMessages();
-        if (Values.CONFIG.isGuiModuleEnabled()) BanksHolder.loadBanks();
+        DataManager.reloadPlugin();
     }
 
     public FileConfiguration getConfig(Type type) {
@@ -175,7 +172,7 @@ public class ConfigManager {
     }
 
     public void recreateFile(File file) {
-        Bukkit.getScheduler().runTaskAsynchronously(BankPlus.getInstance(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(BankPlus.instance(), () -> {
             String configuration = getFileAsString(file);
             if (configuration == null) return;
             try {

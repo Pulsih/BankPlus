@@ -19,7 +19,7 @@ public class UpdateChecker implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
-        if (!Values.CONFIG.isUpdateCheckerEnabled() || (!p.isOp() && !p.hasPermission("bankplus.notify")) || BankPlus.getInstance().isUpdated()) return;
+        if (!Values.CONFIG.isUpdateCheckerEnabled() || (!p.isOp() && !p.hasPermission("bankplus.notify")) || BankPlus.instance().isUpdated()) return;
 
         TextComponent text = new TextComponent(BPChat.color("&a&lBank&9&lPlus &aNew update available! "));
         TextComponent button = new TextComponent(BPChat.color("&a&l[CLICK HERE]"));
@@ -27,7 +27,7 @@ public class UpdateChecker implements Listener {
         button.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click here to download it!").color(ChatColor.GRAY).create()));
         text.addExtra(button);
 
-        Bukkit.getScheduler().runTaskLater(BankPlus.getInstance(), () -> {
+        Bukkit.getScheduler().runTaskLater(BankPlus.instance(), () -> {
             p.sendMessage("");
             p.spigot().sendMessage(text);
             p.sendMessage("");

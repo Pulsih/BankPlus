@@ -3,8 +3,9 @@ package me.pulsi_.bankplus.utils;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.guis.BanksHolder;
-import me.pulsi_.bankplus.guis.BanksManager;
+import me.pulsi_.bankplus.banks.Bank;
+import me.pulsi_.bankplus.banks.BanksHolder;
+import me.pulsi_.bankplus.banks.BanksManager;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.managers.TaskManager;
 import me.pulsi_.bankplus.values.Values;
@@ -46,8 +47,8 @@ public class BPDebugger {
 
         BPLogger.info("MessageIsNumber: &a" + BPMethods.isValidNumber(message));
         if (BPMethods.isValidNumber(message)) {
-            BigDecimal mainBalance = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p));
-            BigDecimal bankBalance = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() ? MultiEconomyManager.getBankBalance(p) : SingleEconomyManager.getBankBalance(p);
+            BigDecimal mainBalance = BigDecimal.valueOf(BankPlus.instance().getEconomy().getBalance(p));
+            BigDecimal bankBalance = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() ? new MultiEconomyManager(p).getBankBalance() : new SingleEconomyManager(p).getBankBalance();
             BigDecimal messageNumber = new BigDecimal(message);
             BPLogger.info("PlayerMainBalance: &a" + mainBalance);
             BPLogger.info("PlayerBankBalance: &a" + bankBalance);
@@ -116,16 +117,17 @@ public class BPDebugger {
         BPLogger.log("");
         BPLogger.log("                       &aBank&9Plus&dDebugger&9: &aGUI");
         BPLogger.info("PlayerName: &a" + p.getName() + " &9(UUID: &a" + p.getUniqueId() + "&9)");
-        BigDecimal mainBalance = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p));
-        BigDecimal bankBalance = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() ? MultiEconomyManager.getBankBalance(p) : SingleEconomyManager.getBankBalance(p);
+        BigDecimal mainBalance = BigDecimal.valueOf(BankPlus.instance().getEconomy().getBalance(p));
+        BigDecimal bankBalance = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() ? new MultiEconomyManager(p).getBankBalance() : new SingleEconomyManager(p).getBankBalance();
         BPLogger.info("PlayerMainBalance: &a" + mainBalance);
         BPLogger.info("PlayerBankBalance: &a" + bankBalance);
         BPLogger.info("ClickedSlot: &a" + slot);
 
         String itemPath = null, actionType = null, actionNumber = null;
         boolean hasAction = false;
-        for (String key : BanksManager.getItems(BanksHolder.openedBank.get(p)).getKeys(false)) {
-            ConfigurationSection item = BanksManager.getConfig(BanksHolder.openedBank.get(p)).getConfigurationSection("Items." + key);
+        Bank bank = BankPlus.instance().getPlayers().get(p.getUniqueId()).getOpenedBank();
+        for (String key : bank.getItems().getKeys(false)) {
+            ConfigurationSection item = bank.getBankConfig().getConfigurationSection("Items." + key);
             if (item == null || slot != item.getInt("Slot")) continue;
             itemPath = item.toString();
 
@@ -154,8 +156,8 @@ public class BPDebugger {
         BPLogger.log("");
         BPLogger.log("                       &aBank&9Plus&dDebugger&9: &aDEPOSIT");
         BPLogger.info("PlayerName: &a" + p.getName() + " &9(UUID: &a" + p.getUniqueId() + "&9)");
-        BigDecimal mainBalance = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p));
-        BigDecimal bankBalance = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() ? MultiEconomyManager.getBankBalance(p) : SingleEconomyManager.getBankBalance(p);
+        BigDecimal mainBalance = BigDecimal.valueOf(BankPlus.instance().getEconomy().getBalance(p));
+        BigDecimal bankBalance = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() ? new MultiEconomyManager(p).getBankBalance() : new SingleEconomyManager(p).getBankBalance();
         BPLogger.info("PlayerMainBalance: &a" + mainBalance);
         BPLogger.info("PlayerBankBalance: &a" + bankBalance);
         BPLogger.info("AmountInserted: &a" + amount);
@@ -175,8 +177,8 @@ public class BPDebugger {
         BPLogger.log("");
         BPLogger.log("                       &aBank&9Plus&dDebugger&9: &aWITHDRAW");
         BPLogger.info("PlayerName: &a" + p.getName() + " &9(UUID: &a" + p.getUniqueId() + "&9)");
-        BigDecimal mainBalance = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p));
-        BigDecimal bankBalance = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() ? MultiEconomyManager.getBankBalance(p) : SingleEconomyManager.getBankBalance(p);
+        BigDecimal mainBalance = BigDecimal.valueOf(BankPlus.instance().getEconomy().getBalance(p));
+        BigDecimal bankBalance = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() ? new MultiEconomyManager(p).getBankBalance() : new SingleEconomyManager(p).getBankBalance();
         BPLogger.info("PlayerMainBalance: &a" + mainBalance);
         BPLogger.info("PlayerBankBalance: &a" + bankBalance);
         BPLogger.info("AmountInserted: &a" + amount);

@@ -56,7 +56,7 @@ public class BankTopManager {
     public static void startUpdateTask() {
         BukkitTask task = TaskManager.getBroadcastTask();
         if (task != null) task.cancel();
-        TaskManager.setBroadcastTask(Bukkit.getScheduler().runTaskTimer(BankPlus.getInstance(), BankTopManager::updateBankTop, Values.CONFIG.getUpdateBankTopDelay(), Values.CONFIG.getUpdateBankTopDelay()));
+        TaskManager.setBroadcastTask(Bukkit.getScheduler().runTaskTimer(BankPlus.instance(), BankTopManager::updateBankTop, Values.CONFIG.getUpdateBankTopDelay(), Values.CONFIG.getUpdateBankTopDelay()));
     }
 
     public static BigDecimal getBankTopBalancePlayer(int position) {

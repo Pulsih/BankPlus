@@ -1,11 +1,12 @@
 package me.pulsi_.bankplus.listeners.bankListener;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.account.BankPlusPlayer;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.guis.BanksHolder;
-import me.pulsi_.bankplus.guis.BanksListGui;
-import me.pulsi_.bankplus.guis.BanksManager;
+import me.pulsi_.bankplus.banks.BanksHolder;
+import me.pulsi_.bankplus.banks.BanksListGui;
+import me.pulsi_.bankplus.banks.BanksManager;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
@@ -16,6 +17,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 
 public class BankClickMethod {
 
@@ -25,22 +27,25 @@ public class BankClickMethod {
         if (bank == null || bank.getHolder() == null || !(bank.getHolder() instanceof BanksHolder)) return;
         e.setCancelled(true);
 
-        String bankName = BanksHolder.openedBank.getOrDefault(p.getUniqueId(), "");
-        if (!BanksHolder.bankGetter.containsKey(bankName)) return;
+        BankPlusPlayer player = BankPlus.instance().getPlayers().get(p.getUniqueId());
+        if (player.getOpenedBank() == null) return;
 
+        String bankName = player.getOpenedBank().getIdentifier();
         if (bankName.equals(BanksListGui.multipleBanksGuiID)) {
             int slot = e.getSlot();
-            if (!BanksListGui.getBankFromSlot.containsKey(p.getName() + "." + slot)) return;
+            HashMap<String, String> slots = player.getPlayerBankClickHolder();
+            if (!slots.containsKey(p.getName() + "." + slot)) return;
 
-            BanksHolder.openBank(p, BanksListGui.getBankFromSlot.get(p.getName() + "." + slot));
-            for (int i = 0; i < BanksManager.getBankNames().size(); i++) BanksListGui.getBankFromSlot.remove(p.getName() + "." + i);
+            new BanksHolder().openBank(p, slots.get(p.getName() + "." + slot));
+            for (int i = 0; i < slots.size(); i++) slots.remove(p.getName() + "." + i);
             return;
         }
 
-        ConfigurationSection items = BanksManager.getItems(bankName);
+        BanksManager banksManager = new BanksManager(bankName);
+        ConfigurationSection items = banksManager.getItems();
         if (items == null) return;
 
-        FileConfiguration config = BanksManager.getConfig(bankName);
+        FileConfiguration config = banksManager.getConfig();
         if (config == null) return;
 
         for (String key : items.getKeys(false)) {
@@ -56,6 +61,9 @@ public class BankClickMethod {
 
             BigDecimal amount;
             boolean isMulti = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled();
+            SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
+            MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
+
             switch (actionType) {
                 case "deposit":
                     switch (actionAmount) {
@@ -64,15 +72,15 @@ public class BankClickMethod {
                             break;
 
                         case "all":
-                            amount = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p));
-                            if (isMulti) MultiEconomyManager.deposit(p, amount, bankName);
-                            else SingleEconomyManager.deposit(p, amount);
+                            amount = BigDecimal.valueOf(BankPlus.instance().getEconomy().getBalance(p));
+                            if (isMulti) multiEconomyManager.deposit(amount, bankName);
+                            else singleEconomyManager.deposit(amount);
                             break;
 
                         case "half":
-                            amount = BigDecimal.valueOf(BankPlus.getEconomy().getBalance(p) / 2);
-                            if (isMulti) MultiEconomyManager.deposit(p, amount, bankName);
-                            else SingleEconomyManager.deposit(p, amount);
+                            amount = BigDecimal.valueOf(BankPlus.instance().getEconomy().getBalance(p) / 2);
+                            if (isMulti) multiEconomyManager.deposit(amount, bankName);
+                            else singleEconomyManager.deposit(amount);
                             break;
 
                         default:
@@ -82,8 +90,8 @@ public class BankClickMethod {
                                 BPLogger.error("Invalid deposit number! (Path: " + item + ", Number: " + actionAmount + ")");
                                 return;
                             }
-                            if (isMulti) MultiEconomyManager.deposit(p, amount, bankName);
-                            else SingleEconomyManager.deposit(p, amount);
+                            if (isMulti) multiEconomyManager.deposit(amount, bankName);
+                            else singleEconomyManager.deposit(amount);
                             break;
                     }
                     break;
@@ -96,21 +104,21 @@ public class BankClickMethod {
 
                         case "all":
                             if (isMulti) {
-                                amount = MultiEconomyManager.getBankBalance(p, bankName);
-                                MultiEconomyManager.withdraw(p, amount, bankName);
+                                amount = multiEconomyManager.getBankBalance(bankName);
+                                multiEconomyManager.withdraw(amount, bankName);
                             } else {
-                                amount = SingleEconomyManager.getBankBalance(p);
-                                SingleEconomyManager.withdraw(p, amount);
+                                amount = singleEconomyManager.getBankBalance();
+                                singleEconomyManager.withdraw(amount);
                             }
                             break;
 
                         case "half":
                             if (isMulti) {
-                                amount = MultiEconomyManager.getBankBalance(p, bankName).divide(BigDecimal.valueOf(2));
-                                MultiEconomyManager.withdraw(p, amount, bankName);
+                                amount = multiEconomyManager.getBankBalance(bankName).divide(BigDecimal.valueOf(2));
+                                multiEconomyManager.withdraw(amount, bankName);
                             } else {
-                                amount = SingleEconomyManager.getBankBalance(p).divide(BigDecimal.valueOf(2));
-                                SingleEconomyManager.withdraw(p, amount);
+                                amount = singleEconomyManager.getBankBalance().divide(BigDecimal.valueOf(2));
+                                singleEconomyManager.withdraw(amount);
                             }
                             break;
 
@@ -121,14 +129,14 @@ public class BankClickMethod {
                                 BPLogger.error("Invalid withdraw number! (Path: " + item + ", Number: " + actionAmount + ")");
                                 return;
                             }
-                            if (isMulti) MultiEconomyManager.withdraw(p, amount, bankName);
-                            else SingleEconomyManager.withdraw(p, amount);
+                            if (isMulti) multiEconomyManager.withdraw(amount, bankName);
+                            else singleEconomyManager.withdraw(amount);
                             break;
                     }
                     break;
 
                 case "upgrade":
-                    BanksManager.upgradeBank(p, bankName);
+                    banksManager.upgradeBank(p);
                     break;
             }
         }

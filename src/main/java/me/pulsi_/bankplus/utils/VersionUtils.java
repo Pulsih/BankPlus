@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.guis.BanksManager;
+import me.pulsi_.bankplus.banks.BanksManager;
 import me.pulsi_.bankplus.managers.DataManager;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -24,10 +24,10 @@ import java.util.List;
 public class VersionUtils {
 
     public static void moveBankFileToBanksFolder() {
-        File oldBankFile = new File(BankPlus.getInstance().getDataFolder(), "bank.yml");
+        File oldBankFile = new File(BankPlus.instance().getDataFolder(), "bank.yml");
         if (!oldBankFile.exists()) return;
 
-        File mainBankFile = new File(BankPlus.getInstance().getDataFolder(), "banks" + File.separator + Values.CONFIG.getMainGuiName() + ".yml");
+        File mainBankFile = new File(BankPlus.instance().getDataFolder(), "banks" + File.separator + Values.CONFIG.getMainGuiName() + ".yml");
 
         FileConfiguration oldBankConfig = new YamlConfiguration(), mainBankConfig = new YamlConfiguration();
         try {
@@ -76,11 +76,11 @@ public class VersionUtils {
         DataManager.reloadPlugin();
     }
 
-    public static void changePlayerStoragePosition(List<String> playersIdentifiers, int point) {
-        File playersFile = new File(BankPlus.getInstance().getDataFolder(), "players.yml");
+    public static void changePlayerStoragePosition(int point) {
+        File playersFile = new File(BankPlus.instance().getDataFolder(), "players.yml");
         if (!playersFile.exists()) return;
 
-        File oldPlayersFile = new File(BankPlus.getInstance().getDataFolder(), "old_players.yml");
+        File oldPlayersFile = new File(BankPlus.instance().getDataFolder(), "old_players.yml");
         playersFile.renameTo(oldPlayersFile);
 
         FileConfiguration playersConfig = new YamlConfiguration();
@@ -94,12 +94,21 @@ public class VersionUtils {
         ConfigurationSection players = playersConfig.getConfigurationSection("Players");
         if (players == null) return;
 
-        if (playersIdentifiers.isEmpty()) playersIdentifiers = new ArrayList<>(players.getKeys(false));
+        List<String> playersIdentifiers = new ArrayList<>(players.getKeys(false));
+        subChangePlayerStoragePosition(players, playersIdentifiers, point);
+    }
 
-        for (int i = point; i < playersIdentifiers.size(); i++) {
-            String id = playersIdentifiers.get(i);
+    private static void subChangePlayerStoragePosition(ConfigurationSection players, List<String> playersIdentifiers, int point) {
+        for (int i = 0; i < 240; i++) {
+            if (point >= playersIdentifiers.size()) {
+                BPLogger.info("Moved " + point + " total players to the playedata folder! Task finished.");
+                return;
+            }
 
-            File file = new File(BankPlus.getInstance().getDataFolder(), "playerdata" + File.separator + id + ".yml");
+            String id = playersIdentifiers.get(point);
+            point++;
+
+            File file = new File(BankPlus.instance().getDataFolder(), "playerdata" + File.separator + id + ".yml");
             if (file.exists()) continue;
 
             try {
@@ -126,12 +135,12 @@ public class VersionUtils {
                 if (sBalance == null) config.set("Money", BPMethods.formatBigDouble(Values.CONFIG.getStartAmount()));
                 else config.set("Money", BPMethods.formatBigDouble(new BigDecimal(sBalance)));
 
-                for (String bankName : BanksManager.getBankNames()) {
+                for (String bankName : BankPlus.instance().getBanks().keySet()) {
                     String sLevel = config.getString("Banks." + bankName + ".Level");
                     if (sLevel == null) config.set("Banks." + bankName + ".Level", 1);
                 }
             } else {
-                for (String bankName : BanksManager.getBankNames()) {
+                for (String bankName : BankPlus.instance().getBanks().keySet()) {
                     if (!Values.CONFIG.getMainGuiName().equals(bankName)) config.set("Banks." + bankName + ".Money", "0.00");
                     else {
                         if (sBalance != null) config.set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(new BigDecimal(sBalance)));
@@ -142,11 +151,11 @@ public class VersionUtils {
             }
 
             try {
-                Bukkit.getScheduler().runTaskAsynchronously(BankPlus.getInstance(), () -> {
+                Bukkit.getScheduler().runTaskAsynchronously(BankPlus.instance(), () -> {
                     try {
                         config.save(file);
                     } catch (Exception e) {
-                        Bukkit.getScheduler().runTask(BankPlus.getInstance(), () -> {
+                        Bukkit.getScheduler().runTask(BankPlus.instance(), () -> {
                             try {
                                 config.save(file);
                             } catch (IOException ex) {
@@ -162,15 +171,10 @@ public class VersionUtils {
                     BPLogger.error(ex.getMessage());
                 }
             }
-
-            point++;
-            if (point >= 60) {
-                int finalPoint = point;
-                List<String> finalPlayersIdentifiers = playersIdentifiers;
-                Bukkit.getScheduler().runTaskLater(BankPlus.getInstance(), () -> changePlayerStoragePosition(finalPlayersIdentifiers, finalPoint), 10L);
-                BPLogger.info("Moved the first " + point + " players to the playedata folder.");
-                break;
-            }
         }
+
+        int finalPoint = point;
+        Bukkit.getScheduler().runTaskLater(BankPlus.instance(), () -> subChangePlayerStoragePosition(players, playersIdentifiers, finalPoint), 10L);
+        BPLogger.info("Moved " + point + " players to the playedata folder.");
     }
 }

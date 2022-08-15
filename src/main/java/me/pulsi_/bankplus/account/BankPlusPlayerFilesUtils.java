@@ -3,7 +3,7 @@ package me.pulsi_.bankplus.account;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.guis.BanksManager;
+import me.pulsi_.bankplus.banks.BanksManager;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
@@ -20,20 +20,21 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class AccountManager {
+public class BankPlusPlayerFilesUtils {
 
     private static final HashMap<UUID, File> playerFile = new HashMap<>();
-
     private static final HashMap<UUID, FileConfiguration> playerConfig = new HashMap<>();
 
     public static void checkForFileFixes(Player p) {
+        SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
+        MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
+        FileConfiguration config = getPlayerConfig(p);
+
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
             if (!BankPlus.wasOnSingleEconomy) return;
 
-            FileConfiguration config = getPlayerConfig(p);
-            BigDecimal bal = SingleEconomyManager.getBankBalance(p);
-
-            for (String bankName : BanksManager.getBankNames()) {
+            BigDecimal bal = singleEconomyManager.getBankBalance();
+            for (String bankName : BankPlus.instance().getBanks().keySet()) {
                 String sBalance = config.getString("Banks." + bankName + ".Money");
                 if (Values.CONFIG.getMainGuiName().equals(bankName)) {
                     config.set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(bal));
@@ -41,28 +42,26 @@ public class AccountManager {
                 }
                 if (sBalance == null) config.set("Banks." + bankName + ".Money", "0.00");
             }
-            SingleEconomyManager.unloadBankBalance(p);
-            MultiEconomyManager.loadBankBalance(p);
+            singleEconomyManager.unloadBankBalance();
+            multiEconomyManager.loadBankBalance();
         } else {
             if (BankPlus.wasOnSingleEconomy) return;
 
-            FileConfiguration config = getPlayerConfig(p);
             BigDecimal amount = new BigDecimal(0);
-
-            for (String bankName : BanksManager.getBankNames()) {
+            for (String bankName : BankPlus.instance().getBanks().keySet()) {
                 String sBalance = config.getString("Banks." + bankName + ".Money");
                 if (sBalance != null) amount = amount.add(new BigDecimal(sBalance));
             }
             config.set("Money", BPMethods.formatBigDouble(amount));
-            MultiEconomyManager.unloadBankBalance(p);
-            SingleEconomyManager.loadBankBalance(p);
+            multiEconomyManager.unloadBankBalance();
+            singleEconomyManager.loadBankBalance();
         }
         savePlayerFile(p, true);
     }
 
     public static void registerPlayer(Player p) {
         String identifier = Values.CONFIG.isStoringUUIDs() ? p.getUniqueId().toString() : p.getName();
-        File file = new File(BankPlus.getInstance().getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
+        File file = new File(BankPlus.instance().getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
         if (!file.exists()) BPLogger.info("Successfully registered " + p.getName() + "!");
         try {
             file.getParentFile().mkdir();
@@ -75,7 +74,7 @@ public class AccountManager {
     public static File getPlayerFile(Player p) {
         if (!playerFile.containsKey(p.getUniqueId())) {
             String identifier = Values.CONFIG.isStoringUUIDs() ? p.getUniqueId().toString() : p.getName();
-            File file = new File(BankPlus.getInstance().getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
+            File file = new File(BankPlus.instance().getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
             playerFile.put(p.getUniqueId(), file);
         }
         return playerFile.get(p.getUniqueId());
@@ -83,7 +82,7 @@ public class AccountManager {
 
     public static File getPlayerFile(OfflinePlayer p) {
         String identifier = Values.CONFIG.isStoringUUIDs() ? p.getUniqueId().toString() : p.getName();
-        return new File(BankPlus.getInstance().getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
+        return new File(BankPlus.instance().getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
     }
 
     public static FileConfiguration getPlayerConfig(Player p) {
@@ -118,11 +117,11 @@ public class AccountManager {
             return;
         }
         try {
-            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.getInstance(), () -> {
+            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.instance(), () -> {
                 try {
                     config.save(file);
                 } catch (Exception e) {
-                    Bukkit.getScheduler().runTask(BankPlus.getInstance(), () -> save(config, file));
+                    Bukkit.getScheduler().runTask(BankPlus.instance(), () -> save(config, file));
                 }
             });
         } catch (Exception e) {
@@ -139,11 +138,11 @@ public class AccountManager {
             return;
         }
         try {
-            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.getInstance(), () -> {
+            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.instance(), () -> {
                 try {
                     config.save(file);
                 } catch (Exception e) {
-                    Bukkit.getScheduler().runTask(BankPlus.getInstance(), () -> save(config, file));
+                    Bukkit.getScheduler().runTask(BankPlus.instance(), () -> save(config, file));
                 }
             });
         } catch (Exception e) {

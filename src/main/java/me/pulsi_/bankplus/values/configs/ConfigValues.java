@@ -34,7 +34,7 @@ public class ConfigValues {
     }
 
     public void setupValues() {
-        FileConfiguration config = BankPlus.getCm().getConfig(ConfigManager.Type.CONFIG);
+        FileConfiguration config = BankPlus.instance().getCm().getConfig(ConfigManager.Type.CONFIG);
 
         exitMessage = config.getString("General.Chat-Exit-Message");
         playerChatPriority = config.getString("General.Event-Priorities.PlayerChat");
@@ -429,7 +429,7 @@ public class ConfigValues {
     }
 
     public boolean isUseEssentialsXAFK() {
-        return BankPlus.getInstance().isEssentialsXHooked() && useEssentialsXAFK;
+        return BankPlus.instance().isEssentialsXHooked() && useEssentialsXAFK;
     }
 
     public int getAfkPlayersTime() {

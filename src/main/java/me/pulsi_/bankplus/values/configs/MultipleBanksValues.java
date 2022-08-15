@@ -11,16 +11,15 @@ public class MultipleBanksValues {
     private boolean multipleBanksModuleEnabled, showNotAvailableBanks, directlyOpenIf1IsAvailable, previousItemGlowing, nextItemGlowing;
     private String banksGuiTitle, previousItemMaterial, nextItemMaterial, previousItemDisplayname, nextItemDisplayname, fillerMaterial;
     private List<String> previousItemLore, nextItemLore;
-    private int banksGuiLines, previousItemSlot, nextItemSlot;
+    private int banksGuiLines, previousItemSlot, nextItemSlot, updateDelay;
     private boolean fillerEnabled, fillerGlowing;
-    private long updateDelay;
 
     public static MultipleBanksValues getInstance() {
         return new MultipleBanksValues();
     }
 
     public void setupValues() {
-        FileConfiguration multipleBanks = BankPlus.getCm().getConfig(ConfigManager.Type.MULTIPLE_BANKS);
+        FileConfiguration multipleBanks = BankPlus.instance().getCm().getConfig(ConfigManager.Type.MULTIPLE_BANKS);
 
         multipleBanksModuleEnabled = multipleBanks.getBoolean("Enabled");
         showNotAvailableBanks = multipleBanks.getBoolean("Shows-Not-Available-Banks");
@@ -38,9 +37,9 @@ public class MultipleBanksValues {
         banksGuiLines = multipleBanks.getInt("Banks-Gui.Lines");
         previousItemSlot = multipleBanks.getInt("Banks-Gui.Previous-Page.Slot");
         nextItemSlot = multipleBanks.getInt("Banks-Gui.Next-Page.Slot");
+        updateDelay = multipleBanks.getInt("Banks-Gui.Update-Delay");
         fillerEnabled = multipleBanks.getBoolean("Banks-Gui.Filler.Enabled");
         fillerGlowing = multipleBanks.getBoolean("Banks-Gui.Filler.Glowing");
-        updateDelay = multipleBanks.getLong("Banks-Gui.Update-Delay");
     }
 
     public boolean isMultipleBanksModuleEnabled() {
@@ -96,21 +95,7 @@ public class MultipleBanksValues {
     }
 
     public int getBanksGuiLines() {
-        if (banksGuiLines < 1) return 9;
-        switch (banksGuiLines) {
-            case 1:
-                return 9;
-            case 2:
-                return 18;
-            case 3:
-                return 27;
-            case 4:
-                return 36;
-            case 5:
-                return 45;
-            default:
-                return 54;
-        }
+        return banksGuiLines;
     }
 
     public int getPreviousItemSlot() {
@@ -129,7 +114,7 @@ public class MultipleBanksValues {
         return fillerGlowing;
     }
 
-    public long getUpdateDelay() {
+    public int getUpdateDelay() {
         return updateDelay;
     }
 }

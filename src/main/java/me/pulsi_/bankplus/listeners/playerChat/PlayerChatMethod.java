@@ -1,9 +1,10 @@
 package me.pulsi_.bankplus.listeners.playerChat;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.account.BankPlusPlayer;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.guis.BanksHolder;
+import me.pulsi_.bankplus.banks.BanksHolder;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.BPDebugger;
 import me.pulsi_.bankplus.utils.BPMethods;
@@ -23,7 +24,8 @@ public class PlayerChatMethod {
         if (!isTyping(p)) return;
         BPDebugger.debugChat(e);
 
-        String identifier = BanksHolder.openedBank.get(p);
+        BankPlusPlayer player = BankPlus.instance().getPlayers().get(p.getUniqueId());
+        String identifier = player.getOpenedBank().getIdentifier();
         String message = ChatColor.stripColor(e.getMessage());
         if (hasTypedExit(message, p, e, identifier)) return;
 
@@ -39,15 +41,18 @@ public class PlayerChatMethod {
 
         boolean isMulti = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled();
 
+        SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
+        MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
+
         if (BPMethods.isDepositing(p)) {
             SetUtils.removePlayerFromDepositing(p);
-            if (isMulti) MultiEconomyManager.deposit(p, amount, identifier);
-            else SingleEconomyManager.deposit(p, amount);
+            if (isMulti) multiEconomyManager.deposit(amount, identifier);
+            else singleEconomyManager.deposit(amount);
         }
         if (BPMethods.isWithdrawing(p)) {
             SetUtils.removePlayerFromWithdrawing(p);
-            if (isMulti) MultiEconomyManager.withdraw(p, amount, identifier);
-            else SingleEconomyManager.withdraw(p, amount);
+            if (isMulti) multiEconomyManager.withdraw(amount, identifier);
+            else singleEconomyManager.withdraw(amount);
         }
         reopenBank(p, identifier);
     }
@@ -67,13 +72,13 @@ public class PlayerChatMethod {
     }
 
     private static void reopenBank(Player p, String identifier) {
-        Bukkit.getScheduler().runTask(BankPlus.getInstance(), () -> {
-            if (Values.CONFIG.isReopeningBankAfterChat()) BanksHolder.openBank(p, identifier);
+        Bukkit.getScheduler().runTask(BankPlus.instance(), () -> {
+            if (Values.CONFIG.isReopeningBankAfterChat()) new BanksHolder().openBank(p, identifier);
         });
     }
 
     private static void executeExitCommands(Player p) {
-        Bukkit.getScheduler().runTask(BankPlus.getInstance(), () -> {
+        Bukkit.getScheduler().runTask(BankPlus.instance(), () -> {
             for (String cmd : Values.CONFIG.getExitCommands()) {
                 if (cmd.startsWith("[CONSOLE]")) {
                     String s = cmd.replace("[CONSOLE] ", "").replace("%player%", p.getName());

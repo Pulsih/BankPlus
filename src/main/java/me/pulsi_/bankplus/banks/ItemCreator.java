@@ -1,4 +1,4 @@
-package me.pulsi_.bankplus.guis;
+package me.pulsi_.bankplus.banks;
 
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.HeadUtils;
@@ -114,10 +114,10 @@ public class ItemCreator {
         return item;
     }
 
-    public static ItemStack getFiller(String bankName) {
+    public static ItemStack getFiller(Bank bank) {
         ItemStack item;
         try {
-            String material = BanksManager.getFillerMaterial(bankName);
+            String material = bank.getFillerMaterial();
             if (material.contains(":")) {
                 String[] itemData = material.split(":");
                 item = new ItemStack(Material.valueOf(itemData[0]), 1, Byte.parseByte(itemData[1]));
@@ -129,7 +129,7 @@ public class ItemCreator {
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(BPChat.color("&f"));
 
-        if (BanksManager.isFillerGlowing(bankName)) {
+        if (bank.isFillerGlowing()) {
             meta.addEnchant(Enchantment.DURABILITY, 1, true);
             item.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
