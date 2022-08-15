@@ -1,10 +1,8 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BankPlusPlayer;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.banks.BanksHolder;
 import me.pulsi_.bankplus.banks.BanksManager;
 import me.pulsi_.bankplus.managers.ConfigManager;
 import me.pulsi_.bankplus.managers.MessageManager;
@@ -149,11 +147,11 @@ public class BPMethods {
     }
 
     public static boolean isDepositing(Player p) {
-        return SetUtils.playerDepositing.contains(p.getUniqueId());
+        return BPSets.playerDepositing.contains(p.getUniqueId());
     }
 
     public static boolean isWithdrawing(Player p) {
-        return SetUtils.playerWithdrawing.contains(p.getUniqueId());
+        return BPSets.playerWithdrawing.contains(p.getUniqueId());
     }
 
     public static boolean isPlayer(CommandSender s) {
@@ -241,7 +239,7 @@ public class BPMethods {
         if (Values.MESSAGES.isTitleCustomAmountEnabled())
             BPMethods.sendTitle("Title-Custom-Transaction.Title-Withdraw", p);
         MessageManager.send(p, "Chat-Withdraw");
-        SetUtils.addPlayerToWithdraw(p);
+        BPSets.addPlayerToWithdraw(p);
         p.closeInventory();
         BankPlus.instance().getPlayers().get(p.getUniqueId()).setOpenedBank(BankPlus.instance().getBanks().get(identifier));
     }
@@ -256,7 +254,7 @@ public class BPMethods {
         if (Values.MESSAGES.isTitleCustomAmountEnabled())
             BPMethods.sendTitle("Title-Custom-Transaction.Title-Deposit", p);
         MessageManager.send(p, "Chat-Deposit");
-        SetUtils.addPlayerToDeposit(p);
+        BPSets.addPlayerToDeposit(p);
         p.closeInventory();
         BankPlus.instance().getPlayers().get(p.getUniqueId()).setOpenedBank(BankPlus.instance().getBanks().get(identifier));
     }

@@ -6,7 +6,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.UUID;
 
-public class HeadUtils {
+public class BPHeads {
 
     public static ItemStack getNameHead(String owner, ItemStack baseSkull) {
         SkullMeta skullMeta = (SkullMeta) baseSkull.getItemMeta();

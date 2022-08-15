@@ -1,7 +1,6 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.banks.BanksManager;
 import me.pulsi_.bankplus.managers.DataManager;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -21,7 +20,7 @@ import java.util.List;
  * for older versions to the newest versions. ( Ex: Automatically moving the player
  * balances from the players.yml to the per-player file )
  */
-public class VersionUtils {
+public class BPVersions {
 
     public static void moveBankFileToBanksFolder() {
         File oldBankFile = new File(BankPlus.instance().getDataFolder(), "bank.yml");

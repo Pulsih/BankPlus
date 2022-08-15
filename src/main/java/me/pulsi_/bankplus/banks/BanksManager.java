@@ -7,6 +7,7 @@ import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPLogger;
+import me.pulsi_.bankplus.utils.BPItems;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -99,8 +100,8 @@ public class BanksManager {
                     if (material == null) continue;
 
                     ItemStack guiItem;
-                    if (material.startsWith("HEAD")) guiItem = ItemCreator.getHead(itemValues);
-                    else guiItem = ItemCreator.createItemStack(itemValues);
+                    if (material.startsWith("HEAD")) guiItem = BPItems.getHead(itemValues);
+                    else guiItem = BPItems.createItemStack(itemValues);
                     if (guiItem == null) continue;
 
                     ItemMeta meta = guiItem.getItemMeta();
@@ -135,7 +136,7 @@ public class BanksManager {
                 }
                 if (bank.hasFiller())
                     for (int i = 0; i < inv.getSize(); i++)
-                        if (inv.getItem(i) == null) inv.setItem(i, ItemCreator.getFiller(bank));
+                        if (inv.getItem(i) == null) inv.setItem(i, BPItems.getFiller(bank));
                 content = inv.getContents();
             }
 

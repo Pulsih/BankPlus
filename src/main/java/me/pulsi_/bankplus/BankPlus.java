@@ -9,7 +9,7 @@ import me.pulsi_.bankplus.managers.ConfigManager;
 import me.pulsi_.bankplus.managers.DataManager;
 import me.pulsi_.bankplus.placeholders.Placeholders;
 import me.pulsi_.bankplus.utils.BPLogger;
-import me.pulsi_.bankplus.utils.VersionUtils;
+import me.pulsi_.bankplus.utils.BPVersions;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
@@ -21,7 +21,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -79,8 +78,8 @@ public final class BankPlus extends JavaPlugin {
         Bukkit.getScheduler().runTaskAsynchronously(this, () -> isUpdated = isPluginUpdated());
         wasOnSingleEconomy = !Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled();
 
-        VersionUtils.moveBankFileToBanksFolder();
-        VersionUtils.changePlayerStoragePosition(0);
+        BPVersions.moveBankFileToBanksFolder();
+        BPVersions.changePlayerStoragePosition(0);
     }
 
     @Override

@@ -8,7 +8,7 @@ import me.pulsi_.bankplus.banks.BanksHolder;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.BPDebugger;
 import me.pulsi_.bankplus.utils.BPMethods;
-import me.pulsi_.bankplus.utils.SetUtils;
+import me.pulsi_.bankplus.utils.BPSets;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -45,12 +45,12 @@ public class PlayerChatMethod {
         MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
 
         if (BPMethods.isDepositing(p)) {
-            SetUtils.removePlayerFromDepositing(p);
+            BPSets.removePlayerFromDepositing(p);
             if (isMulti) multiEconomyManager.deposit(amount, identifier);
             else singleEconomyManager.deposit(amount);
         }
         if (BPMethods.isWithdrawing(p)) {
-            SetUtils.removePlayerFromWithdrawing(p);
+            BPSets.removePlayerFromWithdrawing(p);
             if (isMulti) multiEconomyManager.withdraw(amount, identifier);
             else singleEconomyManager.withdraw(amount);
         }
@@ -60,8 +60,8 @@ public class PlayerChatMethod {
     private static boolean hasTypedExit(String message, Player p, AsyncPlayerChatEvent e, String identifier) {
         if (isTyping(p) && !message.equalsIgnoreCase(Values.CONFIG.getExitMessage())) return false;
         e.setCancelled(true);
-        SetUtils.playerDepositing.remove(p.getUniqueId());
-        SetUtils.playerWithdrawing.remove(p.getUniqueId());
+        BPSets.playerDepositing.remove(p.getUniqueId());
+        BPSets.playerWithdrawing.remove(p.getUniqueId());
         executeExitCommands(p);
         reopenBank(p, identifier);
         return true;

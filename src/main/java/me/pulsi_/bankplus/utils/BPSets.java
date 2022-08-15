@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-public class SetUtils {
+public class BPSets {
 
     public static Set<UUID> playerDepositing = new HashSet<>();
 

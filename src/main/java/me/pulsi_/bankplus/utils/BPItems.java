@@ -1,7 +1,6 @@
-package me.pulsi_.bankplus.banks;
+package me.pulsi_.bankplus.utils;
 
-import me.pulsi_.bankplus.utils.BPChat;
-import me.pulsi_.bankplus.utils.HeadUtils;
+import me.pulsi_.bankplus.banks.Bank;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.configuration.ConfigurationSection;
@@ -11,7 +10,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class ItemCreator {
+public class BPItems {
 
     public static final ItemStack UNKNOWN_ITEM = new ItemStack(Material.BARRIER);
     public static final Material UNKNOWN_MATERIAL = Material.BARRIER;
@@ -44,16 +43,16 @@ public class ItemCreator {
             if (material.startsWith("HEAD[")) {
                 String player = material.replace("HEAD[", "").replace("]", "");
                 try {
-                    item = HeadUtils.getNameHead(player, new ItemStack(Material.PLAYER_HEAD));
+                    item = BPHeads.getNameHead(player, new ItemStack(Material.PLAYER_HEAD));
                 } catch (NoSuchFieldError er) {
-                    item = HeadUtils.getNameHead(player, new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()));
+                    item = BPHeads.getNameHead(player, new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()));
                 }
             } else if (material.startsWith("HEAD-<")) {
                 String textureValue = material.replace("HEAD-<", "").replace(">", "");
                 try {
-                    item = HeadUtils.getValueHead(new ItemStack(Material.PLAYER_HEAD), textureValue);
+                    item = BPHeads.getValueHead(new ItemStack(Material.PLAYER_HEAD), textureValue);
                 } catch (NoSuchFieldError er) {
-                    item = HeadUtils.getValueHead(new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()), textureValue);
+                    item = BPHeads.getValueHead(new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()), textureValue);
                 }
             }
         } catch (IllegalArgumentException e) {
@@ -67,23 +66,23 @@ public class ItemCreator {
         try {
             if (material.equals("HEAD-%PLAYER%")) {
                 try {
-                    item = HeadUtils.getNameHead(p.getName(), new ItemStack(Material.PLAYER_HEAD));
+                    item = BPHeads.getNameHead(p.getName(), new ItemStack(Material.PLAYER_HEAD));
                 } catch (NoSuchFieldError er) {
-                    item = HeadUtils.getNameHead(p.getName(), new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()));
+                    item = BPHeads.getNameHead(p.getName(), new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()));
                 }
             } else if (material.startsWith("HEAD[")) {
                 String playerName = material.replace("HEAD[", "").replace("]", "");
                 try {
-                    item = HeadUtils.getNameHead(playerName, new ItemStack(Material.PLAYER_HEAD));
+                    item = BPHeads.getNameHead(playerName, new ItemStack(Material.PLAYER_HEAD));
                 } catch (NoSuchFieldError er) {
-                    item = HeadUtils.getNameHead(playerName, new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()));
+                    item = BPHeads.getNameHead(playerName, new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()));
                 }
             } else if (material.startsWith("HEAD-<")) {
                 String textureValue = material.replace("HEAD-<", "").replace(">", "");
                 try {
-                    item = HeadUtils.getValueHead(new ItemStack(Material.PLAYER_HEAD), textureValue);
+                    item = BPHeads.getValueHead(new ItemStack(Material.PLAYER_HEAD), textureValue);
                 } catch (NoSuchFieldError er) {
-                    item = HeadUtils.getValueHead(new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()), textureValue);
+                    item = BPHeads.getValueHead(new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()), textureValue);
                 }
             }
         } catch (IllegalArgumentException e) {

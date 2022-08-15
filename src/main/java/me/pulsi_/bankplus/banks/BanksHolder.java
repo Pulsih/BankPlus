@@ -6,6 +6,7 @@ import me.pulsi_.bankplus.account.BankPlusPlayer;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPItems;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
@@ -25,14 +26,13 @@ public class BanksHolder implements InventoryHolder {
     }
 
     public void openBank(Player p, String identifier) {
-        HashMap<String, Bank> banks = BankPlus.instance().getBanks();
         BankPlusPlayer player = BankPlus.instance().getPlayers().get(p.getUniqueId());
+        HashMap<String, Bank> banks = BankPlus.instance().getBanks();
+
         if (!banks.containsKey(identifier)) {
             MessageManager.send(p, "Invalid-Bank");
             return;
         }
-        BukkitTask task = player.getInventoryUpdateTask();
-        if (task != null) task.cancel();
 
         if (identifier.equals(BanksListGui.multipleBanksGuiID)) {
             new BanksListGui().openMultipleBanksGui(p);
@@ -44,18 +44,21 @@ public class BanksHolder implements InventoryHolder {
             return;
         }
 
+        BukkitTask task = player.getInventoryUpdateTask();
+        if (task != null) task.cancel();
+
         Bank baseBank = banks.get(identifier);
         Inventory bank = Bukkit.createInventory(new BanksHolder(), baseBank.getSize(), BPChat.color(baseBank.getTitle()));
         bank.setContents(baseBank.getContent());
         placeHeads(bank, p, identifier);
+        updateMeta(bank, p, identifier);
+
+        long delay = baseBank.getUpdateDelay();
+        if (delay >= 0) player.setInventoryUpdateTask(Bukkit.getScheduler().runTaskTimer(BankPlus.instance(), () -> updateMeta(bank, p, identifier), delay, delay));
 
         player.setOpenedBank(baseBank);
         BPMethods.playSound("PERSONAL", p);
         p.openInventory(bank);
-
-        long delay = baseBank.getUpdateDelay();
-        if (delay == 0) updateMeta(bank, p, identifier);
-        else player.setInventoryUpdateTask(Bukkit.getScheduler().runTaskTimer(BankPlus.instance(), () -> updateMeta(bank, p, identifier), 0, delay));
     }
 
     private void placeHeads(Inventory bank, Player p, String identifier) {
@@ -70,9 +73,9 @@ public class BanksHolder implements InventoryHolder {
             if (material == null || !material.startsWith("HEAD")) continue;
 
             try {
-                bank.setItem(itemValues.getInt("Slot") - 1, ItemCreator.getHead(material, p));
+                bank.setItem(itemValues.getInt("Slot") - 1, BPItems.getHead(material, p));
             } catch (ArrayIndexOutOfBoundsException e) {
-                bank.addItem(ItemCreator.getHead(material, p));
+                bank.addItem(BPItems.getHead(material, p));
             }
         }
     }
