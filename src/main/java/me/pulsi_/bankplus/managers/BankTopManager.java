@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.account.BankPlusPlayer;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -10,20 +11,21 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class BankTopManager {
 
-    public static List<HashMap<BigDecimal, String>> linkedBalanceName = new ArrayList<>();
-    private static final HashMap<Player, Integer> playerBankTopPosition = new HashMap<>();
-    private static final List<BigDecimal> bankTopBalances = new ArrayList<>();
-    private static final List<String> bankTopNames = new ArrayList<>();
+    private final List<HashMap<BigDecimal, String>> linkedBalanceName = new ArrayList<>();
+    private final List<BigDecimal> bankTopBalances = new ArrayList<>();
+    private final List<String> bankTopNames = new ArrayList<>();
+    private final BankPlus plugin;
 
-    public static void updateBankTop() {
-        playerBankTopPosition.clear();
+    public BankTopManager(BankPlus plugin) {
+        this.plugin = plugin;
+    }
+
+    public void updateBankTop() {
+        linkedBalanceName.clear();
         bankTopBalances.clear();
         bankTopNames.clear();
 
@@ -53,38 +55,41 @@ public class BankTopManager {
         else Bukkit.broadcastMessage(message);
     }
 
-    public static void startUpdateTask() {
-        BukkitTask task = TaskManager.getBroadcastTask();
+    public void startUpdateTask() {
+        TaskManager taskManager = plugin.getTaskManager();
+        BukkitTask task = taskManager.getBroadcastTask();
         if (task != null) task.cancel();
-        TaskManager.setBroadcastTask(Bukkit.getScheduler().runTaskTimer(BankPlus.instance(), BankTopManager::updateBankTop, Values.CONFIG.getUpdateBankTopDelay(), Values.CONFIG.getUpdateBankTopDelay()));
+
+        long delay = Values.CONFIG.getUpdateBankTopDelay();
+        taskManager.setBroadcastTask(Bukkit.getScheduler().runTaskTimer(plugin, this::updateBankTop, delay, delay));
     }
 
-    public static BigDecimal getBankTopBalancePlayer(int position) {
-        if (position <= 0) return new BigDecimal(0);
-        if (position - 1 >= bankTopBalances.size()) return new BigDecimal(0);
-        try {
-            return bankTopBalances.get(position - 1);
-        } catch (ArrayIndexOutOfBoundsException e) {
-            return new BigDecimal(0);
-        }
+    public BigDecimal getBankTopBalancePlayer(int position) {
+        if (position < 1 || position > bankTopBalances.size()) return new BigDecimal(0);
+        return bankTopBalances.get(position - 1);
     }
 
-    public static String getBankTopNamePlayer(int position) {
-        if (position <= 0) return "Invalid number.";
-        if (position - 1 >= bankTopNames.size()) return "Not found yet.";
+    public String getBankTopNamePlayer(int position) {
+        if (position < 1) return "Invalid number.";
+        if (position > bankTopNames.size()) return "Not found yet.";
+
         String name = bankTopNames.get(position - 1);
-        if (name == null) return "Not found yet.";
-        return name;
+        return name == null ? "Not found yet." : name;
     }
 
-    public static int getPlayerBankTopPosition(Player p) {
-        if (!playerBankTopPosition.containsKey(p)) {
+    public int getPlayerBankTopPosition(Player p) {
+        BankPlusPlayer player = plugin.getPlayers().get(p.getUniqueId());
+        if (player.getBanktopPosition() == -1) {
             for (int i = 0; i < bankTopNames.size(); i++) {
                 if (!bankTopNames.get(i).equals(p.getName())) continue;
-                playerBankTopPosition.put(p, i + 1);
+                player.setBanktopPosition(i + 1);
                 break;
             }
         }
-        return playerBankTopPosition.get(p);
+        return player.getBanktopPosition();
+    }
+
+    public List<HashMap<BigDecimal, String>> getLinkedBalanceName() {
+        return linkedBalanceName;
     }
 }

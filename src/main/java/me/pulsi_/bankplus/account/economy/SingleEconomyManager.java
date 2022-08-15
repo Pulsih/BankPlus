@@ -1,8 +1,8 @@
 package me.pulsi_.bankplus.account.economy;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BankPlusPlayerFilesUtils;
-import me.pulsi_.bankplus.banks.BanksManager;
+import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
+import me.pulsi_.bankplus.bankGuis.BanksManager;
 import me.pulsi_.bankplus.managers.BankTopManager;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.BPDebugger;
@@ -77,7 +77,7 @@ public class SingleEconomyManager {
 
             HashMap<BigDecimal, String> balanceName = new HashMap<>();
             balanceName.put(balance, name);
-            BankTopManager.linkedBalanceName.add(balanceName);
+            BankPlus.instance().getBankTopManager().getLinkedBalanceName().add(balanceName);
         }
         return balances;
     }
@@ -88,7 +88,7 @@ public class SingleEconomyManager {
     public void loadBankBalance() {
         if (onNull(p, "Cannot load player bank balance!")) return;
         if (totalPlayerMoney.containsKey(p.getUniqueId())) return;
-        String bal = BankPlusPlayerFilesUtils.getPlayerConfig(p).getString("Money");
+        String bal = new BankPlusPlayerFiles(p).getPlayerConfig().getString("Money");
         totalPlayerMoney.put(p.getUniqueId(), bal == null ? new BigDecimal(0) : new BigDecimal(bal));
     }
 
@@ -105,8 +105,9 @@ public class SingleEconomyManager {
      */
     public void saveBankBalance() {
         if (onNull(p, "Cannot save player bank balance!")) return;
-        BankPlusPlayerFilesUtils.getPlayerConfig(p).set("Money", BPMethods.formatBigDouble(getBankBalance()));
-        BankPlusPlayerFilesUtils.savePlayerFile(p, true);
+        BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
+        files.getPlayerConfig().set("Money", BPMethods.formatBigDouble(getBankBalance()));
+        files.savePlayerFile(true);
     }
 
     /**
@@ -127,7 +128,7 @@ public class SingleEconomyManager {
      */
     public BigDecimal getOfflineBankBalance() {
         if (offNull(oP, "Cannot get player bank balance!")) return null;
-        String bal = BankPlusPlayerFilesUtils.getPlayerConfig(oP).getString("Money");
+        String bal = new BankPlusPlayerFiles(oP).getPlayerConfig().getString("Money");
         return bal == null ? new BigDecimal(0) : new BigDecimal(bal);
     }
 
@@ -207,8 +208,9 @@ public class SingleEconomyManager {
      * @param amount The amount.
      */
     private void setOffline(BigDecimal amount) {
-        BankPlusPlayerFilesUtils.getPlayerConfig(oP).set("Money", BPMethods.formatBigDouble(amount));
-        BankPlusPlayerFilesUtils.savePlayerFile(oP, true);
+        BankPlusPlayerFiles files = new BankPlusPlayerFiles(oP);
+        files.getPlayerConfig().set("Money", BPMethods.formatBigDouble(amount));
+        files.savePlayerFile(true);
     }
 
     public void deposit(BigDecimal amount) {

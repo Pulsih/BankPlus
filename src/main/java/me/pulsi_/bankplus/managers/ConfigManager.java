@@ -1,11 +1,8 @@
 package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.banks.BanksHolder;
-import me.pulsi_.bankplus.banks.BanksManager;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
-import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -59,7 +56,7 @@ public class ConfigManager {
         buildMessages();
         buildMultipleBanks();
 
-        DataManager.reloadPlugin();
+        BankPlus.instance().getDataManager().reloadPlugin();
     }
 
     public FileConfiguration getConfig(Type type) {

@@ -34,7 +34,7 @@ public class ConfigValues {
     }
 
     public void setupValues() {
-        FileConfiguration config = BankPlus.instance().getCm().getConfig(ConfigManager.Type.CONFIG);
+        FileConfiguration config = BankPlus.instance().getConfigManager().getConfig(ConfigManager.Type.CONFIG);
 
         exitMessage = config.getString("General.Chat-Exit-Message");
         playerChatPriority = config.getString("General.Event-Priorities.PlayerChat");

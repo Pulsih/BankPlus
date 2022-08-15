@@ -3,10 +3,12 @@ package me.pulsi_.bankplus;
 import me.pulsi_.bankplus.account.BankPlusPlayer;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.banks.Bank;
+import me.pulsi_.bankplus.bankGuis.BankGui;
 import me.pulsi_.bankplus.interest.Interest;
+import me.pulsi_.bankplus.managers.BankTopManager;
 import me.pulsi_.bankplus.managers.ConfigManager;
 import me.pulsi_.bankplus.managers.DataManager;
+import me.pulsi_.bankplus.managers.TaskManager;
 import me.pulsi_.bankplus.placeholders.Placeholders;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPVersions;
@@ -28,16 +30,20 @@ public final class BankPlus extends JavaPlugin {
 
     public static boolean wasOnSingleEconomy;
 
-    private final HashMap<String, Bank> banks = new HashMap<>();
+    private final HashMap<String, BankGui> banks = new HashMap<>();
     private final HashMap<UUID, BankPlusPlayer> players = new HashMap<>();
 
     private static BankPlus instance;
     private Economy econ = null;
     private Permission perms = null;
 
-    private ConfigManager cm;
+    private BankTopManager bankTopManager;
+    private ConfigManager configManager;
+    private DataManager dataManager;
+    private TaskManager taskManager;
+    private Interest interest;
 
-    private boolean isPlaceholderAPIHooked = false, isEssentialsXHooked = false, isUpdated = false;
+    private boolean isPlaceholderAPIHooked = false, isEssentialsXHooked = false, isUpdated = true;
     private String serverVersion;
 
     @Override
@@ -61,9 +67,16 @@ public final class BankPlus extends JavaPlugin {
         }
 
         serverVersion = getServer().getVersion();
-        cm = new ConfigManager(this);
-        setupPermissions();
-        DataManager.setupPlugin();
+        this.bankTopManager = new BankTopManager(this);
+        this.configManager = new ConfigManager(this);
+        this.dataManager = new DataManager(this);
+        this.taskManager = new TaskManager();
+        this.interest = new Interest();
+
+        RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
+        perms = rsp.getProvider();
+
+        dataManager.setupPlugin();
 
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             BPLogger.info("Hooked into PlaceholderAPI!");
@@ -84,15 +97,13 @@ public final class BankPlus extends JavaPlugin {
 
     @Override
     public void onDisable() {
-
-        instance = this;
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) Bukkit.getOnlinePlayers().forEach(p -> new MultiEconomyManager(p).saveBankBalance());
         else Bukkit.getOnlinePlayers().forEach(p -> new SingleEconomyManager(p).saveBankBalance());
-        if (Values.CONFIG.isInterestEnabled()) Interest.saveInterest();
-        DataManager.shutdownPlugin();
+        if (Values.CONFIG.isInterestEnabled()) interest.saveInterest();
+        dataManager.shutdownPlugin();
     }
 
-    public HashMap<String, Bank> getBanks() {
+    public HashMap<String, BankGui> getBanks() {
         return banks;
     }
 
@@ -124,8 +135,24 @@ public final class BankPlus extends JavaPlugin {
         return serverVersion;
     }
 
-    public ConfigManager getCm() {
-        return cm;
+    public BankTopManager getBankTopManager() {
+        return bankTopManager;
+    }
+
+    public ConfigManager getConfigManager() {
+        return configManager;
+    }
+
+    public DataManager getDataManager() {
+        return dataManager;
+    }
+
+    public TaskManager getTaskManager() {
+        return taskManager;
+    }
+
+    public Interest getInterest() {
+        return interest;
     }
 
     private boolean setupEconomy() {
@@ -134,11 +161,6 @@ public final class BankPlus extends JavaPlugin {
         if (rsp == null) return false;
         econ = rsp.getProvider();
         return true;
-    }
-
-    private void setupPermissions() {
-        RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
-        perms = rsp.getProvider();
     }
 
     public static BankPlus instance() {

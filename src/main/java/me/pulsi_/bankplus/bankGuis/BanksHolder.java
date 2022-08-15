@@ -1,12 +1,12 @@
-package me.pulsi_.bankplus.banks;
+package me.pulsi_.bankplus.bankGuis;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayer;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.BPChat;
-import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.utils.BPItems;
+import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
@@ -17,7 +17,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class BanksHolder implements InventoryHolder {
 
@@ -27,7 +29,7 @@ public class BanksHolder implements InventoryHolder {
 
     public void openBank(Player p, String identifier) {
         BankPlusPlayer player = BankPlus.instance().getPlayers().get(p.getUniqueId());
-        HashMap<String, Bank> banks = BankPlus.instance().getBanks();
+        HashMap<String, BankGui> banks = BankPlus.instance().getBanks();
 
         if (!banks.containsKey(identifier)) {
             MessageManager.send(p, "Invalid-Bank");
@@ -47,7 +49,7 @@ public class BanksHolder implements InventoryHolder {
         BukkitTask task = player.getInventoryUpdateTask();
         if (task != null) task.cancel();
 
-        Bank baseBank = banks.get(identifier);
+        BankGui baseBank = banks.get(identifier);
         Inventory bank = Bukkit.createInventory(new BanksHolder(), baseBank.getSize(), BPChat.color(baseBank.getTitle()));
         bank.setContents(baseBank.getContent());
         placeHeads(bank, p, identifier);

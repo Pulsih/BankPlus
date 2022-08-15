@@ -2,11 +2,10 @@ package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayer;
-import me.pulsi_.bankplus.account.BankPlusPlayerFilesUtils;
+import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.OfflineInterestManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.banks.BanksManager;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
@@ -24,15 +23,13 @@ public class PlayerJoinListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
-        BankPlusPlayerFilesUtils.registerPlayer(p);
+        BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
+        files.registerPlayer();
 
-        saveStatistics(p);
-        offlineInterestMessage(p);
-    }
+        BankPlusPlayer player = new BankPlusPlayer(p, files.getPlayerFile(), files.getPlayerConfig());
+        BankPlus.instance().getPlayers().put(p.getUniqueId(), player);
 
-    private void saveStatistics(Player p) {
-        FileConfiguration config = BankPlusPlayerFilesUtils.getPlayerConfig(p);
-
+        FileConfiguration config = player.getPlayerConfig();
         String sOfflineInterest = config.getString("Offline-Interest");
         String sName = config.getString("Account-Name");
         boolean hasChanges = false;
@@ -59,14 +56,13 @@ public class PlayerJoinListener implements Listener {
                     hasChanges = true;
                 }
             }
-            if (hasChanges) BankPlusPlayerFilesUtils.savePlayerFile(p, true);
             new SingleEconomyManager(p).loadBankBalance();
         } else {
             for (String bankName : BankPlus.instance().getBanks().keySet()) {
                 String sBalance = config.getString("Banks." + bankName + ".Money");
                 String sLevel = config.getString("Banks." + bankName + ".Level");
                 if (sBalance == null) {
-                    if (!Values.CONFIG.getMainGuiName().equals(bankName)) config.set("Banks." + bankName + ".Money", "0.00");
+                    if (!Values.CONFIG.getMainGuiName().equals(bankName)) config.set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(BigDecimal.valueOf(0)));
                     else config.set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(Values.CONFIG.getStartAmount()));
                     hasChanges = true;
                 }
@@ -75,15 +71,16 @@ public class PlayerJoinListener implements Listener {
                     hasChanges = true;
                 }
             }
-            if (hasChanges) BankPlusPlayerFilesUtils.savePlayerFile(p, true);
             new MultiEconomyManager(p).loadBankBalance();
         }
-        BankPlus.instance().getPlayers().put(p.getUniqueId(), new BankPlusPlayer(p));
-    }
+        if (hasChanges) files.savePlayerFile(true);
 
+        offlineInterestMessage(p);
+    }
     private void offlineInterestMessage(Player p) {
         if (!Values.CONFIG.isNotifyOfflineInterest()) return;
-        BigDecimal offlineInterest = OfflineInterestManager.getOfflineInterest(p);
+        OfflineInterestManager interestManager = new OfflineInterestManager(p);
+        BigDecimal offlineInterest = interestManager.getOfflineInterest();
         if (offlineInterest.doubleValue() <= 0) return;
 
         long delay = Values.CONFIG.getNotifyOfflineInterestDelay();
@@ -95,6 +92,6 @@ public class PlayerJoinListener implements Listener {
         if (delay == 0) p.sendMessage(message);
         else Bukkit.getScheduler().runTaskLater(BankPlus.instance(), () -> p.sendMessage(message), delay * 20L);
 
-        OfflineInterestManager.setOfflineInterest(p, new BigDecimal(0), true);
+        interestManager.setOfflineInterest(new BigDecimal(0), true);
     }
 }

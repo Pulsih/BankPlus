@@ -2,7 +2,6 @@ package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayer;
-import me.pulsi_.bankplus.banks.BanksHolder;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

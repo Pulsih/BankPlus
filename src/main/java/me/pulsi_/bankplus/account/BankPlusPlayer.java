@@ -1,28 +1,46 @@
 package me.pulsi_.bankplus.account;
 
-import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.banks.Bank;
+import me.pulsi_.bankplus.bankGuis.BankGui;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.io.File;
 import java.util.HashMap;
 
 public class BankPlusPlayer {
 
+    private final Player player;
+    private final File playerFile;
+    private final FileConfiguration playerConfig;
     private BukkitTask inventoryUpdateTask;
-    private Bank openedBank;
+    private BankGui openedBank;
     private HashMap<String, String> playerBankClickHolder;
-    private final Player p;
+    private int banktopPosition = -1;
 
-    public BankPlusPlayer(Player player) {
-        this.p = player;
+    public BankPlusPlayer(Player player, File playerFile, FileConfiguration playerConfig) {
+        this.player = player;
+        this.playerFile = playerFile;
+        this.playerConfig = playerConfig;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public File getPlayerFile() {
+        return playerFile;
+    }
+
+    public FileConfiguration getPlayerConfig() {
+        return playerConfig;
     }
 
     public BukkitTask getInventoryUpdateTask() {
         return inventoryUpdateTask;
     }
 
-    public Bank getOpenedBank() {
+    public BankGui getOpenedBank() {
         return openedBank;
     }
 
@@ -30,11 +48,15 @@ public class BankPlusPlayer {
         return playerBankClickHolder;
     }
 
+    public int getBanktopPosition() {
+        return banktopPosition;
+    }
+
     public void setInventoryUpdateTask(BukkitTask inventoryUpdateTask) {
         this.inventoryUpdateTask = inventoryUpdateTask;
     }
 
-    public void setOpenedBank(Bank openedBank) {
+    public void setOpenedBank(BankGui openedBank) {
         this.openedBank = openedBank;
     }
 
@@ -42,7 +64,7 @@ public class BankPlusPlayer {
         this.playerBankClickHolder = playerBankClickHolder;
     }
 
-    public void updateInstance() {
-        BankPlus.instance().getPlayers().put(p.getUniqueId(), this);
+    public void setBanktopPosition(int banktopPosition) {
+        this.banktopPosition = banktopPosition;
     }
 }

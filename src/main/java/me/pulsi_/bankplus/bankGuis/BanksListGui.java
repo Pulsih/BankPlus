@@ -1,19 +1,21 @@
-package me.pulsi_.bankplus.banks;
+package me.pulsi_.bankplus.bankGuis;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayer;
 import me.pulsi_.bankplus.utils.BPChat;
+import me.pulsi_.bankplus.utils.BPItems;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
-import me.pulsi_.bankplus.utils.BPItems;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.*;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -28,12 +30,12 @@ public class BanksListGui {
 
     public void openMultipleBanksGui(Player p) {
         BankPlusPlayer player = BankPlus.instance().getPlayers().get(p.getUniqueId());
-        HashMap<String, Bank> banks = BankPlus.instance().getBanks();
+        HashMap<String, BankGui> banks = BankPlus.instance().getBanks();
 
         BukkitTask task = player.getInventoryUpdateTask();
         if (task != null) task.cancel();
 
-        Bank baseBanksListGui = banks.get(multipleBanksGuiID);
+        BankGui baseBanksListGui = banks.get(multipleBanksGuiID);
         Inventory banksListGui = Bukkit.createInventory(new BanksHolder(), baseBanksListGui.getSize(), baseBanksListGui.getTitle());
         banksListGui.setContents(baseBanksListGui.getContent());
         placeBanks(banksListGui, p);
@@ -56,7 +58,7 @@ public class BanksListGui {
             for (int i = 0; i < gui.getSize(); i++) gui.setItem(i, filler);
         }
 
-        Bank multipleBanksGui = new Bank(
+        BankGui multipleBanksGui = new BankGui(
                 multipleBanksGuiID, title, Values.MULTIPLE_BANKS.getBanksGuiLines(), Values.MULTIPLE_BANKS.getUpdateDelay(), gui.getContents()
         );
         BankPlus.instance().getBanks().put("MultipleBanksGui", multipleBanksGui);

@@ -3,9 +3,7 @@ package me.pulsi_.bankplus.utils;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.banks.Bank;
-import me.pulsi_.bankplus.banks.BanksHolder;
-import me.pulsi_.bankplus.banks.BanksManager;
+import me.pulsi_.bankplus.bankGuis.BankGui;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.managers.TaskManager;
 import me.pulsi_.bankplus.values.Values;
@@ -93,13 +91,15 @@ public class BPDebugger {
             return;
         }
 
-        String task = TaskManager.getInterestTask().toString();
+        TaskManager tasks = BankPlus.instance().getTaskManager();
+        String task = tasks.toString();
         if (task == null) task = "null";
         else task = task.replace("org.bukkit.craftbukkit.", "");
 
-        BPLogger.info("InterestTask: &a" + task + " &9(IsNull: &a" + (TaskManager.getInterestTask() == null) + "&9)");
+        BPLogger.info("InterestTask: &a" + task + " &9(IsNull: &a" + (tasks.getInterestTask() == null) + "&9)");
         BPLogger.info("ServerMilliseconds: &a" + System.currentTimeMillis() + "ms");
-        BPLogger.info("InterestCooldownMillis: &a" + Interest.getInterestCooldownMillis() + "ms &9(&a" + BPMethods.formatTime(Interest.getInterestCooldownMillis()) + "&9)");
+        Interest interest = BankPlus.instance().getInterest();
+        BPLogger.info("InterestCooldownMillis: &a" + interest.getInterestCooldownMillis() + "ms &9(&a" + BPMethods.formatTime(interest.getInterestCooldownMillis()) + "&9)");
         BPLogger.info("InterestDelay: &a" + Values.CONFIG.getInterestDelay() + "ms &9(&a" + BPMethods.formatTime(Values.CONFIG.getInterestDelay()) + "&9)");
         BPLogger.info("PlayersWaitingInterest: &a" + Bukkit.getOnlinePlayers().size() + " &9(&a" + Bukkit.getOfflinePlayers().length + " Total&9)");
         BPLogger.info("IsOfflineInterest: &a" + Values.CONFIG.isGivingInterestToOfflinePlayers());
@@ -125,7 +125,7 @@ public class BPDebugger {
 
         String itemPath = null, actionType = null, actionNumber = null;
         boolean hasAction = false;
-        Bank bank = BankPlus.instance().getPlayers().get(p.getUniqueId()).getOpenedBank();
+        BankGui bank = BankPlus.instance().getPlayers().get(p.getUniqueId()).getOpenedBank();
         for (String key : bank.getItems().getKeys(false)) {
             ConfigurationSection item = bank.getBankConfig().getConfigurationSection("Items." + key);
             if (item == null || slot != item.getInt("Slot")) continue;

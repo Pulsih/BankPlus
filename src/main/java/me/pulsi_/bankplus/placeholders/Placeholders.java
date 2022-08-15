@@ -2,9 +2,10 @@ package me.pulsi_.bankplus.placeholders;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.account.BankPlusPlayer;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.banks.BanksManager;
+import me.pulsi_.bankplus.bankGuis.BanksManager;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.managers.BankTopManager;
 import me.pulsi_.bankplus.utils.BPChat;
@@ -48,6 +49,7 @@ public class Placeholders extends PlaceholderExpansion {
 
         SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
         MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
+        BankTopManager bankTop = BankPlus.instance().getBankTopManager();
 
         if (identifier.startsWith("capacity")) {
             BigDecimal capacity = new BanksManager(Values.CONFIG.getMainGuiName()).getCapacity(p);
@@ -77,7 +79,7 @@ public class Placeholders extends PlaceholderExpansion {
             return level;
         }
 
-        if (identifier.startsWith("banktop_position")) return BankTopManager.getPlayerBankTopPosition(p) + "";
+        if (identifier.startsWith("banktop_position")) return bankTop.getPlayerBankTopPosition(p) + "";
 
         if (identifier.startsWith("next_level_cost")) {
             if (!new BanksManager(Values.CONFIG.getMainGuiName()).hasNextLevel(p)) return BPChat.color(Values.CONFIG.getBankUpgradedMax());
@@ -132,8 +134,9 @@ public class Placeholders extends PlaceholderExpansion {
             return BPMethods.formatCommas(interestMoney);
         }
 
-        if (identifier.equals("interest_cooldown")) return BPMethods.formatTime(Interest.getInterestCooldownMillis());
-        if (identifier.equals("interest_cooldown_millis")) return String.valueOf(Interest.getInterestCooldownMillis());
+        Interest interest = BankPlus.instance().getInterest();
+        if (identifier.equals("interest_cooldown")) return BPMethods.formatTime(interest.getInterestCooldownMillis());
+        if (identifier.equals("interest_cooldown_millis")) return String.valueOf(interest.getInterestCooldownMillis());
 
         if (identifier.startsWith("banktop_money_")) {
             String number = identifier.replace("banktop_money_", "");
@@ -146,7 +149,7 @@ public class Placeholders extends PlaceholderExpansion {
             if (position > Values.CONFIG.getBankTopSize())
                 return "Limit of the BankTop: " + Values.CONFIG.getBankTopSize();
 
-            BigDecimal money = BankTopManager.getBankTopBalancePlayer(position);
+            BigDecimal money = bankTop.getBankTopBalancePlayer(position);
             switch (Values.CONFIG.getBankTopMoneyFormat()) {
                 case "default_amount":
                     return BPMethods.formatCommas(money);
@@ -169,7 +172,7 @@ public class Placeholders extends PlaceholderExpansion {
             }
             if (position > Values.CONFIG.getBankTopSize())
                 return "Limit of the BankTop: " + Values.CONFIG.getBankTopSize();
-            return BankTopManager.getBankTopNamePlayer(position);
+            return bankTop.getBankTopNamePlayer(position);
         }
         return null;
     }

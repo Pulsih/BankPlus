@@ -1,11 +1,10 @@
 package me.pulsi_.bankplus.commands.cmdProcessor;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BankPlusPlayerFilesUtils;
-import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
+import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.banks.BanksHolder;
-import me.pulsi_.bankplus.banks.BanksManager;
+import me.pulsi_.bankplus.bankGuis.BanksHolder;
+import me.pulsi_.bankplus.bankGuis.BanksManager;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
@@ -190,16 +189,18 @@ public class SingleCmdProcessor {
                 }
 
                 Player p = Bukkit.getPlayerExact(args[1]);
+                BankPlusPlayerFiles files;
                 if (p == null) {
                     OfflinePlayer oP = Bukkit.getOfflinePlayer(args[1]);
-                    BankPlusPlayerFilesUtils.getPlayerConfig(oP).set("Banks." + bankName + ".Level", Integer.valueOf(level));
-                    BankPlusPlayerFilesUtils.savePlayerFile(oP, true);
+                    files = new BankPlusPlayerFiles(oP);
+                    files.getPlayerConfig().set("Banks." + bankName + ".Level", Integer.valueOf(level));
                     MessageManager.send(s, "Set-Level-Message", "%player%$" + oP.getName(), "%level%$" + level);
                 } else {
-                    BankPlusPlayerFilesUtils.getPlayerConfig(p).set("Banks." + bankName + ".Level", Integer.valueOf(level));
-                    BankPlusPlayerFilesUtils.savePlayerFile(p, true);
+                    files = new BankPlusPlayerFiles(p);
+                    files.getPlayerConfig().set("Banks." + bankName + ".Level", Integer.valueOf(level));
                     MessageManager.send(s, "Set-Level-Message", "%player%$" + p.getName(), "%level%$" + level);
                 }
+                files.savePlayerFile(true);
             }
             break;
 

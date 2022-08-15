@@ -1,4 +1,4 @@
-package me.pulsi_.bankplus.banks;
+package me.pulsi_.bankplus.bankGuis;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -14,7 +14,7 @@ import java.io.IOException;
 /**
  * Class that represents a bank.
  */
-public class Bank {
+public class BankGui {
 
     private final String identifier;
     private final File bankFile;
@@ -27,11 +27,11 @@ public class Bank {
     private String permission;
     private ConfigurationSection items, upgrades, banksListGuiItems, settings;
 
-    public Bank(String identifier) {
+    public BankGui(String identifier) {
         this(identifier, null);
     }
 
-    public Bank(String identifier, String title, int size, int updateDelay, ItemStack[] content) {
+    public BankGui(String identifier, String title, int size, int updateDelay, ItemStack[] content) {
         this.identifier = identifier;
         this.bankFile = null;
         this.bankConfig = null;
@@ -44,7 +44,7 @@ public class Bank {
         this.content = content;
     }
 
-    public Bank(String identifier, ItemStack[] content) {
+    public BankGui(String identifier, ItemStack[] content) {
         this.identifier = identifier;
         File file = new File(BankPlus.instance().getDataFolder(), "banks" + File.separator + identifier + ".yml");
         if (!file.exists()) {

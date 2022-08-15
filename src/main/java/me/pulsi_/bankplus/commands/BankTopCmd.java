@@ -1,5 +1,6 @@
 package me.pulsi_.bankplus.commands;
 
+import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.managers.BankTopManager;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.BPChat;
@@ -49,7 +50,7 @@ public class BankTopCmd implements CommandExecutor {
         }
 
         String stringToReplace;
-        BigDecimal money = BankTopManager.getBankTopBalancePlayer(position);
+        BigDecimal money = BankPlus.instance().getBankTopManager().getBankTopBalancePlayer(position);
         switch (Values.CONFIG.getBankTopMoneyFormat()) {
             case "default_amount":
                 stringToReplace = BPMethods.formatCommas(money);
@@ -87,7 +88,7 @@ public class BankTopCmd implements CommandExecutor {
             return message;
         }
 
-        String name = BankTopManager.getBankTopNamePlayer(position);
+        String name = BankPlus.instance().getBankTopManager().getBankTopNamePlayer(position);
         return message.replace("%bankplus_banktop_name_" + position + "%", name);
     }
 }

@@ -1,13 +1,12 @@
 package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BankPlusPlayerFilesUtils;
-import me.pulsi_.bankplus.banks.BanksManager;
+import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
+import me.pulsi_.bankplus.bankGuis.BanksManager;
 import me.pulsi_.bankplus.commands.BankTopCmd;
 import me.pulsi_.bankplus.commands.MainCmd;
 import me.pulsi_.bankplus.external.UpdateChecker;
 import me.pulsi_.bankplus.external.bStats;
-import me.pulsi_.bankplus.banks.BanksHolder;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.listeners.AFKListener;
 import me.pulsi_.bankplus.listeners.InventoryCloseListener;
@@ -23,18 +22,24 @@ import org.bukkit.plugin.PluginManager;
 
 public class DataManager {
 
-    public static void setupPlugin() {
+    private final BankPlus plugin;
+
+    public DataManager(BankPlus plugin) {
+        this.plugin = plugin;
+    }
+
+    public void setupPlugin() {
         long startTime = System.currentTimeMillis();
         long time;
 
         BPLogger.log("");
         BPLogger.log("    &a&lBank&9&lPlus &2Enabling plugin...");
-        BPLogger.log("    &aRunning on version &f" + BankPlus.instance().getDescription().getVersion() + "&a!");
-        BPLogger.log("    &aDetected server version: &f" + BankPlus.instance().getServerVersion());
+        BPLogger.log("    &aRunning on version &f" + plugin.getDescription().getVersion() + "&a!");
+        BPLogger.log("    &aDetected server version: &f" + plugin.getServerVersion());
 
         time = System.currentTimeMillis();
-        new bStats(BankPlus.instance());
-        BankPlus.instance().getCm().createConfigs();
+        new bStats(plugin);
+        plugin.getConfigManager().createConfigs();
         BPLogger.log("    &aLoaded config files! &8(&3" + (System.currentTimeMillis() - time) + "ms&8)");
 
         time = System.currentTimeMillis();
@@ -47,26 +52,28 @@ public class DataManager {
         BPLogger.log("    &aDone! &8(&3" + (System.currentTimeMillis() - startTime) + " total ms&8)");
         BPLogger.log("");
 
-        if (Values.CONFIG.isInterestEnabled()) Interest.startInterest();
+        if (Values.CONFIG.isInterestEnabled()) plugin.getInterest().startInterest();
         if (Values.CONFIG.isIgnoringAfkPlayers()) AFKManager.startCountdown();
         if (Values.CONFIG.isBanktopEnabled()) {
-            BankTopManager.updateBankTop();
-            BankTopManager.startUpdateTask();
+            BankTopManager bankTop = plugin.getBankTopManager();
+            bankTop.updateBankTop();
+            bankTop.startUpdateTask();
         }
         BPMethods.startSavingBalancesTask();
     }
 
-    public static void shutdownPlugin() {
+    public void shutdownPlugin() {
         BPLogger.log("");
         BPLogger.log("    &a&lBank&9&lPlus &cDisabling Plugin!");
         BPLogger.log("");
     }
 
-    public static void reloadPlugin() {
-        ConfigManager cm = BankPlus.instance().getCm();
-        cm.reloadConfig(ConfigManager.Type.CONFIG);
-        cm.reloadConfig(ConfigManager.Type.MESSAGES);
-        cm.reloadConfig(ConfigManager.Type.MULTIPLE_BANKS);
+    public void reloadPlugin() {
+        ConfigManager configManager = plugin.getConfigManager();
+        configManager.reloadConfig(ConfigManager.Type.CONFIG);
+        configManager.reloadConfig(ConfigManager.Type.MESSAGES);
+        configManager.reloadConfig(ConfigManager.Type.MULTIPLE_BANKS);
+
         Values.CONFIG.setupValues();
         Values.MESSAGES.setupValues();
         Values.MULTIPLE_BANKS.setupValues();
@@ -74,62 +81,61 @@ public class DataManager {
 
         if (Values.CONFIG.isGuiModuleEnabled()) new BanksManager().loadBanks();
         if (!AFKManager.isPlayerCountdownActive) AFKManager.startCountdown();
-        if (Values.CONFIG.isInterestEnabled() && Interest.wasDisabled) Interest.startInterest();
-        if (Values.CONFIG.isBanktopEnabled()) BankTopManager.startUpdateTask();
+        Interest interest = plugin.getInterest();
+        if (Values.CONFIG.isInterestEnabled() && interest.wasDisabled()) interest.startInterest();
+        if (Values.CONFIG.isBanktopEnabled()) plugin.getBankTopManager().startUpdateTask();
         BPMethods.startSavingBalancesTask();
 
-        Bukkit.getOnlinePlayers().forEach(BankPlusPlayerFilesUtils::checkForFileFixes);
+        Bukkit.getOnlinePlayers().forEach(p -> new BankPlusPlayerFiles(p).checkForFileFixes());
     }
 
-    private static void registerEvents() {
-        BankPlus plugin = BankPlus.instance();
-        PluginManager plManager = plugin.getServer().getPluginManager();
+    private void registerEvents() {
+        PluginManager pluginManager = plugin.getServer().getPluginManager();
 
-        plManager.registerEvents(new PlayerJoinListener(), plugin);
-        plManager.registerEvents(new PlayerQuitListener(), plugin);
-        plManager.registerEvents(new UpdateChecker(), plugin);
-        plManager.registerEvents(new AFKListener(), plugin);
-        plManager.registerEvents(new InventoryCloseListener(), plugin);
+        pluginManager.registerEvents(new PlayerJoinListener(), plugin);
+        pluginManager.registerEvents(new PlayerQuitListener(), plugin);
+        pluginManager.registerEvents(new UpdateChecker(), plugin);
+        pluginManager.registerEvents(new AFKListener(), plugin);
+        pluginManager.registerEvents(new InventoryCloseListener(), plugin);
 
         switch (Values.CONFIG.getPlayerChatPriority()) {
             case "LOWEST":
-                plManager.registerEvents(new PlayerChatLowest(), plugin);
+                pluginManager.registerEvents(new PlayerChatLowest(), plugin);
                 break;
             case "LOW":
-                plManager.registerEvents(new PlayerChatLow(), plugin);
+                pluginManager.registerEvents(new PlayerChatLow(), plugin);
                 break;
             default:
-                plManager.registerEvents(new PlayerChatNormal(), plugin);
+                pluginManager.registerEvents(new PlayerChatNormal(), plugin);
                 break;
             case "HIGH":
-                plManager.registerEvents(new PlayerChatHigh(), plugin);
+                pluginManager.registerEvents(new PlayerChatHigh(), plugin);
                 break;
             case "HIGHEST":
-                plManager.registerEvents(new PlayerChatHighest(), plugin);
+                pluginManager.registerEvents(new PlayerChatHighest(), plugin);
                 break;
         }
 
         switch (Values.CONFIG.getBankClickPriority()) {
             case "LOWEST":
-                plManager.registerEvents(new BankClickLowest(), plugin);
+                pluginManager.registerEvents(new BankClickLowest(), plugin);
                 break;
             case "LOW":
-                plManager.registerEvents(new BankClickLow(), plugin);
+                pluginManager.registerEvents(new BankClickLow(), plugin);
                 break;
             default:
-                plManager.registerEvents(new BankClickNormal(), plugin);
+                pluginManager.registerEvents(new BankClickNormal(), plugin);
                 break;
             case "HIGH":
-                plManager.registerEvents(new BankClickHigh(), plugin);
+                pluginManager.registerEvents(new BankClickHigh(), plugin);
                 break;
             case "HIGHEST":
-                plManager.registerEvents(new BankClickHighest(), plugin);
+                pluginManager.registerEvents(new BankClickHighest(), plugin);
                 break;
         }
     }
 
-    private static void setupCommands() {
-        BankPlus plugin = BankPlus.instance();
+    private void setupCommands() {
         plugin.getCommand("bankplus").setExecutor(new MainCmd());
         plugin.getCommand("bankplus").setTabCompleter(new MainCmd());
         plugin.getCommand("banktop").setExecutor(new BankTopCmd());

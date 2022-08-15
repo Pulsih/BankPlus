@@ -72,7 +72,7 @@ public class BPVersions {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        DataManager.reloadPlugin();
+        BankPlus.instance().getDataManager().reloadPlugin();
     }
 
     public static void changePlayerStoragePosition(int point) {

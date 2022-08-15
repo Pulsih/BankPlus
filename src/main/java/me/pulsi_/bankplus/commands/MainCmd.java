@@ -1,5 +1,6 @@
 package me.pulsi_.bankplus.commands;
 
+import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.commands.cmdProcessor.MultiCmdProcessor;
 import me.pulsi_.bankplus.commands.cmdProcessor.SingleCmdProcessor;
 import me.pulsi_.bankplus.interest.Interest;
@@ -36,7 +37,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                 case "reload": {
                     if (!BPMethods.hasPermission(s, "bankplus.reload")) return false;
 
-                    DataManager.reloadPlugin();
+                    BankPlus.instance().getDataManager().reloadPlugin();
                     MessageManager.send(s, "Reload");
                     return true;
                 }
@@ -52,7 +53,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                         MessageManager.send(s, "Interest-Disabled");
                         return false;
                     }
-                    Interest.restartInterest();
+                    BankPlus.instance().getInterest().restartInterest();
                     MessageManager.send(s, "Interest-Restarted");
                     return true;
                 }
@@ -64,7 +65,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                         MessageManager.send(s, "Interest-Disabled");
                         return false;
                     }
-                    Interest.giveInterestToEveryone();
+                    BankPlus.instance().getInterest().giveInterestToEveryone();
                     return true;
                 }
 
@@ -75,7 +76,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                         MessageManager.send(s, "Interest-Disabled");
                         return false;
                     }
-                    MessageManager.send(s, "Interest-Time", "%time%$" + BPMethods.formatTime(Interest.getInterestCooldownMillis()));
+                    MessageManager.send(s, "Interest-Time", "%time%$" + BPMethods.formatTime(BankPlus.instance().getInterest().getInterestCooldownMillis()));
                     return true;
                 }
 
@@ -86,13 +87,13 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                         MessageManager.send(s, "Interest-Disabled");
                         return false;
                     }
-                    MessageManager.send(s, "Interest-Time", "%time%$" + Interest.getInterestCooldownMillis());
+                    MessageManager.send(s, "Interest-Time", "%time%$" + BankPlus.instance().getInterest().getInterestCooldownMillis());
                     return true;
                 }
 
                 case "updatebanktop": {
                     if (!BPMethods.hasPermission(s, "bankplus.updatebanktop")) return false;
-                    BankTopManager.updateBankTop();
+                    BankPlus.instance().getBankTopManager().updateBankTop();
                     MessageManager.send(s, "BankTop-Updated");
                     return true;
                 }

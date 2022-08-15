@@ -3,7 +3,7 @@ package me.pulsi_.bankplus.utils;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.banks.BanksManager;
+import me.pulsi_.bankplus.bankGuis.BanksManager;
 import me.pulsi_.bankplus.managers.ConfigManager;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.managers.TaskManager;
@@ -184,11 +184,12 @@ public class BPMethods {
     }
 
     public static void startSavingBalancesTask() {
-        BukkitTask task = TaskManager.getSavingTask();
+        TaskManager tasks = BankPlus.instance().getTaskManager();
+        BukkitTask task = tasks.getSavingTask();
         if (task != null) task.cancel();
 
         if (Values.CONFIG.getSaveBalancedDelay() <= 0) return;
-        TaskManager.setSavingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.instance(), () -> {
+        tasks.setSavingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.instance(), () -> {
             if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) Bukkit.getOnlinePlayers().forEach(p -> new MultiEconomyManager(p).saveBankBalance());
             else Bukkit.getOnlinePlayers().forEach(p-> new SingleEconomyManager(p).saveBankBalance());
             if (Values.CONFIG.isSaveBalancesBroadcast()) BPLogger.info("All player balances have been saved!");
@@ -260,7 +261,7 @@ public class BPMethods {
     }
 
     public static void sendTitle(String path, Player p) {
-        String title = BankPlus.instance().getCm().getConfig(ConfigManager.Type.MESSAGES).getString(path);
+        String title = BankPlus.instance().getConfigManager().getConfig(ConfigManager.Type.MESSAGES).getString(path);
         if (title == null) return;
 
         String newTitle = MessageManager.addPrefix(title);

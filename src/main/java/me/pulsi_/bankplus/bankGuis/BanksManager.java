@@ -1,13 +1,13 @@
-package me.pulsi_.bankplus.banks;
+package me.pulsi_.bankplus.bankGuis;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BankPlusPlayerFilesUtils;
+import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.BPChat;
-import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPItems;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -29,7 +29,7 @@ import java.util.*;
 
 public class BanksManager {
     
-    private final Bank bank;
+    private final BankGui bank;
 
     public BanksManager() {
         this.bank = null;
@@ -40,7 +40,7 @@ public class BanksManager {
     }
     
     public void loadBanks() {
-        HashMap<String, Bank> banks = BankPlus.instance().getBanks();
+        HashMap<String, BankGui> banks = BankPlus.instance().getBanks();
         File file = new File(BankPlus.instance().getDataFolder(), "banks");
         File[] files = file.listFiles();
 
@@ -86,7 +86,7 @@ public class BanksManager {
             }
 
             String identifier = bankFile.getName().replace(".yml", "");
-            Bank bank = new Bank(identifier);
+            BankGui bank = new BankGui(identifier);
 
             ItemStack[] content = null;
             ConfigurationSection items = bankConfig.getConfigurationSection("Items");
@@ -213,7 +213,7 @@ public class BanksManager {
     public BigDecimal getCapacity(Player p) {
         if (!hasUpgrades()) return Values.CONFIG.getMaxBankCapacity();
 
-        FileConfiguration config = BankPlusPlayerFilesUtils.getPlayerConfig(p);
+        FileConfiguration config = new BankPlusPlayerFiles(p).getPlayerConfig();
         int level = Math.max(config.getInt("Banks." + bank.getIdentifier() + ".Level"), 1);
         String capacity = getUpgrades().getString(level + ".Capacity");
         return new BigDecimal(capacity == null ? Values.CONFIG.getMaxBankCapacity().toString() : capacity);
@@ -222,7 +222,7 @@ public class BanksManager {
     public BigDecimal getCapacity(OfflinePlayer p) {
         if (!hasUpgrades()) return Values.CONFIG.getMaxBankCapacity();
 
-        FileConfiguration config = BankPlusPlayerFilesUtils.getPlayerConfig(p);
+        FileConfiguration config = new BankPlusPlayerFiles(p).getPlayerConfig();
         int level = Math.max(config.getInt("Banks." + bank.getIdentifier() + ".Level"), 1);
         String capacity = getUpgrades().getString(level + ".Capacity");
         return new BigDecimal(capacity == null ? Values.CONFIG.getMaxBankCapacity().toString() : capacity);
@@ -236,7 +236,7 @@ public class BanksManager {
     }
 
     public int getLevel(Player p) {
-        FileConfiguration config = BankPlusPlayerFilesUtils.getPlayerConfig(p);
+        FileConfiguration config = new BankPlusPlayerFiles(p).getPlayerConfig();
         return Math.max(config.getInt("Banks." + bank.getIdentifier() + ".Level"), 1);
     }
 
@@ -313,12 +313,14 @@ public class BanksManager {
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) multiEconomyManager.removeBankBalance(cost, bank.getIdentifier());
         else singleEconomyManager.removeBankBalance(cost);
 
-        BankPlusPlayerFilesUtils.getPlayerConfig(p).set("Banks." + bank.getIdentifier() + ".Level", level + 1);
-        BankPlusPlayerFilesUtils.savePlayerFile(p, true);
+        BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
+        files.getPlayerConfig().set("Banks." + bank.getIdentifier() + ".Level", level + 1);
+        files.savePlayerFile(true);
+
         MessageManager.send(p, "Bank-Upgraded");
     }
 
-    public Bank getBank() {
+    public BankGui getBank() {
         return bank;
     }
 }

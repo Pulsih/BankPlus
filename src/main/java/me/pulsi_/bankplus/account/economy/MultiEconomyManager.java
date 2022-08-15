@@ -1,8 +1,8 @@
 package me.pulsi_.bankplus.account.economy;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BankPlusPlayerFilesUtils;
-import me.pulsi_.bankplus.banks.BanksManager;
+import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
+import me.pulsi_.bankplus.bankGuis.BanksManager;
 import me.pulsi_.bankplus.managers.BankTopManager;
 import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.utils.BPDebugger;
@@ -80,7 +80,7 @@ public class MultiEconomyManager {
 
             HashMap<BigDecimal, String> balanceName = new HashMap<>();
             balanceName.put(balance, name);
-            BankTopManager.linkedBalanceName.add(balanceName);
+            BankPlus.instance().getBankTopManager().getLinkedBalanceName().add(balanceName);
         }
         return balances;
     }
@@ -92,7 +92,7 @@ public class MultiEconomyManager {
         if (onNull(p, "Cannot load player bank balance!")) return;
         for (String bankName : BankPlus.instance().getBanks().keySet()) {
             if (bankPlayerMoney.containsKey(p.getUniqueId() + "." + bankName)) return;
-            String bal = BankPlusPlayerFilesUtils.getPlayerConfig(p).getString("Banks." + bankName + ".Money");
+            String bal = new BankPlusPlayerFiles(p).getPlayerConfig().getString("Banks." + bankName + ".Money");
             bankPlayerMoney.put(p.getUniqueId() + "." + bankName, bal == null ? new BigDecimal(0) : new BigDecimal(bal));
         }
     }
@@ -102,8 +102,7 @@ public class MultiEconomyManager {
      */
     public void unloadBankBalance() {
         if (onNull(p, "Cannot unload player bank balance!")) return;
-        FileConfiguration config = BankPlusPlayerFilesUtils.getPlayerConfig(p);
-        ConfigurationSection section = config.getConfigurationSection("Banks");
+        ConfigurationSection section = new BankPlusPlayerFiles(p).getPlayerConfig().getConfigurationSection("Banks");
         if (section != null) section.getKeys(false).forEach(key -> bankPlayerMoney.remove(p.getUniqueId() + "." + key));
     }
 
@@ -112,9 +111,9 @@ public class MultiEconomyManager {
      */
     public void saveBankBalance(String bankName) {
         if (onNull(p, "Cannot save player bank balance!")) return;
-        FileConfiguration players = BankPlusPlayerFilesUtils.getPlayerConfig(p);
-        players.set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(getBankBalance(bankName)));
-        BankPlusPlayerFilesUtils.savePlayerFile(p, true);
+        BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
+        files.getPlayerConfig().set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(getBankBalance(bankName)));
+        files.savePlayerFile(true);
     }
 
     /**
@@ -122,11 +121,10 @@ public class MultiEconomyManager {
      */
     public void saveBankBalance() {
         if (onNull(p, "Cannot save player bank balances!")) return;
-        for (String bankName : BankPlus.instance().getBanks().keySet()) {
-            FileConfiguration players = BankPlusPlayerFilesUtils.getPlayerConfig(p);
-            players.set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(getBankBalance(bankName)));
-        }
-        BankPlusPlayerFilesUtils.savePlayerFile(p, true);
+        BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
+        for (String bankName : BankPlus.instance().getBanks().keySet())
+            files.getPlayerConfig().set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(getBankBalance(bankName)));
+        files.savePlayerFile(true);
     }
 
     /**
@@ -163,7 +161,7 @@ public class MultiEconomyManager {
      */
     public BigDecimal getOfflineBankBalance(String bankName) {
         if (offNull(oP, "Cannot get player bank balance!")) return null;
-        String bal = BankPlusPlayerFilesUtils.getPlayerConfig(oP).getString("Banks." + bankName + ".Money");
+        String bal = new BankPlusPlayerFiles(oP).getPlayerConfig().getString("Banks." + bankName + ".Money");
         return bal == null ? new BigDecimal(0) : new BigDecimal(bal);
     }
 
@@ -175,8 +173,9 @@ public class MultiEconomyManager {
     public BigDecimal getOfflineBankBalance() {
         if (offNull(oP, "Cannot get player bank balances!")) return null;
         BigDecimal amount = new BigDecimal(0);
+        BankPlusPlayerFiles files = new BankPlusPlayerFiles(oP);
         for (String bankName : BankPlus.instance().getBanks().keySet()) {
-            String bal = BankPlusPlayerFilesUtils.getPlayerConfig(oP).getString("Banks." + bankName + ".Money");
+            String bal = files.getPlayerConfig().getString("Banks." + bankName + ".Money");
             amount = amount.add(new BigDecimal(bal == null ? "0" : bal));
         }
         return amount;
@@ -266,8 +265,9 @@ public class MultiEconomyManager {
      * @param bankName The bank.
      */
     private void setOffline(BigDecimal amount, String bankName) {
-        BankPlusPlayerFilesUtils.getPlayerConfig(oP).set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(amount));
-        BankPlusPlayerFilesUtils.savePlayerFile(oP, true);
+        BankPlusPlayerFiles files = new BankPlusPlayerFiles(oP);
+        files.getPlayerConfig().set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(amount));
+        files.savePlayerFile(true);
     }
 
     public void deposit(BigDecimal amount, String bankName) {
