@@ -3,7 +3,7 @@ package me.pulsi_.bankplus.bankGuis;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayer;
-import me.pulsi_.bankplus.managers.MessageManager;
+import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPItems;
 import me.pulsi_.bankplus.utils.BPMethods;
@@ -32,7 +32,7 @@ public class BanksHolder implements InventoryHolder {
         HashMap<String, BankGui> banks = BankPlus.instance().getBanks();
 
         if (!banks.containsKey(identifier)) {
-            MessageManager.send(p, "Invalid-Bank");
+            BPMessages.send(p, "Invalid-Bank");
             return;
         }
 
@@ -42,7 +42,7 @@ public class BanksHolder implements InventoryHolder {
         }
 
         if (!new BanksManager(identifier).isAvailable(p)) {
-            MessageManager.send(p, "Cannot-Access-Bank");
+            BPMessages.send(p, "Cannot-Access-Bank");
             return;
         }
 

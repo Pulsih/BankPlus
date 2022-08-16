@@ -10,6 +10,7 @@ import me.pulsi_.bankplus.bankGuis.BanksManager;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -63,6 +64,7 @@ public class BankClickMethod {
             boolean isMulti = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled();
             SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
             MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
+            Economy economy = BankPlus.instance().getEconomy();
 
             switch (actionType) {
                 case "deposit":
@@ -72,20 +74,24 @@ public class BankClickMethod {
                             break;
 
                         case "all":
-                            amount = BigDecimal.valueOf(BankPlus.instance().getEconomy().getBalance(p));
+                            amount = BigDecimal.valueOf(economy.getBalance(p));
                             if (isMulti) multiEconomyManager.deposit(amount, bankName);
                             else singleEconomyManager.deposit(amount);
                             break;
 
                         case "half":
-                            amount = BigDecimal.valueOf(BankPlus.instance().getEconomy().getBalance(p) / 2);
+                            amount = BigDecimal.valueOf(economy.getBalance(p) / 2);
                             if (isMulti) multiEconomyManager.deposit(amount, bankName);
                             else singleEconomyManager.deposit(amount);
                             break;
 
                         default:
                             try {
-                                amount = new BigDecimal(actionAmount);
+                                if (!actionAmount.endsWith("%")) amount = new BigDecimal(actionAmount);
+                                else {
+                                    BigDecimal percentage = new BigDecimal(actionAmount.replace("%", "")).divide(BigDecimal.valueOf(100));
+                                    amount = BigDecimal.valueOf(economy.getBalance(p)).multiply(percentage);
+                                }
                             } catch (NumberFormatException ex) {
                                 BPLogger.error("Invalid deposit number! (Path: " + item + ", Number: " + actionAmount + ")");
                                 return;
@@ -124,7 +130,15 @@ public class BankClickMethod {
 
                         default:
                             try {
-                                amount = new BigDecimal(actionAmount);
+                                if (!actionAmount.endsWith("%")) amount = new BigDecimal(actionAmount);
+                                else {
+                                    BigDecimal bal;
+                                    if (isMulti) bal = multiEconomyManager.getBankBalance(bankName);
+                                    else bal = singleEconomyManager.getBankBalance();
+
+                                    BigDecimal percentage = new BigDecimal(actionAmount.replace("%", "")).divide(BigDecimal.valueOf(100));
+                                    amount = bal.multiply(percentage);
+                                }
                             } catch (NumberFormatException ex) {
                                 BPLogger.error("Invalid withdraw number! (Path: " + item + ", Number: " + actionAmount + ")");
                                 return;

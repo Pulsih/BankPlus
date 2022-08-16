@@ -10,17 +10,21 @@ import java.util.*;
 
 public class AFKManager {
 
-    public static Map<UUID, Long> afkCooldown = new HashMap<>();
+    private final Map<UUID, Long> afkCooldown = new HashMap<>();
+    private final List<Player> afkPlayers = new ArrayList<>();
+    private boolean isPlayerCountdownActive = false;
 
-    public static List<Player> afkPlayers = new ArrayList<>();
+    private final BankPlus plugin;
 
-    public static boolean isPlayerCountdownActive = false;
+    public AFKManager(BankPlus plugin) {
+        this.plugin = plugin;
+    }
 
-    public static boolean isAFK(Player p) {
+    public boolean isAFK(Player p) {
         return Values.CONFIG.isUseEssentialsXAFK() ? Essentials.getPlugin(Essentials.class).getUser(p).isAfk() : afkPlayers.contains(p);
     }
 
-    public static void startCountdown() {
+    public void startCountdown() {
         if (!Values.CONFIG.isIgnoringAfkPlayers() || Values.CONFIG.isUseEssentialsXAFK()) {
             isPlayerCountdownActive = false;
             return;
@@ -29,10 +33,20 @@ public class AFKManager {
 
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (!afkCooldown.containsKey(p.getUniqueId())) continue;
-            if (afkCooldown.get(p.getUniqueId()) < System.currentTimeMillis()) if (!afkPlayers.contains(p)) afkPlayers.add(p);
-            else afkPlayers.remove(p);
+            if (afkCooldown.get(p.getUniqueId()) > System.currentTimeMillis()) afkPlayers.remove(p);
+            else {
+                if (!afkPlayers.contains(p)) afkPlayers.add(p);
+            }
         }
 
-        Bukkit.getScheduler().runTaskLater(BankPlus.instance(), AFKManager::startCountdown, 20L);
+        Bukkit.getScheduler().runTaskLater(plugin, this::startCountdown, 20L);
+    }
+
+    public Map<UUID, Long> getAfkCooldown() {
+        return afkCooldown;
+    }
+
+    public boolean isPlayerCountdownActive() {
+        return isPlayerCountdownActive;
     }
 }

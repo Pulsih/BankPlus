@@ -6,9 +6,7 @@ import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.OfflineInterestManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankGuis.BanksManager;
-import me.pulsi_.bankplus.managers.AFKManager;
-import me.pulsi_.bankplus.managers.MessageManager;
-import me.pulsi_.bankplus.managers.TaskManager;
+import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
@@ -117,7 +115,7 @@ public class Interest {
     }
 
     private void giveSingleInterest(Player p) {
-        if (!p.hasPermission("bankplus.receive.interest") || (Values.CONFIG.isIgnoringAfkPlayers() && AFKManager.isAFK(p))) return;
+        if (!p.hasPermission("bankplus.receive.interest") || (Values.CONFIG.isIgnoringAfkPlayers() && BankPlus.instance().getAfkManager().isAFK(p))) return;
 
         SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
         BigDecimal bankBalance = singleEconomyManager.getBankBalance();
@@ -126,7 +124,7 @@ public class Interest {
 
         if (bankBalance.doubleValue() <= 0) {
             if (Values.MESSAGES.isInterestBroadcastEnabled())
-                MessageManager.send(p, Values.MESSAGES.getInterestNoMoney(), true);
+                BPMessages.send(p, Values.MESSAGES.getInterestNoMoney(), true);
             return;
         }
         if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
@@ -134,21 +132,21 @@ public class Interest {
             BigDecimal newAmount = maxBankCapacity.subtract(bankBalance);
             if (newAmount.doubleValue() <= 0) {
                 if (Values.MESSAGES.isInterestBroadcastEnabled())
-                    MessageManager.send(p, Values.MESSAGES.getInterestBankFull(), true);
+                    BPMessages.send(p, Values.MESSAGES.getInterestBankFull(), true);
                 return;
             }
             if (Values.MESSAGES.isInterestBroadcastEnabled())
-                MessageManager.send(p, Values.MESSAGES.getInterestMoney(), BPMethods.placeValues(p, newAmount), true);
+                BPMessages.send(p, Values.MESSAGES.getInterestMoney(), BPMethods.placeValues(p, newAmount), true);
             singleEconomyManager.setBankBalance(maxBankCapacity);
             return;
         }
         if (Values.MESSAGES.isInterestBroadcastEnabled())
-            MessageManager.send(p, Values.MESSAGES.getInterestMoney(), BPMethods.placeValues(p, interestMoney), true);
+            BPMessages.send(p, Values.MESSAGES.getInterestMoney(), BPMethods.placeValues(p, interestMoney), true);
         singleEconomyManager.addBankBalance(interestMoney);
     }
 
     private void giveMultiInterest(Player p) {
-        if (!p.hasPermission("bankplus.receive.interest") || (Values.CONFIG.isIgnoringAfkPlayers() && AFKManager.isAFK(p))) return;
+        if (!p.hasPermission("bankplus.receive.interest") || (Values.CONFIG.isIgnoringAfkPlayers() && BankPlus.instance().getAfkManager().isAFK(p))) return;
 
         MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
         BigDecimal interestAmount = new BigDecimal(0);
@@ -170,7 +168,7 @@ public class Interest {
             interestAmount = interestMoney;
         }
         if (Values.MESSAGES.isInterestBroadcastEnabled())
-            MessageManager.send(p, Values.MESSAGES.getMultiInterestMoney(), BPMethods.placeValues(p, interestAmount), true);
+            BPMessages.send(p, Values.MESSAGES.getMultiInterestMoney(), BPMethods.placeValues(p, interestAmount), true);
     }
 
     private void giveSingleInterest(OfflinePlayer[] players) {

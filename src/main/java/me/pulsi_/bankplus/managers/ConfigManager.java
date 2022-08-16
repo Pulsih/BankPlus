@@ -72,32 +72,36 @@ public class ConfigManager {
         }
     }
 
-    public void reloadConfig(Type type) {
+    public boolean reloadConfig(Type type) {
         switch (type) {
             case CONFIG:
                 try {
                     config.load(configFile);
+                    return true;
                 } catch (IOException | InvalidConfigurationException e) {
                     BPLogger.error(e.getMessage());
+                    return false;
                 }
-                break;
 
             case MESSAGES:
                 try {
                     messagesConfig.load(messagesFile);
+                    return true;
                 } catch (IOException | InvalidConfigurationException e) {
                     BPLogger.error(e.getMessage());
+                    return false;
                 }
-                break;
 
             case MULTIPLE_BANKS:
                 try {
                     multipleBanksConfig.load(multipleBanksFile);
+                    return true;
                 } catch (IOException | InvalidConfigurationException e) {
                     BPLogger.error(e.getMessage());
+                    return false;
                 }
-                break;
         }
+        return false;
     }
 
     public void saveConfig(Type type) {
@@ -563,8 +567,8 @@ public class ConfigManager {
 
         addComments(newMessagesConfig, "Titles");
         validatePath(messagesConfig, newMessagesConfig, "Title-Custom-Transaction.Enabled", true);
-        validatePath(messagesConfig, newMessagesConfig, "Title-Custom-Transaction.Title-Deposit", "%prefix% &fType in &achat &fan, amount to &adeposit");
-        validatePath(messagesConfig, newMessagesConfig, "Title-Custom-Transaction.Title-Withdraw", "%prefix% &fType in &achat &fan, amount to &awithdraw");
+        validatePath(messagesConfig, newMessagesConfig, "Title-Custom-Transaction.Title-Deposit", "%prefix% &fType in &achat &fan, amount to &adeposit,10,40,10");
+        validatePath(messagesConfig, newMessagesConfig, "Title-Custom-Transaction.Title-Withdraw", "%prefix% &fType in &achat &fan, amount to &awithdraw,10,40,10");
         addSpace(newMessagesConfig);
 
         addComments(newMessagesConfig, "Interest Messages");
@@ -607,6 +611,7 @@ public class ConfigManager {
         validatePath(messagesConfig, newMessagesConfig, "Insufficient-Money", "%prefix% &cYou don't have enough money!");
         validatePath(messagesConfig, newMessagesConfig, "Gui-Module-Disabled", "%prefix% &cThe gui module is disabled!");
         validatePath(messagesConfig, newMessagesConfig, "Internal-Error", "%prefix% &cAn internal error has occurred, try again later!");
+        validatePath(messagesConfig, newMessagesConfig, "Failed-Reload", "%prefix% &cBankPlus has failed his reload task, please check the console for more info. (This is usually not a bankplus problem!)");
         validatePath(messagesConfig, newMessagesConfig, "Unknown-Command", "%prefix% &cUnknown Command!");
         validatePath(messagesConfig, newMessagesConfig, "No-Permission", "%prefix% &cYou don't have the permission! (%permission%)");
         addSpace(newMessagesConfig);

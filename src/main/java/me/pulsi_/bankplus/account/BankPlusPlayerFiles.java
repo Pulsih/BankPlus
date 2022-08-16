@@ -16,6 +16,8 @@ import org.bukkit.entity.Player;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.UUID;
 
 public class BankPlusPlayerFiles {
 
@@ -82,8 +84,11 @@ public class BankPlusPlayerFiles {
     public File getPlayerFile() {
         if (onNull(player, "Cannot get player file!")) return null;
 
-        BankPlusPlayer bankPlusPlayer = BankPlus.instance().getPlayers().get(player.getUniqueId());
-        if (bankPlusPlayer.getPlayerFile() != null) return bankPlusPlayer.getPlayerFile();
+        HashMap<UUID, BankPlusPlayer> players = BankPlus.instance().getPlayers();
+        if (players.containsKey(player.getUniqueId())) {
+            BankPlusPlayer bankPlusPlayer = players.get(player.getUniqueId());
+            if (bankPlusPlayer.getPlayerFile() != null) return bankPlusPlayer.getPlayerFile();
+        }
 
         String identifier = Values.CONFIG.isStoringUUIDs() ? player.getUniqueId().toString() : player.getName();
         return new File(BankPlus.instance().getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
@@ -98,8 +103,11 @@ public class BankPlusPlayerFiles {
     public FileConfiguration getPlayerConfig() {
         if (onNull(player, "Cannot get player config!")) return null;
 
-        BankPlusPlayer bankPlusPlayer = BankPlus.instance().getPlayers().get(player.getUniqueId());
-        if (bankPlusPlayer.getPlayerConfig() != null) return bankPlusPlayer.getPlayerConfig();
+        HashMap<UUID, BankPlusPlayer> players = BankPlus.instance().getPlayers();
+        if (players.containsKey(player.getUniqueId())) {
+            BankPlusPlayer bankPlusPlayer = players.get(player.getUniqueId());
+            if (bankPlusPlayer.getPlayerConfig() != null) return bankPlusPlayer.getPlayerConfig();
+        }
 
         File file = getPlayerFile();
         FileConfiguration config = new YamlConfiguration();

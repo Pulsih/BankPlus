@@ -5,6 +5,7 @@ import me.pulsi_.bankplus.account.BankPlusPlayer;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.utils.BPLogger;
+import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -50,7 +51,7 @@ public class BankTopManager {
         }
 
         if (!Values.CONFIG.isBanktopUpdateBroadcastEnabled()) return;
-        String message = MessageManager.addPrefix(Values.CONFIG.getBanktopUpdateBroadcastMessage());
+        String message = BPMessages.addPrefix(Values.CONFIG.getBanktopUpdateBroadcastMessage());
         if (Values.CONFIG.isBanktopUpdateBroadcastOnlyConsole()) BPLogger.log(message);
         else Bukkit.broadcastMessage(message);
     }

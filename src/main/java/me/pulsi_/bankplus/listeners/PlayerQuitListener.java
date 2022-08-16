@@ -19,11 +19,11 @@ public class PlayerQuitListener implements Listener {
         Player p = e.getPlayer();
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
             MultiEconomyManager economyManager = new MultiEconomyManager(p);
-            economyManager.saveBankBalance();
+            economyManager.saveBankBalance(true);
             economyManager.unloadBankBalance();
         } else {
             SingleEconomyManager economyManager = new SingleEconomyManager(p);
-            economyManager.saveBankBalance();
+            economyManager.saveBankBalance(true);
             economyManager.unloadBankBalance();
         }
         BankPlusPlayer player = BankPlus.instance().getPlayers().remove(p.getUniqueId());

@@ -1,8 +1,7 @@
-package me.pulsi_.bankplus.managers;
+package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.utils.BPChat;
-import me.pulsi_.bankplus.utils.BPLogger;
+import me.pulsi_.bankplus.managers.ConfigManager;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -12,11 +11,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MessageManager {
+public class BPMessages {
 
     private static final Map<String, List<String>> messages = new HashMap<>();
 
     public static void send(Player p, String message, boolean fromString) {
+        if (!fromString) {
+            send(p, message);
+            return;
+        }
+        p.sendMessage(BPChat.color(message.replace("%prefix%", getPrefix())));
+    }
+
+    public static void send(CommandSender p, String message, boolean fromString) {
         if (!fromString) {
             send(p, message);
             return;

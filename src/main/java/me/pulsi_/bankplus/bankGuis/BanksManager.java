@@ -4,7 +4,7 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.managers.MessageManager;
+import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPItems;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -39,7 +39,7 @@ public class BanksManager {
         this.bank = BankPlus.instance().getBanks().get(bankName);
     }
     
-    public void loadBanks() {
+    public boolean loadBanks() {
         HashMap<String, BankGui> banks = BankPlus.instance().getBanks();
         File file = new File(BankPlus.instance().getDataFolder(), "banks");
         File[] files = file.listFiles();
@@ -83,6 +83,7 @@ public class BanksManager {
                 bankConfig.load(bankFile);
             } catch (IOException | InvalidConfigurationException e) {
                 BPLogger.error("An error has occurred while loading a bank file: " + e.getMessage());
+                return false;
             }
 
             String identifier = bankFile.getName().replace(".yml", "");
@@ -144,6 +145,7 @@ public class BanksManager {
             banks.put(identifier, bank);
         }
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) new BanksListGui().loadMultipleBanksGui();
+        return true;
     }
 
     public boolean exist(String bankName) {
@@ -292,7 +294,7 @@ public class BanksManager {
 
     public void upgradeBank(Player p) {
         if (!hasNextLevel(p)) {
-            MessageManager.send(p, "Bank-Max-Level");
+            BPMessages.send(p, "Bank-Max-Level");
             return;
         }
         BigDecimal balance;
@@ -306,7 +308,7 @@ public class BanksManager {
         int level = getLevel(p);
         BigDecimal cost = getLevelCost(level + 1);
         if (balance.doubleValue() < cost.doubleValue()) {
-            MessageManager.send(p, "Insufficient-Money");
+            BPMessages.send(p, "Insufficient-Money");
             return;
         }
 
@@ -317,7 +319,7 @@ public class BanksManager {
         files.getPlayerConfig().set("Banks." + bank.getIdentifier() + ".Level", level + 1);
         files.savePlayerFile(true);
 
-        MessageManager.send(p, "Bank-Upgraded");
+        BPMessages.send(p, "Bank-Upgraded");
     }
 
     public BankGui getBank() {

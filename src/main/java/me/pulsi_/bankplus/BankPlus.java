@@ -5,10 +5,7 @@ import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankGuis.BankGui;
 import me.pulsi_.bankplus.interest.Interest;
-import me.pulsi_.bankplus.managers.BankTopManager;
-import me.pulsi_.bankplus.managers.ConfigManager;
-import me.pulsi_.bankplus.managers.DataManager;
-import me.pulsi_.bankplus.managers.TaskManager;
+import me.pulsi_.bankplus.managers.*;
 import me.pulsi_.bankplus.placeholders.Placeholders;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPVersions;
@@ -40,6 +37,7 @@ public final class BankPlus extends JavaPlugin {
     private BankTopManager bankTopManager;
     private ConfigManager configManager;
     private DataManager dataManager;
+    private AFKManager afkManager;
     private TaskManager taskManager;
     private Interest interest;
 
@@ -70,11 +68,12 @@ public final class BankPlus extends JavaPlugin {
         this.bankTopManager = new BankTopManager(this);
         this.configManager = new ConfigManager(this);
         this.dataManager = new DataManager(this);
+        this.afkManager = new AFKManager(this);
         this.taskManager = new TaskManager();
         this.interest = new Interest();
 
         RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
-        perms = rsp.getProvider();
+        if (rsp != null) perms = rsp.getProvider();
 
         dataManager.setupPlugin();
 
@@ -97,8 +96,8 @@ public final class BankPlus extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) Bukkit.getOnlinePlayers().forEach(p -> new MultiEconomyManager(p).saveBankBalance());
-        else Bukkit.getOnlinePlayers().forEach(p -> new SingleEconomyManager(p).saveBankBalance());
+        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) Bukkit.getOnlinePlayers().forEach(p -> new MultiEconomyManager(p).saveBankBalance(false));
+        else Bukkit.getOnlinePlayers().forEach(p -> new SingleEconomyManager(p).saveBankBalance(false));
         if (Values.CONFIG.isInterestEnabled()) interest.saveInterest();
         dataManager.shutdownPlugin();
     }
@@ -145,6 +144,10 @@ public final class BankPlus extends JavaPlugin {
 
     public DataManager getDataManager() {
         return dataManager;
+    }
+
+    public AFKManager getAfkManager() {
+        return afkManager;
     }
 
     public TaskManager getTaskManager() {

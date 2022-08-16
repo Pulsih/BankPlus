@@ -1,6 +1,6 @@
 # If you want to know more about bank guis: https://github.com/Pulsih/BankPlus/wiki
 Title: "&a&lBANK"
-Lines: 4
+Lines: 5
 Update-Delay: 10 #In ticks, put 0 to disable
 Filler:
   Enabled: true
@@ -74,10 +74,10 @@ Upgrades:
 Items:
   # You can add as many items as you want
   # and not only for make the bank work
-  Withdraw:
+  WithdrawButton1:
     Material: "EMERALD"
     Amount: 1
-    Displayname: "&aWithdraw"
+    Displayname: "&8&l[&9&lWITHDRAW&8&l] &9500$"
     Slot: 11
     # You can not edit the custom
     # model data of an item.
@@ -86,7 +86,7 @@ Items:
     #CustomModelData: 10
     Lore:
       - ""
-      - "&7Withdraw &a500$ &7from your bank"
+      - "&9&l* &aWithdraw &9500$ &afrom your bank."
       - ""
     Glowing: true
     Action:
@@ -96,42 +96,57 @@ Items:
       Action-Type: "Withdraw"
       Amount: "500"
 
-  WithdrawHalf:
+  WithdrawButton2:
     Material: "EMERALD"
-    Amount: 2
-    Displayname: "&aWithdraw"
+    Amount: 1
+    Displayname: "&8&l[&9&lWITHDRAW&8&l] &925%"
     Slot: 12
     Lore:
       - ""
-      - "&7Withdraw &aHalf &7of the money from your bank"
+      - "&9&l* &aWithdraw &925% &aof the money from your bank."
       - ""
     Glowing: true
     Action:
       Action-Type: "Withdraw"
-      Amount: "HALF"
+      Amount: "25%"
 
-  WithdrawAll:
+  WithdrawButton3:
     Material: "EMERALD"
-    Amount: 3
-    Displayname: "&aWithdraw"
+    Amount: 1
+    Displayname: "&8&l[&9&lWITHDRAW&8&l] &950%"
     Slot: 21
     Lore:
       - ""
-      - "&7Withdraw &aAll &7of the money from your bank"
+      - "&9&l* &aWithdraw &950% &aof the money from your bank."
       - ""
     Glowing: true
     Action:
       Action-Type: "Withdraw"
-      Amount: "ALL"
+      Amount: "HALF" #50%
 
-  WithdrawCustom:
+  WithdrawButton4:
     Material: "EMERALD"
-    Amount: 4
+    Amount: 1
     Slot: 20
-    Displayname: "&aWithdraw"
+    Displayname: "&8&l[&9&lWITHDRAW&8&l] &9ALL"
     Lore:
       - ""
-      - "&7Withdraw a &acustom &7amount of money to your bank"
+      - "&9&l* &aWithdraw &9ALL &amoney from your bank."
+      - ""
+    Glowing: true
+    Action:
+      Action-Type: "Withdraw"
+      Amount: "ALL" #100%
+
+  WithdrawButton5:
+    Material: "EMERALD"
+    Amount: 1
+    Slot: 30
+    Displayname: "&8&l[&9&lWITHDRAW&8&l] &9CUSTOM"
+    Lore:
+      - ""
+      - "&9&l* &aWithdraw a &9custom &aamount from"
+      - "      &ayour bank through chat."
       - ""
     Glowing: true
     Action:
@@ -140,23 +155,24 @@ Items:
 
   Personal-Info:
     Material: "HEAD-%PLAYER%"
-    Displayname: "&aPersonal"
+    Displayname: "&9&l* &a&lPERSONAL"
     Slot: 14
     Lore:
       - ""
-      - "&7Account Name: &f%player_name%"
+      - "&7Account Name: &a%player_name%"
       - "&7Balance: &a%bankplus_balance_formatted%"
       - "&7Capacity: &a%bankplus_capacity_formatted%"
       - ""
       - "&7Wait &a%bankplus_interest_cooldown% &7to get interest!"
       - "&7Expected money from the next interest: &a%bankplus_next_interest_formatted%"
+      - "&7Interest rate: &a%bankplus_interest_rate%"
       - ""
-      - "&7&o(( Taxes on Deposit and Withdraw: 2% ))"
+      - "&7&o(( %bankplus_withdraw_taxes% Withdraw Taxes. %bankplus_deposit_taxes% Deposit Taxes. ))"
     Glowing: true
 
   How-Does-It-Work:
     Material: "HEAD-<eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzU3NDcwMTBkODRhYTU2NDgzYjc1ZjYyNDNkOTRmMzRjNTM0NjAzNTg0YjJjYzY4YTQ1YmYzNjU4NDAxMDVmZCJ9fX0=>"
-    Displayname: "&aHow Does It Work?"
+    Displayname: "&9&l* &a&lHOW DOES IT WORK?"
     Slot: 23
     Lore:
       - ""
@@ -168,67 +184,11 @@ Items:
       - ""
     Glowing: true
 
-  Deposit:
-    Material: "EMERALD"
-    Amount: 1
-    Slot: 17
-    Displayname: "&aDeposit"
-    Lore:
-      - ""
-      - "&7Deposit &a500$ &7to your bank"
-      - ""
-    Glowing: true
-    Action:
-      Action-Type: "Deposit"
-      Amount: "500"
-
-  DepositHalf:
-    Material: "EMERALD"
-    Amount: 2
-    Slot: 16
-    Displayname: "&aDeposit"
-    Lore:
-      - ""
-      - "&7Deposit &aHalf &7of money to your bank"
-      - ""
-    Glowing: true
-    Action:
-      Action-Type: "Deposit"
-      Amount: "HALF"
-
-  DepositAll:
-    Material: "EMERALD"
-    Amount: 3
-    Slot: 25
-    Displayname: "&aDeposit"
-    Lore:
-      - ""
-      - "&7Deposit &aAll &7of money to your bank"
-      - ""
-    Glowing: true
-    Action:
-      Action-Type: "Deposit"
-      Amount: "ALL"
-
-  DepositCustom:
-    Material: "EMERALD"
-    Amount: 4
-    Slot: 26
-    Displayname: "&aDeposit"
-    Lore:
-      - ""
-      - "&7Deposit a &acustom &7amount of money to your bank"
-      - ""
-    Glowing: true
-    Action:
-      Action-Type: "Deposit"
-      Amount: "CUSTOM"
-
   Upgrade:
     Material: "DIAMOND"
     Amount: 1
-    Slot: 36
-    Displayname: "&aUpgrade Bank"
+    Slot: 32
+    Displayname: "&9&l* &a&lUPGRADE BANK"
     Lore:
       - ""
       - "&7Upgrade your bank to the next level!"
@@ -236,6 +196,77 @@ Items:
       - "&7Current level: &a%bankplus_level%"
       - "&7Upgrade Cost: &a%bankplus_next_level_cost%"
       - ""
-    Glowing: false
+    Glowing: true
     Action:
       Action-Type: "Upgrade"
+
+  DepositButton1:
+    Material: "EMERALD"
+    Amount: 1
+    Slot: 17
+    Displayname: "&8&l[&a&lDEPOSIT&8&l] &a500$"
+    Lore:
+      - ""
+      - "&a&l* &9Deposit &a500$ &9in your bank."
+      - ""
+    Glowing: true
+    Action:
+      Action-Type: "Deposit"
+      Amount: "500"
+
+  DepositButton2:
+    Material: "EMERALD"
+    Amount: 1
+    Slot: 16
+    Displayname: "&8&l[&a&lDEPOSIT&8&l] &a25%"
+    Lore:
+      - ""
+      - "&a&l* &9Deposit &a25% &9of your money in your bank."
+      - ""
+    Glowing: true
+    Action:
+      Action-Type: "Deposit"
+      Amount: "25%"
+
+  DepositButton3:
+    Material: "EMERALD"
+    Amount: 1
+    Slot: 25
+    Displayname: "&8&l[&a&lDEPOSIT&8&l] &a50%"
+    Lore:
+      - ""
+      - "&a&l* &9Deposit &a50% &9of your money in your bank."
+      - ""
+    Glowing: true
+    Action:
+      Action-Type: "Deposit"
+      Amount: "HALF"
+
+  DepositButton4:
+    Material: "EMERALD"
+    Amount: 1
+    Slot: 26
+    Displayname: "&8&l[&a&lDEPOSIT&8&l] &aALL"
+    Lore:
+      - ""
+      - "&a&l* &9Deposit &aALL &9money in your bank."
+      - ""
+    Glowing: true
+    Action:
+      Action-Type: "Deposit"
+      Amount: "ALL"
+
+  DepositButton5:
+    Material: "EMERALD"
+    Amount: 1
+    Slot: 34
+    Displayname: "&8&l[&a&lDEPOSIT&8&l] &aCUSTOM"
+    Lore:
+      - ""
+      - "&a&l* &9Deposit a &acustom &9amount in"
+      - "   &9your bank through chat."
+      - ""
+    Glowing: true
+    Action:
+      Action-Type: "Deposit"
+      Amount: "CUSTOM"

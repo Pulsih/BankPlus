@@ -308,12 +308,20 @@ public class ConfigValues {
         return new BigDecimal(maxWithdrawAmount);
     }
 
+    public String getDepositTaxesString() {
+        return depositTaxes;
+    }
+
     public BigDecimal getDepositTaxes() {
         if (!BPMethods.isValidNumber(depositTaxes)) {
             BPLogger.error("Invalid number for the \"DepositTaxes\", Please correct it in the config as soon as possible!");
             return new BigDecimal(0);
         }
         return new BigDecimal(depositTaxes.replace("%", ""));
+    }
+
+    public String getWithdrawTaxesString() {
+        return withdrawTaxes;
     }
 
     public BigDecimal getWithdrawTaxes() {
@@ -358,6 +366,10 @@ public class ConfigValues {
             return new BigDecimal(0);
         }
         return new BigDecimal(interestMaxAmount);
+    }
+
+    public String getInterestMoneyGivenString() {
+        return interestMoneyGiven;
     }
 
     public BigDecimal getInterestMoneyGiven() {

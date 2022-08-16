@@ -16,6 +16,7 @@ import me.pulsi_.bankplus.listeners.bankListener.*;
 import me.pulsi_.bankplus.listeners.playerChat.*;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
@@ -53,7 +54,7 @@ public class DataManager {
         BPLogger.log("");
 
         if (Values.CONFIG.isInterestEnabled()) plugin.getInterest().startInterest();
-        if (Values.CONFIG.isIgnoringAfkPlayers()) AFKManager.startCountdown();
+        if (Values.CONFIG.isIgnoringAfkPlayers()) plugin.getAfkManager().startCountdown();
         if (Values.CONFIG.isBanktopEnabled()) {
             BankTopManager bankTop = plugin.getBankTopManager();
             bankTop.updateBankTop();
@@ -68,25 +69,32 @@ public class DataManager {
         BPLogger.log("");
     }
 
-    public void reloadPlugin() {
+    public boolean reloadPlugin() {
+        boolean success = true;
+
         ConfigManager configManager = plugin.getConfigManager();
-        configManager.reloadConfig(ConfigManager.Type.CONFIG);
-        configManager.reloadConfig(ConfigManager.Type.MESSAGES);
-        configManager.reloadConfig(ConfigManager.Type.MULTIPLE_BANKS);
+        if (!configManager.reloadConfig(ConfigManager.Type.CONFIG)) success = false;
+        if (!configManager.reloadConfig(ConfigManager.Type.MESSAGES)) success = false;
+        if (!configManager.reloadConfig(ConfigManager.Type.MULTIPLE_BANKS)) success = false;
 
         Values.CONFIG.setupValues();
         Values.MESSAGES.setupValues();
         Values.MULTIPLE_BANKS.setupValues();
-        MessageManager.loadMessages();
+        BPMessages.loadMessages();
 
-        if (Values.CONFIG.isGuiModuleEnabled()) new BanksManager().loadBanks();
-        if (!AFKManager.isPlayerCountdownActive) AFKManager.startCountdown();
+        if (Values.CONFIG.isGuiModuleEnabled() && !new BanksManager().loadBanks()) success = false;
+
+        AFKManager afkManager = plugin.getAfkManager();
+        if (!afkManager.isPlayerCountdownActive()) afkManager.startCountdown();
+
         Interest interest = plugin.getInterest();
         if (Values.CONFIG.isInterestEnabled() && interest.wasDisabled()) interest.startInterest();
-        if (Values.CONFIG.isBanktopEnabled()) plugin.getBankTopManager().startUpdateTask();
-        BPMethods.startSavingBalancesTask();
 
+        if (Values.CONFIG.isBanktopEnabled()) plugin.getBankTopManager().startUpdateTask();
+
+        BPMethods.startSavingBalancesTask();
         Bukkit.getOnlinePlayers().forEach(p -> new BankPlusPlayerFiles(p).checkForFileFixes());
+        return success;
     }
 
     private void registerEvents() {
@@ -95,7 +103,7 @@ public class DataManager {
         pluginManager.registerEvents(new PlayerJoinListener(), plugin);
         pluginManager.registerEvents(new PlayerQuitListener(), plugin);
         pluginManager.registerEvents(new UpdateChecker(), plugin);
-        pluginManager.registerEvents(new AFKListener(), plugin);
+        pluginManager.registerEvents(new AFKListener(plugin), plugin);
         pluginManager.registerEvents(new InventoryCloseListener(), plugin);
 
         switch (Values.CONFIG.getPlayerChatPriority()) {

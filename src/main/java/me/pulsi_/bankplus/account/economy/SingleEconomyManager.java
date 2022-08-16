@@ -3,8 +3,7 @@ package me.pulsi_.bankplus.account.economy;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
 import me.pulsi_.bankplus.bankGuis.BanksManager;
-import me.pulsi_.bankplus.managers.BankTopManager;
-import me.pulsi_.bankplus.managers.MessageManager;
+import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPDebugger;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
@@ -103,11 +102,11 @@ public class SingleEconomyManager {
     /**
      * Save the player bank balance to his file.
      */
-    public void saveBankBalance() {
+    public void saveBankBalance(boolean async) {
         if (onNull(p, "Cannot save player bank balance!")) return;
         BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
         files.getPlayerConfig().set("Money", BPMethods.formatBigDouble(getBankBalance()));
-        files.savePlayerFile(true);
+        files.savePlayerFile(async);
     }
 
     /**
@@ -239,7 +238,7 @@ public class SingleEconomyManager {
         if (BPMethods.hasFailed(p, depositResponse)) return;
 
         addBankBalance(amount.subtract(taxes));
-        MessageManager.send(p, "Success-Deposit", BPMethods.placeValues(p, amount.subtract(taxes), taxes));
+        BPMessages.send(p, "Success-Deposit", BPMethods.placeValues(p, amount.subtract(taxes), taxes));
         BPMethods.playSound("DEPOSIT", p);
     }
 
@@ -265,7 +264,7 @@ public class SingleEconomyManager {
         if (BPMethods.hasFailed(p, withdrawResponse)) return;
 
         removeBankBalance(amount);
-        MessageManager.send(p, "Success-Withdraw", BPMethods.placeValues(p, amount.subtract(taxes), taxes));
+        BPMessages.send(p, "Success-Withdraw", BPMethods.placeValues(p, amount.subtract(taxes), taxes));
         BPMethods.playSound("WITHDRAW", p);
     }
 
@@ -282,37 +281,37 @@ public class SingleEconomyManager {
         BigDecimal bankBalance = getBankBalance();
 
         if (bankBalance.doubleValue() < amount.doubleValue()) {
-            MessageManager.send(p, "Insufficient-Money");
+            BPMessages.send(p, "Insufficient-Money");
             return;
         }
 
         if (maxBankCapacity.doubleValue() == 0) {
             removeBankBalance(amount);
-            MessageManager.send(p, "Payment-Sent", BPMethods.placeValues(target, amount));
+            BPMessages.send(p, "Payment-Sent", BPMethods.placeValues(target, amount));
             targetManager.addBankBalance(amount);
-            MessageManager.send(target, "Payment-Received", BPMethods.placeValues(p, amount));
+            BPMessages.send(target, "Payment-Received", BPMethods.placeValues(p, amount));
             return;
         }
 
         BigDecimal targetMoney = targetManager.getBankBalance();
         if (targetMoney.doubleValue() >= maxBankCapacity.doubleValue()) {
-            MessageManager.send(p, "Bank-Full", BPMethods.placeValues(target, BigDecimal.valueOf(0)));
+            BPMessages.send(p, "Bank-Full", BPMethods.placeValues(target, BigDecimal.valueOf(0)));
             return;
         }
 
         BigDecimal moneyLeft = maxBankCapacity.subtract(targetMoney);
         if (amount.doubleValue() >= moneyLeft.doubleValue()) {
             removeBankBalance(moneyLeft);
-            MessageManager.send(p, "Payment-Sent", BPMethods.placeValues(target, moneyLeft));
+            BPMessages.send(p, "Payment-Sent", BPMethods.placeValues(target, moneyLeft));
             targetManager.addBankBalance(moneyLeft);
-            MessageManager.send(target, "Payment-Received", BPMethods.placeValues(p, moneyLeft));
+            BPMessages.send(target, "Payment-Received", BPMethods.placeValues(p, moneyLeft));
             return;
         }
 
         removeBankBalance(amount);
-        MessageManager.send(p, "Payment-Sent", BPMethods.placeValues(target, amount));
+        BPMessages.send(p, "Payment-Sent", BPMethods.placeValues(target, amount));
         targetManager.addBankBalance(amount);
-        MessageManager.send(target, "Payment-Received", BPMethods.placeValues(p, amount));
+        BPMessages.send(target, "Payment-Received", BPMethods.placeValues(p, amount));
     }
 
     private boolean onNull(Player p, String tried) {

@@ -5,7 +5,6 @@ import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankGuis.BanksManager;
 import me.pulsi_.bankplus.managers.ConfigManager;
-import me.pulsi_.bankplus.managers.MessageManager;
 import me.pulsi_.bankplus.managers.TaskManager;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.EconomyResponse;
@@ -127,12 +126,12 @@ public class BPMethods {
         try {
             BigDecimal num = new BigDecimal(number);
             if (num.doubleValue() < 0) {
-                MessageManager.send(s, "Cannot-Use-Negative-Number");
+                BPMessages.send(s, "Cannot-Use-Negative-Number");
                 return true;
             }
             return false;
         } catch (NumberFormatException e) {
-            MessageManager.send(s, "Invalid-Number");
+            BPMessages.send(s, "Invalid-Number");
             return true;
         }
     }
@@ -156,13 +155,13 @@ public class BPMethods {
 
     public static boolean isPlayer(CommandSender s) {
         if (s instanceof Player) return true;
-        MessageManager.send(s, "Not-Player");
+        BPMessages.send(s, "Not-Player");
         return false;
     }
 
     public static boolean hasPermission(CommandSender s, String permission) {
         if (s.hasPermission(permission)) return true;
-        MessageManager.send(s, "No-Permission", "%permission%$" + permission);
+        BPMessages.send(s, "No-Permission", "%permission%$" + permission);
         return false;
     }
 
@@ -189,11 +188,16 @@ public class BPMethods {
         if (task != null) task.cancel();
 
         if (Values.CONFIG.getSaveBalancedDelay() <= 0) return;
+
+        // Cache the values out the runnable to improve a bit the performance.
+        long delay = Values.CONFIG.getSaveBalancedDelay();
+        boolean multi = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled(), saveBroadcast = Values.CONFIG.isSaveBalancesBroadcast();
+
         tasks.setSavingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.instance(), () -> {
-            if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) Bukkit.getOnlinePlayers().forEach(p -> new MultiEconomyManager(p).saveBankBalance());
-            else Bukkit.getOnlinePlayers().forEach(p-> new SingleEconomyManager(p).saveBankBalance());
-            if (Values.CONFIG.isSaveBalancesBroadcast()) BPLogger.info("All player balances have been saved!");
-        }, Values.CONFIG.getSaveBalancedDelay() * 1200L, Values.CONFIG.getSaveBalancedDelay() * 1200L));
+            if (multi) Bukkit.getOnlinePlayers().forEach(p -> new MultiEconomyManager(p).saveBankBalance(true));
+            else Bukkit.getOnlinePlayers().forEach(p-> new SingleEconomyManager(p).saveBankBalance(true));
+            if (saveBroadcast) BPLogger.info("All player balances have been saved!");
+        }, delay * 1200L, delay * 1200L));
     }
 
     public static String formatLong(BigDecimal balance) {
@@ -238,8 +242,8 @@ public class BPMethods {
         if (!hasPermission(p, "bankplus.withdraw")) return;
 
         if (Values.MESSAGES.isTitleCustomAmountEnabled())
-            BPMethods.sendTitle("Title-Custom-Transaction.Title-Withdraw", p);
-        MessageManager.send(p, "Chat-Withdraw");
+            BPMethods.sendTitle(BankPlus.instance().getConfigManager().getConfig(ConfigManager.Type.MESSAGES).getString("Title-Custom-Transaction.Title-Withdraw"), p);
+        BPMessages.send(p, "Chat-Withdraw");
         BPSets.addPlayerToWithdraw(p);
         p.closeInventory();
         BankPlus.instance().getPlayers().get(p.getUniqueId()).setOpenedBank(BankPlus.instance().getBanks().get(identifier));
@@ -253,23 +257,34 @@ public class BPMethods {
         if (!hasPermission(p, "bankplus.deposit")) return;
 
         if (Values.MESSAGES.isTitleCustomAmountEnabled())
-            BPMethods.sendTitle("Title-Custom-Transaction.Title-Deposit", p);
-        MessageManager.send(p, "Chat-Deposit");
+            BPMethods.sendTitle(BankPlus.instance().getConfigManager().getConfig(ConfigManager.Type.MESSAGES).getString("Title-Custom-Transaction.Title-Deposit"), p);
+        BPMessages.send(p, "Chat-Deposit");
         BPSets.addPlayerToDeposit(p);
         p.closeInventory();
         BankPlus.instance().getPlayers().get(p.getUniqueId()).setOpenedBank(BankPlus.instance().getBanks().get(identifier));
     }
 
-    public static void sendTitle(String path, Player p) {
-        String title = BankPlus.instance().getConfigManager().getConfig(ConfigManager.Type.MESSAGES).getString(path);
+    public static void sendTitle(String title, Player p) {
         if (title == null) return;
 
-        String newTitle = MessageManager.addPrefix(title);
+        String newTitle = BPMessages.addPrefix(title);
         if (newTitle.contains(",")) {
             String[] titles = newTitle.split(",");
-            String title1 = titles[0];
-            String title2 = titles[1];
-            p.sendTitle(BPChat.color(title1), BPChat.color(title2));
+            String title1 = titles[0], title2 = titles[1];
+
+            if (titles.length == 2) p.sendTitle(BPChat.color(title1), BPChat.color(title2));
+            else {
+                int fadeIn, stay, fadeOut;
+                try {
+                    fadeIn = Integer.parseInt(titles[2]);
+                    stay = Integer.parseInt(titles[3]);
+                    fadeOut = Integer.parseInt(titles[4]);
+                } catch (IllegalArgumentException e) {
+                    BPLogger.warn("Invalid title string! (NOT BANKPLUS ERROR!) Title: " + title + ". Error: " + e.getMessage());
+                    return;
+                }
+                p.sendTitle(BPChat.color(title1), BPChat.color(title2), fadeIn, stay, fadeOut);
+            }
         } else p.sendTitle(BPChat.color(newTitle), "");
     }
 
@@ -372,15 +387,15 @@ public class BPMethods {
 
     public static boolean hasMoney(BigDecimal money, BigDecimal amount, Player p) {
         if (amount.doubleValue() < 0) {
-            MessageManager.send(p, "Cannot-Use-Negative-Number");
+            BPMessages.send(p, "Cannot-Use-Negative-Number");
             return false;
         }
         if (amount.doubleValue() < Values.CONFIG.getMinimumAmount().doubleValue()) {
-            MessageManager.send(p, "Minimum-Number");
+            BPMessages.send(p, "Minimum-Number");
             return false;
         }
         if (money.doubleValue() == 0 || money.doubleValue() < amount.doubleValue()) {
-            MessageManager.send(p, "Insufficient-Money");
+            BPMessages.send(p, "Insufficient-Money");
             return false;
         }
         return true;
@@ -430,7 +445,7 @@ public class BPMethods {
     public static boolean isBankFull(Player p, String bankName) {
         BigDecimal capacity = new BanksManager(bankName).getCapacity(p);
         if (new MultiEconomyManager(p).getBankBalance(bankName).doubleValue() >= capacity.doubleValue()) {
-            MessageManager.send(p, "Cannot-Deposit-Anymore");
+            BPMessages.send(p, "Cannot-Deposit-Anymore");
             return true;
         }
         return false;
@@ -439,7 +454,7 @@ public class BPMethods {
     public static boolean isBankFull(Player p) {
         BigDecimal capacity = new BanksManager(Values.CONFIG.getMainGuiName()).getCapacity(p);
         if (new SingleEconomyManager(p).getBankBalance().doubleValue() >= capacity.doubleValue()) {
-            MessageManager.send(p, "Cannot-Deposit-Anymore");
+            BPMessages.send(p, "Cannot-Deposit-Anymore");
             return true;
         }
         return false;
@@ -447,7 +462,7 @@ public class BPMethods {
 
     public static boolean hasFailed(Player p, EconomyResponse response) {
         if (!response.transactionSuccess()) {
-            MessageManager.send(p, "Internal-Error");
+            BPMessages.send(p, "Internal-Error");
             BPLogger.warn("Warning! (THIS IS NOT A BANKPLUS ERROR!) Vault has failed his transaction task. To" +
                     " avoid dupe bugs, I also cancelled the bankplus transaction.");
             return true;

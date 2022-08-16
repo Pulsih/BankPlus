@@ -1,8 +1,7 @@
 package me.pulsi_.bankplus.commands;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.managers.BankTopManager;
-import me.pulsi_.bankplus.managers.MessageManager;
+import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
@@ -19,7 +18,7 @@ public class BankTopCmd implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender s, Command command, String label, String[] args) {
         if (!Values.CONFIG.isBanktopEnabled()) {
-            MessageManager.send(s, "BankTop-Disabled");
+            BPMessages.send(s, "BankTop-Disabled");
             return false;
         }
         if (!BPMethods.hasPermission(s, "bankplus.banktop")) return false;
