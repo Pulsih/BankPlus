@@ -44,6 +44,30 @@ public class SingleCmdProcessor {
         }
 
         switch (args[0].toLowerCase()) {
+            case "forceupgrade": {
+                if (!BPMethods.hasPermission(s, "bankplus.forceupgrade")) return;
+
+                if (args.length == 1) {
+                    BPMessages.send(s, "Specify-Player");
+                    return;
+                }
+
+                Player p = Bukkit.getPlayerExact(args[1]);
+                if (p == null) {
+                    BPMessages.send(s, "Invalid-Player");
+                    return;
+                }
+
+                new BanksManager(Values.CONFIG.getMainGuiName()).upgradeBank(p);
+            }
+            break;
+
+            case "upgrade": {
+                if (!BPMethods.isPlayer(s) || !BPMethods.hasPermission(s, "bankplus.upgrade")) return;
+                new BanksManager(Values.CONFIG.getMainGuiName()).upgradeBank((Player) s);
+            }
+            break;
+
             case "customwithdraw": {
                 if (!BPMethods.hasPermission(s, "bankplus.customwithdraw")) return;
 
@@ -80,7 +104,7 @@ public class SingleCmdProcessor {
             }
             break;
 
-            case "force-open": {
+            case "forceopen": {
                 if (!Values.CONFIG.isGuiModuleEnabled()) {
                     BPMessages.send(s, "Gui-Module-Disabled");
                     return;
@@ -446,8 +470,9 @@ public class SingleCmdProcessor {
                 }
                 if (s.hasPermission("bankplus.debug")) listOfArgs.add("debug");
                 if (s.hasPermission("bankplus.deposit")) listOfArgs.add("deposit");
-                if (s.hasPermission("bankplus.force-open")) listOfArgs.add("force-open");
-                if (s.hasPermission("bankplus.give-interest")) listOfArgs.add("giveInterest");
+                if (s.hasPermission("bankplus.forceopen")) listOfArgs.add("forceOpen");
+                if (s.hasPermission("bankplus.forceupgrade")) listOfArgs.add("forceUpgrade");
+                if (s.hasPermission("bankplus.giveinterest")) listOfArgs.add("giveInterest");
                 if (s.hasPermission("bankplus.help")) listOfArgs.add("help");
                 if (s.hasPermission("bankplus.interest")) listOfArgs.add("interest");
                 if (s.hasPermission("bankplus.interestmillis")) listOfArgs.add("interestMillis");
@@ -455,11 +480,12 @@ public class SingleCmdProcessor {
                 if (s.hasPermission("bankplus.pay")) listOfArgs.add("pay");
                 if (s.hasPermission("bankplus.reload")) listOfArgs.add("reload");
                 if (s.hasPermission("bankplus.remove")) listOfArgs.add("remove");
-                if (s.hasPermission("bankplus.restart-interest")) listOfArgs.add("restartInterest");
+                if (s.hasPermission("bankplus.restartinterest")) listOfArgs.add("restartInterest");
                 if (s.hasPermission("bankplus.saveallbankbalances")) listOfArgs.add("saveAllBankBalances");
                 if (s.hasPermission("bankplus.set")) listOfArgs.add("set");
                 if (s.hasPermission("bankplus.setlevel")) listOfArgs.add("setlevel");
                 if (s.hasPermission("bankplus.updatebanktop")) listOfArgs.add("updateBankTop");
+                if (s.hasPermission("bankplus.upgrade")) listOfArgs.add("upgrade");
                 if (s.hasPermission("bankplus.view")) listOfArgs.add("view");
                 if (s.hasPermission("bankplus.withdraw")) listOfArgs.add("withdraw");
 

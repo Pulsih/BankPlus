@@ -135,12 +135,18 @@ public class Placeholders extends PlaceholderExpansion {
         }
 
         Interest interest = BankPlus.instance().getInterest();
-        if (identifier.equals("interest_cooldown")) return BPMethods.formatTime(interest.getInterestCooldownMillis());
-        if (identifier.equals("interest_cooldown_millis")) return String.valueOf(interest.getInterestCooldownMillis());
-
-        if (identifier.equals("withdraw_taxes")) return Values.CONFIG.getWithdrawTaxesString();
-        if (identifier.equals("deposit_taxes")) return Values.CONFIG.getDepositTaxesString();
-        if (identifier.equals("interest_rate")) return Values.CONFIG.getInterestMoneyGivenString();
+        switch (identifier) {
+            case "interest_cooldown":
+                return BPMethods.formatTime(interest.getInterestCooldownMillis());
+            case "interest_cooldown_millis":
+                return String.valueOf(interest.getInterestCooldownMillis());
+            case "withdraw_taxes":
+                return Values.CONFIG.getWithdrawTaxesString();
+            case "deposit_taxes":
+                return Values.CONFIG.getDepositTaxesString();
+            case "interest_rate":
+                return Values.CONFIG.getInterestMoneyGivenString();
+        }
 
         if (identifier.startsWith("banktop_money_")) {
             String number = identifier.replace("banktop_money_", "");
