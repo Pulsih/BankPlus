@@ -14,6 +14,7 @@ description: The best bank plugin on Spigot!
 commands:
   bankplus:
     aliases: [bankp, bank, bp]
-
+  bankopen:
+    usage: /bankopen player - Open Bank to Player from Console
   banktop:
     aliases: [btop]

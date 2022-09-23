@@ -4,6 +4,7 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
 import me.pulsi_.bankplus.bankGuis.BanksManager;
 import me.pulsi_.bankplus.commands.BankTopCmd;
+import me.pulsi_.bankplus.commands.ConsoleBankOpen;
 import me.pulsi_.bankplus.commands.MainCmd;
 import me.pulsi_.bankplus.external.UpdateChecker;
 import me.pulsi_.bankplus.external.bStats;
@@ -147,5 +148,6 @@ public class DataManager {
         plugin.getCommand("bankplus").setExecutor(new MainCmd());
         plugin.getCommand("bankplus").setTabCompleter(new MainCmd());
         plugin.getCommand("banktop").setExecutor(new BankTopCmd());
+        plugin.getCommand("bankopen").setExecutor(new ConsoleBankOpen());
     }
 }
