@@ -3,23 +3,23 @@ package me.pulsi_.bankplus.bankGuis;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayer;
-import me.pulsi_.bankplus.utils.BPMessages;
-import me.pulsi_.bankplus.utils.BPChat;
-import me.pulsi_.bankplus.utils.BPItems;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.*;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 public class BanksHolder implements InventoryHolder {
 
@@ -63,6 +63,7 @@ public class BanksHolder implements InventoryHolder {
         p.openInventory(bank);
     }
 
+
     private void placeHeads(Inventory bank, Player p, String identifier) {
         ConfigurationSection items = new BanksManager(identifier).getItems();
         if (items == null) return;
@@ -72,12 +73,37 @@ public class BanksHolder implements InventoryHolder {
             if (itemValues == null) continue;
 
             String material = itemValues.getString("Material");
-            if (material == null || !material.startsWith("HEAD")) continue;
+            if (material == null) continue;
 
-            try {
-                bank.setItem(itemValues.getInt("Slot") - 1, BPItems.getHead(material, p));
-            } catch (ArrayIndexOutOfBoundsException e) {
-                bank.addItem(BPItems.getHead(material, p));
+            if (material.startsWith("HEAD")){
+                try {
+                    bank.setItem(itemValues.getInt("Slot") - 1, BPItems.getHead(material, p));
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    bank.addItem(BPItems.getHead(material, p));
+                }
+            }
+
+            if(material.startsWith("PLAYER_HEAD")){
+                String texture = itemValues.getString("Texture");
+                int customModelData = itemValues.getInt("CustomModelData");
+                ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+                if(texture != null) {
+                    texture = PlaceholderAPI.setPlaceholders(p, texture);
+                    UUID hashAsId = new UUID(texture.hashCode(), texture.hashCode());
+                    head = Bukkit.getUnsafe().modifyItemStack(head, "{SkullOwner:{Id:\"" + hashAsId + "\",Properties:{textures:[{Value:\"" + texture + "\"}]}}}");
+                    if(customModelData > 0){
+                        ItemMeta headMeta = head.getItemMeta();
+                        headMeta.setCustomModelData(customModelData);
+                        head.setItemMeta(headMeta);
+                    }
+                }
+
+                try{
+                    bank.setItem(itemValues.getInt("Slot")-1, head);
+                }catch (ArrayIndexOutOfBoundsException e){
+                    bank.addItem(head);
+                }
+
             }
         }
     }

@@ -126,6 +126,7 @@ public class BanksManager {
                             BPLogger.warn("Cannot set custom model data to the item: \"" + displayname + "\"&e. Custom model data is only available on 1.14.4+ servers!");
                         }
                     }
+
                     guiItem.setItemMeta(meta);
 
                     try {

@@ -1,5 +1,6 @@
 package me.pulsi_.bankplus.utils;
 
+import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.bankGuis.BankGui;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
