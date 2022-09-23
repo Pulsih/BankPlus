@@ -27,6 +27,7 @@ public class ConsoleBankOpen implements CommandExecutor {
                 }else{
                     BanksHolder banksHolder = new BanksHolder();
                     banksHolder.openBank(targetPlayer);
+                    return true;
                 }
             }
         }
