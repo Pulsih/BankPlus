@@ -10,6 +10,7 @@ import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
+import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -172,9 +173,15 @@ public class Interest {
     }
 
     private void giveSingleInterest(OfflinePlayer[] players) {
+        Permission permission = BankPlus.instance().getPermissions();
+        if (permission == null) {
+            BPLogger.error("Cannot give offline interest, no permission plugin found!");
+            return;
+        }
+
         String wName = Bukkit.getWorlds().get(0).getName(), perm = Values.CONFIG.getInterestOfflinePermission();
         for (OfflinePlayer p : players) {
-            if (p.isOnline() || !BankPlus.instance().getPermissions().playerHas(wName, p, perm)) continue;
+            if (p.isOnline() || !permission.playerHas(wName, p, perm)) continue;
 
             SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
             BigDecimal bankBalance = singleEconomyManager.getBankBalance();
@@ -196,13 +203,19 @@ public class Interest {
     }
 
     private void giveMultiInterest(OfflinePlayer[] players) {
+        Permission permission = BankPlus.instance().getPermissions();
+        if (permission == null) {
+            BPLogger.error("Cannot give offline interest, no permission plugin found!");
+            return;
+        }
+
         String wName = Bukkit.getWorlds().get(0).getName(), perm = Values.CONFIG.getInterestOfflinePermission();
         for (OfflinePlayer p : players) {
             boolean hasToSave = false;
 
             MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
             for (String bankName : new BanksManager().getAvailableBanks(p)) {
-                if (p.isOnline() || !BankPlus.instance().getPermissions().playerHas(wName, p, perm)) continue;
+                if (p.isOnline() || !permission.playerHas(wName, p, perm)) continue;
 
                 BigDecimal bankBalance = multiEconomyManager.getBankBalance(bankName);
                 BigDecimal interestMoney = bankBalance.multiply(Values.CONFIG.getInterestMoneyGiven().divide(BigDecimal.valueOf(100)));
@@ -241,10 +254,6 @@ public class Interest {
         }
         wasDisabled = false;
         return true;
-    }
-
-    public long getCooldown() {
-        return cooldown;
     }
 
     public boolean wasDisabled() {

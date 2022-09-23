@@ -9,10 +9,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class ConfigManager {
 
@@ -373,7 +370,7 @@ public class ConfigManager {
         addSpace(newConfig, "General");
 
         addCommentsUnder(newConfig, "General", "Worlds where the bank won't work");
-        validatePath(config, newConfig, "General.Worlds-Blacklist", new ArrayList<>().add("noBankWorld"));
+        validatePath(config, newConfig, "General.Worlds-Blacklist", new ArrayList<>(Collections.singletonList("noBankWorld")));
         addSpace(newConfig, "General");
 
         addCommentsUnder(newConfig, "General",
@@ -439,20 +436,20 @@ public class ConfigManager {
         addSpace(newConfig, "BankTop");
 
         addCommentsUnder(newConfig, "BankTop", "The message to display the banktop.");
-        List<String> banktopFormat = new ArrayList<>();
-        banktopFormat.add("&8&m---------&8[&a &lBank&9&lPlus &aBankTop &8]&m---------");
-        banktopFormat.add("&61# &6%bankplus_banktop_name_1%&8: &a%bankplus_banktop_money_1%");
-        banktopFormat.add("&22# &2%bankplus_banktop_name_2%&8: &a%bankplus_banktop_money_2%");
-        banktopFormat.add("&a3# &a%bankplus_banktop_name_3%&8: &a%bankplus_banktop_money_3%");
-        banktopFormat.add("&74# &7%bankplus_banktop_name_4%&8: &a%bankplus_banktop_money_4%");
-        banktopFormat.add("&75# &7%bankplus_banktop_name_5%&8: &a%bankplus_banktop_money_5%");
-        banktopFormat.add("&76# &7%bankplus_banktop_name_6%&8: &a%bankplus_banktop_money_6%");
-        banktopFormat.add("&77# &7%bankplus_banktop_name_7%&8: &a%bankplus_banktop_money_7%");
-        banktopFormat.add("&78# &7%bankplus_banktop_name_8%&8: &a%bankplus_banktop_money_8%");
-        banktopFormat.add("&79# &7%bankplus_banktop_name_9%&8: &a%bankplus_banktop_money_9%");
-        banktopFormat.add("&710# &7%bankplus_banktop_name_10%&8: &a%bankplus_banktop_money_10%");
-        banktopFormat.add("  &7&o(( The BankTop will update every 10m ))");
-        validatePath(config, newConfig, "BankTop.Format", banktopFormat);
+        validatePath(config, newConfig, "BankTop.Format", new ArrayList<>(Arrays.asList(
+                "&8&m---------&8[&a &lBank&9&lPlus &aBankTop &8]&m---------",
+                "&61# &6%bankplus_banktop_name_1%&8: &a%bankplus_banktop_money_1%",
+                "&61# &6%bankplus_banktop_name_2%&8: &a%bankplus_banktop_money_2%",
+                "&61# &6%bankplus_banktop_name_3%&8: &a%bankplus_banktop_money_3%",
+                "&61# &6%bankplus_banktop_name_4%&8: &a%bankplus_banktop_money_4%",
+                "&61# &6%bankplus_banktop_name_5%&8: &a%bankplus_banktop_money_5%",
+                "&61# &6%bankplus_banktop_name_6%&8: &a%bankplus_banktop_money_6%",
+                "&61# &6%bankplus_banktop_name_7%&8: &a%bankplus_banktop_money_7%",
+                "&61# &6%bankplus_banktop_name_8%&8: &a%bankplus_banktop_money_8%",
+                "&61# &6%bankplus_banktop_name_9%&8: &a%bankplus_banktop_money_9%",
+                "&61# &6%bankplus_banktop_name_10%&8: &a%bankplus_banktop_money_10%",
+                "  &7&o(( The BankTop will update every 10m ))"
+        )));
         addSpace(newConfig);
 
         validatePath(config, newConfig, "Placeholders.Money.Thousands", "K");
@@ -639,7 +636,7 @@ public class ConfigManager {
                 "main bank but a gui with a list of all available banks.",
                 "",
                 "When enabling this option, many commands will",
-                "change due to the multiple banks options (Ex: The",
+                "change due to the multiple bank options (Ex: The",
                 "command to set money will require to specify the",
                 "bank to set the money in the selected bank )",
                 "",

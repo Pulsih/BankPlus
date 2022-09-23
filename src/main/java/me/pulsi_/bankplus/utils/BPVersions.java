@@ -1,7 +1,6 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.managers.DataManager;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
@@ -22,6 +21,9 @@ import java.util.List;
  */
 public class BPVersions {
 
+    /**
+     * Will be removed in 6.0, used from versions older than 5.7.
+     */
     public static void moveBankFileToBanksFolder() {
         File oldBankFile = new File(BankPlus.instance().getDataFolder(), "bank.yml");
         if (!oldBankFile.exists()) return;
@@ -75,6 +77,9 @@ public class BPVersions {
         BankPlus.instance().getDataManager().reloadPlugin();
     }
 
+    /**
+     * Will be removed in 6.0, used from versions older than 5.7.
+     */
     public static void changePlayerStoragePosition(int point) {
         File playersFile = new File(BankPlus.instance().getDataFolder(), "players.yml");
         if (!playersFile.exists()) return;

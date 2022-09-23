@@ -12,8 +12,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public class BPItems {
 
-    public static final ItemStack UNKNOWN_ITEM = new ItemStack(Material.BARRIER);
-    public static final Material UNKNOWN_MATERIAL = Material.BARRIER;
+    public static final ItemStack UNKNOWN_ITEM = new ItemStack(Material.STONE);
+    public static final Material UNKNOWN_MATERIAL = Material.STONE;
 
     public static ItemStack createItemStack(ConfigurationSection itemValues) {
         String material = itemValues.getString("Material");

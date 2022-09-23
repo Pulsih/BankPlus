@@ -17,7 +17,6 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.HashMap;
@@ -41,12 +40,13 @@ public final class BankPlus extends JavaPlugin {
     private TaskManager taskManager;
     private Interest interest;
 
-    private boolean isPlaceholderAPIHooked = false, isEssentialsXHooked = false, isUpdated = true;
+    private boolean isPlaceholderAPIHooked = false, isEssentialsXHooked = false, isUpdated;
     private String serverVersion;
+
+    private int tries = 1;
 
     @Override
     public void onEnable() {
-        instance = this;
         if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
             BPLogger.log("");
             BPLogger.log("&cCannot load &a&lBank&9&lPlus&c, Vault is not installed!");
@@ -56,6 +56,12 @@ public final class BankPlus extends JavaPlugin {
             return;
         }
         if (!setupEconomy()) {
+            if (tries < 4) {
+                BPLogger.warn("BankPlus didn't find any economy on this server! The plugin will try to enable in 2 seconds! (%i try)".replace("%i", tries + ""));
+                Bukkit.getScheduler().runTaskLater(this, this::onEnable, 40);
+                tries++;
+                return;
+            }
             BPLogger.log("");
             BPLogger.log("&cCannot load &a&lBank&9&lPlus&c, No economy plugin found!");
             BPLogger.log("&cPlease download an economy plugin to use BankPlus!");
@@ -63,6 +69,7 @@ public final class BankPlus extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+        instance = this;
 
         serverVersion = getServer().getVersion();
         this.bankTopManager = new BankTopManager(this);
@@ -87,7 +94,7 @@ public final class BankPlus extends JavaPlugin {
             isEssentialsXHooked = true;
         }
 
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> isUpdated = isPluginUpdated());
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> isUpdated = isPluginUpdated(), 0, (8 * 1200) * 60);
         wasOnSingleEconomy = !Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled();
 
         BPVersions.moveBankFileToBanksFolder();
@@ -171,11 +178,17 @@ public final class BankPlus extends JavaPlugin {
     }
 
     private boolean isPluginUpdated() {
+        boolean updated;
         try {
             String newVersion = new BufferedReader(new InputStreamReader(new URL("https://api.spigotmc.org/legacy/update.php?resource=93130").openConnection().getInputStream())).readLine();
-            return getDescription().getVersion().equals(newVersion);
-        } catch (IOException e) {
-            return true;
+            updated = getDescription().getVersion().equals(newVersion);
+        } catch (Exception e) {
+            updated = true;
         }
+
+        if (updated) BPLogger.info("The plugin is updated!");
+        else BPLogger.info("The plugin is outdated! Please download the latest version here: https://www.spigotmc.org/resources/%E2%9C%A8-bankplus-%E2%9C%A8.93130/");
+
+        return updated;
     }
 }

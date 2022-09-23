@@ -89,12 +89,16 @@ Items:
       - "&9&l* &aWithdraw &9500$ &afrom your bank."
       - ""
     Glowing: true
-    Action:
-      # You can choose a number or:
-      # "ALL" -> All money
-      # "HALF" -> Half of the money
-      Action-Type: "Withdraw"
-      Amount: "500"
+    Actions:
+      # Action list:
+      # - [WITHDRAW] <amount>
+      # - [DEPOSIT] <amount>
+      # * The amount can be a number, a % or "CUSTOM"
+      #
+      # - [PLAYER] <chat> ( Force the player to chat, it can also be a command. )
+      # - [CONSOLE] <command> ( Without "/"! | Execute a console command. )
+      # - [MESSAGE] <message> ( Send a message to the player. )
+      - "[WITHDRAW] 500"
 
   WithdrawButton2:
     Material: "EMERALD"
@@ -105,10 +109,8 @@ Items:
       - ""
       - "&9&l* &aWithdraw &925% &aof the money from your bank."
       - ""
-    Glowing: true
-    Action:
-      Action-Type: "Withdraw"
-      Amount: "25%"
+    Actions:
+      - "[WITHDRAW] 25%"
 
   WithdrawButton3:
     Material: "EMERALD"
@@ -120,9 +122,8 @@ Items:
       - "&9&l* &aWithdraw &950% &aof the money from your bank."
       - ""
     Glowing: true
-    Action:
-      Action-Type: "Withdraw"
-      Amount: "HALF" #50%
+    Actions:
+      - "[WITHDRAW] 50%"
 
   WithdrawButton4:
     Material: "EMERALD"
@@ -134,9 +135,8 @@ Items:
       - "&9&l* &aWithdraw &9ALL &amoney from your bank."
       - ""
     Glowing: true
-    Action:
-      Action-Type: "Withdraw"
-      Amount: "ALL" #100%
+    Actions:
+      - "[WITHDRAW] 100%"
 
   WithdrawButton5:
     Material: "EMERALD"
@@ -149,9 +149,8 @@ Items:
       - "      &ayour bank through chat."
       - ""
     Glowing: true
-    Action:
-      Action-Type: "Withdraw"
-      Amount: "CUSTOM"
+    Actions:
+      - "[WITHDRAW] CUSTOM"
 
   Personal-Info:
     Material: "HEAD-%PLAYER%"
@@ -197,8 +196,8 @@ Items:
       - "&7Upgrade Cost: &a%bankplus_next_level_cost%"
       - ""
     Glowing: true
-    Action:
-      Action-Type: "Upgrade"
+    Actions:
+      - "[UPGRADE]"
 
   DepositButton1:
     Material: "EMERALD"
@@ -210,9 +209,8 @@ Items:
       - "&a&l* &9Deposit &a500$ &9in your bank."
       - ""
     Glowing: true
-    Action:
-      Action-Type: "Deposit"
-      Amount: "500"
+    Actions:
+      - "[DEPOSIT] 500"
 
   DepositButton2:
     Material: "EMERALD"
@@ -224,9 +222,8 @@ Items:
       - "&a&l* &9Deposit &a25% &9of your money in your bank."
       - ""
     Glowing: true
-    Action:
-      Action-Type: "Deposit"
-      Amount: "25%"
+    Actions:
+      - "[DEPOSIT] 25%"
 
   DepositButton3:
     Material: "EMERALD"
@@ -238,9 +235,8 @@ Items:
       - "&a&l* &9Deposit &a50% &9of your money in your bank."
       - ""
     Glowing: true
-    Action:
-      Action-Type: "Deposit"
-      Amount: "HALF"
+    Actions:
+      - "[DEPOSIT] 50%"
 
   DepositButton4:
     Material: "EMERALD"
@@ -252,9 +248,8 @@ Items:
       - "&a&l* &9Deposit &aALL &9money in your bank."
       - ""
     Glowing: true
-    Action:
-      Action-Type: "Deposit"
-      Amount: "ALL"
+    Actions:
+      - "[DEPOSIT] 100%"
 
   DepositButton5:
     Material: "EMERALD"
@@ -267,6 +262,5 @@ Items:
       - "   &9your bank through chat."
       - ""
     Glowing: true
-    Action:
-      Action-Type: "Deposit"
-      Amount: "CUSTOM"
+    Actions:
+      - "[DEPOSIT] CUSTOM"
