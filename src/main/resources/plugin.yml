@@ -6,7 +6,7 @@ depend:
   - Vault
 softdepend:
   - PlaceholderAPI
-  - EssentialsX
+  - Essentials
   - EconomyPlus
 authors: [ Pulsi_ ]
 load: POSTWORLD

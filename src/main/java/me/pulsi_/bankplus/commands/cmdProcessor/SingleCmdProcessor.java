@@ -311,7 +311,7 @@ public class SingleCmdProcessor {
                 if (p == null) {
                     OfflinePlayer oP = Bukkit.getOfflinePlayer(args[1]);
 
-                    BigDecimal capacity = banksManager.getCapacity(oP), balance = new SingleEconomyManager(oP).getBankBalance();
+                    BigDecimal capacity = banksManager.getCapacity(oP), balance = new SingleEconomyManager(oP).getOfflineBankBalance();
                     if (capacity.equals(balance)) {
                         BPMessages.send(s, "Bank-Full", "%player%$" + oP.getName());
                         return;
@@ -364,7 +364,7 @@ public class SingleCmdProcessor {
                 if (p == null) {
                     OfflinePlayer oP = Bukkit.getOfflinePlayer(args[1]);
 
-                    BigDecimal capacity = banksManager.getCapacity(oP), balance = new SingleEconomyManager(oP).getBankBalance();
+                    BigDecimal capacity = banksManager.getCapacity(oP), balance = new SingleEconomyManager(oP).getOfflineBankBalance();
                     if (capacity.equals(balance)) {
                         BPMessages.send(s, "Bank-Full", "%player%$" + oP.getName());
                         return;
@@ -414,7 +414,7 @@ public class SingleCmdProcessor {
                 if (p == null) {
                     OfflinePlayer oP = Bukkit.getOfflinePlayer(args[1]);
 
-                    BigDecimal balance = new SingleEconomyManager(oP).getBankBalance();
+                    BigDecimal balance = new SingleEconomyManager(oP).getOfflineBankBalance();
                     if (balance.equals(new BigDecimal(0))) {
                         BPMessages.send(s, "Bank-Empty", "%player%$" + oP.getName());
                         return;

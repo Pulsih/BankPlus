@@ -59,7 +59,7 @@ public class BanksListGui {
         }
 
         BankGui multipleBanksGui = new BankGui(
-                multipleBanksGuiID, title, Values.MULTIPLE_BANKS.getBanksGuiLines(), Values.MULTIPLE_BANKS.getUpdateDelay(), gui.getContents()
+                multipleBanksGuiID, title, Values.MULTIPLE_BANKS.getBanksGuiLines(), getSize(Values.MULTIPLE_BANKS.getUpdateDelay()), gui.getContents()
         );
         BankPlus.instance().getBanks().put("MultipleBanksGui", multipleBanksGui);
     }
@@ -150,6 +150,22 @@ public class BanksListGui {
         } else {
             meta.setDisplayName(BPChat.color(displayname));
             meta.setLore(newLore);
+        }
+    }
+
+    public int getSize(int size) {
+        if (size < 2) return 9;
+        switch (size) {
+            case 2:
+                return 18;
+            case 3:
+                return 27;
+            case 4:
+                return 36;
+            case 5:
+                return 45;
+            default:
+                return 54;
         }
     }
 

@@ -27,6 +27,7 @@ public class PlayerChatMethod {
         BankPlusPlayer player = BankPlus.instance().getPlayers().get(p.getUniqueId());
         String identifier = player.getOpenedBank().getIdentifier();
         String message = ChatColor.stripColor(e.getMessage());
+
         if (hasTypedExit(message, p, e, identifier)) return;
 
         BigDecimal amount;

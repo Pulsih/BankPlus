@@ -77,6 +77,7 @@ public class PlayerJoinListener implements Listener {
 
         offlineInterestMessage(p);
     }
+
     private void offlineInterestMessage(Player p) {
         if (!Values.CONFIG.isNotifyOfflineInterest()) return;
         OfflineInterestManager interestManager = new OfflineInterestManager(p);
