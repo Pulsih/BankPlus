@@ -3,9 +3,9 @@ package me.pulsi_.bankplus.account.economy;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
 import me.pulsi_.bankplus.bankGuis.BanksManager;
-import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPDebugger;
 import me.pulsi_.bankplus.utils.BPLogger;
+import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.EconomyResponse;
@@ -51,7 +51,7 @@ public class MultiEconomyManager {
     public static List<BigDecimal> getAllBankBalances() {
         List<BigDecimal> balances = new ArrayList<>();
 
-        File dataFolder = new File(BankPlus.instance().getDataFolder(), "playerdata");
+        File dataFolder = new File(BankPlus.INSTANCE.getDataFolder(), "playerdata");
         File[] files = dataFolder.listFiles();
         if (files == null) return balances;
 
@@ -72,14 +72,14 @@ public class MultiEconomyManager {
 
             for (String bankName : section.getKeys(false)) {
                 String bal = config.getString("Banks." + bankName + ".Money");
-                if (bal != null && BPMethods.isValidNumber(bal))
+                if (bal != null && !BPMethods.isInvalidNumber(bal))
                     balance = balance.add(new BigDecimal(bal));
             }
             balances.add(balance);
 
             HashMap<BigDecimal, String> balanceName = new HashMap<>();
             balanceName.put(balance, name);
-            BankPlus.instance().getBankTopManager().getLinkedBalanceName().add(balanceName);
+            BankPlus.INSTANCE.getBankTopManager().getLinkedBalanceName().add(balanceName);
         }
         return balances;
     }
@@ -89,7 +89,7 @@ public class MultiEconomyManager {
      */
     public void loadBankBalance() {
         if (onNull(p, "Cannot load player bank balance!")) return;
-        for (String bankName : BankPlus.instance().getBanks().keySet()) {
+        for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
             if (bankPlayerMoney.containsKey(p.getUniqueId() + "." + bankName)) return;
             String bal = new BankPlusPlayerFiles(p).getPlayerConfig().getString("Banks." + bankName + ".Money");
             bankPlayerMoney.put(p.getUniqueId() + "." + bankName, bal == null ? new BigDecimal(0) : new BigDecimal(bal));
@@ -121,7 +121,7 @@ public class MultiEconomyManager {
     public void saveBankBalance(boolean async) {
         if (onNull(p, "Cannot save player bank balances!")) return;
         BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
-        for (String bankName : BankPlus.instance().getBanks().keySet())
+        for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
             files.getPlayerConfig().set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(getBankBalance(bankName)));
         files.savePlayerFile(async);
     }
@@ -147,7 +147,7 @@ public class MultiEconomyManager {
         if (onNull(p, "Cannot get player bank balances!")) return null;
         loadBankBalance();
         BigDecimal amount = new BigDecimal(0);
-        for (String bankName : BankPlus.instance().getBanks().keySet())
+        for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
             amount = amount.add(bankPlayerMoney.get(p.getUniqueId() + "." + bankName));
         return amount;
     }
@@ -173,7 +173,7 @@ public class MultiEconomyManager {
         if (offNull(oP, "Cannot get player bank balances!")) return null;
         BigDecimal amount = new BigDecimal(0);
         BankPlusPlayerFiles files = new BankPlusPlayerFiles(oP);
-        for (String bankName : BankPlus.instance().getBanks().keySet()) {
+        for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
             String bal = files.getPlayerConfig().getString("Banks." + bankName + ".Money");
             amount = amount.add(new BigDecimal(bal == null ? "0" : bal));
         }
@@ -272,7 +272,7 @@ public class MultiEconomyManager {
     public void deposit(BigDecimal amount, String bankName) {
         if (onNull(p, "Cannot deposit player bank balance!") || !BPMethods.hasPermission(p, "bankplus.deposit")) return;
 
-        BigDecimal money = BigDecimal.valueOf(BankPlus.instance().getEconomy().getBalance(p));
+        BigDecimal money = BigDecimal.valueOf(BankPlus.INSTANCE.getEconomy().getBalance(p));
         if (!BPMethods.hasMoney(money, amount, p) || BPMethods.isBankFull(p, bankName)) return;
 
         BigDecimal maxDepositAmount = Values.CONFIG.getMaxDepositAmount();
@@ -290,7 +290,7 @@ public class MultiEconomyManager {
             if (money.doubleValue() < amount.doubleValue()) amount = money;
         }
 
-        EconomyResponse depositResponse = BankPlus.instance().getEconomy().withdrawPlayer(p, amount.doubleValue());
+        EconomyResponse depositResponse = BankPlus.INSTANCE.getEconomy().withdrawPlayer(p, amount.doubleValue());
         BPDebugger.debugDeposit(p, amount, depositResponse);
         if (BPMethods.hasFailed(p, depositResponse)) return;
 
@@ -316,7 +316,7 @@ public class MultiEconomyManager {
         BigDecimal newBalance = bankBalance.subtract(amount);
         if (newBalance.doubleValue() <= 0) amount = bankBalance;
 
-        EconomyResponse withdrawResponse = BankPlus.instance().getEconomy().depositPlayer(p, amount.subtract(taxes).doubleValue());
+        EconomyResponse withdrawResponse = BankPlus.INSTANCE.getEconomy().depositPlayer(p, amount.subtract(taxes).doubleValue());
         BPDebugger.debugWithdraw(p, amount, withdrawResponse);
         if (BPMethods.hasFailed(p, withdrawResponse)) return;
 

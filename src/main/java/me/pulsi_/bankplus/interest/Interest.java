@@ -6,8 +6,8 @@ import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.OfflineInterestManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankGuis.BanksManager;
-import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPLogger;
+import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.permission.Permission;
@@ -47,27 +47,28 @@ public class Interest {
     }
 
     public void restartInterest() {
-        BukkitTask task = BankPlus.instance().getTaskManager().getInterestTask();
+        BukkitTask task = BankPlus.INSTANCE.getTaskManager().getInterestTask();
         if (task != null) task.cancel();
         startInterest();
     }
 
     public void giveInterestToEveryone() {
         cooldown = System.currentTimeMillis() + Values.CONFIG.getInterestDelay();
+        boolean offInterest = Values.CONFIG.isGivingInterestToOfflinePlayers();
 
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
-            Bukkit.getOnlinePlayers().forEach(this::giveMultiInterest);
-            if (Values.CONFIG.isGivingInterestToOfflinePlayers())
-                Bukkit.getScheduler().runTaskAsynchronously(BankPlus.instance(), () -> giveMultiInterest(Bukkit.getOfflinePlayers()));
-        } else {
-            Bukkit.getOnlinePlayers().forEach(this::giveSingleInterest);
-            if (Values.CONFIG.isGivingInterestToOfflinePlayers())
-                Bukkit.getScheduler().runTaskAsynchronously(BankPlus.instance(), () -> giveSingleInterest(Bukkit.getOfflinePlayers()));
-        }
+        Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE, () -> {
+            if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+                Bukkit.getOnlinePlayers().forEach(this::giveMultiInterest);
+                if (offInterest) giveMultiInterest(Bukkit.getOfflinePlayers());
+            } else {
+                Bukkit.getOnlinePlayers().forEach(this::giveSingleInterest);
+                if (offInterest) giveSingleInterest(Bukkit.getOfflinePlayers());
+            }
+        });
     }
 
     public void saveInterest() {
-        File file = new File(BankPlus.instance().getDataFolder(), "interest-save.yml");
+        File file = new File(BankPlus.INSTANCE.getDataFolder(), "interest-save.yml");
         try {
             file.getParentFile().mkdir();
             file.createNewFile();
@@ -91,7 +92,7 @@ public class Interest {
     }
 
     private File getInterestSaveFile() {
-        File file = new File(BankPlus.instance().getDataFolder(), "interest-save.yml");
+        File file = new File(BankPlus.INSTANCE.getDataFolder(), "interest-save.yml");
         if (!file.exists()) return null;
         return file;
     }
@@ -112,11 +113,11 @@ public class Interest {
     private void loopInterest() {
         if (!isInterestActive()) return;
         if (getInterestCooldownMillis() <= 0) giveInterestToEveryone();
-        BankPlus.instance().getTaskManager().setInterestTask(Bukkit.getScheduler().runTaskLater(BankPlus.instance(), this::loopInterest, 10L));
+        BankPlus.INSTANCE.getTaskManager().setInterestTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, this::loopInterest, 10L));
     }
 
     private void giveSingleInterest(Player p) {
-        if (!p.hasPermission("bankplus.receive.interest") || (Values.CONFIG.isIgnoringAfkPlayers() && BankPlus.instance().getAfkManager().isAFK(p))) return;
+        if (!p.hasPermission("bankplus.receive.interest") || (Values.CONFIG.isIgnoringAfkPlayers() && BankPlus.INSTANCE.getAfkManager().isAFK(p))) return;
 
         SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
         BigDecimal bankBalance = singleEconomyManager.getBankBalance();
@@ -147,7 +148,7 @@ public class Interest {
     }
 
     private void giveMultiInterest(Player p) {
-        if (!p.hasPermission("bankplus.receive.interest") || (Values.CONFIG.isIgnoringAfkPlayers() && BankPlus.instance().getAfkManager().isAFK(p))) return;
+        if (!p.hasPermission("bankplus.receive.interest") || (Values.CONFIG.isIgnoringAfkPlayers() && BankPlus.INSTANCE.getAfkManager().isAFK(p))) return;
 
         MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
         BigDecimal interestAmount = new BigDecimal(0);
@@ -173,7 +174,7 @@ public class Interest {
     }
 
     private void giveSingleInterest(OfflinePlayer[] players) {
-        Permission permission = BankPlus.instance().getPermissions();
+        Permission permission = BankPlus.INSTANCE.getPermissions();
         if (permission == null) {
             BPLogger.error("Cannot give offline interest, no permission plugin found!");
             return;
@@ -203,7 +204,7 @@ public class Interest {
     }
 
     private void giveMultiInterest(OfflinePlayer[] players) {
-        Permission permission = BankPlus.instance().getPermissions();
+        Permission permission = BankPlus.INSTANCE.getPermissions();
         if (permission == null) {
             BPLogger.error("Cannot give offline interest, no permission plugin found!");
             return;
@@ -247,7 +248,7 @@ public class Interest {
 
     private boolean isInterestActive() {
         if (!Values.CONFIG.isInterestEnabled()) {
-            BukkitTask task = BankPlus.instance().getTaskManager().getInterestTask();
+            BukkitTask task = BankPlus.INSTANCE.getTaskManager().getInterestTask();
             if (task != null) task.cancel();
             wasDisabled = true;
             return false;

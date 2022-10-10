@@ -3,7 +3,6 @@ package me.pulsi_.bankplus.account;
 import me.pulsi_.bankplus.bankGuis.BankGui;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.util.HashMap;
@@ -13,7 +12,6 @@ public class BankPlusPlayer {
     private final Player player;
     private final File playerFile;
     private final FileConfiguration playerConfig;
-    private BukkitTask inventoryUpdateTask;
     private BankGui openedBank;
     private HashMap<String, String> playerBankClickHolder;
     private int banktopPosition = -1;
@@ -36,10 +34,6 @@ public class BankPlusPlayer {
         return playerConfig;
     }
 
-    public BukkitTask getInventoryUpdateTask() {
-        return inventoryUpdateTask;
-    }
-
     public BankGui getOpenedBank() {
         return openedBank;
     }
@@ -50,10 +44,6 @@ public class BankPlusPlayer {
 
     public int getBanktopPosition() {
         return banktopPosition;
-    }
-
-    public void setInventoryUpdateTask(BukkitTask inventoryUpdateTask) {
-        this.inventoryUpdateTask = inventoryUpdateTask;
     }
 
     public void setOpenedBank(BankGui openedBank) {

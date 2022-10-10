@@ -15,8 +15,8 @@ import me.pulsi_.bankplus.listeners.PlayerQuitListener;
 import me.pulsi_.bankplus.listeners.bankListener.*;
 import me.pulsi_.bankplus.listeners.playerChat.*;
 import me.pulsi_.bankplus.utils.BPLogger;
-import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.utils.BPMessages;
+import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
@@ -82,7 +82,7 @@ public class DataManager {
         Values.MULTIPLE_BANKS.setupValues();
         BPMessages.loadMessages();
 
-        if (Values.CONFIG.isGuiModuleEnabled() && !new BanksManager().loadBanks()) success = false;
+        if (Values.CONFIG.isGuiModuleEnabled() && !plugin.getBankGuiRegistry().loadBanks()) success = false;
 
         AFKManager afkManager = plugin.getAfkManager();
         if (!afkManager.isPlayerCountdownActive()) afkManager.startCountdown();

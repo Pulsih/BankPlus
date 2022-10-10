@@ -5,8 +5,8 @@ import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.bankGuis.BanksHolder;
 import me.pulsi_.bankplus.bankGuis.BanksManager;
-import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPLogger;
+import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -388,12 +388,12 @@ public class MultiCmdProcessor {
                 BigDecimal amount;
                 switch (args[1]) {
                     case "all":
-                        amount = BigDecimal.valueOf(BankPlus.instance().getEconomy().getBalance(p));
+                        amount = BigDecimal.valueOf(BankPlus.INSTANCE.getEconomy().getBalance(p));
                         multiEconomyManager.deposit(amount, bankName);
                         break;
 
                     case "half":
-                        amount = BigDecimal.valueOf(BankPlus.instance().getEconomy().getBalance(p) / 2);
+                        amount = BigDecimal.valueOf(BankPlus.INSTANCE.getEconomy().getBalance(p) / 2);
                         multiEconomyManager.deposit(amount, bankName);
                         break;
 
@@ -667,7 +667,7 @@ public class MultiCmdProcessor {
                     case "open": {
                         if (!s.hasPermission("bankplus.open")) return null;
                         List<String> args2 = new ArrayList<>();
-                        for (String arg : BankPlus.instance().getBanks().keySet())
+                        for (String arg : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
                             if (arg.startsWith(args[1].toLowerCase())) args2.add(arg);
                         return args2;
                     }
@@ -688,7 +688,7 @@ public class MultiCmdProcessor {
                     case "add": {
                         if (!s.hasPermission("bankplus.add")) return null;
                         List<String> args3 = new ArrayList<>();
-                        for (String arg : BankPlus.instance().getBanks().keySet())
+                        for (String arg : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
                             if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
                         return args3;
                     }
@@ -697,7 +697,7 @@ public class MultiCmdProcessor {
                     case "balance": {
                         if (!s.hasPermission("bankplus.balance")) return null;
                         List<String> args3 = new ArrayList<>();
-                        for (String arg : BankPlus.instance().getBanks().keySet())
+                        for (String arg : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
                             if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
                         return args3;
                     }
@@ -705,7 +705,7 @@ public class MultiCmdProcessor {
                     case "deposit": {
                         if (!s.hasPermission("bankplus.deposit")) return null;
                         List<String> args3 = new ArrayList<>();
-                        for (String arg : BankPlus.instance().getBanks().keySet())
+                        for (String arg : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
                             if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
                         return args3;
                     }
@@ -713,7 +713,7 @@ public class MultiCmdProcessor {
                     case "force-open": {
                         if (!s.hasPermission("bankplus.force-open")) return null;
                         List<String> args3 = new ArrayList<>();
-                        for (String arg : BankPlus.instance().getBanks().keySet())
+                        for (String arg : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
                             if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
                         return args3;
                     }
@@ -721,7 +721,7 @@ public class MultiCmdProcessor {
                     case "pay": {
                         if (!BPMethods.isPlayer(s) || !s.hasPermission("bankplus.pay")) return null;
                         List<String> args3 = new ArrayList<>();
-                        for (String arg : BankPlus.instance().getBanks().keySet())
+                        for (String arg : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
                             if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
                         return args3;
                     }
@@ -729,7 +729,7 @@ public class MultiCmdProcessor {
                     case "remove": {
                         if (!s.hasPermission("bankplus.remove")) return null;
                         List<String> args3 = new ArrayList<>();
-                        for (String arg : BankPlus.instance().getBanks().keySet())
+                        for (String arg : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
                             if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
                         return args3;
                     }
@@ -737,7 +737,7 @@ public class MultiCmdProcessor {
                     case "set": {
                         if (!s.hasPermission("bankplus.set")) return null;
                         List<String> args3 = new ArrayList<>();
-                        for (String arg : BankPlus.instance().getBanks().keySet())
+                        for (String arg : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
                             if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
                         return args3;
                     }
@@ -745,7 +745,7 @@ public class MultiCmdProcessor {
                     case "setlevel": {
                         if (!s.hasPermission("bankplus.setlevel")) return null;
                         List<String> args3 = new ArrayList<>();
-                        for (String arg : BankPlus.instance().getBanks().keySet())
+                        for (String arg : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
                             if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
                         return args3;
                     }
@@ -753,7 +753,7 @@ public class MultiCmdProcessor {
                     case "view": {
                         if (!s.hasPermission("bankplus.view")) return null;
                         List<String> args3 = new ArrayList<>();
-                        for (String arg : BankPlus.instance().getBanks().keySet())
+                        for (String arg : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
                             if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
                         return args3;
                     }
@@ -761,7 +761,7 @@ public class MultiCmdProcessor {
                     case "withdraw": {
                         if (!s.hasPermission("bankplus.withdraw")) return null;
                         List<String> args3 = new ArrayList<>();
-                        for (String arg : BankPlus.instance().getBanks().keySet())
+                        for (String arg : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
                             if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
                         return args3;
                     }
@@ -774,7 +774,7 @@ public class MultiCmdProcessor {
                     case "pay": {
                         if (!BPMethods.isPlayer(s) || !s.hasPermission("bankplus.pay")) return null;
                         List<String> args4 = new ArrayList<>();
-                        for (String arg : BankPlus.instance().getBanks().keySet())
+                        for (String arg : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
                             if (arg.startsWith(args[3].toLowerCase())) args4.add(arg);
                         return args4;
                     }

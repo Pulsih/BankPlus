@@ -43,9 +43,9 @@ public class BPDebugger {
             return;
         }
 
-        BPLogger.info("MessageIsNumber: &a" + BPMethods.isValidNumber(message));
-        if (BPMethods.isValidNumber(message)) {
-            BigDecimal mainBalance = BigDecimal.valueOf(BankPlus.instance().getEconomy().getBalance(p));
+        BPLogger.info("MessageIsNumber: &a" + !BPMethods.isInvalidNumber(message));
+        if (!BPMethods.isInvalidNumber(message)) {
+            BigDecimal mainBalance = BigDecimal.valueOf(BankPlus.INSTANCE.getEconomy().getBalance(p));
             BigDecimal bankBalance = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() ? new MultiEconomyManager(p).getBankBalance() : new SingleEconomyManager(p).getBankBalance();
             BigDecimal messageNumber = new BigDecimal(message);
             BPLogger.info("PlayerMainBalance: &a" + mainBalance);
@@ -91,14 +91,14 @@ public class BPDebugger {
             return;
         }
 
-        TaskManager tasks = BankPlus.instance().getTaskManager();
+        TaskManager tasks = BankPlus.INSTANCE.getTaskManager();
         String task = tasks.toString();
         if (task == null) task = "null";
         else task = task.replace("org.bukkit.craftbukkit.", "");
 
         BPLogger.info("InterestTask: &a" + task + " &9(IsNull: &a" + (tasks.getInterestTask() == null) + "&9)");
         BPLogger.info("ServerMilliseconds: &a" + System.currentTimeMillis() + "ms");
-        Interest interest = BankPlus.instance().getInterest();
+        Interest interest = BankPlus.INSTANCE.getInterest();
         BPLogger.info("InterestCooldownMillis: &a" + interest.getInterestCooldownMillis() + "ms &9(&a" + BPMethods.formatTime(interest.getInterestCooldownMillis()) + "&9)");
         BPLogger.info("InterestDelay: &a" + Values.CONFIG.getInterestDelay() + "ms &9(&a" + BPMethods.formatTime(Values.CONFIG.getInterestDelay()) + "&9)");
         BPLogger.info("PlayersWaitingInterest: &a" + Bukkit.getOnlinePlayers().size() + " &9(&a" + Bukkit.getOfflinePlayers().length + " Total&9)");
@@ -117,7 +117,7 @@ public class BPDebugger {
         BPLogger.log("");
         BPLogger.log("                       &aBank&9Plus&dDebugger&9: &aGUI");
         BPLogger.info("PlayerName: &a" + p.getName() + " &9(UUID: &a" + p.getUniqueId() + "&9)");
-        BigDecimal mainBalance = BigDecimal.valueOf(BankPlus.instance().getEconomy().getBalance(p));
+        BigDecimal mainBalance = BigDecimal.valueOf(BankPlus.INSTANCE.getEconomy().getBalance(p));
         BigDecimal bankBalance = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() ? new MultiEconomyManager(p).getBankBalance() : new SingleEconomyManager(p).getBankBalance();
         BPLogger.info("PlayerMainBalance: &a" + mainBalance);
         BPLogger.info("PlayerBankBalance: &a" + bankBalance);
@@ -125,7 +125,7 @@ public class BPDebugger {
 
         String itemPath = null, actionType = null, actionNumber = null;
         boolean hasAction = false;
-        BankGui bank = BankPlus.instance().getPlayers().get(p.getUniqueId()).getOpenedBank();
+        BankGui bank = BankPlus.INSTANCE.getPlayerRegistry().get(p).getOpenedBank();
         for (String key : bank.getItems().getKeys(false)) {
             ConfigurationSection item = bank.getBankConfig().getConfigurationSection("Items." + key);
             if (item == null || slot != item.getInt("Slot")) continue;
@@ -145,8 +145,8 @@ public class BPDebugger {
             return;
         }
         BPLogger.info("ActionType: &a" + actionType);
-        boolean isValidNumber = actionNumber.equalsIgnoreCase("ALL") || actionNumber.equalsIgnoreCase("HALF") || BPMethods.isValidNumber(actionNumber);
-        BPLogger.info("ActionNumber: &a" + actionNumber + " &9(IsValidNumber: &a" + BPMethods.isValidNumber(actionNumber) + "&9, IsValidAction: &a" + isValidNumber + "&9)");
+        boolean isValidNumber = actionNumber.equalsIgnoreCase("ALL") || actionNumber.equalsIgnoreCase("HALF") || !BPMethods.isInvalidNumber(actionNumber);
+        BPLogger.info("ActionNumber: &a" + actionNumber + " &9(IsValidNumber: &a" + !BPMethods.isInvalidNumber(actionNumber) + "&9, IsValidAction: &a" + isValidNumber + "&9)");
         BPLogger.log("");
     }
 
@@ -156,7 +156,7 @@ public class BPDebugger {
         BPLogger.log("");
         BPLogger.log("                       &aBank&9Plus&dDebugger&9: &aDEPOSIT");
         BPLogger.info("PlayerName: &a" + p.getName() + " &9(UUID: &a" + p.getUniqueId() + "&9)");
-        BigDecimal mainBalance = BigDecimal.valueOf(BankPlus.instance().getEconomy().getBalance(p));
+        BigDecimal mainBalance = BigDecimal.valueOf(BankPlus.INSTANCE.getEconomy().getBalance(p));
         BigDecimal bankBalance = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() ? new MultiEconomyManager(p).getBankBalance() : new SingleEconomyManager(p).getBankBalance();
         BPLogger.info("PlayerMainBalance: &a" + mainBalance);
         BPLogger.info("PlayerBankBalance: &a" + bankBalance);
@@ -177,7 +177,7 @@ public class BPDebugger {
         BPLogger.log("");
         BPLogger.log("                       &aBank&9Plus&dDebugger&9: &aWITHDRAW");
         BPLogger.info("PlayerName: &a" + p.getName() + " &9(UUID: &a" + p.getUniqueId() + "&9)");
-        BigDecimal mainBalance = BigDecimal.valueOf(BankPlus.instance().getEconomy().getBalance(p));
+        BigDecimal mainBalance = BigDecimal.valueOf(BankPlus.INSTANCE.getEconomy().getBalance(p));
         BigDecimal bankBalance = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() ? new MultiEconomyManager(p).getBankBalance() : new SingleEconomyManager(p).getBankBalance();
         BPLogger.info("PlayerMainBalance: &a" + mainBalance);
         BPLogger.info("PlayerBankBalance: &a" + bankBalance);

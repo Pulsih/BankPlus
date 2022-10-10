@@ -7,6 +7,7 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +26,7 @@ public class BankGui {
     private final boolean hasFiller, fillerGlowing;
     private ItemStack[] content;
     private String permission;
+    private BukkitTask inventoryUpdateTask;
     private ConfigurationSection items, upgrades, banksListGuiItems, settings;
 
     public BankGui(String identifier) {
@@ -46,7 +48,7 @@ public class BankGui {
 
     public BankGui(String identifier, ItemStack[] content) {
         this.identifier = identifier;
-        File file = new File(BankPlus.instance().getDataFolder(), "banks" + File.separator + identifier + ".yml");
+        File file = new File(BankPlus.INSTANCE.getDataFolder(), "banks" + File.separator + identifier + ".yml");
         if (!file.exists()) {
             BPLogger.error("The bank named \"" + identifier + "\" does not exist!");
             this.bankFile = null;
@@ -138,43 +140,52 @@ public class BankGui {
         return content;
     }
 
-    public String getPermission() {
-        return permission;
-    }
-    public ConfigurationSection getItems() {
-        return items;
-    }
-
-    public ConfigurationSection getUpgrades() {
-        return upgrades;
-    }
-
-    public ConfigurationSection getBanksListGuiItems() {
-        return banksListGuiItems;
-    }
-
-    public ConfigurationSection getSettings() {
-        return settings;
-    }
-
     public void setContent(ItemStack[] content) {
         this.content = content;
+    }
+
+    public BukkitTask getInventoryUpdateTask() {
+        return inventoryUpdateTask;
+    }
+
+    public void setInventoryUpdateTask(BukkitTask task) {
+        this.inventoryUpdateTask = task;
+    }
+
+    public String getPermission() {
+        return permission;
     }
 
     public void setPermission(String permission) {
         this.permission = permission;
     }
 
+    public ConfigurationSection getItems() {
+        return items;
+    }
+
     public void setItems(ConfigurationSection items) {
         this.items = items;
+    }
+
+    public ConfigurationSection getUpgrades() {
+        return upgrades;
     }
 
     public void setUpgrades(ConfigurationSection upgrades) {
         this.upgrades = upgrades;
     }
 
-    public void setBanksListGuiItems(ConfigurationSection banksListGuiItems) {
-        this.banksListGuiItems = banksListGuiItems;
+    public ConfigurationSection getBanksListGuiItems() {
+        return banksListGuiItems;
+    }
+
+    public void setBanksListGuiItems(ConfigurationSection items) {
+        this.banksListGuiItems = items;
+    }
+
+    public ConfigurationSection getSettings() {
+        return settings;
     }
 
     public void setSettings(ConfigurationSection settings) {

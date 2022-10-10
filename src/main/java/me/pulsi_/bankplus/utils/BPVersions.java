@@ -25,10 +25,10 @@ public class BPVersions {
      * Will be removed in 6.0, used from versions older than 5.7.
      */
     public static void moveBankFileToBanksFolder() {
-        File oldBankFile = new File(BankPlus.instance().getDataFolder(), "bank.yml");
+        File oldBankFile = new File(BankPlus.INSTANCE.getDataFolder(), "bank.yml");
         if (!oldBankFile.exists()) return;
 
-        File mainBankFile = new File(BankPlus.instance().getDataFolder(), "banks" + File.separator + Values.CONFIG.getMainGuiName() + ".yml");
+        File mainBankFile = new File(BankPlus.INSTANCE.getDataFolder(), "banks" + File.separator + Values.CONFIG.getMainGuiName() + ".yml");
 
         FileConfiguration oldBankConfig = new YamlConfiguration(), mainBankConfig = new YamlConfiguration();
         try {
@@ -74,17 +74,17 @@ public class BPVersions {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        BankPlus.instance().getDataManager().reloadPlugin();
+        BankPlus.INSTANCE.getDataManager().reloadPlugin();
     }
 
     /**
      * Will be removed in 6.0, used from versions older than 5.7.
      */
     public static void changePlayerStoragePosition(int point) {
-        File playersFile = new File(BankPlus.instance().getDataFolder(), "players.yml");
+        File playersFile = new File(BankPlus.INSTANCE.getDataFolder(), "players.yml");
         if (!playersFile.exists()) return;
 
-        File oldPlayersFile = new File(BankPlus.instance().getDataFolder(), "old_players.yml");
+        File oldPlayersFile = new File(BankPlus.INSTANCE.getDataFolder(), "old_players.yml");
         playersFile.renameTo(oldPlayersFile);
 
         FileConfiguration playersConfig = new YamlConfiguration();
@@ -112,7 +112,7 @@ public class BPVersions {
             String id = playersIdentifiers.get(point);
             point++;
 
-            File file = new File(BankPlus.instance().getDataFolder(), "playerdata" + File.separator + id + ".yml");
+            File file = new File(BankPlus.INSTANCE.getDataFolder(), "playerdata" + File.separator + id + ".yml");
             if (file.exists()) continue;
 
             try {
@@ -139,12 +139,12 @@ public class BPVersions {
                 if (sBalance == null) config.set("Money", BPMethods.formatBigDouble(Values.CONFIG.getStartAmount()));
                 else config.set("Money", BPMethods.formatBigDouble(new BigDecimal(sBalance)));
 
-                for (String bankName : BankPlus.instance().getBanks().keySet()) {
+                for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
                     String sLevel = config.getString("Banks." + bankName + ".Level");
                     if (sLevel == null) config.set("Banks." + bankName + ".Level", 1);
                 }
             } else {
-                for (String bankName : BankPlus.instance().getBanks().keySet()) {
+                for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
                     if (!Values.CONFIG.getMainGuiName().equals(bankName)) config.set("Banks." + bankName + ".Money", "0.00");
                     else {
                         if (sBalance != null) config.set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(new BigDecimal(sBalance)));
@@ -155,11 +155,11 @@ public class BPVersions {
             }
 
             try {
-                Bukkit.getScheduler().runTaskAsynchronously(BankPlus.instance(), () -> {
+                Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE, () -> {
                     try {
                         config.save(file);
                     } catch (Exception e) {
-                        Bukkit.getScheduler().runTask(BankPlus.instance(), () -> {
+                        Bukkit.getScheduler().runTask(BankPlus.INSTANCE, () -> {
                             try {
                                 config.save(file);
                             } catch (IOException ex) {
@@ -178,7 +178,7 @@ public class BPVersions {
         }
 
         int finalPoint = point;
-        Bukkit.getScheduler().runTaskLater(BankPlus.instance(), () -> subChangePlayerStoragePosition(players, playersIdentifiers, finalPoint), 10L);
+        Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> subChangePlayerStoragePosition(players, playersIdentifiers, finalPoint), 10L);
         BPLogger.info("Moved " + point + " players to the playedata folder.");
     }
 }

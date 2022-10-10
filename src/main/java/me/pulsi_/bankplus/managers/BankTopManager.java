@@ -12,13 +12,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 public class BankTopManager {
 
     private final List<HashMap<BigDecimal, String>> linkedBalanceName = new ArrayList<>();
     private final List<BigDecimal> bankTopBalances = new ArrayList<>();
     private final List<String> bankTopNames = new ArrayList<>();
+
     private final BankPlus plugin;
 
     public BankTopManager(BankPlus plugin) {
@@ -26,34 +30,36 @@ public class BankTopManager {
     }
 
     public void updateBankTop() {
-        linkedBalanceName.clear();
-        bankTopBalances.clear();
-        bankTopNames.clear();
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            linkedBalanceName.clear();
+            bankTopBalances.clear();
+            bankTopNames.clear();
 
-        List<BigDecimal> balances;
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) balances = MultiEconomyManager.getAllBankBalances();
-        else balances = SingleEconomyManager.getAllBankBalances();
-        if (balances.isEmpty()) return;
+            List<BigDecimal> balances;
+            if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                balances = MultiEconomyManager.getAllBankBalances();
+            else balances = SingleEconomyManager.getAllBankBalances();
+            if (balances.isEmpty()) return;
 
-        Collections.sort(balances);
-        Collections.reverse(balances);
-        bankTopBalances.addAll(balances);
+            Collections.sort(balances);
+            Collections.reverse(balances);
+            bankTopBalances.addAll(balances);
 
-        List<HashMap<BigDecimal, String>> copyOfLinkedBalanceName = new ArrayList<>(linkedBalanceName);
-        for (BigDecimal bal : balances) {
-            for (HashMap<BigDecimal, String> linkedMap : copyOfLinkedBalanceName) {
-                if (linkedMap.containsKey(bal)) {
+            List<HashMap<BigDecimal, String>> copyOfLinkedBalanceName = new ArrayList<>(linkedBalanceName);
+            for (BigDecimal bal : balances) {
+                for (HashMap<BigDecimal, String> linkedMap : copyOfLinkedBalanceName) {
+                    if (!linkedMap.containsKey(bal)) continue;
                     bankTopNames.add(linkedMap.get(bal));
                     copyOfLinkedBalanceName.remove(linkedMap);
                     break;
                 }
             }
-        }
 
-        if (!Values.CONFIG.isBanktopUpdateBroadcastEnabled()) return;
-        String message = BPMessages.addPrefix(Values.CONFIG.getBanktopUpdateBroadcastMessage());
-        if (Values.CONFIG.isBanktopUpdateBroadcastOnlyConsole()) BPLogger.log(message);
-        else Bukkit.broadcastMessage(message);
+            if (!Values.CONFIG.isBanktopUpdateBroadcastEnabled()) return;
+            String message = BPMessages.addPrefix(Values.CONFIG.getBanktopUpdateBroadcastMessage());
+            if (Values.CONFIG.isBanktopUpdateBroadcastOnlyConsole()) BPLogger.log(message);
+            else Bukkit.broadcastMessage(message);
+        });
     }
 
     public void startUpdateTask() {
@@ -79,7 +85,7 @@ public class BankTopManager {
     }
 
     public int getPlayerBankTopPosition(Player p) {
-        BankPlusPlayer player = plugin.getPlayers().get(p.getUniqueId());
+        BankPlusPlayer player = plugin.getPlayerRegistry().get(p);
         if (player.getBanktopPosition() == -1) {
             for (int i = 0; i < bankTopNames.size(); i++) {
                 if (!bankTopNames.get(i).equals(p.getName())) continue;

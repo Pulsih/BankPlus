@@ -1,9 +1,9 @@
 package me.pulsi_.bankplus;
 
-import me.pulsi_.bankplus.account.BankPlusPlayer;
+import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.bankGuis.BankGui;
+import me.pulsi_.bankplus.bankGuis.BankGuiRegistry;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.managers.*;
 import me.pulsi_.bankplus.placeholders.Placeholders;
@@ -19,17 +19,15 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.UUID;
 
 public final class BankPlus extends JavaPlugin {
 
     public static boolean wasOnSingleEconomy;
 
-    private final HashMap<String, BankGui> banks = new HashMap<>();
-    private final HashMap<UUID, BankPlusPlayer> players = new HashMap<>();
+    private PlayerRegistry playerRegistry;
+    private BankGuiRegistry bankGuiRegistry;
 
-    private static BankPlus instance;
+    public static BankPlus INSTANCE;
     private Economy econ = null;
     private Permission perms = null;
 
@@ -69,7 +67,10 @@ public final class BankPlus extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        instance = this;
+        INSTANCE = this;
+
+        playerRegistry = new PlayerRegistry();
+        bankGuiRegistry = new BankGuiRegistry();
 
         serverVersion = getServer().getVersion();
         this.bankTopManager = new BankTopManager(this);
@@ -94,7 +95,7 @@ public final class BankPlus extends JavaPlugin {
             isEssentialsXHooked = true;
         }
 
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> isUpdated = isPluginUpdated(), 0, (8 * 1200) * 60);
+        if (Values.CONFIG.isUpdateCheckerEnabled()) Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> isUpdated = isPluginUpdated(), 0, (8 * 1200) * 60);
         wasOnSingleEconomy = !Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled();
 
         BPVersions.moveBankFileToBanksFolder();
@@ -109,12 +110,12 @@ public final class BankPlus extends JavaPlugin {
         dataManager.shutdownPlugin();
     }
 
-    public HashMap<String, BankGui> getBanks() {
-        return banks;
+    public PlayerRegistry getPlayerRegistry() {
+        return playerRegistry;
     }
 
-    public HashMap<UUID, BankPlusPlayer> getPlayers() {
-        return players;
+    public BankGuiRegistry getBankGuiRegistry() {
+        return bankGuiRegistry;
     }
 
     public Economy getEconomy() {
@@ -171,10 +172,6 @@ public final class BankPlus extends JavaPlugin {
         if (rsp == null) return false;
         econ = rsp.getProvider();
         return true;
-    }
-
-    public static BankPlus instance() {
-        return instance;
     }
 
     private boolean isPluginUpdated() {

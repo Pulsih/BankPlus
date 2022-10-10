@@ -3,9 +3,9 @@ package me.pulsi_.bankplus.account.economy;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
 import me.pulsi_.bankplus.bankGuis.BanksManager;
-import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPDebugger;
 import me.pulsi_.bankplus.utils.BPLogger;
+import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.EconomyResponse;
@@ -47,7 +47,7 @@ public class SingleEconomyManager {
     public static List<BigDecimal> getAllBankBalances() {
         List<BigDecimal> balances = new ArrayList<>();
 
-        File dataFolder = new File(BankPlus.instance().getDataFolder(), "playerdata");
+        File dataFolder = new File(BankPlus.INSTANCE.getDataFolder(), "playerdata");
         File[] files = dataFolder.listFiles();
         if (files == null) return balances;
 
@@ -76,7 +76,7 @@ public class SingleEconomyManager {
 
             HashMap<BigDecimal, String> balanceName = new HashMap<>();
             balanceName.put(balance, name);
-            BankPlus.instance().getBankTopManager().getLinkedBalanceName().add(balanceName);
+            BankPlus.INSTANCE.getBankTopManager().getLinkedBalanceName().add(balanceName);
         }
         return balances;
     }
@@ -215,7 +215,7 @@ public class SingleEconomyManager {
     public void deposit(BigDecimal amount) {
         if (onNull(p, "Cannot deposit player bank balance!") || !BPMethods.hasPermission(p, "bankplus.deposit")) return;
 
-        BigDecimal money = BigDecimal.valueOf(BankPlus.instance().getEconomy().getBalance(p));
+        BigDecimal money = BigDecimal.valueOf(BankPlus.INSTANCE.getEconomy().getBalance(p));
         if (!BPMethods.hasMoney(money, amount, p) || BPMethods.isBankFull(p)) return;
 
         BigDecimal maxDepositAmount = Values.CONFIG.getMaxDepositAmount();
@@ -233,7 +233,7 @@ public class SingleEconomyManager {
             if (money.doubleValue() < amount.doubleValue()) amount = money;
         }
 
-        EconomyResponse depositResponse = BankPlus.instance().getEconomy().withdrawPlayer(p, amount.doubleValue());
+        EconomyResponse depositResponse = BankPlus.INSTANCE.getEconomy().withdrawPlayer(p, amount.doubleValue());
         BPDebugger.debugDeposit(p, amount, depositResponse);
         if (BPMethods.hasFailed(p, depositResponse)) return;
 
@@ -259,7 +259,7 @@ public class SingleEconomyManager {
         BigDecimal newBalance = bankBalance.subtract(amount);
         if (newBalance.doubleValue() <= 0) amount = bankBalance;
 
-        EconomyResponse withdrawResponse = BankPlus.instance().getEconomy().depositPlayer(p, amount.subtract(taxes).doubleValue());
+        EconomyResponse withdrawResponse = BankPlus.INSTANCE.getEconomy().depositPlayer(p, amount.subtract(taxes).doubleValue());
         BPDebugger.debugWithdraw(p, amount, withdrawResponse);
         if (BPMethods.hasFailed(p, withdrawResponse)) return;
 

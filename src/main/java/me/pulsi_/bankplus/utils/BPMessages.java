@@ -151,7 +151,7 @@ public class BPMessages {
 
     public static void loadMessages() {
         messages.clear();
-        FileConfiguration config = BankPlus.instance().getConfigManager().getConfig(ConfigManager.Type.MESSAGES);
+        FileConfiguration config = BankPlus.INSTANCE.getConfigManager().getConfig(ConfigManager.Type.MESSAGES);
         for (String path : config.getConfigurationSection("").getKeys(false)) {
             List<String> listOfMessages = config.getStringList(path);
             if (listOfMessages.isEmpty()) {

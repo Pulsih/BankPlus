@@ -53,7 +53,7 @@ public class ConfigManager {
         buildMessages();
         buildMultipleBanks();
 
-        BankPlus.instance().getDataManager().reloadPlugin();
+        plugin.getDataManager().reloadPlugin();
     }
 
     public FileConfiguration getConfig(Type type) {
@@ -170,7 +170,7 @@ public class ConfigManager {
     }
 
     public void recreateFile(File file) {
-        Bukkit.getScheduler().runTaskAsynchronously(BankPlus.instance(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             String configuration = getFileAsString(file);
             if (configuration == null) return;
             try {
@@ -310,7 +310,10 @@ public class ConfigManager {
         validatePath(config, newConfig, "General.Max-Bank-Capacity", "500000000");
         addSpace(newConfig, "General");
 
-        addCommentsUnder(newConfig, "General", "The max amount of decimals that a player balance can have.");
+        addCommentsUnder(newConfig, "General",
+                "The max amount of decimals that a player balance can have.",
+                "",
+                "You can put 0 to use an economy without decimals.");
         validatePath(config, newConfig, "General.Max-Decimals-Amount", 2);
         addSpace(newConfig, "General");
 
@@ -348,7 +351,7 @@ public class ConfigManager {
 
         addCommentsUnder(newConfig, "General",
                 "Enabling this option, it will reopen the bank after",
-                "typing in chat when depositing / withdraw money.");
+                "typing in chat when depositing / withdrawing money.");
         validatePath(config, newConfig, "General.Reopen-Bank-After-Chat", true);
         addSpace(newConfig, "General");
 
@@ -553,7 +556,7 @@ public class ConfigManager {
         validatePath(messagesConfig, newMessagesConfig, "Pay-Message", "%prefix% &aYou have added &f%amount_formatted% Money &ato &f%player%'s &abank balance!");
         validatePath(messagesConfig, newMessagesConfig, "Chat-Deposit", "%prefix% &aType an amount in chat to deposit, type 'exit' to exit");
         validatePath(messagesConfig, newMessagesConfig, "Chat-Withdraw", "%prefix% &aType an amount in chat to withdraw, type 'exit' to exit");
-        validatePath(messagesConfig, newMessagesConfig, "Payment-Sent", "%prefix% &aYou have successfully sent &f%player% %amount_formatted% &amoney!");
+        validatePath(messagesConfig, newMessagesConfig, "Payment-Sent", "%prefix% &aYou have successfully sent to &f%player% %amount_formatted% &amoney!");
         validatePath(messagesConfig, newMessagesConfig, "Payment-Received", "%prefix% &aYou have received &f%amount_formatted% &amoney from &f%player%!");
         validatePath(messagesConfig, newMessagesConfig, "Interest-Time", "%prefix% &aWait more &f%time% &ato get the interest.");
         validatePath(messagesConfig, newMessagesConfig, "Balances-Saved", "%prefix% &aSuccessfully saved all player balances to the file!");

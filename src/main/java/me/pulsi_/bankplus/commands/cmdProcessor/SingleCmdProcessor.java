@@ -5,8 +5,8 @@ import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankGuis.BanksHolder;
 import me.pulsi_.bankplus.bankGuis.BanksManager;
-import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPLogger;
+import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -270,12 +270,12 @@ public class SingleCmdProcessor {
                 BigDecimal amount;
                 switch (args[1]) {
                     case "all":
-                        amount = BigDecimal.valueOf(BankPlus.instance().getEconomy().getBalance(p));
+                        amount = BigDecimal.valueOf(BankPlus.INSTANCE.getEconomy().getBalance(p));
                         singleEconomyManager.deposit(amount);
                         break;
 
                     case "half":
-                        amount = BigDecimal.valueOf(BankPlus.instance().getEconomy().getBalance(p) / 2);
+                        amount = BigDecimal.valueOf(BankPlus.INSTANCE.getEconomy().getBalance(p) / 2);
                         singleEconomyManager.deposit(amount);
                         break;
 
@@ -535,7 +535,7 @@ public class SingleCmdProcessor {
                     case "force-open": {
                         if (!s.hasPermission("bankplus.force-open")) return null;
                         List<String> args3 = new ArrayList<>();
-                        for (String arg : BankPlus.instance().getBanks().keySet()) if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
+                        for (String arg : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
                         return args3;
                     }
 

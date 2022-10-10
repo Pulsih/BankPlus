@@ -1,7 +1,6 @@
 package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.managers.AFKManager;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.entity.Player;

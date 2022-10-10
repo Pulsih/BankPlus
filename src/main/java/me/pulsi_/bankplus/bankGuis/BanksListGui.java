@@ -29,20 +29,27 @@ public class BanksListGui {
     private final Material DEFAULT_MATERIAL = Material.CHEST;
 
     public void openMultipleBanksGui(Player p) {
-        BankPlusPlayer player = BankPlus.instance().getPlayers().get(p.getUniqueId());
-        HashMap<String, BankGui> banks = BankPlus.instance().getBanks();
+        BankPlusPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
 
-        BukkitTask task = player.getInventoryUpdateTask();
-        if (task != null) task.cancel();
+        BankGui openedBank = player.getOpenedBank();
+        if (openedBank != null) {
+            BukkitTask task = openedBank.getInventoryUpdateTask();
+            if (task != null) task.cancel();
+        }
 
-        BankGui baseBanksListGui = banks.get(multipleBanksGuiID);
-        Inventory banksListGui = Bukkit.createInventory(new BanksHolder(), baseBanksListGui.getSize(), baseBanksListGui.getTitle());
+        BankGui baseBanksListGui = BankPlus.INSTANCE.getBankGuiRegistry().get(multipleBanksGuiID);
+
+        String title = baseBanksListGui.getTitle();
+        if (!BankPlus.INSTANCE.isPlaceholderAPIHooked()) title = BPChat.color(title);
+        else title = PlaceholderAPI.setPlaceholders(p, BPChat.color(title));
+
+        Inventory banksListGui = Bukkit.createInventory(new BanksHolder(), baseBanksListGui.getSize(), title);
         banksListGui.setContents(baseBanksListGui.getContent());
         placeBanks(banksListGui, p);
         updateMeta(banksListGui, p);
 
         long delay = Values.MULTIPLE_BANKS.getUpdateDelay();
-        if (delay >= 0) player.setInventoryUpdateTask(Bukkit.getScheduler().runTaskTimer(BankPlus.instance(), () -> updateMeta(banksListGui, p), delay, delay));
+        if (delay >= 0) baseBanksListGui.setInventoryUpdateTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE, () -> updateMeta(banksListGui, p), delay, delay));
 
         player.setOpenedBank(baseBanksListGui);
         BPMethods.playSound("PERSONAL", p);
@@ -61,15 +68,15 @@ public class BanksListGui {
         BankGui multipleBanksGui = new BankGui(
                 multipleBanksGuiID, title, Values.MULTIPLE_BANKS.getBanksGuiLines(), getSize(Values.MULTIPLE_BANKS.getUpdateDelay()), gui.getContents()
         );
-        BankPlus.instance().getBanks().put("MultipleBanksGui", multipleBanksGui);
+        BankPlus.INSTANCE.getBankGuiRegistry().put("MultipleBanksGui", multipleBanksGui);
     }
 
     private void placeBanks(Inventory banksListGui, Player p) {
-        BankPlusPlayer player = BankPlus.instance().getPlayers().get(p.getUniqueId());
+        BankPlusPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
         HashMap<String, String> banksClickHolder = new HashMap<>();
         int slot = 0;
 
-        for (String bankName : BankPlus.instance().getBanks().keySet()) {
+        for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
             ItemStack bankItem;
             Material material;
 
@@ -101,7 +108,7 @@ public class BanksListGui {
 
     private void updateMeta(Inventory banksList, Player p) {
         int slot = 0;
-        for (String bankName : BankPlus.instance().getBanks().keySet()) {
+        for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
             ItemStack item = banksList.getItem(slot);
             slot++;
             if (item == null) continue;
@@ -144,7 +151,7 @@ public class BanksListGui {
         List<String> newLore = new ArrayList<>();
         for (String lines : lore) newLore.add(BPChat.color(lines));
 
-        if (BankPlus.instance().isPlaceholderAPIHooked()) {
+        if (BankPlus.INSTANCE.isPlaceholderAPIHooked()) {
             meta.setDisplayName(PlaceholderAPI.setPlaceholders(p, BPChat.color(displayname)));
             meta.setLore(PlaceholderAPI.setPlaceholders(p, newLore));
         } else {

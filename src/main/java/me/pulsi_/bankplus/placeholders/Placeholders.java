@@ -29,7 +29,7 @@ public class Placeholders extends PlaceholderExpansion {
 
     @Override
     public @NotNull String getAuthor() {
-        return BankPlus.instance().getDescription().getAuthors().toString();
+        return BankPlus.INSTANCE.getDescription().getAuthors().toString();
     }
 
     @Override
@@ -39,7 +39,7 @@ public class Placeholders extends PlaceholderExpansion {
 
     @Override
     public @NotNull String getVersion() {
-        return BankPlus.instance().getDescription().getVersion();
+        return BankPlus.INSTANCE.getDescription().getVersion();
     }
 
     @Override
@@ -48,7 +48,7 @@ public class Placeholders extends PlaceholderExpansion {
 
         SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
         MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
-        BankTopManager bankTop = BankPlus.instance().getBankTopManager();
+        BankTopManager bankTop = BankPlus.INSTANCE.getBankTopManager();
 
         if (identifier.startsWith("capacity")) {
             BigDecimal capacity = new BanksManager(Values.CONFIG.getMainGuiName()).getCapacity(p);
@@ -133,7 +133,7 @@ public class Placeholders extends PlaceholderExpansion {
             return BPMethods.formatCommas(interestMoney);
         }
 
-        Interest interest = BankPlus.instance().getInterest();
+        Interest interest = BankPlus.INSTANCE.getInterest();
         switch (identifier) {
             case "interest_cooldown":
                 return BPMethods.formatTime(interest.getInterestCooldownMillis());

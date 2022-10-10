@@ -34,7 +34,7 @@ public class ConfigValues {
     }
 
     public void setupValues() {
-        FileConfiguration config = BankPlus.instance().getConfigManager().getConfig(ConfigManager.Type.CONFIG);
+        FileConfiguration config = BankPlus.INSTANCE.getConfigManager().getConfig(ConfigManager.Type.CONFIG);
 
         exitMessage = config.getString("General.Chat-Exit-Message");
         playerChatPriority = config.getString("General.Event-Priorities.PlayerChat");
@@ -293,7 +293,7 @@ public class ConfigValues {
     }
 
     public BigDecimal getMaxDepositAmount() {
-        if (!BPMethods.isValidNumber(maxDepositAmount)) {
+        if (BPMethods.isInvalidNumber(maxDepositAmount)) {
             BPLogger.error("Invalid number for the \"MaxDepositAmount\", Please correct it in the config as soon as possible!");
             return new BigDecimal(0);
         }
@@ -301,7 +301,7 @@ public class ConfigValues {
     }
 
     public BigDecimal getMaxWithdrawAmount() {
-        if (!BPMethods.isValidNumber(maxWithdrawAmount)) {
+        if (BPMethods.isInvalidNumber(maxWithdrawAmount)) {
             BPLogger.error("Invalid number for the \"MaxWithdrawAmount\", Please correct it in the config as soon as possible!");
             return new BigDecimal(0);
         }
@@ -313,7 +313,7 @@ public class ConfigValues {
     }
 
     public BigDecimal getDepositTaxes() {
-        if (!BPMethods.isValidNumber(depositTaxes)) {
+        if (BPMethods.isInvalidNumber(depositTaxes)) {
             BPLogger.error("Invalid number for the \"DepositTaxes\", Please correct it in the config as soon as possible!");
             return new BigDecimal(0);
         }
@@ -325,7 +325,7 @@ public class ConfigValues {
     }
 
     public BigDecimal getWithdrawTaxes() {
-        if (!BPMethods.isValidNumber(withdrawTaxes)) {
+        if (BPMethods.isInvalidNumber(withdrawTaxes)) {
             BPLogger.error("Invalid number for the \"WithdrawTaxes\", Please correct it in the config as soon as possible!");
             return new BigDecimal(0);
         }
@@ -333,7 +333,7 @@ public class ConfigValues {
     }
 
     public BigDecimal getMinimumAmount() {
-        if (!BPMethods.isValidNumber(minimumAmount)) {
+        if (BPMethods.isInvalidNumber(minimumAmount)) {
             BPLogger.error("Invalid number for the \"MinimumAmount\", Please correct it in the config as soon as possible!");
             return new BigDecimal(0);
         }
@@ -341,7 +341,7 @@ public class ConfigValues {
     }
 
     public BigDecimal getMaxBankCapacity() {
-        if (!BPMethods.isValidNumber(maxBankCapacity)) {
+        if (BPMethods.isInvalidNumber(maxBankCapacity)) {
             BPLogger.error("Invalid number for the \"MaxBankCapacity\", Please correct it in the config as soon as possible!");
             return new BigDecimal(0);
         }
@@ -349,7 +349,7 @@ public class ConfigValues {
     }
 
     public BigDecimal getStartAmount() {
-        if (!BPMethods.isValidNumber(startAmount)) {
+        if (BPMethods.isInvalidNumber(startAmount)) {
             BPLogger.error("Invalid number for the \"StartAmount\", Please correct it in the config as soon as possible!");
             return new BigDecimal(0);
         }
@@ -361,7 +361,7 @@ public class ConfigValues {
     }
 
     public BigDecimal getInterestMaxAmount() {
-        if (!BPMethods.isValidNumber(interestMaxAmount)) {
+        if (BPMethods.isInvalidNumber(interestMaxAmount)) {
             BPLogger.error("Invalid number for the \"InterestMaxAmount\", Please correct it in the config as soon as possible!");
             return new BigDecimal(0);
         }
@@ -373,7 +373,7 @@ public class ConfigValues {
     }
 
     public BigDecimal getInterestMoneyGiven() {
-        if (!BPMethods.isValidNumber(interestMoneyGiven)) {
+        if (BPMethods.isInvalidNumber(interestMoneyGiven)) {
             BPLogger.error("Invalid number for the \"InterestMoneyGiven\", Please correct it in the config as soon as possible!");
             return new BigDecimal(0);
         }
@@ -441,7 +441,7 @@ public class ConfigValues {
     }
 
     public boolean isUseEssentialsXAFK() {
-        return BankPlus.instance().isEssentialsXHooked() && useEssentialsXAFK;
+        return BankPlus.INSTANCE.isEssentialsXHooked() && useEssentialsXAFK;
     }
 
     public int getAfkPlayersTime() {

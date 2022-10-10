@@ -3,9 +3,9 @@ package me.pulsi_.bankplus.commands;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.commands.cmdProcessor.MultiCmdProcessor;
 import me.pulsi_.bankplus.commands.cmdProcessor.SingleCmdProcessor;
-import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPDebugger;
+import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.command.Command;
@@ -34,7 +34,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                 case "reload": {
                     if (!BPMethods.hasPermission(s, "bankplus.reload")) return false;
 
-                    boolean reloaded = BankPlus.instance().getDataManager().reloadPlugin();
+                    boolean reloaded = BankPlus.INSTANCE.getDataManager().reloadPlugin();
                     if (reloaded) BPMessages.send(s, "Reload");
                     else BPMessages.send(s, "Failed-Reload");
                     return true;
@@ -51,7 +51,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                         BPMessages.send(s, "Interest-Disabled");
                         return false;
                     }
-                    BankPlus.instance().getInterest().restartInterest();
+                    BankPlus.INSTANCE.getInterest().restartInterest();
                     BPMessages.send(s, "Interest-Restarted");
                     return true;
                 }
@@ -63,7 +63,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                         BPMessages.send(s, "Interest-Disabled");
                         return false;
                     }
-                    BankPlus.instance().getInterest().giveInterestToEveryone();
+                    BankPlus.INSTANCE.getInterest().giveInterestToEveryone();
                     return true;
                 }
 
@@ -74,7 +74,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                         BPMessages.send(s, "Interest-Disabled");
                         return false;
                     }
-                    BPMessages.send(s, "Interest-Time", "%time%$" + BPMethods.formatTime(BankPlus.instance().getInterest().getInterestCooldownMillis()));
+                    BPMessages.send(s, "Interest-Time", "%time%$" + BPMethods.formatTime(BankPlus.INSTANCE.getInterest().getInterestCooldownMillis()));
                     return true;
                 }
 
@@ -85,13 +85,13 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                         BPMessages.send(s, "Interest-Disabled");
                         return false;
                     }
-                    BPMessages.send(s, "Interest-Time", "%time%$" + BankPlus.instance().getInterest().getInterestCooldownMillis());
+                    BPMessages.send(s, "Interest-Time", "%time%$" + BankPlus.INSTANCE.getInterest().getInterestCooldownMillis());
                     return true;
                 }
 
                 case "updatebanktop": {
                     if (!BPMethods.hasPermission(s, "bankplus.updatebanktop")) return false;
-                    BankPlus.instance().getBankTopManager().updateBankTop();
+                    BankPlus.INSTANCE.getBankTopManager().updateBankTop();
                     BPMessages.send(s, "BankTop-Updated");
                     return true;
                 }

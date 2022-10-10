@@ -19,7 +19,7 @@ public class MultipleBanksValues {
     }
 
     public void setupValues() {
-        FileConfiguration multipleBanks = BankPlus.instance().getConfigManager().getConfig(ConfigManager.Type.MULTIPLE_BANKS);
+        FileConfiguration multipleBanks = BankPlus.INSTANCE.getConfigManager().getConfig(ConfigManager.Type.MULTIPLE_BANKS);
 
         multipleBanksModuleEnabled = multipleBanks.getBoolean("Enabled");
         showNotAvailableBanks = multipleBanks.getBoolean("Shows-Not-Available-Banks");

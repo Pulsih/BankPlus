@@ -16,8 +16,6 @@ import org.bukkit.entity.Player;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.UUID;
 
 public class BankPlusPlayerFiles {
 
@@ -43,7 +41,7 @@ public class BankPlusPlayerFiles {
             if (!BankPlus.wasOnSingleEconomy) return;
 
             BigDecimal bal = singleEconomyManager.getBankBalance();
-            for (String bankName : BankPlus.instance().getBanks().keySet()) {
+            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
                 String sBalance = config.getString("Banks." + bankName + ".Money");
                 if (Values.CONFIG.getMainGuiName().equals(bankName)) {
                     config.set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(bal));
@@ -57,7 +55,7 @@ public class BankPlusPlayerFiles {
             if (BankPlus.wasOnSingleEconomy) return;
 
             BigDecimal amount = new BigDecimal(0);
-            for (String bankName : BankPlus.instance().getBanks().keySet()) {
+            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
                 String sBalance = config.getString("Banks." + bankName + ".Money");
                 if (sBalance != null) amount = amount.add(new BigDecimal(sBalance));
             }
@@ -71,7 +69,7 @@ public class BankPlusPlayerFiles {
     public void registerPlayer() {
         if (onNull(player, "Cannot register player!")) return;
         String identifier = Values.CONFIG.isStoringUUIDs() ? player.getUniqueId().toString() : player.getName();
-        File file = new File(BankPlus.instance().getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
+        File file = new File(BankPlus.INSTANCE.getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
         if (!file.exists()) BPLogger.info("Successfully registered " + player.getName() + "!");
         try {
             file.getParentFile().mkdir();
@@ -84,30 +82,24 @@ public class BankPlusPlayerFiles {
     public File getPlayerFile() {
         if (onNull(player, "Cannot get player file!")) return null;
 
-        HashMap<UUID, BankPlusPlayer> players = BankPlus.instance().getPlayers();
-        if (players.containsKey(player.getUniqueId())) {
-            BankPlusPlayer bankPlusPlayer = players.get(player.getUniqueId());
-            if (bankPlusPlayer.getPlayerFile() != null) return bankPlusPlayer.getPlayerFile();
-        }
+        BankPlusPlayer bankPlusPlayer = BankPlus.INSTANCE.getPlayerRegistry().get(player);
+        if (bankPlusPlayer != null && bankPlusPlayer.getPlayerFile() != null) return bankPlusPlayer.getPlayerFile();
 
         String identifier = Values.CONFIG.isStoringUUIDs() ? player.getUniqueId().toString() : player.getName();
-        return new File(BankPlus.instance().getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
+        return new File(BankPlus.INSTANCE.getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
     }
 
     public File getOfflinePlayerFile() {
         if (offNull(offlinePlayer, "Cannot get player file!")) return null;
         String identifier = Values.CONFIG.isStoringUUIDs() ? offlinePlayer.getUniqueId().toString() : offlinePlayer.getName();
-        return new File(BankPlus.instance().getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
+        return new File(BankPlus.INSTANCE.getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
     }
 
     public FileConfiguration getPlayerConfig() {
         if (onNull(player, "Cannot get player config!")) return null;
 
-        HashMap<UUID, BankPlusPlayer> players = BankPlus.instance().getPlayers();
-        if (players.containsKey(player.getUniqueId())) {
-            BankPlusPlayer bankPlusPlayer = players.get(player.getUniqueId());
-            if (bankPlusPlayer.getPlayerConfig() != null) return bankPlusPlayer.getPlayerConfig();
-        }
+        BankPlusPlayer bankPlusPlayer = BankPlus.INSTANCE.getPlayerRegistry().get(player);
+        if (bankPlusPlayer != null && bankPlusPlayer.getPlayerConfig() != null) return bankPlusPlayer.getPlayerConfig();
 
         File file = getPlayerFile();
         FileConfiguration config = new YamlConfiguration();
@@ -140,11 +132,11 @@ public class BankPlusPlayerFiles {
             return;
         }
         try {
-            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.instance(), () -> {
+            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE, () -> {
                 try {
                     config.save(file);
                 } catch (Exception e) {
-                    Bukkit.getScheduler().runTask(BankPlus.instance(), () -> save(config, file));
+                    Bukkit.getScheduler().runTask(BankPlus.INSTANCE, () -> save(config, file));
                 }
             });
         } catch (Exception e) {
@@ -161,11 +153,11 @@ public class BankPlusPlayerFiles {
             return;
         }
         try {
-            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.instance(), () -> {
+            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE, () -> {
                 try {
                     config.save(file);
                 } catch (Exception e) {
-                    Bukkit.getScheduler().runTask(BankPlus.instance(), () -> save(config, file));
+                    Bukkit.getScheduler().runTask(BankPlus.INSTANCE, () -> save(config, file));
                 }
             });
         } catch (Exception e) {

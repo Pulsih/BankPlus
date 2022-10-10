@@ -5,8 +5,8 @@ import me.pulsi_.bankplus.account.BankPlusPlayer;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankGuis.BanksHolder;
-import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPDebugger;
+import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.utils.BPSets;
 import me.pulsi_.bankplus.values.Values;
@@ -24,7 +24,7 @@ public class PlayerChatMethod {
         if (!isTyping(p)) return;
         BPDebugger.debugChat(e);
 
-        BankPlusPlayer player = BankPlus.instance().getPlayers().get(p.getUniqueId());
+        BankPlusPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
         String identifier = player.getOpenedBank().getIdentifier();
         String message = ChatColor.stripColor(e.getMessage());
 
@@ -73,13 +73,13 @@ public class PlayerChatMethod {
     }
 
     private static void reopenBank(Player p, String identifier) {
-        Bukkit.getScheduler().runTask(BankPlus.instance(), () -> {
+        Bukkit.getScheduler().runTask(BankPlus.INSTANCE, () -> {
             if (Values.CONFIG.isReopeningBankAfterChat()) new BanksHolder().openBank(p, identifier);
         });
     }
 
     private static void executeExitCommands(Player p) {
-        Bukkit.getScheduler().runTask(BankPlus.instance(), () -> {
+        Bukkit.getScheduler().runTask(BankPlus.INSTANCE, () -> {
             for (String cmd : Values.CONFIG.getExitCommands()) {
                 if (cmd.startsWith("[CONSOLE]")) {
                     String s = cmd.replace("[CONSOLE] ", "").replace("%player%", p.getName());

@@ -27,7 +27,7 @@ public class PlayerJoinListener implements Listener {
         files.registerPlayer();
 
         BankPlusPlayer player = new BankPlusPlayer(p, files.getPlayerFile(), files.getPlayerConfig());
-        BankPlus.instance().getPlayers().put(p.getUniqueId(), player);
+        BankPlus.INSTANCE.getPlayerRegistry().put(p, player);
 
         FileConfiguration config = player.getPlayerConfig();
         String sOfflineInterest = config.getString("Offline-Interest");
@@ -49,7 +49,7 @@ public class PlayerJoinListener implements Listener {
                 config.set("Money", BPMethods.formatBigDouble(Values.CONFIG.getStartAmount()));
                 hasChanges = true;
             }
-            for (String bankName : BankPlus.instance().getBanks().keySet()) {
+            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
                 String sLevel = config.getString("Banks." + bankName + ".Level");
                 if (sLevel == null) {
                     config.set("Banks." + bankName + ".Level", 1);
@@ -58,7 +58,7 @@ public class PlayerJoinListener implements Listener {
             }
             new SingleEconomyManager(p).loadBankBalance();
         } else {
-            for (String bankName : BankPlus.instance().getBanks().keySet()) {
+            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
                 String sBalance = config.getString("Banks." + bankName + ".Money");
                 String sLevel = config.getString("Banks." + bankName + ".Level");
                 if (sBalance == null) {
@@ -91,7 +91,7 @@ public class PlayerJoinListener implements Listener {
                 .replace("%amount_formatted_long%", BPMethods.formatLong(offlineInterest)));
 
         if (delay == 0) p.sendMessage(message);
-        else Bukkit.getScheduler().runTaskLater(BankPlus.instance(), () -> p.sendMessage(message), delay * 20L);
+        else Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> p.sendMessage(message), delay * 20L);
 
         interestManager.setOfflineInterest(new BigDecimal(0), true);
     }

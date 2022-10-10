@@ -122,26 +122,38 @@ public class BPMethods {
         else return time.replace("%days_placeholder%", Values.CONFIG.getDays());
     }
 
+    /**
+     * BankPlus does not accept negative numbers, if a number is lower than 0, it will return true.
+     * @param number The number to check.
+     * @return true if is invalid or false if is not.
+     */
+    public static boolean isInvalidNumber(String number) {
+        return isInvalidNumber(number, null);
+    }
+
+    /**
+     * BankPlus does not accept negative numbers, if a number is lower than 0, it will return true.
+     * @param number The number to check.
+     * @param s The command sender to automatically alert if number is invalid.
+     * @return true if is invalid or false if is not.
+     */
     public static boolean isInvalidNumber(String number, CommandSender s) {
         try {
+            if (Values.CONFIG.getMaxDecimalsAmount() <= 0 && number.contains(".")) {
+                if (s != null) BPMessages.send(s, "Invalid-Number");
+                return true;
+            }
+
+            if (number.contains("%")) number = number.replace("%", "");
             BigDecimal num = new BigDecimal(number);
             if (num.doubleValue() < 0) {
-                BPMessages.send(s, "Cannot-Use-Negative-Number");
+                if (s != null) BPMessages.send(s, "Cannot-Use-Negative-Number");
                 return true;
             }
             return false;
         } catch (NumberFormatException e) {
-            BPMessages.send(s, "Invalid-Number");
+            if (s != null) BPMessages.send(s, "Invalid-Number");
             return true;
-        }
-    }
-
-    public static boolean isValidNumber(String number) {
-        try {
-            new BigDecimal(number.replace("%", ""));
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
         }
     }
 
@@ -165,25 +177,29 @@ public class BPMethods {
         return false;
     }
 
-    public static String formatBigDouble(BigDecimal bal) {
-        String balance = bal.toString();
-        if (bal.doubleValue() > 0 && balance.contains(".")) {
-            String decimals = balance.split("\\.")[1];
-            if (decimals.length() > Values.CONFIG.getMaxDecimalsAmount()) {
-                String correctedDecimals = decimals.substring(0, Values.CONFIG.getMaxDecimalsAmount());
-                balance = balance.split("\\.")[0] + "." + correctedDecimals;
+    public static String formatBigDouble(BigDecimal balance) {
+        String bal = balance.toString();
+        int maxDecimals = Values.CONFIG.getMaxDecimalsAmount();
+
+        if (maxDecimals <= 0) return bal.contains(".") ? bal.split("\\.")[0] : bal;
+
+        if (balance.doubleValue() > 0 && bal.contains(".")) {
+            String decimals = bal.split("\\.")[1];
+            if (decimals.length() > maxDecimals) {
+                String correctedDecimals = decimals.substring(0, maxDecimals);
+                bal = bal.split("\\.")[0] + "." + correctedDecimals;
             }
         } else {
             StringBuilder decimals = new StringBuilder();
-            for (int i = 0; i < Values.CONFIG.getMaxDecimalsAmount(); i++) decimals.append("0");
-            if (bal.doubleValue() <= 0) balance = "0." + decimals;
-            else balance = balance + "." + decimals;
+            for (int i = 0; i < maxDecimals; i++) decimals.append("0");
+            if (balance.doubleValue() <= 0) bal = "0." + decimals;
+            else bal += "." + decimals;
         }
-        return balance;
+        return bal;
     }
 
     public static void startSavingBalancesTask() {
-        TaskManager tasks = BankPlus.instance().getTaskManager();
+        TaskManager tasks = BankPlus.INSTANCE.getTaskManager();
         BukkitTask task = tasks.getSavingTask();
         if (task != null) task.cancel();
 
@@ -193,7 +209,7 @@ public class BPMethods {
         long delay = Values.CONFIG.getSaveBalancedDelay();
         boolean multi = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled(), saveBroadcast = Values.CONFIG.isSaveBalancesBroadcast();
 
-        tasks.setSavingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.instance(), () -> {
+        tasks.setSavingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE, () -> {
             if (multi) Bukkit.getOnlinePlayers().forEach(p -> new MultiEconomyManager(p).saveBankBalance(true));
             else Bukkit.getOnlinePlayers().forEach(p-> new SingleEconomyManager(p).saveBankBalance(true));
             if (saveBroadcast) BPLogger.info("All player balances have been saved!");
@@ -242,11 +258,11 @@ public class BPMethods {
         if (!hasPermission(p, "bankplus.withdraw")) return;
 
         if (Values.MESSAGES.isTitleCustomAmountEnabled())
-            BPMethods.sendTitle(BankPlus.instance().getConfigManager().getConfig(ConfigManager.Type.MESSAGES).getString("Title-Custom-Transaction.Title-Withdraw"), p);
+            BPMethods.sendTitle(BankPlus.INSTANCE.getConfigManager().getConfig(ConfigManager.Type.MESSAGES).getString("Title-Custom-Transaction.Title-Withdraw"), p);
         BPMessages.send(p, "Chat-Withdraw");
         BPSets.addPlayerToWithdraw(p);
         p.closeInventory();
-        BankPlus.instance().getPlayers().get(p.getUniqueId()).setOpenedBank(BankPlus.instance().getBanks().get(identifier));
+        BankPlus.INSTANCE.getPlayerRegistry().get(p).setOpenedBank(BankPlus.INSTANCE.getBankGuiRegistry().get(identifier));
     }
 
     public static void customDeposit(Player p) {
@@ -257,11 +273,11 @@ public class BPMethods {
         if (!hasPermission(p, "bankplus.deposit")) return;
 
         if (Values.MESSAGES.isTitleCustomAmountEnabled())
-            BPMethods.sendTitle(BankPlus.instance().getConfigManager().getConfig(ConfigManager.Type.MESSAGES).getString("Title-Custom-Transaction.Title-Deposit"), p);
+            BPMethods.sendTitle(BankPlus.INSTANCE.getConfigManager().getConfig(ConfigManager.Type.MESSAGES).getString("Title-Custom-Transaction.Title-Deposit"), p);
         BPMessages.send(p, "Chat-Deposit");
         BPSets.addPlayerToDeposit(p);
         p.closeInventory();
-        BankPlus.instance().getPlayers().get(p.getUniqueId()).setOpenedBank(BankPlus.instance().getBanks().get(identifier));
+        BankPlus.INSTANCE.getPlayerRegistry().get(p).setOpenedBank(BankPlus.INSTANCE.getBankGuiRegistry().get(identifier));
     }
 
     public static void sendTitle(String title, Player p) {
@@ -283,7 +299,11 @@ public class BPMethods {
                     BPLogger.warn("Invalid title string! (NOT BANKPLUS ERROR!) Title: " + title + ". Error: " + e.getMessage());
                     return;
                 }
-                p.sendTitle(BPChat.color(title1), BPChat.color(title2), fadeIn, stay, fadeOut);
+                try {
+                    p.sendTitle(BPChat.color(title1), BPChat.color(title2), fadeIn, stay, fadeOut);
+                } catch (NoSuchMethodError e) {
+                    p.sendTitle(BPChat.color(title1), BPChat.color(title2));
+                }
             }
         } else p.sendTitle(BPChat.color(newTitle), "");
     }
@@ -364,7 +384,7 @@ public class BPMethods {
     }
 
     public static String getSoundBasedOnServerVersion() {
-        String v = BankPlus.instance().getServerVersion();
+        String v = BankPlus.INSTANCE.getServerVersion();
         if (v.contains("1.7") || v.contains("1.8")) return "ORB_PICKUP,5,1";
         else return "ENTITY_EXPERIENCE_ORB_PICKUP,5,1";
     }
@@ -471,7 +491,7 @@ public class BPMethods {
     }
 
     public static boolean isLegacyServer() {
-        String v = BankPlus.instance().getServerVersion();
+        String v = BankPlus.INSTANCE.getServerVersion();
         return v.contains("1.7") || v.contains("1.8") || v.contains("1.9") ||
                 v.contains("1.10") || v.contains("1.11") || v.contains("1.12");
     }

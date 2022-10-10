@@ -31,7 +31,7 @@ public class BankClickMethod {
         if (bank == null || bank.getHolder() == null || !(bank.getHolder() instanceof BanksHolder)) return;
         e.setCancelled(true);
 
-        BankPlusPlayer player = BankPlus.instance().getPlayers().get(p.getUniqueId());
+        BankPlusPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
         if (player.getOpenedBank() == null) return;
 
         BPDebugger.debugGui(e);
@@ -64,7 +64,7 @@ public class BankClickMethod {
             boolean isMulti = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled();
             SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
             MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
-            Economy economy = BankPlus.instance().getEconomy();
+            Economy economy = BankPlus.INSTANCE.getEconomy();
 
             for (String actionType : actions) {
                 String identifier = actionType.split(" ")[0], value = actionType.split(" ")[1];

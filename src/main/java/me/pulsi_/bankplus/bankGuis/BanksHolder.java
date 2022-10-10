@@ -3,9 +3,9 @@ package me.pulsi_.bankplus.bankGuis;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayer;
-import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPItems;
+import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -18,7 +18,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class BanksHolder implements InventoryHolder {
@@ -28,10 +27,10 @@ public class BanksHolder implements InventoryHolder {
     }
 
     public void openBank(Player p, String identifier) {
-        BankPlusPlayer player = BankPlus.instance().getPlayers().get(p.getUniqueId());
-        HashMap<String, BankGui> banks = BankPlus.instance().getBanks();
+        BankPlusPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
+        BankGuiRegistry registry = BankPlus.INSTANCE.getBankGuiRegistry();
 
-        if (!banks.containsKey(identifier)) {
+        if (!registry.contains(identifier)) {
             BPMessages.send(p, "Invalid-Bank");
             return;
         }
@@ -46,17 +45,25 @@ public class BanksHolder implements InventoryHolder {
             return;
         }
 
-        BukkitTask task = player.getInventoryUpdateTask();
-        if (task != null) task.cancel();
+        BankGui openedBank = player.getOpenedBank();
+        if (openedBank != null) {
+            BukkitTask task = openedBank.getInventoryUpdateTask();
+            if (task != null) task.cancel();
+        }
 
-        BankGui baseBank = banks.get(identifier);
-        Inventory bank = Bukkit.createInventory(new BanksHolder(), baseBank.getSize(), BPChat.color(baseBank.getTitle()));
+        BankGui baseBank = registry.get(identifier);
+
+        String title = baseBank.getTitle();
+        if (!BankPlus.INSTANCE.isPlaceholderAPIHooked()) title = BPChat.color(title);
+        else title = PlaceholderAPI.setPlaceholders(p, BPChat.color(title));
+
+        Inventory bank = Bukkit.createInventory(new BanksHolder(), baseBank.getSize(), title);
         bank.setContents(baseBank.getContent());
         placeHeads(bank, p, identifier);
         updateMeta(bank, p, identifier);
 
         long delay = baseBank.getUpdateDelay();
-        if (delay >= 0) player.setInventoryUpdateTask(Bukkit.getScheduler().runTaskTimer(BankPlus.instance(), () -> updateMeta(bank, p, identifier), delay, delay));
+        if (delay >= 0) baseBank.setInventoryUpdateTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE, () -> updateMeta(bank, p, identifier), delay, delay));
 
         player.setOpenedBank(baseBank);
         BPMethods.playSound("PERSONAL", p);
@@ -102,7 +109,7 @@ public class BanksHolder implements InventoryHolder {
         List<String> lore = new ArrayList<>();
         for (String lines : itemValues.getStringList("Lore")) lore.add(BPChat.color(lines));
 
-        if (BankPlus.instance().isPlaceholderAPIHooked()) {
+        if (BankPlus.INSTANCE.isPlaceholderAPIHooked()) {
             meta.setDisplayName(PlaceholderAPI.setPlaceholders(p, BPChat.color(displayName)));
             meta.setLore(PlaceholderAPI.setPlaceholders(p, lore));
         } else {
