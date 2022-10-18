@@ -4,6 +4,7 @@ import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
@@ -31,7 +32,7 @@ public class OfflineInterestManager {
 
         String interest;
         if (player != null) interest = new BankPlusPlayerFiles(player).getPlayerConfig().getString("Offline-Interest");
-        else interest = new BankPlusPlayerFiles(offlinePlayer).getPlayerConfig().getString("Offline-Interest");
+        else interest = new BankPlusPlayerFiles(offlinePlayer).getOfflinePlayerConfig().getString("Offline-Interest");
 
         return interest == null ? new BigDecimal(0) : new BigDecimal(interest);
     }
@@ -42,11 +43,15 @@ public class OfflineInterestManager {
             return;
         }
 
-        BankPlusPlayerFiles files;
-        if (player != null) files = new BankPlusPlayerFiles(player);
-        else files = new BankPlusPlayerFiles(offlinePlayer);
-
-        files.getPlayerConfig().set("Offline-Interest", BPMethods.formatBigDouble(amount));
-        if (save) files.savePlayerFile(true);
+        if (player != null) {
+            BankPlusPlayerFiles files = new BankPlusPlayerFiles(player);
+            files.getPlayerConfig().set("Offline-Interest", BPMethods.formatBigDouble(amount));
+            if (save) files.savePlayerFile(true);
+        } else {
+            BankPlusPlayerFiles files = new BankPlusPlayerFiles(offlinePlayer);
+            FileConfiguration config = files.getOfflinePlayerConfig();
+            config.set("Offline-Interest", BPMethods.formatBigDouble(amount));
+            if (save) files.saveOfflinePlayerFile(config, true);
+        }
     }
 }

@@ -7,6 +7,7 @@ import me.pulsi_.bankplus.bankGuis.BankGuiRegistry;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.managers.*;
 import me.pulsi_.bankplus.placeholders.Placeholders;
+import me.pulsi_.bankplus.utils.BPDebugger;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPVersions;
 import me.pulsi_.bankplus.values.Values;
@@ -28,6 +29,7 @@ public final class BankPlus extends JavaPlugin {
     private BankGuiRegistry bankGuiRegistry;
 
     public static BankPlus INSTANCE;
+    public static BPDebugger DEBUGGER;
     private Economy econ = null;
     private Permission perms = null;
 
@@ -68,11 +70,12 @@ public final class BankPlus extends JavaPlugin {
             return;
         }
         INSTANCE = this;
+        DEBUGGER = new BPDebugger();
 
-        playerRegistry = new PlayerRegistry();
-        bankGuiRegistry = new BankGuiRegistry();
+        this.playerRegistry = new PlayerRegistry();
+        this.bankGuiRegistry = new BankGuiRegistry();
 
-        serverVersion = getServer().getVersion();
+        this.serverVersion = getServer().getVersion();
         this.bankTopManager = new BankTopManager(this);
         this.configManager = new ConfigManager(this);
         this.dataManager = new DataManager(this);

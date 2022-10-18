@@ -499,13 +499,7 @@ public class SingleCmdProcessor {
                         if (!s.hasPermission("bankplus.debug")) return null;
                         List<String> args2 = new ArrayList<>();
                         List<String> listOfArgs = new ArrayList<>();
-                        if (s.hasPermission("bankplus.debug")) {
-                            listOfArgs.add("CHAT");
-                            listOfArgs.add("DEPOSIT");
-                            listOfArgs.add("GUI");
-                            listOfArgs.add("INTEREST");
-                            listOfArgs.add("WITHDRAW");
-                        }
+                        if (s.hasPermission("bankplus.debug")) listOfArgs.add("TRANSACTIONS");
                         for (String arg : listOfArgs)
                             if (arg.toLowerCase().startsWith(args[1].toLowerCase())) args2.add(arg);
                         return args2;

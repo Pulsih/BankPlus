@@ -99,34 +99,20 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                 case "debug": {
                     if (!BPMethods.hasPermission(s, "bankplus.debug")) return false;
                     if (args.length == 1) {
-                        s.sendMessage(BPChat.color("&a&lBank&9&lPlus &aChoose a valid option: CHAT, DEPOSIT, INTEREST, GUI, WITHDRAW."));
+                        s.sendMessage(BPChat.color("&a&lBank&9&lPlus &aChoose a valid option: TRANSACTIONS."));
                         return false;
                     }
                     switch (args[1].toLowerCase()) {
-                        case "chat":
-                            BPDebugger.toggleChatDebugger(s);
-                            break;
-
-                        case "deposit":
-                            BPDebugger.toggleDepositDebugger(s);
-                            break;
-
-                        case "gui":
-                            BPDebugger.toggleGuiDebugger(s);
-                            break;
-
-                        case "interest":
-                            BPDebugger.debugInterest();
-                            if (s instanceof Player)
-                                s.sendMessage(BPChat.color("&a&lBank&9&lPlus &aDone! Check the console for the debug report!"));
-                            break;
-
-                        case "withdraw":
-                            BPDebugger.toggleWithdrawDebugger(s);
+                        case "transactions":
+                            BPDebugger debugger = BankPlus.DEBUGGER;
+                            boolean enabled = !debugger.isTransactionsDebuggerEnabled();
+                            debugger.setTransactionsDebuggerEnabled(!debugger.isTransactionsDebuggerEnabled());
+                            BPMessages.send(s, (BPChat.prefix + " &7Successfully " + enabled + " &7the transactions report!")
+                                    .replace("true", "&2enabled").replace("false", "&cdisabled"), false);
                             break;
 
                         default:
-                            s.sendMessage(BPChat.color("&a&lBank&9&lPlus &aChoose a valid option: CHAT, INTEREST, GUI."));
+                            s.sendMessage(BPChat.color("&a&lBank&9&lPlus &aChoose a valid option: TRANSACTIONS."));
                     }
                     return true;
                 }

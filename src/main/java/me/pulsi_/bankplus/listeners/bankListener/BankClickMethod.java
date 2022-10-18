@@ -34,7 +34,6 @@ public class BankClickMethod {
         BankPlusPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
         if (player.getOpenedBank() == null) return;
 
-        BPDebugger.debugGui(e);
         String bankName = player.getOpenedBank().getIdentifier();
         if (bankName.equals(BanksListGui.multipleBanksGuiID)) {
             int slot = e.getSlot();

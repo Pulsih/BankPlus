@@ -165,6 +165,26 @@ public class BankPlusPlayerFiles {
         }
     }
 
+    public void saveOfflinePlayerFile(FileConfiguration config, boolean async) {
+        File file = getOfflinePlayerFile();
+
+        if (!async) {
+            save(config, file);
+            return;
+        }
+        try {
+            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE, () -> {
+                try {
+                    config.save(file);
+                } catch (Exception e) {
+                    Bukkit.getScheduler().runTask(BankPlus.INSTANCE, () -> save(config, file));
+                }
+            });
+        } catch (Exception e) {
+            save(config, file);
+        }
+    }
+
     private void save(FileConfiguration config, File file) {
         try {
             config.save(file);

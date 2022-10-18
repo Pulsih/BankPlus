@@ -23,8 +23,5 @@ public class InventoryCloseListener implements Listener {
             BukkitTask task = openedBank.getInventoryUpdateTask();
             if (task != null) task.cancel();
         }
-
-        player.getOpenedBank().setInventoryUpdateTask(null);
-        player.setOpenedBank(null);
     }
 }

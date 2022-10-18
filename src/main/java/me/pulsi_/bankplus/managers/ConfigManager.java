@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.managers;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPVersions;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -185,17 +186,29 @@ public class ConfigManager {
     }
 
     public void buildConfig() {
+        // Create a copy of the config file
         File newConfigFile = new File(plugin.getDataFolder(), "config.yml");
+        FileConfiguration oldConfig = new YamlConfiguration();
         FileConfiguration newConfig = new YamlConfiguration();
 
+        BPVersions.renameGeneralSection(newConfigFile);
+
+        try {
+            oldConfig.load(newConfigFile);
+        } catch (Exception e) {
+
+        }
+
         addComments(newConfig,
-                "Configuration File of BankPlus",
+                "oldConfiguration File of BankPlus",
                 "Made by Pulsi_, Version v" + plugin.getDescription().getVersion());
         addSpace(newConfig);
 
         addComments(newConfig, "Check for new updates of the plugin.");
-        validatePath(config, newConfig, "Update-Checker", true);
+        validatePath(oldConfig, newConfig, "Update-Checker", true);
         addSpace(newConfig);
+
+        /* Interest */
 
         addComments(newConfig,
                 "Interest will increase players bank balance",
@@ -203,30 +216,30 @@ public class ConfigManager {
                 "",
                 "To restart the interest type /bank restartInterest.",
                 "",
-                "Players must have the \"bankplus.interest\"",
+                "Players must have the \"bankplus.receive.interest\"",
                 "permission to receive the interest.");
         addCommentsUnder(newConfig, "Interest", "Enable or disable the interest feature.");
-        validatePath(config, newConfig, "Interest.Enabled", true);
+        validatePath(oldConfig, newConfig, "Interest.Enabled", true);
         addSpace(newConfig, "Interest");
 
         addCommentsUnder(newConfig, "Interest.AFK-Settings", "If a player is AFK, it won't receive the interest.");
-        validatePath(config, newConfig, "Interest.AFK-Settings.Ignore-AFK-Players", false);
+        validatePath(oldConfig, newConfig, "Interest.AFK-Settings.Ignore-AFK-Players", false);
         addSpace(newConfig, "Interest.AFK-Settings");
 
         addCommentsUnder(newConfig, "Interest.AFK-Settings",
                 "Choose if using the EssentialsX AFK.",
                 "(You will need to install EssentialsX)");
-        validatePath(config, newConfig, "Interest.AFK-Settings.Use-EssentialsX-AFK", false);
+        validatePath(oldConfig, newConfig, "Interest.AFK-Settings.Use-EssentialsX-AFK", false);
         addSpace(newConfig, "Interest.AFK-Settings");
 
         addCommentsUnder(newConfig, "Interest.AFK-Settings",
                 "The time, in minutes, that will pass",
                 "before marking a player as AFK");
-        validatePath(config, newConfig, "Interest.AFK-Settings.AFK-Time", 5);
+        validatePath(oldConfig, newConfig, "Interest.AFK-Settings.AFK-Time", 5);
         addSpace(newConfig, "Interest.AFK-Settings");
 
         addCommentsUnder(newConfig, "Interest", "The percentage of money given.");
-        validatePath(config, newConfig, "Interest.Money-Given", "5%");
+        validatePath(oldConfig, newConfig, "Interest.Money-Given", "5%");
         addSpace(newConfig, "Interest");
 
         addCommentsUnder(newConfig, "Interest",
@@ -237,196 +250,219 @@ public class ConfigManager {
                 "If no time will be specified, it",
                 "will automatically choose minutes.",
                 "(You must put the space to specify the time!)");
-        validatePath(config, newConfig, "Interest.Delay", "5 m");
+        validatePath(oldConfig, newConfig, "Interest.Delay", "5 m");
         addSpace(newConfig, "Interest");
 
         addCommentsUnder(newConfig, "Interest", "The max amount that you can receive with interest.");
-        validatePath(config, newConfig, "Interest.Max-Amount", "500000");
+        validatePath(oldConfig, newConfig, "Interest.Max-Amount", "500000");
         addSpace(newConfig, "Interest");
 
         addCommentsUnder(newConfig, "Interest", "Choose if also giving interest to offline players.");
-        validatePath(config, newConfig, "Interest.Give-To-Offline-Players", false);
+        validatePath(oldConfig, newConfig, "Interest.Give-To-Offline-Players", false);
         addSpace(newConfig, "Interest");
 
         addCommentsUnder(newConfig, "Interest", "The permission for offline players to receive interest.");
-        validatePath(config, newConfig, "Interest.Offline-Permission", "bankplus.receive.interest");
+        validatePath(oldConfig, newConfig, "Interest.Offline-Permission", "bankplus.receive.interest");
         addSpace(newConfig);
 
-        addCommentsUnder(newConfig, "General",
+        /* Deposit settings */
+
+        addCommentsUnder(newConfig, "General-Settings",
                 "You need to restart the server",
                 "to apply these changes.",
                 "",
                 "Priorities: LOWEST, LOW, NORMAL, HIGH, HIGHEST");
-        validatePath(config, newConfig, "General.Event-Priorities.PlayerChat", "NORMAL");
-        validatePath(config, newConfig, "General.Event-Priorities.BankClick", "NORMAL");
-        addSpace(newConfig, "General");
+        validatePath(oldConfig, newConfig, "General-Settings.Event-Priorities.PlayerChat", "NORMAL");
+        validatePath(oldConfig, newConfig, "General-Settings.Event-Priorities.BankClick", "NORMAL");
+        addSpace(newConfig, "General-Settings");
 
-        addCommentsUnder(newConfig, "General",
+        addCommentsUnder(newConfig, "General-Settings",
                 "The amount that a player will receive",
                 "when joining for the first time");
-        validatePath(config, newConfig, "General.Join-Start-Amount", "500");
-        addSpace(newConfig, "General");
+        validatePath(oldConfig, newConfig, "General-Settings.Join-Start-Amount", "500");
+        addSpace(newConfig, "General-Settings");
 
-        addCommentsUnder(newConfig, "General",
+        addCommentsUnder(newConfig, "General-Settings",
                 "Enable or not the guis module.",
                 "",
                 "If the module is not enabled, you won't",
                 "be able to use the multiple gui and gui",
                 "settings features.");
-        validatePath(config, newConfig, "General.Enable-Guis", true);
-        addSpace(newConfig, "General");
+        validatePath(oldConfig, newConfig, "General-Settings.Enable-Guis", true);
+        addSpace(newConfig, "General-Settings");
 
-        addCommentsUnder(newConfig, "General",
+        addCommentsUnder(newConfig, "General-Settings",
                 "This is really important, you must have 1",
                 "main gui selected, based on the names of",
                 "the files in the guis folder.");
-        validatePath(config, newConfig, "General.Main-Gui", "bank");
-        addSpace(newConfig, "General");
+        validatePath(oldConfig, newConfig, "General-Settings.Main-Gui", "bank");
+        addSpace(newConfig, "General-Settings");
 
-        addCommentsUnder(newConfig, "General",
+        addCommentsUnder(newConfig, "General-Settings",
                 "Store player's money using UUIDs,",
                 "otherwise the plugin will use names.");
-        validatePath(config, newConfig, "General.Use-UUIDs", true);
-        addSpace(newConfig, "General");
+        validatePath(oldConfig, newConfig, "General-Settings.Use-UUIDs", true);
+        addSpace(newConfig, "General-Settings");
 
-        addCommentsUnder(newConfig, "General",
+        addCommentsUnder(newConfig, "General-Settings",
                 "In minutes, the delay to save all players balances. It is used",
                 "to prevent players from losing their money if the server crashes.",
                 "Put 0 to disable this option.");
-        validatePath(config, newConfig, "General.Save-Delay", 10);
-        addSpace(newConfig, "General");
+        validatePath(oldConfig, newConfig, "General-Settings.Save-Delay", 10);
+        addSpace(newConfig, "General-Settings");
 
-        addCommentsUnder(newConfig, "General",
+        addCommentsUnder(newConfig, "General-Settings",
                 "Choose if sending a message to the console",
                 "when the plugin save all balances. (Only console)");
-        validatePath(config, newConfig, "General.Save-Broadcast", true);
-        addSpace(newConfig, "General");
+        validatePath(oldConfig, newConfig, "General-Settings.Save-Broadcast", true);
+        addSpace(newConfig, "General-Settings");
 
-        addCommentsUnder(newConfig, "General",
+        addCommentsUnder(newConfig, "General-Settings",
                 "The max amount that a player can deposit, use 0 to disable.",
                 "",
-                "If you enable the upgrades module",
-                "this setting will be override.");
-        validatePath(config, newConfig, "General.Max-Bank-Capacity", "500000000");
-        addSpace(newConfig, "General");
+                "IMPORTANT! The bank capacity is defined in the BANK FILE!",
+                "This option is only a fallback value in case the",
+                "level of the bank does not specify its capacity!");
+        validatePath(oldConfig, newConfig, "General-Settings.Max-Bank-Capacity", "500000000");
+        addSpace(newConfig, "General-Settings");
 
-        addCommentsUnder(newConfig, "General",
+        addCommentsUnder(newConfig, "General-Settings",
                 "The max amount of decimals that a player balance can have.",
                 "",
                 "You can put 0 to use an economy without decimals.");
-        validatePath(config, newConfig, "General.Max-Decimals-Amount", 2);
-        addSpace(newConfig, "General");
+        validatePath(oldConfig, newConfig, "General-Settings.Max-Decimals-Amount", 2);
+        addSpace(newConfig, "General-Settings");
 
-        addCommentsUnder(newConfig, "General", "The max amount to deposit per time, use 0 to disable.");
-        validatePath(config, newConfig, "General.Max-Deposit-Amount", "0");
-        addSpace(newConfig, "General");
+        addCommentsUnder(newConfig, "General-Settings",
+                "Enabling this option, it will reopen the bank after",
+                "typing in chat when depositing / withdrawing money.");
+        validatePath(oldConfig, newConfig, "General-Settings.Reopen-Bank-After-Chat", true);
+        addSpace(newConfig, "General-Settings");
 
-        addCommentsUnder(newConfig, "General", "The max amount to withdraw per time, use 0 to disable.");
-        validatePath(config, newConfig, "General.Max-Withdrawn-Amount", "0");
-        addSpace(newConfig, "General");
+        addCommentsUnder(newConfig, "General-Settings",
+                "The message that a player has to type",
+                "to stop typing the custom amount.");
+        validatePath(oldConfig, newConfig, "General-Settings.Chat-Exit-Message", "exit");
+        addSpace(newConfig, "General-Settings");
 
-        addCommentsUnder(newConfig, "General",
+        addCommentsUnder(newConfig, "General-Settings",
+                "These commands will be executed when leaving from typing",
+                "in chat while using the custom withdraw / deposit.",
+                "",
+                "You can put as many commands as you want.");
+        validatePath(oldConfig, newConfig, "General-Settings.Chat-Exit-Commands", "[]");
+        addCommentsUnder(newConfig, "General-Settings",
+                "- \"[CONSOLE] tell %player% You typed in chat!\"",
+                "- \"[PLAYER] say I typed in chat!\"");
+        addSpace(newConfig, "General-Settings");
+
+        addCommentsUnder(newConfig, "General-Settings", "Worlds where the bank won't work");
+        validatePath(oldConfig, newConfig, "General-Settings.Worlds-Blacklist", new ArrayList<>(Collections.singletonList("noBankWorld")));
+        addSpace(newConfig, "General-Settings");
+
+        addCommentsUnder(newConfig, "General-Settings",
+                "Send an alert message to show the player how",
+                "much money has earned while being offline.");
+        validatePath(oldConfig, newConfig, "General-Settings.Offline-Interest-Earned-Message.Enabled", true);
+        addCommentsUnder(newConfig, "General-Settings.Offline-Interest-Earned-Message", "In seconds, put 0 to disable the delay.");
+        validatePath(oldConfig, newConfig, "General-Settings.Offline-Interest-Earned-Message.Delay", 2);
+        validatePath(oldConfig, newConfig, "General-Settings.Offline-Interest-Earned-Message.Message",
+                "&a&lBank&9&lPlus &aYou have earned &f%amount% money &awhile being offline!");
+        addSpace(newConfig, "General-Settings");
+
+        validatePath(oldConfig, newConfig, "General-Settings.Withdraw-Sound.Enabled", true);
+        addCommentsUnder(newConfig, "General-Settings.Withdraw-Sound", "Sound-Type,Volume,Pitch.");
+        validatePath(oldConfig, newConfig, "General-Settings.Withdraw-Sound.Sound", BPMethods.getSoundBasedOnServerVersion());
+        addSpace(newConfig, "General-Settings");
+
+        validatePath(oldConfig, newConfig, "General-Settings.Deposit-Sound.Enabled", true);
+        validatePath(oldConfig, newConfig, "General-Settings.Deposit-Sound.Sound", BPMethods.getSoundBasedOnServerVersion());
+        addSpace(newConfig, "General-Settings");
+
+        validatePath(oldConfig, newConfig, "General-Settings.View-Sound.Enabled", true);
+        validatePath(oldConfig, newConfig, "General-Settings.View-Sound.Sound", BPMethods.getSoundBasedOnServerVersion());
+        addSpace(newConfig, "General-Settings");
+
+        validatePath(oldConfig, newConfig, "General-Settings.Personal-Sound.Enabled", true);
+        validatePath(oldConfig, newConfig, "General-Settings.Personal-Sound.Sound", BPMethods.getSoundBasedOnServerVersion());
+        addSpace(newConfig);
+
+        /* Deposit settings */
+
+        addComments(newConfig,
+                "The player needs to have the permission",
+                "\"bankplus.deposit\" to be able to deposit.");
+        addCommentsUnder(newConfig, "Deposit-Settings", "The max amount to deposit per time, use 0 to disable.");
+        validatePath(oldConfig, newConfig, "Deposit-Settings.Max-Deposit-Amount", getValueFromOldPath(oldConfig,
+                "General-Settings.Max-Deposit-Amount", "Deposit-Settings.Max-Deposit-Amount", "0"));
+        addSpace(newConfig, "Deposit-Settings");
+
+        addCommentsUnder(newConfig, "Deposit-Settings", "The minimum amount to deposit per time, use 0 to disable.");
+        validatePath(oldConfig, newConfig, "Deposit-Settings.Minimum-Deposit-Amount", getValueFromOldPath(oldConfig,
+                "General-Settings.Minimum-Amount", "Deposit-Settings.Minimum-Deposit-Amount", "0"));
+        addSpace(newConfig, "Deposit-Settings");
+
+        addCommentsUnder(newConfig, "Deposit-Settings",
                 "The money that a player will loose for taxes",
                 "when depositing, use 0 to disable.",
                 "",
                 "Use the permission \"bankplus.deposit.bypass-taxes\"",
                 "to bypass the deposit taxes.");
-        validatePath(config, newConfig, "General.Deposit-Taxes", "0%");
-        addSpace(newConfig, "General");
+        validatePath(oldConfig, newConfig, "Deposit-Settings.Deposit-Taxes", getValueFromOldPath(oldConfig,
+                "General-Settings.Deposit-Taxes", "Deposit-Settings.Deposit-Taxes", "0%"));
+        addSpace(newConfig);
 
-        addCommentsUnder(newConfig, "General",
+        /* Withdraw settings */
+
+        addComments(newConfig,
+                "The player needs to have the permission",
+                "\"bankplus.withdraw\" to be able to deposit.");
+        addCommentsUnder(newConfig, "Withdraw-Settings", "The max amount to withdraw per time, use 0 to disable.");
+        validatePath(oldConfig, newConfig, "Withdraw-Settings.Max-Withdrawn-Amount", getValueFromOldPath(oldConfig,
+                "General-Settings.Max-Withdraw-Amount", "Withdraw-Settings.Max-Withdrawn-Amount", "0"));
+        addSpace(newConfig, "Withdraw-Settings");
+
+        addCommentsUnder(newConfig, "Withdraw-Settings", "The minimum amount to withdraw per time, use 0 to disable.");
+        validatePath(oldConfig, newConfig, "Withdraw-Settings.Minimum-Withdraw-Amount", getValueFromOldPath(oldConfig,
+                "General-Settings.Minimum-Amount", "Withdraw-Settings.Minimum-Withdraw-Amount", "0"));
+        addSpace(newConfig, "Withdraw-Settings");
+
+        addCommentsUnder(newConfig, "Withdraw-Settings",
                 "The money that a player will loose for taxes",
                 "when withdrawing, use 0 to disable.",
                 "",
                 "Use the permission \"bankplus.withdraw.bypass-taxes\"",
                 "to bypass the deposit taxes.");
-        validatePath(config, newConfig, "General.Withdraw-Taxes", "2%");
-        addSpace(newConfig, "General");
-
-        addCommentsUnder(newConfig, "General",
-                "The minimum amount that a player needs to",
-                "put to withdraw / deposit, put 0 to disable.");
-        validatePath(config, newConfig, "General.Minimum-Amount", "0");
-        addSpace(newConfig, "General");
-
-        addCommentsUnder(newConfig, "General",
-                "Enabling this option, it will reopen the bank after",
-                "typing in chat when depositing / withdrawing money.");
-        validatePath(config, newConfig, "General.Reopen-Bank-After-Chat", true);
-        addSpace(newConfig, "General");
-
-        addCommentsUnder(newConfig, "General",
-                "The message that a player has to type",
-                "to stop typing the custom amount.");
-        validatePath(config, newConfig, "General.Chat-Exit-Message", "exit");
-        addSpace(newConfig, "General");
-
-        addCommentsUnder(newConfig, "General",
-                "These commands will be executed when leaving from typing",
-                "in chat while using the custom withdraw / deposit." +
-                        "",
-                "You can put as many commands as you want.");
-        validatePath(config, newConfig, "General.Chat-Exit-Commands", "[]");
-        addCommentsUnder(newConfig, "General",
-                "- \"[CONSOLE] tell %player% You closed the bank!\"",
-                "- \"[PLAYER] say I closed the bank!\"");
-        addSpace(newConfig, "General");
-
-        addCommentsUnder(newConfig, "General", "Worlds where the bank won't work");
-        validatePath(config, newConfig, "General.Worlds-Blacklist", new ArrayList<>(Collections.singletonList("noBankWorld")));
-        addSpace(newConfig, "General");
-
-        addCommentsUnder(newConfig, "General",
-                "Send an alert message to show the player how",
-                "much money has earned while being offline.");
-        validatePath(config, newConfig, "General.Offline-Interest-Earned-Message.Enabled", true);
-        addCommentsUnder(newConfig, "General.Offline-Interest-Earned-Message", "In seconds, put 0 to disable the delay.");
-        validatePath(config, newConfig, "General.Offline-Interest-Earned-Message.Delay", 2);
-        validatePath(config, newConfig, "General.Offline-Interest-Earned-Message.Message",
-                "&a&lBank&9&lPlus &aYou have earned &f%amount% money &awhile being offline!");
-        addSpace(newConfig, "General");
-
-        validatePath(config, newConfig, "General.Withdraw-Sound.Enabled", true);
-        addCommentsUnder(newConfig, "General.Withdraw-Sound", "Sound-Type,Volume,Pitch.");
-        validatePath(config, newConfig, "General.Withdraw-Sound.Sound", BPMethods.getSoundBasedOnServerVersion());
-        addSpace(newConfig, "General");
-
-        validatePath(config, newConfig, "General.Deposit-Sound.Enabled", true);
-        validatePath(config, newConfig, "General.Deposit-Sound.Sound", BPMethods.getSoundBasedOnServerVersion());
-        addSpace(newConfig, "General");
-
-        validatePath(config, newConfig, "General.View-Sound.Enabled", true);
-        validatePath(config, newConfig, "General.View-Sound.Sound", BPMethods.getSoundBasedOnServerVersion());
-        addSpace(newConfig, "General");
-
-        validatePath(config, newConfig, "General.Personal-Sound.Enabled", true);
-        validatePath(config, newConfig, "General.Personal-Sound.Sound", BPMethods.getSoundBasedOnServerVersion());
+        validatePath(oldConfig, newConfig, "Withdraw-Settings.Withdraw-Taxes", getValueFromOldPath(oldConfig,
+                "General-Settings.Withdraw-Taxes", "Withdraw-Settings.Withdraw-Taxes" , "0%"));
         addSpace(newConfig);
 
+        /* BankTop settings */
+
         addCommentsUnder(newConfig, "BankTop", "Enable or not the feature.");
-        validatePath(config, newConfig, "BankTop.Enabled", true);
+        validatePath(oldConfig, newConfig, "BankTop.Enabled", true);
         addSpace(newConfig, "BankTop");
 
         addCommentsUnder(newConfig, "BankTop", "The size of the banktop.");
-        validatePath(config, newConfig, "BankTop.Size", 10);
+        validatePath(oldConfig, newConfig, "BankTop.Size", 10);
         addSpace(newConfig, "BankTop");
 
         addCommentsUnder(newConfig, "BankTop", "In ticks, the delay before the top will update.");
-        validatePath(config, newConfig, "BankTop.Update-Delay", 12000);
+        validatePath(oldConfig, newConfig, "BankTop.Update-Delay", 12000);
         addSpace(newConfig, "BankTop");
 
         addCommentsUnder(newConfig, "BankTop.Update-Broadcast",
-                "Choose if sending a message to the console",
+                "Choose if broadcasting to the server",
                 "when the plugin updates the banktop.");
-        validatePath(config, newConfig, "BankTop.Update-Broadcast.Enabled", true);
+        validatePath(oldConfig, newConfig, "BankTop.Update-Broadcast.Enabled", true);
         addSpace(newConfig, "BankTop.Update-Broadcast");
 
-        addCommentsUnder(newConfig, "BankTop.Update-Broadcast", "Choose if the alert will be sent only to the console.");
-        validatePath(config, newConfig, "BankTop.Update-Broadcast.Only-Console", false);
+        addCommentsUnder(newConfig, "BankTop.Update-Broadcast", "Choose if the broadcast will be sent only to the console.");
+        validatePath(oldConfig, newConfig, "BankTop.Update-Broadcast.Only-Console", false);
         addSpace(newConfig, "BankTop.Update-Broadcast");
 
         addCommentsUnder(newConfig, "BankTop.Update-Broadcast", "The message that will be sent when updating.");
-        validatePath(config, newConfig, "BankTop.Update-Broadcast.Message", "%prefix% &aThe BankTop has been updated!");
+        validatePath(oldConfig, newConfig, "BankTop.Update-Broadcast.Message", "%prefix% &aThe BankTop has been updated!");
         addSpace(newConfig, "BankTop");
 
         addCommentsUnder(newConfig, "BankTop",
@@ -435,11 +471,11 @@ public class ConfigManager {
                 "You can choose between:",
                 "  default_amount, amount_long,",
                 "  amount_formatted, amount_formatted_long");
-        validatePath(config, newConfig, "BankTop.Money-Format", "amount_formatted");
+        validatePath(oldConfig, newConfig, "BankTop.Money-Format", "amount_formatted");
         addSpace(newConfig, "BankTop");
 
         addCommentsUnder(newConfig, "BankTop", "The message to display the banktop.");
-        validatePath(config, newConfig, "BankTop.Format", new ArrayList<>(Arrays.asList(
+        validatePath(oldConfig, newConfig, "BankTop.Format", new ArrayList<>(Arrays.asList(
                 "&8&m---------&8[&a &lBank&9&lPlus &aBankTop &8]&m---------",
                 "&61# &6%bankplus_banktop_name_1%&8: &a%bankplus_banktop_money_1%",
                 "&61# &6%bankplus_banktop_name_2%&8: &a%bankplus_banktop_money_2%",
@@ -455,40 +491,42 @@ public class ConfigManager {
         )));
         addSpace(newConfig);
 
-        validatePath(config, newConfig, "Placeholders.Money.Thousands", "K");
-        validatePath(config, newConfig, "Placeholders.Money.Millions", "M");
-        validatePath(config, newConfig, "Placeholders.Money.Billions", "B");
-        validatePath(config, newConfig, "Placeholders.Money.Trillions", "T");
-        validatePath(config, newConfig, "Placeholders.Money.Quadrillions", "Q");
-        validatePath(config, newConfig, "Placeholders.Money.Quintillions", "QQ");
+        /* Placeholders section */
+
+        validatePath(oldConfig, newConfig, "Placeholders.Money.Thousands", "K");
+        validatePath(oldConfig, newConfig, "Placeholders.Money.Millions", "M");
+        validatePath(oldConfig, newConfig, "Placeholders.Money.Billions", "B");
+        validatePath(oldConfig, newConfig, "Placeholders.Money.Trillions", "T");
+        validatePath(oldConfig, newConfig, "Placeholders.Money.Quadrillions", "Q");
+        validatePath(oldConfig, newConfig, "Placeholders.Money.Quintillions", "QQ");
         addSpace(newConfig, "Placeholders");
 
-        validatePath(config, newConfig, "Placeholders.Time.Second", "Second");
-        validatePath(config, newConfig, "Placeholders.Time.Seconds", "Seconds");
-        validatePath(config, newConfig, "Placeholders.Time.Minute", "Minute");
-        validatePath(config, newConfig, "Placeholders.Time.Minutes", "Minutes");
-        validatePath(config, newConfig, "Placeholders.Time.Hour", "Hour");
-        validatePath(config, newConfig, "Placeholders.Time.Hours", "Hours");
-        validatePath(config, newConfig, "Placeholders.Time.Day", "Days");
-        validatePath(config, newConfig, "Placeholders.Time.Days", "Days");
-        validatePath(config, newConfig, "Placeholders.Time.Interest-Time.Only-Seconds", "%seconds% %seconds_placeholder%");
-        validatePath(config, newConfig, "Placeholders.Time.Interest-Time.Only-Minutes", "%minutes% %minutes_placeholder%");
-        validatePath(config, newConfig, "Placeholders.Time.Interest-Time.Only-Hours", "%hours% %hours_placeholder%");
-        validatePath(config, newConfig, "Placeholders.Time.Interest-Time.Only-Days", "%days% %days_placeholder%");
-        validatePath(config, newConfig, "Placeholders.Time.Interest-Time.Seconds-Minutes", "%seconds% %seconds_placeholder% and %minutes% %minutes_placeholder%");
-        validatePath(config, newConfig, "Placeholders.Time.Interest-Time.Seconds-Hours", "%seconds% %seconds_placeholder% and %hours% %hours_placeholder%");
-        validatePath(config, newConfig, "Placeholders.Time.Interest-Time.Seconds-Days", "%seconds% %seconds_placeholder% and %days% %days_placeholder%");
-        validatePath(config, newConfig, "Placeholders.Time.Interest-Time.Seconds-Minutes-Hours", "%seconds% %seconds_placeholder%, %minutes% %minutes_placeholder% and %hours% %hours_placeholder%");
-        validatePath(config, newConfig, "Placeholders.Time.Interest-Time.Seconds-Hours-Days", "%seconds% %seconds_placeholder%, %hours% %hours_placeholder% and %days% %days_placeholder%");
-        validatePath(config, newConfig, "Placeholders.Time.Interest-Time.Seconds-Minutes-Days", "%seconds% %seconds_placeholder%, %minutes% %minutes_placeholder% and %days% %days_placeholder%");
-        validatePath(config, newConfig, "Placeholders.Time.Interest-Time.Seconds-Minutes-Hours-Days", "%seconds% %seconds_placeholder%, %minutes% %minutes_placeholder%, %hours% %hours_placeholder% and %days% %days_placeholder%");
-        validatePath(config, newConfig, "Placeholders.Time.Interest-Time.Minutes-Hours", "%minutes% %minutes_placeholder% and %hours% %hours_placeholder%");
-        validatePath(config, newConfig, "Placeholders.Time.Interest-Time.Minutes-Days", "%minutes% %minutes_placeholder% and %days% %days_placeholder%");
-        validatePath(config, newConfig, "Placeholders.Time.Interest-Time.Minutes-Hours-Days", "%minutes% %minutes_placeholder%, %hours% %hours_placeholder% and %days% %days_placeholder%");
-        validatePath(config, newConfig, "Placeholders.Time.Interest-Time.Hours-Days", "%hours% %hours_placeholder% and %days% %days_placeholder%");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Second", "Second");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Seconds", "Seconds");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Minute", "Minute");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Minutes", "Minutes");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Hour", "Hour");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Hours", "Hours");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Day", "Days");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Days", "Days");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Only-Seconds", "%seconds% %seconds_placeholder%");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Only-Minutes", "%minutes% %minutes_placeholder%");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Only-Hours", "%hours% %hours_placeholder%");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Only-Days", "%days% %days_placeholder%");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Seconds-Minutes", "%seconds% %seconds_placeholder% and %minutes% %minutes_placeholder%");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Seconds-Hours", "%seconds% %seconds_placeholder% and %hours% %hours_placeholder%");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Seconds-Days", "%seconds% %seconds_placeholder% and %days% %days_placeholder%");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Seconds-Minutes-Hours", "%seconds% %seconds_placeholder%, %minutes% %minutes_placeholder% and %hours% %hours_placeholder%");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Seconds-Hours-Days", "%seconds% %seconds_placeholder%, %hours% %hours_placeholder% and %days% %days_placeholder%");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Seconds-Minutes-Days", "%seconds% %seconds_placeholder%, %minutes% %minutes_placeholder% and %days% %days_placeholder%");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Seconds-Minutes-Hours-Days", "%seconds% %seconds_placeholder%, %minutes% %minutes_placeholder%, %hours% %hours_placeholder% and %days% %days_placeholder%");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Minutes-Hours", "%minutes% %minutes_placeholder% and %hours% %hours_placeholder%");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Minutes-Days", "%minutes% %minutes_placeholder% and %days% %days_placeholder%");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Minutes-Hours-Days", "%minutes% %minutes_placeholder%, %hours% %hours_placeholder% and %days% %days_placeholder%");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Hours-Days", "%hours% %hours_placeholder% and %days% %days_placeholder%");
         addSpace(newConfig, "Placeholders");
 
-        validatePath(config, newConfig, "Placeholders.Upgrades.Max-Level", "&cMaxed");
+        validatePath(oldConfig, newConfig, "Placeholders.Upgrades.Max-Level", "&cMaxed");
 
         commentsCount = 0;
         spacesCount = 0;
@@ -740,5 +778,9 @@ public class ConfigManager {
         Object value = from.get(path);
         if (value == null) to.set(path, valuePath);
         else to.set(path, value);
+    }
+
+    private Object getValueFromOldPath(FileConfiguration from, String path, String fallbackPath, Object fallbackValue) {
+        return from.get(path) == null ? fallbackValue : from.get(path);
     }
 }

@@ -92,7 +92,6 @@ public class PlayerJoinListener implements Listener {
 
         if (delay == 0) p.sendMessage(message);
         else Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> p.sendMessage(message), delay * 20L);
-
         interestManager.setOfflineInterest(new BigDecimal(0), true);
     }
 }

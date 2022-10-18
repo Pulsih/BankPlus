@@ -410,7 +410,7 @@ public class BPMethods {
             BPMessages.send(p, "Cannot-Use-Negative-Number");
             return false;
         }
-        if (amount.doubleValue() < Values.CONFIG.getMinimumAmount().doubleValue()) {
+        if (amount.doubleValue() < Values.CONFIG.getDepositMinimumAmount().doubleValue()) {
             BPMessages.send(p, "Minimum-Number");
             return false;
         }
@@ -484,7 +484,7 @@ public class BPMethods {
         if (!response.transactionSuccess()) {
             BPMessages.send(p, "Internal-Error");
             BPLogger.warn("Warning! (THIS IS NOT A BANKPLUS ERROR!) Vault has failed his transaction task. To" +
-                    " avoid dupe bugs, I also cancelled the bankplus transaction.");
+                    " avoid dupe bugs also bankplus has cancelled the transaction.");
             return true;
         }
         return false;

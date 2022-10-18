@@ -8,11 +8,11 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 /**
  * This class will be changed between version, it will be used to add the compatibility
@@ -20,6 +20,35 @@ import java.util.List;
  * balances from the players.yml to the per-player file )
  */
 public class BPVersions {
+
+    /**
+     * Will be removed in 6.1, used from versions older than 5.8.
+     */
+    public static void renameGeneralSection(File file) {
+        List<String> lines = new ArrayList<>();
+        try {
+            Scanner scanner = new Scanner(file);
+            while (scanner.hasNextLine()) lines.add(scanner.nextLine());
+        } catch (FileNotFoundException e) {
+            BPLogger.error(e.getMessage());
+            return;
+        }
+
+        StringBuilder configuration = new StringBuilder();
+        for (String line : lines) {
+            if (line.contains("General:")) line = "General-Settings:";
+            configuration.append(line).append("\n");
+        }
+
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+            writer.write(configuration.toString());
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            BPLogger.error(e.getMessage());
+        }
+    }
 
     /**
      * Will be removed in 6.0, used from versions older than 5.7.

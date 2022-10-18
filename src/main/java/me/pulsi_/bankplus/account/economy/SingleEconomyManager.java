@@ -3,7 +3,6 @@ package me.pulsi_.bankplus.account.economy;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
 import me.pulsi_.bankplus.bankGuis.BanksManager;
-import me.pulsi_.bankplus.utils.BPDebugger;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
@@ -127,7 +126,7 @@ public class SingleEconomyManager {
      */
     public BigDecimal getOfflineBankBalance() {
         if (offNull(oP, "Cannot get player bank balance!")) return null;
-        String bal = new BankPlusPlayerFiles(oP).getPlayerConfig().getString("Money");
+        String bal = new BankPlusPlayerFiles(oP).getOfflinePlayerConfig().getString("Money");
         return bal == null ? new BigDecimal(0) : new BigDecimal(bal);
     }
 
@@ -167,8 +166,18 @@ public class SingleEconomyManager {
      * @param amount The amount.
      */
     public void addOfflineBankBalance(BigDecimal amount) {
+        addOfflineBankBalance(amount, false);
+    }
+
+    /**
+     * Add to the offline player bank balance the selected amount.
+     *
+     * @param amount The amount.
+     * @param addOfflineInterest Choose if adding both balance and offline interest.
+     */
+    public void addOfflineBankBalance(BigDecimal amount, boolean addOfflineInterest) {
         if (offNull(oP, "Cannot add player bank balance!")) return;
-        setOffline(getBankBalance().add(amount));
+        setOffline(getOfflineBankBalance().add(amount), addOfflineInterest);
     }
 
     /**
@@ -188,7 +197,7 @@ public class SingleEconomyManager {
      */
     public void removeOfflineBankBalance(BigDecimal amount) {
         if (offNull(oP, "Cannot remove player bank balance!")) return;
-        setOffline(getBankBalance().subtract(amount));
+        setOffline(getOfflineBankBalance().subtract(amount));
     }
 
     /**
@@ -207,9 +216,24 @@ public class SingleEconomyManager {
      * @param amount The amount.
      */
     private void setOffline(BigDecimal amount) {
+        setOffline(amount, false);
+    }
+
+    /**
+     * Method used to simplify the transaction.
+     *
+     * @param amount The amount.
+     * @param addOfflineInterest Choose if adding both balance and offline interest.
+     */
+    private void setOffline(BigDecimal amount, boolean addOfflineInterest) {
         BankPlusPlayerFiles files = new BankPlusPlayerFiles(oP);
-        files.getPlayerConfig().set("Money", BPMethods.formatBigDouble(amount));
-        files.savePlayerFile(true);
+        FileConfiguration config = files.getOfflinePlayerConfig();
+        config.set("Money", BPMethods.formatBigDouble(amount));
+        if (addOfflineInterest && Values.CONFIG.isNotifyOfflineInterest()) {
+            BigDecimal offlineInterest = new BigDecimal(BPMethods.formatBigDouble(amount)).subtract(getOfflineBankBalance());
+            if (offlineInterest.doubleValue() > 0) config.set("Offline-Interest", offlineInterest.toString());
+        }
+        files.saveOfflinePlayerFile(config, true);
     }
 
     public void deposit(BigDecimal amount) {
@@ -234,7 +258,7 @@ public class SingleEconomyManager {
         }
 
         EconomyResponse depositResponse = BankPlus.INSTANCE.getEconomy().withdrawPlayer(p, amount.doubleValue());
-        BPDebugger.debugDeposit(p, amount, depositResponse);
+        BankPlus.DEBUGGER.debugTransactions(p, amount, depositResponse);
         if (BPMethods.hasFailed(p, depositResponse)) return;
 
         addBankBalance(amount.subtract(taxes));
@@ -260,7 +284,7 @@ public class SingleEconomyManager {
         if (newBalance.doubleValue() <= 0) amount = bankBalance;
 
         EconomyResponse withdrawResponse = BankPlus.INSTANCE.getEconomy().depositPlayer(p, amount.subtract(taxes).doubleValue());
-        BPDebugger.debugWithdraw(p, amount, withdrawResponse);
+        BankPlus.DEBUGGER.debugTransactions(p, amount, withdrawResponse);
         if (BPMethods.hasFailed(p, withdrawResponse)) return;
 
         removeBankBalance(amount);

@@ -13,6 +13,7 @@ import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -180,12 +181,19 @@ public class Interest {
             return;
         }
 
-        String wName = Bukkit.getWorlds().get(0).getName(), perm = Values.CONFIG.getInterestOfflinePermission();
+        String perm = Values.CONFIG.getInterestOfflinePermission();
         for (OfflinePlayer p : players) {
-            if (p.isOnline() || !permission.playerHas(wName, p, perm)) continue;
+            if (p.isOnline()) continue;
+
+            boolean hasPermission = false;
+            for (World world : Bukkit.getWorlds()) {
+                hasPermission = permission.playerHas(world.getName(), p, perm);
+                if (hasPermission) break;
+            }
+            if (!hasPermission) continue;
 
             SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
-            BigDecimal bankBalance = singleEconomyManager.getBankBalance();
+            BigDecimal bankBalance = singleEconomyManager.getOfflineBankBalance();
             BigDecimal interestMoney = bankBalance.multiply(Values.CONFIG.getInterestMoneyGiven().divide(BigDecimal.valueOf(100)));
             BigDecimal maxBankCapacity = Values.CONFIG.getMaxBankCapacity(), maxAmount = Values.CONFIG.getInterestMaxAmount();
 
@@ -194,12 +202,10 @@ public class Interest {
             if (maxBankCapacity.doubleValue() != 0 && (bankBalance.add(interestMoney).doubleValue() >= maxBankCapacity.doubleValue())) {
                 BigDecimal newAmount = maxBankCapacity.subtract(bankBalance);
                 if (newAmount.doubleValue() <= 0) continue;
-                singleEconomyManager.addBankBalance(newAmount);
-                addOfflineInterest(p, newAmount, true);
+                singleEconomyManager.addOfflineBankBalance(newAmount, true);
                 continue;
             }
-            singleEconomyManager.addBankBalance(interestMoney);
-            addOfflineInterest(p, interestMoney, true);
+            singleEconomyManager.addOfflineBankBalance(interestMoney, true);
         }
     }
 
@@ -210,15 +216,22 @@ public class Interest {
             return;
         }
 
-        String wName = Bukkit.getWorlds().get(0).getName(), perm = Values.CONFIG.getInterestOfflinePermission();
+        String perm = Values.CONFIG.getInterestOfflinePermission();
         for (OfflinePlayer p : players) {
             boolean hasToSave = false;
 
             MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
             for (String bankName : new BanksManager().getAvailableBanks(p)) {
-                if (p.isOnline() || !permission.playerHas(wName, p, perm)) continue;
+                if (p.isOnline()) continue;
 
-                BigDecimal bankBalance = multiEconomyManager.getBankBalance(bankName);
+                boolean hasPermission = false;
+                for (World world : Bukkit.getWorlds()) {
+                    hasPermission = permission.playerHas(world.getName(), p, perm);
+                    if (hasPermission) break;
+                }
+                if (!hasPermission) continue;
+
+                BigDecimal bankBalance = multiEconomyManager.getOfflineBankBalance(bankName);
                 BigDecimal interestMoney = bankBalance.multiply(Values.CONFIG.getInterestMoneyGiven().divide(BigDecimal.valueOf(100)));
                 BigDecimal maxBankCapacity = new BanksManager(bankName).getCapacity(p), maxAmount = Values.CONFIG.getInterestMaxAmount();
 
@@ -227,23 +240,15 @@ public class Interest {
                 if (maxBankCapacity.doubleValue() != 0 && (bankBalance.add(interestMoney).doubleValue() >= maxBankCapacity.doubleValue())) {
                     BigDecimal newAmount = maxBankCapacity.subtract(bankBalance);
                     if (newAmount.doubleValue() <= 0) continue;
-                    multiEconomyManager.addBankBalance(newAmount, bankName);
-                    addOfflineInterest(p, newAmount, false);
+                    multiEconomyManager.addOfflineBankBalance(newAmount, bankName, true);
                     hasToSave = true;
                     continue;
                 }
-                multiEconomyManager.addBankBalance(interestMoney, bankName);
-                addOfflineInterest(p, interestMoney, false);
+                multiEconomyManager.addOfflineBankBalance(interestMoney, bankName, true);
                 hasToSave = true;
             }
             if (hasToSave) new BankPlusPlayerFiles(p).savePlayerFile(true);
         }
-    }
-
-    private void addOfflineInterest(OfflinePlayer p, BigDecimal amount, boolean save) {
-        if (!Values.CONFIG.isOfflineInterestEarnedMessageEnabled()) return;
-        OfflineInterestManager interestManager = new OfflineInterestManager(p);
-        interestManager.setOfflineInterest(interestManager.getOfflineInterest().add(amount), save);
     }
 
     private boolean isInterestActive() {

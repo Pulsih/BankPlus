@@ -22,7 +22,6 @@ public class PlayerChatMethod {
     public static void process(AsyncPlayerChatEvent e) {
         Player p = e.getPlayer();
         if (!isTyping(p)) return;
-        BPDebugger.debugChat(e);
 
         BankPlusPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
         String identifier = player.getOpenedBank().getIdentifier();
