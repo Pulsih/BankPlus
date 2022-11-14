@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.bankGuis;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayer;
+import me.pulsi_.bankplus.bankGuis.objects.Bank;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPItems;
 import me.pulsi_.bankplus.utils.BPMessages;
@@ -45,13 +46,13 @@ public class BanksHolder implements InventoryHolder {
             return;
         }
 
-        BankGui openedBank = player.getOpenedBank();
+        Bank openedBank = player.getOpenedBank();
         if (openedBank != null) {
             BukkitTask task = openedBank.getInventoryUpdateTask();
             if (task != null) task.cancel();
         }
 
-        BankGui baseBank = registry.get(identifier);
+        Bank baseBank = registry.get(identifier);
 
         String title = baseBank.getTitle();
         if (!BankPlus.INSTANCE.isPlaceholderAPIHooked()) title = BPChat.color(title);

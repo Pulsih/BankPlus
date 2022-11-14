@@ -1,4 +1,4 @@
-package me.pulsi_.bankplus.bankGuis;
+package me.pulsi_.bankplus.bankGuis.objects;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -12,10 +12,7 @@ import org.bukkit.scheduler.BukkitTask;
 import java.io.File;
 import java.io.IOException;
 
-/**
- * Class that represents a bank.
- */
-public class BankGui {
+public class Bank {
 
     private final String identifier;
     private final File bankFile;
@@ -29,11 +26,11 @@ public class BankGui {
     private BukkitTask inventoryUpdateTask;
     private ConfigurationSection items, upgrades, banksListGuiItems, settings;
 
-    public BankGui(String identifier) {
+    public Bank(String identifier) {
         this(identifier, null);
     }
 
-    public BankGui(String identifier, String title, int size, int updateDelay, ItemStack[] content) {
+    public Bank(String identifier, String title, int size, int updateDelay, ItemStack[] content) {
         this.identifier = identifier;
         this.bankFile = null;
         this.bankConfig = null;
@@ -46,7 +43,7 @@ public class BankGui {
         this.content = content;
     }
 
-    public BankGui(String identifier, ItemStack[] content) {
+    public Bank(String identifier, ItemStack[] content) {
         this.identifier = identifier;
         File file = new File(BankPlus.INSTANCE.getDataFolder(), "banks" + File.separator + identifier + ".yml");
         if (!file.exists()) {

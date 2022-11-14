@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.bankGuis;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayer;
+import me.pulsi_.bankplus.bankGuis.objects.Bank;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPItems;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -31,13 +32,13 @@ public class BanksListGui {
     public void openMultipleBanksGui(Player p) {
         BankPlusPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
 
-        BankGui openedBank = player.getOpenedBank();
+        Bank openedBank = player.getOpenedBank();
         if (openedBank != null) {
             BukkitTask task = openedBank.getInventoryUpdateTask();
             if (task != null) task.cancel();
         }
 
-        BankGui baseBanksListGui = BankPlus.INSTANCE.getBankGuiRegistry().get(multipleBanksGuiID);
+        Bank baseBanksListGui = BankPlus.INSTANCE.getBankGuiRegistry().get(multipleBanksGuiID);
 
         String title = baseBanksListGui.getTitle();
         if (!BankPlus.INSTANCE.isPlaceholderAPIHooked()) title = BPChat.color(title);
@@ -57,7 +58,7 @@ public class BanksListGui {
     }
 
     public void loadMultipleBanksGui() {
-        String title = Values.MULTIPLE_BANKS.getBanksGuiTitle() == null ? BPChat.color("&c&l * TITLE NOT FOUND *") : BPChat.color(Values.MULTIPLE_BANKS.getBanksGuiTitle());
+        String title = BPChat.color(Values.MULTIPLE_BANKS.getBanksGuiTitle() == null ? "&c&l * TITLE NOT FOUND *" : Values.MULTIPLE_BANKS.getBanksGuiTitle());
         Inventory gui = Bukkit.createInventory(new BanksHolder(), Values.MULTIPLE_BANKS.getBanksGuiLines(), title);
 
         if (Values.MULTIPLE_BANKS.isFillerEnabled()) {
@@ -65,7 +66,7 @@ public class BanksListGui {
             for (int i = 0; i < gui.getSize(); i++) gui.setItem(i, filler);
         }
 
-        BankGui multipleBanksGui = new BankGui(
+        Bank multipleBanksGui = new Bank(
                 multipleBanksGuiID, title, Values.MULTIPLE_BANKS.getBanksGuiLines(), getSize(Values.MULTIPLE_BANKS.getUpdateDelay()), gui.getContents()
         );
         BankPlus.INSTANCE.getBankGuiRegistry().put("MultipleBanksGui", multipleBanksGui);
@@ -77,6 +78,8 @@ public class BanksListGui {
         int slot = 0;
 
         for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
+            if (bankName.equals(multipleBanksGuiID)) continue;
+
             ItemStack bankItem;
             Material material;
 
@@ -86,13 +89,9 @@ public class BanksListGui {
             if (section == null) material = DEFAULT_MATERIAL;
             else {
                 try {
-                    if (banksManager.isAvailable(p)) {
-                        material = Material.valueOf(section.getString("Available.Material"));
-                        glow = section.getBoolean("Available.Glowing");
-                    } else {
-                        material = Material.valueOf(section.getString("Unavailable.Material"));
-                        glow = section.getBoolean("Unavailable.Glowing");
-                    }
+                    String path = banksManager.isAvailable(p) ? "Available." : "Unavailable.";
+                    material = Material.valueOf(section.getString(path + "Material"));
+                    glow = section.getBoolean(path + "Glowing");
                 } catch (IllegalArgumentException e) {
                     material = BPItems.UNKNOWN_MATERIAL;
                 }
@@ -112,28 +111,21 @@ public class BanksListGui {
             ItemStack item = banksList.getItem(slot);
             slot++;
             if (item == null) continue;
-            ItemMeta meta = item.getItemMeta();
 
+            ItemMeta meta = item.getItemMeta();
             String displayname = "&c&l* DISPLAYNAME NOT FOUND *";
             List<String> lore = new ArrayList<>();
-            int modelData;
 
             BanksManager banksManager = new BanksManager(bankName);
             ConfigurationSection section = banksManager.getBanksGuiItemSection();
             if (section != null) {
-                boolean hasPerm = banksManager.hasPermission();
-                String perm = banksManager.getPermission();
-                if (!hasPerm || p.hasPermission(perm)) {
-                    String dName = section.getString("Available.Displayname");
-                    displayname = dName == null ? "&c&l* DISPLAYNAME NOT FOUND *" : dName;
-                    lore = section.getStringList("Available.Lore");
-                    modelData = section.getInt("Available.CustomModelData");
-                } else {
-                    String dName = section.getString("Unavailable.Displayname");
-                    displayname = dName == null ? "&c&l* DISPLAYNAME NOT FOUND *" : dName;
-                    lore = section.getStringList("Unavailable.Lore");
-                    modelData = section.getInt("Unavailable.CustomModelData");
-                }
+                String path = (!banksManager.hasPermissionSection() || p.hasPermission(banksManager.getPermission())) ? "Available." : "Unavailable.";
+
+                String dName = section.getString(path + "Displayname");
+                displayname = dName == null ? "&c&l* DISPLAYNAME NOT FOUND *" : dName;
+                lore = section.getStringList(path + "Lore");
+                int modelData = section.getInt(path + "CustomModelData");
+
                 if (modelData > 0) {
                     try {
                         meta.setCustomModelData(modelData);

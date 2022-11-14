@@ -1,6 +1,6 @@
 package me.pulsi_.bankplus.account;
 
-import me.pulsi_.bankplus.bankGuis.BankGui;
+import me.pulsi_.bankplus.bankGuis.objects.Bank;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
@@ -12,7 +12,7 @@ public class BankPlusPlayer {
     private final Player player;
     private final File playerFile;
     private final FileConfiguration playerConfig;
-    private BankGui openedBank;
+    private Bank openedBank;
     private HashMap<String, String> playerBankClickHolder;
     private int banktopPosition = -1;
 
@@ -34,7 +34,7 @@ public class BankPlusPlayer {
         return playerConfig;
     }
 
-    public BankGui getOpenedBank() {
+    public Bank getOpenedBank() {
         return openedBank;
     }
 
@@ -46,7 +46,7 @@ public class BankPlusPlayer {
         return banktopPosition;
     }
 
-    public void setOpenedBank(BankGui openedBank) {
+    public void setOpenedBank(Bank openedBank) {
         this.openedBank = openedBank;
     }
 

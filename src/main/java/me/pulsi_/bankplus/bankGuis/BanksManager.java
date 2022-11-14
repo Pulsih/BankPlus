@@ -4,6 +4,7 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
+import me.pulsi_.bankplus.bankGuis.objects.Bank;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -19,18 +20,14 @@ import java.util.List;
 
 public class BanksManager {
     
-    private final BankGui bank;
+    private final Bank bank;
 
-    public BanksManager() {
-        this.bank = null;
-    }
-    
     public BanksManager(String bankName) {
         this.bank = BankPlus.INSTANCE.getBankGuiRegistry().get(bankName);
     }
 
-    public boolean exist(String bankName) {
-        return BankPlus.INSTANCE.getBankGuiRegistry().contains(bankName);
+    public boolean exist() {
+        return bank != null;
     }
 
     public File getFile() {
@@ -73,7 +70,7 @@ public class BanksManager {
         return bank.getSettings() != null;
     }
 
-    public boolean hasPermission() {
+    public boolean hasPermissionSection() {
         return bank.getPermission() != null;
     }
 
@@ -105,7 +102,7 @@ public class BanksManager {
     public BigDecimal getCapacity(OfflinePlayer p) {
         if (!hasUpgrades()) return Values.CONFIG.getMaxBankCapacity();
 
-        FileConfiguration config = new BankPlusPlayerFiles(p).getPlayerConfig();
+        FileConfiguration config = new BankPlusPlayerFiles(p).getOfflinePlayerConfig();
         int level = Math.max(config.getInt("Banks." + bank.getIdentifier() + ".Level"), 1);
         String capacity = getUpgrades().getString(level + ".Capacity");
         return new BigDecimal(capacity == null ? Values.CONFIG.getMaxBankCapacity().toString() : capacity);
@@ -118,11 +115,6 @@ public class BanksManager {
         return new BigDecimal(cost == null ? "0" : cost);
     }
 
-    public int getLevel(Player p) {
-        FileConfiguration config = new BankPlusPlayerFiles(p).getPlayerConfig();
-        return Math.max(config.getInt("Banks." + bank.getIdentifier() + ".Level"), 1);
-    }
-
     public List<String> getLevels() {
         List<String> levels = new ArrayList<>();
         if (!hasUpgrades()) {
@@ -132,6 +124,11 @@ public class BanksManager {
 
         levels.addAll(getUpgrades().getKeys(false));
         return levels;
+    }
+
+    public int getLevel(Player p) {
+        FileConfiguration config = new BankPlusPlayerFiles(p).getPlayerConfig();
+        return Math.max(config.getInt("Banks." + bank.getIdentifier() + ".Level"), 1);
     }
 
     public boolean hasNextLevel(Player p) {
@@ -161,12 +158,12 @@ public class BanksManager {
     }
 
     public boolean isAvailable(Player p) {
-        if (!hasPermission()) return true;
+        if (!hasPermissionSection()) return true;
         else return p.hasPermission(getPermission());
     }
 
     public boolean isAvailable(OfflinePlayer p) {
-        if (!hasPermission()) return true;
+        if (!hasPermissionSection()) return true;
         else {
             String wName = Bukkit.getWorlds().get(0).getName();
             return BankPlus.INSTANCE.getPermissions().playerHas(wName, p, getPermission());
@@ -203,7 +200,7 @@ public class BanksManager {
         BPMessages.send(p, "Bank-Upgraded");
     }
 
-    public BankGui getBank() {
+    public Bank getBank() {
         return bank;
     }
 }

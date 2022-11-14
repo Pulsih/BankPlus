@@ -93,6 +93,7 @@ Items:
       # Action list:
       # - [WITHDRAW] <amount>
       # - [DEPOSIT] <amount>
+      # - [UPGRADE] ( As the name says, is a shortcut for the command /bank upgrade )
       # * The amount can be a number, a % or "CUSTOM"
       #
       # - [PLAYER] <chat> ( Force the player to chat, it can also be a command. )
@@ -109,6 +110,7 @@ Items:
       - ""
       - "&9&l* &aWithdraw &925% &aof the money from your bank."
       - ""
+    Glowing: true
     Actions:
       - "[WITHDRAW] 25%"
 

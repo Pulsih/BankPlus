@@ -152,7 +152,7 @@ public class Interest {
 
         MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
         BigDecimal interestAmount = new BigDecimal(0);
-        for (String bankName : new BanksManager().getAvailableBanks(p)) {
+        for (String bankName : new BanksManager(null).getAvailableBanks(p)) {
             BigDecimal bankBalance = multiEconomyManager.getBankBalance(bankName);
             BigDecimal interestMoney = bankBalance.multiply(Values.CONFIG.getInterestMoneyGiven().divide(BigDecimal.valueOf(100)));
             BigDecimal maxBankCapacity = new BanksManager(bankName).getCapacity(p), maxAmount = Values.CONFIG.getInterestMaxAmount();
@@ -220,7 +220,7 @@ public class Interest {
             boolean hasToSave = false;
 
             MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
-            for (String bankName : new BanksManager().getAvailableBanks(p)) {
+            for (String bankName : new BanksManager(null).getAvailableBanks(p)) {
                 if (p.isOnline()) continue;
 
                 boolean hasPermission = false;

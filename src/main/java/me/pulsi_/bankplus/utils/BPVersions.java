@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.bankGuis.objects.Bank;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
@@ -10,9 +11,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.*;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * This class will be changed between version, it will be used to add the compatibility
@@ -22,7 +21,50 @@ import java.util.Scanner;
 public class BPVersions {
 
     /**
-     * Will be removed in 6.1, used from versions older than 5.8.
+     * Will be removed in 6.1, used for versions older than 5.8.
+     */
+    public static void updateBankFileActions() {
+        for (Bank bank : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().values()) {
+            FileConfiguration config = bank.getBankConfig();
+
+            ConfigurationSection items = config.getConfigurationSection("Items");
+            if (items == null) continue;
+
+            for (String item : items.getKeys(false)) {
+                ConfigurationSection values = config.getConfigurationSection("Items." + item);
+                if (values == null || values.getString("Action") == null) continue;
+                String actionType = values.getString("Action.Action-Type"), actionAmount = values.getString("Action.Amount");
+
+                if (actionType == null) continue;
+                actionType = actionType.toUpperCase();
+
+                if (actionAmount == null) {
+                    config.set("Items." + item + ".Actions", Collections.singletonList("[" + actionType + "]"));
+                    config.set("Items." + item + ".Action", null);
+                    continue;
+                }
+
+                switch (actionAmount) {
+                    case "ALL":
+                        actionAmount = "100%";
+                        break;
+                    case "HALF":
+                        actionAmount = "50%";
+                }
+
+                config.set("Items." + item + ".Actions", Collections.singletonList("[" + actionType + "]" + " " + actionAmount));
+                config.set("Items." + item + ".Action", null);
+            }
+            try {
+                config.save(bank.getBankFile());
+            } catch (IOException e) {
+                BPLogger.error("Could not save the " + bank.getIdentifier() + " bank file: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Will be removed in 6.1, used for versions older than 5.8.
      */
     public static void renameGeneralSection(File file) {
         List<String> lines = new ArrayList<>();
@@ -51,7 +93,7 @@ public class BPVersions {
     }
 
     /**
-     * Will be removed in 6.0, used from versions older than 5.7.
+     * Will be removed in 6.0, used for versions older than 5.7.
      */
     public static void moveBankFileToBanksFolder() {
         File oldBankFile = new File(BankPlus.INSTANCE.getDataFolder(), "bank.yml");
@@ -107,9 +149,9 @@ public class BPVersions {
     }
 
     /**
-     * Will be removed in 6.0, used from versions older than 5.7.
+     * Will be removed in 6.0, used for versions older than 5.7.
      */
-    public static void changePlayerStoragePosition(int point) {
+    public static void changePlayerStoragePosition() {
         File playersFile = new File(BankPlus.INSTANCE.getDataFolder(), "players.yml");
         if (!playersFile.exists()) return;
 
@@ -128,7 +170,7 @@ public class BPVersions {
         if (players == null) return;
 
         List<String> playersIdentifiers = new ArrayList<>(players.getKeys(false));
-        subChangePlayerStoragePosition(players, playersIdentifiers, point);
+        subChangePlayerStoragePosition(players, playersIdentifiers, 0);
     }
 
     private static void subChangePlayerStoragePosition(ConfigurationSection players, List<String> playersIdentifiers, int point) {

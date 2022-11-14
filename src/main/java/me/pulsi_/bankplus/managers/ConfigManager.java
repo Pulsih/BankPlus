@@ -195,12 +195,10 @@ public class ConfigManager {
 
         try {
             oldConfig.load(newConfigFile);
-        } catch (Exception e) {
-
-        }
+        } catch (Exception ignored) { }
 
         addComments(newConfig,
-                "oldConfiguration File of BankPlus",
+                "Configuration File of BankPlus",
                 "Made by Pulsi_, Version v" + plugin.getDescription().getVersion());
         addSpace(newConfig);
 
@@ -350,7 +348,7 @@ public class ConfigManager {
                 "in chat while using the custom withdraw / deposit.",
                 "",
                 "You can put as many commands as you want.");
-        validatePath(oldConfig, newConfig, "General-Settings.Chat-Exit-Commands", "[]");
+        validatePath(oldConfig, newConfig, "General-Settings.Chat-Exit-Commands", new ArrayList<>());
         addCommentsUnder(newConfig, "General-Settings",
                 "- \"[CONSOLE] tell %player% You typed in chat!\"",
                 "- \"[PLAYER] say I typed in chat!\"");
@@ -418,8 +416,8 @@ public class ConfigManager {
                 "The player needs to have the permission",
                 "\"bankplus.withdraw\" to be able to deposit.");
         addCommentsUnder(newConfig, "Withdraw-Settings", "The max amount to withdraw per time, use 0 to disable.");
-        validatePath(oldConfig, newConfig, "Withdraw-Settings.Max-Withdrawn-Amount", getValueFromOldPath(oldConfig,
-                "General-Settings.Max-Withdraw-Amount", "Withdraw-Settings.Max-Withdrawn-Amount", "0"));
+        validatePath(oldConfig, newConfig, "Withdraw-Settings.Max-Withdraw-Amount", getValueFromOldPath(oldConfig,
+                "General-Settings.Max-Withdraw-Amount", "Withdraw-Settings.Max-Withdraw-Amount", "0"));
         addSpace(newConfig, "Withdraw-Settings");
 
         addCommentsUnder(newConfig, "Withdraw-Settings", "The minimum amount to withdraw per time, use 0 to disable.");

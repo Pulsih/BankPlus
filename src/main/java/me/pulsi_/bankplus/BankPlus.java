@@ -102,7 +102,8 @@ public final class BankPlus extends JavaPlugin {
         wasOnSingleEconomy = !Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled();
 
         BPVersions.moveBankFileToBanksFolder();
-        BPVersions.changePlayerStoragePosition(0);
+        BPVersions.changePlayerStoragePosition();
+        BPVersions.updateBankFileActions();
     }
 
     @Override

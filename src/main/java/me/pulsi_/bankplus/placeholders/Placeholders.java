@@ -56,7 +56,7 @@ public class Placeholders extends PlaceholderExpansion {
                 if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
                     return "The multiple-banks module is disabled.";
                 String bankName = identifier.substring(identifier.indexOf("{") + 1, identifier.indexOf("}"));
-                if (!new BanksManager().exist(bankName)) return "The selected bank does not exist.";
+                if (!new BanksManager(bankName).exist()) return "The selected bank does not exist.";
                 capacity = new BanksManager(bankName).getCapacity(p);
             }
             String formatter = identifier.replace("capacity", "");
@@ -72,7 +72,7 @@ public class Placeholders extends PlaceholderExpansion {
                 if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
                     return "The multiple-banks module is disabled.";
                 String bankName = identifier.substring(identifier.indexOf("{") + 1, identifier.indexOf("}"));
-                if (!new BanksManager().exist(bankName)) return "The selected bank does not exist.";
+                if (!new BanksManager(bankName).exist()) return "The selected bank does not exist.";
                 level = String.valueOf(new BanksManager(bankName).getLevel(p));
             }
             return level;
@@ -87,7 +87,7 @@ public class Placeholders extends PlaceholderExpansion {
                 if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
                     return "The multiple-banks module is disabled.";
                 String bankName = identifier.substring(identifier.indexOf("{") + 1, identifier.indexOf("}"));
-                if (!new BanksManager().exist(bankName)) return "The selected bank does not exist.";
+                if (!new BanksManager(bankName).exist()) return "The selected bank does not exist.";
                 if (!new BanksManager(bankName).hasNextLevel(p)) return BPChat.color(Values.CONFIG.getBankUpgradedMax());
                 cost = new BanksManager(bankName).getLevelCost(new BanksManager(bankName).getLevel(p) + 1);
             }
@@ -106,7 +106,7 @@ public class Placeholders extends PlaceholderExpansion {
                 if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
                     return "The multiple-banks module is disabled.";
                 String bankName = identifier.substring(identifier.indexOf("{") + 1, identifier.indexOf("}"));
-                if (!new BanksManager().exist(bankName)) return "The selected bank does not exist.";
+                if (!new BanksManager(bankName).exist()) return "The selected bank does not exist.";
                 bal = multiEconomyManager.getBankBalance(bankName);
             }
             String formatter = identifier.replace("balance", "");
@@ -123,7 +123,7 @@ public class Placeholders extends PlaceholderExpansion {
                 if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
                     return "The multiple-banks module is disabled.";
                 String bankName = identifier.substring(identifier.indexOf("{") + 1, identifier.indexOf("}"));
-                if (!new BanksManager().exist(bankName)) return "The selected bank does not exist.";
+                if (!new BanksManager(bankName).exist()) return "The selected bank does not exist.";
                 interestMoney = multiEconomyManager.getBankBalance(bankName).multiply(percentage);
             }
             String formatter = identifier.replace("next_interest", "");

@@ -65,14 +65,33 @@ public class BankClickMethod {
             Economy economy = BankPlus.INSTANCE.getEconomy();
 
             for (String actionType : actions) {
-                String identifier = actionType.split(" ")[0], value = actionType.split(" ")[1];
+                String[] parts = actionType.split(" ");
+                String identifier = parts.length > 0 ? parts[0] : null, value = null;
+
+                if (identifier == null) continue;
+                else {
+                    if (parts.length != 1) {
+                        for (int i = 1; i < parts.length; i++) {
+                            value += parts[i];
+                            if (i + 1 < parts.length) value += " ";
+                        }
+                    }
+                }
 
                 switch (identifier) {
                     case "[CONSOLE]":
+                        if (value == null) {
+                            BPLogger.warn("Cannot dispatch console command! The action " + identifier + " in the bank " + bankName + " does not specify a command!");
+                            return;
+                        }
                         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), value);
                         break;
 
                     case "[DEPOSIT]":
+                        if (value == null) {
+                            BPLogger.warn("Cannot deposit for " + p.getName() + "! The action " + identifier + " in the bank " + bankName + " does not specify a value!");
+                            return;
+                        }
                         if (value.equals("CUSTOM")) {
                             BPMethods.customDeposit(p, bankName);
                             return;
@@ -87,11 +106,15 @@ public class BankClickMethod {
                             BPLogger.error("Invalid deposit number! (Path: " + itemValues + ", Number: " + value + ")");
                             continue;
                         }
-                        if (isMulti) multiEconomyManager.deposit(amount, bankName);
-                        else singleEconomyManager.deposit(amount);
+                        if (!isMulti) singleEconomyManager.deposit(amount);
+                        else multiEconomyManager.deposit(amount, bankName);
                         break;
 
                     case "[PLAYER]":
+                        if (value == null) {
+                            BPLogger.warn("Cannot force chat for " + p.getName() + "! The action " + identifier + " in the bank " + bankName + " does not specify a value!");
+                            return;
+                        }
                         p.chat(value);
                         break;
 
@@ -100,6 +123,10 @@ public class BankClickMethod {
                         break;
 
                     case "[WITHDRAW]":
+                        if (value == null) {
+                            BPLogger.warn("Cannot withdraw for " + p.getName() + "! The action " + identifier + " in the bank " + bankName + " does not specify a value!");
+                            return;
+                        }
                         if (value.equals("CUSTOM")) {
                             BPMethods.customWithdraw(p, bankName);
                             return;
@@ -108,14 +135,15 @@ public class BankClickMethod {
                             if (!value.endsWith("%")) amount = new BigDecimal(value);
                             else {
                                 BigDecimal percentage = new BigDecimal(value.replace("%", "")).divide(BigDecimal.valueOf(100));
-                                amount = BigDecimal.valueOf(economy.getBalance(p)).multiply(percentage);
+                                if (!isMulti) amount = singleEconomyManager.getBankBalance().multiply(percentage);
+                                else amount = multiEconomyManager.getBankBalance(bankName).multiply(percentage);
                             }
                         } catch (NumberFormatException ex) {
                             BPLogger.error("Invalid withdraw number! (Path: " + itemValues + ", Number: " + value + ")");
                             continue;
                         }
-                        if (isMulti) multiEconomyManager.withdraw(amount, bankName);
-                        else singleEconomyManager.withdraw(amount);
+                        if (!isMulti) singleEconomyManager.withdraw(amount);
+                        else multiEconomyManager.withdraw(amount, bankName);
                 }
             }
         }

@@ -139,6 +139,10 @@ public class BPMethods {
      */
     public static boolean isInvalidNumber(String number, CommandSender s) {
         try {
+            if (number == null) {
+                BPMessages.send(s, "Invalid-Number");
+                return true;
+            }
             if (Values.CONFIG.getMaxDecimalsAmount() <= 0 && number.contains(".")) {
                 if (s != null) BPMessages.send(s, "Invalid-Number");
                 return true;
@@ -405,16 +409,12 @@ public class BPMethods {
         return days * hoursInMilliseconds(24);
     }
 
-    public static boolean hasMoney(BigDecimal money, BigDecimal amount, Player p) {
+    public static boolean checkPreRequisites(BigDecimal money, BigDecimal amount, Player p) {
         if (amount.doubleValue() < 0) {
             BPMessages.send(p, "Cannot-Use-Negative-Number");
             return false;
         }
-        if (amount.doubleValue() < Values.CONFIG.getDepositMinimumAmount().doubleValue()) {
-            BPMessages.send(p, "Minimum-Number");
-            return false;
-        }
-        if (money.doubleValue() == 0 || money.doubleValue() < amount.doubleValue()) {
+        if (money.doubleValue() <= 0) {
             BPMessages.send(p, "Insufficient-Money");
             return false;
         }

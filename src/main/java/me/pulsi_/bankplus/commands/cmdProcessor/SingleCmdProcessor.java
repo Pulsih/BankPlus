@@ -127,14 +127,14 @@ public class SingleCmdProcessor {
                     BPMessages.send(s, "Specify-Bank");
                     return;
                 }
-                String identifier = args[2];
+                String bankName = args[2];
 
-                if (!new BanksManager().exist(identifier)) {
+                if (!new BanksManager(bankName).exist()) {
                     BPMessages.send(s, "Invalid-Bank");
                     return;
                 }
-                banksHolder.openBank(p, identifier);
-                BPMessages.send(s, "Force-Open", "%player%$" + p.getName(), "%bank%$", identifier);
+                banksHolder.openBank(p, bankName);
+                BPMessages.send(s, "Force-Open", "%player%$" + p.getName(), "%bank%$", bankName);
             }
             break;
 
@@ -177,7 +177,7 @@ public class SingleCmdProcessor {
                 Player p = Bukkit.getPlayerExact(args[1]);
                 if (p == null) {
                     OfflinePlayer oP = Bukkit.getOfflinePlayer(args[1]);
-                    BPMessages.send(s, "Bank-Others", BPMethods.placeValues(oP, new SingleEconomyManager(oP).getBankBalance()));
+                    BPMessages.send(s, "Bank-Others", BPMethods.placeValues(oP, new SingleEconomyManager(oP).getOfflineBankBalance()));
                     return;
                 }
                 BPMessages.send(s, "Bank-Others", BPMethods.placeValues(p, new SingleEconomyManager(p).getBankBalance()));

@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.bankGuis;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.bankGuis.objects.Bank;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPItems;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -22,17 +23,17 @@ import java.util.*;
 
 public class BankGuiRegistry {
 
-    private final HashMap<String, BankGui> banks = new HashMap<>();
+    private final HashMap<String, Bank> banks = new HashMap<>();
 
-    public void put(String identifier, BankGui bank) {
+    public void put(String identifier, Bank bank) {
         banks.put(identifier, bank);
     }
 
-    public BankGui get(String identifier) {
+    public Bank get(String identifier) {
         return banks.get(identifier);
     }
 
-    public BankGui remove(String identifier) {
+    public Bank remove(String identifier) {
         return banks.remove(identifier);
     }
 
@@ -40,12 +41,12 @@ public class BankGuiRegistry {
         return banks.containsKey(identifier);
     }
 
-    public HashMap<String, BankGui> getBanks() {
+    public HashMap<String, Bank> getBanks() {
         return banks;
     }
 
     public boolean loadBanks() {
-        HashMap<String, BankGui> banks = BankPlus.INSTANCE.getBankGuiRegistry().getBanks();
+        HashMap<String, Bank> banks = BankPlus.INSTANCE.getBankGuiRegistry().getBanks();
         File file = new File(BankPlus.INSTANCE.getDataFolder(), "banks");
         File[] files = file.listFiles();
 
@@ -92,7 +93,7 @@ public class BankGuiRegistry {
             }
 
             String identifier = bankFile.getName().replace(".yml", "");
-            BankGui bank = new BankGui(identifier);
+            Bank bank = new Bank(identifier);
 
             ItemStack[] content = null;
             ConfigurationSection items = bankConfig.getConfigurationSection("Items");

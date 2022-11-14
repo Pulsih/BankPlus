@@ -76,7 +76,7 @@ public class ConfigValues {
         interestDelay = config.getString("Interest.Delay");
         interestOfflinePermission = config.getString("Interest.Offline-Permission");
         maxDepositAmount = config.getString("Deposit-Settings.Max-Deposit-Amount");
-        maxWithdrawAmount = config.getString("Withdraw-Settings.Max-Withdrawn-Amount");
+        maxWithdrawAmount = config.getString("Withdraw-Settings.Max-Withdraw-Amount");
         depositTaxes = config.getString("Deposit-Settings.Deposit-Taxes");
         withdrawTaxes = config.getString("Withdraw-Settings.Withdraw-Taxes");
         depositMinimumAmount = config.getString("Deposit-Settings.Minimum-Deposit-Amount");

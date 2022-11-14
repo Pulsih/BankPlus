@@ -1,6 +1,6 @@
 package me.pulsi_.bankplus.utils;
 
-import me.pulsi_.bankplus.bankGuis.BankGui;
+import me.pulsi_.bankplus.bankGuis.objects.Bank;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.configuration.ConfigurationSection;
@@ -113,7 +113,7 @@ public class BPItems {
         return item;
     }
 
-    public static ItemStack getFiller(BankGui bank) {
+    public static ItemStack getFiller(Bank bank) {
         ItemStack item;
         try {
             String material = bank.getFillerMaterial();

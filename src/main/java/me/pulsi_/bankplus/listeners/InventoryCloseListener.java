@@ -2,7 +2,7 @@ package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayer;
-import me.pulsi_.bankplus.bankGuis.BankGui;
+import me.pulsi_.bankplus.bankGuis.objects.Bank;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -18,7 +18,7 @@ public class InventoryCloseListener implements Listener {
         BankPlusPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
         if (player == null) return;
 
-        BankGui openedBank = player.getOpenedBank();
+        Bank openedBank = player.getOpenedBank();
         if (openedBank != null) {
             BukkitTask task = openedBank.getInventoryUpdateTask();
             if (task != null) task.cancel();

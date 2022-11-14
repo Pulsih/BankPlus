@@ -4,7 +4,7 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayer;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.bankGuis.BankGui;
+import me.pulsi_.bankplus.bankGuis.objects.Bank;
 import me.pulsi_.bankplus.utils.BPSets;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.entity.Player;
@@ -29,7 +29,7 @@ public class PlayerQuitListener implements Listener {
         }
         BankPlusPlayer player = BankPlus.INSTANCE.getPlayerRegistry().remove(p);
 
-        BankGui openedBank = player.getOpenedBank();
+        Bank openedBank = player.getOpenedBank();
         if (openedBank != null) {
             BukkitTask task = openedBank.getInventoryUpdateTask();
             if (task != null) task.cancel();
