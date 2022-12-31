@@ -28,7 +28,7 @@ public class PlayerQuitListener implements Listener {
             economyManager.unloadBankBalance();
         }
         BankPlusPlayer player = BankPlus.INSTANCE.getPlayerRegistry().remove(p);
-
+        if (player == null) return;
         Bank openedBank = player.getOpenedBank();
         if (openedBank != null) {
             BukkitTask task = openedBank.getInventoryUpdateTask();
