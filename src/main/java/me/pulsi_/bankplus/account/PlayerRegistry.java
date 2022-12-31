@@ -14,13 +14,6 @@ public class PlayerRegistry {
     }
 
     public BankPlusPlayer get(Player p) {
-        if (!contains(p)) {
-            BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
-            files.registerPlayer();
-            BankPlusPlayer player = new BankPlusPlayer(p, files.getPlayerFile(), files.getPlayerConfig());
-            put(p, player);
-            return player;
-        }
         return players.get(p.getUniqueId());
     }
 
