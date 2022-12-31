@@ -42,7 +42,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
 
                 case "help":
                     if (BPMethods.hasPermission(s, "bankplus.help")) BPMessages.send(s, "Help-Message");
-                    break;
+                    return true;
 
                 case "restartinterest": {
                     if (!BPMethods.hasPermission(s, "bankplus.restart-interest")) return false;
