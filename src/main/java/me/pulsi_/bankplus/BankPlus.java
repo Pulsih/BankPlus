@@ -101,6 +101,14 @@ public final class BankPlus extends JavaPlugin {
         if (Values.CONFIG.isUpdateCheckerEnabled()) Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> isUpdated = isPluginUpdated(), 0, (8 * 1200) * 60);
         wasOnSingleEconomy = !Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled();
 
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
+            files.registerPlayer();
+
+            BankPlusPlayer player = new BankPlusPlayer(p, files.getPlayerFile(), files.getPlayerConfig());
+            BankPlus.INSTANCE.getPlayerRegistry().put(p, player);
+        }
+
         BPVersions.moveBankFileToBanksFolder();
         BPVersions.changePlayerStoragePosition();
         BPVersions.updateBankFileActions();
