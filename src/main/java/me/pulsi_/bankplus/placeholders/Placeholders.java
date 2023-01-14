@@ -29,7 +29,7 @@ public class Placeholders extends PlaceholderExpansion {
 
     @Override
     public @NotNull String getAuthor() {
-        return BankPlus.INSTANCE.getDescription().getAuthors().toString();
+        return "Pulsi_";
     }
 
     @Override

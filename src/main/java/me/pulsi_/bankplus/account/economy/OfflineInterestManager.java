@@ -1,7 +1,6 @@
 package me.pulsi_.bankplus.account.economy;
 
 import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
-import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -11,47 +10,25 @@ import java.math.BigDecimal;
 
 public class OfflineInterestManager {
 
-    private final Player player;
-    private final OfflinePlayer offlinePlayer;
+    private final Player p;
 
-    public OfflineInterestManager(Player player) {
-        this.player = player;
-        this.offlinePlayer = null;
+    public OfflineInterestManager(Player p) {
+        this.p = p;
     }
 
-    public OfflineInterestManager(OfflinePlayer offlinePlayer) {
-        this.player = null;
-        this.offlinePlayer = offlinePlayer;
+    public OfflineInterestManager(OfflinePlayer p) {
+        this.p = p.getPlayer();
     }
 
     public BigDecimal getOfflineInterest() {
-        if (player == null && offlinePlayer == null) {
-            BPLogger.error("Cannot get offline interest because the player is null!");
-            return null;
-        }
-
-        String interest;
-        if (player != null) interest = new BankPlusPlayerFiles(player).getPlayerConfig().getString("Offline-Interest");
-        else interest = new BankPlusPlayerFiles(offlinePlayer).getOfflinePlayerConfig().getString("Offline-Interest");
-
-        return interest == null ? new BigDecimal(0) : new BigDecimal(interest);
+        String interest = new BankPlusPlayerFiles(p).getPlayerConfig().getString("Offline-Interest");
+        return new BigDecimal(interest == null ? "0" : interest);
     }
 
     public void setOfflineInterest(BigDecimal amount, boolean save) {
-        if (player == null && offlinePlayer == null) {
-            BPLogger.error("Cannot set offline interest because the player is null!");
-            return;
-        }
-
-        if (player != null) {
-            BankPlusPlayerFiles files = new BankPlusPlayerFiles(player);
-            files.getPlayerConfig().set("Offline-Interest", BPMethods.formatBigDouble(amount));
-            if (save) files.savePlayerFile(true);
-        } else {
-            BankPlusPlayerFiles files = new BankPlusPlayerFiles(offlinePlayer);
-            FileConfiguration config = files.getOfflinePlayerConfig();
-            config.set("Offline-Interest", BPMethods.formatBigDouble(amount));
-            if (save) files.saveOfflinePlayerFile(config, true);
-        }
+        BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
+        FileConfiguration config = files.getPlayerConfig();
+        config.set("Offline-Interest", BPMethods.formatBigDouble(amount));
+        if (save) files.savePlayerFile(config, true);
     }
 }

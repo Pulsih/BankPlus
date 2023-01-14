@@ -234,7 +234,7 @@ public class MultiCmdProcessor {
                     Player p = Bukkit.getPlayerExact(args[1]);
                     if (p == null) {
                         OfflinePlayer oP = Bukkit.getOfflinePlayer(args[1]);
-                        BPMessages.send(s, "Multiple-Bank-Others", BPMethods.placeValues(oP, new MultiEconomyManager(oP).getOfflineBankBalance()));
+                        BPMessages.send(s, "Multiple-Bank-Others", BPMethods.placeValues(oP, new MultiEconomyManager(oP).getBankBalance()));
                         return;
                     }
                     BPMessages.send(s, "Multiple-Bank-Others", BPMethods.placeValues(p, new MultiEconomyManager(p).getBankBalance()));
@@ -252,7 +252,7 @@ public class MultiCmdProcessor {
                             BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + oP.getName());
                             return;
                         }
-                        BPMessages.send(s, "Bank-Others", BPMethods.placeValues(oP, new MultiEconomyManager(oP).getOfflineBankBalance(bankName)));
+                        BPMessages.send(s, "Bank-Others", BPMethods.placeValues(oP, new MultiEconomyManager(oP).getBankBalance(bankName)));
                         return;
                     }
                     if (!new BanksManager(bankName).isAvailable(p)) {
@@ -437,7 +437,7 @@ public class MultiCmdProcessor {
                 if (p == null) {
                     OfflinePlayer oP = Bukkit.getOfflinePlayer(args[1]);
 
-                    BigDecimal capacity = banksManager.getCapacity(oP), balance = new MultiEconomyManager(oP).getOfflineBankBalance(bankName);
+                    BigDecimal capacity = banksManager.getCapacity(oP), balance = new MultiEconomyManager(oP).getBankBalance(bankName);
                     if (capacity.equals(balance)) {
                         BPMessages.send(s, "Bank-Full", "%player%$" + oP.getName());
                         return;
@@ -498,7 +498,7 @@ public class MultiCmdProcessor {
                 if (p == null) {
                     OfflinePlayer oP = Bukkit.getOfflinePlayer(args[1]);
 
-                    BigDecimal capacity = banksManager.getCapacity(oP), balance = new MultiEconomyManager(oP).getOfflineBankBalance(bankName);
+                    BigDecimal capacity = banksManager.getCapacity(oP), balance = new MultiEconomyManager(oP).getBankBalance(bankName);
                     if (capacity.equals(balance)) {
                         BPMessages.send(s, "Bank-Full", "%player%$" + oP.getName());
                         return;
@@ -558,7 +558,7 @@ public class MultiCmdProcessor {
                 if (p == null) {
                     OfflinePlayer oP = Bukkit.getOfflinePlayer(args[1]);
 
-                    BigDecimal balance = new MultiEconomyManager(oP).getOfflineBankBalance(bankName);
+                    BigDecimal balance = new MultiEconomyManager(oP).getBankBalance(bankName);
                     if (balance.equals(new BigDecimal(0))) {
                         BPMessages.send(s, "Bank-Empty", "%player%$" + oP.getName());
                         return;

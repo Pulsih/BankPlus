@@ -19,22 +19,22 @@ import java.math.BigDecimal;
 
 public class BankPlusPlayerFiles {
 
-    private final Player player;
-    private final OfflinePlayer offlinePlayer;
+    private final Player p;
+    private final OfflinePlayer op;
 
-    public BankPlusPlayerFiles(Player player) {
-        this.player = player;
-        this.offlinePlayer = null;
+    public BankPlusPlayerFiles(Player p) {
+        this.p = p;
+        this.op = null;
     }
 
-    public BankPlusPlayerFiles(OfflinePlayer offlinePlayer) {
-        this.player = null;
-        this.offlinePlayer = offlinePlayer;
+    public BankPlusPlayerFiles(OfflinePlayer op) {
+        this.p = null;
+        this.op = op;
     }
 
     public void checkForFileFixes() {
-        SingleEconomyManager singleEconomyManager = new SingleEconomyManager(player);
-        MultiEconomyManager multiEconomyManager = new MultiEconomyManager(player);
+        SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
+        MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
         FileConfiguration config = getPlayerConfig();
 
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
@@ -66,59 +66,45 @@ public class BankPlusPlayerFiles {
         savePlayerFile(true);
     }
 
-    public void registerPlayer() {
-        if (onNull(player, "Cannot register player!")) return;
-        String identifier = Values.CONFIG.isStoringUUIDs() ? player.getUniqueId().toString() : player.getName();
+    public boolean isPlayerRegistered() {
+        String identifier = Values.CONFIG.isStoringUUIDs() ? (p == null ? op.getUniqueId() : p.getUniqueId()).toString() : (p == null ? op.getName() : p.getName());
+
         File file = new File(BankPlus.INSTANCE.getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
-        if (!file.exists()) BPLogger.info("Successfully registered " + player.getName() + "!");
+        if (file.exists()) return false;
+
+        String name = (p != null ? p.getName() : op.getName());
+        BPLogger.info("Successfully registered " + name + "!");
         try {
             file.getParentFile().mkdir();
             file.createNewFile();
         } catch (IOException e) {
-            BPLogger.warn("Something went wrong when registering " + player.getName() + ": " + e.getMessage());
+            BPLogger.warn("Something went wrong when registering " + name + ": " + e.getMessage());
         }
+        return true;
     }
 
     public File getPlayerFile() {
-        if (onNull(player, "Cannot get player file!")) return null;
+        if (p != null) {
+            BankPlusPlayer bankPlusPlayer = BankPlus.INSTANCE.getPlayerRegistry().get(p);
+            if (bankPlusPlayer != null && bankPlusPlayer.getPlayerFile() != null) return bankPlusPlayer.getPlayerFile();
+        }
 
-        BankPlusPlayer bankPlusPlayer = BankPlus.INSTANCE.getPlayerRegistry().get(player);
-        if (bankPlusPlayer != null && bankPlusPlayer.getPlayerFile() != null) return bankPlusPlayer.getPlayerFile();
-
-        String identifier = Values.CONFIG.isStoringUUIDs() ? player.getUniqueId().toString() : player.getName();
-        return new File(BankPlus.INSTANCE.getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
-    }
-
-    public File getOfflinePlayerFile() {
-        if (offNull(offlinePlayer, "Cannot get player file!")) return null;
-        String identifier = Values.CONFIG.isStoringUUIDs() ? offlinePlayer.getUniqueId().toString() : offlinePlayer.getName();
+        String identifier = Values.CONFIG.isStoringUUIDs() ? (p == null ? op.getUniqueId() : p.getUniqueId()).toString() : (p == null ? op.getName() : p.getName());
         return new File(BankPlus.INSTANCE.getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
     }
 
     public FileConfiguration getPlayerConfig() {
-        if (onNull(player, "Cannot get player config!")) return null;
-
-        BankPlusPlayer bankPlusPlayer = BankPlus.INSTANCE.getPlayerRegistry().get(player);
-        if (bankPlusPlayer != null && bankPlusPlayer.getPlayerConfig() != null) return bankPlusPlayer.getPlayerConfig();
+        if (p != null) {
+            BankPlusPlayer bankPlusPlayer = BankPlus.INSTANCE.getPlayerRegistry().get(p);
+            if (bankPlusPlayer != null && bankPlusPlayer.getPlayerConfig() != null) return bankPlusPlayer.getPlayerConfig();
+        }
 
         File file = getPlayerFile();
         FileConfiguration config = new YamlConfiguration();
         try {
             config.load(file);
         } catch (IOException | InvalidConfigurationException e) {
-            BPLogger.warn("Something went wrong while trying to get the " + player.getName() + "'s file configuration: " + e.getMessage());
-        }
-        return config;
-    }
-
-    public FileConfiguration getOfflinePlayerConfig() {
-        if (offNull(offlinePlayer, "Cannot get player config!")) return null;
-        File file = getOfflinePlayerFile();
-        FileConfiguration config = new YamlConfiguration();
-        try {
-            config.load(file);
-        } catch (IOException | InvalidConfigurationException e) {
-            BPLogger.warn("Something went wrong while trying to get the " + offlinePlayer.getName() + "'s file configuration: " + e.getMessage());
+            BPLogger.warn("Something went wrong while trying to get " + op.getName() + "'s file configuration: " + e.getMessage());
         }
         return config;
     }
@@ -144,9 +130,8 @@ public class BankPlusPlayerFiles {
         }
     }
 
-    public void saveOfflinePlayerFile(boolean async) {
-        File file = getOfflinePlayerFile();
-        FileConfiguration config = getOfflinePlayerConfig();
+    public void savePlayerFile(FileConfiguration config, boolean async) {
+        File file = getPlayerFile();
 
         if (!async) {
             save(config, file);
@@ -165,9 +150,7 @@ public class BankPlusPlayerFiles {
         }
     }
 
-    public void saveOfflinePlayerFile(FileConfiguration config, boolean async) {
-        File file = getOfflinePlayerFile();
-
+    public void savePlayerFile(File file, FileConfiguration config, boolean async) {
         if (!async) {
             save(config, file);
             return;
@@ -191,21 +174,5 @@ public class BankPlusPlayerFiles {
         } catch (IOException e) {
             BPLogger.error(e.getMessage());
         }
-    }
-
-    private boolean onNull(Player p, String tried) {
-        if (p == null) {
-            BPLogger.error(tried + " Called online-player method but the player was null!");
-            return true;
-        }
-        return false;
-    }
-
-    private boolean offNull(OfflinePlayer p, String tried) {
-        if (p == null) {
-            BPLogger.error(tried + " Called offline-player method but the player was null!");
-            return true;
-        }
-        return false;
     }
 }

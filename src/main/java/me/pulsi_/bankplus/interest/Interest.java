@@ -174,25 +174,25 @@ public class Interest {
     }
 
     private void giveSingleInterest(OfflinePlayer[] players) {
+        String perm = Values.CONFIG.getInterestOfflinePermission();
         Permission permission = BankPlus.INSTANCE.getPermissions();
-        if (permission == null) {
+        if (!perm.equals("") && permission == null) {
             BPLogger.error("Cannot give offline interest, no permission plugin found!");
             return;
         }
 
-        String perm = Values.CONFIG.getInterestOfflinePermission();
         for (OfflinePlayer p : players) {
             if (p.isOnline()) continue;
 
             boolean hasPermission = false;
             for (World world : Bukkit.getWorlds()) {
-                hasPermission = permission.playerHas(world.getName(), p, perm);
+                hasPermission = perm.equals("") || permission.playerHas(world.getName(), p, perm);
                 if (hasPermission) break;
             }
             if (!hasPermission) continue;
 
             SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
-            BigDecimal bankBalance = singleEconomyManager.getOfflineBankBalance();
+            BigDecimal bankBalance = singleEconomyManager.getBankBalance();
             BigDecimal interestMoney = bankBalance.multiply(Values.CONFIG.getInterestMoneyGiven().divide(BigDecimal.valueOf(100)));
             BigDecimal maxBankCapacity = Values.CONFIG.getMaxBankCapacity(), maxAmount = Values.CONFIG.getInterestMaxAmount();
 
@@ -201,21 +201,21 @@ public class Interest {
             if (maxBankCapacity.doubleValue() != 0 && (bankBalance.add(interestMoney).doubleValue() >= maxBankCapacity.doubleValue())) {
                 BigDecimal newAmount = maxBankCapacity.subtract(bankBalance);
                 if (newAmount.doubleValue() <= 0) continue;
-                singleEconomyManager.addOfflineBankBalance(newAmount, true);
+                singleEconomyManager.addBankBalance(newAmount, true);
                 continue;
             }
-            singleEconomyManager.addOfflineBankBalance(interestMoney, true);
+            singleEconomyManager.addBankBalance(interestMoney, true);
         }
     }
 
     private void giveMultiInterest(OfflinePlayer[] players) {
+        String perm = Values.CONFIG.getInterestOfflinePermission();
         Permission permission = BankPlus.INSTANCE.getPermissions();
-        if (permission == null) {
+        if (!perm.equals("") && permission == null) {
             BPLogger.error("Cannot give offline interest, no permission plugin found!");
             return;
         }
 
-        String perm = Values.CONFIG.getInterestOfflinePermission();
         for (OfflinePlayer p : players) {
             boolean hasToSave = false;
 
@@ -225,12 +225,12 @@ public class Interest {
 
                 boolean hasPermission = false;
                 for (World world : Bukkit.getWorlds()) {
-                    hasPermission = permission.playerHas(world.getName(), p, perm);
+                    hasPermission = perm.equals("") || permission.playerHas(world.getName(), p, perm);
                     if (hasPermission) break;
                 }
                 if (!hasPermission) continue;
 
-                BigDecimal bankBalance = multiEconomyManager.getOfflineBankBalance(bankName);
+                BigDecimal bankBalance = multiEconomyManager.getBankBalance(bankName);
                 BigDecimal interestMoney = bankBalance.multiply(Values.CONFIG.getInterestMoneyGiven().divide(BigDecimal.valueOf(100)));
                 BigDecimal maxBankCapacity = new BanksManager(bankName).getCapacity(p), maxAmount = Values.CONFIG.getInterestMaxAmount();
 
@@ -239,11 +239,11 @@ public class Interest {
                 if (maxBankCapacity.doubleValue() != 0 && (bankBalance.add(interestMoney).doubleValue() >= maxBankCapacity.doubleValue())) {
                     BigDecimal newAmount = maxBankCapacity.subtract(bankBalance);
                     if (newAmount.doubleValue() <= 0) continue;
-                    multiEconomyManager.addOfflineBankBalance(newAmount, bankName, true);
+                    multiEconomyManager.addBankBalance(newAmount, bankName, true);
                     hasToSave = true;
                     continue;
                 }
-                multiEconomyManager.addOfflineBankBalance(interestMoney, bankName, true);
+                multiEconomyManager.addBankBalance(interestMoney, bankName, true);
                 hasToSave = true;
             }
             if (hasToSave) new BankPlusPlayerFiles(p).savePlayerFile(true);

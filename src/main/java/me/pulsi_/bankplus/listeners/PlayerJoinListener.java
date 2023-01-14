@@ -24,7 +24,7 @@ public class PlayerJoinListener implements Listener {
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
         BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
-        files.registerPlayer();
+        files.isPlayerRegistered();
 
         BankPlusPlayer player = new BankPlusPlayer(p, files.getPlayerFile(), files.getPlayerConfig());
         BankPlus.INSTANCE.getPlayerRegistry().put(p, player);

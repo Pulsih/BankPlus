@@ -48,7 +48,7 @@ public class DataManager {
 
         time = System.currentTimeMillis();
         setupCommands();
-        BPLogger.log("    &aLoaded plugin command! &8(&3" + (System.currentTimeMillis() - time) + "ms&8)");
+        BPLogger.log("    &aLoaded plugin commands! &8(&3" + (System.currentTimeMillis() - time) + "ms&8)");
         BPLogger.log("    &aDone! &8(&3" + (System.currentTimeMillis() - startTime) + " total ms&8)");
         BPLogger.log("");
 

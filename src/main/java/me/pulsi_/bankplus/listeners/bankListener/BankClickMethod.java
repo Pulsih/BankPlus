@@ -69,12 +69,10 @@ public class BankClickMethod {
                 String identifier = parts.length > 0 ? parts[0] : null, value = null;
 
                 if (identifier == null) continue;
-                else {
-                    if (parts.length != 1) {
-                        for (int i = 1; i < parts.length; i++) {
-                            value += parts[i];
-                            if (i + 1 < parts.length) value += " ";
-                        }
+                else if (parts.length != 1) {
+                    for (int i = 1; i < parts.length; i++) {
+                        value += parts[i];
+                        if (i + 1 < parts.length) value += " ";
                     }
                 }
 

@@ -30,18 +30,17 @@ public class MultiEconomyManager {
      */
     public static Map<String, BigDecimal> bankPlayerMoney = new HashMap<>();
     private final Player p;
-    private final OfflinePlayer oP;
+    private final OfflinePlayer op;
 
-    public MultiEconomyManager(Player player) {
-        this.p = player;
-        this.oP = null;
+    public MultiEconomyManager(Player p) {
+        this.p = p;
+        this.op = null;
     }
 
-    public MultiEconomyManager(OfflinePlayer player) {
+    public MultiEconomyManager(OfflinePlayer op) {
         this.p = null;
-        this.oP = player;
+        this.op = op;
     }
-
     /**
      * Return a list with all player balances.
      *
@@ -84,14 +83,14 @@ public class MultiEconomyManager {
     }
 
     /**
-     * Load the player bank balances.
+     * Load the player bank balances. This cannot be an offline player!
      */
     public void loadBankBalance() {
-        if (onNull("Cannot load player bank balance!")) return;
+        if (p == null) return;
         for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
             if (bankPlayerMoney.containsKey(p.getUniqueId() + "." + bankName)) return;
             String bal = new BankPlusPlayerFiles(p).getPlayerConfig().getString("Banks." + bankName + ".Money");
-            bankPlayerMoney.put(p.getUniqueId() + "." + bankName, bal == null ? new BigDecimal(0) : new BigDecimal(bal));
+            bankPlayerMoney.putIfAbsent(p.getUniqueId() + "." + bankName, new BigDecimal(bal == null ? "0" : bal));
         }
     }
 
@@ -99,7 +98,6 @@ public class MultiEconomyManager {
      * Unload the player bank balances.
      */
     public void unloadBankBalance() {
-        if (onNull("Cannot unload player bank balance!")) return;
         ConfigurationSection section = new BankPlusPlayerFiles(p).getPlayerConfig().getConfigurationSection("Banks");
         if (section != null) section.getKeys(false).forEach(key -> bankPlayerMoney.remove(p.getUniqueId() + "." + key));
     }
@@ -108,7 +106,6 @@ public class MultiEconomyManager {
      * Save the selected bank balance to the player file.
      */
     public void saveBankBalance(String bankName, boolean async) {
-        if (onNull("Cannot save player bank balance!")) return;
         BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
         files.getPlayerConfig().set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(getBankBalance(bankName)));
         files.savePlayerFile(async);
@@ -118,7 +115,6 @@ public class MultiEconomyManager {
      * Save all bank balances to the player file.
      */
     public void saveBankBalance(boolean async) {
-        if (onNull("Cannot save player bank balances!")) return;
         BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
         for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
             files.getPlayerConfig().set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(getBankBalance(bankName)));
@@ -132,7 +128,10 @@ public class MultiEconomyManager {
      * @return BidDecimal amount.
      */
     public BigDecimal getBankBalance(String bankName) {
-        if (onNull("Cannot get player bank balance!")) return null;
+        if (p == null) {
+            String bal = new BankPlusPlayerFiles(op).getPlayerConfig().getString("Banks." + bankName + ".Money");
+            return new BigDecimal(bal == null ? "0" : bal);
+        }
         loadBankBalance();
         return bankPlayerMoney.get(p.getUniqueId() + "." + bankName);
     }
@@ -143,38 +142,17 @@ public class MultiEconomyManager {
      * @return BidDecimal amount.
      */
     public BigDecimal getBankBalance() {
-        if (onNull("Cannot get player bank balances!")) return null;
-        loadBankBalance();
         BigDecimal amount = new BigDecimal(0);
-        for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
-            amount = amount.add(bankPlayerMoney.get(p.getUniqueId() + "." + bankName));
-        return amount;
-    }
-
-    /**
-     * Get the offline player bank balance.
-     *
-     * @param bankName The bank.
-     * @return BidDecimal amount.
-     */
-    public BigDecimal getOfflineBankBalance(String bankName) {
-        if (offNull("Cannot get player bank balance!")) return null;
-        String bal = new BankPlusPlayerFiles(oP).getPlayerConfig().getString("Banks." + bankName + ".Money");
-        return bal == null ? new BigDecimal(0) : new BigDecimal(bal);
-    }
-
-    /**
-     * Get the total offline player bank balance of all banks.
-     *
-     * @return BidDecimal amount.
-     */
-    public BigDecimal getOfflineBankBalance() {
-        if (offNull("Cannot get player bank balances!")) return null;
-        BigDecimal amount = new BigDecimal(0);
-        BankPlusPlayerFiles files = new BankPlusPlayerFiles(oP);
-        for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
-            String bal = files.getPlayerConfig().getString("Banks." + bankName + ".Money");
-            amount = amount.add(new BigDecimal(bal == null ? "0" : bal));
+        if (p != null) {
+            loadBankBalance();
+            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
+                amount = amount.add(bankPlayerMoney.get(p.getUniqueId() + "." + bankName));
+        } else {
+            BankPlusPlayerFiles files = new BankPlusPlayerFiles(op);
+            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
+                String bal = files.getPlayerConfig().getString("Banks." + bankName + ".Money");
+                amount = amount.add(new BigDecimal(bal == null ? "0" : bal));
+            }
         }
         return amount;
     }
@@ -186,19 +164,7 @@ public class MultiEconomyManager {
      * @param bankName The bank.
      */
     public void setBankBalance(BigDecimal amount, String bankName) {
-        if (onNull("Cannot set player bank balance!")) return;
         set(amount, bankName);
-    }
-
-    /**
-     * Set the offline player bank balance to the selected amount in the selected bank.
-     *
-     * @param amount   The new bank balance amount.
-     * @param bankName The bank.
-     */
-    public void setOfflineBankBalance(BigDecimal amount, String bankName) {
-        if (offNull("Cannot set player bank balance!")) return;
-        setOffline(amount, bankName);
     }
 
     /**
@@ -208,8 +174,7 @@ public class MultiEconomyManager {
      * @param bankName The bank.
      */
     public void addBankBalance(BigDecimal amount, String bankName) {
-        if (onNull("Cannot add player bank balance!")) return;
-        set(getBankBalance(bankName).add(amount), bankName);
+        addBankBalance(amount, bankName, false);
     }
 
     /**
@@ -218,20 +183,8 @@ public class MultiEconomyManager {
      * @param amount   The amount.
      * @param bankName The bank.
      */
-    public void addOfflineBankBalance(BigDecimal amount, String bankName) {
-        addOfflineBankBalance(amount, bankName, false);
-    }
-
-    /**
-     * Add to the offline player bank balance the selected amount.
-     *
-     * @param amount             The amount.
-     * @param bankName           The bank.
-     * @param addOfflineInterest Choose if adding both balance and offline interest.
-     */
-    public void addOfflineBankBalance(BigDecimal amount, String bankName, boolean addOfflineInterest) {
-        if (offNull("Cannot add player bank balance!")) return;
-        setOffline(getOfflineBankBalance(bankName).add(amount), bankName, addOfflineInterest);
+    public void addBankBalance(BigDecimal amount, String bankName, boolean addOfflineInterest) {
+        set(getBankBalance(bankName).add(amount), bankName, addOfflineInterest);
     }
 
     /**
@@ -241,19 +194,7 @@ public class MultiEconomyManager {
      * @param bankName The bank.
      */
     public void removeBankBalance(BigDecimal amount, String bankName) {
-        if (onNull("Cannot remove player bank balance!")) return;
         set(getBankBalance(bankName).subtract(amount), bankName);
-    }
-
-    /**
-     * Remove from the offline player bank balance the selected amount.
-     *
-     * @param amount   The amount.
-     * @param bankName The bank.
-     */
-    public void removeOfflineBankBalance(BigDecimal amount, String bankName) {
-        if (offNull("Cannot remove player bank balance!")) return;
-        setOffline(getOfflineBankBalance(bankName).subtract(amount), bankName);
     }
 
     /**
@@ -263,19 +204,7 @@ public class MultiEconomyManager {
      * @param bankName The bank.
      */
     private void set(BigDecimal amount, String bankName) {
-        String amountFormatted = BPMethods.formatBigDouble(amount);
-        BigDecimal finalAmount = new BigDecimal(amountFormatted).doubleValue() < 0 ? new BigDecimal(0) : new BigDecimal(amountFormatted);
-        bankPlayerMoney.put(p.getUniqueId() + "." + bankName, finalAmount);
-    }
-
-    /**
-     * Method used to simplify the transaction.
-     *
-     * @param amount   The amount.
-     * @param bankName The bank.
-     */
-    private void setOffline(BigDecimal amount, String bankName) {
-        setOffline(amount, bankName, false);
+        set(amount, bankName, false);
     }
 
     /**
@@ -285,21 +214,26 @@ public class MultiEconomyManager {
      * @param bankName           The bank.
      * @param addOfflineInterest Choose if adding both balance and offline interest.
      */
-    private void setOffline(BigDecimal amount, String bankName, boolean addOfflineInterest) {
-        BankPlusPlayerFiles files = new BankPlusPlayerFiles(oP);
-        FileConfiguration config = files.getOfflinePlayerConfig();
+    private void set(BigDecimal amount, String bankName, boolean addOfflineInterest) {
+        if (p != null) {
+            String amountFormatted = BPMethods.formatBigDouble(amount);
+            BigDecimal finalAmount = new BigDecimal(amountFormatted).doubleValue() < 0 ? new BigDecimal(0) : new BigDecimal(amountFormatted);
+            bankPlayerMoney.put(p.getUniqueId() + "." + bankName, finalAmount);
+            return;
+        }
+
+        BankPlusPlayerFiles files = new BankPlusPlayerFiles(op);
+        FileConfiguration config = files.getPlayerConfig();
         config.set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(amount));
-        if (Values.CONFIG.isNotifyOfflineInterest()) {
-            BigDecimal offlineInterest = new BigDecimal(BPMethods.formatBigDouble(amount)).subtract(getOfflineBankBalance(bankName));
+        if (addOfflineInterest && Values.CONFIG.isNotifyOfflineInterest()) {
+            BigDecimal offlineInterest = new BigDecimal(BPMethods.formatBigDouble(amount)).subtract(getBankBalance(bankName));
             if (offlineInterest.doubleValue() > 0) config.set("Offline-Interest", offlineInterest.toString());
         }
 
-        files.saveOfflinePlayerFile(config, true);
+        files.savePlayerFile(config, true);
     }
 
     public void deposit(BigDecimal amount, String bankName) {
-        if (onNull("Cannot deposit player bank balance!") || !BPMethods.hasPermission(p, "bankplus.deposit")) return;
-
         if (amount.doubleValue() < Values.CONFIG.getDepositMinimumAmount().doubleValue()) {
             BPMessages.send(p, "Minimum-Number", "%min%$" + Values.CONFIG.getDepositMinimumAmount());
             return;
@@ -323,7 +257,7 @@ public class MultiEconomyManager {
         Make it possible so when depositing all your money with taxes, the money will have the ability
         to FILL the bank instead of always depositing a bit less and never filling up the bank.
         */
-        if (capacity.doubleValue() != 0 && newBankBalance.doubleValue() >= capacity.doubleValue()) {
+        if (capacity.doubleValue() > 0 && newBankBalance.doubleValue() >= capacity.doubleValue()) {
             BigDecimal moneyToFull = capacity.subtract(getBankBalance());
             amount = moneyToFull.add(taxes);
             if (money.doubleValue() < amount.doubleValue()) amount = money;
@@ -339,8 +273,6 @@ public class MultiEconomyManager {
     }
 
     public void withdraw(BigDecimal amount, String bankName) {
-        if (onNull("Cannot withdraw player bank balance!") || !BPMethods.hasPermission(p, "bankplus.withdraw")) return;
-
         if (amount.doubleValue() < Values.CONFIG.getWithdrawMinimumAmount().doubleValue()) {
             BPMessages.send(p, "Minimum-Number", "%min%$" + Values.CONFIG.getWithdrawMinimumAmount());
             return;
@@ -351,7 +283,7 @@ public class MultiEconomyManager {
         if (amount.doubleValue() > bankBal.doubleValue()) amount = bankBal;
 
         BigDecimal maxWithdrawAmount = Values.CONFIG.getMaxWithdrawAmount();
-        if (maxWithdrawAmount.doubleValue() != 0 && amount.doubleValue() >= maxWithdrawAmount.doubleValue())
+        if (maxWithdrawAmount.doubleValue() > 0 && amount.doubleValue() >= maxWithdrawAmount.doubleValue())
             amount = maxWithdrawAmount;
 
         BigDecimal taxes = new BigDecimal(0);
@@ -376,8 +308,6 @@ public class MultiEconomyManager {
      * @param toBank   The bank where the money will be added.
      */
     public void pay(String fromBank, Player target, BigDecimal amount, String toBank) {
-        if (onNull("Cannot initialize pay transaction!")) return;
-
         MultiEconomyManager targetManager = new MultiEconomyManager(target);
         BigDecimal maxBankCapacity = Values.CONFIG.getMaxBankCapacity();
         BigDecimal bankBalance = getBankBalance(fromBank);
@@ -414,21 +344,5 @@ public class MultiEconomyManager {
         BPMessages.send(p, "Payment-Sent", BPMethods.placeValues(target, amount));
         targetManager.addBankBalance(amount, toBank);
         BPMessages.send(target, "Payment-Received", BPMethods.placeValues(p, amount));
-    }
-
-    private boolean onNull(String tried) {
-        if (p == null) {
-            BPLogger.error(tried + " Specified offline-player but called online-player method!");
-            return true;
-        }
-        return false;
-    }
-
-    private boolean offNull(String tried) {
-        if (oP == null) {
-            BPLogger.error(tried + " Specified online-player but called offline-player method!");
-            return true;
-        }
-        return false;
     }
 }

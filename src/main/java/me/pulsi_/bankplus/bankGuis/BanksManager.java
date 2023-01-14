@@ -90,19 +90,14 @@ public class BanksManager {
         return bank.getUpgrades();
     }
 
+    public BigDecimal getCapacity(OfflinePlayer p) {
+        return getCapacity((Player) p);
+    }
+
     public BigDecimal getCapacity(Player p) {
         if (!hasUpgrades()) return Values.CONFIG.getMaxBankCapacity();
 
         FileConfiguration config = new BankPlusPlayerFiles(p).getPlayerConfig();
-        int level = Math.max(config.getInt("Banks." + bank.getIdentifier() + ".Level"), 1);
-        String capacity = getUpgrades().getString(level + ".Capacity");
-        return new BigDecimal(capacity == null ? Values.CONFIG.getMaxBankCapacity().toString() : capacity);
-    }
-
-    public BigDecimal getCapacity(OfflinePlayer p) {
-        if (!hasUpgrades()) return Values.CONFIG.getMaxBankCapacity();
-
-        FileConfiguration config = new BankPlusPlayerFiles(p).getOfflinePlayerConfig();
         int level = Math.max(config.getInt("Banks." + bank.getIdentifier() + ".Level"), 1);
         String capacity = getUpgrades().getString(level + ".Capacity");
         return new BigDecimal(capacity == null ? Values.CONFIG.getMaxBankCapacity().toString() : capacity);

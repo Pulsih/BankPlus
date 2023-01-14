@@ -14,6 +14,7 @@ import java.util.*;
 
 public class ConfigManager {
 
+    private boolean containsChanges = false;
     private int commentsCount = 0;
     private int spacesCount = 0;
     private final String commentIdentifier = "bankplus_comment";
@@ -130,6 +131,10 @@ public class ConfigManager {
         }
     }
 
+    public boolean containsChanges() {
+        return containsChanges;
+    }
+
     private String getFileAsString(File file) {
         List<String> lines = new ArrayList<>();
         try {
@@ -186,15 +191,14 @@ public class ConfigManager {
     }
 
     public void buildConfig() {
-        // Create a copy of the config file
-        File newConfigFile = new File(plugin.getDataFolder(), "config.yml");
+        File copyOfConfigFile = new File(plugin.getDataFolder(), "config.yml");
         FileConfiguration oldConfig = new YamlConfiguration();
         FileConfiguration newConfig = new YamlConfiguration();
 
-        BPVersions.renameGeneralSection(newConfigFile);
+        BPVersions.renameGeneralSection(copyOfConfigFile);
 
         try {
-            oldConfig.load(newConfigFile);
+            oldConfig.load(copyOfConfigFile);
         } catch (Exception ignored) { }
 
         addComments(newConfig,
@@ -236,7 +240,12 @@ public class ConfigManager {
         validatePath(oldConfig, newConfig, "Interest.AFK-Settings.AFK-Time", 5);
         addSpace(newConfig, "Interest.AFK-Settings");
 
-        addCommentsUnder(newConfig, "Interest", "The percentage of money given.");
+        addCommentsUnder(newConfig, "Interest",
+                "The percentage of money given.",
+                "",
+                "IMPORTANT! This amount is defined in the BANK FILE!",
+                "This option is only a fallback value in case the",
+                "level of the bank does not specify its amount!");
         validatePath(oldConfig, newConfig, "Interest.Money-Given", "5%");
         addSpace(newConfig, "Interest");
 
@@ -259,7 +268,9 @@ public class ConfigManager {
         validatePath(oldConfig, newConfig, "Interest.Give-To-Offline-Players", false);
         addSpace(newConfig, "Interest");
 
-        addCommentsUnder(newConfig, "Interest", "The permission for offline players to receive interest.");
+        addCommentsUnder(newConfig, "Interest",
+                "The permission for offline players to receive interest.",
+                "You can put \"\" if you don't want to use a permission.");
         validatePath(oldConfig, newConfig, "Interest.Offline-Permission", "bankplus.receive.interest");
         addSpace(newConfig);
 
@@ -391,13 +402,13 @@ public class ConfigManager {
                 "The player needs to have the permission",
                 "\"bankplus.deposit\" to be able to deposit.");
         addCommentsUnder(newConfig, "Deposit-Settings", "The max amount to deposit per time, use 0 to disable.");
-        validatePath(oldConfig, newConfig, "Deposit-Settings.Max-Deposit-Amount", getValueFromOldPath(oldConfig,
-                "General-Settings.Max-Deposit-Amount", "Deposit-Settings.Max-Deposit-Amount", "0"));
+        validatePath(oldConfig, newConfig, "Deposit-Settings.Max-Deposit-Amount",
+                getValueFromOldPath(oldConfig, "General-Settings.Max-Deposit-Amount", "Deposit-Settings.Max-Deposit-Amount", "0"));
         addSpace(newConfig, "Deposit-Settings");
 
         addCommentsUnder(newConfig, "Deposit-Settings", "The minimum amount to deposit per time, use 0 to disable.");
-        validatePath(oldConfig, newConfig, "Deposit-Settings.Minimum-Deposit-Amount", getValueFromOldPath(oldConfig,
-                "General-Settings.Minimum-Amount", "Deposit-Settings.Minimum-Deposit-Amount", "0"));
+        validatePath(oldConfig, newConfig, "Deposit-Settings.Minimum-Deposit-Amount",
+                getValueFromOldPath(oldConfig, "General-Settings.Minimum-Amount", "Deposit-Settings.Minimum-Deposit-Amount", "0"));
         addSpace(newConfig, "Deposit-Settings");
 
         addCommentsUnder(newConfig, "Deposit-Settings",
@@ -406,8 +417,8 @@ public class ConfigManager {
                 "",
                 "Use the permission \"bankplus.deposit.bypass-taxes\"",
                 "to bypass the deposit taxes.");
-        validatePath(oldConfig, newConfig, "Deposit-Settings.Deposit-Taxes", getValueFromOldPath(oldConfig,
-                "General-Settings.Deposit-Taxes", "Deposit-Settings.Deposit-Taxes", "0%"));
+        validatePath(oldConfig, newConfig, "Deposit-Settings.Deposit-Taxes",
+                getValueFromOldPath(oldConfig, "General-Settings.Deposit-Taxes", "Deposit-Settings.Deposit-Taxes", "0%"));
         addSpace(newConfig);
 
         /* Withdraw settings */
@@ -416,13 +427,13 @@ public class ConfigManager {
                 "The player needs to have the permission",
                 "\"bankplus.withdraw\" to be able to deposit.");
         addCommentsUnder(newConfig, "Withdraw-Settings", "The max amount to withdraw per time, use 0 to disable.");
-        validatePath(oldConfig, newConfig, "Withdraw-Settings.Max-Withdraw-Amount", getValueFromOldPath(oldConfig,
-                "General-Settings.Max-Withdraw-Amount", "Withdraw-Settings.Max-Withdraw-Amount", "0"));
+        validatePath(oldConfig, newConfig, "Withdraw-Settings.Max-Withdraw-Amount", 
+                getValueFromOldPath(oldConfig, "General-Settings.Max-Withdraw-Amount", "Withdraw-Settings.Max-Withdraw-Amount", "0"));
         addSpace(newConfig, "Withdraw-Settings");
 
         addCommentsUnder(newConfig, "Withdraw-Settings", "The minimum amount to withdraw per time, use 0 to disable.");
-        validatePath(oldConfig, newConfig, "Withdraw-Settings.Minimum-Withdraw-Amount", getValueFromOldPath(oldConfig,
-                "General-Settings.Minimum-Amount", "Withdraw-Settings.Minimum-Withdraw-Amount", "0"));
+        validatePath(oldConfig, newConfig, "Withdraw-Settings.Minimum-Withdraw-Amount",
+                getValueFromOldPath(oldConfig, "General-Settings.Minimum-Amount", "Withdraw-Settings.Minimum-Withdraw-Amount", "0"));
         addSpace(newConfig, "Withdraw-Settings");
 
         addCommentsUnder(newConfig, "Withdraw-Settings",
@@ -431,8 +442,8 @@ public class ConfigManager {
                 "",
                 "Use the permission \"bankplus.withdraw.bypass-taxes\"",
                 "to bypass the deposit taxes.");
-        validatePath(oldConfig, newConfig, "Withdraw-Settings.Withdraw-Taxes", getValueFromOldPath(oldConfig,
-                "General-Settings.Withdraw-Taxes", "Withdraw-Settings.Withdraw-Taxes" , "0%"));
+        validatePath(oldConfig, newConfig, "Withdraw-Settings.Withdraw-Taxes",
+                getValueFromOldPath(oldConfig, "General-Settings.Withdraw-Taxes", "Withdraw-Settings.Withdraw-Taxes" , "0%"));
         addSpace(newConfig);
 
         /* BankTop settings */
@@ -530,18 +541,23 @@ public class ConfigManager {
         spacesCount = 0;
 
         try {
-            newConfig.save(newConfigFile);
+            newConfig.save(copyOfConfigFile);
         } catch (IOException e) {
             BPLogger.error(e.getMessage());
         }
         reloadConfig(Type.CONFIG);
-        recreateFile(newConfigFile);
+        recreateFile(copyOfConfigFile);
     }
 
     public void buildMessages() {
-        File newMessagesFile = new File(plugin.getDataFolder(), "messages.yml");
+        File copyOfMessagesFile = new File(plugin.getDataFolder(), "messages.yml");
+        FileConfiguration oldMessagesConfig = new YamlConfiguration();
         FileConfiguration newMessagesConfig = new YamlConfiguration();
 
+        try {
+            oldMessagesConfig.load(copyOfMessagesFile);
+        } catch (Exception ignored) { }
+        
         addComments(newMessagesConfig,
                 "Messages File of BankPlus",
                 "Made by Pulsi_, Version v" + plugin.getDescription().getVersion());
@@ -560,7 +576,7 @@ public class ConfigManager {
         addSpace(newMessagesConfig);
 
         addComments(newMessagesConfig, "The main plugin prefix.");
-        validatePath(messagesConfig, newMessagesConfig, "Prefix", "&a&lBank&9&lPlus");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Prefix", "&a&lBank&9&lPlus");
         addSpace(newMessagesConfig);
 
         addComments(newMessagesConfig,
@@ -572,47 +588,47 @@ public class ConfigManager {
         addSpace(newMessagesConfig);
 
         addComments(newMessagesConfig, "System");
-        validatePath(messagesConfig, newMessagesConfig, "Reload", "%prefix% &aPlugin reloaded!");
-        validatePath(messagesConfig, newMessagesConfig, "Interest-Restarted", "%prefix% &aInterest Restarted!");
-        validatePath(messagesConfig, newMessagesConfig, "Interest-Disabled", "%prefix% &cThe interest is disabled!");
-        validatePath(messagesConfig, newMessagesConfig, "BankTop-Disabled", "%prefix% &cThe banktop is disabled!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Reload", "%prefix% &aPlugin reloaded!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Interest-Restarted", "%prefix% &aInterest Restarted!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Interest-Disabled", "%prefix% &cThe interest is disabled!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "BankTop-Disabled", "%prefix% &cThe banktop is disabled!");
         addSpace(newMessagesConfig);
 
         addComments(newMessagesConfig, "Plugin");
-        validatePath(messagesConfig, newMessagesConfig, "Personal-Bank", "%prefix% &aYou have &f%amount_formatted% &amoney in your bank.");
-        validatePath(messagesConfig, newMessagesConfig, "Multiple-Personal-Bank", "%prefix% &aYou have a total amount of &f%amount_formatted% &amoney in your banks.");
-        validatePath(messagesConfig, newMessagesConfig, "Success-Withdraw", "%prefix% &aSuccessfully withdrew &f%amount_formatted% &amoney! (&f%taxes_formatted% &alost in taxes)");
-        validatePath(messagesConfig, newMessagesConfig, "Success-Deposit", "%prefix% &aSuccessfully deposited &f%amount_formatted% &amoney! (&f%taxes_formatted% &alost in taxes)");
-        validatePath(messagesConfig, newMessagesConfig, "Bank-Others", "%prefix% &f%player% &ahas &f%amount_formatted% Money &ain their bank!");
-        validatePath(messagesConfig, newMessagesConfig, "Multiple-Bank-Others", "%prefix% &f%player% &ahas a total amount of &f%amount_formatted% Money &ain their banks!");
-        validatePath(messagesConfig, newMessagesConfig, "Set-Message", "%prefix% &aYou have set &f%player%'s &abank balance to &f%amount_formatted%&a!");
-        validatePath(messagesConfig, newMessagesConfig, "Add-Message", "%prefix% &aYou have added &f%amount_formatted% Money &ato &f%player%'s &abank balance!");
-        validatePath(messagesConfig, newMessagesConfig, "Remove-Message", "%prefix% &aYou have removed &f%amount_formatted% &amoney to &f%player%'s &abank balance!");
-        validatePath(messagesConfig, newMessagesConfig, "Set-Level-Message", "%prefix% &aYou have set &f%player%'s &abank level to &f%level%&a!");
-        validatePath(messagesConfig, newMessagesConfig, "Pay-Message", "%prefix% &aYou have added &f%amount_formatted% Money &ato &f%player%'s &abank balance!");
-        validatePath(messagesConfig, newMessagesConfig, "Chat-Deposit", "%prefix% &aType an amount in chat to deposit, type 'exit' to exit");
-        validatePath(messagesConfig, newMessagesConfig, "Chat-Withdraw", "%prefix% &aType an amount in chat to withdraw, type 'exit' to exit");
-        validatePath(messagesConfig, newMessagesConfig, "Payment-Sent", "%prefix% &aYou have successfully sent to &f%player% %amount_formatted% &amoney!");
-        validatePath(messagesConfig, newMessagesConfig, "Payment-Received", "%prefix% &aYou have received &f%amount_formatted% &amoney from &f%player%!");
-        validatePath(messagesConfig, newMessagesConfig, "Interest-Time", "%prefix% &aWait more &f%time% &ato get the interest.");
-        validatePath(messagesConfig, newMessagesConfig, "Balances-Saved", "%prefix% &aSuccessfully saved all player balances to the file!");
-        validatePath(messagesConfig, newMessagesConfig, "BankTop-Updated", "%prefix% &aSuccessfully updated the banktop!");
-        validatePath(messagesConfig, newMessagesConfig, "Bank-Upgraded", "%prefix% &aSuccessfully upgraded the bank!");
-        validatePath(messagesConfig, newMessagesConfig, "Force-Open", "%prefix% &aSuccessfully forced &f%player% &ato open the bank!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Personal-Bank", "%prefix% &aYou have &f%amount_formatted% &amoney in your bank.");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Multiple-Personal-Bank", "%prefix% &aYou have a total amount of &f%amount_formatted% &amoney in your banks.");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Success-Withdraw", "%prefix% &aSuccessfully withdrew &f%amount_formatted% &amoney! (&f%taxes_formatted% &alost in taxes)");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Success-Deposit", "%prefix% &aSuccessfully deposited &f%amount_formatted% &amoney! (&f%taxes_formatted% &alost in taxes)");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Bank-Others", "%prefix% &f%player% &ahas &f%amount_formatted% Money &ain their bank!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Multiple-Bank-Others", "%prefix% &f%player% &ahas a total amount of &f%amount_formatted% Money &ain their banks!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Set-Message", "%prefix% &aYou have set &f%player%'s &abank balance to &f%amount_formatted%&a!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Add-Message", "%prefix% &aYou have added &f%amount_formatted% Money &ato &f%player%'s &abank balance!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Remove-Message", "%prefix% &aYou have removed &f%amount_formatted% &amoney to &f%player%'s &abank balance!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Set-Level-Message", "%prefix% &aYou have set &f%player%'s &abank level to &f%level%&a!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Pay-Message", "%prefix% &aYou have added &f%amount_formatted% Money &ato &f%player%'s &abank balance!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Chat-Deposit", "%prefix% &aType an amount in chat to deposit, type 'exit' to exit");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Chat-Withdraw", "%prefix% &aType an amount in chat to withdraw, type 'exit' to exit");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Payment-Sent", "%prefix% &aYou have successfully sent to &f%player% %amount_formatted% &amoney!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Payment-Received", "%prefix% &aYou have received &f%amount_formatted% &amoney from &f%player%!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Interest-Time", "%prefix% &aWait more &f%time% &ato get the interest.");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Balances-Saved", "%prefix% &aSuccessfully saved all player balances to the file!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "BankTop-Updated", "%prefix% &aSuccessfully updated the banktop!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Bank-Upgraded", "%prefix% &aSuccessfully upgraded the bank!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Force-Open", "%prefix% &aSuccessfully forced &f%player% &ato open the bank!");
         addSpace(newMessagesConfig);
 
         addComments(newMessagesConfig, "Titles");
-        validatePath(messagesConfig, newMessagesConfig, "Title-Custom-Transaction.Enabled", true);
-        validatePath(messagesConfig, newMessagesConfig, "Title-Custom-Transaction.Title-Deposit", "%prefix% &fType in &achat &fan, amount to &adeposit,10,40,10");
-        validatePath(messagesConfig, newMessagesConfig, "Title-Custom-Transaction.Title-Withdraw", "%prefix% &fType in &achat &fan, amount to &awithdraw,10,40,10");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Title-Custom-Transaction.Enabled", true);
+        validatePath(oldMessagesConfig, newMessagesConfig, "Title-Custom-Transaction.Title-Deposit", "%prefix% &fType in &achat &fan, amount to &adeposit,10,40,10");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Title-Custom-Transaction.Title-Withdraw", "%prefix% &fType in &achat &fan, amount to &awithdraw,10,40,10");
         addSpace(newMessagesConfig);
 
         addComments(newMessagesConfig, "Interest Messages");
-        validatePath(messagesConfig, newMessagesConfig, "Interest-Broadcast.Enabled", true);
-        validatePath(messagesConfig, newMessagesConfig, "Interest-Broadcast.Message", "%prefix% &aYou have earned &f%amount_formatted% Money &ain interest!");
-        validatePath(messagesConfig, newMessagesConfig, "Interest-Broadcast.Multi-Message", "%prefix% &aYou have earned a total amount of &f%amount_formatted% Money &ain interest!");
-        validatePath(messagesConfig, newMessagesConfig, "Interest-Broadcast.No-Money", "%prefix% &aSadly, you received 0 money from interest.");
-        validatePath(messagesConfig, newMessagesConfig, "Interest-Broadcast.Bank-Full", "%prefix% &cYou can't earn anymore money from interest because your bank is full!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Interest-Broadcast.Enabled", true);
+        validatePath(oldMessagesConfig, newMessagesConfig, "Interest-Broadcast.Message", "%prefix% &aYou have earned &f%amount_formatted% Money &ain interest!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Interest-Broadcast.Multi-Message", "%prefix% &aYou have earned a total amount of &f%amount_formatted% Money &ain interest!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Interest-Broadcast.No-Money", "%prefix% &aSadly, you received 0 money from interest.");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Interest-Broadcast.Bank-Full", "%prefix% &cYou can't earn anymore money from interest because your bank is full!");
         addSpace(newMessagesConfig);
 
         addComments(newMessagesConfig, "Help Message");
@@ -623,50 +639,55 @@ public class ConfigManager {
         helpMessages.add("&a/bank view <player> &7View the balance of a player.");
         helpMessages.add("&7Plugin made by Pulsi_");
         helpMessages.add("&aRate 5 Star!");
-        validatePath(messagesConfig, newMessagesConfig, "Help-Message", helpMessages);
+        validatePath(oldMessagesConfig, newMessagesConfig, "Help-Message", helpMessages);
         addSpace(newMessagesConfig);
 
         addComments(newMessagesConfig, "Errors");
-        validatePath(messagesConfig, newMessagesConfig, "Specify-Number", "%prefix% &cPlease specify a number!");
-        validatePath(messagesConfig, newMessagesConfig, "Specify-Player", "%prefix% &cPlease specify a player!");
-        validatePath(messagesConfig, newMessagesConfig, "Specify-Bank", "%prefix% &cPlease specify a bank!");
-        validatePath(messagesConfig, newMessagesConfig, "Invalid-Number", "%prefix% &cPlease choose a valid number!");
-        validatePath(messagesConfig, newMessagesConfig, "Invalid-Player", "%prefix% &cPlease choose a valid player!");
-        validatePath(messagesConfig, newMessagesConfig, "Invalid-Bank", "%prefix% &cPlease choose a valid bank!");
-        validatePath(messagesConfig, newMessagesConfig, "Invalid-Bank-Level", "%prefix% &cPlease choose a valid bank level!");
-        validatePath(messagesConfig, newMessagesConfig, "Cannot-Deposit-Anymore", "%prefix% &cYou can't deposit anymore money!");
-        validatePath(messagesConfig, newMessagesConfig, "Cannot-Use-Bank-Here", "%prefix% &cSorry, the bank is disabled in this world!");
-        validatePath(messagesConfig, newMessagesConfig, "Cannot-Use-Negative-Number", "%prefix% &cYou can't use a negative number!");
-        validatePath(messagesConfig, newMessagesConfig, "Bank-Full", "%prefix% &cThe bank of %player% is full!");
-        validatePath(messagesConfig, newMessagesConfig, "Bank-Empty", "%prefix% &cThe bank of %player% is empty!");
-        validatePath(messagesConfig, newMessagesConfig, "Cannot-Access-Bank", "%prefix% &cYou can't access to this bank!");
-        validatePath(messagesConfig, newMessagesConfig, "Cannot-Access-Bank-Others", "%prefix% &c%player% can't access to this bank!");
-        validatePath(messagesConfig, newMessagesConfig, "Bank-Max-Level", "%prefix% &cThe bank is already at the max level!");
-        validatePath(messagesConfig, newMessagesConfig, "Minimum-Number", "%prefix% &cPlease use an higher number for this action! ( Minimum: 10 )");
-        validatePath(messagesConfig, newMessagesConfig, "Not-Player", "%prefix% &cYou are not a player!");
-        validatePath(messagesConfig, newMessagesConfig, "Insufficient-Money", "%prefix% &cYou don't have enough money!");
-        validatePath(messagesConfig, newMessagesConfig, "Gui-Module-Disabled", "%prefix% &cThe gui module is disabled!");
-        validatePath(messagesConfig, newMessagesConfig, "Internal-Error", "%prefix% &cAn internal error has occurred, try again later!");
-        validatePath(messagesConfig, newMessagesConfig, "Failed-Reload", "%prefix% &cBankPlus has failed his reload task, please check the console for more info. (This is usually not a bankplus problem!)");
-        validatePath(messagesConfig, newMessagesConfig, "Unknown-Command", "%prefix% &cUnknown Command!");
-        validatePath(messagesConfig, newMessagesConfig, "No-Permission", "%prefix% &cYou don't have the permission! (%permission%)");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Specify-Number", "%prefix% &cPlease specify a number!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Specify-Player", "%prefix% &cPlease specify a player!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Specify-Bank", "%prefix% &cPlease specify a bank!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Invalid-Number", "%prefix% &cPlease choose a valid number!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Invalid-Player", "%prefix% &cPlease choose a valid player!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Invalid-Bank", "%prefix% &cPlease choose a valid bank!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Invalid-Bank-Level", "%prefix% &cPlease choose a valid bank level!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Cannot-Deposit-Anymore", "%prefix% &cYou can't deposit anymore money!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Cannot-Use-Bank-Here", "%prefix% &cSorry, the bank is disabled in this world!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Cannot-Use-Negative-Number", "%prefix% &cYou can't use a negative number!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Bank-Full", "%prefix% &cThe bank of %player% is full!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Bank-Empty", "%prefix% &cThe bank of %player% is empty!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Cannot-Access-Bank", "%prefix% &cYou can't access to this bank!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Cannot-Access-Bank-Others", "%prefix% &c%player% can't access to this bank!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Bank-Max-Level", "%prefix% &cThe bank is already at the max level!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Minimum-Number", "%prefix% &cPlease use an higher number for this action! ( Minimum: 10 )");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Not-Player", "%prefix% &cYou are not a player!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Insufficient-Money", "%prefix% &cYou don't have enough money!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Gui-Module-Disabled", "%prefix% &cThe gui module is disabled!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Internal-Error", "%prefix% &cAn internal error has occurred, try again later!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Failed-Reload", "%prefix% &cBankPlus has failed his reload task, please check the console for more info. (This is usually not a bankplus problem!)");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Unknown-Command", "%prefix% &cUnknown Command!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "No-Permission", "%prefix% &cYou don't have the permission! (%permission%)");
         addSpace(newMessagesConfig);
 
         commentsCount = 0;
         spacesCount = 0;
 
         try {
-            newMessagesConfig.save(newMessagesFile);
+            newMessagesConfig.save(copyOfMessagesFile);
         } catch (IOException e) {
             BPLogger.error(e.getMessage());
         }
         reloadConfig(Type.MESSAGES);
-        recreateFile(newMessagesFile);
+        recreateFile(copyOfMessagesFile);
     }
 
     public void buildMultipleBanks() {
-        File newMultipleBanksFile = new File(plugin.getDataFolder(), "multiple_banks.yml");
+        File copyOfMultipleBanksFile = new File(plugin.getDataFolder(), "multiple_banks.yml");
+        FileConfiguration oldMultipleBanksConfig = new YamlConfiguration();
         FileConfiguration newMultipleBanksConfig = new YamlConfiguration();
+        
+        try {
+            oldMultipleBanksConfig.load(copyOfMultipleBanksFile);
+        } catch (Exception ignored) { }
 
         addComments(newMultipleBanksConfig,
                 "Put this to true to enable the multiple-banks feature.",
@@ -680,20 +701,20 @@ public class ConfigManager {
                 "bank to set the money in the selected bank )",
                 "",
                 "Remember that must specify a main gui in the config file.");
-        validatePath(multipleBanksConfig, newMultipleBanksConfig, "Enabled", false);
+        validatePath(oldMultipleBanksConfig, newMultipleBanksConfig, "Enabled", false);
         addSpace(newMultipleBanksConfig);
 
         addComments(newMultipleBanksConfig,
                 "Choose if showing or hiding a",
                 "bank if it's not accessible.");
-        validatePath(multipleBanksConfig, newMultipleBanksConfig, "Shows-Not-Available-Banks", true);
+        validatePath(oldMultipleBanksConfig, newMultipleBanksConfig, "Shows-Not-Available-Banks", true);
         addSpace(newMultipleBanksConfig);
 
         addComments(newMultipleBanksConfig,
                 "If having only 1 bank available, this option will",
                 "make the player directly open that one instead of",
                 "opening the banks-gui with just the 1 gui available.");
-        validatePath(multipleBanksConfig, newMultipleBanksConfig, "Directly-Open-If-1-Is-Available", false);
+        validatePath(oldMultipleBanksConfig, newMultipleBanksConfig, "Directly-Open-If-1-Is-Available", false);
         addSpace(newMultipleBanksConfig);
 
         addComments(newMultipleBanksConfig,
@@ -701,51 +722,51 @@ public class ConfigManager {
                 "",
                 "To add more banks go to the \"banks\" folder and",
                 "add more files following the default bank format.");
-        validatePath(multipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Title", "&a&lBANKS LIST");
+        validatePath(oldMultipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Title", "&a&lBANKS LIST");
         addSpace(newMultipleBanksConfig, "Banks-Gui");
 
         addCommentsUnder(newMultipleBanksConfig, "Banks-Gui",
                 "If the number of banks is higher",
                 "than the gui slots, it will",
                 "separate the banks in more pages.");
-        validatePath(multipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Lines", 1);
+        validatePath(oldMultipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Lines", 1);
         addSpace(newMultipleBanksConfig, "Banks-Gui");
 
         addCommentsUnder(newMultipleBanksConfig, "Banks-Gui", "In ticks.");
-        validatePath(multipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Update-Delay", 20);
+        validatePath(oldMultipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Update-Delay", 20);
         addSpace(newMultipleBanksConfig, "Banks-Gui");
 
-        validatePath(multipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Filler.Enabled", true);
-        validatePath(multipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Filler.Material", "WHITE_STAINED_GLASS_PANE");
-        validatePath(multipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Filler.Glowing", false);
+        validatePath(oldMultipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Filler.Enabled", true);
+        validatePath(oldMultipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Filler.Material", "WHITE_STAINED_GLASS_PANE");
+        validatePath(oldMultipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Filler.Glowing", false);
         addSpace(newMultipleBanksConfig, "Banks-Gui");
 
-        validatePath(multipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Previous-Page.Material", "ARROW");
-        validatePath(multipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Previous-Page.Displayname", "&aPrevious page &8(&7%previous_page%/%all_pages%&8)");
-        validatePath(multipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Previous-Page.Lore", new ArrayList<>(Collections.singleton("&7Go to the previous page")));
-        validatePath(multipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Previous-Page.Glowing", false);
+        validatePath(oldMultipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Previous-Page.Material", "ARROW");
+        validatePath(oldMultipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Previous-Page.Displayname", "&aPrevious page &8(&7%previous_page%/%all_pages%&8)");
+        validatePath(oldMultipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Previous-Page.Lore", new ArrayList<>(Collections.singleton("&7Go to the previous page")));
+        validatePath(oldMultipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Previous-Page.Glowing", false);
         addCommentsUnder(newMultipleBanksConfig, "Banks-Gui",
                 "It will show the item only if the",
                 "banks are more than the empty slots.");
-        validatePath(multipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Previous-Page.Slot", 1);
+        validatePath(oldMultipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Previous-Page.Slot", 1);
         addSpace(newMultipleBanksConfig, "Banks-Gui");
 
-        validatePath(multipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Next-Page.Material", "ARROW");
-        validatePath(multipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Next-Page.Displayname", "&aNext page &8(&7%nex_page%/%all_pages%&8)");
-        validatePath(multipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Next-Page.Lore", new ArrayList<>(Collections.singleton("&7Go to the next page")));
-        validatePath(multipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Next-Page.Glowing", false);
-        validatePath(multipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Next-Page.Slot", 9);
+        validatePath(oldMultipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Next-Page.Material", "ARROW");
+        validatePath(oldMultipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Next-Page.Displayname", "&aNext page &8(&7%nex_page%/%all_pages%&8)");
+        validatePath(oldMultipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Next-Page.Lore", new ArrayList<>(Collections.singleton("&7Go to the next page")));
+        validatePath(oldMultipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Next-Page.Glowing", false);
+        validatePath(oldMultipleBanksConfig, newMultipleBanksConfig, "Banks-Gui.Next-Page.Slot", 9);
 
         commentsCount = 0;
         spacesCount = 0;
 
         try {
-            newMultipleBanksConfig.save(newMultipleBanksFile);
+            newMultipleBanksConfig.save(copyOfMultipleBanksFile);
         } catch (IOException e) {
             BPLogger.error(e.getMessage());
         }
         reloadConfig(Type.MULTIPLE_BANKS);
-        recreateFile(newMultipleBanksFile);
+        recreateFile(copyOfMultipleBanksFile);
     }
 
     private void addSpace(FileConfiguration config) {
@@ -772,13 +793,19 @@ public class ConfigManager {
         }
     }
 
-    private void validatePath(FileConfiguration from, FileConfiguration to, String path, Object valuePath) {
+    private void validatePath(FileConfiguration from, FileConfiguration to, String path, Object fallbackValue) {
         Object value = from.get(path);
-        if (value == null) to.set(path, valuePath);
+        if (value == null) to.set(path, fallbackValue);
         else to.set(path, value);
     }
 
-    private Object getValueFromOldPath(FileConfiguration from, String path, String fallbackPath, Object fallbackValue) {
-        return from.get(path) == null ? fallbackValue : from.get(path);
+    private void validatePath(FileConfiguration from, FileConfiguration to, String path, String fallbackValue) {
+        String value = from.getString(path);
+        if (value == null) to.set(path, fallbackValue);
+        else to.set(path, value);
+    }
+
+    private Object getValueFromOldPath(FileConfiguration from, String oldPath, String newPath, Object fallbackValue) {
+        return from.get(oldPath) == null ? from.get(newPath) == null ? fallbackValue : from.get(newPath) : from.get(oldPath);
     }
 }
