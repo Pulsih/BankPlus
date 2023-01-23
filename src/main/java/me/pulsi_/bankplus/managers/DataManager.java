@@ -64,7 +64,7 @@ public class DataManager {
 
     public void shutdownPlugin() {
         BPLogger.log("");
-        BPLogger.log("    &a&lBank&9&lPlus &cDisabling Plugin!");
+        BPLogger.log("    &a&lBank&9&lPlus &cPlugin successfully disabled!");
         BPLogger.log("");
     }
 

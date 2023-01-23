@@ -14,6 +14,7 @@ import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -47,7 +48,8 @@ public final class BankPlus extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
+        PluginManager plManager = Bukkit.getPluginManager();
+        if (plManager.getPlugin("Vault") == null) {
             BPLogger.log("");
             BPLogger.log("&cCannot load &a&lBank&9&lPlus&c, Vault is not installed!");
             BPLogger.log("&cPlease download it in order to use this plugin!");
@@ -57,7 +59,7 @@ public final class BankPlus extends JavaPlugin {
         }
         if (!setupEconomy()) {
             if (tries < 4) {
-                BPLogger.warn("BankPlus didn't find any economy on this server! The plugin will try to enable in 2 seconds! (%i try)".replace("%i", tries + ""));
+                BPLogger.warn("BankPlus didn't find any economy plugin on this server! The plugin will re-search in 2 seconds! (" + tries + " try)");
                 Bukkit.getScheduler().runTaskLater(this, this::onEnable, 40);
                 tries++;
                 return;
@@ -88,12 +90,12 @@ public final class BankPlus extends JavaPlugin {
 
         dataManager.setupPlugin();
 
-        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+        if (plManager.getPlugin("PlaceholderAPI") != null) {
             BPLogger.info("Hooked into PlaceholderAPI!");
             new Placeholders().register();
             isPlaceholderAPIHooked = true;
         }
-        if (Bukkit.getPluginManager().getPlugin("Essentials") != null) {
+        if (plManager.getPlugin("Essentials") != null) {
             BPLogger.info("Hooked into Essentials!");
             isEssentialsXHooked = true;
         }

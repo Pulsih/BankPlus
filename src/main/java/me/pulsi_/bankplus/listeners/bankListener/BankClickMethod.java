@@ -33,9 +33,9 @@ public class BankClickMethod {
         BankPlusPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
         if (player.getOpenedBank() == null) return;
 
+        int slot = e.getSlot();
         String bankName = player.getOpenedBank().getIdentifier();
         if (bankName.equals(BanksListGui.multipleBanksGuiID)) {
-            int slot = e.getSlot();
             HashMap<String, String> slots = player.getPlayerBankClickHolder();
             if (!slots.containsKey(p.getName() + "." + slot)) return;
 
@@ -53,7 +53,7 @@ public class BankClickMethod {
 
         for (String key : items.getKeys(false)) {
             ConfigurationSection itemValues = config.getConfigurationSection("Items." + key);
-            if (itemValues == null || e.getSlot() + 1 != itemValues.getInt("Slot")) continue;
+            if (itemValues == null || slot + 1 != itemValues.getInt("Slot")) continue;
 
             List<String> actions = itemValues.getStringList("Actions");
             if (actions.isEmpty()) continue;
@@ -66,33 +66,37 @@ public class BankClickMethod {
 
             for (String actionType : actions) {
                 String[] parts = actionType.split(" ");
-                String identifier = parts.length > 0 ? parts[0] : null, value = null;
+                int length = parts.length;
 
+                String identifier = length > 0 ? parts[0] : null, value = "";
                 if (identifier == null) continue;
-                else if (parts.length != 1) {
-                    for (int i = 1; i < parts.length; i++) {
-                        value += parts[i];
-                        if (i + 1 < parts.length) value += " ";
+
+                if (length != 1) {
+                    StringBuilder builder = new StringBuilder();
+                    for (int i = 1; i < length; i++) {
+                        builder.append(parts[i]);
+                        if (i + 1 < length) builder.append(" ");
                     }
+                    value = builder.toString();
                 }
 
                 switch (identifier) {
                     case "[CONSOLE]":
-                        if (value == null) {
+                        if (value.equals("")) {
                             BPLogger.warn("Cannot dispatch console command! The action " + identifier + " in the bank " + bankName + " does not specify a command!");
-                            return;
+                            continue;
                         }
                         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), value);
                         break;
 
                     case "[DEPOSIT]":
-                        if (value == null) {
+                        if (value.equals("")) {
                             BPLogger.warn("Cannot deposit for " + p.getName() + "! The action " + identifier + " in the bank " + bankName + " does not specify a value!");
-                            return;
+                            continue;
                         }
                         if (value.equals("CUSTOM")) {
                             BPMethods.customDeposit(p, bankName);
-                            return;
+                            continue;
                         }
                         try {
                             if (!value.endsWith("%")) amount = new BigDecimal(value);
@@ -101,7 +105,7 @@ public class BankClickMethod {
                                 amount = BigDecimal.valueOf(economy.getBalance(p)).multiply(percentage);
                             }
                         } catch (NumberFormatException ex) {
-                            BPLogger.error("Invalid deposit number! (Path: " + itemValues + ", Number: " + value + ")");
+                            BPLogger.warn("Invalid deposit number! (Button: " + key + ", Number: " + value + ")");
                             continue;
                         }
                         if (!isMulti) singleEconomyManager.deposit(amount);
@@ -109,7 +113,7 @@ public class BankClickMethod {
                         break;
 
                     case "[PLAYER]":
-                        if (value == null) {
+                        if (value.equals("")) {
                             BPLogger.warn("Cannot force chat for " + p.getName() + "! The action " + identifier + " in the bank " + bankName + " does not specify a value!");
                             return;
                         }
@@ -121,13 +125,13 @@ public class BankClickMethod {
                         break;
 
                     case "[WITHDRAW]":
-                        if (value == null) {
+                        if (value.equals("")) {
                             BPLogger.warn("Cannot withdraw for " + p.getName() + "! The action " + identifier + " in the bank " + bankName + " does not specify a value!");
-                            return;
+                            continue;
                         }
                         if (value.equals("CUSTOM")) {
                             BPMethods.customWithdraw(p, bankName);
-                            return;
+                            continue;
                         }
                         try {
                             if (!value.endsWith("%")) amount = new BigDecimal(value);
@@ -137,7 +141,7 @@ public class BankClickMethod {
                                 else amount = multiEconomyManager.getBankBalance(bankName).multiply(percentage);
                             }
                         } catch (NumberFormatException ex) {
-                            BPLogger.error("Invalid withdraw number! (Path: " + itemValues + ", Number: " + value + ")");
+                            BPLogger.warn("Invalid withdraw number! (Button: " + key + ", Number: " + value + ")");
                             continue;
                         }
                         if (!isMulti) singleEconomyManager.withdraw(amount);
