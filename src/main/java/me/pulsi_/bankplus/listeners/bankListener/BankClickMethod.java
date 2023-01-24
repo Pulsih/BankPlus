@@ -80,20 +80,17 @@ public class BankClickMethod {
                     value = builder.toString();
                 }
 
+                if (value.equals("")) {
+                    BPLogger.warn("No value specified! Item: " + key + ". File: " + bankName + ".yml. Action: " + identifier + ".");
+                    continue;
+                }
+
                 switch (identifier) {
                     case "[CONSOLE]":
-                        if (value.equals("")) {
-                            BPLogger.warn("Cannot dispatch console command! The action " + identifier + " in the bank " + bankName + " does not specify a command!");
-                            continue;
-                        }
                         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), value);
                         break;
 
                     case "[DEPOSIT]":
-                        if (value.equals("")) {
-                            BPLogger.warn("Cannot deposit for " + p.getName() + "! The action " + identifier + " in the bank " + bankName + " does not specify a value!");
-                            continue;
-                        }
                         if (value.equals("CUSTOM")) {
                             BPMethods.customDeposit(p, bankName);
                             continue;
@@ -113,10 +110,6 @@ public class BankClickMethod {
                         break;
 
                     case "[PLAYER]":
-                        if (value.equals("")) {
-                            BPLogger.warn("Cannot force chat for " + p.getName() + "! The action " + identifier + " in the bank " + bankName + " does not specify a value!");
-                            return;
-                        }
                         p.chat(value);
                         break;
 
@@ -125,10 +118,6 @@ public class BankClickMethod {
                         break;
 
                     case "[WITHDRAW]":
-                        if (value.equals("")) {
-                            BPLogger.warn("Cannot withdraw for " + p.getName() + "! The action " + identifier + " in the bank " + bankName + " does not specify a value!");
-                            continue;
-                        }
                         if (value.equals("CUSTOM")) {
                             BPMethods.customWithdraw(p, bankName);
                             continue;

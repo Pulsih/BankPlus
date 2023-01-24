@@ -121,8 +121,10 @@ public class Interest {
 
         SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
         BigDecimal bankBalance = singleEconomyManager.getBankBalance();
-        BigDecimal interestMoney = bankBalance.multiply(Values.CONFIG.getInterestMoneyGiven().divide(BigDecimal.valueOf(100)));
-        BigDecimal maxBankCapacity = new BanksManager(Values.CONFIG.getMainGuiName()).getCapacity(p), maxAmount = Values.CONFIG.getInterestMaxAmount();
+
+        BanksManager bankManager = new BanksManager(Values.CONFIG.getMainGuiName());
+        BigDecimal interestMoney = bankBalance.multiply(bankManager.getInterest(p).divide(BigDecimal.valueOf(100)));
+        BigDecimal maxBankCapacity = bankManager.getCapacity(p), maxAmount = Values.CONFIG.getInterestMaxAmount();
 
         if (bankBalance.doubleValue() <= 0) {
             if (Values.MESSAGES.isInterestBroadcastEnabled())
@@ -153,9 +155,11 @@ public class Interest {
         MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
         BigDecimal interestAmount = new BigDecimal(0);
         for (String bankName : new BanksManager(null).getAvailableBanks(p)) {
+
             BigDecimal bankBalance = multiEconomyManager.getBankBalance(bankName);
-            BigDecimal interestMoney = bankBalance.multiply(Values.CONFIG.getInterestMoneyGiven().divide(BigDecimal.valueOf(100)));
-            BigDecimal maxBankCapacity = new BanksManager(bankName).getCapacity(p), maxAmount = Values.CONFIG.getInterestMaxAmount();
+            BanksManager bankManager = new BanksManager(bankName);
+            BigDecimal interestMoney = bankBalance.multiply(bankManager.getInterest(p).divide(BigDecimal.valueOf(100)));
+            BigDecimal maxBankCapacity = bankManager.getCapacity(p), maxAmount = Values.CONFIG.getInterestMaxAmount();
 
             if (bankBalance.doubleValue() <= 0) continue;
             if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
@@ -193,8 +197,9 @@ public class Interest {
 
             SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
             BigDecimal bankBalance = singleEconomyManager.getBankBalance();
-            BigDecimal interestMoney = bankBalance.multiply(Values.CONFIG.getInterestMoneyGiven().divide(BigDecimal.valueOf(100)));
-            BigDecimal maxBankCapacity = Values.CONFIG.getMaxBankCapacity(), maxAmount = Values.CONFIG.getInterestMaxAmount();
+            BanksManager bankManager = new BanksManager(Values.CONFIG.getMainGuiName());
+            BigDecimal interestMoney = bankBalance.multiply(bankManager.getInterest(p).divide(BigDecimal.valueOf(100)));
+            BigDecimal maxBankCapacity = bankManager.getCapacity(p), maxAmount = Values.CONFIG.getInterestMaxAmount();
 
             if (bankBalance.doubleValue() <= 0) continue;
             if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
@@ -219,7 +224,6 @@ public class Interest {
         for (OfflinePlayer p : players) {
             boolean hasToSave = false;
 
-            MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
             for (String bankName : new BanksManager(null).getAvailableBanks(p)) {
                 if (p.isOnline()) continue;
 
@@ -230,9 +234,11 @@ public class Interest {
                 }
                 if (!hasPermission) continue;
 
+                MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
                 BigDecimal bankBalance = multiEconomyManager.getBankBalance(bankName);
-                BigDecimal interestMoney = bankBalance.multiply(Values.CONFIG.getInterestMoneyGiven().divide(BigDecimal.valueOf(100)));
-                BigDecimal maxBankCapacity = new BanksManager(bankName).getCapacity(p), maxAmount = Values.CONFIG.getInterestMaxAmount();
+                BanksManager bankManager = new BanksManager(bankName);
+                BigDecimal interestMoney = bankBalance.multiply(bankManager.getInterest(p).divide(BigDecimal.valueOf(100)));
+                BigDecimal maxBankCapacity = bankManager.getCapacity(p), maxAmount = Values.CONFIG.getInterestMaxAmount();
 
                 if (bankBalance.doubleValue() <= 0) continue;
                 if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;

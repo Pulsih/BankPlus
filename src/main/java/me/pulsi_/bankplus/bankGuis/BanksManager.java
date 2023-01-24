@@ -5,7 +5,9 @@ import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankGuis.objects.Bank;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
+import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -91,7 +93,12 @@ public class BanksManager {
     }
 
     public BigDecimal getCapacity(OfflinePlayer p) {
-        return getCapacity((Player) p);
+        if (!hasUpgrades()) return Values.CONFIG.getMaxBankCapacity();
+
+        FileConfiguration config = new BankPlusPlayerFiles(p).getPlayerConfig();
+        int level = Math.max(config.getInt("Banks." + bank.getIdentifier() + ".Level"), 1);
+        String capacity = getUpgrades().getString(level + ".Capacity");
+        return new BigDecimal(capacity == null ? Values.CONFIG.getMaxBankCapacity().toString() : capacity);
     }
 
     public BigDecimal getCapacity(Player p) {
@@ -101,6 +108,36 @@ public class BanksManager {
         int level = Math.max(config.getInt("Banks." + bank.getIdentifier() + ".Level"), 1);
         String capacity = getUpgrades().getString(level + ".Capacity");
         return new BigDecimal(capacity == null ? Values.CONFIG.getMaxBankCapacity().toString() : capacity);
+    }
+
+    public BigDecimal getInterest(Player p) {
+        if (!hasUpgrades()) return Values.CONFIG.getInterestMoneyGiven();
+
+        FileConfiguration config = new BankPlusPlayerFiles(p).getPlayerConfig();
+        int level = Math.max(config.getInt("Banks." + bank.getIdentifier() + ".Level"), 1);
+        String interest = getUpgrades().getString(level + ".Interest");
+
+        if (BPMethods.isInvalidNumber(interest)) {
+            BPLogger.error("Invalid interest amount in the " + level + "* upgrades section, file: " + bank.getIdentifier() + ".yml, ");
+            return Values.CONFIG.getInterestMoneyGiven();
+        }
+
+        return new BigDecimal(interest.replace("%", ""));
+    }
+
+    public BigDecimal getInterest(OfflinePlayer p) {
+        if (!hasUpgrades()) return Values.CONFIG.getInterestMoneyGiven();
+
+        FileConfiguration config = new BankPlusPlayerFiles(p).getPlayerConfig();
+        int level = Math.max(config.getInt("Banks." + bank.getIdentifier() + ".Level"), 1);
+        String interest = getUpgrades().getString(level + ".Interest");
+
+        if (BPMethods.isInvalidNumber(interest)) {
+            BPLogger.error("Invalid interest amount in the " + level + "* upgrades section, file: " + bank.getIdentifier() + ".yml, ");
+            return Values.CONFIG.getInterestMoneyGiven();
+        }
+
+        return new BigDecimal(interest.replace("%", ""));
     }
 
     public BigDecimal getLevelCost(int level) {

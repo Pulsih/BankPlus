@@ -138,16 +138,15 @@ public class BPMethods {
      * @return true if is invalid or false if is not.
      */
     public static boolean isInvalidNumber(String number, CommandSender s) {
+        if (number == null) {
+            BPMessages.send(s, "Invalid-Number");
+            return true;
+        }
+        if (Values.CONFIG.getMaxDecimalsAmount() <= 0) {
+            if (s != null) BPMessages.send(s, "Invalid-Number");
+            return true;
+        }
         try {
-            if (number == null) {
-                BPMessages.send(s, "Invalid-Number");
-                return true;
-            }
-            if (Values.CONFIG.getMaxDecimalsAmount() <= 0 && number.contains(".")) {
-                if (s != null) BPMessages.send(s, "Invalid-Number");
-                return true;
-            }
-
             if (number.contains("%")) number = number.replace("%", "");
             BigDecimal num = new BigDecimal(number);
             if (num.doubleValue() < 0) {

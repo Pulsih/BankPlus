@@ -62,14 +62,22 @@ Upgrades:
   # This must be a number an indicates the bank level.
   1: # 1 Is the default level, it can't be lower than 1.
     Capacity: "50000"
+    Interest: "5%"
   2:
+    # The cost that a player will need to
+    # pay to upgrade the bank to level 2.
     Cost: "5000"
     # If the capacity is not specified, the bank will
     # have the default capacity set in the config.yml
     Capacity: "100000"
+    # If the interest is not specified, the bank will
+    # use the default interest rate from the config.yml
+    Interest: "10%"
   3:
     Cost: "10000"
     Capacity: "200000"
+    Interest: "15%"
+
 
 Items:
   # You can add as many items as you want
@@ -91,11 +99,10 @@ Items:
     Glowing: true
     Actions:
       # Action list:
+      # * The amount can be a number, a % or "CUSTOM"
       # - [WITHDRAW] <amount>
       # - [DEPOSIT] <amount>
       # - [UPGRADE] ( As the name says, is a shortcut for the command /bank upgrade )
-      # * The amount can be a number, a % or "CUSTOM"
-      #
       # - [PLAYER] <chat> ( Force the player to chat, it can also be a command. )
       # - [CONSOLE] <command> ( Without "/"! | Execute a console command. )
       # - [MESSAGE] <message> ( Send a message to the player. )
