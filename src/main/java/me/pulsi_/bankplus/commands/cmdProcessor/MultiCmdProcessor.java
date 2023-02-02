@@ -164,7 +164,7 @@ public class MultiCmdProcessor {
                     return;
                 }
                 banksHolder.openBank(p, bankName);
-                BPMessages.send(s, "Force-Open", "%player%$" + p.getName());
+                BPMessages.send(s, "Force-Open", "%player%$" + p.getName(), "%bank%$" + bankName);
             }
             break;
 
@@ -603,7 +603,6 @@ public class MultiCmdProcessor {
     }
 
     public static List<String> getMultiTabComplete(CommandSender s, String[] args) {
-        String a0 = args[0].toLowerCase();
         switch (args.length) {
             case 1: {
                 List<String> args1 = new ArrayList<>();
@@ -634,12 +633,12 @@ public class MultiCmdProcessor {
                 if (s.hasPermission("bankplus.view")) listOfArgs.add("view");
                 if (s.hasPermission("bankplus.withdraw")) listOfArgs.add("withdraw");
 
-                for (String arg : listOfArgs) if (arg.startsWith(a0)) args1.add(arg);
+                for (String arg : listOfArgs) if (arg.startsWith(args[0].toLowerCase())) args1.add(arg);
                 return args1;
             }
 
             case 2: {
-                switch (a0) {
+                switch (args[0].toLowerCase()) {
                     case "debug": {
                         if (!s.hasPermission("bankplus.debug")) return null;
                         List<String> args2 = new ArrayList<>();
@@ -678,7 +677,7 @@ public class MultiCmdProcessor {
             break;
 
             case 3: {
-                switch (a0) {
+                switch (args[0].toLowerCase()) {
                     case "add": {
                         if (!s.hasPermission("bankplus.add")) return null;
                         List<String> args3 = new ArrayList<>();
@@ -704,7 +703,7 @@ public class MultiCmdProcessor {
                         return args3;
                     }
 
-                    case "force-open": {
+                    case "forceoopen": {
                         if (!s.hasPermission("bankplus.force-open")) return null;
                         List<String> args3 = new ArrayList<>();
                         for (String arg : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
@@ -764,7 +763,7 @@ public class MultiCmdProcessor {
             break;
 
             case 4: {
-                switch (a0) {
+                switch (args[0].toLowerCase()) {
                     case "pay": {
                         if (!BPMethods.isPlayer(s) || !s.hasPermission("bankplus.pay")) return null;
                         List<String> args4 = new ArrayList<>();

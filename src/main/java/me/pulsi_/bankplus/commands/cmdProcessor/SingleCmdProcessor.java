@@ -123,18 +123,8 @@ public class SingleCmdProcessor {
                     return;
                 }
 
-                if (args.length == 2) {
-                    BPMessages.send(s, "Specify-Bank");
-                    return;
-                }
-                String bankName = args[2];
-
-                if (!new BanksManager(bankName).exist()) {
-                    BPMessages.send(s, "Invalid-Bank");
-                    return;
-                }
-                banksHolder.openBank(p, bankName);
-                BPMessages.send(s, "Force-Open", "%player%$" + p.getName(), "%bank%$", bankName);
+                banksHolder.openBank(p, Values.CONFIG.getMainGuiName());
+                BPMessages.send(s, "Force-Open", "%player%$" + p.getName(), "%bank%$" + Values.CONFIG.getMainGuiName());
             }
             break;
 
@@ -533,21 +523,12 @@ public class SingleCmdProcessor {
             break;
 
             case 3: {
-                switch (args[0].toLowerCase()) {
-                    case "force-open": {
-                        if (!s.hasPermission("bankplus.force-open")) return null;
-                        List<String> args3 = new ArrayList<>();
-                        for (String arg : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
-                        return args3;
-                    }
-
-                    case "setlevel": {
-                        if (!s.hasPermission("bankplus.setlevel")) return null;
-                        List<String> args3 = new ArrayList<>();
-                        for (String arg : new BanksManager(Values.CONFIG.getMainGuiName()).getLevels())
-                            if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
-                        return args3;
-                    }
+                if (args[0].equalsIgnoreCase("setlevel")) {
+                    if (!s.hasPermission("bankplus.setlevel")) return null;
+                    List<String> args3 = new ArrayList<>();
+                    for (String arg : new BanksManager(Values.CONFIG.getMainGuiName()).getLevels())
+                        if (arg.startsWith(args[2].toLowerCase())) args3.add(arg);
+                    return args3;
                 }
             }
         }

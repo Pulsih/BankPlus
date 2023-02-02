@@ -16,23 +16,23 @@ public class BPMessages {
     private static final Map<String, List<String>> messages = new HashMap<>();
 
     public static void send(Player p, String message, boolean fromString) {
-        if (!fromString) {
+        if (p == null || !fromString) {
             send(p, message);
             return;
         }
         p.sendMessage(BPChat.color(message.replace("%prefix%", getPrefix())));
     }
 
-    public static void send(CommandSender p, String message, boolean fromString) {
-        if (!fromString) {
-            send(p, message);
+    public static void send(CommandSender s, String message, boolean fromString) {
+        if (s == null || !fromString) {
+            send(s, message);
             return;
         }
-        p.sendMessage(BPChat.color(message.replace("%prefix%", getPrefix())));
+        s.sendMessage(BPChat.color(message.replace("%prefix%", getPrefix())));
     }
 
     public static void send(Player p, String message, List<String> stringsToReplace, boolean fromString) {
-        if (!fromString) {
+        if (p == null || !fromString) {
             send(p, message);
             return;
         }
@@ -46,7 +46,7 @@ public class BPMessages {
     }
 
     public static void send(Player p, String identifier) {
-        if (!messages.containsKey(identifier)) return;
+        if (p == null || !messages.containsKey(identifier)) return;
 
         List<String> listOfMessages = messages.get(identifier);
         if (listOfMessages.isEmpty()) {
@@ -58,7 +58,7 @@ public class BPMessages {
     }
 
     public static void send(Player p, String identifier, String... stringsToReplace) {
-        if (!messages.containsKey(identifier)) return;
+        if (p == null || !messages.containsKey(identifier)) return;
 
         List<String> listOfMessages = messages.get(identifier);
         if (listOfMessages.isEmpty()) {
@@ -78,7 +78,7 @@ public class BPMessages {
     }
 
     public static void send(Player p, String identifier, List<String> stringsToReplace) {
-        if (!messages.containsKey(identifier)) return;
+        if (p == null || !messages.containsKey(identifier)) return;
 
         List<String> listOfMessages = messages.get(identifier);
         if (listOfMessages.isEmpty()) {
@@ -98,7 +98,7 @@ public class BPMessages {
     }
 
     public static void send(CommandSender s, String identifier) {
-        if (!messages.containsKey(identifier)) return;
+        if (s == null || !messages.containsKey(identifier)) return;
 
         List<String> listOfMessages = messages.get(identifier);
         if (listOfMessages.isEmpty()) {
@@ -110,7 +110,7 @@ public class BPMessages {
     }
 
     public static void send(CommandSender s, String identifier, String... stringsToReplace) {
-        if (!messages.containsKey(identifier)) return;
+        if (s == null || !messages.containsKey(identifier)) return;
 
         List<String> listOfMessages = messages.get(identifier);
         if (listOfMessages.isEmpty()) {
@@ -130,7 +130,7 @@ public class BPMessages {
     }
 
     public static void send(CommandSender s, String identifier, List<String> stringsToReplace) {
-        if (!messages.containsKey(identifier)) return;
+        if (s == null || !messages.containsKey(identifier)) return;
 
         List<String> listOfMessages = messages.get(identifier);
         if (listOfMessages.isEmpty()) {

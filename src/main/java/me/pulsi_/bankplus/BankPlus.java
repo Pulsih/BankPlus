@@ -24,7 +24,7 @@ import java.net.URL;
 
 public final class BankPlus extends JavaPlugin {
 
-    public static boolean wasOnSingleEconomy;
+    private boolean wasOnSingleEconomy;
 
     private PlayerRegistry playerRegistry;
     private BankGuiRegistry bankGuiRegistry;
@@ -114,6 +114,10 @@ public final class BankPlus extends JavaPlugin {
         else Bukkit.getOnlinePlayers().forEach(p -> new SingleEconomyManager(p).saveBankBalance(false));
         if (Values.CONFIG.isInterestEnabled()) interest.saveInterest();
         dataManager.shutdownPlugin();
+    }
+
+    public boolean wasOnSingleEconomy() {
+        return wasOnSingleEconomy;
     }
 
     public PlayerRegistry getPlayerRegistry() {

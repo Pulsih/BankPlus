@@ -71,6 +71,11 @@ public class BankClickMethod {
                 String identifier = length > 0 ? parts[0] : null, value = "";
                 if (identifier == null) continue;
 
+                if (identifier.equals("[UPGRADE]")) {
+                    banksManager.upgradeBank(p);
+                    continue;
+                }
+
                 if (length != 1) {
                     StringBuilder builder = new StringBuilder();
                     for (int i = 1; i < length; i++) {
@@ -111,10 +116,6 @@ public class BankClickMethod {
 
                     case "[PLAYER]":
                         p.chat(value);
-                        break;
-
-                    case "[UPGRADE]":
-                        banksManager.upgradeBank(p);
                         break;
 
                     case "[WITHDRAW]":

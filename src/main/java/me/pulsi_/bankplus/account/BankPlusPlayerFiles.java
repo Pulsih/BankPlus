@@ -38,7 +38,7 @@ public class BankPlusPlayerFiles {
         FileConfiguration config = getPlayerConfig();
 
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
-            if (!BankPlus.wasOnSingleEconomy) return;
+            if (!BankPlus.INSTANCE.wasOnSingleEconomy()) return;
 
             BigDecimal bal = singleEconomyManager.getBankBalance();
             for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
@@ -52,7 +52,7 @@ public class BankPlusPlayerFiles {
             singleEconomyManager.unloadBankBalance();
             multiEconomyManager.loadBankBalance();
         } else {
-            if (BankPlus.wasOnSingleEconomy) return;
+            if (BankPlus.INSTANCE.wasOnSingleEconomy()) return;
 
             BigDecimal amount = new BigDecimal(0);
             for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {

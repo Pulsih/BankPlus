@@ -118,7 +118,7 @@ public class BanksManager {
         String interest = getUpgrades().getString(level + ".Interest");
 
         if (BPMethods.isInvalidNumber(interest)) {
-            BPLogger.error("Invalid interest amount in the " + level + "* upgrades section, file: " + bank.getIdentifier() + ".yml, ");
+            BPLogger.error("Invalid interest amount in the " + level + "* upgrades section, file: " + bank.getIdentifier() + ".yml");
             return Values.CONFIG.getInterestMoneyGiven();
         }
 
@@ -133,7 +133,7 @@ public class BanksManager {
         String interest = getUpgrades().getString(level + ".Interest");
 
         if (BPMethods.isInvalidNumber(interest)) {
-            BPLogger.error("Invalid interest amount in the " + level + "* upgrades section, file: " + bank.getIdentifier() + ".yml, ");
+            BPLogger.error("Invalid interest amount in the " + level + "* upgrades section, file: " + bank.getIdentifier() + ".yml");
             return Values.CONFIG.getInterestMoneyGiven();
         }
 

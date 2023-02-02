@@ -143,19 +143,19 @@ public class BPMethods {
             return true;
         }
         if (Values.CONFIG.getMaxDecimalsAmount() <= 0) {
-            if (s != null) BPMessages.send(s, "Invalid-Number");
+            BPMessages.send(s, "Invalid-Number");
             return true;
         }
         try {
             if (number.contains("%")) number = number.replace("%", "");
             BigDecimal num = new BigDecimal(number);
             if (num.doubleValue() < 0) {
-                if (s != null) BPMessages.send(s, "Cannot-Use-Negative-Number");
+                BPMessages.send(s, "Cannot-Use-Negative-Number");
                 return true;
             }
             return false;
         } catch (NumberFormatException e) {
-            if (s != null) BPMessages.send(s, "Invalid-Number");
+            BPMessages.send(s, "Invalid-Number");
             return true;
         }
     }
