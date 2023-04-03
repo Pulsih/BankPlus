@@ -2,7 +2,7 @@ package me.pulsi_.bankplus.account.economy;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
-import me.pulsi_.bankplus.bankGuis.BanksManager;
+import me.pulsi_.bankplus.bankGuis.BankReader;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
@@ -205,7 +205,7 @@ public class SingleEconomyManager {
         if (Values.CONFIG.getDepositTaxes().doubleValue() > 0 && !p.hasPermission("bankplus.deposit.bypass-taxes"))
             taxes = amount.multiply(Values.CONFIG.getDepositTaxes().divide(BigDecimal.valueOf(100)));
 
-        BigDecimal capacity = new BanksManager(Values.CONFIG.getMainGuiName()).getCapacity(p);
+        BigDecimal capacity = new BankReader(Values.CONFIG.getMainGuiName()).getCapacity(p);
         BigDecimal newBankBalance = getBankBalance().add(amount);
 
         /*

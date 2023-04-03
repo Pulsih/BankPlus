@@ -241,7 +241,7 @@ public class ConfigManager {
         addSpace(newConfig, "Interest.AFK-Settings");
 
         addCommentsUnder(newConfig, "Interest",
-                "The percentage of money given.",
+                "The percentage of money given. ( default: 5% )",
                 "",
                 "IMPORTANT! This amount is defined in the BANK FILE!",
                 "This option is only a fallback value in case the",
@@ -266,6 +266,19 @@ public class ConfigManager {
 
         addCommentsUnder(newConfig, "Interest", "Choose if also giving interest to offline players.");
         validatePath(oldConfig, newConfig, "Interest.Give-To-Offline-Players", false);
+        addSpace(newConfig, "Interest");
+
+        addCommentsUnder(newConfig, "Interest",
+                "Choose if the interest rate for offline players",
+                "will be different from the default one.");
+        validatePath(oldConfig, newConfig, "Interest.Different-Offline-Rate", false);
+        addSpace(newConfig, "Interest");
+
+        addCommentsUnder(newConfig, "Interest",
+                "If 'Different-Offline-Rate' is enabled, the offline players",
+                "will receive this interest rate. It works the same as the",
+                "'Money-Given' above, you can edit this in the bank file.");
+        validatePath(oldConfig, newConfig, "Interest.Offline-Money-Given", "5%");
         addSpace(newConfig, "Interest");
 
         addCommentsUnder(newConfig, "Interest",

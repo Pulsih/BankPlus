@@ -63,6 +63,7 @@ Upgrades:
   1: # 1 Is the default level, it can't be lower than 1.
     Capacity: "50000"
     Interest: "5%"
+    Offline-Interest: "2%"
   2:
     # The cost that a player will need to
     # pay to upgrade the bank to level 2.
@@ -73,11 +74,14 @@ Upgrades:
     # If the interest is not specified, the bank will
     # use the default interest rate from the config.yml
     Interest: "10%"
+    # This offline interest will only work if the 'Different-Offline-Rate'
+    # section is enabled in the config.yml, otherwise it will use the normal interest.
+    Offline-Interest: "5%"
   3:
     Cost: "10000"
     Capacity: "200000"
     Interest: "15%"
-
+    Offline-Interest: "10%"
 
 Items:
   # You can add as many items as you want

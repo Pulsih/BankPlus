@@ -6,7 +6,7 @@ import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankGuis.BanksHolder;
 import me.pulsi_.bankplus.bankGuis.BanksListGui;
-import me.pulsi_.bankplus.bankGuis.BanksManager;
+import me.pulsi_.bankplus.bankGuis.BankReader;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
@@ -44,11 +44,11 @@ public class BankClickMethod {
             return;
         }
 
-        BanksManager banksManager = new BanksManager(bankName);
-        ConfigurationSection items = banksManager.getItems();
+        BankReader bankReader = new BankReader(bankName);
+        ConfigurationSection items = bankReader.getItems();
         if (items == null) return;
 
-        FileConfiguration config = banksManager.getConfig();
+        FileConfiguration config = bankReader.getConfig();
         if (config == null) return;
 
         for (String key : items.getKeys(false)) {
@@ -56,7 +56,12 @@ public class BankClickMethod {
             if (itemValues == null || slot + 1 != itemValues.getInt("Slot")) continue;
 
             List<String> actions = itemValues.getStringList("Actions");
-            if (actions.isEmpty()) continue;
+            if (actions.isEmpty()) {
+                // Check if they are still using the old methods, still process it and invite them to update it.
+                if (processOldClickMethod(itemValues, bankName, p))
+                    BPLogger.warn("Warning! You are using an old format for the item action! Check out the BankPlus wiki and update it ");
+                continue;
+            }
 
             BigDecimal amount;
             boolean isMulti = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled();
@@ -72,7 +77,7 @@ public class BankClickMethod {
                 if (identifier == null) continue;
 
                 if (identifier.equals("[UPGRADE]")) {
-                    banksManager.upgradeBank(p);
+                    bankReader.upgradeBank(p);
                     continue;
                 }
 
@@ -139,5 +144,98 @@ public class BankClickMethod {
                 }
             }
         }
+    }
+
+    private static boolean processOldClickMethod(ConfigurationSection itemValues, String bankName, Player p) {
+        String actionType = itemValues.getString("Action.Action-Type");
+        if (actionType == null) return false;
+
+        BankReader bankReader = new BankReader(bankName);
+        String actionAmount = itemValues.getString("Action.Amount");
+
+        actionType = actionType.toLowerCase();
+        actionAmount = actionAmount == null ? "null" : actionAmount.toLowerCase();
+
+        BigDecimal amount;
+        boolean isMulti = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled();
+        SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
+        MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
+        Economy economy = BankPlus.INSTANCE.getEconomy();
+        switch (actionType) {
+            case "deposit":
+                switch (actionAmount) {
+                    case "custom":
+                        BPMethods.customDeposit(p);
+                        break;
+
+                    case "all":
+                        amount = BigDecimal.valueOf(economy.getBalance(p));
+                        if (isMulti) multiEconomyManager.deposit(amount, bankName);
+                        else singleEconomyManager.deposit(amount);
+                        break;
+
+                    case "half":
+                        amount = BigDecimal.valueOf(economy.getBalance(p) / 2);
+                        if (isMulti) multiEconomyManager.deposit(amount, bankName);
+                        else singleEconomyManager.deposit(amount);
+                        break;
+
+                    default:
+                        try {
+                            amount = new BigDecimal(actionAmount);
+                        } catch (NumberFormatException ex) {
+                            BPLogger.error("Invalid deposit number! (Path: " + itemValues + ", Number: " + actionAmount + ")");
+                            return true;
+                        }
+                        if (isMulti) multiEconomyManager.deposit(amount, bankName);
+                        else singleEconomyManager.deposit(amount);
+                        break;
+                }
+                break;
+
+            case "withdraw":
+                switch (actionAmount) {
+                    case "custom":
+                        BPMethods.customWithdraw(p);
+                        break;
+
+                    case "all":
+                        if (isMulti) {
+                            amount = multiEconomyManager.getBankBalance(bankName);
+                            multiEconomyManager.withdraw(amount, bankName);
+                        } else {
+                            amount = singleEconomyManager.getBankBalance();
+                            singleEconomyManager.withdraw(amount);
+                        }
+                        break;
+
+                    case "half":
+                        if (isMulti) {
+                            amount = multiEconomyManager.getBankBalance(bankName).divide(BigDecimal.valueOf(2));
+                            multiEconomyManager.withdraw(amount, bankName);
+                        } else {
+                            amount = singleEconomyManager.getBankBalance().divide(BigDecimal.valueOf(2));
+                            singleEconomyManager.withdraw(amount);
+                        }
+                        break;
+
+                    default:
+                        try {
+                            amount = new BigDecimal(actionAmount);
+                        } catch (NumberFormatException ex) {
+                            BPLogger.error("Invalid withdraw number! (Path: " + itemValues + ", Number: " + actionAmount + ")");
+                            return true;
+                        }
+                        if (isMulti) multiEconomyManager.withdraw(amount, bankName);
+                        else singleEconomyManager.withdraw(amount);
+                        break;
+                }
+                break;
+
+            case "upgrade":
+                bankReader.upgradeBank(p);
+                break;
+        }
+        return true;
     }
 }

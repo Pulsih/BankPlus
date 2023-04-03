@@ -3,7 +3,7 @@ package me.pulsi_.bankplus.utils;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.bankGuis.BanksManager;
+import me.pulsi_.bankplus.bankGuis.BankReader;
 import me.pulsi_.bankplus.managers.ConfigManager;
 import me.pulsi_.bankplus.managers.TaskManager;
 import me.pulsi_.bankplus.values.Values;
@@ -142,12 +142,9 @@ public class BPMethods {
             BPMessages.send(s, "Invalid-Number");
             return true;
         }
-        if (Values.CONFIG.getMaxDecimalsAmount() <= 0) {
-            BPMessages.send(s, "Invalid-Number");
-            return true;
-        }
+        if (number.contains("%")) number = number.replace("%", "");
+
         try {
-            if (number.contains("%")) number = number.replace("%", "");
             BigDecimal num = new BigDecimal(number);
             if (num.doubleValue() < 0) {
                 BPMessages.send(s, "Cannot-Use-Negative-Number");
@@ -462,7 +459,7 @@ public class BPMethods {
     }
 
     public static boolean isBankFull(Player p, String bankName) {
-        BigDecimal capacity = new BanksManager(bankName).getCapacity(p);
+        BigDecimal capacity = new BankReader(bankName).getCapacity(p);
         if (new MultiEconomyManager(p).getBankBalance(bankName).doubleValue() >= capacity.doubleValue()) {
             BPMessages.send(p, "Cannot-Deposit-Anymore");
             return true;
@@ -471,7 +468,7 @@ public class BPMethods {
     }
 
     public static boolean isBankFull(Player p) {
-        BigDecimal capacity = new BanksManager(Values.CONFIG.getMainGuiName()).getCapacity(p);
+        BigDecimal capacity = new BankReader(Values.CONFIG.getMainGuiName()).getCapacity(p);
         if (new SingleEconomyManager(p).getBankBalance().doubleValue() >= capacity.doubleValue()) {
             BPMessages.send(p, "Cannot-Deposit-Anymore");
             return true;

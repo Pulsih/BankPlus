@@ -67,9 +67,7 @@ public class BankPlusPlayerFiles {
     }
 
     public boolean isPlayerRegistered() {
-        String identifier = Values.CONFIG.isStoringUUIDs() ? (p == null ? op.getUniqueId() : p.getUniqueId()).toString() : (p == null ? op.getName() : p.getName());
-
-        File file = new File(BankPlus.INSTANCE.getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
+        File file = getPlayerFile();
         if (file.exists()) return false;
 
         String name = (p != null ? p.getName() : op.getName());
@@ -104,7 +102,7 @@ public class BankPlusPlayerFiles {
         try {
             config.load(file);
         } catch (IOException | InvalidConfigurationException e) {
-            BPLogger.warn("Something went wrong while trying to get " + op.getName() + "'s file configuration: " + e.getMessage());
+            BPLogger.warn("Something went wrong while trying to get " + (p == null ? op.getName() : p.getName()) + "'s file configuration: " + e.getMessage());
         }
         return config;
     }

@@ -11,6 +11,8 @@ import java.util.List;
 
 public class ConfigValues {
 
+    private static final String DEF_ERROR = "Invalid number for \"%\", Please correct it in the config as soon as possible!";
+
     private List<String> worldsBlacklist, exitCommands, bankTopFormat;
     private String exitMessage, playerChatPriority, bankClickPriority;
     private String second, seconds, minute, minutes, hour, hours, day, days;
@@ -19,12 +21,13 @@ public class ConfigValues {
     private String interestTimeMinutesHoursDays, interestTimeSecondsHoursDays, interestTimeSecondsMinutesHoursDays, interestTimeSecondsMinutesDays;
     private String k, m, b, t, q, qq;
     private String withdrawSound, depositSound, viewSound, personalSound;
-    private String notifyOfflineInterestMessage, interestDelay, interestOfflinePermission;
     private String maxDepositAmount, maxWithdrawAmount, depositTaxes, withdrawTaxes, depositMinimumAmount, withdrawMinimumAmount, maxBankCapacity, startAmount;
-    private String bankTopMoneyFormat, banktopUpdateBroadcastMessage, interestMaxAmount, interestMoneyGiven, bankUpgradedMax, mainGuiName;
+    private String bankTopMoneyFormat, banktopUpdateBroadcastMessage, bankUpgradedMaxPlaceholder, mainGuiName;
+    private String notifyOfflineInterestMessage, interestDelay, interestOfflinePermission, interestMaxAmount, interestMoneyGiven, offlineInterestMoneyGiven;
     private long notifyOfflineInterestDelay, saveBalancedDelay, updateBankTopDelay;
     private int afkPlayersTime, maxDecimalsAmount, bankTopSize;
-    private boolean isReopeningBankAfterChat, isInterestEnabled, isNotifyOfflineInterest, isStoringUUIDs, isGivingInterestToOfflinePlayers;
+    private boolean isReopeningBankAfterChat, isNotifyOfflineInterest, isStoringUUIDs;
+    private boolean isInterestEnabled, isGivingInterestToOfflinePlayers, isOfflineInterestDifferentRate;
     private boolean isOfflineInterestEarnedMessageEnabled, isUpdateCheckerEnabled, isWithdrawSoundEnabled, isDepositSoundEnabled;
     private boolean isViewSoundEnabled, isPersonalSoundEnabled, isIgnoringAfkPlayers, useEssentialsXAFK;
     private boolean banktopEnabled, banktopUpdateBroadcastEnabled, banktopUpdateBroadcastOnlyConsole, saveBalancesBroadcast, guiModuleEnabled;
@@ -86,7 +89,8 @@ public class ConfigValues {
         notifyOfflineInterestDelay = config.getLong("General-Settings.Offline-Interest-Earned-Message.Delay");
         interestMaxAmount = config.getString("Interest.Max-Amount");
         interestMoneyGiven = config.getString("Interest.Money-Given");
-        bankUpgradedMax = config.getString("Placeholders.Upgrades.Max-Level");
+        offlineInterestMoneyGiven = config.getString("Interest.Offline-Money-Given");
+        bankUpgradedMaxPlaceholder = config.getString("Placeholders.Upgrades.Max-Level");
         worldsBlacklist = config.getStringList("General-Settings.Worlds-Blacklist");
         exitCommands = config.getStringList("General-Settings.Chat-Exit-Commands");
         isReopeningBankAfterChat = config.getBoolean("General-Settings.Reopen-Bank-After-Chat");
@@ -94,6 +98,7 @@ public class ConfigValues {
         isNotifyOfflineInterest = config.getBoolean("General-Settings.Offline-Interest-Earned-Message.Enabled");
         isStoringUUIDs = config.getBoolean("General-Settings.Use-UUIDs");
         isGivingInterestToOfflinePlayers = config.getBoolean("Interest.Give-To-Offline-Players");
+        isOfflineInterestDifferentRate = config.getBoolean("Interest.Different-Offline-Rate");
         isOfflineInterestEarnedMessageEnabled = config.getBoolean("General-Settings.Offline-Interest-Earned-Message.Enabled");
         isUpdateCheckerEnabled = config.getBoolean("Update-Checker");
         isWithdrawSoundEnabled = config.getBoolean("General-Settings.Withdraw-Sound.Enabled");
@@ -295,7 +300,7 @@ public class ConfigValues {
 
     public BigDecimal getMaxDepositAmount() {
         if (BPMethods.isInvalidNumber(maxDepositAmount)) {
-            BPLogger.error("Invalid number for \"MaxDepositAmount\", Please correct it in the config as soon as possible!");
+            BPLogger.error(DEF_ERROR.replace("%", "Deposit-Settings.Max-Deposit-Amount"));
             return new BigDecimal(0);
         }
         return new BigDecimal(maxDepositAmount);
@@ -303,7 +308,7 @@ public class ConfigValues {
 
     public BigDecimal getMaxWithdrawAmount() {
         if (BPMethods.isInvalidNumber(maxWithdrawAmount)) {
-            BPLogger.error("Invalid number for \"MaxWithdrawAmount\", Please correct it in the config as soon as possible!");
+            BPLogger.error(DEF_ERROR.replace("%", "Withdraw-Settings.Max-Withdraw-Amount"));
             return new BigDecimal(0);
         }
         return new BigDecimal(maxWithdrawAmount);
@@ -315,7 +320,7 @@ public class ConfigValues {
 
     public BigDecimal getDepositTaxes() {
         if (BPMethods.isInvalidNumber(depositTaxes)) {
-            BPLogger.error("Invalid number for \"DepositTaxes\", Please correct it in the config as soon as possible!");
+            BPLogger.error(DEF_ERROR.replace("%", "Deposit-Settings.Deposit-Taxes"));
             return new BigDecimal(0);
         }
         return new BigDecimal(depositTaxes.replace("%", ""));
@@ -327,7 +332,7 @@ public class ConfigValues {
 
     public BigDecimal getWithdrawTaxes() {
         if (BPMethods.isInvalidNumber(withdrawTaxes)) {
-            BPLogger.error("Invalid number for \"WithdrawTaxes\", Please correct it in the config as soon as possible!");
+            BPLogger.error(DEF_ERROR.replace("%", "Withdraw-Settings.Withdraw-Taxes"));
             return new BigDecimal(0);
         }
         return new BigDecimal(withdrawTaxes.replace("%", ""));
@@ -335,7 +340,7 @@ public class ConfigValues {
 
     public BigDecimal getDepositMinimumAmount() {
         if (BPMethods.isInvalidNumber(depositMinimumAmount)) {
-            BPLogger.error("Invalid number for \"MinimumDepositAmount\", Please correct it in the config as soon as possible!");
+            BPLogger.error(DEF_ERROR.replace("%", "Deposit-Settings.Minimum-Deposit-Amount"));
             return new BigDecimal(0);
         }
         return new BigDecimal(depositMinimumAmount);
@@ -343,7 +348,7 @@ public class ConfigValues {
 
     public BigDecimal getWithdrawMinimumAmount() {
         if (BPMethods.isInvalidNumber(withdrawMinimumAmount)) {
-            BPLogger.error("Invalid number for \"MinimumWithdrawAmount\", Please correct it in the config as soon as possible!");
+            BPLogger.error(DEF_ERROR.replace("%", "Withdraw-Settings.Minimum-Withdraw-Amount"));
             return new BigDecimal(0);
         }
         return new BigDecimal(withdrawMinimumAmount);
@@ -351,7 +356,7 @@ public class ConfigValues {
 
     public BigDecimal getMaxBankCapacity() {
         if (BPMethods.isInvalidNumber(maxBankCapacity)) {
-            BPLogger.error("Invalid number for \"MaxBankCapacity\", Please correct it in the config as soon as possible!");
+            BPLogger.error(DEF_ERROR.replace("%", "General-Settings.Max-Bank-Capacity"));
             return new BigDecimal(0);
         }
         return new BigDecimal(maxBankCapacity);
@@ -359,7 +364,7 @@ public class ConfigValues {
 
     public BigDecimal getStartAmount() {
         if (BPMethods.isInvalidNumber(startAmount)) {
-            BPLogger.error("Invalid number for \"StartAmount\", Please correct it in the config as soon as possible!");
+            BPLogger.error(DEF_ERROR.replace("%", "General-Settings.Join-Start-Amount"));
             return new BigDecimal(0);
         }
         return new BigDecimal(startAmount);
@@ -371,7 +376,7 @@ public class ConfigValues {
 
     public BigDecimal getInterestMaxAmount() {
         if (BPMethods.isInvalidNumber(interestMaxAmount)) {
-            BPLogger.error("Invalid number for \"InterestMaxAmount\", Please correct it in the config as soon as possible!");
+            BPLogger.error(DEF_ERROR.replace("%", "Interest.Max-Amount"));
             return new BigDecimal(0);
         }
         return new BigDecimal(interestMaxAmount);
@@ -383,14 +388,26 @@ public class ConfigValues {
 
     public BigDecimal getInterestMoneyGiven() {
         if (BPMethods.isInvalidNumber(interestMoneyGiven)) {
-            BPLogger.error("Invalid number for \"InterestMoneyGiven\", Please correct it in the config as soon as possible!");
+            BPLogger.error(DEF_ERROR.replace("%", "Interest.Money-Given"));
             return new BigDecimal(0);
         }
         return new BigDecimal(interestMoneyGiven.replace("%", ""));
     }
 
-    public String getBankUpgradedMax() {
-        return bankUpgradedMax == null ? "&cMaxed" : bankUpgradedMax;
+    public String getOfflineInterestMoneyGivenString() {
+        return offlineInterestMoneyGiven;
+    }
+
+    public BigDecimal getOfflineInterestMoneyGiven() {
+        if (BPMethods.isInvalidNumber(offlineInterestMoneyGiven)) {
+            BPLogger.error(DEF_ERROR.replace("%", "Interest.Offline-Money-Given"));
+            return new BigDecimal(0);
+        }
+        return new BigDecimal(offlineInterestMoneyGiven.replace("%", ""));
+    }
+
+    public String getBankUpgradedMaxPlaceholder() {
+        return bankUpgradedMaxPlaceholder == null ? "&cMaxed" : bankUpgradedMaxPlaceholder;
     }
 
     public List<String> getWorldsBlacklist() {
@@ -419,6 +436,10 @@ public class ConfigValues {
 
     public boolean isGivingInterestToOfflinePlayers() {
         return isGivingInterestToOfflinePlayers;
+    }
+
+    public boolean isOfflineInterestDifferentRate() {
+        return isOfflineInterestDifferentRate;
     }
 
     public boolean isOfflineInterestEarnedMessageEnabled() {

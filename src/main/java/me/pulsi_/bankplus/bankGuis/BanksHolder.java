@@ -41,7 +41,7 @@ public class BanksHolder implements InventoryHolder {
             return;
         }
 
-        if (!new BanksManager(identifier).isAvailable(p)) {
+        if (!new BankReader(identifier).isAvailable(p)) {
             BPMessages.send(p, "Cannot-Access-Bank");
             return;
         }
@@ -72,7 +72,7 @@ public class BanksHolder implements InventoryHolder {
     }
 
     private void placeHeads(Inventory bank, Player p, String identifier) {
-        ConfigurationSection items = new BanksManager(identifier).getItems();
+        ConfigurationSection items = new BankReader(identifier).getItems();
         if (items == null) return;
 
         for (String item : items.getKeys(false)) {
@@ -91,7 +91,7 @@ public class BanksHolder implements InventoryHolder {
     }
 
     private void updateMeta(Inventory bank, Player p, String identifier) {
-        ConfigurationSection items = new BanksManager(identifier).getItems();
+        ConfigurationSection items = new BankReader(identifier).getItems();
         if (items == null) return;
 
         for (String item : items.getKeys(false)) {

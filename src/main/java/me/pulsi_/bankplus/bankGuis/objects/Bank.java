@@ -41,6 +41,11 @@ public class Bank {
         this.fillerMaterial = null;
         this.fillerGlowing = false;
         this.content = content;
+        this.permission = null;
+        this.items = null;
+        this.upgrades = null;
+        this.banksListGuiItems = null;
+        this.settings = null;
     }
 
     public Bank(String identifier, ItemStack[] content) {

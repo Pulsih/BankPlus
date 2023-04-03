@@ -105,7 +105,6 @@ public final class BankPlus extends JavaPlugin {
 
         BPVersions.moveBankFileToBanksFolder();
         BPVersions.changePlayerStoragePosition();
-        BPVersions.updateBankFileActions();
     }
 
     @Override

@@ -1,7 +1,6 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.bankGuis.objects.Bank;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
@@ -19,49 +18,6 @@ import java.util.*;
  * balances from the players.yml to the per-player file )
  */
 public class BPVersions {
-
-    /**
-     * Will be removed in 6.1, used for versions older than 5.8.
-     */
-    public static void updateBankFileActions() {
-        for (Bank bank : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().values()) {
-            FileConfiguration config = bank.getBankConfig();
-
-            ConfigurationSection items = config.getConfigurationSection("Items");
-            if (items == null) continue;
-
-            for (String item : items.getKeys(false)) {
-                ConfigurationSection values = config.getConfigurationSection("Items." + item);
-                if (values == null || values.getString("Action") == null) continue;
-                String actionType = values.getString("Action.Action-Type"), actionAmount = values.getString("Action.Amount");
-
-                if (actionType == null) continue;
-                actionType = actionType.toUpperCase();
-
-                if (actionAmount == null) {
-                    config.set("Items." + item + ".Actions", Collections.singletonList("[" + actionType + "]"));
-                    config.set("Items." + item + ".Action", null);
-                    continue;
-                }
-
-                switch (actionAmount) {
-                    case "ALL":
-                        actionAmount = "100%";
-                        break;
-                    case "HALF":
-                        actionAmount = "50%";
-                }
-
-                config.set("Items." + item + ".Actions", Collections.singletonList("[" + actionType + "]" + " " + actionAmount));
-                config.set("Items." + item + ".Action", null);
-            }
-            try {
-                config.save(bank.getBankFile());
-            } catch (IOException e) {
-                BPLogger.error("Could not save the " + bank.getIdentifier() + " bank file: " + e.getMessage());
-            }
-        }
-    }
 
     /**
      * Will be removed in 6.1, used for versions older than 5.8.

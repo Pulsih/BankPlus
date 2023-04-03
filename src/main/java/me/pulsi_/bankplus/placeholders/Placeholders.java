@@ -4,7 +4,7 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.bankGuis.BanksManager;
+import me.pulsi_.bankplus.bankGuis.BankReader;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.managers.BankTopManager;
 import me.pulsi_.bankplus.utils.BPChat;
@@ -51,13 +51,13 @@ public class Placeholders extends PlaceholderExpansion {
         BankTopManager bankTop = BankPlus.INSTANCE.getBankTopManager();
 
         if (identifier.startsWith("capacity")) {
-            BigDecimal capacity = new BanksManager(Values.CONFIG.getMainGuiName()).getCapacity(p);
+            BigDecimal capacity = new BankReader(Values.CONFIG.getMainGuiName()).getCapacity(p);
             if (identifier.endsWith("}") && identifier.contains("{")) {
                 if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
                     return "The multiple-banks module is disabled.";
                 String bankName = identifier.substring(identifier.indexOf("{") + 1, identifier.indexOf("}"));
-                if (!new BanksManager(bankName).exist()) return "The selected bank does not exist.";
-                capacity = new BanksManager(bankName).getCapacity(p);
+                if (!new BankReader(bankName).exist()) return "The selected bank does not exist.";
+                capacity = new BankReader(bankName).getCapacity(p);
             }
             String formatter = identifier.replace("capacity", "");
             if (formatter.contains("_long")) return String.valueOf(capacity);
@@ -67,13 +67,13 @@ public class Placeholders extends PlaceholderExpansion {
         }
 
         if (identifier.startsWith("level")) {
-            String level = String.valueOf(new BanksManager(Values.CONFIG.getMainGuiName()).getLevel(p));
+            String level = String.valueOf(new BankReader(Values.CONFIG.getMainGuiName()).getCurrentLevel(p));
             if (identifier.endsWith("}") && identifier.contains("{")) {
                 if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
                     return "The multiple-banks module is disabled.";
                 String bankName = identifier.substring(identifier.indexOf("{") + 1, identifier.indexOf("}"));
-                if (!new BanksManager(bankName).exist()) return "The selected bank does not exist.";
-                level = String.valueOf(new BanksManager(bankName).getLevel(p));
+                if (!new BankReader(bankName).exist()) return "The selected bank does not exist.";
+                level = String.valueOf(new BankReader(bankName).getCurrentLevel(p));
             }
             return level;
         }
@@ -81,15 +81,15 @@ public class Placeholders extends PlaceholderExpansion {
         if (identifier.startsWith("banktop_position")) return bankTop.getPlayerBankTopPosition(p) + "";
 
         if (identifier.startsWith("next_level_cost")) {
-            if (!new BanksManager(Values.CONFIG.getMainGuiName()).hasNextLevel(p)) return BPChat.color(Values.CONFIG.getBankUpgradedMax());
-            BigDecimal cost = new BanksManager(Values.CONFIG.getMainGuiName()).getLevelCost(new BanksManager(Values.CONFIG.getMainGuiName()).getLevel(p) + 1);
+            if (!new BankReader(Values.CONFIG.getMainGuiName()).hasNextLevel(p)) return BPChat.color(Values.CONFIG.getBankUpgradedMaxPlaceholder());
+            BigDecimal cost = new BankReader(Values.CONFIG.getMainGuiName()).getLevelCost(new BankReader(Values.CONFIG.getMainGuiName()).getCurrentLevel(p) + 1);
             if (identifier.endsWith("}") && identifier.contains("{")) {
                 if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
                     return "The multiple-banks module is disabled.";
                 String bankName = identifier.substring(identifier.indexOf("{") + 1, identifier.indexOf("}"));
-                if (!new BanksManager(bankName).exist()) return "The selected bank does not exist.";
-                if (!new BanksManager(bankName).hasNextLevel(p)) return BPChat.color(Values.CONFIG.getBankUpgradedMax());
-                cost = new BanksManager(bankName).getLevelCost(new BanksManager(bankName).getLevel(p) + 1);
+                if (!new BankReader(bankName).exist()) return "The selected bank does not exist.";
+                if (!new BankReader(bankName).hasNextLevel(p)) return BPChat.color(Values.CONFIG.getBankUpgradedMaxPlaceholder());
+                cost = new BankReader(bankName).getLevelCost(new BankReader(bankName).getCurrentLevel(p) + 1);
             }
             String formatter = identifier.replace("next_level_cost", "");
             if (formatter.contains("_long")) return String.valueOf(cost);
@@ -106,7 +106,7 @@ public class Placeholders extends PlaceholderExpansion {
                 if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
                     return "The multiple-banks module is disabled.";
                 String bankName = identifier.substring(identifier.indexOf("{") + 1, identifier.indexOf("}"));
-                if (!new BanksManager(bankName).exist()) return "The selected bank does not exist.";
+                if (!new BankReader(bankName).exist()) return "The selected bank does not exist.";
                 bal = multiEconomyManager.getBankBalance(bankName);
             }
             String formatter = identifier.replace("balance", "");
@@ -123,7 +123,7 @@ public class Placeholders extends PlaceholderExpansion {
                 if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
                     return "The multiple-banks module is disabled.";
                 String bankName = identifier.substring(identifier.indexOf("{") + 1, identifier.indexOf("}"));
-                if (!new BanksManager(bankName).exist()) return "The selected bank does not exist.";
+                if (!new BankReader(bankName).exist()) return "The selected bank does not exist.";
                 interestMoney = multiEconomyManager.getBankBalance(bankName).multiply(percentage);
             }
             String formatter = identifier.replace("next_interest", "");
