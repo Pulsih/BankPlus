@@ -1,6 +1,6 @@
 package me.pulsi_.bankplus.account;
 
-import me.pulsi_.bankplus.bankGuis.objects.Bank;
+import me.pulsi_.bankplus.bankSystem.Bank;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 

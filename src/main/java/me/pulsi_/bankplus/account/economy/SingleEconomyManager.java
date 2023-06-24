@@ -2,7 +2,7 @@ package me.pulsi_.bankplus.account.economy;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
-import me.pulsi_.bankplus.bankGuis.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;

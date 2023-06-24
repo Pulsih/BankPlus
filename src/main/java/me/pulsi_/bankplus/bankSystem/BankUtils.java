@@ -1,9 +1,8 @@
-package me.pulsi_.bankplus.bankGuis;
+package me.pulsi_.bankplus.bankSystem;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayer;
-import me.pulsi_.bankplus.bankGuis.objects.Bank;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPItems;
 import me.pulsi_.bankplus.utils.BPMessages;
@@ -13,7 +12,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitTask;
@@ -21,27 +19,31 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BanksHolder implements InventoryHolder {
+public class BankUtils {
 
-    public void openBank(Player p) {
-        openBank(p, Values.CONFIG.getMainGuiName());
+    public static void openBank(Player p) {
+        openBank(p, Values.CONFIG.getMainGuiName(), false);
     }
 
-    public void openBank(Player p, String identifier) {
+    public static void openBank(Player p, boolean bypass) {
+        openBank(p, Values.CONFIG.getMainGuiName(), bypass);
+    }
+
+    public static void openBank(Player p, String identifier, boolean bypass) {
         BankPlusPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
         BankGuiRegistry registry = BankPlus.INSTANCE.getBankGuiRegistry();
 
-        if (!registry.contains(identifier)) {
+        if (identifier.equals(BankListGui.multipleBanksGuiID)) {
+            BankListGui.openMultipleBanksGui(p);
+            return;
+        }
+
+        if (!registry.getBanks().containsKey(identifier)) {
             BPMessages.send(p, "Invalid-Bank");
             return;
         }
 
-        if (identifier.equals(BanksListGui.multipleBanksGuiID)) {
-            new BanksListGui().openMultipleBanksGui(p);
-            return;
-        }
-
-        if (!new BankReader(identifier).isAvailable(p)) {
+        if (!new BankReader(identifier).isAvailable(p) && !bypass) {
             BPMessages.send(p, "Cannot-Access-Bank");
             return;
         }
@@ -52,13 +54,13 @@ public class BanksHolder implements InventoryHolder {
             if (task != null) task.cancel();
         }
 
-        Bank baseBank = registry.get(identifier);
+        Bank baseBank = registry.getBanks().get(identifier);
 
         String title = baseBank.getTitle();
         if (!BankPlus.INSTANCE.isPlaceholderAPIHooked()) title = BPChat.color(title);
         else title = PlaceholderAPI.setPlaceholders(p, BPChat.color(title));
 
-        Inventory bank = Bukkit.createInventory(new BanksHolder(), baseBank.getSize(), title);
+        Inventory bank = Bukkit.createInventory(new BankHolder(), baseBank.getSize(), title);
         bank.setContents(baseBank.getContent());
         placeHeads(bank, p, identifier);
         updateMeta(bank, p, identifier);
@@ -71,7 +73,7 @@ public class BanksHolder implements InventoryHolder {
         p.openInventory(bank);
     }
 
-    private void placeHeads(Inventory bank, Player p, String identifier) {
+    private static void placeHeads(Inventory bank, Player p, String identifier) {
         ConfigurationSection items = new BankReader(identifier).getItems();
         if (items == null) return;
 
@@ -90,7 +92,7 @@ public class BanksHolder implements InventoryHolder {
         }
     }
 
-    private void updateMeta(Inventory bank, Player p, String identifier) {
+    private static void updateMeta(Inventory bank, Player p, String identifier) {
         ConfigurationSection items = new BankReader(identifier).getItems();
         if (items == null) return;
 
@@ -103,7 +105,7 @@ public class BanksHolder implements InventoryHolder {
         }
     }
 
-    private void setMeta(ConfigurationSection itemValues, ItemStack item, Player p) {
+    private static void setMeta(ConfigurationSection itemValues, ItemStack item, Player p) {
         ItemMeta meta = item.getItemMeta();
 
         String displayName = itemValues.getString("Displayname") == null ? "&c&l*CANNOT FIND DISPLAYNAME*" : itemValues.getString("Displayname");
@@ -118,10 +120,5 @@ public class BanksHolder implements InventoryHolder {
             meta.setLore(lore);
         }
         item.setItemMeta(meta);
-    }
-
-    @Override
-    public Inventory getInventory() {
-        return null;
     }
 }

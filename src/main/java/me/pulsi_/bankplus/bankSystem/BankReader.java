@@ -1,10 +1,9 @@
-package me.pulsi_.bankplus.bankGuis;
+package me.pulsi_.bankplus.bankSystem;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.bankGuis.objects.Bank;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
@@ -36,7 +35,7 @@ public class BankReader {
     }
 
     public BankReader(String bankName) {
-        this.bank = BankPlus.INSTANCE.getBankGuiRegistry().get(bankName);
+        this.bank = BankPlus.INSTANCE.getBankGuiRegistry().getBanks().get(bankName);
     }
 
     public boolean exist() {

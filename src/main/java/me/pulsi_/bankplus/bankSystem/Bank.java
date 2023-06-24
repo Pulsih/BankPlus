@@ -1,4 +1,4 @@
-package me.pulsi_.bankplus.bankGuis.objects;
+package me.pulsi_.bankplus.bankSystem;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.utils.BPLogger;

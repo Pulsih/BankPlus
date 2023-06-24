@@ -1,7 +1,6 @@
-package me.pulsi_.bankplus.bankGuis;
+package me.pulsi_.bankplus.bankSystem;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.bankGuis.objects.Bank;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPItems;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -25,28 +24,13 @@ public class BankGuiRegistry {
 
     private final HashMap<String, Bank> banks = new HashMap<>();
 
-    public void put(String identifier, Bank bank) {
-        banks.put(identifier, bank);
-    }
-
-    public Bank get(String identifier) {
-        return banks.get(identifier);
-    }
-
-    public Bank remove(String identifier) {
-        return banks.remove(identifier);
-    }
-
-    public boolean contains(String identifier) {
-        return banks.containsKey(identifier);
-    }
-
     public HashMap<String, Bank> getBanks() {
         return banks;
     }
 
+    public Bank bankListGui;
+
     public boolean loadBanks() {
-        HashMap<String, Bank> banks = BankPlus.INSTANCE.getBankGuiRegistry().getBanks();
         File file = new File(BankPlus.INSTANCE.getDataFolder(), "banks");
         File[] files = file.listFiles();
 
@@ -55,6 +39,7 @@ public class BankGuiRegistry {
 
         if (files == null || files.length == 0) {
             File defaultBankFile = new File(BankPlus.INSTANCE.getDataFolder(), "banks" + File.separator + Values.CONFIG.getMainGuiName() + ".yml");
+
             if (!defaultBankFile.exists()) {
                 BankPlus.INSTANCE.saveResource("banks" + File.separator + "bankplus_main_gui_base_file.yml", false);
                 File newMainFile = new File(BankPlus.INSTANCE.getDataFolder(), "banks" + File.separator + "bankplus_main_gui_base_file.yml");
@@ -71,7 +56,7 @@ public class BankGuiRegistry {
                 break;
             }
             if (!theresMainGui) {
-                BPLogger.warn("The main gui was missing, creating the file...");
+                BPLogger.info("The main gui was missing, creating the file...");
                 File defaultBankFile = new File(BankPlus.INSTANCE.getDataFolder(), "banks" + File.separator + Values.CONFIG.getMainGuiName() + ".yml");
                 defaultBankFile.getParentFile().mkdir();
 
@@ -114,7 +99,9 @@ public class BankGuiRegistry {
                     ItemMeta meta = guiItem.getItemMeta();
                     String displayname = itemValues.getString("Displayname");
                     List<String> lore = new ArrayList<>();
-                    for (String lines : itemValues.getStringList("Lore")) lore.add(BPChat.color(lines));
+
+                    for (String lines : itemValues.getStringList("Lore"))
+                        lore.add(BPChat.color(lines));
 
                     meta.setDisplayName(BPChat.color(displayname == null ? "&c&l*CANNOT FIND DISPLAYNAME*" : displayname));
                     meta.setLore(lore);
@@ -150,7 +137,23 @@ public class BankGuiRegistry {
             bank.setContent(content);
             banks.put(identifier, bank);
         }
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) new BanksListGui().loadMultipleBanksGui();
+        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) loadMultipleBanksGui();
         return true;
+    }
+
+    public void loadMultipleBanksGui() {
+        String title = BPChat.color(Values.MULTIPLE_BANKS.getBanksGuiTitle() == null ? "&c&l * TITLE NOT FOUND *" : Values.MULTIPLE_BANKS.getBanksGuiTitle());
+        Inventory gui = Bukkit.createInventory(new BankHolder(), Values.MULTIPLE_BANKS.getBanksGuiLines(), title);
+
+        if (Values.MULTIPLE_BANKS.isFillerEnabled()) {
+            ItemStack filler = BPItems.getFiller(Values.MULTIPLE_BANKS.getFillerMaterial(), Values.MULTIPLE_BANKS.isFillerGlowing());
+            for (int i = 0; i < gui.getSize(); i++)
+                gui.setItem(i, filler);
+        }
+
+        Bank multipleBanksGui = new Bank(
+                BankListGui.multipleBanksGuiID, title, Values.MULTIPLE_BANKS.getBanksGuiLines(), Values.MULTIPLE_BANKS.getUpdateDelay(), gui.getContents()
+        );
+        BankPlus.INSTANCE.getBankGuiRegistry().bankListGui = multipleBanksGui;
     }
 }

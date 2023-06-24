@@ -548,7 +548,7 @@ public class ConfigManager {
         validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Hours-Days", "%hours% %hours_placeholder% and %days% %days_placeholder%");
         addSpace(newConfig, "Placeholders");
 
-        validatePath(oldConfig, newConfig, "Placeholders.Upgrades.Max-Level", "&cMaxed");
+        validatePath(oldConfig, newConfig, "Placeholders.Upgrades.Max-Level", "Maxed");
 
         commentsCount = 0;
         spacesCount = 0;

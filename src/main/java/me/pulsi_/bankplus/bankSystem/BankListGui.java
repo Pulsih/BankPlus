@@ -1,9 +1,8 @@
-package me.pulsi_.bankplus.bankGuis;
+package me.pulsi_.bankplus.bankSystem;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayer;
-import me.pulsi_.bankplus.bankGuis.objects.Bank;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPItems;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -24,12 +23,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class BanksListGui {
+public class BankListGui {
 
     public static final String multipleBanksGuiID = "MultipleBanksGui";
-    private final Material DEFAULT_MATERIAL = Material.CHEST;
+    private static final Material DEFAULT_MATERIAL = Material.CHEST;
 
-    public void openMultipleBanksGui(Player p) {
+    public static void openMultipleBanksGui(Player p) {
         BankPlusPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
 
         Bank openedBank = player.getOpenedBank();
@@ -38,65 +37,61 @@ public class BanksListGui {
             if (task != null) task.cancel();
         }
 
-        Bank baseBanksListGui = BankPlus.INSTANCE.getBankGuiRegistry().get(multipleBanksGuiID);
+        if (Values.MULTIPLE_BANKS.isDirectlyOpenIf1IsAvailable()) {
+            BankReader reader = new BankReader();
+
+            if (reader.getAvailableBanks(p).size() == 1) {
+                BankUtils.openBank(p, reader.getAvailableBanks(p).get(0), false);
+                return;
+            }
+        }
+
+        Bank baseBanksListGui = BankPlus.INSTANCE.getBankGuiRegistry().bankListGui;
 
         String title = baseBanksListGui.getTitle();
         if (!BankPlus.INSTANCE.isPlaceholderAPIHooked()) title = BPChat.color(title);
         else title = PlaceholderAPI.setPlaceholders(p, BPChat.color(title));
 
-        Inventory banksListGui = Bukkit.createInventory(new BanksHolder(), baseBanksListGui.getSize(), title);
+        Inventory banksListGui = Bukkit.createInventory(new BankHolder(), baseBanksListGui.getSize(), title);
         banksListGui.setContents(baseBanksListGui.getContent());
         placeBanks(banksListGui, p);
         updateMeta(banksListGui, p);
 
         long delay = Values.MULTIPLE_BANKS.getUpdateDelay();
-        if (delay >= 0) baseBanksListGui.setInventoryUpdateTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE, () -> updateMeta(banksListGui, p), delay, delay));
+        if (delay >= 0)
+            baseBanksListGui.setInventoryUpdateTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE, () -> updateMeta(banksListGui, p), delay, delay));
 
         player.setOpenedBank(baseBanksListGui);
         BPMethods.playSound("PERSONAL", p);
         p.openInventory(banksListGui);
     }
 
-    public void loadMultipleBanksGui() {
-        String title = BPChat.color(Values.MULTIPLE_BANKS.getBanksGuiTitle() == null ? "&c&l * TITLE NOT FOUND *" : Values.MULTIPLE_BANKS.getBanksGuiTitle());
-        Inventory gui = Bukkit.createInventory(new BanksHolder(), Values.MULTIPLE_BANKS.getBanksGuiLines(), title);
-
-        if (Values.MULTIPLE_BANKS.isFillerEnabled()) {
-            ItemStack filler = BPItems.getFiller(Values.MULTIPLE_BANKS.getFillerMaterial(), Values.MULTIPLE_BANKS.isFillerGlowing());
-            for (int i = 0; i < gui.getSize(); i++) gui.setItem(i, filler);
-        }
-
-        Bank multipleBanksGui = new Bank(
-                multipleBanksGuiID, title, Values.MULTIPLE_BANKS.getBanksGuiLines(), getSize(Values.MULTIPLE_BANKS.getUpdateDelay()), gui.getContents()
-        );
-        BankPlus.INSTANCE.getBankGuiRegistry().put("MultipleBanksGui", multipleBanksGui);
-    }
-
-    private void placeBanks(Inventory banksListGui, Player p) {
+    private static void placeBanks(Inventory banksListGui, Player p) {
         BankPlusPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
         HashMap<String, String> banksClickHolder = new HashMap<>();
         int slot = 0;
 
         for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
-            if (bankName.equals(multipleBanksGuiID)) continue;
+            BankReader reader = new BankReader(bankName);
+            if (Values.MULTIPLE_BANKS.isShowNotAvailableBanks() && !reader.isAvailable(p)) continue;
 
-            ItemStack bankItem;
             Material material;
-
+            ItemStack bankItem;
             boolean glow = false;
-            BankReader banksManager = new BankReader(bankName);
-            ConfigurationSection section = banksManager.getBanksGuiItemSection();
+            ConfigurationSection section = reader.getBanksGuiItemSection();
+
             if (section == null) material = DEFAULT_MATERIAL;
             else {
+                String path = reader.isAvailable(p) ? "Available" : "Unavailable";
+                glow = section.getBoolean(path + ".Glowing");
                 try {
-                    String path = banksManager.isAvailable(p) ? "Available." : "Unavailable.";
-                    material = Material.valueOf(section.getString(path + "Material"));
-                    glow = section.getBoolean(path + "Glowing");
+                    material = Material.valueOf(section.getString(path + ".Material"));
                 } catch (IllegalArgumentException e) {
                     material = BPItems.UNKNOWN_MATERIAL;
                 }
             }
             bankItem = new ItemStack(material);
+
             if (glow) glow(bankItem);
             banksListGui.setItem(slot, bankItem);
             banksClickHolder.put(p.getName() + "." + slot, bankName);
@@ -105,26 +100,31 @@ public class BanksListGui {
         player.setPlayerBankClickHolder(banksClickHolder);
     }
 
-    private void updateMeta(Inventory banksList, Player p) {
+    private static void updateMeta(Inventory banksList, Player p) {
         int slot = 0;
         for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
+            BankReader reader = new BankReader(bankName);
+
+            if (Values.MULTIPLE_BANKS.isShowNotAvailableBanks() && !reader.isAvailable(p)) continue;
+
             ItemStack item = banksList.getItem(slot);
             slot++;
+
             if (item == null) continue;
 
             ItemMeta meta = item.getItemMeta();
             String displayname = "&c&l* DISPLAYNAME NOT FOUND *";
             List<String> lore = new ArrayList<>();
 
-            BankReader banksManager = new BankReader(bankName);
-            ConfigurationSection section = banksManager.getBanksGuiItemSection();
+            ConfigurationSection section = reader.getBanksGuiItemSection();
             if (section != null) {
-                String path = (!banksManager.hasPermissionSection() || p.hasPermission(banksManager.getPermission())) ? "Available." : "Unavailable.";
+                String path = (!reader.hasPermissionSection() || p.hasPermission(reader.getPermission())) ? "Available" : "Unavailable";
 
-                String dName = section.getString(path + "Displayname");
-                displayname = dName == null ? "&c&l* DISPLAYNAME NOT FOUND *" : dName;
-                lore = section.getStringList(path + "Lore");
-                int modelData = section.getInt(path + "CustomModelData");
+                String dName = section.getString(path + ".Displayname");
+                if (dName != null) displayname = dName;
+
+                lore = section.getStringList(path + ".Lore");
+                int modelData = section.getInt(path + ".CustomModelData");
 
                 if (modelData > 0) {
                     try {
@@ -139,7 +139,7 @@ public class BanksListGui {
         }
     }
 
-    private void setMeta(String displayname, List<String> lore, ItemMeta meta, Player p) {
+    private static void setMeta(String displayname, List<String> lore, ItemMeta meta, Player p) {
         List<String> newLore = new ArrayList<>();
         for (String lines : lore) newLore.add(BPChat.color(lines));
 
@@ -149,22 +149,6 @@ public class BanksListGui {
         } else {
             meta.setDisplayName(BPChat.color(displayname));
             meta.setLore(newLore);
-        }
-    }
-
-    public int getSize(int size) {
-        if (size < 2) return 9;
-        switch (size) {
-            case 2:
-                return 18;
-            case 3:
-                return 27;
-            case 4:
-                return 36;
-            case 5:
-                return 45;
-            default:
-                return 54;
         }
     }
 

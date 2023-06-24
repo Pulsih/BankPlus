@@ -95,19 +95,7 @@ public class MultipleBanksValues {
     }
 
     public int getBanksGuiLines() {
-        if (banksGuiLines < 2) return 9;
-        switch (banksGuiLines) {
-            case 2:
-                return 18;
-            case 3:
-                return 27;
-            case 4:
-                return 36;
-            case 5:
-                return 45;
-            default:
-                return 54;
-        }
+        return Math.max(9, Math.min(54, banksGuiLines * 9));
     }
 
     public int getPreviousItemSlot() {

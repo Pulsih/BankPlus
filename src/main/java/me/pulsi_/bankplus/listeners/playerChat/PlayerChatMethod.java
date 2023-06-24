@@ -4,7 +4,8 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayer;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.bankGuis.BanksHolder;
+import me.pulsi_.bankplus.bankSystem.BankHolder;
+import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.utils.BPSets;
@@ -72,7 +73,7 @@ public class PlayerChatMethod {
 
     private static void reopenBank(Player p, String identifier) {
         Bukkit.getScheduler().runTask(BankPlus.INSTANCE, () -> {
-            if (Values.CONFIG.isReopeningBankAfterChat()) new BanksHolder().openBank(p, identifier);
+            if (Values.CONFIG.isReopeningBankAfterChat()) BankUtils.openBank(p, identifier, false);
         });
     }
 

@@ -3,8 +3,9 @@ package me.pulsi_.bankplus.commands.cmdProcessor;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.bankGuis.BanksHolder;
-import me.pulsi_.bankplus.bankGuis.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankHolder;
+import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
@@ -23,7 +24,7 @@ public class SingleCmdProcessor {
 
     public static void processCmd(CommandSender s, String[] args) {
 
-        BanksHolder banksHolder = new BanksHolder();
+        BankHolder bankHolder = new BankHolder();
         SingleEconomyManager singleEconomyManager = null;
         if (s instanceof Player) singleEconomyManager = new SingleEconomyManager((Player) s);
 
@@ -35,7 +36,7 @@ public class SingleCmdProcessor {
             }
 
             Player p = (Player) s;
-            if (Values.CONFIG.isGuiModuleEnabled()) banksHolder.openBank(p);
+            if (Values.CONFIG.isGuiModuleEnabled()) BankUtils.openBank(p);
             else {
                 BPMessages.send(p, "Personal-Bank", BPMethods.placeValues(p, singleEconomyManager.getBankBalance()));
                 BPMethods.playSound("PERSONAL", p);
@@ -123,7 +124,7 @@ public class SingleCmdProcessor {
                     return;
                 }
 
-                banksHolder.openBank(p, Values.CONFIG.getMainGuiName());
+                BankUtils.openBank(p, true);
                 BPMessages.send(s, "Force-Open", "%player%$" + p.getName(), "%bank%$" + Values.CONFIG.getMainGuiName());
             }
             break;

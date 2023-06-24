@@ -3,7 +3,7 @@ package me.pulsi_.bankplus.utils;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.bankGuis.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.managers.ConfigManager;
 import me.pulsi_.bankplus.managers.TaskManager;
 import me.pulsi_.bankplus.values.Values;
@@ -262,7 +262,7 @@ public class BPMethods {
         BPMessages.send(p, "Chat-Withdraw");
         BPSets.addPlayerToWithdraw(p);
         p.closeInventory();
-        BankPlus.INSTANCE.getPlayerRegistry().get(p).setOpenedBank(BankPlus.INSTANCE.getBankGuiRegistry().get(identifier));
+        BankPlus.INSTANCE.getPlayerRegistry().get(p).setOpenedBank(BankPlus.INSTANCE.getBankGuiRegistry().getBanks().get(identifier));
     }
 
     public static void customDeposit(Player p) {
@@ -277,7 +277,7 @@ public class BPMethods {
         BPMessages.send(p, "Chat-Deposit");
         BPSets.addPlayerToDeposit(p);
         p.closeInventory();
-        BankPlus.INSTANCE.getPlayerRegistry().get(p).setOpenedBank(BankPlus.INSTANCE.getBankGuiRegistry().get(identifier));
+        BankPlus.INSTANCE.getPlayerRegistry().get(p).setOpenedBank(BankPlus.INSTANCE.getBankGuiRegistry().getBanks().get(identifier));
     }
 
     public static void sendTitle(String title, Player p) {

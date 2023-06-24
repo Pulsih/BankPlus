@@ -1,6 +1,6 @@
 package me.pulsi_.bankplus.utils;
 
-import me.pulsi_.bankplus.bankGuis.objects.Bank;
+import me.pulsi_.bankplus.bankSystem.Bank;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.configuration.ConfigurationSection;

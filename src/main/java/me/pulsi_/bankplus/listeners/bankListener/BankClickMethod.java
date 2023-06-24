@@ -4,9 +4,10 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayer;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.bankGuis.BanksHolder;
-import me.pulsi_.bankplus.bankGuis.BanksListGui;
-import me.pulsi_.bankplus.bankGuis.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankHolder;
+import me.pulsi_.bankplus.bankSystem.BankUtils;
+import me.pulsi_.bankplus.bankSystem.BankListGui;
+import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
@@ -27,7 +28,7 @@ public class BankClickMethod {
     public static void process(InventoryClickEvent e) {
         Player p = (Player) e.getWhoClicked();
         Inventory bank = e.getClickedInventory();
-        if (bank == null || bank.getHolder() == null || !(bank.getHolder() instanceof BanksHolder)) return;
+        if (bank == null || bank.getHolder() == null || !(bank.getHolder() instanceof BankHolder)) return;
         e.setCancelled(true);
 
         BankPlusPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
@@ -35,12 +36,15 @@ public class BankClickMethod {
 
         int slot = e.getSlot();
         String bankName = player.getOpenedBank().getIdentifier();
-        if (bankName.equals(BanksListGui.multipleBanksGuiID)) {
+        if (bankName.equals(BankListGui.multipleBanksGuiID)) {
             HashMap<String, String> slots = player.getPlayerBankClickHolder();
             if (!slots.containsKey(p.getName() + "." + slot)) return;
 
-            new BanksHolder().openBank(p, slots.get(p.getName() + "." + slot));
-            for (int i = 0; i < slots.size(); i++) slots.remove(p.getName() + "." + i);
+            p.closeInventory();
+            BankUtils.openBank(p, slots.get(p.getName() + "." + slot), false);
+            for (int i = 0; i < slots.size(); i++)
+                slots.remove(p.getName() + "." + i);
+
             return;
         }
 

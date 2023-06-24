@@ -3,8 +3,10 @@ package me.pulsi_.bankplus.commands.cmdProcessor;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.bankGuis.BanksHolder;
-import me.pulsi_.bankplus.bankGuis.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankHolder;
+import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankUtils;
+import me.pulsi_.bankplus.bankSystem.BankListGui;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
@@ -22,8 +24,6 @@ import java.util.List;
 public class MultiCmdProcessor {
 
     public static void processCmd(CommandSender s, String[] args) {
-
-        BanksHolder banksHolder = new BanksHolder();
         MultiEconomyManager multiEconomyManager = null;
         if (s instanceof Player) multiEconomyManager = new MultiEconomyManager((Player) s);
 
@@ -35,7 +35,7 @@ public class MultiCmdProcessor {
             }
 
             Player p = (Player) s;
-            if (Values.CONFIG.isGuiModuleEnabled()) banksHolder.openBank(p, "MultipleBanksGui");
+            if (Values.CONFIG.isGuiModuleEnabled()) BankUtils.openBank(p, BankListGui.multipleBanksGuiID, false);
             else {
                 BPMessages.send(p, "Multiple-Personal-Bank", BPMethods.placeValues(p, multiEconomyManager.getBankBalance()));
                 BPMethods.playSound("PERSONAL", p);
@@ -170,7 +170,8 @@ public class MultiCmdProcessor {
                     BPMessages.send(s, "Invalid-Bank");
                     return;
                 }
-                banksHolder.openBank(p, bankName);
+
+                BankUtils.openBank(p, bankName, true);
                 BPMessages.send(s, "Force-Open", "%player%$" + p.getName(), "%bank%$" + bankName);
             }
             break;
@@ -182,7 +183,7 @@ public class MultiCmdProcessor {
                     BPMessages.send(s, "Specify-Bank");
                     return;
                 }
-                banksHolder.openBank((Player) s, args[1]);
+                BankUtils.openBank((Player) s, args[1], false);
             }
             break;
 
