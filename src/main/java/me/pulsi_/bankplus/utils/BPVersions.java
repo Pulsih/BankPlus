@@ -10,7 +10,9 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.*;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 /**
  * This class will be changed between version, it will be used to add the compatibility

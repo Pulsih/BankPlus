@@ -14,17 +14,20 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class SingleCmdProcessor {
 
+    private static final List<String> confirms = new ArrayList<>();
+
     public static void processCmd(CommandSender s, String[] args) {
 
-        BankHolder bankHolder = new BankHolder();
         SingleEconomyManager singleEconomyManager = null;
         if (s instanceof Player) singleEconomyManager = new SingleEconomyManager((Player) s);
 
@@ -397,6 +400,32 @@ public class SingleCmdProcessor {
             }
             break;
 
+            case "addall": {
+                if (!BPMethods.hasPermission(s, "bankplus.addall")) return;
+
+                if (args.length == 1) {
+                    BPMessages.send(s, "Specify-Number");
+                    return;
+                }
+
+                String num = args[1];
+                if (BPMethods.isInvalidNumber(num, s)) return;
+
+                if (!confirms.contains(s.getName())) {
+                    confirms.add(s.getName());
+                    BPMessages.send(s,
+                            BPMessages.getPrefix() + " &cWarning, this command is going to add to every single player that joined the server (" +
+                                    Bukkit.getOfflinePlayers().length + " players) the specified amount of money if the bank is available and it might" +
+                                    " require some time, type the command again within 3 seconds to confirm."
+                            , true);
+                    Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> confirms.remove(s.getName()), 20L * 3);
+                    return;
+                }
+
+                addAll(s, 0, new BankReader(Values.CONFIG.getMainGuiName()), new BigDecimal(num));
+            }
+            break;
+
             case "remove": {
                 if (!BPMethods.hasPermission(s, "bankplus.remove")) return;
 
@@ -451,9 +480,11 @@ public class SingleCmdProcessor {
 
             case "saveallbankbalances": {
                 if (!BPMethods.hasPermission(s, "bankplus.saveallbankbalances")) return;
+
                 Bukkit.getOnlinePlayers().forEach(p -> new SingleEconomyManager(p).saveBankBalance(true));
                 BPMessages.send(s, "Balances-Saved");
-                if (Values.CONFIG.isSaveBalancesBroadcast()) BPLogger.info("All player balances have been saved!");
+                if (Values.CONFIG.isSaveBalancesBroadcast())
+                    BPLogger.info("All player balances have been saved!");
             }
             break;
 
@@ -469,6 +500,7 @@ public class SingleCmdProcessor {
                 List<String> args1 = new ArrayList<>();
                 List<String> listOfArgs = new ArrayList<>();
                 if (s.hasPermission("bankplus.add")) listOfArgs.add("add");
+                if (s.hasPermission("bankplus.addall")) listOfArgs.add("addAll");
                 if (s.hasPermission("bankplus.balance")) {
                     listOfArgs.add("balance");
                     listOfArgs.add("bal");
@@ -485,6 +517,7 @@ public class SingleCmdProcessor {
                 if (s.hasPermission("bankplus.pay")) listOfArgs.add("pay");
                 if (s.hasPermission("bankplus.reload")) listOfArgs.add("reload");
                 if (s.hasPermission("bankplus.remove")) listOfArgs.add("remove");
+                if (s.hasPermission("bankplus.resetall")) listOfArgs.add("resetAll");
                 if (s.hasPermission("bankplus.restartinterest")) listOfArgs.add("restartInterest");
                 if (s.hasPermission("bankplus.saveallbankbalances")) listOfArgs.add("saveAllBankBalances");
                 if (s.hasPermission("bankplus.set")) listOfArgs.add("set");
@@ -525,6 +558,14 @@ public class SingleCmdProcessor {
                             if (arg.startsWith(args[1].toLowerCase())) args2.add(arg);
                         return args2;
                     }
+
+                    case "resetall": {
+                        if (s.hasPermission("bankplus.resetall")) return null;
+                        List<String> args2 = new ArrayList<>();
+                        for (String arg : Arrays.asList("remove", "maintain"))
+                            if (arg.startsWith(args[1].toLowerCase())) args2.add(arg);
+                        return args2;
+                    }
                 }
             }
             break;
@@ -540,5 +581,38 @@ public class SingleCmdProcessor {
             }
         }
         return null;
+    }
+
+    private static void addAll(CommandSender s, int count, BankReader reader, BigDecimal amount) {
+
+        int temp = 0;
+        for (int i = 0; i < 60; i++) {
+            if (count + temp >= Bukkit.getOfflinePlayers().length) {
+                BPMessages.send(s, BPMessages.getPrefix() + " &2Task finished!", true);
+                return;
+            }
+
+            OfflinePlayer oP = Bukkit.getOfflinePlayers()[count + temp];
+            if (oP.isOnline()) {
+                Player p = Bukkit.getPlayer(oP.getUniqueId());
+
+                SingleEconomyManager em = new SingleEconomyManager(p);
+                BigDecimal capacity = reader.getCapacity(p), balance = em.getBankBalance();
+                if (capacity.subtract(balance).doubleValue() > 0) {
+                    if (balance.add(amount).doubleValue() >= capacity.doubleValue()) em.setBankBalance(capacity);
+                    else em.addBankBalance(amount);
+                }
+            } else {
+                SingleEconomyManager em = new SingleEconomyManager(oP);
+                BigDecimal capacity = reader.getCapacity(oP), balance = em.getBankBalance();
+                if (capacity.subtract(balance).doubleValue() > 0) {
+                    if (balance.add(amount).doubleValue() >= capacity.doubleValue()) em.setBankBalance(capacity);
+                    else em.addBankBalance(amount);
+                }
+            }
+            temp++;
+        }
+        int finalTemp = temp + 1;
+        Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> addAll(s, count + finalTemp, reader, amount), 2);
     }
 }

@@ -21,11 +21,11 @@ public class AFKManager {
     }
 
     public boolean isAFK(Player p) {
-        return Values.CONFIG.isUseEssentialsXAFK() ? Essentials.getPlugin(Essentials.class).getUser(p).isAfk() : afkPlayers.contains(p);
+        return Values.CONFIG.useEssentialsXAFK() ? Essentials.getPlugin(Essentials.class).getUser(p).isAfk() : afkPlayers.contains(p);
     }
 
     public void startCountdown() {
-        if (!Values.CONFIG.isIgnoringAfkPlayers() || Values.CONFIG.isUseEssentialsXAFK()) {
+        if (!Values.CONFIG.isIgnoringAfkPlayers() || Values.CONFIG.useEssentialsXAFK()) {
             isPlayerCountdownActive = false;
             return;
         }

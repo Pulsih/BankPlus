@@ -78,10 +78,10 @@ public class BankTopManager {
 
     public String getBankTopNamePlayer(int position) {
         if (position < 1) return "Invalid number.";
-        if (position > bankTopNames.size()) return "Not found yet.";
+        if (position > bankTopNames.size()) return Values.CONFIG.getBanktopPlayerNotFoundPlaceholder();
 
         String name = bankTopNames.get(position - 1);
-        return name == null ? "Not found yet." : name;
+        return name == null ? Values.CONFIG.getBanktopPlayerNotFoundPlaceholder() : name;
     }
 
     public int getPlayerBankTopPosition(Player p) {

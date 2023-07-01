@@ -167,7 +167,7 @@ public class BPMessages {
         return BPChat.color(message.replace("%prefix%", getPrefix()));
     }
 
-    private static String getPrefix() {
+    public static String getPrefix() {
         if (!messages.containsKey("Prefix")) return BPChat.prefix;
         List<String> prefix = messages.get("Prefix");
         if (prefix.isEmpty()) return BPChat.prefix;

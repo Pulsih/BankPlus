@@ -3,10 +3,10 @@ package me.pulsi_.bankplus.commands.cmdProcessor;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.bankSystem.BankHolder;
+import me.pulsi_.bankplus.bankSystem.Bank;
+import me.pulsi_.bankplus.bankSystem.BankListGui;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
-import me.pulsi_.bankplus.bankSystem.BankListGui;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MultiCmdProcessor {
+
+    private static final List<String> confirms = new ArrayList<>();
 
     public static void processCmd(CommandSender s, String[] args) {
         MultiEconomyManager multiEconomyManager = null;
@@ -540,6 +542,43 @@ public class MultiCmdProcessor {
             }
             break;
 
+            case "addall": {
+                if (!BPMethods.hasPermission(s, "bankplus.addall")) return;
+
+                if (args.length == 1) {
+                    BPMessages.send(s, "Specify-Bank");
+                    return;
+                }
+                if (args.length == 2) {
+                    BPMessages.send(s, "Specify-Number");
+                    return;
+                }
+
+                String bankName = args[1];
+                BankReader reader = new BankReader(bankName);
+                if (!reader.exist()) {
+                    BPMessages.send(s, "Invalid-Bank");
+                    return;
+                }
+
+                String num = args[2];
+                if (BPMethods.isInvalidNumber(num, s)) return;
+
+                if (!confirms.contains(s.getName())) {
+                    confirms.add(s.getName());
+                    BPMessages.send(s,
+                            BPMessages.getPrefix() + " &cWarning, this command is going to add to every single player that joined the server (" +
+                                    Bukkit.getOfflinePlayers().length + " players) the specified amount of money in the selected bank if available and" +
+                                    " it might require some time, type the command again within 3 seconds to confirm."
+                            , true);
+                    Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> confirms.remove(s.getName()), 20L * 3);
+                    return;
+                }
+
+                addAll(s, 0, reader, new BigDecimal(num), bankName);
+            }
+            break;
+
             case "remove": {
                 if (!BPMethods.hasPermission(s, "bankplus.remove")) return;
 
@@ -620,6 +659,7 @@ public class MultiCmdProcessor {
                 List<String> args1 = new ArrayList<>();
                 List<String> listOfArgs = new ArrayList<>();
                 if (s.hasPermission("bankplus.add")) listOfArgs.add("add");
+                if (s.hasPermission("bankplus.addall")) listOfArgs.add("addAll");
                 if (s.hasPermission("bankplus.balance")) {
                     listOfArgs.add("balance");
                     listOfArgs.add("bal");
@@ -636,6 +676,7 @@ public class MultiCmdProcessor {
                 if (s.hasPermission("bankplus.pay")) listOfArgs.add("pay");
                 if (s.hasPermission("bankplus.reload")) listOfArgs.add("reload");
                 if (s.hasPermission("bankplus.remove")) listOfArgs.add("remove");
+                if (s.hasPermission("bankplus.resetall")) listOfArgs.add("resetAll");
                 if (s.hasPermission("bankplus.restartinterest")) listOfArgs.add("restartInterest");
                 if (s.hasPermission("bankplus.saveallbankbalances")) listOfArgs.add("saveAllBankBalances");
                 if (s.hasPermission("bankplus.set")) listOfArgs.add("set");
@@ -651,6 +692,14 @@ public class MultiCmdProcessor {
 
             case 2: {
                 switch (args[0].toLowerCase()) {
+                    case "addall": {
+                        if (!s.hasPermission("bankplus.addall")) return null;
+                        List<String> args2 = new ArrayList<>();
+                        for (String arg : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
+                            if (arg.startsWith(args[1].toLowerCase())) args2.add(arg);
+                        return args2;
+                    }
+
                     case "debug": {
                         if (!s.hasPermission("bankplus.debug")) return null;
                         List<String> args2 = new ArrayList<>();
@@ -681,6 +730,14 @@ public class MultiCmdProcessor {
                         if (!s.hasPermission("bankplus.withdraw")) return null;
                         List<String> args2 = new ArrayList<>();
                         for (String arg : Arrays.asList("1", "2", "3"))
+                            if (arg.startsWith(args[1].toLowerCase())) args2.add(arg);
+                        return args2;
+                    }
+
+                    case "resetall": {
+                        if (s.hasPermission("bankplus.resetall")) return null;
+                        List<String> args2 = new ArrayList<>();
+                        for (String arg : Arrays.asList("remove", "maintain"))
                             if (arg.startsWith(args[1].toLowerCase())) args2.add(arg);
                         return args2;
                     }
@@ -795,5 +852,42 @@ public class MultiCmdProcessor {
             }
         }
         return null;
+    }
+
+    private static void addAll(CommandSender s, int count, BankReader reader, BigDecimal amount, String bankName) {
+
+        int temp = 0;
+        for (int i = 0; i < 60; i++) {
+            if (count + temp >= Bukkit.getOfflinePlayers().length) {
+                BPMessages.send(s, BPMessages.getPrefix() + " &2Task finished!", true);
+                return;
+            }
+
+            OfflinePlayer oP = Bukkit.getOfflinePlayers()[count + temp];
+            if (reader.isAvailable(oP)) {
+                if (oP.isOnline()) {
+                    Player p = Bukkit.getPlayer(oP.getUniqueId());
+                    MultiEconomyManager em = new MultiEconomyManager(p);
+                    BigDecimal capacity = reader.getCapacity(p), balance = em.getBankBalance(bankName);
+
+                    if (capacity.subtract(balance).doubleValue() > 0) {
+                        if (balance.add(amount).doubleValue() < capacity.doubleValue()) em.addBankBalance(amount, bankName);
+                        else em.setBankBalance(capacity, bankName);
+                    }
+                } else {
+                    MultiEconomyManager em = new MultiEconomyManager(oP);
+                    BigDecimal capacity = reader.getCapacity(oP), balance = em.getBankBalance(bankName);
+
+                    if (capacity.subtract(balance).doubleValue() > 0) {
+                        if (balance.add(amount).doubleValue() < capacity.doubleValue()) em.addBankBalance(amount, bankName);
+                        else em.setBankBalance(capacity, bankName);
+                    }
+                }
+            }
+            temp++;
+        }
+
+        int finalTemp = temp + 1;
+        Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> addAll(s, count + finalTemp, reader, amount, bankName), 2);
     }
 }

@@ -8,6 +8,7 @@ import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
@@ -336,23 +337,38 @@ public class BankReader {
             BPMessages.send(p, "Bank-Max-Level");
             return;
         }
-        BigDecimal balance;
-
-        SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
-        MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
-
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) balance = multiEconomyManager.getBankBalance();
-        else balance = singleEconomyManager.getBankBalance();
 
         int level = getCurrentLevel(p);
         BigDecimal cost = getLevelCost(level + 1);
-        if (balance.doubleValue() < cost.doubleValue()) {
-            BPMessages.send(p, "Insufficient-Money");
-            return;
-        }
 
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) multiEconomyManager.removeBankBalance(cost, bank.getIdentifier());
-        else singleEconomyManager.removeBankBalance(cost);
+        if (Values.CONFIG.useBankBalanceToUpgrade()) {
+
+            BigDecimal balance;
+            SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
+            MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
+
+            if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) balance = multiEconomyManager.getBankBalance();
+            else balance = singleEconomyManager.getBankBalance();
+
+            if (balance.doubleValue() < cost.doubleValue()) {
+                BPMessages.send(p, "Insufficient-Money");
+                return;
+            }
+
+            if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) multiEconomyManager.removeBankBalance(cost, bank.getIdentifier());
+            else singleEconomyManager.removeBankBalance(cost);
+        } else {
+
+            Economy economy = BankPlus.INSTANCE.getEconomy();
+            double balance = economy.getBalance(p);
+
+            if (balance < cost.doubleValue()) {
+                BPMessages.send(p, "Insufficient-Money");
+                return;
+            }
+
+            economy.withdrawPlayer(p, cost.doubleValue());
+        }
 
         BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
         files.getPlayerConfig().set("Banks." + bank.getIdentifier() + ".Level", level + 1);

@@ -20,7 +20,7 @@ public class AFKListener implements Listener {
 
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
-        if (!Values.CONFIG.isIgnoringAfkPlayers() || Values.CONFIG.isUseEssentialsXAFK()) return;
+        if (!Values.CONFIG.isIgnoringAfkPlayers() || Values.CONFIG.useEssentialsXAFK()) return;
 
         Player p = e.getPlayer();
         long time = System.currentTimeMillis() + BPMethods.minutesInMilliseconds(Values.CONFIG.getAfkPlayersTime());
@@ -29,7 +29,7 @@ public class AFKListener implements Listener {
 
     @EventHandler
     public void onInteract(PlayerInteractEvent e) {
-        if (!Values.CONFIG.isIgnoringAfkPlayers() || Values.CONFIG.isUseEssentialsXAFK()) return;
+        if (!Values.CONFIG.isIgnoringAfkPlayers() || Values.CONFIG.useEssentialsXAFK()) return;
 
         Player p = e.getPlayer();
         long time = System.currentTimeMillis() + BPMethods.minutesInMilliseconds(Values.CONFIG.getAfkPlayersTime());
@@ -38,7 +38,7 @@ public class AFKListener implements Listener {
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
-        if (!Values.CONFIG.isIgnoringAfkPlayers() || Values.CONFIG.isUseEssentialsXAFK()) return;
+        if (!Values.CONFIG.isIgnoringAfkPlayers() || Values.CONFIG.useEssentialsXAFK()) return;
 
         Player p = e.getPlayer();
         long time = System.currentTimeMillis() + BPMethods.minutesInMilliseconds(Values.CONFIG.getAfkPlayersTime());

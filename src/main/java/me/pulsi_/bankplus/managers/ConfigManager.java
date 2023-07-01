@@ -51,9 +51,9 @@ public class ConfigManager {
         reloadConfig(Type.MESSAGES);
         reloadConfig(Type.MULTIPLE_BANKS);
 
-        buildConfig();
-        buildMessages();
-        buildMultipleBanks();
+        updateConfig();
+        updateMessages();
+        updateMultipleBanks();
 
         plugin.getDataManager().reloadPlugin();
     }
@@ -190,7 +190,7 @@ public class ConfigManager {
         });
     }
 
-    public void buildConfig() {
+    public void updateConfig() {
         File copyOfConfigFile = new File(plugin.getDataFolder(), "config.yml");
         FileConfiguration oldConfig = new YamlConfiguration();
         FileConfiguration newConfig = new YamlConfiguration();
@@ -199,7 +199,13 @@ public class ConfigManager {
 
         try {
             oldConfig.load(copyOfConfigFile);
-        } catch (Exception ignored) { }
+        } catch (Exception e) {
+            BPLogger.error(
+                    "BankPlus was unable to load config.yml to check for changes, try restarting the" +
+                    " server and if the problem persist contact the developer! (" + e.getMessage() + ")"
+            );
+            return;
+        }
 
         addComments(newConfig,
                 "Configuration File of BankPlus",
@@ -286,8 +292,6 @@ public class ConfigManager {
                 "You can put \"\" if you don't want to use a permission.");
         validatePath(oldConfig, newConfig, "Interest.Offline-Permission", "bankplus.receive.interest");
         addSpace(newConfig);
-
-        /* Deposit settings */
 
         addCommentsUnder(newConfig, "General-Settings",
                 "You need to restart the server",
@@ -378,8 +382,19 @@ public class ConfigManager {
                 "- \"[PLAYER] say I typed in chat!\"");
         addSpace(newConfig, "General-Settings");
 
-        addCommentsUnder(newConfig, "General-Settings", "Worlds where the bank won't work");
-        validatePath(oldConfig, newConfig, "General-Settings.Worlds-Blacklist", new ArrayList<>(Collections.singletonList("noBankWorld")));
+        // To fix the config problem from 5.7 where the list was written with "true", make a check.
+        addCommentsUnder(newConfig, "General-Settings", "Worlds where the banks won't work");
+        boolean bugged = oldConfig.getBoolean("General-Settings.Worlds-Blacklist");
+        if (bugged)
+            newConfig.set("General-Settings.Worlds-Blacklist", new ArrayList<>(Collections.singletonList("noBankWorld")));
+        else
+            validatePath(oldConfig, newConfig, "General-Settings.Worlds-Blacklist", new ArrayList<>(Collections.singletonList("noBankWorld")));
+        addSpace(newConfig, "General-Settings");
+
+        addCommentsUnder(newConfig, "General-Settings",
+                "Choose if using the bank or the vault",
+                "balance to upgrade the bank levels.");
+        validatePath(oldConfig, newConfig, "General-Settings.Use-Bank-Balance-To-Upgrade", true);
         addSpace(newConfig, "General-Settings");
 
         addCommentsUnder(newConfig, "General-Settings",
@@ -440,7 +455,7 @@ public class ConfigManager {
                 "The player needs to have the permission",
                 "\"bankplus.withdraw\" to be able to deposit.");
         addCommentsUnder(newConfig, "Withdraw-Settings", "The max amount to withdraw per time, use 0 to disable.");
-        validatePath(oldConfig, newConfig, "Withdraw-Settings.Max-Withdraw-Amount", 
+        validatePath(oldConfig, newConfig, "Withdraw-Settings.Max-Withdraw-Amount",
                 getValueFromOldPath(oldConfig, "General-Settings.Max-Withdraw-Amount", "Withdraw-Settings.Max-Withdraw-Amount", "0"));
         addSpace(newConfig, "Withdraw-Settings");
 
@@ -456,7 +471,7 @@ public class ConfigManager {
                 "Use the permission \"bankplus.withdraw.bypass-taxes\"",
                 "to bypass the deposit taxes.");
         validatePath(oldConfig, newConfig, "Withdraw-Settings.Withdraw-Taxes",
-                getValueFromOldPath(oldConfig, "General-Settings.Withdraw-Taxes", "Withdraw-Settings.Withdraw-Taxes" , "0%"));
+                getValueFromOldPath(oldConfig, "General-Settings.Withdraw-Taxes", "Withdraw-Settings.Withdraw-Taxes", "0%"));
         addSpace(newConfig);
 
         /* BankTop settings */
@@ -515,6 +530,7 @@ public class ConfigManager {
 
         /* Placeholders section */
 
+        addComments(newConfig, "You can use color codes.");
         validatePath(oldConfig, newConfig, "Placeholders.Money.Thousands", "K");
         validatePath(oldConfig, newConfig, "Placeholders.Money.Millions", "M");
         validatePath(oldConfig, newConfig, "Placeholders.Money.Billions", "B");
@@ -549,6 +565,9 @@ public class ConfigManager {
         addSpace(newConfig, "Placeholders");
 
         validatePath(oldConfig, newConfig, "Placeholders.Upgrades.Max-Level", "Maxed");
+        addSpace(newConfig, "Placeholders");
+
+        validatePath(oldConfig, newConfig, "Placeholders.BankTop.Player-Not-Found", "Player not found.");
 
         commentsCount = 0;
         spacesCount = 0;
@@ -562,15 +581,21 @@ public class ConfigManager {
         recreateFile(copyOfConfigFile);
     }
 
-    public void buildMessages() {
+    public void updateMessages() {
         File copyOfMessagesFile = new File(plugin.getDataFolder(), "messages.yml");
         FileConfiguration oldMessagesConfig = new YamlConfiguration();
         FileConfiguration newMessagesConfig = new YamlConfiguration();
 
         try {
             oldMessagesConfig.load(copyOfMessagesFile);
-        } catch (Exception ignored) { }
-        
+        } catch (Exception e) {
+            BPLogger.error(
+                    "BankPlus was unable to load messages.yml to check for changes, try restarting the" +
+                    " server and if the problem persist contact the developer! (" + e.getMessage() + ")"
+            );
+            return;
+        }
+
         addComments(newMessagesConfig,
                 "Messages File of BankPlus",
                 "Made by Pulsi_, Version v" + plugin.getDescription().getVersion());
@@ -693,14 +718,20 @@ public class ConfigManager {
         recreateFile(copyOfMessagesFile);
     }
 
-    public void buildMultipleBanks() {
+    public void updateMultipleBanks() {
         File copyOfMultipleBanksFile = new File(plugin.getDataFolder(), "multiple_banks.yml");
         FileConfiguration oldMultipleBanksConfig = new YamlConfiguration();
         FileConfiguration newMultipleBanksConfig = new YamlConfiguration();
-        
+
         try {
             oldMultipleBanksConfig.load(copyOfMultipleBanksFile);
-        } catch (Exception ignored) { }
+        } catch (Exception e) {
+            BPLogger.error(
+                    "BankPlus was unable to load multiple_banks.yml to check for changes, try restarting the" +
+                    " server and if the problem persist contact the developer! (" + e.getMessage() + ")"
+            );
+            return;
+        }
 
         addComments(newMultipleBanksConfig,
                 "Put this to true to enable the multiple-banks feature.",
