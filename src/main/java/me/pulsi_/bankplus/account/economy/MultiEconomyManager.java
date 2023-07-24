@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.account.economy;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
 import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
@@ -107,7 +108,7 @@ public class MultiEconomyManager {
      */
     public void saveBankBalance(String bankName, boolean async) {
         BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
-        files.getPlayerConfig().set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(getBankBalance(bankName)));
+        files.getPlayerConfig().set("Banks." + bankName + ".Money", BPFormatter.formatBigDouble(getBankBalance(bankName)));
         files.savePlayerFile(async);
     }
 
@@ -117,7 +118,7 @@ public class MultiEconomyManager {
     public void saveBankBalance(boolean async) {
         BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
         for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
-            files.getPlayerConfig().set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(getBankBalance(bankName)));
+            files.getPlayerConfig().set("Banks." + bankName + ".Money", BPFormatter.formatBigDouble(getBankBalance(bankName)));
         files.savePlayerFile(async);
     }
 
@@ -216,7 +217,7 @@ public class MultiEconomyManager {
      */
     private void set(BigDecimal amount, String bankName, boolean addOfflineInterest) {
         if (p != null) {
-            String amountFormatted = BPMethods.formatBigDouble(amount);
+            String amountFormatted = BPFormatter.formatBigDouble(amount);
             BigDecimal finalAmount = new BigDecimal(amountFormatted).doubleValue() < 0 ? new BigDecimal(0) : new BigDecimal(amountFormatted);
             bankPlayerMoney.put(p.getUniqueId() + "." + bankName, finalAmount);
             return;
@@ -224,9 +225,9 @@ public class MultiEconomyManager {
 
         BankPlusPlayerFiles files = new BankPlusPlayerFiles(op);
         FileConfiguration config = files.getPlayerConfig();
-        config.set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(amount));
+        config.set("Banks." + bankName + ".Money", BPFormatter.formatBigDouble(amount));
         if (addOfflineInterest && Values.CONFIG.isNotifyOfflineInterest()) {
-            BigDecimal offlineInterest = new BigDecimal(BPMethods.formatBigDouble(amount)).subtract(getBankBalance(bankName));
+            BigDecimal offlineInterest = new BigDecimal(BPFormatter.formatBigDouble(amount)).subtract(getBankBalance(bankName));
             if (offlineInterest.doubleValue() > 0) config.set("Offline-Interest", offlineInterest.toString());
         }
 
@@ -264,7 +265,6 @@ public class MultiEconomyManager {
         }
 
         EconomyResponse depositResponse = BankPlus.INSTANCE.getEconomy().withdrawPlayer(p, amount.doubleValue());
-        BankPlus.DEBUGGER.debugTransactions(p, amount, depositResponse);
         if (BPMethods.hasFailed(p, depositResponse)) return;
 
         addBankBalance(amount.subtract(taxes), bankName);
@@ -291,7 +291,6 @@ public class MultiEconomyManager {
             taxes = amount.multiply(Values.CONFIG.getDepositTaxes().divide(BigDecimal.valueOf(100)));
 
         EconomyResponse withdrawResponse = BankPlus.INSTANCE.getEconomy().depositPlayer(p, amount.doubleValue());
-        BankPlus.DEBUGGER.debugTransactions(p, amount, withdrawResponse);
         if (BPMethods.hasFailed(p, withdrawResponse)) return;
 
         removeBankBalance(amount.add(taxes), bankName);

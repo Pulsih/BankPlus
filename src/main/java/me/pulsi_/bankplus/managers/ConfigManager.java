@@ -2,9 +2,8 @@ package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.utils.BPLogger;
-import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.utils.BPVersions;
-import org.bukkit.Bukkit;
+import me.pulsi_.bankplus.xSeries.XSound;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -14,13 +13,10 @@ import java.util.*;
 
 public class ConfigManager {
 
-    private boolean containsChanges = false;
     private int commentsCount = 0;
     private int spacesCount = 0;
     private final String commentIdentifier = "bankplus_comment";
     private final String spaceIdentifier = "bankplus_space";
-
-    private final BankPlus plugin;
     private File configFile, messagesFile, multipleBanksFile;
     private FileConfiguration config, messagesConfig, multipleBanksConfig;
 
@@ -30,32 +26,24 @@ public class ConfigManager {
         MULTIPLE_BANKS
     }
 
+    private final BankPlus plugin;
+
     public ConfigManager(BankPlus plugin) {
         this.plugin = plugin;
     }
 
-    public void createConfigs() {
+    public void setupConfigs() {
         configFile = new File(plugin.getDataFolder(), "config.yml");
         messagesFile = new File(plugin.getDataFolder(), "messages.yml");
         multipleBanksFile = new File(plugin.getDataFolder(), "multiple_banks.yml");
-
-        if (!configFile.exists()) plugin.saveResource("config.yml", false);
-        if (!messagesFile.exists()) plugin.saveResource("messages.yml", false);
-        if (!multipleBanksFile.exists()) plugin.saveResource("multiple_banks.yml", false);
 
         config = new YamlConfiguration();
         messagesConfig = new YamlConfiguration();
         multipleBanksConfig = new YamlConfiguration();
 
-        reloadConfig(Type.CONFIG);
-        reloadConfig(Type.MESSAGES);
-        reloadConfig(Type.MULTIPLE_BANKS);
-
-        updateConfig();
-        updateMessages();
-        updateMultipleBanks();
-
-        plugin.getDataManager().reloadPlugin();
+        setupConfig();
+        setupMessages();
+        setupMultipleBanks();
     }
 
     public FileConfiguration getConfig(Type type) {
@@ -78,7 +66,7 @@ public class ConfigManager {
                     config.load(configFile);
                     return true;
                 } catch (IOException | InvalidConfigurationException e) {
-                    BPLogger.error(e.getMessage());
+                    BPLogger.error("Could not load " + type.name() + " config! (Error: " + e.getMessage().replace("\n", "") + ")");
                     return false;
                 }
 
@@ -87,7 +75,7 @@ public class ConfigManager {
                     messagesConfig.load(messagesFile);
                     return true;
                 } catch (IOException | InvalidConfigurationException e) {
-                    BPLogger.error(e.getMessage());
+                    BPLogger.error("Could not load " + type.name() + " config! (Error: " + e.getMessage().replace("\n", "") + ")");
                     return false;
                 }
 
@@ -96,7 +84,7 @@ public class ConfigManager {
                     multipleBanksConfig.load(multipleBanksFile);
                     return true;
                 } catch (IOException | InvalidConfigurationException e) {
-                    BPLogger.error(e.getMessage());
+                    BPLogger.error("Could not load " + type.name() + " config! (Error: " + e.getMessage().replace("\n", "") + ")");
                     return false;
                 }
         }
@@ -131,10 +119,6 @@ public class ConfigManager {
         }
     }
 
-    public boolean containsChanges() {
-        return containsChanges;
-    }
-
     private String getFileAsString(File file) {
         List<String> lines = new ArrayList<>();
         try {
@@ -144,7 +128,7 @@ public class ConfigManager {
             BPLogger.error(e.getMessage());
             return null;
         }
-
+ 
         StringBuilder config = new StringBuilder();
         for (String line : lines) {
             if (line.contains(commentIdentifier)) {
@@ -176,33 +160,38 @@ public class ConfigManager {
     }
 
     public void recreateFile(File file) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            String configuration = getFileAsString(file);
-            if (configuration == null) return;
-            try {
-                BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-                writer.write(configuration);
-                writer.flush();
-                writer.close();
-            } catch (IOException e) {
-                BPLogger.error(e.getMessage());
-            }
-        });
+        String configuration = getFileAsString(file);
+        if (configuration == null) return;
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+            writer.write(configuration);
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            BPLogger.error(e.getMessage());
+        }
     }
 
-    public void updateConfig() {
-        File copyOfConfigFile = new File(plugin.getDataFolder(), "config.yml");
+    public void setupConfig() {
+        boolean updateFile = true;
+
+        if (!configFile.exists()) plugin.saveResource("config.yml", false);
+        else {
+            reloadConfig(Type.CONFIG);
+            updateFile = config.get("Update-File") == null || config.getBoolean("Update-File");
+        }
+        if (!updateFile) return;
+
         FileConfiguration oldConfig = new YamlConfiguration();
         FileConfiguration newConfig = new YamlConfiguration();
 
-        BPVersions.renameGeneralSection(copyOfConfigFile);
+        BPVersions.renameGeneralSection(configFile);
 
         try {
-            oldConfig.load(copyOfConfigFile);
+            oldConfig.load(configFile);
         } catch (Exception e) {
             BPLogger.error(
-                    "BankPlus was unable to load config.yml to check for changes, try restarting the" +
-                    " server and if the problem persist contact the developer! (" + e.getMessage() + ")"
+                    "BankPlus was unable to load config.yml to check for changes! (Error: " + e.getLocalizedMessage().replace("\n", "") + ")"
             );
             return;
         }
@@ -210,6 +199,10 @@ public class ConfigManager {
         addComments(newConfig,
                 "Configuration File of BankPlus",
                 "Made by Pulsi_, Version v" + plugin.getDescription().getVersion());
+        addSpace(newConfig);
+
+        addComments(newConfig, "Automatically update the file if there are any missing changes.");
+        validatePath(oldConfig, newConfig, "Update-File", true);
         addSpace(newConfig);
 
         addComments(newConfig, "Check for new updates of the plugin.");
@@ -409,19 +402,19 @@ public class ConfigManager {
 
         validatePath(oldConfig, newConfig, "General-Settings.Withdraw-Sound.Enabled", true);
         addCommentsUnder(newConfig, "General-Settings.Withdraw-Sound", "Sound-Type,Volume,Pitch.");
-        validatePath(oldConfig, newConfig, "General-Settings.Withdraw-Sound.Sound", BPMethods.getSoundBasedOnServerVersion());
+        validatePath(oldConfig, newConfig, "General-Settings.Withdraw-Sound.Sound", XSound.ENTITY_EXPERIENCE_ORB_PICKUP.parseSound().name() + ",5,1");
         addSpace(newConfig, "General-Settings");
 
         validatePath(oldConfig, newConfig, "General-Settings.Deposit-Sound.Enabled", true);
-        validatePath(oldConfig, newConfig, "General-Settings.Deposit-Sound.Sound", BPMethods.getSoundBasedOnServerVersion());
+        validatePath(oldConfig, newConfig, "General-Settings.Deposit-Sound.Sound", XSound.ENTITY_EXPERIENCE_ORB_PICKUP.parseSound().name() + ",5,1");
         addSpace(newConfig, "General-Settings");
 
         validatePath(oldConfig, newConfig, "General-Settings.View-Sound.Enabled", true);
-        validatePath(oldConfig, newConfig, "General-Settings.View-Sound.Sound", BPMethods.getSoundBasedOnServerVersion());
+        validatePath(oldConfig, newConfig, "General-Settings.View-Sound.Sound", XSound.ENTITY_EXPERIENCE_ORB_PICKUP.parseSound().name() + ",5,1");
         addSpace(newConfig, "General-Settings");
 
         validatePath(oldConfig, newConfig, "General-Settings.Personal-Sound.Enabled", true);
-        validatePath(oldConfig, newConfig, "General-Settings.Personal-Sound.Sound", BPMethods.getSoundBasedOnServerVersion());
+        validatePath(oldConfig, newConfig, "General-Settings.Personal-Sound.Sound", XSound.ENTITY_EXPERIENCE_ORB_PICKUP.parseSound().name() + ",5,1");
         addSpace(newConfig);
 
         /* Deposit settings */
@@ -573,25 +566,32 @@ public class ConfigManager {
         spacesCount = 0;
 
         try {
-            newConfig.save(copyOfConfigFile);
-        } catch (IOException e) {
-            BPLogger.error(e.getMessage());
+            newConfig.save(configFile);
+        } catch (Exception e) {
+            BPLogger.error("Could not save file changes to config.yml! (Error: " + e.getMessage() + ")");
+            return;
         }
-        reloadConfig(Type.CONFIG);
-        recreateFile(copyOfConfigFile);
+        recreateFile(configFile);
     }
 
-    public void updateMessages() {
-        File copyOfMessagesFile = new File(plugin.getDataFolder(), "messages.yml");
+    public void setupMessages() {
+        boolean updateFile = true;
+
+        if (!messagesFile.exists()) plugin.saveResource("messages.yml", false);
+        else {
+            reloadConfig(Type.MESSAGES);
+            updateFile = messagesConfig.get("Update-File") == null || messagesConfig.getBoolean("Update-File");
+        }
+        if (!updateFile) return;
+
         FileConfiguration oldMessagesConfig = new YamlConfiguration();
         FileConfiguration newMessagesConfig = new YamlConfiguration();
 
         try {
-            oldMessagesConfig.load(copyOfMessagesFile);
+            oldMessagesConfig.load(messagesFile);
         } catch (Exception e) {
             BPLogger.error(
-                    "BankPlus was unable to load messages.yml to check for changes, try restarting the" +
-                    " server and if the problem persist contact the developer! (" + e.getMessage() + ")"
+                    "BankPlus was unable to load messages.yml to check for changes! (Error: " + e.getLocalizedMessage().replace("\n", "") + ")"
             );
             return;
         }
@@ -602,15 +602,17 @@ public class ConfigManager {
         addSpace(newMessagesConfig);
 
         addComments(newMessagesConfig,
-                "Local Placeholders",
-                "These placeholders will work only in some of these messages, do",
-                "not use it for gui or any other things because they won't work!",
-                "",
-                "%amount% -> Number Formatted with commas",
-                "%amount_long% -> Raw Number",
-                "%amount_formatted% -> Number Formatted",
-                "%amount_formatted_long% -> Number formatted without \".\"",
-                "%player% -> Player name");
+                "* Placeholders *",
+                "BankPlus messages support placeholderapi and you can",
+                "use every type of placeholder inside the messages.");
+        addSpace(newMessagesConfig);
+
+        addComments(newMessagesConfig, "Automatically update the file if there are any missing changes.");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Update-File", true);
+        addSpace(newMessagesConfig);
+
+        addComments(newMessagesConfig, "Enable the alert message when a message is missing in the file.");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Enable-Missing-Message-Alert", true);
         addSpace(newMessagesConfig);
 
         addComments(newMessagesConfig, "The main plugin prefix.");
@@ -622,7 +624,10 @@ public class ConfigManager {
                 "MessageIdentifier: \"A single message\"",
                 "MessageIdentifier:",
                 "  - \"Multiple messages\"",
-                "  - \"in just one! :)\"");
+                "  - \"in just one! :)\"",
+                "",
+                "If you don't want a message to show put:",
+                "Message: \"\"");
         addSpace(newMessagesConfig);
 
         addComments(newMessagesConfig, "System");
@@ -704,34 +709,44 @@ public class ConfigManager {
         validatePath(oldMessagesConfig, newMessagesConfig, "Failed-Reload", "%prefix% &cBankPlus has failed his reload task, please check the console for more info. (This is usually not a bankplus problem!)");
         validatePath(oldMessagesConfig, newMessagesConfig, "Unknown-Command", "%prefix% &cUnknown Command!");
         validatePath(oldMessagesConfig, newMessagesConfig, "No-Permission", "%prefix% &cYou don't have the permission! (%permission%)");
-        addSpace(newMessagesConfig);
 
         commentsCount = 0;
         spacesCount = 0;
 
         try {
-            newMessagesConfig.save(copyOfMessagesFile);
-        } catch (IOException e) {
-            BPLogger.error(e.getMessage());
+            newMessagesConfig.save(messagesFile);
+        } catch (Exception e) {
+            BPLogger.error("Could not save file changes to messages.yml! (Error: " + e.getMessage() + ")");
+            return;
         }
-        reloadConfig(Type.MESSAGES);
-        recreateFile(copyOfMessagesFile);
+        recreateFile(messagesFile);
     }
 
-    public void updateMultipleBanks() {
-        File copyOfMultipleBanksFile = new File(plugin.getDataFolder(), "multiple_banks.yml");
+    public void setupMultipleBanks() {
+        boolean updateFile = true;
+
+        if (!multipleBanksFile.exists()) plugin.saveResource("multiple_banks.yml", false);
+        else {
+            reloadConfig(Type.MESSAGES);
+            updateFile = multipleBanksConfig.get("Update-File") == null || multipleBanksConfig.getBoolean("Update-File");
+        }
+        if (!updateFile) return;
+
         FileConfiguration oldMultipleBanksConfig = new YamlConfiguration();
         FileConfiguration newMultipleBanksConfig = new YamlConfiguration();
 
         try {
-            oldMultipleBanksConfig.load(copyOfMultipleBanksFile);
+            oldMultipleBanksConfig.load(multipleBanksFile);
         } catch (Exception e) {
             BPLogger.error(
-                    "BankPlus was unable to load multiple_banks.yml to check for changes, try restarting the" +
-                    " server and if the problem persist contact the developer! (" + e.getMessage() + ")"
+                    "BankPlus was unable to load multiple_banks.yml to check for changes! (Error: " + e.getLocalizedMessage().replace("\n", "") + ")"
             );
             return;
         }
+
+        addComments(newMultipleBanksConfig, "Automatically update the file if there are any missing changes.");
+        validatePath(oldMultipleBanksConfig, newMultipleBanksConfig, "Update-File", true);
+        addSpace(newMultipleBanksConfig);
 
         addComments(newMultipleBanksConfig,
                 "Put this to true to enable the multiple-banks feature.",
@@ -805,12 +820,11 @@ public class ConfigManager {
         spacesCount = 0;
 
         try {
-            newMultipleBanksConfig.save(copyOfMultipleBanksFile);
-        } catch (IOException e) {
-            BPLogger.error(e.getMessage());
+            newMultipleBanksConfig.save(multipleBanksFile);
+        } catch (Exception e) {
+            BPLogger.error("Could not save file changes to multiple_banks.yml! (Error: " + e.getMessage() + ")");
         }
-        reloadConfig(Type.MULTIPLE_BANKS);
-        recreateFile(copyOfMultipleBanksFile);
+        recreateFile(multipleBanksFile);
     }
 
     private void addSpace(FileConfiguration config) {

@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.account.economy;
 
 import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPFormatter;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -28,7 +28,7 @@ public class OfflineInterestManager {
     public void setOfflineInterest(BigDecimal amount, boolean save) {
         BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
         FileConfiguration config = files.getPlayerConfig();
-        config.set("Offline-Interest", BPMethods.formatBigDouble(amount));
+        config.set("Offline-Interest", BPFormatter.formatBigDouble(amount));
         if (save) files.savePlayerFile(config, true);
     }
 }

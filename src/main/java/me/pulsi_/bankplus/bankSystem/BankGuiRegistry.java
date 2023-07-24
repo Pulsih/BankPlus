@@ -73,7 +73,7 @@ public class BankGuiRegistry {
             try {
                 bankConfig.load(bankFile);
             } catch (IOException | InvalidConfigurationException e) {
-                BPLogger.error("An error has occurred while loading a bank file: " + e.getMessage());
+                BPLogger.error("An error has occurred while loading " + bankFile.getName() + " bank file: " + e.getMessage());
                 return false;
             }
 
@@ -143,7 +143,7 @@ public class BankGuiRegistry {
 
     public void loadMultipleBanksGui() {
         String title = BPChat.color(Values.MULTIPLE_BANKS.getBanksGuiTitle() == null ? "&c&l * TITLE NOT FOUND *" : Values.MULTIPLE_BANKS.getBanksGuiTitle());
-        Inventory gui = Bukkit.createInventory(new BankHolder(), Values.MULTIPLE_BANKS.getBanksGuiLines(), title);
+        Inventory gui = Bukkit.createInventory(new BankHolder(), Math.max(9, Math.min(54, Values.MULTIPLE_BANKS.getBanksGuiLines() * 9)), title);
 
         if (Values.MULTIPLE_BANKS.isFillerEnabled()) {
             ItemStack filler = BPItems.getFiller(Values.MULTIPLE_BANKS.getFillerMaterial(), Values.MULTIPLE_BANKS.isFillerGlowing());

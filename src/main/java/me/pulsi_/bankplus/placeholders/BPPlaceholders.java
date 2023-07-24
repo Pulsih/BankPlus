@@ -8,6 +8,7 @@ import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.managers.BankTopManager;
 import me.pulsi_.bankplus.utils.BPChat;
+import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -16,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 
-public class Placeholders extends PlaceholderExpansion {
+public class BPPlaceholders extends PlaceholderExpansion {
 
     @Override
     public boolean persist() {
@@ -91,25 +92,22 @@ public class Placeholders extends PlaceholderExpansion {
         }
 
         if (identifier.startsWith("next_level_cost")) {
-            BankReader mainReader = new BankReader(Values.CONFIG.getMainGuiName());
-            if (!mainReader.hasNextLevel(p))
-                return BPChat.color(Values.CONFIG.getBankUpgradedMaxPlaceholder());
+            BankReader reader;
+            BigDecimal cost;
 
-            BigDecimal cost = mainReader.getLevelCost(mainReader.getCurrentLevel(p) + 1);
-
-            if (identifier.contains("{") && identifier.endsWith("}")) {
+            if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
+            else {
                 if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
                     return "&cThe multiple-banks module is disabled!";
 
-                BankReader reader = new BankReader(target);
+                reader = new BankReader(target);
                 if (!reader.exist())
                     return "&cThe selected bank does not exist!";
-
-                if (!reader.hasNextLevel(p))
-                    return Values.CONFIG.getBankUpgradedMaxPlaceholder();
-
-                cost = reader.getLevelCost(reader.getCurrentLevel(p) + 1);
             }
+            if (!reader.hasNextLevel(p))
+                return Values.CONFIG.getBankUpgradedMaxPlaceholder();
+
+            cost = reader.getLevelCost(reader.getCurrentLevel(p) + 1);
 
             String formatter = identifier.replace("next_level_cost", "");
             return getFormat(formatter, cost);
@@ -136,19 +134,25 @@ public class Placeholders extends PlaceholderExpansion {
         }
 
         if (identifier.startsWith("next_interest")) {
-            BigDecimal percentage = Values.CONFIG.getInterestMoneyGiven().divide(BigDecimal.valueOf(100));
-            BigDecimal interestMoney = singleEconomyManager.getBankBalance().multiply(percentage);
+            BankReader reader;
+            BigDecimal percentage, interestMoney, balance;
 
-            if (target != null) {
+            if (target == null) {
+                reader = new BankReader(Values.CONFIG.getMainGuiName());
+                percentage = reader.getInterest(p).divide(BigDecimal.valueOf(100));
+                balance = singleEconomyManager.getBankBalance();
+            } else {
                 if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
                     return "&cThe multiple-banks module is disabled!";
 
-                BankReader reader = new BankReader(target);
+                reader = new BankReader(target);
                 if (!reader.exist())
                     return "The selected bank does not exist.";
 
-                interestMoney = multiEconomyManager.getBankBalance(target).multiply(percentage);
+                percentage = reader.getInterest(p).divide(BigDecimal.valueOf(100));
+                balance = multiEconomyManager.getBankBalance(target);
             }
+            interestMoney = new BigDecimal(Math.min(Values.CONFIG.getInterestMaxAmount().doubleValue(), balance.multiply(percentage).doubleValue()));
 
             String formatter = identifier.replace("next_interest", "");
             return getFormat(formatter, interestMoney);
@@ -172,13 +176,13 @@ public class Placeholders extends PlaceholderExpansion {
             BigDecimal money = bankTop.getBankTopBalancePlayer(position);
             switch (Values.CONFIG.getBankTopMoneyFormat()) {
                 case "default_amount":
-                    return BPMethods.formatCommas(money);
+                    return BPFormatter.formatCommas(money);
                 case "amount_long":
                     return String.valueOf(money);
                 default:
-                    return BPMethods.format(money);
+                    return BPFormatter.format(money);
                 case "amount_formatted_long":
-                    return BPMethods.formatLong(money);
+                    return BPFormatter.formatLong(money);
             }
         }
 
@@ -205,7 +209,7 @@ public class Placeholders extends PlaceholderExpansion {
                 return BPChat.color("&cThe banktop is not enabled!");
 
             Player result = p;
-            if (identifier.contains("{") && identifier.endsWith("}")) {
+            if (target != null) {
                 Player pTarget = Bukkit.getPlayer(target);
 
                 if (pTarget == null)
@@ -215,6 +219,24 @@ public class Placeholders extends PlaceholderExpansion {
             }
 
             return bankTop.getPlayerBankTopPosition(result) + "";
+        }
+
+        if (identifier.startsWith("interest_rate")) {
+            BankReader reader;
+            BigDecimal interestRate;
+
+            if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
+            else {
+                if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                    return "&cThe multiple-banks module is disabled!";
+
+                reader = new BankReader(target);
+                if (!reader.exist())
+                    return "The selected bank does not exist.";
+            }
+            interestRate = reader.getInterest(p);
+
+            return interestRate + "";
         }
 
         Interest interest = BankPlus.INSTANCE.getInterest();
@@ -229,11 +251,7 @@ public class Placeholders extends PlaceholderExpansion {
                 return Values.CONFIG.getWithdrawTaxesString();
 
             case "deposit_taxes":
-
                 return Values.CONFIG.getDepositTaxesString();
-
-            case "interest_rate":
-                return Values.CONFIG.getInterestMoneyGivenString();
         }
 
         return null;
@@ -241,8 +259,8 @@ public class Placeholders extends PlaceholderExpansion {
 
     private String getFormat(String formatter, BigDecimal value) {
         if (formatter.contains("_long")) return String.valueOf(value);
-        if (formatter.contains("_formatted")) return BPMethods.format(value);
-        if (formatter.contains("_formatted_long")) return BPMethods.formatLong(value);
-        return BPMethods.formatCommas(value);
+        if (formatter.contains("_formatted")) return BPFormatter.format(value);
+        if (formatter.contains("_formatted_long")) return BPFormatter.formatLong(value);
+        return BPFormatter.formatCommas(value);
     }
 }

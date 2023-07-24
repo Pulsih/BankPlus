@@ -1,10 +1,7 @@
 package me.pulsi_.bankplus.commands;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.utils.BPChat;
-import me.pulsi_.bankplus.utils.BPLogger;
-import me.pulsi_.bankplus.utils.BPMessages;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.*;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -52,16 +49,16 @@ public class BankTopCmd implements CommandExecutor {
         BigDecimal money = BankPlus.INSTANCE.getBankTopManager().getBankTopBalancePlayer(position);
         switch (Values.CONFIG.getBankTopMoneyFormat()) {
             case "default_amount":
-                stringToReplace = BPMethods.formatCommas(money);
+                stringToReplace = BPFormatter.formatCommas(money);
                 break;
             case "amount_long":
                 stringToReplace = String.valueOf(money);
                 break;
             default:
-                stringToReplace = BPMethods.format(money);
+                stringToReplace = BPFormatter.format(money);
                 break;
             case "amount_formatted_long":
-                stringToReplace = BPMethods.formatLong(money);
+                stringToReplace = BPFormatter.formatLong(money);
                 break;
         }
         return message.replace("%bankplus_banktop_money_" + position + "%", stringToReplace);

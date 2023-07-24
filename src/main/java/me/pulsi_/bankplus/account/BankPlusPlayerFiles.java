@@ -3,8 +3,8 @@ package me.pulsi_.bankplus.account;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
+import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPLogger;
-import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -44,7 +44,7 @@ public class BankPlusPlayerFiles {
             for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
                 String sBalance = config.getString("Banks." + bankName + ".Money");
                 if (Values.CONFIG.getMainGuiName().equals(bankName)) {
-                    config.set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(bal));
+                    config.set("Banks." + bankName + ".Money", BPFormatter.formatBigDouble(bal));
                     continue;
                 }
                 if (sBalance == null) config.set("Banks." + bankName + ".Money", "0.00");
@@ -59,7 +59,7 @@ public class BankPlusPlayerFiles {
                 String sBalance = config.getString("Banks." + bankName + ".Money");
                 if (sBalance != null) amount = amount.add(new BigDecimal(sBalance));
             }
-            config.set("Money", BPMethods.formatBigDouble(amount));
+            config.set("Money", BPFormatter.formatBigDouble(amount));
             multiEconomyManager.unloadBankBalance();
             singleEconomyManager.loadBankBalance();
         }

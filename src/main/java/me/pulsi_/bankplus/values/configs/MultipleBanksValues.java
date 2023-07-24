@@ -95,7 +95,7 @@ public class MultipleBanksValues {
     }
 
     public int getBanksGuiLines() {
-        return Math.max(9, Math.min(54, banksGuiLines * 9));
+        return banksGuiLines;
     }
 
     public int getPreviousItemSlot() {

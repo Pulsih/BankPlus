@@ -72,7 +72,7 @@ public class PlayerChatMethod {
 
     private static void reopenBank(Player p, String identifier) {
         Bukkit.getScheduler().runTask(BankPlus.INSTANCE, () -> {
-            if (Values.CONFIG.isReopeningBankAfterChat()) BankUtils.openBank(p, identifier, false);
+            if (Values.CONFIG.isReopeningBankAfterChat()) BankUtils.openBank(p, identifier, true);
         });
     }
 

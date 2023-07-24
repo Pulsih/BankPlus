@@ -3,11 +3,8 @@ package me.pulsi_.bankplus.commands;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.commands.cmdProcessor.MultiCmdProcessor;
 import me.pulsi_.bankplus.commands.cmdProcessor.SingleCmdProcessor;
-import me.pulsi_.bankplus.utils.BPChat;
-import me.pulsi_.bankplus.utils.BPDebugger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
@@ -105,27 +102,6 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                     return true;
                 }
 
-                case "debug": {
-                    if (!BPMethods.hasPermission(s, "bankplus.debug")) return false;
-                    if (args.length == 1) {
-                        s.sendMessage(BPChat.color("&a&lBank&9&lPlus &aChoose a valid option: TRANSACTIONS."));
-                        return false;
-                    }
-                    switch (args[1].toLowerCase()) {
-                        case "transactions":
-                            BPDebugger debugger = BankPlus.DEBUGGER;
-                            boolean enabled = !debugger.isTransactionsDebuggerEnabled();
-                            debugger.setTransactionsDebuggerEnabled(!debugger.isTransactionsDebuggerEnabled());
-                            BPMessages.send(s, (BPChat.prefix + " &7Successfully " + enabled + " &7the transactions report!")
-                                    .replace("true", "&2enabled").replace("false", "&cdisabled"), false);
-                            break;
-
-                        default:
-                            s.sendMessage(BPChat.color("&a&lBank&9&lPlus &aChoose a valid option: TRANSACTIONS."));
-                    }
-                    return true;
-                }
-
                 case "resetall": {
                     if (!BPMethods.hasPermission(s, "bankplus.resetall")) return false;
 
@@ -156,8 +132,8 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                     }
 
                     resetAll(s, 0, mode);
+                    return true;
                 }
-                break;
             }
         }
 

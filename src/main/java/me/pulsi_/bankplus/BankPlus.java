@@ -6,8 +6,7 @@ import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankGuiRegistry;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.managers.*;
-import me.pulsi_.bankplus.placeholders.Placeholders;
-import me.pulsi_.bankplus.utils.BPDebugger;
+import me.pulsi_.bankplus.placeholders.BPPlaceholders;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPVersions;
 import me.pulsi_.bankplus.values.Values;
@@ -24,13 +23,11 @@ import java.net.URL;
 
 public final class BankPlus extends JavaPlugin {
 
+    public static BankPlus INSTANCE;
     private boolean wasOnSingleEconomy;
 
     private PlayerRegistry playerRegistry;
     private BankGuiRegistry bankGuiRegistry;
-
-    public static BankPlus INSTANCE;
-    public static BPDebugger DEBUGGER;
     private Economy econ = null;
     private Permission perms = null;
 
@@ -72,7 +69,6 @@ public final class BankPlus extends JavaPlugin {
             return;
         }
         INSTANCE = this;
-        DEBUGGER = new BPDebugger();
 
         this.playerRegistry = new PlayerRegistry();
         this.bankGuiRegistry = new BankGuiRegistry();
@@ -92,7 +88,7 @@ public final class BankPlus extends JavaPlugin {
 
         if (plManager.getPlugin("PlaceholderAPI") != null) {
             BPLogger.info("Hooked into PlaceholderAPI!");
-            new Placeholders().register();
+            new BPPlaceholders().register();
             isPlaceholderAPIHooked = true;
         }
         if (plManager.getPlugin("Essentials") != null) {
@@ -100,7 +96,8 @@ public final class BankPlus extends JavaPlugin {
             isEssentialsXHooked = true;
         }
 
-        if (Values.CONFIG.isUpdateCheckerEnabled()) Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> isUpdated = isPluginUpdated(), 0, (8 * 1200) * 60);
+        if (Values.CONFIG.isUpdateCheckerEnabled())
+            Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> isUpdated = isPluginUpdated(), 0, (8 * 1200) * 60 /*8 hours*/);
         wasOnSingleEconomy = !Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled();
 
         BPVersions.moveBankFileToBanksFolder();
@@ -112,6 +109,7 @@ public final class BankPlus extends JavaPlugin {
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) Bukkit.getOnlinePlayers().forEach(p -> new MultiEconomyManager(p).saveBankBalance(false));
         else Bukkit.getOnlinePlayers().forEach(p -> new SingleEconomyManager(p).saveBankBalance(false));
         if (Values.CONFIG.isInterestEnabled()) interest.saveInterest();
+
         dataManager.shutdownPlugin();
     }
 
@@ -186,7 +184,8 @@ public final class BankPlus extends JavaPlugin {
     private boolean isPluginUpdated() {
         boolean updated;
         try {
-            String newVersion = new BufferedReader(new InputStreamReader(new URL("https://api.spigotmc.org/legacy/update.php?resource=93130").openConnection().getInputStream())).readLine();
+            String newVersion = new BufferedReader(new InputStreamReader(
+                    new URL("https://api.spigotmc.org/legacy/update.php?resource=93130").openConnection().getInputStream())).readLine();
             updated = getDescription().getVersion().equals(newVersion);
         } catch (Exception e) {
             updated = true;

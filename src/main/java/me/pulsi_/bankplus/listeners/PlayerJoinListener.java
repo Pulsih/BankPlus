@@ -7,7 +7,7 @@ import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.OfflineInterestManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.utils.BPChat;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -35,7 +35,7 @@ public class PlayerJoinListener implements Listener {
         boolean hasChanges = false;
 
         if (Values.CONFIG.isNotifyOfflineInterest() && sOfflineInterest == null) {
-            config.set("Offline-Interest", BPMethods.formatBigDouble(BigDecimal.valueOf(0)));
+            config.set("Offline-Interest", BPFormatter.formatBigDouble(BigDecimal.valueOf(0)));
             hasChanges = true;
         }
         if (sName == null) {
@@ -43,10 +43,25 @@ public class PlayerJoinListener implements Listener {
             hasChanges = true;
         }
 
-        if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
+                String sBalance = config.getString("Banks." + bankName + ".Money");
+                String sLevel = config.getString("Banks." + bankName + ".Level");
+                if (sBalance == null) {
+                    if (!Values.CONFIG.getMainGuiName().equals(bankName)) config.set("Banks." + bankName + ".Money", BPFormatter.formatBigDouble(BigDecimal.valueOf(0)));
+                    else config.set("Banks." + bankName + ".Money", BPFormatter.formatBigDouble(Values.CONFIG.getStartAmount()));
+                    hasChanges = true;
+                }
+                if (sLevel == null) {
+                    config.set("Banks." + bankName + ".Level", 1);
+                    hasChanges = true;
+                }
+            }
+            new MultiEconomyManager(p).loadBankBalance();
+        } else {
             String sBalance = config.getString("Money");
             if (sBalance == null) {
-                config.set("Money", BPMethods.formatBigDouble(Values.CONFIG.getStartAmount()));
+                config.set("Money", BPFormatter.formatBigDouble(Values.CONFIG.getStartAmount()));
                 hasChanges = true;
             }
             for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
@@ -57,21 +72,6 @@ public class PlayerJoinListener implements Listener {
                 }
             }
             new SingleEconomyManager(p).loadBankBalance();
-        } else {
-            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
-                String sBalance = config.getString("Banks." + bankName + ".Money");
-                String sLevel = config.getString("Banks." + bankName + ".Level");
-                if (sBalance == null) {
-                    if (!Values.CONFIG.getMainGuiName().equals(bankName)) config.set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(BigDecimal.valueOf(0)));
-                    else config.set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(Values.CONFIG.getStartAmount()));
-                    hasChanges = true;
-                }
-                if (sLevel == null) {
-                    config.set("Banks." + bankName + ".Level", 1);
-                    hasChanges = true;
-                }
-            }
-            new MultiEconomyManager(p).loadBankBalance();
         }
         if (hasChanges) files.savePlayerFile(true);
 
@@ -86,9 +86,9 @@ public class PlayerJoinListener implements Listener {
 
         long delay = Values.CONFIG.getNotifyOfflineInterestDelay();
         String message = BPChat.color(Values.CONFIG.getNotifyOfflineInterestMessage()
-                .replace("%amount%", BPMethods.formatCommas(offlineInterest))
-                .replace("%amount_formatted%", BPMethods.format(offlineInterest))
-                .replace("%amount_formatted_long%", BPMethods.formatLong(offlineInterest)));
+                .replace("%amount%", BPFormatter.formatCommas(offlineInterest))
+                .replace("%amount_formatted%", BPFormatter.format(offlineInterest))
+                .replace("%amount_formatted_long%", BPFormatter.formatLong(offlineInterest)));
 
         if (delay == 0) p.sendMessage(message);
         else Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> p.sendMessage(message), delay * 20L);

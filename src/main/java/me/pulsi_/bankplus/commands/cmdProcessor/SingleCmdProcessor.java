@@ -3,7 +3,6 @@ package me.pulsi_.bankplus.commands.cmdProcessor;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.bankSystem.BankHolder;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -14,13 +13,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 public class SingleCmdProcessor {
 
@@ -304,44 +300,38 @@ public class SingleCmdProcessor {
 
                 String num = args[2];
                 if (BPMethods.isInvalidNumber(num, s)) return;
-                BigDecimal amount = new BigDecimal(num);
 
+                BigDecimal amount = new BigDecimal(num);
                 Player p = Bukkit.getPlayerExact(args[1]);
                 String bankName = Values.CONFIG.getMainGuiName();
                 BankReader bankReader = new BankReader(bankName);
+
+                boolean silent = args.length > 3 && args[3].toLowerCase().contains("true");
 
                 if (p == null) {
                     OfflinePlayer oP = Bukkit.getOfflinePlayer(args[1]);
 
                     SingleEconomyManager em = new SingleEconomyManager(oP);
                     BigDecimal capacity = bankReader.getCapacity(oP), balance = em.getBankBalance();
-                    if (capacity.subtract(balance).doubleValue() <= 0) {
-                        BPMessages.send(s, "Bank-Full", "%player%$" + oP.getName());
-                        return;
-                    }
                     if (amount.doubleValue() >= capacity.doubleValue()) {
-                        BPMessages.send(s, "Set-Message", BPMethods.placeValues(oP, capacity));
+                        if (!silent) BPMessages.send(s, "Set-Message", BPMethods.placeValues(oP, capacity));
                         em.setBankBalance(capacity);
                         return;
                     }
                     em.setBankBalance(amount);
-                    BPMessages.send(s, "Set-Message", BPMethods.placeValues(oP, amount));
+                    if (!silent) BPMessages.send(s, "Set-Message", BPMethods.placeValues(oP, amount));
                     return;
                 }
 
                 SingleEconomyManager em = new SingleEconomyManager(p);
                 BigDecimal capacity = bankReader.getCapacity(p), balance = em.getBankBalance();
-                if (capacity.subtract(balance).doubleValue() <= 0) {
-                    BPMessages.send(s, "Bank-Full", "%player%$" + p.getName());
-                    return;
-                }
                 if (amount.doubleValue() >= capacity.doubleValue()) {
-                    BPMessages.send(s, "Set-Message", BPMethods.placeValues(p, capacity));
+                    if (!silent) BPMessages.send(s, "Set-Message", BPMethods.placeValues(p, capacity));
                     em.setBankBalance(capacity);
                     return;
                 }
                 em.setBankBalance(amount);
-                BPMessages.send(s, "Set-Message", BPMethods.placeValues(p, amount));
+                if (!silent) BPMessages.send(s, "Set-Message", BPMethods.placeValues(p, amount));
             }
             break;
 
@@ -359,11 +349,14 @@ public class SingleCmdProcessor {
 
                 String num = args[2];
                 if (BPMethods.isInvalidNumber(num, s)) return;
-                BigDecimal amount = new BigDecimal(num);
 
+                BigDecimal amount = new BigDecimal(num);
                 Player p = Bukkit.getPlayerExact(args[1]);
+
                 String bankName = Values.CONFIG.getMainGuiName();
                 BankReader bankReader = new BankReader(bankName);
+
+                boolean silent = args.length > 3 && args[3].toLowerCase().contains("true");
 
                 if (p == null) {
                     OfflinePlayer oP = Bukkit.getOfflinePlayer(args[1]);
@@ -371,32 +364,33 @@ public class SingleCmdProcessor {
                     SingleEconomyManager em = new SingleEconomyManager(oP);
                     BigDecimal capacity = bankReader.getCapacity(oP), balance = em.getBankBalance();
                     if (capacity.equals(balance)) {
-                        BPMessages.send(s, "Bank-Full", "%player%$" + oP.getName());
+                        if (!silent) BPMessages.send(s, "Bank-Full", "%player%$" + oP.getName());
                         return;
                     }
                     if (balance.add(amount).doubleValue() >= capacity.doubleValue()) {
-                        BPMessages.send(s, "Add-Message", BPMethods.placeValues(oP, capacity.subtract(balance)));
+                        if (!silent) BPMessages.send(s, "Add-Message", BPMethods.placeValues(oP, capacity.subtract(balance)));
                         em.setBankBalance(capacity);
                         return;
                     }
                     em.addBankBalance(amount);
-                    BPMessages.send(s, "Add-Message", BPMethods.placeValues(oP, amount));
+
+                    if (!silent) BPMessages.send(s, "Add-Message", BPMethods.placeValues(oP, amount));
                     return;
                 }
 
                 SingleEconomyManager em = new SingleEconomyManager(p);
                 BigDecimal capacity = bankReader.getCapacity(p), balance = em.getBankBalance();
                 if (capacity.subtract(balance).doubleValue() <= 0) {
-                    BPMessages.send(s, "Bank-Full", "%player%$" + p.getName());
+                    if (!silent) BPMessages.send(s, "Bank-Full", "%player%$" + p.getName());
                     return;
                 }
                 if (balance.add(amount).doubleValue() >= capacity.doubleValue()) {
-                    BPMessages.send(s, "Add-Message", BPMethods.placeValues(p, capacity.subtract(balance)));
+                    if (!silent) BPMessages.send(s, "Add-Message", BPMethods.placeValues(p, capacity.subtract(balance)));
                     em.setBankBalance(capacity);
                     return;
                 }
                 em.addBankBalance(amount);
-                BPMessages.send(s, "Add-Message", BPMethods.placeValues(p, amount));
+                if (!silent) BPMessages.send(s, "Add-Message", BPMethods.placeValues(p, amount));
             }
             break;
 
@@ -440,41 +434,44 @@ public class SingleCmdProcessor {
 
                 String num = args[2];
                 if (BPMethods.isInvalidNumber(num, s)) return;
-                BigDecimal amount = new BigDecimal(num);
 
+                BigDecimal amount = new BigDecimal(num);
                 Player p = Bukkit.getPlayerExact(args[1]);
+
+                boolean silent = args.length > 3 && args[3].toLowerCase().contains("true");
+
                 if (p == null) {
                     OfflinePlayer oP = Bukkit.getOfflinePlayer(args[1]);
 
                     SingleEconomyManager em = new SingleEconomyManager(oP);
                     BigDecimal balance = em.getBankBalance();
                     if (balance.doubleValue() <= 0) {
-                        BPMessages.send(s, "Bank-Empty", "%player%$" + oP.getName());
+                        if (!silent) BPMessages.send(s, "Bank-Empty", "%player%$" + oP.getName());
                         return;
                     }
                     if (balance.subtract(amount).doubleValue() <= 0) {
-                        BPMessages.send(s, "Remove-Message", BPMethods.placeValues(oP, balance));
+                        if (!silent) BPMessages.send(s, "Remove-Message", BPMethods.placeValues(oP, balance));
                         em.setBankBalance(new BigDecimal(0));
                         return;
                     }
                     em.removeBankBalance(amount);
-                    BPMessages.send(s, "Remove-Message", BPMethods.placeValues(oP, amount));
+                    if (!silent) BPMessages.send(s, "Remove-Message", BPMethods.placeValues(oP, amount));
                     return;
                 }
 
                 SingleEconomyManager em = new SingleEconomyManager(p);
                 BigDecimal balance = em.getBankBalance();
                 if (balance.doubleValue() <= 0) {
-                    BPMessages.send(s, "Bank-Empty", "%player%$" + p.getName());
+                    if (!silent) BPMessages.send(s, "Bank-Empty", "%player%$" + p.getName());
                     return;
                 }
                 if (balance.subtract(amount).doubleValue() <= 0) {
-                    BPMessages.send(s, "Remove-Message", BPMethods.placeValues(p, balance));
+                    if (!silent) BPMessages.send(s, "Remove-Message", BPMethods.placeValues(p, balance));
                     em.setBankBalance(new BigDecimal(0));
                     return;
                 }
                 em.removeBankBalance(amount);
-                BPMessages.send(s, "Remove-Message", BPMethods.placeValues(p, amount));
+                if (!silent) BPMessages.send(s, "Remove-Message", BPMethods.placeValues(p, amount));
             }
             break;
 
@@ -505,7 +502,6 @@ public class SingleCmdProcessor {
                     listOfArgs.add("balance");
                     listOfArgs.add("bal");
                 }
-                if (s.hasPermission("bankplus.debug")) listOfArgs.add("debug");
                 if (s.hasPermission("bankplus.deposit")) listOfArgs.add("deposit");
                 if (s.hasPermission("bankplus.forceopen")) listOfArgs.add("forceOpen");
                 if (s.hasPermission("bankplus.forceupgrade")) listOfArgs.add("forceUpgrade");
@@ -533,20 +529,10 @@ public class SingleCmdProcessor {
 
             case 2: {
                 switch (args[0].toLowerCase()) {
-                    case "debug": {
-                        if (!s.hasPermission("bankplus.debug")) return null;
-                        List<String> args2 = new ArrayList<>();
-                        List<String> listOfArgs = new ArrayList<>();
-                        if (s.hasPermission("bankplus.debug")) listOfArgs.add("TRANSACTIONS");
-                        for (String arg : listOfArgs)
-                            if (arg.toLowerCase().startsWith(args[1].toLowerCase())) args2.add(arg);
-                        return args2;
-                    }
-
                     case "deposit": {
                         if (!s.hasPermission("bankplus.deposit")) return null;
                         List<String> args2 = new ArrayList<>();
-                        for (String arg : Arrays.asList("1", "2", "3"))
+                        for (String arg : new String[]{"1", "2", "3", "..."})
                             if (arg.startsWith(args[1].toLowerCase())) args2.add(arg);
                         return args2;
                     }
@@ -554,7 +540,7 @@ public class SingleCmdProcessor {
                     case "withdraw": {
                         if (!s.hasPermission("bankplus.withdraw")) return null;
                         List<String> args2 = new ArrayList<>();
-                        for (String arg : Arrays.asList("1", "2", "3"))
+                        for (String arg : new String[]{"1", "2", "3", "..."})
                             if (arg.startsWith(args[1].toLowerCase())) args2.add(arg);
                         return args2;
                     }
@@ -562,7 +548,7 @@ public class SingleCmdProcessor {
                     case "resetall": {
                         if (s.hasPermission("bankplus.resetall")) return null;
                         List<String> args2 = new ArrayList<>();
-                        for (String arg : Arrays.asList("remove", "maintain"))
+                        for (String arg : new String[]{"remove", "maintain"})
                             if (arg.startsWith(args[1].toLowerCase())) args2.add(arg);
                         return args2;
                     }
@@ -579,6 +565,38 @@ public class SingleCmdProcessor {
                     return args3;
                 }
             }
+            break;
+
+            case 4: {
+                switch (args[0].toLowerCase()) {
+                    case "add": {
+                        if (!s.hasPermission("bankplus.add")) return null;
+                        List<String> args4 = new ArrayList<>();
+                        String[] listOfArgs = {"silent=true", "silent=false"};
+                        for (String arg : listOfArgs)
+                            if (arg.toLowerCase().startsWith(args[3].toLowerCase())) args4.add(arg);
+                        return args4;
+                    }
+
+                    case "remove": {
+                        if (!s.hasPermission("bankplus.remove")) return null;
+                        List<String> args4 = new ArrayList<>();
+                        String[] listOfArgs = {"silent=true", "silent=false"};
+                        for (String arg : listOfArgs)
+                            if (arg.toLowerCase().startsWith(args[3].toLowerCase())) args4.add(arg);
+                        return args4;
+                    }
+
+                    case "set": {
+                        if (!s.hasPermission("bankplus.set")) return null;
+                        List<String> args4 = new ArrayList<>();
+                        String[] listOfArgs = {"silent=true", "silent=false"};
+                        for (String arg : listOfArgs)
+                            if (arg.toLowerCase().startsWith(args[3].toLowerCase())) args4.add(arg);
+                        return args4;
+                    }
+                }
+            }
         }
         return null;
     }
@@ -586,29 +604,21 @@ public class SingleCmdProcessor {
     private static void addAll(CommandSender s, int count, BankReader reader, BigDecimal amount) {
 
         int temp = 0;
+        Player[] players = (Player[]) Bukkit.getOnlinePlayers().toArray();
+
         for (int i = 0; i < 60; i++) {
-            if (count + temp >= Bukkit.getOfflinePlayers().length) {
+            if (count + temp >= players.length) {
                 BPMessages.send(s, BPMessages.getPrefix() + " &2Task finished!", true);
                 return;
             }
 
-            OfflinePlayer oP = Bukkit.getOfflinePlayers()[count + temp];
-            if (oP.isOnline()) {
-                Player p = Bukkit.getPlayer(oP.getUniqueId());
+            Player p = players[count + temp];
+            SingleEconomyManager em = new SingleEconomyManager(p);
+            BigDecimal capacity = reader.getCapacity(p), balance = em.getBankBalance();
 
-                SingleEconomyManager em = new SingleEconomyManager(p);
-                BigDecimal capacity = reader.getCapacity(p), balance = em.getBankBalance();
-                if (capacity.subtract(balance).doubleValue() > 0) {
-                    if (balance.add(amount).doubleValue() >= capacity.doubleValue()) em.setBankBalance(capacity);
-                    else em.addBankBalance(amount);
-                }
-            } else {
-                SingleEconomyManager em = new SingleEconomyManager(oP);
-                BigDecimal capacity = reader.getCapacity(oP), balance = em.getBankBalance();
-                if (capacity.subtract(balance).doubleValue() > 0) {
-                    if (balance.add(amount).doubleValue() >= capacity.doubleValue()) em.setBankBalance(capacity);
-                    else em.addBankBalance(amount);
-                }
+            if (capacity.subtract(balance).doubleValue() > 0) {
+                if (balance.add(amount).doubleValue() >= capacity.doubleValue()) em.setBankBalance(capacity);
+                else em.addBankBalance(amount);
             }
             temp++;
         }

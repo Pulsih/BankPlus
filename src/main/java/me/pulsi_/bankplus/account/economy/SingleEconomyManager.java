@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.account.economy;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
 import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
@@ -100,7 +101,7 @@ public class SingleEconomyManager {
      */
     public void saveBankBalance(boolean async) {
         BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
-        files.getPlayerConfig().set("Money", BPMethods.formatBigDouble(getBankBalance()));
+        files.getPlayerConfig().set("Money", BPFormatter.formatBigDouble(getBankBalance()));
         files.savePlayerFile(async);
     }
 
@@ -172,7 +173,7 @@ public class SingleEconomyManager {
      */
     private void set(BigDecimal amount, boolean addOfflineInterest) {
         if (p != null) {
-            String amountFormatted = BPMethods.formatBigDouble(amount);
+            String amountFormatted = BPFormatter.formatBigDouble(amount);
             BigDecimal finalAmount = new BigDecimal(amountFormatted).doubleValue() < 0 ? new BigDecimal(0) : new BigDecimal(amountFormatted);
             totalPlayerMoney.put(p.getUniqueId(), finalAmount);
             return;
@@ -180,9 +181,9 @@ public class SingleEconomyManager {
 
         BankPlusPlayerFiles files = new BankPlusPlayerFiles(op);
         FileConfiguration config = files.getPlayerConfig();
-        config.set("Money", BPMethods.formatBigDouble(amount));
+        config.set("Money", BPFormatter.formatBigDouble(amount));
         if (addOfflineInterest && Values.CONFIG.isNotifyOfflineInterest()) {
-            BigDecimal offlineInterest = new BigDecimal(BPMethods.formatBigDouble(amount)).subtract(getBankBalance());
+            BigDecimal offlineInterest = new BigDecimal(BPFormatter.formatBigDouble(amount)).subtract(getBankBalance());
             if (offlineInterest.doubleValue() > 0) config.set("Offline-Interest", offlineInterest.toString());
         }
         files.savePlayerFile(config, true);
@@ -219,7 +220,6 @@ public class SingleEconomyManager {
         }
 
         EconomyResponse depositResponse = BankPlus.INSTANCE.getEconomy().withdrawPlayer(p, amount.doubleValue());
-        BankPlus.DEBUGGER.debugTransactions(p, amount, depositResponse);
         if (BPMethods.hasFailed(p, depositResponse)) return;
 
         addBankBalance(amount.subtract(taxes));
@@ -246,7 +246,6 @@ public class SingleEconomyManager {
             taxes = amount.multiply(Values.CONFIG.getDepositTaxes().divide(BigDecimal.valueOf(100)));
 
         EconomyResponse withdrawResponse = BankPlus.INSTANCE.getEconomy().depositPlayer(p, amount.doubleValue());
-        BankPlus.DEBUGGER.debugTransactions(p, amount, withdrawResponse);
         if (BPMethods.hasFailed(p, withdrawResponse)) return;
 
         removeBankBalance(amount.add(taxes));

@@ -84,14 +84,13 @@ Upgrades:
     Offline-Interest: "10%"
 
 Items:
-  # You can add as many items as you want
-  # and not only for make the bank work
+  # You can add as many items as you want.
   WithdrawButton1:
     Material: "EMERALD"
     Amount: 1
     Displayname: "&8&l[&9&lWITHDRAW&8&l] &9500$"
     Slot: 11
-    # You can not edit the custom
+    # You can edit the custom
     # model data of an item.
     #
     # Working only on 1.14.4+

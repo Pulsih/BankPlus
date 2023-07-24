@@ -160,13 +160,13 @@ public class BPVersions {
             String sName = players.getString(id + ".Account-Name");
             String sBalance = players.getString(id + ".Money");
 
-            if (sOfflineInterest == null) config.set("Offline-Interest", BPMethods.formatBigDouble(BigDecimal.valueOf(0)));
+            if (sOfflineInterest == null) config.set("Offline-Interest", BPFormatter.formatBigDouble(BigDecimal.valueOf(0)));
             else config.set("Offline-Interest", sOfflineInterest);
             if (sName != null) config.set("Account-Name", sName);
 
             if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
-                if (sBalance == null) config.set("Money", BPMethods.formatBigDouble(Values.CONFIG.getStartAmount()));
-                else config.set("Money", BPMethods.formatBigDouble(new BigDecimal(sBalance)));
+                if (sBalance == null) config.set("Money", BPFormatter.formatBigDouble(Values.CONFIG.getStartAmount()));
+                else config.set("Money", BPFormatter.formatBigDouble(new BigDecimal(sBalance)));
 
                 for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
                     String sLevel = config.getString("Banks." + bankName + ".Level");
@@ -176,8 +176,8 @@ public class BPVersions {
                 for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
                     if (!Values.CONFIG.getMainGuiName().equals(bankName)) config.set("Banks." + bankName + ".Money", "0.00");
                     else {
-                        if (sBalance != null) config.set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(new BigDecimal(sBalance)));
-                        else config.set("Banks." + bankName + ".Money", BPMethods.formatBigDouble(Values.CONFIG.getStartAmount()));
+                        if (sBalance != null) config.set("Banks." + bankName + ".Money", BPFormatter.formatBigDouble(new BigDecimal(sBalance)));
+                        else config.set("Banks." + bankName + ".Money", BPFormatter.formatBigDouble(Values.CONFIG.getStartAmount()));
                     }
                     config.set("Banks." + bankName + ".Level", 1);
                 }

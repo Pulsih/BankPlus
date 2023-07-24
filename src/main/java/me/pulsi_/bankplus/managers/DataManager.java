@@ -30,36 +30,21 @@ public class DataManager {
 
     public void setupPlugin() {
         long startTime = System.currentTimeMillis();
-        long time;
 
         BPLogger.log("");
         BPLogger.log("    &a&lBank&9&lPlus &2Enabling plugin...");
         BPLogger.log("    &aRunning on version &f" + plugin.getDescription().getVersion() + "&a!");
         BPLogger.log("    &aDetected server version: &f" + plugin.getServerVersion());
 
-        time = System.currentTimeMillis();
+        BPLogger.log("    &aSetting up the plugin...");
         new bStats(plugin);
-        plugin.getConfigManager().createConfigs();
-        BPLogger.log("    &aLoaded config files! &8(&3" + (System.currentTimeMillis() - time) + "ms&8)");
-
-        time = System.currentTimeMillis();
+        plugin.getConfigManager().setupConfigs();
+        reloadPlugin();
         registerEvents();
-        BPLogger.log("    &aRegistered events! &8(&3" + (System.currentTimeMillis() - time) + "ms&8)");
-
-        time = System.currentTimeMillis();
         setupCommands();
-        BPLogger.log("    &aLoaded plugin commands! &8(&3" + (System.currentTimeMillis() - time) + "ms&8)");
-        BPLogger.log("    &aDone! &8(&3" + (System.currentTimeMillis() - startTime) + " total ms&8)");
-        BPLogger.log("");
 
-        if (Values.CONFIG.isInterestEnabled()) plugin.getInterest().startInterest();
-        if (Values.CONFIG.isIgnoringAfkPlayers()) plugin.getAfkManager().startCountdown();
-        if (Values.CONFIG.isBanktopEnabled()) {
-            BankTopManager bankTop = plugin.getBankTopManager();
-            bankTop.updateBankTop();
-            bankTop.startUpdateTask();
-        }
-        BPMethods.startSavingBalancesTask();
+        BPLogger.log("    &aDone! &8(&3" + (System.currentTimeMillis() - startTime) + "ms&8)");
+        BPLogger.log("");
     }
 
     public void shutdownPlugin() {
@@ -81,6 +66,11 @@ public class DataManager {
         Values.MULTIPLE_BANKS.setupValues();
         BPMessages.loadMessages();
 
+        if (Values.CONFIG.isInterestEnabled()) plugin.getInterest().startInterest();
+        if (Values.CONFIG.isIgnoringAfkPlayers()) plugin.getAfkManager().startCountdown();
+        if (Values.CONFIG.isBanktopEnabled()) plugin.getBankTopManager().startUpdateTask();
+        BPMethods.startSavingBalancesTask();
+
         if (Values.CONFIG.isGuiModuleEnabled() && !plugin.getBankGuiRegistry().loadBanks()) success = false;
 
         AFKManager afkManager = plugin.getAfkManager();
@@ -88,8 +78,6 @@ public class DataManager {
 
         Interest interest = plugin.getInterest();
         if (Values.CONFIG.isInterestEnabled() && interest.wasDisabled()) interest.startInterest();
-
-        if (Values.CONFIG.isBanktopEnabled()) plugin.getBankTopManager().startUpdateTask();
 
         BPMethods.startSavingBalancesTask();
         Bukkit.getOnlinePlayers().forEach(p -> new BankPlusPlayerFiles(p).checkForFileFixes());

@@ -1,91 +1,94 @@
 package me.pulsi_.bankplus.utils;
 
+import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.managers.ConfigManager;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class BPMessages {
 
     private static final Map<String, List<String>> messages = new HashMap<>();
 
+    private static String prefix = null;
+
+    private static boolean enableMissingMessageAlert;
+
+    /**
+     * The "fromString" parameter means that if it's true, it will send a custom message and won't search it from the loaded messages.
+     */
     public static void send(Player p, String message, boolean fromString) {
-        if (p == null || !fromString) {
-            send(p, message);
-            return;
-        }
-        p.sendMessage(BPChat.color(message.replace("%prefix%", getPrefix())));
+        send(p, message, new ArrayList<>(), fromString);
     }
 
+    /**
+     * The "fromString" parameter means that if it's true, it will send a custom message and won't search it from the loaded messages.
+     */
     public static void send(CommandSender s, String message, boolean fromString) {
-        if (s == null || !fromString) {
-            send(s, message);
-            return;
-        }
-        s.sendMessage(BPChat.color(message.replace("%prefix%", getPrefix())));
+        send(s, message, new ArrayList<>(), fromString);
     }
 
+    /**
+     * The "fromString" parameter means that if it's true, it will send a custom message and won't search it from the loaded messages.
+     */
     public static void send(Player p, String message, List<String> stringsToReplace, boolean fromString) {
-        if (p == null || !fromString) {
-            send(p, message);
+        if (p == null) return;
+
+        if (!fromString) {
+            send(p, message, stringsToReplace);
             return;
         }
+
         for (String stringToReplace : stringsToReplace) {
             if (!stringToReplace.contains("$")) continue;
             String oldChar = stringToReplace.split("\\$")[0];
             String replacement = stringToReplace.split("\\$")[1];
             message = message.replace(oldChar, replacement);
         }
-        p.sendMessage(BPChat.color(message.replace("%prefix%", getPrefix())));
+        p.sendMessage(format(p, message));
+    }
+
+    /**
+     * The "fromString" parameter means that if it's true, it will send a custom message and won't search it from the loaded messages.
+     */
+    public static void send(CommandSender s, String message, List<String> stringsToReplace, boolean fromString) {
+        if (s == null) return;
+
+        if (!fromString) {
+            send(s, message, stringsToReplace);
+            return;
+        }
+
+        for (String stringToReplace : stringsToReplace) {
+            if (!stringToReplace.contains("$")) continue;
+            String oldChar = stringToReplace.split("\\$")[0];
+            String replacement = stringToReplace.split("\\$")[1];
+            message = message.replace(oldChar, replacement);
+        }
+        s.sendMessage(format(s, message));
     }
 
     public static void send(Player p, String identifier) {
-        if (p == null || !messages.containsKey(identifier)) return;
-
-        List<String> listOfMessages = messages.get(identifier);
-        if (listOfMessages.isEmpty()) {
-            BPLogger.error("The message \"" + identifier + "\" is missing in the messages file!");
-            return;
-        }
-
-        for (String message : listOfMessages) p.sendMessage(BPChat.color(message.replace("%prefix%", getPrefix())));
+        send(p, identifier, new ArrayList<>());
     }
 
     public static void send(Player p, String identifier, String... stringsToReplace) {
-        if (p == null || !messages.containsKey(identifier)) return;
-
-        List<String> listOfMessages = messages.get(identifier);
-        if (listOfMessages.isEmpty()) {
-            BPLogger.error("The message \"" + identifier + "\" is missing in the messages file!");
-            return;
-        }
-
-        for (String message : listOfMessages) {
-            for (String stringToReplace : stringsToReplace) {
-                if (!stringToReplace.contains("$")) continue;
-                String oldChar = stringToReplace.split("\\$")[0];
-                String replacement = stringToReplace.split("\\$")[1];
-                message = message.replace(oldChar, replacement);
-            }
-            p.sendMessage(BPChat.color(message.replace("%prefix%", getPrefix())));
-        }
+        send(p, identifier, Arrays.asList(stringsToReplace));
     }
 
     public static void send(Player p, String identifier, List<String> stringsToReplace) {
-        if (p == null || !messages.containsKey(identifier)) return;
+        if (p == null) return;
 
-        List<String> listOfMessages = messages.get(identifier);
-        if (listOfMessages.isEmpty()) {
-            BPLogger.error("The message \"" + identifier + "\" is missing in the messages file!");
+        if (!messages.containsKey(identifier)) {
+            if (enableMissingMessageAlert)
+                p.sendMessage(addPrefix("%prefix% The \"" + identifier + "\" message is missing in the messages file!"));
             return;
         }
 
+        List<String> listOfMessages = messages.get(identifier);
         for (String message : listOfMessages) {
             for (String stringToReplace : stringsToReplace) {
                 if (!stringToReplace.contains("$")) continue;
@@ -93,51 +96,28 @@ public class BPMessages {
                 String replacement = stringToReplace.split("\\$")[1];
                 message = message.replace(oldChar, replacement);
             }
-            p.sendMessage(BPChat.color(message.replace("%prefix%", getPrefix())));
+            if (!message.equals("")) p.sendMessage(format(p, message));
         }
     }
 
     public static void send(CommandSender s, String identifier) {
-        if (s == null || !messages.containsKey(identifier)) return;
-
-        List<String> listOfMessages = messages.get(identifier);
-        if (listOfMessages.isEmpty()) {
-            BPLogger.error("The message \"" + identifier + "\" is missing in the messages file!");
-            return;
-        }
-
-        for (String message : listOfMessages) s.sendMessage(BPChat.color(message.replace("%prefix%", getPrefix())));
+        send(s, identifier, new ArrayList<>());
     }
 
     public static void send(CommandSender s, String identifier, String... stringsToReplace) {
-        if (s == null || !messages.containsKey(identifier)) return;
-
-        List<String> listOfMessages = messages.get(identifier);
-        if (listOfMessages.isEmpty()) {
-            BPLogger.error("The message \"" + identifier + "\" is missing in the messages file!");
-            return;
-        }
-
-        for (String message : listOfMessages) {
-            for (String stringToReplace : stringsToReplace) {
-                if (!stringToReplace.contains("$")) continue;
-                String oldChar = stringToReplace.split("\\$")[0];
-                String replacement = stringToReplace.split("\\$")[1];
-                message = message.replace(oldChar, replacement);
-            }
-            s.sendMessage(BPChat.color(message.replace("%prefix%", getPrefix())));
-        }
+        send(s, identifier, Arrays.asList(stringsToReplace));
     }
 
     public static void send(CommandSender s, String identifier, List<String> stringsToReplace) {
-        if (s == null || !messages.containsKey(identifier)) return;
+        if (s == null) return;
 
-        List<String> listOfMessages = messages.get(identifier);
-        if (listOfMessages.isEmpty()) {
-            BPLogger.error("The message \"" + identifier + "\" is missing in the messages file!");
+        if (!messages.containsKey(identifier)) {
+            if (enableMissingMessageAlert)
+                s.sendMessage(addPrefix("%prefix% The \"" + identifier + "\" message is missing in the messages file!"));
             return;
         }
 
+        List<String> listOfMessages = messages.get(identifier);
         for (String message : listOfMessages) {
             for (String stringToReplace : stringsToReplace) {
                 if (!stringToReplace.contains("$")) continue;
@@ -145,22 +125,25 @@ public class BPMessages {
                 String replacement = stringToReplace.split("\\$")[1];
                 message = message.replace(oldChar, replacement);
             }
-            s.sendMessage(BPChat.color(message.replace("%prefix%", getPrefix())));
+            if (!message.equals("")) s.sendMessage(format(s, message));
         }
     }
 
     public static void loadMessages() {
         messages.clear();
+
         FileConfiguration config = BankPlus.INSTANCE.getConfigManager().getConfig(ConfigManager.Type.MESSAGES);
         for (String path : config.getConfigurationSection("").getKeys(false)) {
-            List<String> listOfMessages = config.getStringList(path);
-            if (listOfMessages.isEmpty()) {
-                String message = config.getString(path);
-                messages.put(path, Collections.singletonList(message));
-                continue;
-            }
-            messages.put(path, config.getStringList(path));
+            if (!path.equals("Update-File") && !path.equals("Enable-Missing-Message-Alert"))
+                messages.put(path, config.getStringList(path).isEmpty() ? Collections.singletonList(config.getString(path)) : config.getStringList(path));
         }
+
+        prefix = BPChat.prefix;
+        if (messages.containsKey("Prefix")) {
+            List<String> prefixes = messages.get("Prefix");
+            if (!prefixes.isEmpty()) prefix = prefixes.get(0);
+        }
+        enableMissingMessageAlert = config.getBoolean("Enable-Missing-Message-Alert");
     }
 
     public static String addPrefix(String message) {
@@ -168,9 +151,14 @@ public class BPMessages {
     }
 
     public static String getPrefix() {
-        if (!messages.containsKey("Prefix")) return BPChat.prefix;
-        List<String> prefix = messages.get("Prefix");
-        if (prefix.isEmpty()) return BPChat.prefix;
-        return prefix.get(0);
+        return prefix;
+    }
+
+    private static String format(Player p, String text) {
+        return BankPlus.INSTANCE.isPlaceholderAPIHooked() ? PlaceholderAPI.setPlaceholders(p, addPrefix(text)) : addPrefix(text);
+    }
+
+    private static String format(CommandSender s, String text) {
+        return s instanceof Player ? format((Player) s, addPrefix(text)) : addPrefix(text);
     }
 }

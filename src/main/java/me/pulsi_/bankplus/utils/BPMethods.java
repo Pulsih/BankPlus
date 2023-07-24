@@ -16,11 +16,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class BPMethods {
 
@@ -124,6 +121,7 @@ public class BPMethods {
 
     /**
      * BankPlus does not accept negative numbers, if a number is lower than 0, it will return true.
+     *
      * @param number The number to check.
      * @return true if is invalid or false if is not.
      */
@@ -133,8 +131,9 @@ public class BPMethods {
 
     /**
      * BankPlus does not accept negative numbers, if a number is lower than 0, it will return true.
+     *
      * @param number The number to check.
-     * @param s The command sender to automatically alert if number is invalid.
+     * @param s      The command sender to automatically alert if number is invalid.
      * @return true if is invalid or false if is not.
      */
     public static boolean isInvalidNumber(String number, CommandSender s) {
@@ -177,27 +176,6 @@ public class BPMethods {
         return false;
     }
 
-    public static String formatBigDouble(BigDecimal balance) {
-        String bal = balance.toString();
-        int maxDecimals = Values.CONFIG.getMaxDecimalsAmount();
-
-        if (maxDecimals <= 0) return bal.contains(".") ? bal.split("\\.")[0] : bal;
-
-        if (balance.doubleValue() > 0 && bal.contains(".")) {
-            String decimals = bal.split("\\.")[1];
-            if (decimals.length() > maxDecimals) {
-                String correctedDecimals = decimals.substring(0, maxDecimals);
-                bal = bal.split("\\.")[0] + "." + correctedDecimals;
-            }
-        } else {
-            StringBuilder decimals = new StringBuilder();
-            for (int i = 0; i < maxDecimals; i++) decimals.append("0");
-            if (balance.doubleValue() <= 0) bal = "0." + decimals;
-            else bal += "." + decimals;
-        }
-        return bal;
-    }
-
     public static void startSavingBalancesTask() {
         TaskManager tasks = BankPlus.INSTANCE.getTaskManager();
         BukkitTask task = tasks.getSavingTask();
@@ -211,43 +189,9 @@ public class BPMethods {
 
         tasks.setSavingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE, () -> {
             if (multi) Bukkit.getOnlinePlayers().forEach(p -> new MultiEconomyManager(p).saveBankBalance(true));
-            else Bukkit.getOnlinePlayers().forEach(p-> new SingleEconomyManager(p).saveBankBalance(true));
+            else Bukkit.getOnlinePlayers().forEach(p -> new SingleEconomyManager(p).saveBankBalance(true));
             if (saveBroadcast) BPLogger.info("All player balances have been saved!");
         }, delay * 1200L, delay * 1200L));
-    }
-
-    public static String formatLong(BigDecimal balance) {
-        double bal = balance.doubleValue();
-        if (bal < 1000L) return "" + balance;
-        if (bal < 1000000L) return Math.round(bal / 1000D) + Values.CONFIG.getK();
-        if (bal < 1000000000L) return Math.round(bal / 1000000D) + Values.CONFIG.getM();
-        if (bal < 1000000000000L) return Math.round(bal / 1000000000D) + Values.CONFIG.getB();
-        if (bal < 1000000000000000L) return Math.round(bal / 1000000000000D) + Values.CONFIG.getT();
-        if (bal < 1000000000000000000L) return Math.round(bal / 1000000000000000D) + Values.CONFIG.getQ();
-        return Math.round(bal / 1000000000000000000D) + Values.CONFIG.getQq();
-    }
-
-    public static String format(BigDecimal balance) {
-        double bal = balance.doubleValue();
-        if (bal < 1000L) return setMaxDigits(balance, 2);
-        if (bal < 1000000L) return setMaxDigits(BigDecimal.valueOf(bal / 1000L), 2) + Values.CONFIG.getK();
-        if (bal < 1000000000L) return setMaxDigits(BigDecimal.valueOf(bal / 1000000D), 2) + Values.CONFIG.getM();
-        if (bal < 1000000000000L) return setMaxDigits(BigDecimal.valueOf(bal / 1000000000D), 2) + Values.CONFIG.getB();
-        if (bal < 1000000000000000L) return setMaxDigits(BigDecimal.valueOf(bal / 1000000000000D), 2) + Values.CONFIG.getT();
-        if (bal < 1000000000000000000L) return setMaxDigits(BigDecimal.valueOf(bal / 1000000000000000D), 2) + Values.CONFIG.getQ();
-        return setMaxDigits(BigDecimal.valueOf(bal / 1000000000000000000L), 2) + Values.CONFIG.getQq();
-    }
-
-    public static String setMaxDigits(BigDecimal balance, int digits) {
-        NumberFormat format = NumberFormat.getInstance(Locale.ENGLISH);
-        format.setMaximumFractionDigits(digits);
-        format.setMinimumFractionDigits(0);
-        return format.format(balance);
-    }
-
-    public static String formatCommas(BigDecimal amount) {
-        DecimalFormat formatter = new DecimalFormat("#,###");
-        return formatter.format(amount);
     }
 
     public static void customWithdraw(Player p) {
@@ -283,29 +227,31 @@ public class BPMethods {
     public static void sendTitle(String title, Player p) {
         if (title == null) return;
 
-        String newTitle = BPMessages.addPrefix(title);
-        if (newTitle.contains(",")) {
-            String[] titles = newTitle.split(",");
+        if (title.contains(",")) {
+            String[] titles = title.split(",");
             String title1 = titles[0], title2 = titles[1];
 
             if (titles.length == 2) p.sendTitle(BPChat.color(title1), BPChat.color(title2));
             else {
-                int fadeIn, stay, fadeOut;
-                try {
-                    fadeIn = Integer.parseInt(titles[2]);
-                    stay = Integer.parseInt(titles[3]);
-                    fadeOut = Integer.parseInt(titles[4]);
-                } catch (IllegalArgumentException e) {
-                    BPLogger.warn("Invalid title string! (NOT BANKPLUS ERROR!) Title: " + title + ". Error: " + e.getMessage());
-                    return;
+                int[] values = {20, 20, 20};
+                boolean error = false;
+
+                for (int i = 2; i < titles.length; i++) {
+                    try {
+                        values[i - 2] = Integer.parseInt(titles[i]);
+                    } catch (NumberFormatException e) {
+                        error = true;
+                    }
                 }
+                if (error) BPLogger.warn("Invalid number in the title fades values! Please correct it as soon as possible! (Title: " + title + "&a)");
+
                 try {
-                    p.sendTitle(BPChat.color(title1), BPChat.color(title2), fadeIn, stay, fadeOut);
+                    p.sendTitle(BPChat.color(title1), BPChat.color(title2), values[0], values[1], values[2]);
                 } catch (NoSuchMethodError e) {
                     p.sendTitle(BPChat.color(title1), BPChat.color(title2));
                 }
             }
-        } else p.sendTitle(BPChat.color(newTitle), "");
+        } else p.sendTitle(BPChat.color(title), "");
     }
 
     public static void playSound(String input, Player p) {
@@ -383,12 +329,6 @@ public class BPMethods {
         }
     }
 
-    public static String getSoundBasedOnServerVersion() {
-        String v = BankPlus.INSTANCE.getServerVersion();
-        if (v.contains("1.7") || v.contains("1.8")) return "ORB_PICKUP,5,1";
-        else return "ENTITY_EXPERIENCE_ORB_PICKUP,5,1";
-    }
-
     public static long secondsInMilliseconds(int seconds) {
         return seconds * 1000L;
     }
@@ -422,10 +362,10 @@ public class BPMethods {
         values.add("%player%$" + p.getName());
         values.add("%player_name%$" + p.getName());
 
-        values.add("%amount%$" + BPMethods.formatCommas(amount));
+        values.add("%amount%$" + BPFormatter.formatCommas(amount));
         values.add("%amount_long%$" + amount);
-        values.add("%amount_formatted%$" + BPMethods.format(amount));
-        values.add("%amount_formatted_long%$" + BPMethods.formatLong(amount));
+        values.add("%amount_formatted%$" + BPFormatter.format(amount));
+        values.add("%amount_formatted_long%$" + BPFormatter.formatLong(amount));
         return values;
     }
 
@@ -434,10 +374,10 @@ public class BPMethods {
         values.add("%player%$" + p.getName());
         values.add("%player_name%$" + p.getName());
 
-        values.add("%amount%$" + BPMethods.formatCommas(amount));
+        values.add("%amount%$" + BPFormatter.formatCommas(amount));
         values.add("%amount_long%$" + amount);
-        values.add("%amount_formatted%$" + BPMethods.format(amount));
-        values.add("%amount_formatted_long%$" + BPMethods.formatLong(amount));
+        values.add("%amount_formatted%$" + BPFormatter.format(amount));
+        values.add("%amount_formatted_long%$" + BPFormatter.formatLong(amount));
         return values;
     }
 
@@ -446,15 +386,15 @@ public class BPMethods {
         values.add("%player%$" + p.getName());
         values.add("%player_name%$" + p.getName());
 
-        values.add("%amount%$" + BPMethods.formatCommas(amount));
+        values.add("%amount%$" + BPFormatter.formatCommas(amount));
         values.add("%amount_long%$" + amount);
-        values.add("%amount_formatted%$" + BPMethods.format(amount));
-        values.add("%amount_formatted_long%$" + BPMethods.formatLong(amount));
+        values.add("%amount_formatted%$" + BPFormatter.format(amount));
+        values.add("%amount_formatted_long%$" + BPFormatter.formatLong(amount));
 
-        values.add("%taxes%$" + BPMethods.formatCommas(taxes));
+        values.add("%taxes%$" + BPFormatter.formatCommas(taxes));
         values.add("%taxes_long%$" + taxes);
-        values.add("%taxes_formatted%$" + BPMethods.format(taxes));
-        values.add("%taxes_formatted_long%$" + BPMethods.formatLong(taxes));
+        values.add("%taxes_formatted%$" + BPFormatter.format(taxes));
+        values.add("%taxes_formatted_long%$" + BPFormatter.formatLong(taxes));
         return values;
     }
 
