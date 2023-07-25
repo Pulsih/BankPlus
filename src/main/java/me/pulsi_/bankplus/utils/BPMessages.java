@@ -84,7 +84,7 @@ public class BPMessages {
 
         if (!messages.containsKey(identifier)) {
             if (enableMissingMessageAlert)
-                p.sendMessage(addPrefix("%prefix% The \"" + identifier + "\" message is missing in the messages file!"));
+                p.sendMessage(addPrefix("%prefix% &cThe \"" + identifier + "\" message is missing in the messages file!"));
             return;
         }
 
@@ -113,7 +113,7 @@ public class BPMessages {
 
         if (!messages.containsKey(identifier)) {
             if (enableMissingMessageAlert)
-                s.sendMessage(addPrefix("%prefix% The \"" + identifier + "\" message is missing in the messages file!"));
+                s.sendMessage(addPrefix("%prefix% &cThe \"" + identifier + "\" message is missing in the messages file!"));
             return;
         }
 
@@ -138,11 +138,10 @@ public class BPMessages {
                 messages.put(path, config.getStringList(path).isEmpty() ? Collections.singletonList(config.getString(path)) : config.getStringList(path));
         }
 
-        prefix = BPChat.prefix;
         if (messages.containsKey("Prefix")) {
             List<String> prefixes = messages.get("Prefix");
-            if (!prefixes.isEmpty()) prefix = prefixes.get(0);
-        }
+            prefix = prefixes.isEmpty() ? BPChat.prefix : prefixes.get(0);
+        } else prefix = BPChat.prefix;
         enableMissingMessageAlert = config.getBoolean("Enable-Missing-Message-Alert");
     }
 

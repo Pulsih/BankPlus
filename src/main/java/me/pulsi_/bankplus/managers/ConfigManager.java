@@ -4,6 +4,7 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPVersions;
 import me.pulsi_.bankplus.xSeries.XSound;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -17,13 +18,21 @@ public class ConfigManager {
     private int spacesCount = 0;
     private final String commentIdentifier = "bankplus_comment";
     private final String spaceIdentifier = "bankplus_space";
-    private File configFile, messagesFile, multipleBanksFile;
-    private FileConfiguration config, messagesConfig, multipleBanksConfig;
+    private File configFile, messagesFile, multipleBanksFile, savesFile;
+    private FileConfiguration config, messagesConfig, multipleBanksConfig, savesConfig;
+    private boolean autoUpdateFiles, updated = true;
 
     public enum Type {
-        CONFIG,
-        MESSAGES,
-        MULTIPLE_BANKS
+        CONFIG("config"),
+        MESSAGES("messages"),
+        MULTIPLE_BANKS("multiple_banks"),
+        SAVES("saves");
+
+        public String name;
+
+        Type(String name) {
+            this.name = name;
+        }
     }
 
     private final BankPlus plugin;
@@ -33,14 +42,17 @@ public class ConfigManager {
     }
 
     public void setupConfigs() {
-        configFile = new File(plugin.getDataFolder(), "config.yml");
-        messagesFile = new File(plugin.getDataFolder(), "messages.yml");
-        multipleBanksFile = new File(plugin.getDataFolder(), "multiple_banks.yml");
+        savesFile = new File(plugin.getDataFolder(), Type.SAVES.name + ".yml");
+        configFile = new File(plugin.getDataFolder(), Type.CONFIG.name + ".yml");
+        messagesFile = new File(plugin.getDataFolder(), Type.MESSAGES.name + ".yml");
+        multipleBanksFile = new File(plugin.getDataFolder(), Type.MULTIPLE_BANKS.name + ".yml");
 
+        savesConfig = new YamlConfiguration();
         config = new YamlConfiguration();
         messagesConfig = new YamlConfiguration();
         multipleBanksConfig = new YamlConfiguration();
 
+        setupSavesFile();
         setupConfig();
         setupMessages();
         setupMultipleBanks();
@@ -54,6 +66,8 @@ public class ConfigManager {
                 return messagesConfig;
             case MULTIPLE_BANKS:
                 return multipleBanksConfig;
+            case SAVES:
+                return savesConfig;
             default:
                 return null;
         }
@@ -87,36 +101,17 @@ public class ConfigManager {
                     BPLogger.error("Could not load " + type.name() + " config! (Error: " + e.getMessage().replace("\n", "") + ")");
                     return false;
                 }
+
+            case SAVES:
+                try {
+                    savesConfig.load(savesFile);
+                    return true;
+                } catch (IOException | InvalidConfigurationException e) {
+                    BPLogger.error("Could not load " + type.name() + " config! (Error: " + e.getMessage().replace("\n", "") + ")");
+                    return false;
+                }
         }
         return false;
-    }
-
-    public void saveConfig(Type type) {
-        switch (type) {
-            case CONFIG:
-                try {
-                    config.save(configFile);
-                } catch (IOException e) {
-                    BPLogger.warn(e.getMessage());
-                }
-                break;
-
-            case MESSAGES:
-                try {
-                    messagesConfig.save(messagesFile);
-                } catch (IOException e) {
-                    BPLogger.warn(e.getMessage());
-                }
-                break;
-
-            case MULTIPLE_BANKS:
-                try {
-                    multipleBanksConfig.save(multipleBanksFile);
-                } catch (IOException e) {
-                    BPLogger.warn(e.getMessage());
-                }
-                break;
-        }
     }
 
     private String getFileAsString(File file) {
@@ -160,25 +155,49 @@ public class ConfigManager {
     }
 
     public void recreateFile(File file) {
-        String configuration = getFileAsString(file);
-        if (configuration == null) return;
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            String configuration = getFileAsString(file);
+            if (configuration == null) return;
+            try {
+                BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+                writer.write(configuration);
+                writer.flush();
+                writer.close();
+            } catch (IOException e) {
+                BPLogger.error(e.getMessage());
+            }
+        });
+    }
+
+    public void setupSavesFile() {
+        if (!savesFile.exists()) {
+            createFile(Type.SAVES.name);
+            updated = false;
+        }
+
+        reloadConfig(Type.SAVES);
+
+        if (updated) updated = savesConfig.get("version") != null && savesConfig.getString("version").equals(plugin.getDescription().getVersion());
+
+        savesConfig.options().header("DO NOT EDIT / REMOVE THIS FILE OR BANKPLUS MAY GET RESET!");
+        savesConfig.set("version", plugin.getDescription().getVersion());
+
         try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-            writer.write(configuration);
-            writer.flush();
-            writer.close();
+            savesConfig.save(savesFile);
         } catch (IOException e) {
-            BPLogger.error(e.getMessage());
+            BPLogger.error("Could not save \"saves\" file! (Error: " + e.getMessage().replace("\n", "") + ")");
         }
     }
 
     public void setupConfig() {
-        boolean updateFile = true;
+        boolean updateFile = true, alreadyExist = configFile.exists();
 
-        if (!configFile.exists()) plugin.saveResource("config.yml", false);
+        if (!alreadyExist) createFile(Type.CONFIG.name);
         else {
             reloadConfig(Type.CONFIG);
-            updateFile = config.get("Update-File") == null || config.getBoolean("Update-File");
+
+            autoUpdateFiles = config.get("General-Settings.Auto-Update-Files") == null || config.getBoolean("General-Settings.Auto-Update-Files");
+            updateFile = !updated && autoUpdateFiles;
         }
         if (!updateFile) return;
 
@@ -196,13 +215,18 @@ public class ConfigManager {
             return;
         }
 
+        if (alreadyExist) {
+            File backupFile = createFile("backup/" + Type.CONFIG.name);
+            try {
+                oldConfig.save(backupFile);
+            } catch (IOException e) {
+                BPLogger.error("Could not create backup " + Type.CONFIG.name + " file! (Error: " + e.getMessage().replace("\n", "") + ")");
+            }
+        }
+
         addComments(newConfig,
                 "Configuration File of BankPlus",
                 "Made by Pulsi_, Version v" + plugin.getDescription().getVersion());
-        addSpace(newConfig);
-
-        addComments(newConfig, "Automatically update the file if there are any missing changes.");
-        validatePath(oldConfig, newConfig, "Update-File", true);
         addSpace(newConfig);
 
         addComments(newConfig, "Check for new updates of the plugin.");
@@ -285,6 +309,16 @@ public class ConfigManager {
                 "You can put \"\" if you don't want to use a permission.");
         validatePath(oldConfig, newConfig, "Interest.Offline-Permission", "bankplus.receive.interest");
         addSpace(newConfig);
+
+        addCommentsUnder(newConfig, "General-Settings",
+                "Choose if automatically update your files",
+                "when a new version is downloaded, you can",
+                "disable this option if you see that the",
+                "plugin is failing at updating the files",
+                "itself, the old affected files will be",
+                "saved in a folder as backup.");
+        validatePath(oldConfig, newConfig, "General-Settings.Auto-Update-Files", true);
+        addSpace(newConfig, "General-Settings");
 
         addCommentsUnder(newConfig, "General-Settings",
                 "You need to restart the server",
@@ -532,29 +566,17 @@ public class ConfigManager {
         validatePath(oldConfig, newConfig, "Placeholders.Money.Quintillions", "QQ");
         addSpace(newConfig, "Placeholders");
 
-        validatePath(oldConfig, newConfig, "Placeholders.Time.Second", "Second");
-        validatePath(oldConfig, newConfig, "Placeholders.Time.Seconds", "Seconds");
-        validatePath(oldConfig, newConfig, "Placeholders.Time.Minute", "Minute");
-        validatePath(oldConfig, newConfig, "Placeholders.Time.Minutes", "Minutes");
-        validatePath(oldConfig, newConfig, "Placeholders.Time.Hour", "Hour");
-        validatePath(oldConfig, newConfig, "Placeholders.Time.Hours", "Hours");
-        validatePath(oldConfig, newConfig, "Placeholders.Time.Day", "Days");
-        validatePath(oldConfig, newConfig, "Placeholders.Time.Days", "Days");
-        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Only-Seconds", "%seconds% %seconds_placeholder%");
-        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Only-Minutes", "%minutes% %minutes_placeholder%");
-        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Only-Hours", "%hours% %hours_placeholder%");
-        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Only-Days", "%days% %days_placeholder%");
-        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Seconds-Minutes", "%seconds% %seconds_placeholder% and %minutes% %minutes_placeholder%");
-        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Seconds-Hours", "%seconds% %seconds_placeholder% and %hours% %hours_placeholder%");
-        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Seconds-Days", "%seconds% %seconds_placeholder% and %days% %days_placeholder%");
-        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Seconds-Minutes-Hours", "%seconds% %seconds_placeholder%, %minutes% %minutes_placeholder% and %hours% %hours_placeholder%");
-        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Seconds-Hours-Days", "%seconds% %seconds_placeholder%, %hours% %hours_placeholder% and %days% %days_placeholder%");
-        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Seconds-Minutes-Days", "%seconds% %seconds_placeholder%, %minutes% %minutes_placeholder% and %days% %days_placeholder%");
-        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Seconds-Minutes-Hours-Days", "%seconds% %seconds_placeholder%, %minutes% %minutes_placeholder%, %hours% %hours_placeholder% and %days% %days_placeholder%");
-        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Minutes-Hours", "%minutes% %minutes_placeholder% and %hours% %hours_placeholder%");
-        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Minutes-Days", "%minutes% %minutes_placeholder% and %days% %days_placeholder%");
-        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Minutes-Hours-Days", "%minutes% %minutes_placeholder%, %hours% %hours_placeholder% and %days% %days_placeholder%");
-        validatePath(oldConfig, newConfig, "Placeholders.Time.Interest-Time.Hours-Days", "%hours% %hours_placeholder% and %days% %days_placeholder%");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Second", "s");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Seconds", "s");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Minute", "m");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Minutes", "m");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Hour", "h");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Hours", "h");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Day", "d");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Days", "d");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Format", "%d%h%m%s");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Separator", ", ");
+        validatePath(oldConfig, newConfig, "Placeholders.Time.Final-Separator", " and ");
         addSpace(newConfig, "Placeholders");
 
         validatePath(oldConfig, newConfig, "Placeholders.Upgrades.Max-Level", "Maxed");
@@ -575,13 +597,11 @@ public class ConfigManager {
     }
 
     public void setupMessages() {
-        boolean updateFile = true;
+        boolean updateFile = true, alreadyExist = messagesFile.exists();
 
-        if (!messagesFile.exists()) plugin.saveResource("messages.yml", false);
-        else {
-            reloadConfig(Type.MESSAGES);
-            updateFile = messagesConfig.get("Update-File") == null || messagesConfig.getBoolean("Update-File");
-        }
+        if (!alreadyExist) createFile(Type.MESSAGES.name);
+        else updateFile = !updated && autoUpdateFiles;
+
         if (!updateFile) return;
 
         FileConfiguration oldMessagesConfig = new YamlConfiguration();
@@ -596,6 +616,15 @@ public class ConfigManager {
             return;
         }
 
+        if (alreadyExist) {
+            File backupFile = createFile("backup/" + Type.MESSAGES.name);
+            try {
+                oldMessagesConfig.save(backupFile);
+            } catch (IOException e) {
+                BPLogger.error("Could not create backup " + Type.MESSAGES.name + " file! (Error: " + e.getMessage().replace("\n", "") + ")");
+            }
+        }
+
         addComments(newMessagesConfig,
                 "Messages File of BankPlus",
                 "Made by Pulsi_, Version v" + plugin.getDescription().getVersion());
@@ -605,10 +634,6 @@ public class ConfigManager {
                 "* Placeholders *",
                 "BankPlus messages support placeholderapi and you can",
                 "use every type of placeholder inside the messages.");
-        addSpace(newMessagesConfig);
-
-        addComments(newMessagesConfig, "Automatically update the file if there are any missing changes.");
-        validatePath(oldMessagesConfig, newMessagesConfig, "Update-File", true);
         addSpace(newMessagesConfig);
 
         addComments(newMessagesConfig, "Enable the alert message when a message is missing in the file.");
@@ -723,13 +748,11 @@ public class ConfigManager {
     }
 
     public void setupMultipleBanks() {
-        boolean updateFile = true;
+        boolean updateFile = true, alreadyExist = multipleBanksFile.exists();
 
-        if (!multipleBanksFile.exists()) plugin.saveResource("multiple_banks.yml", false);
-        else {
-            reloadConfig(Type.MESSAGES);
-            updateFile = multipleBanksConfig.get("Update-File") == null || multipleBanksConfig.getBoolean("Update-File");
-        }
+        if (!alreadyExist) createFile(Type.MULTIPLE_BANKS.name);
+        else updateFile = !updated && autoUpdateFiles;
+
         if (!updateFile) return;
 
         FileConfiguration oldMultipleBanksConfig = new YamlConfiguration();
@@ -744,9 +767,14 @@ public class ConfigManager {
             return;
         }
 
-        addComments(newMultipleBanksConfig, "Automatically update the file if there are any missing changes.");
-        validatePath(oldMultipleBanksConfig, newMultipleBanksConfig, "Update-File", true);
-        addSpace(newMultipleBanksConfig);
+        if (alreadyExist) {
+            File backupFile = createFile("backup/" + Type.MULTIPLE_BANKS.name);
+            try {
+                oldMultipleBanksConfig.save(backupFile);
+            } catch (IOException e) {
+                BPLogger.error("Could not create backup " + Type.MULTIPLE_BANKS.name + " file! (Error: " + e.getMessage().replace("\n", "") + ")");
+            }
+        }
 
         addComments(newMultipleBanksConfig,
                 "Put this to true to enable the multiple-banks feature.",
@@ -865,5 +893,16 @@ public class ConfigManager {
 
     private Object getValueFromOldPath(FileConfiguration from, String oldPath, String newPath, Object fallbackValue) {
         return from.get(oldPath) == null ? from.get(newPath) == null ? fallbackValue : from.get(newPath) : from.get(oldPath);
+    }
+
+    private File createFile(String name) {
+        File file = new File(BankPlus.INSTANCE.getDataFolder(), name + ".yml");
+        try {
+            file.getParentFile().mkdir();
+            file.createNewFile();
+        } catch (IOException e) {
+            BPLogger.error("Failed to to create the " + name + " file! " + e.getMessage());
+        }
+        return file;
     }
 }

@@ -32,10 +32,11 @@ public class Interest {
         long interestSave = 0;
 
         FileConfiguration config = getInterestSaveConfig();
-        if (config != null) interestSave = config.getLong("interest-save");
-
-        File file = getInterestSaveFile();
-        if (file != null) file.delete();
+        if (config != null) {
+            interestSave = config.getLong("interest-save");
+            config.set("interest-save", null);
+            saveInterestSaveFile(config);
+        }
 
         if (interestSave > 0) cooldown = System.currentTimeMillis() + interestSave;
         else cooldown = System.currentTimeMillis() + Values.CONFIG.getInterestDelay();
@@ -68,33 +69,14 @@ public class Interest {
     }
 
     public void saveInterest() {
-        File file = new File(BankPlus.INSTANCE.getDataFolder(), "interest-save.yml");
-        try {
-            file.getParentFile().mkdir();
-            file.createNewFile();
-        } catch (IOException e) {
-            BPLogger.error("Failed to to create the interest-save file! " + e.getMessage());
-        }
-
-        FileConfiguration config = new YamlConfiguration();
-        try {
-            config.load(file);
-        } catch (IOException | InvalidConfigurationException e) {
-            BPLogger.error("Failed to load the interest-save file! " + e.getMessage());
-        }
+        FileConfiguration config = getInterestSaveConfig();
         config.set("interest-save", getInterestCooldownMillis());
-
-        try {
-            config.save(file);
-        } catch (IOException e) {
-            BPLogger.error("Failed to save the interest-save file! " + e.getMessage());
-        }
+        saveInterestSaveFile(config);
     }
 
     private File getInterestSaveFile() {
-        File file = new File(BankPlus.INSTANCE.getDataFolder(), "interest-save.yml");
-        if (!file.exists()) return null;
-        return file;
+        File file = new File(BankPlus.INSTANCE.getDataFolder(), "saves.yml");
+        return file.exists() ? file : null;
     }
 
     private FileConfiguration getInterestSaveConfig() {
@@ -108,6 +90,16 @@ public class Interest {
             BPLogger.error("Failed to load the interest-save file! " + e.getMessage());
         }
         return config;
+    }
+
+    private void saveInterestSaveFile(FileConfiguration config) {
+        File file = getInterestSaveFile();
+
+        try {
+            config.save(file);
+        } catch (IOException e) {
+            BPLogger.error("Failed to save the interest-save file! " + e.getMessage());
+        }
     }
 
     private void loopInterest() {

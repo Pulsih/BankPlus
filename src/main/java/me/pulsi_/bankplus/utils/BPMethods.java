@@ -25,98 +25,83 @@ public class BPMethods {
         if (!Values.CONFIG.isInterestEnabled()) return BPChat.color("&cInterest disabled.");
 
         long seconds = milliseconds / 1000;
-        if (seconds <= 0) return placeSeconds(Values.CONFIG.getInterestTimeOnlySeconds(), 0);
-        if (seconds < 60) return placeSeconds(Values.CONFIG.getInterestTimeOnlySeconds(), seconds);
-
         long minutes = seconds / 60;
-        long newSeconds = seconds - (60 * minutes);
-        if (seconds < 3600) {
-            if (seconds % 60 == 0) return placeMinutes(Values.CONFIG.getInterestTimeOnlyMinutes(), minutes);
+        long hours = minutes / 60;
+        long days = hours / 24;
 
-            String secondsPlaced = placeSeconds(Values.CONFIG.getInterestTimeSecondsMinutes(), newSeconds);
-            return placeMinutes(secondsPlaced, minutes);
-        }
+        String format = Values.CONFIG.getInterestTimeFormat();
+        String[] parts = format.split("%");
+        int amount = parts.length;
 
-        long hours = seconds / 3600;
-        long newMinutes = minutes - (60 * hours);
-        if (seconds < 86400) {
-            if (newSeconds == 0 && newMinutes == 0)
-                return placeHours(Values.CONFIG.getInterestTimeOnlyHours(), hours);
-            if (newSeconds == 0) {
-                String minutesPlaced = placeMinutes(Values.CONFIG.getInterestTimeMinutesHours(), newMinutes);
-                return placeHours(minutesPlaced, hours);
+        for (int i = 1; i < amount; i++) {
+            String identifier = parts[i];
+            long time = 0;
+
+            switch (identifier) {
+                case "s":
+                    time = seconds - (minutes * 60);
+                    break;
+                case "m":
+                    time = minutes - (hours * 60);
+                    break;
+                case "h":
+                    time = hours - (days * 24);
+                    break;
+                case "d":
+                    time = days;
+                    break;
             }
-            if (newMinutes == 0) {
-                String secondsPlaced = placeSeconds(Values.CONFIG.getInterestTimeSecondsHours(), newSeconds);
-                return placeHours(secondsPlaced, hours);
+            if (time <= 0) format = format.replace("%" + identifier, "");
+        }
+
+        parts = format.split("%");
+        amount = parts.length;
+
+        for (int i = 1; i < amount; i++) {
+            String identifier = parts[i], timeIdentifier = "";
+            long time = 0;
+
+            switch (identifier) {
+                case "s":
+                    time = seconds - (minutes * 60);
+                    timeIdentifier = "seconds";
+                    break;
+                case "m":
+                    time = minutes - (hours * 60);
+                    timeIdentifier = "minutes";
+                    break;
+                case "h":
+                    time = hours - (days * 24);
+                    timeIdentifier = "hours";
+                    break;
+                case "d":
+                    time = days;
+                    timeIdentifier = "days";
+                    break;
             }
 
-            String secondsPlaced = placeSeconds(Values.CONFIG.getInterestTimeSecondsMinutesHours(), newSeconds);
-            String minutesPlaced = placeMinutes(secondsPlaced, newMinutes);
-            return placeHours(minutesPlaced, hours);
+            int last = i + 2;
+            String separator = last > amount ? "" : last == amount ? Values.CONFIG.getInterestTimeFinalSeparator() : Values.CONFIG.getInterestTimeSeparator();
+            String replacer = time <= 0 ? "" : time + getTimeIdentifier(timeIdentifier, time) + separator;
+
+            format = format.replace("%" + identifier, replacer);
         }
 
-        long days = seconds / 86400;
-        long newHours = hours - (24 * days);
-        if (newSeconds == 0 && newMinutes == 0 && newHours == 0)
-            return placeDays(Values.CONFIG.getInterestTimeOnlyDays(), days);
-        if (newSeconds == 0 && newMinutes == 0) {
-            String hoursPlaced = placeHours(Values.CONFIG.getInterestTimeHoursDays(), newHours);
-            return placeDays(hoursPlaced, days);
-        }
-        if (newSeconds == 0 && newHours == 0) {
-            String minutesPlaced = placeMinutes(Values.CONFIG.getInterestTimeMinutesDays(), newMinutes);
-            return placeDays(minutesPlaced, days);
-        }
-        if (newMinutes == 0 && newHours == 0) {
-            String secondsPlaced = placeMinutes(Values.CONFIG.getInterestTimeSecondsDays(), newSeconds);
-            return placeDays(secondsPlaced, days);
-        }
-
-        if (newSeconds == 0) {
-            String minutesPlaced = placeMinutes(Values.CONFIG.getInterestTimeMinutesHoursDays(), newMinutes);
-            String hoursPlaced = placeHours(minutesPlaced, newHours);
-            return placeDays(hoursPlaced, days);
-        }
-        if (newMinutes == 0) {
-            String secondsPlaced = placeSeconds(Values.CONFIG.getInterestTimeSecondsHoursDays(), newSeconds);
-            String hoursPlaced = placeHours(secondsPlaced, newHours);
-            return placeDays(hoursPlaced, days);
-        }
-        if (newHours == 0) {
-            String secondsPlaced = placeSeconds(Values.CONFIG.getInterestTimeSecondsMinutesDays(), newSeconds);
-            String minutesPlaced = placeMinutes(secondsPlaced, newMinutes);
-            return placeDays(minutesPlaced, days);
-        }
-
-        String secondsPlaced = placeSeconds(Values.CONFIG.getInterestTimeSecondsMinutesHoursDays(), newSeconds);
-        String minutesPlaced = placeMinutes(secondsPlaced, newMinutes);
-        String hoursPlaced = placeHours(minutesPlaced, newHours);
-        return placeDays(hoursPlaced, days);
+        return format;
     }
 
-    private static String placeSeconds(String message, long seconds) {
-        String time = message.replace("%seconds%", String.valueOf(seconds));
-        if (seconds == 1) return time.replace("%seconds_placeholder%", Values.CONFIG.getSecond());
-        else return time.replace("%seconds_placeholder%", Values.CONFIG.getSeconds());
-    }
-
-    private static String placeMinutes(String message, long minutes) {
-        String time = message.replace("%minutes%", String.valueOf(minutes));
-        if (minutes == 1) return time.replace("%minutes_placeholder%", Values.CONFIG.getMinute());
-        else return time.replace("%minutes_placeholder%", Values.CONFIG.getMinutes());
-    }
-
-    private static String placeHours(String message, long hours) {
-        String time = message.replace("%hours%", String.valueOf(hours));
-        if (hours == 1) return time.replace("%hours_placeholder%", Values.CONFIG.getHour());
-        else return time.replace("%hours_placeholder%", Values.CONFIG.getHours());
-    }
-
-    private static String placeDays(String message, long days) {
-        String time = message.replace("%days%", String.valueOf(days));
-        if (days == 1) return time.replace("%days_placeholder%", Values.CONFIG.getDay());
-        else return time.replace("%days_placeholder%", Values.CONFIG.getDays());
+    private static String getTimeIdentifier(String id, long time) {
+        switch (id) {
+            case "seconds":
+                return time == 1 ? Values.CONFIG.getSecond() : Values.CONFIG.getSeconds();
+            case "minutes":
+                return time == 1 ? Values.CONFIG.getMinute() : Values.CONFIG.getMinutes();
+            case "hours":
+                return time == 1 ? Values.CONFIG.getHour() : Values.CONFIG.getHours();
+            case "days":
+                return time == 1 ? Values.CONFIG.getDay() : Values.CONFIG.getDays();
+        }
+        return "";
     }
 
     /**
@@ -243,7 +228,8 @@ public class BPMethods {
                         error = true;
                     }
                 }
-                if (error) BPLogger.warn("Invalid number in the title fades values! Please correct it as soon as possible! (Title: " + title + "&a)");
+                if (error)
+                    BPLogger.warn("Invalid number in the title fades values! Please correct it as soon as possible! (Title: " + title + "&a)");
 
                 try {
                     p.sendTitle(BPChat.color(title1), BPChat.color(title2), values[0], values[1], values[2]);

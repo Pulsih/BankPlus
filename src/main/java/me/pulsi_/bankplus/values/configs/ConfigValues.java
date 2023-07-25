@@ -16,9 +16,7 @@ public class ConfigValues {
     private List<String> worldsBlacklist, exitCommands, bankTopFormat;
     private String exitMessage, playerChatPriority, bankClickPriority;
     private String second, seconds, minute, minutes, hour, hours, day, days;
-    private String interestTimeOnlySeconds, interestTimeOnlyMinutes, interestTimeOnlyHours, interestTimeOnlyDays, interestTimeSecondsMinutes, interestTimeMinutesHours;
-    private String interestTimeSecondsHours, interestTimeSecondsMinutesHours, interestTimeHoursDays, interestTimeMinutesDays, interestTimeSecondsDays;
-    private String interestTimeMinutesHoursDays, interestTimeSecondsHoursDays, interestTimeSecondsMinutesHoursDays, interestTimeSecondsMinutesDays;
+    private String interestTimeSeparator, interestTimeFinalSeparator, interestTimeFormat;
     private String k, m, b, t, q, qq;
     private String withdrawSound, depositSound, viewSound, personalSound;
     private String maxDepositAmount, maxWithdrawAmount, depositTaxes, withdrawTaxes, depositMinimumAmount, withdrawMinimumAmount, maxBankCapacity, startAmount;
@@ -50,21 +48,9 @@ public class ConfigValues {
         hours = config.getString("Placeholders.Time.Hours");
         day = config.getString("Placeholders.Time.Day");
         days = config.getString("Placeholders.Time.Days");
-        interestTimeOnlySeconds = config.getString("Placeholders.Time.Interest-Time.Only-Seconds");
-        interestTimeOnlyMinutes = config.getString("Placeholders.Time.Interest-Time.Only-Minutes");
-        interestTimeOnlyHours = config.getString("Placeholders.Time.Interest-Time.Only-Hours");
-        interestTimeOnlyDays = config.getString("Placeholders.Time.Interest-Time.Only-Days");
-        interestTimeSecondsMinutes = config.getString("Placeholders.Time.Interest-Time.Seconds-Minutes");
-        interestTimeMinutesHours = config.getString("Placeholders.Time.Interest-Time.Minutes-Hours");
-        interestTimeSecondsHours = config.getString("Placeholders.Time.Interest-Time.Seconds-Hours");
-        interestTimeSecondsMinutesHours = config.getString("Placeholders.Time.Interest-Time.Seconds-Minutes-Hours");
-        interestTimeHoursDays = config.getString("Placeholders.Time.Interest-Time.Hours-Days");
-        interestTimeMinutesDays = config.getString("Placeholders.Time.Interest-Time.Minutes-Days");
-        interestTimeSecondsDays = config.getString("Placeholders.Time.Interest-Time.Seconds-Days");
-        interestTimeMinutesHoursDays = config.getString("Placeholders.Time.Interest-Time.Minutes-Hours-Days");
-        interestTimeSecondsHoursDays = config.getString("Placeholders.Time.Interest-Time.Seconds-Hours-Days");
-        interestTimeSecondsMinutesDays = config.getString("Placeholders.Time.Interest-Time.Seconds-Minutes-Days");
-        interestTimeSecondsMinutesHoursDays = config.getString("Placeholders.Time.Interest-Time.Seconds-Minutes-Hours-Days");
+        interestTimeSeparator = config.getString("Placeholders.Time.Separator");
+        interestTimeFinalSeparator = config.getString("Placeholders.Time.Final-Separator");
+        interestTimeFormat = config.getString("Placeholders.Time.Format");
         k = config.getString("Placeholders.Money.Thousands");
         m = config.getString("Placeholders.Money.Millions");
         b = config.getString("Placeholders.Money.Billions");
@@ -169,64 +155,16 @@ public class ConfigValues {
         return days == null ? "Days" : days;
     }
 
-    public String getInterestTimeOnlySeconds() {
-        return interestTimeOnlySeconds;
+    public String getInterestTimeSeparator() {
+        return interestTimeSeparator;
     }
 
-    public String getInterestTimeOnlyMinutes() {
-        return interestTimeOnlyMinutes;
+    public String getInterestTimeFinalSeparator() {
+        return interestTimeFinalSeparator;
     }
 
-    public String getInterestTimeOnlyHours() {
-        return interestTimeOnlyHours;
-    }
-
-    public String getInterestTimeOnlyDays() {
-        return interestTimeOnlyDays;
-    }
-
-    public String getInterestTimeSecondsMinutes() {
-        return interestTimeSecondsMinutes;
-    }
-
-    public String getInterestTimeMinutesHours() {
-        return interestTimeMinutesHours;
-    }
-
-    public String getInterestTimeSecondsHours() {
-        return interestTimeSecondsHours;
-    }
-
-    public String getInterestTimeSecondsMinutesHours() {
-        return interestTimeSecondsMinutesHours;
-    }
-
-    public String getInterestTimeHoursDays() {
-        return interestTimeHoursDays;
-    }
-
-    public String getInterestTimeMinutesDays() {
-        return interestTimeMinutesDays;
-    }
-
-    public String getInterestTimeSecondsDays() {
-        return interestTimeSecondsDays;
-    }
-
-    public String getInterestTimeMinutesHoursDays() {
-        return interestTimeMinutesHoursDays;
-    }
-
-    public String getInterestTimeSecondsHoursDays() {
-        return interestTimeSecondsHoursDays;
-    }
-
-    public String getInterestTimeSecondsMinutesHoursDays() {
-        return interestTimeSecondsMinutesHoursDays;
-    }
-
-    public String getInterestTimeSecondsMinutesDays() {
-        return interestTimeSecondsMinutesDays;
+    public String getInterestTimeFormat() {
+        return interestTimeFormat;
     }
 
     public String getK() {
