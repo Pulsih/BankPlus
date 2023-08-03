@@ -10,7 +10,7 @@ public class MultipleBanksValues {
 
     private boolean multipleBanksModuleEnabled, showNotAvailableBanks, directlyOpenIf1IsAvailable, previousItemGlowing, nextItemGlowing;
     private String banksGuiTitle, previousItemMaterial, nextItemMaterial, previousItemDisplayname, nextItemDisplayname, fillerMaterial;
-    private List<String> previousItemLore, nextItemLore;
+    private List<String> previousItemLore, nextItemLore, autoBanksUnlocker;
     private int banksGuiLines, previousItemSlot, nextItemSlot, updateDelay;
     private boolean fillerEnabled, fillerGlowing;
 
@@ -24,6 +24,7 @@ public class MultipleBanksValues {
         multipleBanksModuleEnabled = multipleBanks.getBoolean("Enabled");
         showNotAvailableBanks = multipleBanks.getBoolean("Shows-Not-Available-Banks");
         directlyOpenIf1IsAvailable = multipleBanks.getBoolean("Directly-Open-If-1-Is-Available");
+        autoBanksUnlocker = multipleBanks.getStringList("Auto-Banks-Unlocker");
         previousItemGlowing = multipleBanks.getBoolean("Banks-Gui.Previous-Page.Glowing");
         nextItemGlowing = multipleBanks.getBoolean("Banks-Gui.Next-Page.Glowing");
         banksGuiTitle = multipleBanks.getString("Banks-Gui.Title");
@@ -52,6 +53,10 @@ public class MultipleBanksValues {
 
     public boolean isDirectlyOpenIf1IsAvailable() {
         return directlyOpenIf1IsAvailable;
+    }
+
+    public List<String> getAutoBanksUnlocker() {
+        return autoBanksUnlocker;
     }
 
     public boolean isPreviousItemGlowing() {

@@ -119,8 +119,7 @@ public class BankReader {
     public BigDecimal getCapacity(Player p) {
         if (!hasUpgrades()) return Values.CONFIG.getMaxBankCapacity();
 
-        FileConfiguration config = new BankPlusPlayerFiles(p).getPlayerConfig();
-        int level = Math.max(config.getInt("Banks." + bank.getIdentifier() + ".Level"), 1);
+        int level = getCurrentLevel(p);
         String capacity = getUpgrades().getString(level + ".Capacity");
         return new BigDecimal(capacity == null ? Values.CONFIG.getMaxBankCapacity().toString() : capacity);
     }
@@ -133,8 +132,7 @@ public class BankReader {
     public BigDecimal getCapacity(OfflinePlayer p) {
         if (!hasUpgrades()) return Values.CONFIG.getMaxBankCapacity();
 
-        FileConfiguration config = new BankPlusPlayerFiles(p).getPlayerConfig();
-        int level = Math.max(config.getInt("Banks." + bank.getIdentifier() + ".Level"), 1);
+        int level = getCurrentLevel(p);
         String capacity = getUpgrades().getString(level + ".Capacity");
         return new BigDecimal(capacity == null ? Values.CONFIG.getMaxBankCapacity().toString() : capacity);
     }
@@ -147,8 +145,7 @@ public class BankReader {
     public BigDecimal getInterest(Player p) {
         if (!hasUpgrades()) return Values.CONFIG.getInterestMoneyGiven();
 
-        FileConfiguration config = new BankPlusPlayerFiles(p).getPlayerConfig();
-        int level = Math.max(config.getInt("Banks." + bank.getIdentifier() + ".Level"), 1);
+        int level = getCurrentLevel(p);
         String interest = getUpgrades().getString(level + ".Interest");
 
         if (BPMethods.isInvalidNumber(interest)) {
@@ -167,8 +164,7 @@ public class BankReader {
     public BigDecimal getInterest(OfflinePlayer p) {
         if (!hasUpgrades()) return Values.CONFIG.getInterestMoneyGiven();
 
-        FileConfiguration config = new BankPlusPlayerFiles(p).getPlayerConfig();
-        int level = Math.max(config.getInt("Banks." + bank.getIdentifier() + ".Level"), 1);
+        int level = getCurrentLevel(p);
         String interest = getUpgrades().getString(level + ".Interest");
 
         if (BPMethods.isInvalidNumber(interest)) {
@@ -187,8 +183,7 @@ public class BankReader {
     public BigDecimal getOfflineInterest(Player p) {
         if (!hasUpgrades()) return Values.CONFIG.getOfflineInterestMoneyGiven();
 
-        FileConfiguration config = new BankPlusPlayerFiles(p).getPlayerConfig();
-        int level = Math.max(config.getInt("Banks." + bank.getIdentifier() + ".Level"), 1);
+        int level = getCurrentLevel(p);
         String interest = getUpgrades().getString(level + ".Offline-Interest");
 
         if (BPMethods.isInvalidNumber(interest)) {
@@ -207,8 +202,7 @@ public class BankReader {
     public BigDecimal getOfflineInterest(OfflinePlayer p) {
         if (!hasUpgrades()) return Values.CONFIG.getOfflineInterestMoneyGiven();
 
-        FileConfiguration config = new BankPlusPlayerFiles(p).getPlayerConfig();
-        int level = Math.max(config.getInt("Banks." + bank.getIdentifier() + ".Level"), 1);
+        int level = getCurrentLevel(p);
         String interest = getUpgrades().getString(level + ".Offline-Interest");
 
         if (BPMethods.isInvalidNumber(interest)) {
@@ -257,27 +251,33 @@ public class BankReader {
     }
 
     /**
+     * Get the current bank level for that player.
+     * @param p The player.
+     * @return The current level.
+     */
+    public int getCurrentLevel(OfflinePlayer p) {
+        FileConfiguration config = new BankPlusPlayerFiles(p).getPlayerConfig();
+        return Math.max(config.getInt("Banks." + bank.getIdentifier() + ".Level"), 1);
+    }
+
+    /**
      * Check if the bank of that player has a next level.
      * @param p The player.
      * @return true if it has a next level, false otherwise.
      */
     public boolean hasNextLevel(Player p) {
         ConfigurationSection section = getUpgrades();
-        if (section == null) return false;
-
-        return section.getConfigurationSection(String.valueOf(getCurrentLevel(p) + 1)) != null;
+        return section == null ? false : section.getConfigurationSection(String.valueOf(getCurrentLevel(p) + 1)) != null;
     }
 
     /**
-     * Check if the selected bank has a next level
+     * Check if the selected bank has another level next the one specified.
      * @param currentLevel The current level of the bank.
      * @return true if it has a next level, false otherwise.
      */
     public boolean hasNextLevel(int currentLevel) {
         ConfigurationSection section = getUpgrades();
-        if (section == null) return false;
-
-        return section.getConfigurationSection(String.valueOf(currentLevel + 1)) != null;
+        return section == null ? false : section.getConfigurationSection(String.valueOf(currentLevel + 1)) != null;
     }
 
     /**
@@ -338,8 +338,8 @@ public class BankReader {
             return;
         }
 
-        int level = getCurrentLevel(p);
-        BigDecimal cost = getLevelCost(level + 1);
+        int nextLevel = getCurrentLevel(p) + 1;
+        BigDecimal cost = getLevelCost(nextLevel);
 
         if (Values.CONFIG.useBankBalanceToUpgrade()) {
 
@@ -371,10 +371,25 @@ public class BankReader {
         }
 
         BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
-        files.getPlayerConfig().set("Banks." + bank.getIdentifier() + ".Level", level + 1);
+        files.getPlayerConfig().set("Banks." + bank.getIdentifier() + ".Level", nextLevel);
         files.savePlayerFile(true);
 
         BPMessages.send(p, "Bank-Upgraded");
+
+        if (!hasNextLevel(nextLevel)) {
+            for (String line : Values.MULTIPLE_BANKS.getAutoBanksUnlocker()) {
+                if (!line.contains(":")) continue;
+
+                String[] parts = line.split(":");
+                String bankName = parts[0];
+                if (!bankName.equals(bank.getIdentifier())) continue;
+
+                for (int i = 1; i < parts.length;i++) {
+                    String cmd = parts[i].replace("%player%", p.getName());
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+                }
+            }
+        }
     }
 
     /**

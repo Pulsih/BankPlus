@@ -380,6 +380,11 @@ public class ConfigManager {
         addSpace(newConfig, "General-Settings");
 
         addCommentsUnder(newConfig, "General-Settings",
+                "The text displayed when the capacity is 0 (infinite).");
+        validatePath(oldConfig, newConfig, "General-Settings.Infinite-Capacity-Text", "Infinite");
+        addSpace(newConfig, "General-Settings");
+
+        addCommentsUnder(newConfig, "General-Settings",
                 "The max amount of decimals that a player balance can have.",
                 "",
                 "You can put 0 to use an economy without decimals.");
@@ -802,6 +807,27 @@ public class ConfigManager {
                 "make the player directly open that one instead of",
                 "opening the banks-gui with just the 1 gui available.");
         validatePath(oldMultipleBanksConfig, newMultipleBanksConfig, "Directly-Open-If-1-Is-Available", false);
+        addSpace(newMultipleBanksConfig);
+
+        addComments(newMultipleBanksConfig,
+                "This is a new feature used to automatically unlock",
+                "new banks when a player has maxed the selected bank.",
+                "",
+                "The format is \"the bank name:the command to run from console\"",
+                "Since the access to banks works with permissions, use",
+                "your own permission plugin to make the player access the",
+                "new bank, this action will be run as soon as the",
+                "player upgrade the selected bank to the max level",
+                "(In this example, when you max the \"bank\" bank it will run",
+                "the \"lp user %player% permission set bankplus.bank2\" cmd):",
+                "Auto-Banks-Unlocker:",
+                "- \"bank:lp user %player% permission set bankplus.bank2\"",
+                "",
+                "You can also use more than 1 cmd:",
+                "Auto-Banks-Unlocker",
+                "- \"bank:cmd1:cmd2:cmd3\"");
+        validatePath(oldMultipleBanksConfig, newMultipleBanksConfig, "Auto-Banks-Unlocker", new ArrayList<>());
+
         addSpace(newMultipleBanksConfig);
 
         addComments(newMultipleBanksConfig,

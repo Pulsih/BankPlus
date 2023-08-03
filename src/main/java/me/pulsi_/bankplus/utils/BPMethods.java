@@ -386,6 +386,8 @@ public class BPMethods {
 
     public static boolean isBankFull(Player p, String bankName) {
         BigDecimal capacity = new BankReader(bankName).getCapacity(p);
+        if (capacity.doubleValue() <= 0d) return false;
+
         if (new MultiEconomyManager(p).getBankBalance(bankName).doubleValue() >= capacity.doubleValue()) {
             BPMessages.send(p, "Cannot-Deposit-Anymore");
             return true;
@@ -395,6 +397,8 @@ public class BPMethods {
 
     public static boolean isBankFull(Player p) {
         BigDecimal capacity = new BankReader(Values.CONFIG.getMainGuiName()).getCapacity(p);
+        if (capacity.doubleValue() <= 0d) return false;
+
         if (new SingleEconomyManager(p).getBankBalance().doubleValue() >= capacity.doubleValue()) {
             BPMessages.send(p, "Cannot-Deposit-Anymore");
             return true;

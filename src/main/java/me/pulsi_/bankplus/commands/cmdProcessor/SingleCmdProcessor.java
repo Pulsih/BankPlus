@@ -408,11 +408,11 @@ public class SingleCmdProcessor {
                 if (!confirms.contains(s.getName())) {
                     confirms.add(s.getName());
                     BPMessages.send(s,
-                            BPMessages.getPrefix() + " &cWarning, this command is going to add to every single player that joined the server (" +
-                                    Bukkit.getOfflinePlayers().length + " players) the specified amount of money if the bank is available and it might" +
-                                    " require some time, type the command again within 3 seconds to confirm."
+                            BPMessages.getPrefix() + " &cWarning, this command is going to add to every online player (" +
+                                    Bukkit.getOnlinePlayers().size() + " players) the specified amount of money if the bank is available and it might" +
+                                    " require some time, type the command again within 5 seconds to confirm."
                             , true);
-                    Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> confirms.remove(s.getName()), 20L * 3);
+                    Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> confirms.remove(s.getName()), 20L * 5);
                     return;
                 }
 
@@ -472,16 +472,6 @@ public class SingleCmdProcessor {
                 }
                 em.removeBankBalance(amount);
                 if (!silent) BPMessages.send(s, "Remove-Message", BPMethods.placeValues(p, amount));
-            }
-            break;
-
-            case "saveallbankbalances": {
-                if (!BPMethods.hasPermission(s, "bankplus.saveallbankbalances")) return;
-
-                Bukkit.getOnlinePlayers().forEach(p -> new SingleEconomyManager(p).saveBankBalance(true));
-                BPMessages.send(s, "Balances-Saved");
-                if (Values.CONFIG.isSaveBalancesBroadcast())
-                    BPLogger.info("All player balances have been saved!");
             }
             break;
 

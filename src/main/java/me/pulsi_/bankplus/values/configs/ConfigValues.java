@@ -18,7 +18,7 @@ public class ConfigValues {
     private String second, seconds, minute, minutes, hour, hours, day, days;
     private String interestTimeSeparator, interestTimeFinalSeparator, interestTimeFormat;
     private String k, m, b, t, q, qq;
-    private String withdrawSound, depositSound, viewSound, personalSound;
+    private String infiniteCapacityText, withdrawSound, depositSound, viewSound, personalSound;
     private String maxDepositAmount, maxWithdrawAmount, depositTaxes, withdrawTaxes, depositMinimumAmount, withdrawMinimumAmount, maxBankCapacity, startAmount;
     private String bankTopMoneyFormat, banktopUpdateBroadcastMessage, bankUpgradedMaxPlaceholder, banktopPlayerNotFoundPlaceholder, mainGuiName;
     private String notifyOfflineInterestMessage, interestDelay, interestOfflinePermission, interestMaxAmount, interestMoneyGiven, offlineInterestMoneyGiven;
@@ -71,6 +71,7 @@ public class ConfigValues {
         depositMinimumAmount = config.getString("Deposit-Settings.Minimum-Deposit-Amount");
         withdrawMinimumAmount = config.getString("Withdraw-Settings.Minimum-Withdraw-Amount");
         maxBankCapacity = config.getString("General-Settings.Max-Bank-Capacity");
+        infiniteCapacityText = config.getString("General-Settings.Infinite-Capacity-Text");
         startAmount = config.getString("General-Settings.Join-Start-Amount");
         notifyOfflineInterestDelay = config.getLong("General-Settings.Offline-Interest-Earned-Message.Delay");
         interestMaxAmount = config.getString("Interest.Max-Amount");
@@ -300,6 +301,10 @@ public class ConfigValues {
             return new BigDecimal(0);
         }
         return new BigDecimal(maxBankCapacity);
+    }
+
+    public String getInfiniteCapacityText() {
+        return infiniteCapacityText == null ? "" : infiniteCapacityText;
     }
 
     public BigDecimal getStartAmount() {

@@ -213,7 +213,7 @@ public class SingleEconomyManager {
         Make it possible so when depositing all your money with taxes, the money will have the ability
         to FILL the bank instead of always depositing a bit less and never filling up the bank.
         */
-        if (capacity.doubleValue() > 0 && newBankBalance.doubleValue() >= capacity.doubleValue()) {
+        if (capacity.doubleValue() > 0d && newBankBalance.doubleValue() >= capacity.doubleValue()) {
             BigDecimal moneyToFull = capacity.subtract(getBankBalance());
             amount = moneyToFull.add(taxes);
             if (money.doubleValue() < amount.doubleValue()) amount = money;

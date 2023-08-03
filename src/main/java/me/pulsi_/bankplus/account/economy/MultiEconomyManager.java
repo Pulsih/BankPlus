@@ -241,7 +241,7 @@ public class MultiEconomyManager {
         }
 
         BigDecimal money = BigDecimal.valueOf(BankPlus.INSTANCE.getEconomy().getBalance(p));
-        if (!BPMethods.checkPreRequisites(money, amount, p) || BPMethods.isBankFull(p)) return;
+        if (!BPMethods.checkPreRequisites(money, amount, p) || BPMethods.isBankFull(p, bankName)) return;
 
         BigDecimal maxDepositAmount = Values.CONFIG.getMaxDepositAmount();
         if (maxDepositAmount.doubleValue() != 0 && amount.doubleValue() >= maxDepositAmount.doubleValue())
@@ -258,7 +258,7 @@ public class MultiEconomyManager {
         Make it possible so when depositing all your money with taxes, the money will have the ability
         to FILL the bank instead of always depositing a bit less and never filling up the bank.
         */
-        if (capacity.doubleValue() > 0 && newBankBalance.doubleValue() >= capacity.doubleValue()) {
+        if (capacity.doubleValue() > 0d && newBankBalance.doubleValue() >= capacity.doubleValue()) {
             BigDecimal moneyToFull = capacity.subtract(getBankBalance());
             amount = moneyToFull.add(taxes);
             if (money.doubleValue() < amount.doubleValue()) amount = money;

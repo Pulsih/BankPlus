@@ -69,6 +69,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
                 capacity = reader.getCapacity(p);
             }
+            if (capacity.longValue() <= 0) return Values.CONFIG.getInfiniteCapacityText();
 
             String formatter = identifier.replace("capacity", "");
             return getFormat(formatter, capacity);

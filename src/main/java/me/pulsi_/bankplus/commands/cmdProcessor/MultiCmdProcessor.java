@@ -6,7 +6,6 @@ import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankListGui;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
-import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
@@ -568,11 +567,11 @@ public class MultiCmdProcessor {
                 if (!confirms.contains(s.getName())) {
                     confirms.add(s.getName());
                     BPMessages.send(s,
-                            BPMessages.getPrefix() + " &cWarning, this command is going to add to every single player that joined the server (" +
-                                    Bukkit.getOfflinePlayers().length + " players) the specified amount of money in the selected bank if available and" +
-                                    " it might require some time, type the command again within 3 seconds to confirm."
+                            BPMessages.getPrefix() + " &cWarning, this command is going to add to every online player (" +
+                                    Bukkit.getOnlinePlayers().size() + " players) the specified amount of money in the selected bank if available and" +
+                                    " it might require some time, type the command again within 5 seconds to confirm."
                             , true);
-                    Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> confirms.remove(s.getName()), 20L * 3);
+                    Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> confirms.remove(s.getName()), 20L * 5);
                     return;
                 }
 
@@ -642,14 +641,6 @@ public class MultiCmdProcessor {
                 }
                 em.removeBankBalance(amount, bankName);
                 if (!silent) BPMessages.send(s, "Remove-Message", BPMethods.placeValues(p, amount));
-            }
-            break;
-
-            case "saveallbankbalances": {
-                if (!BPMethods.hasPermission(s, "bankplus.saveallbankbalances")) return;
-                Bukkit.getOnlinePlayers().forEach(p -> new MultiEconomyManager(p).saveBankBalance(true));
-                BPMessages.send(s, "Balances-Saved");
-                if (Values.CONFIG.isSaveBalancesBroadcast()) BPLogger.info("All player balances have been saved!");
             }
             break;
 

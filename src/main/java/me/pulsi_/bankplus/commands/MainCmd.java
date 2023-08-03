@@ -5,6 +5,7 @@ import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.commands.cmdProcessor.MultiCmdProcessor;
 import me.pulsi_.bankplus.commands.cmdProcessor.SingleCmdProcessor;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
@@ -102,6 +103,19 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                     return true;
                 }
 
+                case "saveallbankbalances": {
+                    if (!BPMethods.hasPermission(s, "bankplus.saveallbankbalances")) return false;
+
+                    if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                        Bukkit.getOnlinePlayers().forEach(p -> new MultiEconomyManager(p).saveBankBalance(true));
+                    else
+                        Bukkit.getOnlinePlayers().forEach(p -> new SingleEconomyManager(p).saveBankBalance(true));
+
+                    BPMessages.send(s, "Balances-Saved");
+                    if (Values.CONFIG.isSaveBalancesBroadcast()) BPLogger.info("All player balances have been saved!");
+                }
+                break;
+
                 case "resetall": {
                     if (!BPMethods.hasPermission(s, "bankplus.resetall")) return false;
 
@@ -125,9 +139,9 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                         confirms.add(s.getName());
                         BPMessages.send(s,
                                 BPMessages.getPrefix() + " &cWarning, this command is going to reset everyone's bank balance, based on the mode" +
-                                        " you choose, this action is not reversible and may take few seconds, type the command again within 3 seconds to confirm."
+                                        " you choose, this action is not reversible and may take few seconds, type the command again within 5 seconds to confirm."
                                 , true);
-                        Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> confirms.remove(s.getName()), 20L * 3);
+                        Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> confirms.remove(s.getName()), 20L * 5);
                         return false;
                     }
 
