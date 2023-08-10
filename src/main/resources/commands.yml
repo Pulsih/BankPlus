@@ -1,0 +1,218 @@
+# Put "" to not send the message.
+# The cooldown must be more than 0 to work.
+addall:
+  usage:
+    single: "%prefix% &cUsage: &7/bank addall [amount]"
+    multi: "%prefix% &cUsage: &7/bank addall [amount] [bankName]"
+  need-confirm: true
+  confirm-cooldown: 5
+  confirm-message: "%prefix% &cWarning, this command is going to add to every online player (%server_online% players) the specified
+    amount of money if the bank is available and it might require some time, type the command again within 5 seconds to confirm."
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+add:
+  usage:
+    single: "%prefix% &cUsage: &7/bank add [player] [amount]"
+    multi: "%prefix% &cUsage: &7/bank add [player] [amount] [bankName]"
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+balance:
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+customdeposit:
+  usage: "%prefix% &cUsage: &7/bank customdeposit [bankName]"
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+customwithdraw:
+  usage: "%prefix% &cUsage: &7/bank customwithdraw [bankName]"
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+deposit:
+  usage:
+    single: "%prefix% &cUsage: &7/bank deposit [amount]"
+    multi: "%prefix% &cUsage: &7/bank deposit [amount] [bankName]"
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+forceopen:
+  usage:
+    single: "%prefix% &cUsage: &7/bank forceopen [player]"
+    multi: "%prefix% &cUsage: &7/bank forceopen [player] [bankName]"
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+forceupgrade:
+  usage:
+    single: "%prefix% &cUsage: &7/bank forceupgrade [player]"
+    multi: "%prefix% &cUsage: &7/bank forceupgrade [player] [bankName]"
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+giveinterest:
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+help:
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+interest:
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+interestmillis:
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+open:
+  usage: "%prefix% &cUsage: &7/bank open [bankName]"
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+pay:
+  usage:
+    single: "%prefix% &cUsage: &7/bank pay [player] [amount]"
+    multi: "%prefix% &cUsage: &7/bank pay [player] [amount] [fromBankName] [toBankName]"
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+reload:
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+remove:
+  usage:
+    single: "%prefix% &cUsage: &7/bank remove [player] [amount]"
+    multi: "%prefix% &cUsage: &7/bank remove [player] [amount] [bankName]"
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+resetall:
+  usage: "%prefix% &cUsage: &7/bank resetall [mode] | Specify a mode between &a\"delete\" &7and &a\"maintain\"&7: &adelete &7will remove all players
+    money and they will be lost, &amaintain &7will move all players money from their banks to their vault balance."
+  need-confirm: true
+  confirm-cooldown: 5
+  confirm-message: "%prefix% &cWarning, this command is going to reset everyone's bank balance, based on the mode you 
+    choose, this action is not reversible and may take few seconds, type the command again within 5 seconds to confirm."
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+restartinterest:
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+saveallbankbalances:
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+set:
+  usage:
+    single: "%prefix% &cUsage: &7/bank set [player] [amount]"
+    multi: "%prefix% &cUsage: &7/bank set [player] [amount] [bankName]"
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+setlevel:
+  usage:
+    single: "%prefix% &cUsage: &7/bank setlevel [level]"
+    multi: "%prefix% &cUsage: &7/bank setlevel [level] [bankName]"
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+updatebanktop:
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+upgrade:
+  usage: "%prefix% &cUsage: &7/bank upgrade [bankName]"
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+view:
+  usage:
+    single: "%prefix% &cUsage: &7/bank view [player]"
+    multi: "%prefix% &cUsage: &7/bank view [player] <bankName>"
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
+withdraw:
+  usage:
+    single: "%prefix% &cUsage: &7/bank withdraw [amount]"
+    multi: "%prefix% &cUsage: &7/bank withdraw [amount] [bankName]"
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""

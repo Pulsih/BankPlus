@@ -333,6 +333,10 @@ public class BankReader {
      * @param p The player.
      */
     public void upgradeBank(Player p) {
+        if (!isAvailable(p)) {
+            BPMessages.send(p, "Cannot-Access-Bank");
+            return;
+        }
         if (!hasNextLevel(p)) {
             BPMessages.send(p, "Bank-Max-Level");
             return;

@@ -10,6 +10,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class ConfigManager {
@@ -18,15 +19,16 @@ public class ConfigManager {
     private int spacesCount = 0;
     private final String commentIdentifier = "bankplus_comment";
     private final String spaceIdentifier = "bankplus_space";
-    private File configFile, messagesFile, multipleBanksFile, savesFile;
-    private FileConfiguration config, messagesConfig, multipleBanksConfig, savesConfig;
+    private File configFile, messagesFile, multipleBanksFile, commandsFile, savesFile;
+    private FileConfiguration config, messagesConfig, multipleBanksConfig, commandsConfig, savesConfig;
     private boolean autoUpdateFiles, updated = true;
 
     public enum Type {
         CONFIG("config"),
         MESSAGES("messages"),
         MULTIPLE_BANKS("multiple_banks"),
-        SAVES("saves");
+        SAVES("saves"),
+        COMMANDS("commands");
 
         public String name;
 
@@ -43,16 +45,22 @@ public class ConfigManager {
 
     public void setupConfigs() {
         savesFile = new File(plugin.getDataFolder(), Type.SAVES.name + ".yml");
+
+        commandsFile = new File(plugin.getDataFolder(), Type.COMMANDS.name + ".yml");
         configFile = new File(plugin.getDataFolder(), Type.CONFIG.name + ".yml");
         messagesFile = new File(plugin.getDataFolder(), Type.MESSAGES.name + ".yml");
         multipleBanksFile = new File(plugin.getDataFolder(), Type.MULTIPLE_BANKS.name + ".yml");
 
         savesConfig = new YamlConfiguration();
+
+        commandsConfig = new YamlConfiguration();
         config = new YamlConfiguration();
         messagesConfig = new YamlConfiguration();
         multipleBanksConfig = new YamlConfiguration();
 
         setupSavesFile();
+
+        setupCommands();
         setupConfig();
         setupMessages();
         setupMultipleBanks();
@@ -66,6 +74,8 @@ public class ConfigManager {
                 return messagesConfig;
             case MULTIPLE_BANKS:
                 return multipleBanksConfig;
+            case COMMANDS:
+                return commandsConfig;
             case SAVES:
                 return savesConfig;
             default:
@@ -96,6 +106,15 @@ public class ConfigManager {
             case MULTIPLE_BANKS:
                 try {
                     multipleBanksConfig.load(multipleBanksFile);
+                    return true;
+                } catch (IOException | InvalidConfigurationException e) {
+                    BPLogger.error("Could not load " + type.name() + " config! (Error: " + e.getMessage().replace("\n", "") + ")");
+                    return false;
+                }
+
+            case COMMANDS:
+                try {
+                    commandsConfig.load(commandsFile);
                     return true;
                 } catch (IOException | InvalidConfigurationException e) {
                     BPLogger.error("Could not load " + type.name() + " config! (Error: " + e.getMessage().replace("\n", "") + ")");
@@ -506,6 +525,24 @@ public class ConfigManager {
                 getValueFromOldPath(oldConfig, "General-Settings.Withdraw-Taxes", "Withdraw-Settings.Withdraw-Taxes", "0%"));
         addSpace(newConfig);
 
+        /* Loan settings */
+
+        addCommentsUnder(newConfig, "Loan-Settings", "The max amount to give as a loan.");
+        validatePath(oldConfig, newConfig, "Load-Settings.Max-Amount", "5000");
+        addSpace(newConfig, "Loan-Settings");
+
+        addCommentsUnder(newConfig, "Loan-Settings", "The default interest for loans.");
+        validatePath(oldConfig, newConfig, "Load-Settings.Interest", "5%");
+        addSpace(newConfig, "Loan-Settings");
+
+        addCommentsUnder(newConfig, "Loan-Settings", "In how many times the loan will be repaid.");
+        validatePath(oldConfig, newConfig, "Load-Settings.Installments", 3);
+        addSpace(newConfig, "Loan-Settings");
+
+        addCommentsUnder(newConfig, "Loan-Settings", "The delay between payments in ticks (20 ticks = 1 second).");
+        validatePath(oldConfig, newConfig, "Load-Settings.Delay", 1200);
+        addSpace(newConfig);
+
         /* BankTop settings */
 
         addCommentsUnder(newConfig, "BankTop", "Enable or not the feature.");
@@ -687,7 +724,16 @@ public class ConfigManager {
         validatePath(oldMessagesConfig, newMessagesConfig, "Balances-Saved", "%prefix% &aSuccessfully saved all player balances to the file!");
         validatePath(oldMessagesConfig, newMessagesConfig, "BankTop-Updated", "%prefix% &aSuccessfully updated the banktop!");
         validatePath(oldMessagesConfig, newMessagesConfig, "Bank-Upgraded", "%prefix% &aSuccessfully upgraded the bank!");
-        validatePath(oldMessagesConfig, newMessagesConfig, "Force-Open", "%prefix% &aSuccessfully forced &f%player% &ato open the bank!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Sent", "%prefix% &aSuccessfully sent the loan request to &f%player%&a, waiting for a confirm...");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Received", Arrays.asList(
+                "                &6&l!! LOAN REQUEST !!",
+                "",
+                "  &f%player% &asent you a loan of &f%amount_formatted% &amoney",
+                "&aType &2/bank loan accept&a to accept or &c/bank loan deny&a to deny.",
+                "&7&o(( The loan will be automatically be payed back with 5% interest ))"
+        ));
+        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Sent-Accepted", "%prefix% &aSuccessfully accepted &f%player%&a's loan!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Received-Accepted", "%prefix% &aSuccessfully accepted &f%player%&a's loan!");
         addSpace(newMessagesConfig);
 
         addComments(newMessagesConfig, "Titles");
@@ -879,6 +925,29 @@ public class ConfigManager {
             BPLogger.error("Could not save file changes to multiple_banks.yml! (Error: " + e.getMessage() + ")");
         }
         recreateFile(multipleBanksFile);
+    }
+
+    public void setupCommands() {
+        if (!commandsFile.exists()) plugin.saveResource("commands.yml", true);
+
+        InputStreamReader internalFile = new InputStreamReader(BankPlus.INSTANCE.getResource("commands.yml"), StandardCharsets.UTF_8);
+        YamlConfiguration internalConfig = YamlConfiguration.loadConfiguration(internalFile), externalConfig = YamlConfiguration.loadConfiguration(commandsFile);
+
+        boolean hasChanges = false;
+        for (String key : internalConfig.getKeys(true)) {
+            if (externalConfig.contains(key)) continue;
+
+            hasChanges = true;
+            externalConfig.set(key, internalConfig.get(key));
+        }
+
+        if (!hasChanges) return;
+
+        try {
+            externalConfig.save(commandsFile);
+        } catch (Exception e) {
+            BPLogger.error("Could not save file changes to commands.yml! (Error: " + e.getMessage() + ")");
+        }
     }
 
     private void addSpace(FileConfiguration config) {

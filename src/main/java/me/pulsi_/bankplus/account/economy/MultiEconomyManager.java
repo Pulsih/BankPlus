@@ -301,12 +301,12 @@ public class MultiEconomyManager {
     /**
      * Method used to execute the pay transaction.
      *
-     * @param fromBank The bank where the money will be taken.
      * @param target   The player that will receive your money.
      * @param amount   How much money you want to pay.
+     * @param fromBank The bank where the money will be taken.
      * @param toBank   The bank where the money will be added.
      */
-    public void pay(String fromBank, Player target, BigDecimal amount, String toBank) {
+    public void pay(Player target, BigDecimal amount, String fromBank, String toBank) {
         MultiEconomyManager targetManager = new MultiEconomyManager(target);
         BigDecimal maxBankCapacity = Values.CONFIG.getMaxBankCapacity();
         BigDecimal bankBalance = getBankBalance(fromBank);

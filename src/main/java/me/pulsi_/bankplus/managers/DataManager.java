@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.managers;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
 import me.pulsi_.bankplus.commands.BankTopCmd;
+import me.pulsi_.bankplus.commands.CmdRegisterer;
 import me.pulsi_.bankplus.commands.MainCmd;
 import me.pulsi_.bankplus.external.UpdateChecker;
 import me.pulsi_.bankplus.external.bStats;
@@ -57,6 +58,7 @@ public class DataManager {
         boolean success = true;
 
         ConfigManager configManager = plugin.getConfigManager();
+        if (!configManager.reloadConfig(ConfigManager.Type.COMMANDS)) success = false;
         if (!configManager.reloadConfig(ConfigManager.Type.CONFIG)) success = false;
         if (!configManager.reloadConfig(ConfigManager.Type.MESSAGES)) success = false;
         if (!configManager.reloadConfig(ConfigManager.Type.MULTIPLE_BANKS)) success = false;
@@ -65,6 +67,10 @@ public class DataManager {
         Values.MESSAGES.setupValues();
         Values.MULTIPLE_BANKS.setupValues();
         BPMessages.loadMessages();
+
+        CmdRegisterer registerer = new CmdRegisterer();
+        registerer.resetCmds();
+        registerer.registerCmds();
 
         if (Values.CONFIG.isInterestEnabled()) plugin.getInterest().startInterest();
         if (Values.CONFIG.isIgnoringAfkPlayers()) plugin.getAfkManager().startCountdown();
