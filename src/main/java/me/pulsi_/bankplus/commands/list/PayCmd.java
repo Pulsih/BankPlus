@@ -84,6 +84,8 @@ public class PayCmd extends BPCommand {
         if (!(s instanceof Player) || !s.hasPermission("bankplus." + identifier)) return null;
         Player p = (Player) s;
 
+        Player target = args.length > 1 ? Bukkit.getPlayerExact(args[1]) : null;
+
         if (args.length == 3) {
             List<String> args2 = new ArrayList<>();
             for (String arg : Arrays.asList("1", "2", "3"))
@@ -100,8 +102,11 @@ public class PayCmd extends BPCommand {
             }
 
             if (args.length == 5) {
+                List<String> banks = new ArrayList<>();
+                if (target != null) banks = new BankReader().getAvailableBanks(target);
+
                 List<String> args4 = new ArrayList<>();
-                for (String arg : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
+                for (String arg : banks)
                     if (arg.startsWith(args[4].toLowerCase())) args4.add(arg);
                 return args4;
             }

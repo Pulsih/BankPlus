@@ -527,20 +527,30 @@ public class ConfigManager {
 
         /* Loan settings */
 
+        addComments(newConfig,
+                "Loans are a way to give money to a player and then",
+                "having them back after a period of time.",
+                "If a player can't afford to give the money back he",
+                "will receive a debt, every money put in the bank",
+                "with a debt will be removed till the debt reach 0");
         addCommentsUnder(newConfig, "Loan-Settings", "The max amount to give as a loan.");
-        validatePath(oldConfig, newConfig, "Load-Settings.Max-Amount", "5000");
+        validatePath(oldConfig, newConfig, "Loan-Settings.Max-Amount", "5000");
         addSpace(newConfig, "Loan-Settings");
 
         addCommentsUnder(newConfig, "Loan-Settings", "The default interest for loans.");
-        validatePath(oldConfig, newConfig, "Load-Settings.Interest", "5%");
+        validatePath(oldConfig, newConfig, "Loan-Settings.Interest", "5%");
         addSpace(newConfig, "Loan-Settings");
 
         addCommentsUnder(newConfig, "Loan-Settings", "In how many times the loan will be repaid.");
-        validatePath(oldConfig, newConfig, "Load-Settings.Installments", 3);
+        validatePath(oldConfig, newConfig, "Loan-Settings.Installments", 3);
         addSpace(newConfig, "Loan-Settings");
 
-        addCommentsUnder(newConfig, "Loan-Settings", "The delay between payments in ticks (20 ticks = 1 second).");
-        validatePath(oldConfig, newConfig, "Load-Settings.Delay", 1200);
+        addCommentsUnder(newConfig, "Loan-Settings", "The time in ticks between payments (20 ticks = 1 second).");
+        validatePath(oldConfig, newConfig, "Loan-Settings.Delay", 1200);
+        addSpace(newConfig);
+
+        addCommentsUnder(newConfig, "Loan-Settings", "The time in seconds before the loan request will be deleted.");
+        validatePath(oldConfig, newConfig, "Loan-Settings.Accept-Time", 5);
         addSpace(newConfig);
 
         /* BankTop settings */
@@ -728,12 +738,16 @@ public class ConfigManager {
         validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Received", Arrays.asList(
                 "                &6&l!! LOAN REQUEST !!",
                 "",
-                "  &f%player% &asent you a loan of &f%amount_formatted% &amoney",
+                "   &f%player% &asent you a loan of &f%amount_formatted% &amoney",
                 "&aType &2/bank loan accept&a to accept or &c/bank loan deny&a to deny.",
                 "&7&o(( The loan will be automatically be payed back with 5% interest ))"
         ));
-        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Sent-Accepted", "%prefix% &aSuccessfully accepted &f%player%&a's loan!");
-        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Received-Accepted", "%prefix% &aSuccessfully accepted &f%player%&a's loan!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Sent-Accepted", "%prefix% &f%player% &ahas accepted your loan request!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Received-Accepted", "%prefix% &aSuccessfully accepted &f%player%&a's loan! &8(&2+%amount_formatted%&8)");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Sent-Denied", "%prefix% &f%player% &chas denied your loan request!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Received-Denied", "%prefix% &aSuccessfully denied &f%player%&a's loan!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Sent-Cancelled", "%prefix% &cYou have cancelled your loan request!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Received-Cancelled", "%prefix% &f%player% &ahas cancelled the loan request!");
         addSpace(newMessagesConfig);
 
         addComments(newMessagesConfig, "Titles");
@@ -785,6 +799,9 @@ public class ConfigManager {
         validatePath(oldMessagesConfig, newMessagesConfig, "Failed-Reload", "%prefix% &cBankPlus has failed his reload task, please check the console for more info. (This is usually not a bankplus problem!)");
         validatePath(oldMessagesConfig, newMessagesConfig, "Unknown-Command", "%prefix% &cUnknown Command!");
         validatePath(oldMessagesConfig, newMessagesConfig, "No-Permission", "%prefix% &cYou don't have the permission! (%permission%)");
+        validatePath(oldMessagesConfig, newMessagesConfig, "No-Loan-Requests", "%prefix% &cYou haven't received any loan requests!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "No-Loan-Sent", "%prefix% &cYou haven't sent any loan!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Already-Sent", "%prefix% &cYou have already 1 loan request sent!");
 
         commentsCount = 0;
         spacesCount = 0;

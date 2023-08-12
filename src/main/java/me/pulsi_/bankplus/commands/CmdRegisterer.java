@@ -17,6 +17,7 @@ public class CmdRegisterer {
         new HelpCmd("help").register();
         new InterestCmd("interest").register();
         new InterestMillisCmd("interestmillis").register();
+        new LoanCmd("loan").register();
         new OpenCmd("open").register();
         new PayCmd("pay").register();
         new ReloadCmd("reload").register();

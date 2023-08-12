@@ -29,6 +29,8 @@ public class ConfigValues {
     private boolean isOfflineInterestEarnedMessageEnabled, isUpdateCheckerEnabled, isWithdrawSoundEnabled, isDepositSoundEnabled;
     private boolean isViewSoundEnabled, isPersonalSoundEnabled, isIgnoringAfkPlayers, useEssentialsXAFK, useBankBalanceToUpgrade;
     private boolean banktopEnabled, banktopUpdateBroadcastEnabled, banktopUpdateBroadcastOnlyConsole, saveBalancesBroadcast, guiModuleEnabled;
+    private String loanMaxAmount, loanInterest;
+    private int loanInstalments, loanDelay, loanAcceptTime;
 
     public static ConfigValues getInstance() {
         return new ConfigValues();
@@ -110,6 +112,11 @@ public class ConfigValues {
         saveBalancesBroadcast = config.getBoolean("General-Settings.Save-Broadcast");
         guiModuleEnabled = config.getBoolean("General-Settings.Enable-Guis");
         mainGuiName = config.getString("General-Settings.Main-Gui");
+        loanMaxAmount = config.getString("Loan-Settings.Max-Amount");
+        loanInterest = config.getString("Loan-Settings.Interest");
+        loanInstalments = config.getInt("Loan-Settings.Installments");
+        loanDelay = config.getInt("Loan-Settings.Delay");
+        loanAcceptTime = config.getInt("Loan-Settings.Accept-Time");
     }
 
     public String getPlayerChatPriority() {
@@ -327,10 +334,6 @@ public class ConfigValues {
         return new BigDecimal(interestMaxAmount);
     }
 
-    public String getInterestMoneyGivenString() {
-        return interestMoneyGiven;
-    }
-
     public BigDecimal getInterestMoneyGiven() {
         if (BPMethods.isInvalidNumber(interestMoneyGiven)) {
             BPLogger.error(DEF_ERROR.replace("%", "Interest.Money-Given"));
@@ -481,5 +484,33 @@ public class ConfigValues {
 
     public String getMainGuiName() {
         return mainGuiName == null ? "bank" : mainGuiName;
+    }
+
+    public BigDecimal getLoanMaxAmount() {
+        if (BPMethods.isInvalidNumber(loanMaxAmount)) {
+            BPLogger.error(DEF_ERROR.replace("%", "Loan-Settings.Max-Amount"));
+            return new BigDecimal(0);
+        }
+        return new BigDecimal(loanMaxAmount);
+    }
+
+    public BigDecimal getLoanInterest() {
+        if (BPMethods.isInvalidNumber(loanInterest)) {
+            BPLogger.error(DEF_ERROR.replace("%", "Loan-Settings.Interest"));
+            return new BigDecimal(0);
+        }
+        return new BigDecimal(loanInterest.replace("%", ""));
+    }
+
+    public int getLoanInstalments() {
+        return loanInstalments;
+    }
+
+    public int getLoanDelay() {
+        return loanDelay;
+    }
+
+    public int getLoanAcceptTime() {
+        return loanAcceptTime;
     }
 }

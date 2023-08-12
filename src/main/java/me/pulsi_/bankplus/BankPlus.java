@@ -5,6 +5,7 @@ import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankGuiRegistry;
 import me.pulsi_.bankplus.interest.Interest;
+import me.pulsi_.bankplus.loanSystem.LoanRegistry;
 import me.pulsi_.bankplus.managers.*;
 import me.pulsi_.bankplus.placeholders.BPPlaceholders;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -28,6 +29,7 @@ public final class BankPlus extends JavaPlugin {
 
     private PlayerRegistry playerRegistry;
     private BankGuiRegistry bankGuiRegistry;
+    private LoanRegistry loanRegistry;
     private Economy econ = null;
     private Permission perms = null;
 
@@ -72,6 +74,7 @@ public final class BankPlus extends JavaPlugin {
 
         this.playerRegistry = new PlayerRegistry();
         this.bankGuiRegistry = new BankGuiRegistry();
+        this.loanRegistry = new LoanRegistry();
 
         this.serverVersion = getServer().getVersion();
         this.bankTopManager = new BankTopManager(this);
@@ -123,6 +126,10 @@ public final class BankPlus extends JavaPlugin {
 
     public BankGuiRegistry getBankGuiRegistry() {
         return bankGuiRegistry;
+    }
+
+    public LoanRegistry getLoanRegistry() {
+        return loanRegistry;
     }
 
     public Economy getEconomy() {
