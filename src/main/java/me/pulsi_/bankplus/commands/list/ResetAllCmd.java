@@ -25,18 +25,28 @@ public class ResetAllCmd extends BPCommand {
     }
 
     @Override
-    public void execute(CommandSender s, String args[]) {
-        if (!preExecute(s, args, false, false)) return;
+    public boolean playerOnly() {
+        return false;
+    }
 
+    @Override
+    public boolean skipUsageWarn() {
+        return false;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender s, String args[]) {
         String mode = args[1];
         if (!mode.equalsIgnoreCase("delete") && !mode.equalsIgnoreCase("maintain")) {
             BPMessages.send(s,
                     BPMessages.getPrefix() + " &cInvalid reset mode! Choose one between &a\"delete\" &cand &a\"maintain\"&c."
                     , true);
-            return;
+            return false;
         }
 
+        if (confirm(s)) return false;
         resetAll(s, 0, mode);
+        return true;
     }
 
     @Override

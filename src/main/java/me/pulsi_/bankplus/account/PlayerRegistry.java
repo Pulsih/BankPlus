@@ -7,17 +7,17 @@ import java.util.UUID;
 
 public class PlayerRegistry {
 
-    private final HashMap<UUID, BankPlusPlayer> players = new HashMap<>();
+    private final HashMap<UUID, BPPlayer> players = new HashMap<>();
 
-    public void put(Player p, BankPlusPlayer player) {
+    public void put(Player p, BPPlayer player) {
         players.put(p.getUniqueId(), player);
     }
 
-    public BankPlusPlayer get(Player p) {
+    public BPPlayer get(Player p) {
         return players.get(p.getUniqueId());
     }
 
-    public BankPlusPlayer remove(Player p) {
+    public BPPlayer remove(Player p) {
         return players.remove(p.getUniqueId());
     }
 
@@ -25,7 +25,7 @@ public class PlayerRegistry {
         return players.containsKey(p.getUniqueId());
     }
 
-    public HashMap<UUID, BankPlusPlayer> getPlayers() {
+    public HashMap<UUID, BPPlayer> getPlayers() {
         return players;
     }
 }

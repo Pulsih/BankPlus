@@ -331,6 +331,14 @@ public class BPMethods {
         return days * hoursInMilliseconds(24);
     }
 
+    public static int millisecondsInTicks(long milliseconds) {
+        return (int) ((milliseconds / 1000) * 20);
+    }
+
+    public static long ticksInMilliseconds(int ticks) {
+        return (ticks / 20) * 1000;
+    }
+
     public static boolean checkPreRequisites(BigDecimal money, BigDecimal amount, Player p) {
         if (amount.doubleValue() < 0) {
             BPMessages.send(p, "Cannot-Use-Negative-Number");

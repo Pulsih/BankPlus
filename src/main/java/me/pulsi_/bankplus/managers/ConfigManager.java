@@ -547,7 +547,7 @@ public class ConfigManager {
 
         addCommentsUnder(newConfig, "Loan-Settings", "The time in ticks between payments (20 ticks = 1 second).");
         validatePath(oldConfig, newConfig, "Loan-Settings.Delay", 1200);
-        addSpace(newConfig);
+        addSpace(newConfig, "Loan-Settings");
 
         addCommentsUnder(newConfig, "Loan-Settings", "The time in seconds before the loan request will be deleted.");
         validatePath(oldConfig, newConfig, "Loan-Settings.Accept-Time", 5);
@@ -736,18 +736,23 @@ public class ConfigManager {
         validatePath(oldMessagesConfig, newMessagesConfig, "Bank-Upgraded", "%prefix% &aSuccessfully upgraded the bank!");
         validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Sent", "%prefix% &aSuccessfully sent the loan request to &f%player%&a, waiting for a confirm...");
         validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Received", Arrays.asList(
-                "                &6&l!! LOAN REQUEST !!",
+                "                       &6&l!! LOAN REQUEST !!",
                 "",
-                "   &f%player% &asent you a loan of &f%amount_formatted% &amoney",
+                "         &f%player% &asent you a loan of &f%amount_formatted% &amoney",
                 "&aType &2/bank loan accept&a to accept or &c/bank loan deny&a to deny.",
-                "&7&o(( The loan will be automatically be payed back with 5% interest ))"
+                "&7&o(( The money will be automatically be payed back with 5% interest ))"
         ));
         validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Sent-Accepted", "%prefix% &f%player% &ahas accepted your loan request!");
-        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Received-Accepted", "%prefix% &aSuccessfully accepted &f%player%&a's loan! &8(&2+%amount_formatted%&8)");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Received-Accepted", "%prefix% &aSuccessfully accepted &f%player%&a's loan, &f%amount_formatted% &amoney have been added to your bank.");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Received-Accepted-Full", "%prefix% &aSuccessfully accepted &f%player%&a's loan, &f%amount_formatted% &amoney have been added to your bank but since it was full, &f%extra_formatted% &amoney went to your wallet.");
         validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Sent-Denied", "%prefix% &f%player% &chas denied your loan request!");
-        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Received-Denied", "%prefix% &aSuccessfully denied &f%player%&a's loan!");
-        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Sent-Cancelled", "%prefix% &cYou have cancelled your loan request!");
-        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Received-Cancelled", "%prefix% &f%player% &ahas cancelled the loan request!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Received-Denied", "%prefix% &aSuccessfully denied &f%player%&a's loan.");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Sent-Cancelled", "%prefix% &aYou have cancelled your loan request.");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Received-Cancelled", "%prefix% &f%player% &chas cancelled the loan request.");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Payback", "%prefix% &aYou have received &f%amount_formatted% &afrom the loan given to &f%player%.");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Payback-Full", "%prefix% &aYou have received &f%amount_formatted% &afrom the loan given to &f%player% &abut your bank was full so &f%extra_formatted% &amoney has been added to your wallet.");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Returned", "%prefix% &aYou have returned &f%amount_formatted% &amoney from &f%player%&a's loan.");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Returned-Debt", "%prefix% &cSadly, you did not have enough money to pay back &f%player%&c, so you are now in debt for %f%amount_formatted%&c.");
         addSpace(newMessagesConfig);
 
         addComments(newMessagesConfig, "Titles");
@@ -801,7 +806,8 @@ public class ConfigManager {
         validatePath(oldMessagesConfig, newMessagesConfig, "No-Permission", "%prefix% &cYou don't have the permission! (%permission%)");
         validatePath(oldMessagesConfig, newMessagesConfig, "No-Loan-Requests", "%prefix% &cYou haven't received any loan requests!");
         validatePath(oldMessagesConfig, newMessagesConfig, "No-Loan-Sent", "%prefix% &cYou haven't sent any loan!");
-        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Already-Sent", "%prefix% &cYou have already 1 loan request sent!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Already-Sent", "%prefix% &cYou have already sent a loan request!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Cannot-Afford-Loan", "%prefix% &c%player% can't afford for this loan!");
 
         commentsCount = 0;
         spacesCount = 0;

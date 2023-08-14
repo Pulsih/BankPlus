@@ -14,12 +14,23 @@ public class ReloadCmd extends BPCommand {
     }
 
     @Override
-    public void execute(CommandSender s, String args[]) {
-        if (!preExecute(s, args, false, true)) return;
+    public boolean playerOnly() {
+        return false;
+    }
+
+    @Override
+    public boolean skipUsageWarn() {
+        return true;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender s, String args[]) {
+        if (confirm(s)) return false;
 
         boolean reloaded = BankPlus.INSTANCE.getDataManager().reloadPlugin();
         if (reloaded) BPMessages.send(s, "Reload");
         else BPMessages.send(s, "Failed-Reload");
+        return true;
     }
 
     @Override

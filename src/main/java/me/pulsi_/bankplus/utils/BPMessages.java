@@ -79,7 +79,7 @@ public class BPMessages {
         send(p, identifier, Arrays.asList(stringsToReplace));
     }
 
-    public static void send(Player p, String identifier, List<String> stringsToReplace) {
+    public static void send(Player p, String identifier, List<String>... stringsToReplace) {
         if (p == null) return;
 
         if (!messages.containsKey(identifier)) {
@@ -90,13 +90,15 @@ public class BPMessages {
 
         List<String> listOfMessages = messages.get(identifier);
         for (String message : listOfMessages) {
-            for (String stringToReplace : stringsToReplace) {
-                if (!stringToReplace.contains("$")) continue;
-                String oldChar = stringToReplace.split("\\$")[0];
-                String replacement = stringToReplace.split("\\$")[1];
-                message = message.replace(oldChar, replacement);
+            for (List<String> replacers : stringsToReplace) {
+                for (String stringToReplace : replacers) {
+                    if (!stringToReplace.contains("$")) continue;
+                    String oldChar = stringToReplace.split("\\$")[0];
+                    String replacement = stringToReplace.split("\\$")[1];
+                    message = message.replace(oldChar, replacement);
+                }
+                if (!message.equals("")) p.sendMessage(format(p, message));
             }
-            if (!message.equals("")) p.sendMessage(format(p, message));
         }
     }
 
@@ -108,7 +110,7 @@ public class BPMessages {
         send(s, identifier, Arrays.asList(stringsToReplace));
     }
 
-    public static void send(CommandSender s, String identifier, List<String> stringsToReplace) {
+    public static void send(CommandSender s, String identifier, List<String>... stringsToReplace) {
         if (s == null) return;
 
         if (!messages.containsKey(identifier)) {
@@ -119,13 +121,15 @@ public class BPMessages {
 
         List<String> listOfMessages = messages.get(identifier);
         for (String message : listOfMessages) {
-            for (String stringToReplace : stringsToReplace) {
-                if (!stringToReplace.contains("$")) continue;
-                String oldChar = stringToReplace.split("\\$")[0];
-                String replacement = stringToReplace.split("\\$")[1];
-                message = message.replace(oldChar, replacement);
+            for (List<String> replacers : stringsToReplace) {
+                for (String stringToReplace : replacers) {
+                    if (!stringToReplace.contains("$")) continue;
+                    String oldChar = stringToReplace.split("\\$")[0];
+                    String replacement = stringToReplace.split("\\$")[1];
+                    message = message.replace(oldChar, replacement);
+                }
+                if (!message.equals("")) s.sendMessage(format(s, message));
             }
-            if (!message.equals("")) s.sendMessage(format(s, message));
         }
     }
 

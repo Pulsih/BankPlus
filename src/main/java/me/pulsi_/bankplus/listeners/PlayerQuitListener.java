@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BankPlusPlayer;
+import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.Bank;
@@ -27,7 +27,7 @@ public class PlayerQuitListener implements Listener {
             economyManager.saveBankBalance(true);
             economyManager.unloadBankBalance();
         }
-        BankPlusPlayer player = BankPlus.INSTANCE.getPlayerRegistry().remove(p);
+        BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().remove(p);
 
         Bank openedBank = player.getOpenedBank();
         if (openedBank != null) {

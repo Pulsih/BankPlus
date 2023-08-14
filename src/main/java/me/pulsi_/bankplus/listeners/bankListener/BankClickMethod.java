@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.listeners.bankListener;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BankPlusPlayer;
+import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankHolder;
@@ -31,7 +31,7 @@ public class BankClickMethod {
         if (bank == null || bank.getHolder() == null || !(bank.getHolder() instanceof BankHolder)) return;
         e.setCancelled(true);
 
-        BankPlusPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
+        BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
         if (player.getOpenedBank() == null) return;
 
         int slot = e.getSlot();

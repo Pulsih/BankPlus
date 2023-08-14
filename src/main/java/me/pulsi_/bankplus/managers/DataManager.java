@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
+import me.pulsi_.bankplus.account.BPPlayerFiles;
 import me.pulsi_.bankplus.commands.BankTopCmd;
 import me.pulsi_.bankplus.commands.CmdRegisterer;
 import me.pulsi_.bankplus.commands.MainCmd;
@@ -14,6 +14,7 @@ import me.pulsi_.bankplus.listeners.PlayerJoinListener;
 import me.pulsi_.bankplus.listeners.PlayerQuitListener;
 import me.pulsi_.bankplus.listeners.bankListener.*;
 import me.pulsi_.bankplus.listeners.playerChat.*;
+import me.pulsi_.bankplus.loanSystem.LoanUtils;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
@@ -75,8 +76,6 @@ public class DataManager {
         if (Values.CONFIG.isInterestEnabled()) plugin.getInterest().startInterest();
         if (Values.CONFIG.isIgnoringAfkPlayers()) plugin.getAfkManager().startCountdown();
         if (Values.CONFIG.isBanktopEnabled()) plugin.getBankTopManager().startUpdateTask();
-        BPMethods.startSavingBalancesTask();
-
         if (Values.CONFIG.isGuiModuleEnabled() && !plugin.getBankGuiRegistry().loadBanks()) success = false;
 
         AFKManager afkManager = plugin.getAfkManager();
@@ -85,8 +84,9 @@ public class DataManager {
         Interest interest = plugin.getInterest();
         if (Values.CONFIG.isInterestEnabled() && interest.wasDisabled()) interest.startInterest();
 
+        LoanUtils.loadAllLoans();
         BPMethods.startSavingBalancesTask();
-        Bukkit.getOnlinePlayers().forEach(p -> new BankPlusPlayerFiles(p).checkForFileFixes());
+        Bukkit.getOnlinePlayers().forEach(p -> new BPPlayerFiles(p).checkForFileFixes());
         return success;
     }
 

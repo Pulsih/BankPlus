@@ -1,6 +1,5 @@
 package me.pulsi_.bankplus.commands.list;
 
-import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankReader;
@@ -27,22 +26,30 @@ public class PayCmd extends BPCommand {
     }
 
     @Override
-    public void execute(CommandSender s, String args[]) {
-        if (!preExecute(s, args, true, false)) return;
+    public boolean playerOnly() {
+        return true;
+    }
 
+    @Override
+    public boolean skipUsageWarn() {
+        return false;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender s, String args[]) {
         Player target = Bukkit.getPlayerExact(args[1]);
-        if (target == null) {
+        if (target == null || target.equals(s)) {
             BPMessages.send(s, "Invalid-Player");
-            return;
+            return false;
         }
 
         if (args.length == 2) {
             BPMessages.send(s, "Specify-Number");
-            return;
+            return false;
         }
 
         String num = args[2];
-        if (BPMethods.isInvalidNumber(num, s)) return;
+        if (BPMethods.isInvalidNumber(num, s)) return false;
 
         BigDecimal amount = new BigDecimal(num);
         Player payer = (Player) s;
@@ -50,33 +57,38 @@ public class PayCmd extends BPCommand {
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
             if (args.length == 3 || args.length == 4) {
                 BPMessages.send(s, "Specify-Bank");
-                return;
+                return false;
             }
 
             String fromBank = args[3];
             BankReader fromReader = new BankReader(fromBank);
             if (fromReader.exist()) {
                 BPMessages.send(s, "Invalid-Bank");
-                return;
+                return false;
             }
             if (!fromReader.isAvailable(payer)) {
                 BPMessages.send(s, "Cannot-Access-Bank");
-                return;
+                return false;
             }
 
             String toBank = args[4];
             BankReader toReader = new BankReader(toBank);
             if (toReader.exist()) {
                 BPMessages.send(s, "Invalid-Bank");
-                return;
+                return false;
             }
             if (!toReader.isAvailable(target)) {
                 BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
-                return;
+                return false;
             }
 
+            if (confirm(s)) return false;
             new MultiEconomyManager(payer).pay(target, amount, fromBank, toBank);
-        } else new SingleEconomyManager(payer).pay(target, amount);
+        } else {
+            if (confirm(s)) return false;
+            new SingleEconomyManager(payer).pay(target, amount);
+        }
+        return true;
     }
 
     @Override

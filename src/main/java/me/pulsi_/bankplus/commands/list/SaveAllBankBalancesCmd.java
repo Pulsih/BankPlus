@@ -18,8 +18,18 @@ public class SaveAllBankBalancesCmd extends BPCommand {
     }
 
     @Override
-    public void execute(CommandSender s, String args[]) {
-        if (!preExecute(s, args, false, true)) return;
+    public boolean playerOnly() {
+        return false;
+    }
+
+    @Override
+    public boolean skipUsageWarn() {
+        return true;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender s, String args[]) {
+        if (confirm(s)) return false;
 
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
             Bukkit.getOnlinePlayers().forEach(p -> new MultiEconomyManager(p).saveBankBalance(true));
@@ -28,6 +38,7 @@ public class SaveAllBankBalancesCmd extends BPCommand {
 
         BPMessages.send(s, "Balances-Saved");
         if (Values.CONFIG.isSaveBalancesBroadcast()) BPLogger.info("All player balances have been saved!");
+        return true;
     }
 
     @Override

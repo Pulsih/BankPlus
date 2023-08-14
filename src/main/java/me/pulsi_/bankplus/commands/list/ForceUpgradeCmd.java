@@ -21,36 +21,46 @@ public class ForceUpgradeCmd extends BPCommand {
     }
 
     @Override
-    public void execute(CommandSender s, String args[]) {
-        if (!preExecute(s, args, false, false)) return;
+    public boolean playerOnly() {
+        return false;
+    }
 
+    @Override
+    public boolean skipUsageWarn() {
+        return false;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender s, String args[]) {
         Player target = Bukkit.getPlayerExact(args[1]);
         if (target == null) {
             BPMessages.send(s, "Invalid-Player");
-            return;
+            return false;
         }
 
         String bankName = Values.CONFIG.getMainGuiName();
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
             if (args.length == 2) {
                 BPMessages.send(s, "Specify-Bank");
-                return;
+                return false;
             }
 
             bankName = args[2];
             BankReader reader = new BankReader(bankName);
             if (!reader.exist()) {
                 BPMessages.send(s, "Invalid-Bank");
-                return;
+                return false;
             }
             if (!reader.isAvailable(target)) {
                 BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
-                return;
+                return false;
             }
         }
 
+        if (confirm(s)) return false;
         BankReader reader = new BankReader(bankName);
         reader.upgradeBank(target);
+        return true;
     }
 
     @Override

@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.account.economy;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
+import me.pulsi_.bankplus.account.BPPlayerFiles;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -85,7 +85,7 @@ public class SingleEconomyManager {
      */
     public void loadBankBalance() {
         if (p == null || totalPlayerMoney.containsKey(p.getUniqueId())) return;
-        String bal = new BankPlusPlayerFiles(p).getPlayerConfig().getString("Money");
+        String bal = new BPPlayerFiles(p).getPlayerConfig().getString("Money");
         totalPlayerMoney.put(p.getUniqueId(), bal == null ? new BigDecimal(0) : new BigDecimal(bal));
     }
 
@@ -100,7 +100,7 @@ public class SingleEconomyManager {
      * Save the player bank balance to his file.
      */
     public void saveBankBalance(boolean async) {
-        BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
+        BPPlayerFiles files = new BPPlayerFiles(p);
         files.getPlayerConfig().set("Money", BPFormatter.formatBigDouble(getBankBalance()));
         files.savePlayerFile(async);
     }
@@ -112,7 +112,7 @@ public class SingleEconomyManager {
      */
     public BigDecimal getBankBalance() {
         if (p == null) {
-            String bal = new BankPlusPlayerFiles(op).getPlayerConfig().getString("Money");
+            String bal = new BPPlayerFiles(op).getPlayerConfig().getString("Money");
             return bal == null ? new BigDecimal(0) : new BigDecimal(bal);
         }
         loadBankBalance();
@@ -179,7 +179,7 @@ public class SingleEconomyManager {
             return;
         }
 
-        BankPlusPlayerFiles files = new BankPlusPlayerFiles(op);
+        BPPlayerFiles files = new BPPlayerFiles(op);
         FileConfiguration config = files.getPlayerConfig();
         config.set("Money", BPFormatter.formatBigDouble(amount));
         if (addOfflineInterest && Values.CONFIG.isNotifyOfflineInterest()) {
@@ -260,41 +260,33 @@ public class SingleEconomyManager {
      * @param amount How much money you want to pay.
      */
     public void pay(Player target, BigDecimal amount) {
-        SingleEconomyManager targetManager = new SingleEconomyManager(target);
-        BigDecimal maxBankCapacity = Values.CONFIG.getMaxBankCapacity();
-        BigDecimal bankBalance = getBankBalance();
+        BigDecimal senderBalance = getBankBalance();
 
-        if (bankBalance.doubleValue() < amount.doubleValue()) {
+        if (senderBalance.doubleValue() < amount.doubleValue()) {
             BPMessages.send(p, "Insufficient-Money");
             return;
         }
 
-        if (maxBankCapacity.doubleValue() == 0) {
-            removeBankBalance(amount);
+        SingleEconomyManager targetEM = new SingleEconomyManager(target);
+        BigDecimal targetCapacity = new BankReader(Values.CONFIG.getMainGuiName()).getCapacity(target), targetBalance = getBankBalance(), newBalance = amount.add(targetBalance);
+
+        if (targetBalance.doubleValue() >= targetCapacity.doubleValue()) {
+            BPMessages.send(p, "Bank-Full", "%player%$" + target.getName());
+            return;
+        }
+
+        if (newBalance.doubleValue() >= targetCapacity.doubleValue() && targetCapacity.doubleValue() > 0d) {
+            removeBankBalance(targetCapacity.min(targetBalance));
+            targetEM.setBankBalance(targetCapacity);
+
             BPMessages.send(p, "Payment-Sent", BPMethods.placeValues(target, amount));
-            targetManager.addBankBalance(amount);
             BPMessages.send(target, "Payment-Received", BPMethods.placeValues(p, amount));
             return;
         }
 
-        BigDecimal targetMoney = targetManager.getBankBalance();
-        if (targetMoney.doubleValue() >= maxBankCapacity.doubleValue()) {
-            BPMessages.send(p, "Bank-Full", BPMethods.placeValues(target, BigDecimal.valueOf(0)));
-            return;
-        }
-
-        BigDecimal moneyLeft = maxBankCapacity.subtract(targetMoney);
-        if (amount.doubleValue() >= moneyLeft.doubleValue()) {
-            removeBankBalance(moneyLeft);
-            BPMessages.send(p, "Payment-Sent", BPMethods.placeValues(target, moneyLeft));
-            targetManager.addBankBalance(moneyLeft);
-            BPMessages.send(target, "Payment-Received", BPMethods.placeValues(p, moneyLeft));
-            return;
-        }
-
         removeBankBalance(amount);
+        targetEM.addBankBalance(amount);
         BPMessages.send(p, "Payment-Sent", BPMethods.placeValues(target, amount));
-        targetManager.addBankBalance(amount);
         BPMessages.send(target, "Payment-Received", BPMethods.placeValues(p, amount));
     }
 }

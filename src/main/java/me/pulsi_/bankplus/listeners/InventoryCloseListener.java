@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BankPlusPlayer;
+import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.bankSystem.Bank;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,7 +15,7 @@ public class InventoryCloseListener implements Listener {
     public void onClose(InventoryCloseEvent e) {
         Player p = (Player) e.getPlayer();
 
-        BankPlusPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
+        BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
         if (player == null) return;
 
         Bank openedBank = player.getOpenedBank();

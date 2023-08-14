@@ -14,11 +14,22 @@ public class UpdateBankTopCmd extends BPCommand {
     }
 
     @Override
-    public void execute(CommandSender s, String args[]) {
-        if (!preExecute(s, args, false, true)) return;
+    public boolean playerOnly() {
+        return false;
+    }
+
+    @Override
+    public boolean skipUsageWarn() {
+        return true;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender s, String args[]) {
+        if (confirm(s)) return false;
 
         BankPlus.INSTANCE.getBankTopManager().updateBankTop();
         BPMessages.send(s, "BankTop-Updated");
+        return true;
     }
 
     @Override

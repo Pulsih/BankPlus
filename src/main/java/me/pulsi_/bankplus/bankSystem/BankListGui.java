@@ -2,7 +2,7 @@ package me.pulsi_.bankplus.bankSystem;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BankPlusPlayer;
+import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPItems;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -29,7 +29,7 @@ public class BankListGui {
     private static final Material DEFAULT_MATERIAL = Material.CHEST;
 
     public static void openMultipleBanksGui(Player p) {
-        BankPlusPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
+        BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
 
         Bank openedBank = player.getOpenedBank();
         if (openedBank != null) {
@@ -67,7 +67,7 @@ public class BankListGui {
     }
 
     private static void placeBanks(Inventory banksListGui, Player p) {
-        BankPlusPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
+        BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
         HashMap<String, String> banksClickHolder = new HashMap<>();
         int slot = 0;
 

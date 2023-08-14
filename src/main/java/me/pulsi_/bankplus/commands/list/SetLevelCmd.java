@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
+import me.pulsi_.bankplus.account.BPPlayerFiles;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.commands.MainCmd;
@@ -31,60 +31,58 @@ public class SetLevelCmd extends BPCommand {
     }
 
     @Override
-    public void execute(CommandSender s, String args[]) {
-        if (!preExecute(s, args, false, false)) return;
+    public boolean playerOnly() {
+        return false;
+    }
 
+    @Override
+    public boolean skipUsageWarn() {
+        return false;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender s, String args[]) {
         OfflinePlayer p = Bukkit.getPlayerExact(args[1]);
         if (!p.hasPlayedBefore()) {
             BPMessages.send(s, "Invalid-Player");
-            return;
+            return false;
         }
 
         if (args.length == 2) {
             BPMessages.send(s, "Specify-Number");
-            return;
+            return false;
         }
 
         String level = args[2];
-        if (BPMethods.isInvalidNumber(level, s)) return;
+        if (BPMethods.isInvalidNumber(level, s)) return false;
 
+        String bankName;
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
             if (args.length == 3) {
                 BPMessages.send(s, "Specify-Bank");
-                return;
+                return false;
             }
 
-            String bankName = args[3];
-            BankReader reader = new BankReader(bankName);
-            if (!reader.exist()) {
-                BPMessages.send(s, "Invalid-Bank");
-                return;
-            }
-            if (!reader.getLevels().contains(level)) {
-                BPMessages.send(s, "Invalid-Bank-Level");
-                return;
-            }
+            bankName = args[3];
+        } else bankName = Values.CONFIG.getMainGuiName();
 
-            BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
-            files.getPlayerConfig().set("Banks." + bankName + ".Level", Integer.valueOf(level));
-            files.savePlayerFile(true);
-
-            BPMessages.send(s, "Set-Level-Message", "%player%$" + p.getName(), "%level%$" + level);
-        } else {
-            String bankName = Values.CONFIG.getMainGuiName();
-            BankReader reader = new BankReader(bankName);
-
-            if (!reader.getLevels().contains(level)) {
-                BPMessages.send(s, "Invalid-Bank-Level");
-                return;
-            }
-
-            BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
-            files.getPlayerConfig().set("Banks." + bankName + ".Level", Integer.valueOf(level));
-            files.savePlayerFile(true);
-
-            BPMessages.send(s, "Set-Level-Message", "%player%$" + p.getName(), "%level%$" + level);
+        BankReader reader = new BankReader(bankName);
+        if (!reader.exist()) {
+            BPMessages.send(s, "Invalid-Bank");
+            return false;
         }
+        if (!reader.getLevels().contains(level)) {
+            BPMessages.send(s, "Invalid-Bank-Level");
+            return false;
+        }
+        if (confirm(s)) return false;
+
+        BPPlayerFiles files = new BPPlayerFiles(p);
+        files.getPlayerConfig().set("Banks." + bankName + ".Level", Integer.valueOf(level));
+        files.savePlayerFile(true);
+
+        BPMessages.send(s, "Set-Level-Message", "%player%$" + p.getName(), "%level%$" + level);
+        return true;
     }
 
     @Override

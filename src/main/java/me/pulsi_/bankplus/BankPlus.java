@@ -6,6 +6,7 @@ import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankGuiRegistry;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.loanSystem.LoanRegistry;
+import me.pulsi_.bankplus.loanSystem.LoanUtils;
 import me.pulsi_.bankplus.managers.*;
 import me.pulsi_.bankplus.placeholders.BPPlaceholders;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -112,6 +113,7 @@ public final class BankPlus extends JavaPlugin {
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) Bukkit.getOnlinePlayers().forEach(p -> new MultiEconomyManager(p).saveBankBalance(false));
         else Bukkit.getOnlinePlayers().forEach(p -> new SingleEconomyManager(p).saveBankBalance(false));
         if (Values.CONFIG.isInterestEnabled()) interest.saveInterest();
+        LoanUtils.saveLoans();
 
         dataManager.shutdownPlugin();
     }

@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.bankSystem;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
+import me.pulsi_.bankplus.account.BPPlayerFiles;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -112,7 +112,7 @@ public class BankReader {
     }
 
     /**
-     * Get the current bank capacity based on the level of the bank of this player.
+     * Get the current bank capacity based on the bank level of this player.
      * @param p The player
      * @return A BigDecimal number representing the capacity.
      */
@@ -125,7 +125,7 @@ public class BankReader {
     }
 
     /**
-     * Get the current bank capacity based on the level of the bank of this player.
+     * Get the current bank capacity based on the bank level of this player.
      * @param p The player
      * @return A BigDecimal number representing the capacity.
      */
@@ -246,7 +246,7 @@ public class BankReader {
      * @return The current level.
      */
     public int getCurrentLevel(Player p) {
-        FileConfiguration config = new BankPlusPlayerFiles(p).getPlayerConfig();
+        FileConfiguration config = new BPPlayerFiles(p).getPlayerConfig();
         return Math.max(config.getInt("Banks." + bank.getIdentifier() + ".Level"), 1);
     }
 
@@ -256,7 +256,7 @@ public class BankReader {
      * @return The current level.
      */
     public int getCurrentLevel(OfflinePlayer p) {
-        FileConfiguration config = new BankPlusPlayerFiles(p).getPlayerConfig();
+        FileConfiguration config = new BPPlayerFiles(p).getPlayerConfig();
         return Math.max(config.getInt("Banks." + bank.getIdentifier() + ".Level"), 1);
     }
 
@@ -374,7 +374,7 @@ public class BankReader {
             economy.withdrawPlayer(p, cost.doubleValue());
         }
 
-        BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
+        BPPlayerFiles files = new BPPlayerFiles(p);
         files.getPlayerConfig().set("Banks." + bank.getIdentifier() + ".Level", nextLevel);
         files.savePlayerFile(true);
 

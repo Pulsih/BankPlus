@@ -1,6 +1,8 @@
 package me.pulsi_.bankplus.commands.list;
 
+import me.pulsi_.bankplus.bankSystem.BankHolder;
 import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
@@ -21,25 +23,36 @@ public class OpenCmd extends BPCommand {
     }
 
     @Override
-    public void execute(CommandSender s, String args[]) {
-        if (!preExecute(s, args, true, true)) return;
+    public boolean playerOnly() {
+        return true;
+    }
+
+    @Override
+    public boolean skipUsageWarn() {
+        return true;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender s, String args[]) {
         Player p = (Player) s;
 
         String bankName = Values.CONFIG.getMainGuiName();
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
             if (args.length == 1) {
                 if (getUsage() != null && !getUsage().equals("")) BPMessages.send(s, getUsage(), true);
-                return;
+                return false;
             }
 
             bankName = args[1];
             if (!new BankReader(bankName).exist()) {
                 BPMessages.send(s, "Invalid-Bank");
-                return;
+                return false;
             }
         }
 
-        BPMethods.customDeposit(p, bankName);
+        if (confirm(s)) return false;
+        BankUtils.openBank(p, bankName, false);
+        return true;
     }
 
     @Override

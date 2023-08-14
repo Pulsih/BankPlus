@@ -26,13 +26,21 @@ public class ViewCmd extends BPCommand {
     }
 
     @Override
-    public void execute(CommandSender s, String args[]) {
-        if (!preExecute(s, args, false, false)) return;
+    public boolean playerOnly() {
+        return false;
+    }
 
+    @Override
+    public boolean skipUsageWarn() {
+        return false;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender s, String args[]) {
         OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
         if (!p.hasPlayedBefore()) {
             BPMessages.send(s, "Invalid-Player");
-            return;
+            return false;
         }
 
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
@@ -44,21 +52,23 @@ public class ViewCmd extends BPCommand {
                 BankReader bankReader = new BankReader(bankName);
                 if (!bankReader.exist()) {
                     BPMessages.send(s, "Invalid-Bank");
-                    return;
+                    return false;
                 }
 
-                if (s instanceof Player) BPMethods.playSound("VIEW", (Player) s);
                 if (!bankReader.isAvailable(p)) {
                     BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + p.getName());
-                    return;
+                    return false;
                 }
+                if (confirm(s)) return false;
+                if (s instanceof Player) BPMethods.playSound("VIEW", (Player) s);
                 BPMessages.send(s, "Bank-Others", BPMethods.placeValues(p, new MultiEconomyManager(p).getBankBalance(bankName)));
             }
         } else {
-
+            if (confirm(s)) return false;
             if (s instanceof Player) BPMethods.playSound("VIEW", (Player) s);
             BPMessages.send(s, "Bank-Others", BPMethods.placeValues(p, new SingleEconomyManager(p).getBankBalance()));
         }
+        return true;
     }
 
     @Override

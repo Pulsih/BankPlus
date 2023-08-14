@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BankPlusPlayer;
+import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -85,7 +85,7 @@ public class BankTopManager {
     }
 
     public int getPlayerBankTopPosition(Player p) {
-        BankPlusPlayer player = plugin.getPlayerRegistry().get(p);
+        BPPlayer player = plugin.getPlayerRegistry().get(p);
         if (player.getBanktopPosition() == -1) {
             for (int i = 0; i < bankTopNames.size(); i++) {
                 if (!bankTopNames.get(i).equals(p.getName())) continue;

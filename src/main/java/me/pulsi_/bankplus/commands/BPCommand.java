@@ -97,38 +97,52 @@ public abstract class BPCommand {
             MainCmd.commands.put(alias, this);
     }
 
-    public boolean preExecute(CommandSender s, String args[], boolean playerOnly, boolean has1Arg) {
-        if (!BPMethods.hasPermission(s, getPermission()) || (playerOnly && !BPMethods.isPlayer(s))) return false;
-
-        if (args.length == 1 && !has1Arg) {
-            if (getUsage() != null && !getUsage().equals("")) BPMessages.send(s, getUsage(), true);
-            return false;
-        }
-
+    /**
+     * Call this function when the command is ready to run to make the confirmation, if this
+     * function is not called, even if the confirmation in the config is set to true, it won't work.
+     * @param s The command sender
+     * @return true if it has to confirm, false otherwise
+     */
+    public boolean confirm(CommandSender s) {
         if (needConfirm()) {
             if (!confirm.contains(s.getName())) {
                 Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> confirm.remove(s.getName()), getConfirmCooldown() * 20);
                 if (getConfirmMessage() != null && !getConfirmMessage().equals(""))
                     BPMessages.send(s, getConfirmMessage(), true);
                 confirm.add(s.getName());
-                return false;
+                return true;
             }
             confirm.remove(s.getName());
         }
+        return false;
+    }
+
+    public void execute(CommandSender s, String args[]) {
+        if (!BPMethods.hasPermission(s, getPermission()) || (playerOnly() && !BPMethods.isPlayer(s))) return;
+
+        if (!skipUsageWarn() && args.length == 1) {
+            if (getUsage() != null && !getUsage().equals("")) BPMessages.send(s, getUsage(), true);
+            return;
+        }
+
+        if (!onCommand(s, args)) return;
 
         if (hasCooldown() && getCooldown() > 0 && !(s instanceof ConsoleCommandSender)) {
             if (cooldownMap.containsKey(s.getName()) && cooldownMap.get(s.getName()) > System.currentTimeMillis()) {
                 if (getCooldownMessage() != null && !getCooldownMessage().equals(""))
                     BPMessages.send(s, getCooldownMessage(), true);
-                return false;
+                return;
             }
             cooldownMap.put(s.getName(), System.currentTimeMillis() + (getCooldown() * 1000));
             Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> cooldownMap.remove(s.getName()), getCooldown() * 20);
         }
-        return true;
     }
 
-    public abstract void execute(CommandSender s, String args[]);
+    public abstract boolean playerOnly();
+
+    public abstract boolean skipUsageWarn();
+
+    public abstract boolean onCommand(CommandSender s, String args[]);
 
     public abstract List<String> tabCompletion(CommandSender s, String args[]);
 }

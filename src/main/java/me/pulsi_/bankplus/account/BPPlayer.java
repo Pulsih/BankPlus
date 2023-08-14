@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 import java.io.File;
 import java.util.HashMap;
 
-public class BankPlusPlayer {
+public class BPPlayer {
 
     private final Player player;
     private final File playerFile;
@@ -16,7 +16,7 @@ public class BankPlusPlayer {
     private HashMap<String, String> playerBankClickHolder;
     private int banktopPosition = -1;
 
-    public BankPlusPlayer(Player player, File playerFile, FileConfiguration playerConfig) {
+    public BPPlayer(Player player, File playerFile, FileConfiguration playerConfig) {
         this.player = player;
         this.playerFile = playerFile;
         this.playerConfig = playerConfig;

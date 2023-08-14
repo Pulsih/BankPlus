@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.account.economy;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
+import me.pulsi_.bankplus.account.BPPlayerFiles;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -90,7 +90,7 @@ public class MultiEconomyManager {
         if (p == null) return;
         for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
             if (bankPlayerMoney.containsKey(p.getUniqueId() + "." + bankName)) return;
-            String bal = new BankPlusPlayerFiles(p).getPlayerConfig().getString("Banks." + bankName + ".Money");
+            String bal = new BPPlayerFiles(p).getPlayerConfig().getString("Banks." + bankName + ".Money");
             bankPlayerMoney.putIfAbsent(p.getUniqueId() + "." + bankName, new BigDecimal(bal == null ? "0" : bal));
         }
     }
@@ -99,7 +99,7 @@ public class MultiEconomyManager {
      * Unload the player bank balances.
      */
     public void unloadBankBalance() {
-        ConfigurationSection section = new BankPlusPlayerFiles(p).getPlayerConfig().getConfigurationSection("Banks");
+        ConfigurationSection section = new BPPlayerFiles(p).getPlayerConfig().getConfigurationSection("Banks");
         if (section != null) section.getKeys(false).forEach(key -> bankPlayerMoney.remove(p.getUniqueId() + "." + key));
     }
 
@@ -107,7 +107,7 @@ public class MultiEconomyManager {
      * Save the selected bank balance to the player file.
      */
     public void saveBankBalance(String bankName, boolean async) {
-        BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
+        BPPlayerFiles files = new BPPlayerFiles(p);
         files.getPlayerConfig().set("Banks." + bankName + ".Money", BPFormatter.formatBigDouble(getBankBalance(bankName)));
         files.savePlayerFile(async);
     }
@@ -116,7 +116,7 @@ public class MultiEconomyManager {
      * Save all bank balances to the player file.
      */
     public void saveBankBalance(boolean async) {
-        BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
+        BPPlayerFiles files = new BPPlayerFiles(p);
         for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
             files.getPlayerConfig().set("Banks." + bankName + ".Money", BPFormatter.formatBigDouble(getBankBalance(bankName)));
         files.savePlayerFile(async);
@@ -130,7 +130,7 @@ public class MultiEconomyManager {
      */
     public BigDecimal getBankBalance(String bankName) {
         if (p == null) {
-            String bal = new BankPlusPlayerFiles(op).getPlayerConfig().getString("Banks." + bankName + ".Money");
+            String bal = new BPPlayerFiles(op).getPlayerConfig().getString("Banks." + bankName + ".Money");
             return new BigDecimal(bal == null ? "0" : bal);
         }
         loadBankBalance();
@@ -149,7 +149,7 @@ public class MultiEconomyManager {
             for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
                 amount = amount.add(bankPlayerMoney.get(p.getUniqueId() + "." + bankName));
         } else {
-            BankPlusPlayerFiles files = new BankPlusPlayerFiles(op);
+            BPPlayerFiles files = new BPPlayerFiles(op);
             for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
                 String bal = files.getPlayerConfig().getString("Banks." + bankName + ".Money");
                 amount = amount.add(new BigDecimal(bal == null ? "0" : bal));
@@ -223,7 +223,7 @@ public class MultiEconomyManager {
             return;
         }
 
-        BankPlusPlayerFiles files = new BankPlusPlayerFiles(op);
+        BPPlayerFiles files = new BPPlayerFiles(op);
         FileConfiguration config = files.getPlayerConfig();
         config.set("Banks." + bankName + ".Money", BPFormatter.formatBigDouble(amount));
         if (addOfflineInterest && Values.CONFIG.isNotifyOfflineInterest()) {
@@ -307,41 +307,33 @@ public class MultiEconomyManager {
      * @param toBank   The bank where the money will be added.
      */
     public void pay(Player target, BigDecimal amount, String fromBank, String toBank) {
-        MultiEconomyManager targetManager = new MultiEconomyManager(target);
-        BigDecimal maxBankCapacity = Values.CONFIG.getMaxBankCapacity();
-        BigDecimal bankBalance = getBankBalance(fromBank);
+        BigDecimal senderBalance = getBankBalance(fromBank);
 
-        if (bankBalance.doubleValue() < amount.doubleValue()) {
+        if (senderBalance.doubleValue() < amount.doubleValue()) {
             BPMessages.send(p, "Insufficient-Money");
             return;
         }
 
-        if (maxBankCapacity.doubleValue() == 0) {
-            removeBankBalance(amount, fromBank);
+        MultiEconomyManager targetEM = new MultiEconomyManager(target);
+        BigDecimal targetCapacity = new BankReader(toBank).getCapacity(target), targetBalance = targetEM.getBankBalance(toBank), newBalance = amount.add(targetBalance);
+
+        if (targetBalance.doubleValue() >= targetCapacity.doubleValue()) {
+            BPMessages.send(p, "Bank-Full", "%player%$" + target.getName());
+            return;
+        }
+
+        if (newBalance.doubleValue() >= targetCapacity.doubleValue() && targetCapacity.doubleValue() > 0d) {
+            removeBankBalance(targetCapacity.min(targetBalance), fromBank);
+            targetEM.setBankBalance(targetCapacity, toBank);
+
             BPMessages.send(p, "Payment-Sent", BPMethods.placeValues(target, amount));
-            targetManager.addBankBalance(amount, toBank);
             BPMessages.send(target, "Payment-Received", BPMethods.placeValues(p, amount));
             return;
         }
 
-        BigDecimal targetMoney = targetManager.getBankBalance();
-        if (targetMoney.doubleValue() >= maxBankCapacity.doubleValue()) {
-            BPMessages.send(p, "Bank-Full", BPMethods.placeValues(target, BigDecimal.valueOf(0)));
-            return;
-        }
-
-        BigDecimal moneyLeft = maxBankCapacity.subtract(targetMoney);
-        if (amount.doubleValue() >= moneyLeft.doubleValue()) {
-            removeBankBalance(moneyLeft, fromBank);
-            BPMessages.send(p, "Payment-Sent", BPMethods.placeValues(target, moneyLeft));
-            targetManager.addBankBalance(moneyLeft, toBank);
-            BPMessages.send(target, "Payment-Received", BPMethods.placeValues(p, moneyLeft));
-            return;
-        }
-
         removeBankBalance(amount, fromBank);
+        targetEM.addBankBalance(amount, toBank);
         BPMessages.send(p, "Payment-Sent", BPMethods.placeValues(target, amount));
-        targetManager.addBankBalance(amount, toBank);
         BPMessages.send(target, "Payment-Received", BPMethods.placeValues(p, amount));
     }
 }

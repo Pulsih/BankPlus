@@ -17,14 +17,24 @@ public class InterestCmd extends BPCommand {
     }
 
     @Override
-    public void execute(CommandSender s, String args[]) {
-        if (!preExecute(s, args, false, true)) return;
+    public boolean playerOnly() {
+        return false;
+    }
 
+    @Override
+    public boolean skipUsageWarn() {
+        return true;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender s, String args[]) {
         if (!Values.CONFIG.isInterestEnabled()) {
             BPMessages.send(s, "Interest-Disabled");
-            return;
+            return false;
         }
+        if (confirm(s)) return false;
         BPMessages.send(s, "Interest-Time", "%time%$" + BPMethods.formatTime(BankPlus.INSTANCE.getInterest().getInterestCooldownMillis()));
+        return true;
     }
 
     @Override

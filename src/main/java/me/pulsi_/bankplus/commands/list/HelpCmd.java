@@ -13,10 +13,20 @@ public class HelpCmd extends BPCommand {
     }
 
     @Override
-    public void execute(CommandSender s, String args[]) {
-        if (!preExecute(s, args, false, true)) return;
+    public boolean playerOnly() {
+        return false;
+    }
 
+    @Override
+    public boolean skipUsageWarn() {
+        return true;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender s, String args[]) {
+        if (confirm(s)) return false;
         BPMessages.send(s, "Help-Message");
+        return true;
     }
 
     @Override

@@ -23,27 +23,38 @@ public class BalanceCmd extends BPCommand {
     }
 
     @Override
-    public void execute(CommandSender s, String args[]) {
-        if (!preExecute(s, args, true, true)) return;
+    public boolean playerOnly() {
+        return true;
+    }
 
+    @Override
+    public boolean skipUsageWarn() {
+        return true;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender s, String args[]) {
         Player p = (Player) s;
 
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
             MultiEconomyManager em = new MultiEconomyManager(p);
-            if (args.length == 1)
+            if (args.length == 1) {
+                if (confirm(s)) return false;
                 BPMessages.send(p, "Multiple-Personal-Bank", BPMethods.placeValues(p, em.getBankBalance()));
-            else {
+            } else {
                 String bankName = args[1];
                 if (!new BankReader(bankName).exist()) {
                     BPMessages.send(s, "Invalid-Bank");
-                    return;
+                    return false;
                 }
+                if (confirm(s)) return false;
                 BPMessages.send(p, "Personal-Bank", BPMethods.placeValues(p, em.getBankBalance(bankName)));
             }
         } else {
-
+            if (confirm(s)) return false;
             BPMessages.send(p, "Personal-Bank", BPMethods.placeValues(p, new SingleEconomyManager(p).getBankBalance()));
         }
+        return true;
     }
 
     @Override

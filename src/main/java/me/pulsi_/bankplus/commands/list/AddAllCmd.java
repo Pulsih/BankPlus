@@ -27,11 +27,19 @@ public class AddAllCmd extends BPCommand {
     }
 
     @Override
-    public void execute(CommandSender s, String args[]) {
-        if (!preExecute(s, args, false, false)) return;
+    public boolean playerOnly() {
+        return false;
+    }
 
+    @Override
+    public boolean skipUsageWarn() {
+        return false;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender s, String args[]) {
         String num = args[1];
-        if (BPMethods.isInvalidNumber(num, s)) return;
+        if (BPMethods.isInvalidNumber(num, s)) return false;
 
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
             String bankName = args[2];
@@ -39,12 +47,16 @@ public class AddAllCmd extends BPCommand {
             BankReader reader = new BankReader(bankName);
             if (!reader.exist()) {
                 BPMessages.send(s, "Invalid-Bank");
-                return;
+                return false;
             }
 
+            if (confirm(s)) return false;
             multiAddAll(s, new ArrayList<>(Bukkit.getOnlinePlayers()), new BankReader(bankName), new BigDecimal(num), bankName);
-        } else singleAddAll(s, new ArrayList<>(Bukkit.getOnlinePlayers()), new BankReader(Values.CONFIG.getMainGuiName()), new BigDecimal(num));
-
+        } else {
+            if (confirm(s)) return false;
+            singleAddAll(s, new ArrayList<>(Bukkit.getOnlinePlayers()), new BankReader(Values.CONFIG.getMainGuiName()), new BigDecimal(num));
+        }
+        return true;
     }
 
     @Override

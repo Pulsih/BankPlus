@@ -17,22 +17,28 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 
-public class BankPlusPlayerFiles {
+public class BPPlayerFiles {
 
     private final Player p;
     private final OfflinePlayer op;
 
-    public BankPlusPlayerFiles(Player p) {
-        this.p = p;
-        this.op = null;
-    }
+    private final FileConfiguration config;
+    private final File file;
 
-    public BankPlusPlayerFiles(OfflinePlayer op) {
-        this.p = null;
+    public BPPlayerFiles(OfflinePlayer op) {
         this.op = op;
+        this.p = op.isOnline() ? (Player) op : null;
+
+        this.config = getPlayerConfig();
+        this.file = getPlayerFile();
     }
 
     public void checkForFileFixes() {
+        if (p == null) {
+            BPLogger.error("Cannot check for file fixes for " + op.getName() + "! The player must be online!");
+            return;
+        }
+
         SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
         MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
         FileConfiguration config = getPlayerConfig();
@@ -82,19 +88,23 @@ public class BankPlusPlayerFiles {
     }
 
     public File getPlayerFile() {
+        if (file != null) return file;
+
         if (p != null) {
-            BankPlusPlayer bankPlusPlayer = BankPlus.INSTANCE.getPlayerRegistry().get(p);
-            if (bankPlusPlayer != null && bankPlusPlayer.getPlayerFile() != null) return bankPlusPlayer.getPlayerFile();
+            BPPlayer bpPlayer = BankPlus.INSTANCE.getPlayerRegistry().get(p);
+            if (bpPlayer != null && bpPlayer.getPlayerFile() != null) return bpPlayer.getPlayerFile();
         }
 
-        String identifier = Values.CONFIG.isStoringUUIDs() ? (p == null ? op.getUniqueId() : p.getUniqueId()).toString() : (p == null ? op.getName() : p.getName());
+        String identifier = (Values.CONFIG.isStoringUUIDs() ? op.getUniqueId().toString() : op.getName());
         return new File(BankPlus.INSTANCE.getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
     }
 
     public FileConfiguration getPlayerConfig() {
+        if (config != null) return config;
+
         if (p != null) {
-            BankPlusPlayer bankPlusPlayer = BankPlus.INSTANCE.getPlayerRegistry().get(p);
-            if (bankPlusPlayer != null && bankPlusPlayer.getPlayerConfig() != null) return bankPlusPlayer.getPlayerConfig();
+            BPPlayer bpPlayer = BankPlus.INSTANCE.getPlayerRegistry().get(p);
+            if (bpPlayer != null && bpPlayer.getPlayerConfig() != null) return bpPlayer.getPlayerConfig();
         }
 
         File file = getPlayerFile();
@@ -102,15 +112,12 @@ public class BankPlusPlayerFiles {
         try {
             config.load(file);
         } catch (IOException | InvalidConfigurationException e) {
-            BPLogger.warn("Something went wrong while trying to get " + (p == null ? op.getName() : p.getName()) + "'s file configuration: " + e.getMessage());
+            BPLogger.warn("Something went wrong while trying to get " + op.getName() + "'s file configuration: " + e.getMessage());
         }
         return config;
     }
 
     public void savePlayerFile(boolean async) {
-        File file = getPlayerFile();
-        FileConfiguration config = getPlayerConfig();
-
         if (!async) {
             save(config, file);
             return;
@@ -129,26 +136,6 @@ public class BankPlusPlayerFiles {
     }
 
     public void savePlayerFile(FileConfiguration config, boolean async) {
-        File file = getPlayerFile();
-
-        if (!async) {
-            save(config, file);
-            return;
-        }
-        try {
-            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE, () -> {
-                try {
-                    config.save(file);
-                } catch (Exception e) {
-                    Bukkit.getScheduler().runTask(BankPlus.INSTANCE, () -> save(config, file));
-                }
-            });
-        } catch (Exception e) {
-            save(config, file);
-        }
-    }
-
-    public void savePlayerFile(File file, FileConfiguration config, boolean async) {
         if (!async) {
             save(config, file);
             return;

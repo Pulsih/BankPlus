@@ -1,6 +1,5 @@
 package me.pulsi_.bankplus.commands.list;
 
-import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.loanSystem.LoanUtils;
@@ -26,72 +25,84 @@ public class LoanCmd extends BPCommand {
     }
 
     @Override
-    public void execute(CommandSender s, String args[]) {
-        if (!BPMethods.isPlayer(s)) return;
+    public boolean playerOnly() {
+        return true;
+    }
+
+    @Override
+    public boolean skipUsageWarn() {
+        return false;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender s, String args[]) {
         Player p = (Player) s;
 
         if (args.length > 1) {
             if (args[1].toLowerCase().equals("accept")) {
                 LoanUtils.acceptRequest(p);
-                return;
+                return false;
             }
 
             if (args[1].toLowerCase().equals("deny")) {
                 LoanUtils.denyRequest(p);
-                return;
+                return false;
             }
 
             if (args[1].toLowerCase().equals("cancel")) {
                 LoanUtils.cancelRequest(p);
-                return;
+                return false;
             }
         }
 
         if (LoanUtils.sentRequest(p)) {
             BPMessages.send(p, "Loan-Already-Sent");
-            return;
+            return false;
         }
-
-        if (!preExecute(s, args, true, false)) return;
 
         Player target = Bukkit.getPlayerExact(args[1]);
 
+        if (target == null || target.equals(s)) {
+            BPMessages.send(s, "Invalid-Player");
+            return false;
+        }
+
         if (args.length == 2) {
             BPMessages.send(p, "Specify-Number");
-            return;
+            return false;
         }
 
         String num = args[2];
-        if (BPMethods.isInvalidNumber(num, p)) return;
+        if (BPMethods.isInvalidNumber(num, p)) return false;
         BigDecimal amount = new BigDecimal(num);
 
         String from, to;
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
             if (args.length == 3 || args.length == 4) {
                 BPMessages.send(p, "Specify-Bank");
-                return;
+                return false;
             }
 
             String fromBankName = args[3];
             BankReader fromReader = new BankReader(fromBankName);
             if (!fromReader.exist()) {
                 BPMessages.send(p, "Invalid-Bank");
-                return;
+                return false;
             }
             if (!fromReader.isAvailable(p)) {
                 BPMessages.send(p, "Cannot-Access-Bank");
-                return;
+                return false;
             }
 
             String toBankName = args[4];
             BankReader toReader = new BankReader(toBankName);
             if (!toReader.exist()) {
                 BPMessages.send(p, "Invalid-Bank");
-                return;
+                return false;
             }
             if (!toReader.isAvailable(target)) {
                 BPMessages.send(p, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
-                return;
+                return false;
             }
 
             from = fromBankName;
@@ -101,7 +112,9 @@ public class LoanCmd extends BPCommand {
             to = Values.CONFIG.getMainGuiName();
         }
 
+        if (confirm(s)) return false;
         LoanUtils.sendRequest(p, target, amount, from, to);
+        return true;
     }
 
     @Override

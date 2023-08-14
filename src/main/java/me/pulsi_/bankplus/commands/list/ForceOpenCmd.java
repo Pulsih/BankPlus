@@ -23,31 +23,41 @@ public class ForceOpenCmd extends BPCommand {
     }
 
     @Override
-    public void execute(CommandSender s, String args[]) {
-        if (!preExecute(s, args, false, false)) return;
+    public boolean playerOnly() {
+        return false;
+    }
 
+    @Override
+    public boolean skipUsageWarn() {
+        return false;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender s, String args[]) {
         Player p = Bukkit.getPlayerExact(args[1]);
         if (p == null) {
             BPMessages.send(s, "Invalid-Player");
-            return;
+            return false;
         }
 
         String bankName = Values.CONFIG.getMainGuiName();
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
             if (args.length == 2) {
                 BPMessages.send(s, "Specify-Bank");
-                return;
+                return false;
             }
 
             bankName = args[2];
             if (!new BankReader(bankName).exist()) {
                 BPMessages.send(s, "Invalid-Bank");
-                return;
+                return false;
             }
         }
 
+        if (confirm(s)) return false;
         BankUtils.openBank(p, bankName, true);
         BPMessages.send(s, "Force-Open", "%player%$" + p.getName(), "%bank%$" + bankName);
+        return true;
     }
 
     @Override

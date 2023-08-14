@@ -1,8 +1,8 @@
 package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BankPlusPlayer;
-import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
+import me.pulsi_.bankplus.account.BPPlayer;
+import me.pulsi_.bankplus.account.BPPlayerFiles;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.OfflineInterestManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
@@ -23,10 +23,10 @@ public class PlayerJoinListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
-        BankPlusPlayerFiles files = new BankPlusPlayerFiles(p);
+        BPPlayerFiles files = new BPPlayerFiles(p);
         files.isPlayerRegistered();
 
-        BankPlusPlayer player = new BankPlusPlayer(p, files.getPlayerFile(), files.getPlayerConfig());
+        BPPlayer player = new BPPlayer(p, files.getPlayerFile(), files.getPlayerConfig());
         BankPlus.INSTANCE.getPlayerRegistry().put(p, player);
 
         FileConfiguration config = player.getPlayerConfig();

@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.interest;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BankPlusPlayerFiles;
+import me.pulsi_.bankplus.account.BPPlayerFiles;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankReader;
@@ -246,7 +246,7 @@ public class Interest {
                 multiEconomyManager.addBankBalance(interestMoney, bankName, true);
                 hasToSave = true;
             }
-            if (hasToSave) new BankPlusPlayerFiles(p).savePlayerFile(true);
+            if (hasToSave) new BPPlayerFiles(p).savePlayerFile(true);
         }
     }
 

@@ -26,58 +26,55 @@ public class DepositCmd extends BPCommand {
     }
 
     @Override
-    public void execute(CommandSender s, String args[]) {
-        if (!preExecute(s, args, true, false)) return;
+    public boolean playerOnly() {
+        return true;
+    }
 
+    @Override
+    public boolean skipUsageWarn() {
+        return false;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender s, String args[]) {
         Player p = (Player) s;
+
+        BigDecimal amount;
+        switch (args[1]) {
+            case "all":
+                amount = BigDecimal.valueOf(BankPlus.INSTANCE.getEconomy().getBalance(p));
+                break;
+
+            case "half":
+                amount = BigDecimal.valueOf(BankPlus.INSTANCE.getEconomy().getBalance(p) / 2);
+                break;
+
+            default:
+                String num = args[1];
+                if (BPMethods.isInvalidNumber(num, s)) return false;
+                amount = new BigDecimal(num);
+        }
 
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
             if (args.length == 2) {
                 BPMessages.send(s, "Specify-Bank");
-                return;
+                return false;
             }
 
             String bankName = args[2];
             if (!new BankReader(bankName).exist()) {
                 BPMessages.send(s, "Invalid-Bank");
-                return;
+                return false;
             }
 
-            BigDecimal amount;
-            switch (args[1]) {
-                case "all":
-                    amount = BigDecimal.valueOf(BankPlus.INSTANCE.getEconomy().getBalance(p));
-                    break;
-
-                case "half":
-                    amount = BigDecimal.valueOf(BankPlus.INSTANCE.getEconomy().getBalance(p) / 2);
-                    break;
-
-                default:
-                    String num = args[1];
-                    if (BPMethods.isInvalidNumber(num, s)) return;
-                    amount = new BigDecimal(num);
-            }
+            if (confirm(s)) return false;
             new MultiEconomyManager(p).deposit(amount, bankName);
         } else {
 
-            BigDecimal amount;
-            switch (args[1]) {
-                case "all":
-                    amount = BigDecimal.valueOf(BankPlus.INSTANCE.getEconomy().getBalance(p));
-                    break;
-
-                case "half":
-                    amount = BigDecimal.valueOf(BankPlus.INSTANCE.getEconomy().getBalance(p) / 2);
-                    break;
-
-                default:
-                    String num = args[1];
-                    if (BPMethods.isInvalidNumber(num, s)) return;
-                    amount = new BigDecimal(num);
-            }
+            if (confirm(s)) return false;
             new SingleEconomyManager(p).deposit(amount);
         }
+        return true;
     }
 
     @Override

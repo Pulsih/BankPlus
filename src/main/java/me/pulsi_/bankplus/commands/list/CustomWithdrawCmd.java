@@ -22,25 +22,36 @@ public class CustomWithdrawCmd extends BPCommand {
     }
 
     @Override
-    public void execute(CommandSender s, String args[]) {
-        if (!preExecute(s, args, true, true)) return;
+    public boolean playerOnly() {
+        return true;
+    }
+
+    @Override
+    public boolean skipUsageWarn() {
+        return false;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender s, String args[]) {
         Player p = (Player) s;
 
         String bankName = Values.CONFIG.getMainGuiName();
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
             if (args.length == 1) {
                 if (getUsage() != null && !getUsage().equals("")) BPMessages.send(s, getUsage(), true);
-                return;
+                return false;
             }
 
             bankName = args[1];
             if (!new BankReader(bankName).exist()) {
                 BPMessages.send(s, "Invalid-Bank");
-                return;
+                return false;
             }
         }
 
+        if (confirm(s)) return false;
         BPMethods.customWithdraw(p, bankName);
+        return true;
     }
 
     @Override

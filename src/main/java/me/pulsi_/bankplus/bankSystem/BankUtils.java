@@ -2,7 +2,7 @@ package me.pulsi_.bankplus.bankSystem;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BankPlusPlayer;
+import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPItems;
 import me.pulsi_.bankplus.utils.BPMessages;
@@ -30,7 +30,7 @@ public class BankUtils {
     }
 
     public static void openBank(Player p, String identifier, boolean bypass) {
-        BankPlusPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
+        BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
         BankGuiRegistry registry = BankPlus.INSTANCE.getBankGuiRegistry();
 
         if (identifier.equals(BankListGui.multipleBanksGuiID)) {
