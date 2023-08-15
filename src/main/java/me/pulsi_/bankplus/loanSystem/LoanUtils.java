@@ -5,6 +5,7 @@ import me.pulsi_.bankplus.account.BPPlayerFiles;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.debt.DebtUtils;
 import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
@@ -14,6 +15,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -67,7 +69,6 @@ public class LoanUtils {
         sent.remove(sender.getUniqueId());
 
         BigDecimal amount = loan.getMoneyGiven();
-        BPMessages.send(p, "Loan-Request-Received-Accepted", BPMethods.placeValues(sender, amount));
         BPMessages.send(sender, "Loan-Request-Sent-Accepted", "%player%$" + p.getName());
 
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
@@ -80,7 +81,7 @@ public class LoanUtils {
             if (balance.add(amount).doubleValue() >= capacity.doubleValue() && capacity.doubleValue() > 0d) {
                 em.setBankBalance(capacity, loan.getToBankName());
 
-                BigDecimal extra = amount.min(capacity.min(balance));
+                BigDecimal extra = amount.subtract(capacity.subtract(balance));
                 BankPlus.INSTANCE.getEconomy().depositPlayer(p, extra.doubleValue());
 
                 List<String> extraFormatter = new ArrayList<>();
@@ -104,7 +105,7 @@ public class LoanUtils {
             if (balance.add(amount).doubleValue() >= capacity.doubleValue() && capacity.doubleValue() > 0d) {
                 em.setBankBalance(capacity);
 
-                BigDecimal extra = amount.min(capacity.min(balance));
+                BigDecimal extra = amount.subtract(capacity.subtract(balance));
                 BankPlus.INSTANCE.getEconomy().depositPlayer(p, extra.doubleValue());
 
                 List<String> extraFormatter = new ArrayList<>();
@@ -172,11 +173,11 @@ public class LoanUtils {
         OfflinePlayer sender = loan.getSender(), target = loan.getTarget();
 
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
-            MultiEconomyManager sEM = sender.isOnline() ? new MultiEconomyManager((Player) sender) : new MultiEconomyManager(sender);
+            MultiEconomyManager sEM = sender.isOnline() ? new MultiEconomyManager(Bukkit.getPlayer(sender.getUniqueId())) : new MultiEconomyManager(sender);
             BigDecimal sBal = sEM.getBankBalance(loan.getFromBankName()), capacity = new BankReader(loan.getFromBankName()).getCapacity(sender);
 
             if (sBal.add(amount).doubleValue() >= capacity.doubleValue() && capacity.doubleValue() > 0d) {
-                BigDecimal extra = amount.min(capacity.min(sBal));
+                BigDecimal extra = amount.subtract(capacity.subtract(sBal));
                 sEM.setBankBalance(capacity, loan.getFromBankName());
 
                 List<String> extraFormatter = new ArrayList<>();
@@ -184,33 +185,33 @@ public class LoanUtils {
                 extraFormatter.add("%extra_long%$" + extra);
                 extraFormatter.add("%extra_formatted%$" + BPFormatter.format(extra));
                 extraFormatter.add("%extra_formatted_long%$" + BPFormatter.formatLong(extra));
-                if (sender.isOnline()) BPMessages.send((Player) sender, "Loan-Payback-Full", BPMethods.placeValues(target, amount), extraFormatter);
+                if (sender.isOnline()) BPMessages.send(Bukkit.getPlayer(sender.getUniqueId()), "Loan-Payback-Full", BPMethods.placeValues(target, amount), extraFormatter);
 
                 BankPlus.INSTANCE.getEconomy().depositPlayer(sender, extra.doubleValue());
             } else {
                 sEM.addBankBalance(amount, loan.getFromBankName());
-                if (sender.isOnline()) BPMessages.send((Player) sender, "Loan-Payback", BPMethods.placeValues(target, amount));
+                if (sender.isOnline()) BPMessages.send(Bukkit.getPlayer(sender.getUniqueId()), "Loan-Payback", BPMethods.placeValues(target, amount));
             }
 
-            MultiEconomyManager tEM = target.isOnline() ? new MultiEconomyManager((Player) target) : new MultiEconomyManager(target);
+            MultiEconomyManager tEM = target.isOnline() ? new MultiEconomyManager(Bukkit.getPlayer(target.getUniqueId())) : new MultiEconomyManager(target);
             BigDecimal tBal = tEM.getBankBalance(loan.getToBankName());
             if (tBal.doubleValue() < amount.doubleValue()) {
-                BigDecimal debt = amount.min(tBal);
+                BigDecimal debt = amount.subtract(tBal).add(DebtUtils.getDebt(target));
                 tEM.setBankBalance(BigDecimal.valueOf(0), loan.getToBankName());
-                if (target.isOnline()) BPMessages.send((Player) target, "Loan-Returned-Debt", BPMethods.placeValues(sender, debt));
+                if (target.isOnline()) BPMessages.send(Bukkit.getPlayer(target.getUniqueId()), "Loan-Returned-Debt", BPMethods.placeValues(sender, debt));
 
-                // ADD DEBT
+                DebtUtils.setDebt(target, debt);
             } else {
                 tEM.removeBankBalance(amount, loan.getToBankName());
-                if (target.isOnline()) BPMessages.send((Player) target, "Loan-Returned", BPMethods.placeValues(sender, amount));
+                if (target.isOnline()) BPMessages.send(Bukkit.getPlayer(target.getUniqueId()), "Loan-Returned", BPMethods.placeValues(sender, amount));
             }
 
         } else {
-            SingleEconomyManager sEM = sender.isOnline() ? new SingleEconomyManager((Player) sender) : new SingleEconomyManager(sender);
+            SingleEconomyManager sEM = sender.isOnline() ? new SingleEconomyManager(Bukkit.getPlayer(sender.getUniqueId())) : new SingleEconomyManager(sender);
             BigDecimal sBal = sEM.getBankBalance(), capacity = new BankReader(loan.getFromBankName()).getCapacity(sender);
 
             if (sBal.add(amount).doubleValue() >= capacity.doubleValue() && capacity.doubleValue() > 0d) {
-                BigDecimal extra = amount.min(capacity.min(sBal));
+                BigDecimal extra = amount.subtract(capacity.subtract(sBal));
                 sEM.setBankBalance(capacity);
 
                 List<String> extraFormatter = new ArrayList<>();
@@ -218,25 +219,25 @@ public class LoanUtils {
                 extraFormatter.add("%extra_long%$" + extra);
                 extraFormatter.add("%extra_formatted%$" + BPFormatter.format(extra));
                 extraFormatter.add("%extra_formatted_long%$" + BPFormatter.formatLong(extra));
-                if (sender.isOnline()) BPMessages.send((Player) sender, "Loan-Payback-Full", BPMethods.placeValues(target, amount), extraFormatter);
+                if (sender.isOnline()) BPMessages.send(Bukkit.getPlayer(sender.getUniqueId()), "Loan-Payback-Full", BPMethods.placeValues(target, amount), extraFormatter);
 
                 BankPlus.INSTANCE.getEconomy().depositPlayer(sender, extra.doubleValue());
             } else {
                 sEM.addBankBalance(amount);
-                if (sender.isOnline()) BPMessages.send((Player) sender, "Loan-Payback", BPMethods.placeValues(target, amount));
+                if (sender.isOnline()) BPMessages.send(Bukkit.getPlayer(sender.getUniqueId()), "Loan-Payback", BPMethods.placeValues(target, amount));
             }
 
-            SingleEconomyManager tEM = sender.isOnline() ? new SingleEconomyManager((Player) target) : new SingleEconomyManager(target);
+            SingleEconomyManager tEM = sender.isOnline() ? new SingleEconomyManager(Bukkit.getPlayer(target.getUniqueId())) : new SingleEconomyManager(target);
             BigDecimal tBal = tEM.getBankBalance();
             if (tBal.doubleValue() < amount.doubleValue()) {
-                BigDecimal debt = amount.min(tBal);
+                BigDecimal debt = amount.subtract(tBal).add(DebtUtils.getDebt(target));
                 tEM.setBankBalance(BigDecimal.valueOf(0));
-                if (target.isOnline()) BPMessages.send((Player) target, "Loan-Returned-Debt", BPMethods.placeValues(sender, debt));
+                if (target.isOnline()) BPMessages.send(Bukkit.getPlayer(target.getUniqueId()), "Loan-Returned-Debt", BPMethods.placeValues(sender, debt));
 
-                // ADD DEBT
+                DebtUtils.setDebt(target, debt);
             } else {
                 tEM.removeBankBalance(amount);
-                if (target.isOnline()) BPMessages.send((Player) target, "Loan-Returned", BPMethods.placeValues(sender, amount));
+                if (target.isOnline()) BPMessages.send(Bukkit.getPlayer(target.getUniqueId()), "Loan-Returned", BPMethods.placeValues(sender, amount));
             }
         }
 
@@ -254,12 +255,12 @@ public class LoanUtils {
         FileConfiguration config = files.getPlayerConfig();
 
         ConfigurationSection loans = config.getConfigurationSection("loans");
-        if (loans == null) return;
+        if (loans == null || loans.getKeys(false).isEmpty()) return;
 
         for (String loanSender : loans.getKeys(false)) {
-            Player sender;
+            OfflinePlayer sender;
             try {
-                sender = Values.CONFIG.isStoringUUIDs() ? Bukkit.getPlayer(UUID.fromString(loanSender)) : Bukkit.getPlayer(loanSender);
+                sender = Values.CONFIG.isStoringUUIDs() ? Bukkit.getOfflinePlayer(UUID.fromString(loanSender)) : Bukkit.getOfflinePlayer(loanSender);
             } catch (IllegalArgumentException e) {
                 continue;
             }
@@ -270,10 +271,16 @@ public class LoanUtils {
             loan.timeLeft = System.currentTimeMillis() + values.getLong("time_left");
 
             BankPlus.INSTANCE.getLoanRegistry().getLoans().add(loan);
+            startLoanTask(loan);
         }
     }
 
     public static void loadAllLoans() {
+        saveLoans();
+        for (BPLoan loan : new ArrayList<>(BankPlus.INSTANCE.getLoanRegistry().getLoans())) {
+            BukkitTask task = loan.task;
+            if (task != null) task.cancel();
+        }
         BankPlus.INSTANCE.getLoanRegistry().getLoans().clear();
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) loadPlayerLoans(p);
     }
@@ -295,7 +302,7 @@ public class LoanUtils {
     }
 
     public static void saveLoans() {
-        for (BPLoan loan : new ArrayList<>(BankPlus.INSTANCE.getLoanRegistry().getLoans()))
+        for (BPLoan loan : BankPlus.INSTANCE.getLoanRegistry().getLoans())
             saveLoan(loan);
     }
 

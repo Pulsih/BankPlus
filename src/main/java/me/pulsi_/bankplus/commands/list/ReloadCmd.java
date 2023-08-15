@@ -27,9 +27,12 @@ public class ReloadCmd extends BPCommand {
     public boolean onCommand(CommandSender s, String args[]) {
         if (confirm(s)) return false;
 
+        long time = System.currentTimeMillis();
+        BPMessages.send(s, "Reload-Started");
+
         boolean reloaded = BankPlus.INSTANCE.getDataManager().reloadPlugin();
-        if (reloaded) BPMessages.send(s, "Reload");
-        else BPMessages.send(s, "Failed-Reload");
+        if (reloaded) BPMessages.send(s, "Reload-Ended", "%time%$" + (System.currentTimeMillis() - time));
+        else BPMessages.send(s, "Reload-Failed");
         return true;
     }
 

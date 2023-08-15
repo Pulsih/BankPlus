@@ -131,9 +131,9 @@ pay:
   cooldown: 0
   cooldown-message: ""
 reload:
-  need-confirm: false
-  confirm-cooldown: 0
-  confirm-message: ""
+  need-confirm: true
+  confirm-cooldown: 5
+  confirm-message: "%prefix% &cAre you sure to reload the plugin? This is not a simple operation and many reloads could be heavy for your server."
   has-cooldown: false
   cooldown: 0
   cooldown-message: ""

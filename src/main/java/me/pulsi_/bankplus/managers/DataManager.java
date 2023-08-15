@@ -8,10 +8,7 @@ import me.pulsi_.bankplus.commands.MainCmd;
 import me.pulsi_.bankplus.external.UpdateChecker;
 import me.pulsi_.bankplus.external.bStats;
 import me.pulsi_.bankplus.interest.Interest;
-import me.pulsi_.bankplus.listeners.AFKListener;
-import me.pulsi_.bankplus.listeners.InventoryCloseListener;
-import me.pulsi_.bankplus.listeners.PlayerJoinListener;
-import me.pulsi_.bankplus.listeners.PlayerQuitListener;
+import me.pulsi_.bankplus.listeners.*;
 import me.pulsi_.bankplus.listeners.bankListener.*;
 import me.pulsi_.bankplus.listeners.playerChat.*;
 import me.pulsi_.bankplus.loanSystem.LoanUtils;
@@ -91,47 +88,49 @@ public class DataManager {
     }
 
     private void registerEvents() {
-        PluginManager pluginManager = plugin.getServer().getPluginManager();
+        PluginManager plManager = plugin.getServer().getPluginManager();
 
-        pluginManager.registerEvents(new PlayerJoinListener(), plugin);
-        pluginManager.registerEvents(new PlayerQuitListener(), plugin);
-        pluginManager.registerEvents(new UpdateChecker(), plugin);
-        pluginManager.registerEvents(new AFKListener(plugin), plugin);
-        pluginManager.registerEvents(new InventoryCloseListener(), plugin);
+        plManager.registerEvents(new PlayerJoinListener(), plugin);
+        plManager.registerEvents(new PlayerQuitListener(), plugin);
+        plManager.registerEvents(new UpdateChecker(), plugin);
+        plManager.registerEvents(new AFKListener(plugin), plugin);
+        plManager.registerEvents(new InventoryCloseListener(), plugin);
+        plManager.registerEvents(new BPTransactionListener(), plugin);
+
 
         switch (Values.CONFIG.getPlayerChatPriority()) {
             case "LOWEST":
-                pluginManager.registerEvents(new PlayerChatLowest(), plugin);
+                plManager.registerEvents(new PlayerChatLowest(), plugin);
                 break;
             case "LOW":
-                pluginManager.registerEvents(new PlayerChatLow(), plugin);
+                plManager.registerEvents(new PlayerChatLow(), plugin);
                 break;
             default:
-                pluginManager.registerEvents(new PlayerChatNormal(), plugin);
+                plManager.registerEvents(new PlayerChatNormal(), plugin);
                 break;
             case "HIGH":
-                pluginManager.registerEvents(new PlayerChatHigh(), plugin);
+                plManager.registerEvents(new PlayerChatHigh(), plugin);
                 break;
             case "HIGHEST":
-                pluginManager.registerEvents(new PlayerChatHighest(), plugin);
+                plManager.registerEvents(new PlayerChatHighest(), plugin);
                 break;
         }
 
         switch (Values.CONFIG.getBankClickPriority()) {
             case "LOWEST":
-                pluginManager.registerEvents(new BankClickLowest(), plugin);
+                plManager.registerEvents(new BankClickLowest(), plugin);
                 break;
             case "LOW":
-                pluginManager.registerEvents(new BankClickLow(), plugin);
+                plManager.registerEvents(new BankClickLow(), plugin);
                 break;
             default:
-                pluginManager.registerEvents(new BankClickNormal(), plugin);
+                plManager.registerEvents(new BankClickNormal(), plugin);
                 break;
             case "HIGH":
-                pluginManager.registerEvents(new BankClickHigh(), plugin);
+                plManager.registerEvents(new BankClickHigh(), plugin);
                 break;
             case "HIGHEST":
-                pluginManager.registerEvents(new BankClickHighest(), plugin);
+                plManager.registerEvents(new BankClickHighest(), plugin);
                 break;
         }
     }

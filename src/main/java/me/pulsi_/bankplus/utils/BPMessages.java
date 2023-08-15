@@ -97,8 +97,8 @@ public class BPMessages {
                     String replacement = stringToReplace.split("\\$")[1];
                     message = message.replace(oldChar, replacement);
                 }
-                if (!message.equals("")) p.sendMessage(format(p, message));
             }
+            if (!message.equals("")) p.sendMessage(format(p, message));
         }
     }
 
@@ -128,8 +128,8 @@ public class BPMessages {
                     String replacement = stringToReplace.split("\\$")[1];
                     message = message.replace(oldChar, replacement);
                 }
-                if (!message.equals("")) s.sendMessage(format(s, message));
             }
+            if (!message.equals("")) s.sendMessage(format(s, message));
         }
     }
 

@@ -5,6 +5,7 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.debt.DebtUtils;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.managers.BankTopManager;
 import me.pulsi_.bankplus.utils.BPChat;
@@ -90,6 +91,11 @@ public class BPPlaceholders extends PlaceholderExpansion {
             }
 
             return level;
+        }
+
+        if (identifier.startsWith("debt")) {
+            String formatter = identifier.replace("debt", "");
+            return getFormat(formatter, DebtUtils.getDebt(p));
         }
 
         if (identifier.startsWith("next_level_cost")) {

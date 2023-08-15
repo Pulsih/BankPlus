@@ -708,7 +708,9 @@ public class ConfigManager {
         addSpace(newMessagesConfig);
 
         addComments(newMessagesConfig, "System");
-        validatePath(oldMessagesConfig, newMessagesConfig, "Reload", "%prefix% &aPlugin reloaded!");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Reload-Started", "%prefix% &aThe plugin will not try to reload...");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Reload-Ended", "%prefix% &2Plugin successfully reloaded! &8(&b%time%ms&8)");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Reload-Failed", "%prefix% &cFailed reloading task, please check the console for more info. (Usually this is not a bankplus problem!)");
         validatePath(oldMessagesConfig, newMessagesConfig, "Interest-Restarted", "%prefix% &aInterest Restarted!");
         validatePath(oldMessagesConfig, newMessagesConfig, "Interest-Disabled", "%prefix% &cThe interest is disabled!");
         validatePath(oldMessagesConfig, newMessagesConfig, "BankTop-Disabled", "%prefix% &cThe banktop is disabled!");
@@ -751,8 +753,9 @@ public class ConfigManager {
         validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Request-Received-Cancelled", "%prefix% &f%player% &chas cancelled the loan request.");
         validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Payback", "%prefix% &aYou have received &f%amount_formatted% &afrom the loan given to &f%player%.");
         validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Payback-Full", "%prefix% &aYou have received &f%amount_formatted% &afrom the loan given to &f%player% &abut your bank was full so &f%extra_formatted% &amoney has been added to your wallet.");
-        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Returned", "%prefix% &aYou have returned &f%amount_formatted% &amoney from &f%player%&a's loan.");
-        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Returned-Debt", "%prefix% &cSadly, you did not have enough money to pay back &f%player%&c, so you are now in debt for %f%amount_formatted%&c.");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Returned", "%prefix% &aYou have returned &f%amount_formatted% &amoney to &f%player% &afor his loan.");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Loan-Returned-Debt", "%prefix% &cSadly, you did not have enough money to pay back &f%player%&c, so you are now in debt for &f%amount_formatted%&c.");
+        validatePath(oldMessagesConfig, newMessagesConfig, "Debt-Money-Taken", "%prefix% &cWe took &f%amount_formatted% &cmoney from your bank to pay your debt, which is now: %debt_formatted%");
         addSpace(newMessagesConfig);
 
         addComments(newMessagesConfig, "Titles");
@@ -801,7 +804,6 @@ public class ConfigManager {
         validatePath(oldMessagesConfig, newMessagesConfig, "Insufficient-Money", "%prefix% &cYou don't have enough money!");
         validatePath(oldMessagesConfig, newMessagesConfig, "Gui-Module-Disabled", "%prefix% &cThe gui module is disabled!");
         validatePath(oldMessagesConfig, newMessagesConfig, "Internal-Error", "%prefix% &cAn internal error has occurred, try again later!");
-        validatePath(oldMessagesConfig, newMessagesConfig, "Failed-Reload", "%prefix% &cBankPlus has failed his reload task, please check the console for more info. (This is usually not a bankplus problem!)");
         validatePath(oldMessagesConfig, newMessagesConfig, "Unknown-Command", "%prefix% &cUnknown Command!");
         validatePath(oldMessagesConfig, newMessagesConfig, "No-Permission", "%prefix% &cYou don't have the permission! (%permission%)");
         validatePath(oldMessagesConfig, newMessagesConfig, "No-Loan-Requests", "%prefix% &cYou haven't received any loan requests!");

@@ -351,44 +351,29 @@ public class BPMethods {
         return true;
     }
 
-    public static List<String> placeValues(Player p, BigDecimal amount) {
-        List<String> values = new ArrayList<>();
-        values.add("%player%$" + p.getName());
-        values.add("%player_name%$" + p.getName());
-
-        values.add("%amount%$" + BPFormatter.formatCommas(amount));
-        values.add("%amount_long%$" + amount);
-        values.add("%amount_formatted%$" + BPFormatter.format(amount));
-        values.add("%amount_formatted_long%$" + BPFormatter.formatLong(amount));
-        return values;
+    public static List<String> placeValues(BigDecimal amount) {
+        return placeValues(null, amount, "amount");
     }
 
     public static List<String> placeValues(OfflinePlayer p, BigDecimal amount) {
-        List<String> values = new ArrayList<>();
-        values.add("%player%$" + p.getName());
-        values.add("%player_name%$" + p.getName());
-
-        values.add("%amount%$" + BPFormatter.formatCommas(amount));
-        values.add("%amount_long%$" + amount);
-        values.add("%amount_formatted%$" + BPFormatter.format(amount));
-        values.add("%amount_formatted_long%$" + BPFormatter.formatLong(amount));
-        return values;
+        return placeValues(p, amount, "amount");
     }
 
-    public static List<String> placeValues(OfflinePlayer p, BigDecimal amount, BigDecimal taxes) {
+    public static List<String> placeValues(BigDecimal amount, String newIdentifier) {
+        return placeValues(null, amount, newIdentifier);
+    }
+
+    public static List<String> placeValues(OfflinePlayer p, BigDecimal amount, String newIdentifier) {
         List<String> values = new ArrayList<>();
-        values.add("%player%$" + p.getName());
-        values.add("%player_name%$" + p.getName());
+        if (p != null) {
+            values.add("%player%$" + p.getName());
+            values.add("%player_name%$" + p.getName());
+        }
 
-        values.add("%amount%$" + BPFormatter.formatCommas(amount));
-        values.add("%amount_long%$" + amount);
-        values.add("%amount_formatted%$" + BPFormatter.format(amount));
-        values.add("%amount_formatted_long%$" + BPFormatter.formatLong(amount));
-
-        values.add("%taxes%$" + BPFormatter.formatCommas(taxes));
-        values.add("%taxes_long%$" + taxes);
-        values.add("%taxes_formatted%$" + BPFormatter.format(taxes));
-        values.add("%taxes_formatted_long%$" + BPFormatter.formatLong(taxes));
+        values.add("%" + newIdentifier + "%$" + BPFormatter.formatCommas(amount));
+        values.add("%" + newIdentifier + "_long%$" + amount);
+        values.add("%" + newIdentifier + "_formatted%$" + BPFormatter.format(amount));
+        values.add("%" + newIdentifier + "_formatted_long%$" + BPFormatter.formatLong(amount));
         return values;
     }
 

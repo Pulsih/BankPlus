@@ -5,6 +5,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.HashMap;
 
 public class BPPlayer {
@@ -15,6 +16,8 @@ public class BPPlayer {
     private Bank openedBank;
     private HashMap<String, String> playerBankClickHolder;
     private int banktopPosition = -1;
+
+    private BigDecimal debt;
 
     public BPPlayer(Player player, File playerFile, FileConfiguration playerConfig) {
         this.player = player;
@@ -46,6 +49,10 @@ public class BPPlayer {
         return banktopPosition;
     }
 
+    public BigDecimal getDebt() {
+        return debt;
+    }
+
     public void setOpenedBank(Bank openedBank) {
         this.openedBank = openedBank;
     }
@@ -56,5 +63,9 @@ public class BPPlayer {
 
     public void setBanktopPosition(int banktopPosition) {
         this.banktopPosition = banktopPosition;
+    }
+
+    public void setDebt(BigDecimal debt) {
+        this.debt = debt;
     }
 }

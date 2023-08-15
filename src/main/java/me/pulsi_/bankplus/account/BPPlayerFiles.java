@@ -27,7 +27,7 @@ public class BPPlayerFiles {
 
     public BPPlayerFiles(OfflinePlayer op) {
         this.op = op;
-        this.p = op.isOnline() ? (Player) op : null;
+        this.p = op.isOnline() ? Bukkit.getPlayer(op.getUniqueId()) : null;
 
         this.config = getPlayerConfig();
         this.file = getPlayerFile();

@@ -32,6 +32,7 @@ public class PlayerJoinListener implements Listener {
         FileConfiguration config = player.getPlayerConfig();
         String sOfflineInterest = config.getString("Offline-Interest");
         String sName = config.getString("Account-Name");
+        String debt = config.getString("Debt");
         boolean hasChanges = false;
 
         if (Values.CONFIG.isNotifyOfflineInterest() && sOfflineInterest == null) {
@@ -40,6 +41,10 @@ public class PlayerJoinListener implements Listener {
         }
         if (sName == null) {
             config.set("Account-Name", p.getName());
+            hasChanges = true;
+        }
+        if (debt == null) {
+            config.set("Debt", BPFormatter.formatBigDouble(BigDecimal.valueOf(0)));
             hasChanges = true;
         }
 

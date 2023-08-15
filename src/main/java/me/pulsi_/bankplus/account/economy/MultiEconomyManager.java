@@ -3,12 +3,14 @@ package me.pulsi_.bankplus.account.economy;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayerFiles;
 import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.events.BPTransactionEvent;
 import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.EconomyResponse;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -165,7 +167,14 @@ public class MultiEconomyManager {
      * @param bankName The bank.
      */
     public void setBankBalance(BigDecimal amount, String bankName) {
-        set(amount, bankName);
+        BPTransactionEvent event = new BPTransactionEvent(
+                op, BPTransactionEvent.TransactionType.SET, getBankBalance(bankName), amount, false, bankName
+        );
+        Bukkit.getPluginManager().callEvent(event);
+
+        if (event.isCancelled()) return;
+
+        set(event.getTransactionAmount(), bankName);
     }
 
     /**
@@ -185,7 +194,14 @@ public class MultiEconomyManager {
      * @param bankName The bank.
      */
     public void addBankBalance(BigDecimal amount, String bankName, boolean addOfflineInterest) {
-        set(getBankBalance(bankName).add(amount), bankName, addOfflineInterest);
+        BPTransactionEvent event = new BPTransactionEvent(
+                op, BPTransactionEvent.TransactionType.ADD, getBankBalance(bankName), amount, false, bankName
+        );
+        Bukkit.getPluginManager().callEvent(event);
+
+        if (event.isCancelled()) return;
+
+        set(getBankBalance(bankName).add(event.getTransactionAmount()), bankName, addOfflineInterest);
     }
 
     /**
@@ -195,7 +211,14 @@ public class MultiEconomyManager {
      * @param bankName The bank.
      */
     public void removeBankBalance(BigDecimal amount, String bankName) {
-        set(getBankBalance(bankName).subtract(amount), bankName);
+        BPTransactionEvent event = new BPTransactionEvent(
+                op, BPTransactionEvent.TransactionType.REMOVE, getBankBalance(bankName), amount, false, bankName
+        );
+        Bukkit.getPluginManager().callEvent(event);
+
+        if (event.isCancelled()) return;
+
+        set(getBankBalance(bankName).subtract(event.getTransactionAmount()), bankName);
     }
 
     /**
@@ -235,6 +258,14 @@ public class MultiEconomyManager {
     }
 
     public void deposit(BigDecimal amount, String bankName) {
+        BPTransactionEvent event = new BPTransactionEvent(
+                op, BPTransactionEvent.TransactionType.DEPOSIT, getBankBalance(bankName), amount, false, bankName
+        );
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) return;
+
+        amount = event.getTransactionAmount();
+
         if (amount.doubleValue() < Values.CONFIG.getDepositMinimumAmount().doubleValue()) {
             BPMessages.send(p, "Minimum-Number", "%min%$" + Values.CONFIG.getDepositMinimumAmount());
             return;
@@ -268,11 +299,19 @@ public class MultiEconomyManager {
         if (BPMethods.hasFailed(p, depositResponse)) return;
 
         addBankBalance(amount.subtract(taxes), bankName);
-        BPMessages.send(p, "Success-Deposit", BPMethods.placeValues(p, amount.subtract(taxes), taxes));
+        BPMessages.send(p, "Success-Deposit", BPMethods.placeValues(p, amount.subtract(taxes)), BPMethods.placeValues(taxes, "taxes"));
         BPMethods.playSound("DEPOSIT", p);
     }
 
     public void withdraw(BigDecimal amount, String bankName) {
+        BPTransactionEvent event = new BPTransactionEvent(
+                op, BPTransactionEvent.TransactionType.WITHDRAW, getBankBalance(bankName), amount, false, bankName
+        );
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) return;
+
+        amount = event.getTransactionAmount();
+
         if (amount.doubleValue() < Values.CONFIG.getWithdrawMinimumAmount().doubleValue()) {
             BPMessages.send(p, "Minimum-Number", "%min%$" + Values.CONFIG.getWithdrawMinimumAmount());
             return;
@@ -294,7 +333,7 @@ public class MultiEconomyManager {
         if (BPMethods.hasFailed(p, withdrawResponse)) return;
 
         removeBankBalance(amount.add(taxes), bankName);
-        BPMessages.send(p, "Success-Withdraw", BPMethods.placeValues(p, amount.subtract(taxes), taxes));
+        BPMessages.send(p, "Success-Withdraw", BPMethods.placeValues(p, amount.subtract(taxes)), BPMethods.placeValues(taxes, "taxes"));
         BPMethods.playSound("WITHDRAW", p);
     }
 
@@ -323,7 +362,7 @@ public class MultiEconomyManager {
         }
 
         if (newBalance.doubleValue() >= targetCapacity.doubleValue() && targetCapacity.doubleValue() > 0d) {
-            removeBankBalance(targetCapacity.min(targetBalance), fromBank);
+            removeBankBalance(targetCapacity.subtract(targetBalance), fromBank);
             targetEM.setBankBalance(targetCapacity, toBank);
 
             BPMessages.send(p, "Payment-Sent", BPMethods.placeValues(target, amount));
