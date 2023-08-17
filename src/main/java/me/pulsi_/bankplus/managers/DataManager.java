@@ -72,7 +72,10 @@ public class DataManager {
 
         if (Values.CONFIG.isInterestEnabled()) plugin.getInterest().startInterest();
         if (Values.CONFIG.isIgnoringAfkPlayers()) plugin.getAfkManager().startCountdown();
-        if (Values.CONFIG.isBanktopEnabled()) plugin.getBankTopManager().startUpdateTask();
+        if (Values.CONFIG.isBanktopEnabled()) {
+            plugin.getBankTopManager().updateBankTop();
+            plugin.getBankTopManager().startUpdateTask();
+        }
         if (Values.CONFIG.isGuiModuleEnabled() && !plugin.getBankGuiRegistry().loadBanks()) success = false;
 
         AFKManager afkManager = plugin.getAfkManager();

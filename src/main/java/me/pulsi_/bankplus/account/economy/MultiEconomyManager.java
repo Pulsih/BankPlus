@@ -170,7 +170,7 @@ public class MultiEconomyManager {
         BPTransactionEvent event = new BPTransactionEvent(
                 op, BPTransactionEvent.TransactionType.SET, getBankBalance(bankName), amount, false, bankName
         );
-        Bukkit.getPluginManager().callEvent(event);
+        BPMethods.callEvent(event);
 
         if (event.isCancelled()) return;
 
@@ -197,7 +197,7 @@ public class MultiEconomyManager {
         BPTransactionEvent event = new BPTransactionEvent(
                 op, BPTransactionEvent.TransactionType.ADD, getBankBalance(bankName), amount, false, bankName
         );
-        Bukkit.getPluginManager().callEvent(event);
+        BPMethods.callEvent(event);
 
         if (event.isCancelled()) return;
 
@@ -214,7 +214,7 @@ public class MultiEconomyManager {
         BPTransactionEvent event = new BPTransactionEvent(
                 op, BPTransactionEvent.TransactionType.REMOVE, getBankBalance(bankName), amount, false, bankName
         );
-        Bukkit.getPluginManager().callEvent(event);
+        BPMethods.callEvent(event);
 
         if (event.isCancelled()) return;
 
@@ -261,7 +261,7 @@ public class MultiEconomyManager {
         BPTransactionEvent event = new BPTransactionEvent(
                 op, BPTransactionEvent.TransactionType.DEPOSIT, getBankBalance(bankName), amount, false, bankName
         );
-        Bukkit.getPluginManager().callEvent(event);
+        BPMethods.callEvent(event);
         if (event.isCancelled()) return;
 
         amount = event.getTransactionAmount();
@@ -307,7 +307,7 @@ public class MultiEconomyManager {
         BPTransactionEvent event = new BPTransactionEvent(
                 op, BPTransactionEvent.TransactionType.WITHDRAW, getBankBalance(bankName), amount, false, bankName
         );
-        Bukkit.getPluginManager().callEvent(event);
+        BPMethods.callEvent(event);
         if (event.isCancelled()) return;
 
         amount = event.getTransactionAmount();

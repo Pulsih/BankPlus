@@ -13,6 +13,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.math.BigDecimal;
@@ -409,9 +410,7 @@ public class BPMethods {
         return false;
     }
 
-    public static boolean isLegacyServer() {
-        String v = BankPlus.INSTANCE.getServerVersion();
-        return v.contains("1.7") || v.contains("1.8") || v.contains("1.9") ||
-                v.contains("1.10") || v.contains("1.11") || v.contains("1.12");
+    public static void callEvent(Event event) {
+        Bukkit.getScheduler().runTask(BankPlus.INSTANCE, () -> Bukkit.getPluginManager().callEvent(event));
     }
 }

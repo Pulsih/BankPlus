@@ -80,17 +80,9 @@ public class LoanUtils {
             // If the bank is full, instead of loosing money they will be added to the vault balance
             if (balance.add(amount).doubleValue() >= capacity.doubleValue() && capacity.doubleValue() > 0d) {
                 em.setBankBalance(capacity, loan.getToBankName());
-
                 BigDecimal extra = amount.subtract(capacity.subtract(balance));
                 BankPlus.INSTANCE.getEconomy().depositPlayer(p, extra.doubleValue());
-
-                List<String> extraFormatter = new ArrayList<>();
-                extraFormatter.add("%extra%$" + BPFormatter.formatCommas(extra));
-                extraFormatter.add("%extra_long%$" + extra);
-                extraFormatter.add("%extra_formatted%$" + BPFormatter.format(extra));
-                extraFormatter.add("%extra_formatted_long%$" + BPFormatter.formatLong(extra));
-
-                BPMessages.send(p, "Loan-Request-Received-Accepted-Full", BPMethods.placeValues(sender, amount), extraFormatter);
+                BPMessages.send(p, "Loan-Request-Received-Accepted-Full", BPMethods.placeValues(sender, amount), BPMethods.placeValues(extra, "extra"));
             } else {
                 em.addBankBalance(amount, loan.getToBankName());
                 BPMessages.send(p, "Loan-Request-Received-Accepted", BPMethods.placeValues(sender, amount));
@@ -104,17 +96,9 @@ public class LoanUtils {
 
             if (balance.add(amount).doubleValue() >= capacity.doubleValue() && capacity.doubleValue() > 0d) {
                 em.setBankBalance(capacity);
-
                 BigDecimal extra = amount.subtract(capacity.subtract(balance));
                 BankPlus.INSTANCE.getEconomy().depositPlayer(p, extra.doubleValue());
-
-                List<String> extraFormatter = new ArrayList<>();
-                extraFormatter.add("%extra%$" + BPFormatter.formatCommas(extra));
-                extraFormatter.add("%extra_long%$" + extra);
-                extraFormatter.add("%extra_formatted%$" + BPFormatter.format(extra));
-                extraFormatter.add("%extra_formatted_long%$" + BPFormatter.formatLong(extra));
-
-                BPMessages.send(p, "Loan-Request-Received-Accepted-Full", BPMethods.placeValues(sender, amount), extraFormatter);
+                BPMessages.send(p, "Loan-Request-Received-Accepted-Full", BPMethods.placeValues(sender, amount), BPMethods.placeValues(extra, "extra"));
             } else {
                 em.addBankBalance(amount);
                 BPMessages.send(p, "Loan-Request-Received-Accepted", BPMethods.placeValues(sender, amount));

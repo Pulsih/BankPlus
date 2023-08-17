@@ -125,7 +125,7 @@ public class SingleEconomyManager {
         BPTransactionEvent event = new BPTransactionEvent(
                 op, BPTransactionEvent.TransactionType.SET, getBankBalance(), amount, true, Values.CONFIG.getMainGuiName()
         );
-        Bukkit.getPluginManager().callEvent(event);
+        BPMethods.callEvent(event);
 
         if (event.isCancelled()) return;
 
@@ -151,7 +151,7 @@ public class SingleEconomyManager {
         BPTransactionEvent event = new BPTransactionEvent(
                 op, BPTransactionEvent.TransactionType.ADD, getBankBalance(), amount, true, Values.CONFIG.getMainGuiName()
         );
-        Bukkit.getPluginManager().callEvent(event);
+        BPMethods.callEvent(event);
 
         if (event.isCancelled()) return;
 
@@ -167,7 +167,7 @@ public class SingleEconomyManager {
         BPTransactionEvent event = new BPTransactionEvent(
                 op, BPTransactionEvent.TransactionType.REMOVE, getBankBalance(), amount, true, Values.CONFIG.getMainGuiName()
         );
-        Bukkit.getPluginManager().callEvent(event);
+        BPMethods.callEvent(event);
 
         if (event.isCancelled()) return;
 
@@ -211,7 +211,7 @@ public class SingleEconomyManager {
         BPTransactionEvent event = new BPTransactionEvent(
                 op, BPTransactionEvent.TransactionType.DEPOSIT, getBankBalance(), amount, true, Values.CONFIG.getMainGuiName()
         );
-        Bukkit.getPluginManager().callEvent(event);
+        BPMethods.callEvent(event);
         if (event.isCancelled()) return;
 
         amount = event.getTransactionAmount();
@@ -257,7 +257,7 @@ public class SingleEconomyManager {
         BPTransactionEvent event = new BPTransactionEvent(
                 op, BPTransactionEvent.TransactionType.WITHDRAW, getBankBalance(), amount, true, Values.CONFIG.getMainGuiName()
         );
-        Bukkit.getPluginManager().callEvent(event);
+        BPMethods.callEvent(event);
         if (event.isCancelled()) return;
 
         amount = event.getTransactionAmount();
