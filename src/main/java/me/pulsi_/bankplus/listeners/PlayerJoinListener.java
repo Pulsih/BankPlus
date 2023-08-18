@@ -8,6 +8,7 @@ import me.pulsi_.bankplus.account.economy.OfflineInterestManager;
 import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPFormatter;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -24,7 +25,7 @@ public class PlayerJoinListener implements Listener {
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
         BPPlayerFiles files = new BPPlayerFiles(p);
-        files.isPlayerRegistered();
+        if (!files.isPlayerRegistered()) BPLogger.info("Successfully registered " + p.getName() + "!");
 
         BPPlayer player = new BPPlayer(p, files.getPlayerFile(), files.getPlayerConfig());
         BankPlus.INSTANCE.getPlayerRegistry().put(p, player);
@@ -78,13 +79,14 @@ public class PlayerJoinListener implements Listener {
             }
             new SingleEconomyManager(p).loadBankBalance();
         }
-        if (hasChanges) files.savePlayerFile(true);
+        if (hasChanges) files.savePlayerFile(config, true);
 
         offlineInterestMessage(p);
     }
 
     private void offlineInterestMessage(Player p) {
         if (!Values.CONFIG.isNotifyOfflineInterest()) return;
+
         OfflineInterestManager interestManager = new OfflineInterestManager(p);
         BigDecimal offlineInterest = interestManager.getOfflineInterest();
         if (offlineInterest.doubleValue() <= 0) return;

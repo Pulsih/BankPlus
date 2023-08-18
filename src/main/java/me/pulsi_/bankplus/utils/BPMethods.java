@@ -170,14 +170,14 @@ public class BPMethods {
         if (Values.CONFIG.getSaveBalancedDelay() <= 0) return;
 
         // Cache the values out the runnable to improve a bit the performance.
-        long delay = Values.CONFIG.getSaveBalancedDelay();
+        long delay = Values.CONFIG.getSaveBalancedDelay() * 1200L;
         boolean multi = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled(), saveBroadcast = Values.CONFIG.isSaveBalancesBroadcast();
 
         tasks.setSavingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE, () -> {
             if (multi) Bukkit.getOnlinePlayers().forEach(p -> new MultiEconomyManager(p).saveBankBalance(true));
             else Bukkit.getOnlinePlayers().forEach(p -> new SingleEconomyManager(p).saveBankBalance(true));
             if (saveBroadcast) BPLogger.info("All player balances have been saved!");
-        }, delay * 1200L, delay * 1200L));
+        }, delay, delay));
     }
 
     public static void customWithdraw(Player p) {

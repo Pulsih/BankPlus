@@ -44,6 +44,8 @@ public class DataManager {
 
         BPLogger.log("    &aDone! &8(&3" + (System.currentTimeMillis() - startTime) + "ms&8)");
         BPLogger.log("");
+
+        if (Values.CONFIG.isBanktopEnabled()) plugin.getBankTopManager().updateBankTop();
     }
 
     public void shutdownPlugin() {
@@ -70,12 +72,8 @@ public class DataManager {
         registerer.resetCmds();
         registerer.registerCmds();
 
-        if (Values.CONFIG.isInterestEnabled()) plugin.getInterest().startInterest();
         if (Values.CONFIG.isIgnoringAfkPlayers()) plugin.getAfkManager().startCountdown();
-        if (Values.CONFIG.isBanktopEnabled()) {
-            plugin.getBankTopManager().updateBankTop();
-            plugin.getBankTopManager().startUpdateTask();
-        }
+        if (Values.CONFIG.isBanktopEnabled()) plugin.getBankTopManager().startUpdateTask();
         if (Values.CONFIG.isGuiModuleEnabled() && !plugin.getBankGuiRegistry().loadBanks()) success = false;
 
         AFKManager afkManager = plugin.getAfkManager();

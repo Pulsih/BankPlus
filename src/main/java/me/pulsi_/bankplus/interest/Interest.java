@@ -26,7 +26,7 @@ import java.math.BigDecimal;
 public class Interest {
 
     private long cooldown = 0;
-    private boolean wasDisabled = false;
+    private boolean wasDisabled = true;
 
     public void startInterest() {
         long interestSave = 0;

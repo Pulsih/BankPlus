@@ -113,39 +113,60 @@ public class BankReader {
 
     /**
      * Get the current bank capacity based on the bank level of this player.
-     * @param p The player
-     * @return A BigDecimal number representing the capacity.
+     * @param p The player.
+     * @return The capacity amount.
      */
     public BigDecimal getCapacity(Player p) {
-        if (!hasUpgrades()) return Values.CONFIG.getMaxBankCapacity();
-
-        int level = getCurrentLevel(p);
-        String capacity = getUpgrades().getString(level + ".Capacity");
-        return new BigDecimal(capacity == null ? Values.CONFIG.getMaxBankCapacity().toString() : capacity);
+        return getCapacity(getCurrentLevel(p));
     }
 
     /**
      * Get the current bank capacity based on the bank level of this player.
-     * @param p The player
-     * @return A BigDecimal number representing the capacity.
+     * @param p The player.
+     * @return The capacity amount.
      */
     public BigDecimal getCapacity(OfflinePlayer p) {
+        return getCapacity(getCurrentLevel(p));
+    }
+
+    /**
+     * Get the bank capacity of that specified level.
+     * @param level The bank level.
+     * @return The capacity amount.
+     */
+    public BigDecimal getCapacity(int level) {
         if (!hasUpgrades()) return Values.CONFIG.getMaxBankCapacity();
 
-        int level = getCurrentLevel(p);
         String capacity = getUpgrades().getString(level + ".Capacity");
         return new BigDecimal(capacity == null ? Values.CONFIG.getMaxBankCapacity().toString() : capacity);
     }
 
     /**
-     * Get the custom interest amount different from the one selected in the config based on the bank level.
-     * @param p The player
-     * @return A BigDecimal number representing the interest rate.
+     * Get the interest rate of the player's bank level.
+     * @param p The player.
+     * @return The interest amount.
      */
     public BigDecimal getInterest(Player p) {
+        return getInterest(getCurrentLevel(p));
+    }
+
+    /**
+     * Get the interest rate of the player's bank level.
+     * @param p The player.
+     * @return The interest amount.
+     */
+    public BigDecimal getInterest(OfflinePlayer p) {
+        return getInterest(getCurrentLevel(p));
+    }
+
+    /**
+     * Get the interest rate of that bank level.
+     * @param level The bank level.
+     * @return The interest amount.
+     */
+    public BigDecimal getInterest(int level) {
         if (!hasUpgrades()) return Values.CONFIG.getInterestMoneyGiven();
 
-        int level = getCurrentLevel(p);
         String interest = getUpgrades().getString(level + ".Interest");
 
         if (BPMethods.isInvalidNumber(interest)) {
@@ -157,56 +178,35 @@ public class BankReader {
     }
 
     /**
-     * Get the custom interest amount different from the one selected in the config based on the bank level.
+     * Get the offline interest rate of the player's bank level.
      * @param p The player
-     * @return A BigDecimal number representing the interest rate.
+     * @return The offline interest amount.
      */
-    public BigDecimal getInterest(OfflinePlayer p) {
-        if (!hasUpgrades()) return Values.CONFIG.getInterestMoneyGiven();
-
-        int level = getCurrentLevel(p);
-        String interest = getUpgrades().getString(level + ".Interest");
-
-        if (BPMethods.isInvalidNumber(interest)) {
-            if (interest != null) BPLogger.error("Invalid interest amount in the " + level + "* upgrades level, file: " + bank.getIdentifier() + ".yml");
-            return Values.CONFIG.getInterestMoneyGiven();
-        }
-
-        return new BigDecimal(interest.replace("%", ""));
+    public BigDecimal getOfflineInterest(Player p) {
+        return getOfflineInterest(getCurrentLevel(p));
     }
 
     /**
-     * Get the custom offline interest amount different from the one selected in the config based on the bank level.
+     * Get the offline interest rate of the player's bank level.
      * @param p The player
-     * @return A BigDecimal number representing the offline interest rate.
+     * @return The offline interest amount.
      */
-    public BigDecimal getOfflineInterest(Player p) {
+    public BigDecimal getOfflineInterest(OfflinePlayer p) {
+        return getOfflineInterest(getCurrentLevel(p));
+    }
+
+    /**
+     * Get the offline interest rate of that bank level.
+     * @param level The bank level.
+     * @return The offline interest amount.
+     */
+    public BigDecimal getOfflineInterest(int level) {
         if (!hasUpgrades()) return Values.CONFIG.getOfflineInterestMoneyGiven();
 
-        int level = getCurrentLevel(p);
         String interest = getUpgrades().getString(level + ".Offline-Interest");
 
         if (BPMethods.isInvalidNumber(interest)) {
             if (interest != null) BPLogger.error("Invalid offline interest amount in the " + level + "* upgrades section, file: " + bank.getIdentifier() + ".yml");
-            return Values.CONFIG.getOfflineInterestMoneyGiven();
-        }
-
-        return new BigDecimal(interest.replace("%", ""));
-    }
-
-    /**
-     * Get the custom offline interest amount different from the one selected in the config based on the bank level.
-     * @param p The player
-     * @return A BigDecimal number representing the offline interest rate.
-     */
-    public BigDecimal getOfflineInterest(OfflinePlayer p) {
-        if (!hasUpgrades()) return Values.CONFIG.getOfflineInterestMoneyGiven();
-
-        int level = getCurrentLevel(p);
-        String interest = getUpgrades().getString(level + ".Offline-Interest");
-
-        if (BPMethods.isInvalidNumber(interest)) {
-            if (interest != null) BPLogger.error("Invalid offline interest amount in the " + level + "* upgrades level, file: " + bank.getIdentifier() + ".yml");
             return Values.CONFIG.getOfflineInterestMoneyGiven();
         }
 

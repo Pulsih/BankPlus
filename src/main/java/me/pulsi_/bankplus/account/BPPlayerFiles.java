@@ -22,15 +22,9 @@ public class BPPlayerFiles {
     private final Player p;
     private final OfflinePlayer op;
 
-    private final FileConfiguration config;
-    private final File file;
-
     public BPPlayerFiles(OfflinePlayer op) {
         this.op = op;
         this.p = op.isOnline() ? Bukkit.getPlayer(op.getUniqueId()) : null;
-
-        this.config = getPlayerConfig();
-        this.file = getPlayerFile();
     }
 
     public void checkForFileFixes() {
@@ -74,22 +68,18 @@ public class BPPlayerFiles {
 
     public boolean isPlayerRegistered() {
         File file = getPlayerFile();
-        if (file.exists()) return false;
+        if (file.exists()) return true;
 
-        String name = (p != null ? p.getName() : op.getName());
-        BPLogger.info("Successfully registered " + name + "!");
         try {
             file.getParentFile().mkdir();
             file.createNewFile();
         } catch (IOException e) {
-            BPLogger.warn("Something went wrong when registering " + name + ": " + e.getMessage());
+            BPLogger.warn("Something went wrong when registering " + op.getName() + ": " + e.getMessage());
         }
-        return true;
+        return false;
     }
 
     public File getPlayerFile() {
-        if (file != null) return file;
-
         if (p != null) {
             BPPlayer bpPlayer = BankPlus.INSTANCE.getPlayerRegistry().get(p);
             if (bpPlayer != null && bpPlayer.getPlayerFile() != null) return bpPlayer.getPlayerFile();
@@ -100,24 +90,18 @@ public class BPPlayerFiles {
     }
 
     public FileConfiguration getPlayerConfig() {
-        if (config != null) return config;
-
         if (p != null) {
             BPPlayer bpPlayer = BankPlus.INSTANCE.getPlayerRegistry().get(p);
             if (bpPlayer != null && bpPlayer.getPlayerConfig() != null) return bpPlayer.getPlayerConfig();
         }
 
-        File file = getPlayerFile();
-        FileConfiguration config = new YamlConfiguration();
-        try {
-            config.load(file);
-        } catch (IOException | InvalidConfigurationException e) {
-            BPLogger.warn("Something went wrong while trying to get " + op.getName() + "'s file configuration: " + e.getMessage());
-        }
-        return config;
+        return YamlConfiguration.loadConfiguration(getPlayerFile());
     }
 
     public void savePlayerFile(boolean async) {
+        FileConfiguration config = getPlayerConfig();
+        File file = getPlayerFile();
+
         if (!async) {
             save(config, file);
             return;
@@ -136,6 +120,8 @@ public class BPPlayerFiles {
     }
 
     public void savePlayerFile(FileConfiguration config, boolean async) {
+        File file = getPlayerFile();
+
         if (!async) {
             save(config, file);
             return;

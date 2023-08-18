@@ -72,8 +72,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
             }
             if (capacity.longValue() <= 0) return Values.CONFIG.getInfiniteCapacityText();
 
-            String formatter = identifier.replace("capacity", "");
-            return getFormat(formatter, capacity);
+            return getFormat(identifier, capacity);
         }
 
         if (identifier.startsWith("level")) {
@@ -93,9 +92,22 @@ public class BPPlaceholders extends PlaceholderExpansion {
             return level;
         }
 
-        if (identifier.startsWith("debt")) {
-            String formatter = identifier.replace("debt", "");
-            return getFormat(formatter, DebtUtils.getDebt(p));
+        if (identifier.startsWith("next_level")) {
+            BankReader reader;
+
+            if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
+            else {
+                if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                    return "The multiple-banks module is disabled.";
+
+                reader = new BankReader(target);
+                if (!reader.exist())
+                    return "&cThe selected bank does not exist.";
+            }
+            if (!reader.hasNextLevel(p))
+                return Values.CONFIG.getBankUpgradedMaxPlaceholder();
+
+            return (reader.getCurrentLevel(p) + 1) + "";
         }
 
         if (identifier.startsWith("next_level_cost")) {
@@ -116,8 +128,70 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
             cost = reader.getLevelCost(reader.getCurrentLevel(p) + 1);
 
-            String formatter = identifier.replace("next_level_cost", "");
-            return getFormat(formatter, cost);
+            return getFormat(identifier, cost);
+        }
+
+        if (identifier.startsWith("next_level_capacity")) {
+            BankReader reader;
+            BigDecimal capacity;
+
+            if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
+            else {
+                if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                    return "&cThe multiple-banks module is disabled!";
+
+                reader = new BankReader(target);
+                if (!reader.exist())
+                    return "&cThe selected bank does not exist!";
+            }
+            if (!reader.hasNextLevel(p))
+                return Values.CONFIG.getBankUpgradedMaxPlaceholder();
+
+            capacity = reader.getCapacity(reader.getCurrentLevel(p) + 1);
+            if (capacity.longValue() <= 0) return Values.CONFIG.getInfiniteCapacityText();
+
+            return getFormat(identifier, capacity);
+        }
+
+        if (identifier.startsWith("next_level_interest_rate")) {
+            BankReader reader;
+
+            if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
+            else {
+                if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                    return "&cThe multiple-banks module is disabled!";
+
+                reader = new BankReader(target);
+                if (!reader.exist())
+                    return "The selected bank does not exist.";
+            }
+            if (!reader.hasNextLevel(p))
+                return Values.CONFIG.getBankUpgradedMaxPlaceholder();
+
+            return reader.getInterest(reader.getCurrentLevel(p) + 1) + "";
+        }
+
+        if (identifier.startsWith("next_level_offline_interest_rate")) {
+            BankReader reader;
+
+            if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
+            else {
+                if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                    return "&cThe multiple-banks module is disabled!";
+
+                reader = new BankReader(target);
+                if (!reader.exist())
+                    return "The selected bank does not exist.";
+            }
+            if (!reader.hasNextLevel(p))
+                return Values.CONFIG.getBankUpgradedMaxPlaceholder();
+
+            return reader.getOfflineInterest(reader.getCurrentLevel(p) + 1) + "";
+        }
+
+        if (identifier.startsWith("debt")) {
+            String formatter = identifier.replace("debt", "");
+            return getFormat(formatter, DebtUtils.getDebt(p));
         }
 
         if (identifier.startsWith("balance")) {
@@ -136,8 +210,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
                 bal = multiEconomyManager.getBankBalance(target);
             }
 
-            String formatter = identifier.replace("balance", "");
-            return getFormat(formatter, bal);
+            return getFormat(identifier, bal);
         }
 
         if (identifier.startsWith("next_interest")) {
@@ -161,8 +234,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
             }
             interestMoney = new BigDecimal(Math.min(Values.CONFIG.getInterestMaxAmount().doubleValue(), balance.multiply(percentage).doubleValue()));
 
-            String formatter = identifier.replace("next_interest", "");
-            return getFormat(formatter, interestMoney);
+            return getFormat(identifier, interestMoney);
         }
 
         if (identifier.startsWith("banktop_money_")) {
@@ -246,6 +318,129 @@ public class BPPlaceholders extends PlaceholderExpansion {
             return interestRate + "";
         }
 
+        if (identifier.startsWith("offline_interest_rate")) {
+            BankReader reader;
+            BigDecimal interestRate;
+
+            if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
+            else {
+                if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                    return "&cThe multiple-banks module is disabled!";
+
+                reader = new BankReader(target);
+                if (!reader.exist())
+                    return "The selected bank does not exist.";
+            }
+            interestRate = reader.getOfflineInterest(p);
+
+            return interestRate + "";
+        }
+
+        if (identifier.startsWith("calculate_deposit_taxes_")) {
+            String secondIdentifier = identifier.replace("calculate_deposit_taxes_", "");
+
+            BigDecimal taxes = null;
+            if (secondIdentifier.startsWith("number_")) {
+                String number = secondIdentifier.replace("number_", "");
+
+                BigDecimal amount;
+                if (target != null) {
+                    if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                        return "&cThe multiple-banks module is disabled!";
+
+                    if (!new BankReader(target).exist())
+                        return "The selected bank does not exist.";
+
+                    number = number.replace("{" + target + "}", "");
+                }
+
+                try {
+                    amount = new BigDecimal(number.replace("%", ""));
+                } catch (NumberFormatException e) {
+                    return "Invalid Number!";
+                }
+
+                taxes = amount.multiply(Values.CONFIG.getDepositTaxes().divide(BigDecimal.valueOf(100)));
+            }
+
+            if (secondIdentifier.startsWith("percentage_")) {
+                String number = secondIdentifier.replace("percentage_", "");
+
+                BigDecimal amount, balance;
+                try {
+                    balance = BigDecimal.valueOf(BankPlus.INSTANCE.getEconomy().getBalance(p));
+                } catch (NumberFormatException e) {
+                    return "Invalid vault balance!";
+                }
+
+                try {
+                    amount = new BigDecimal(number.replace("%", ""));
+                } catch (NumberFormatException e) {
+                    return "Invalid Number!";
+                }
+
+                BigDecimal percentageBalance = balance.multiply(amount.divide(BigDecimal.valueOf(100)));
+                taxes = percentageBalance.multiply(Values.CONFIG.getDepositTaxes().divide(BigDecimal.valueOf(100)));
+            }
+            return getFormat(identifier, taxes);
+        }
+
+        if (identifier.startsWith("calculate_withdraw_taxes_")) {
+            String secondIdentifier = identifier.replace("calculate_withdraw_taxes_", "");
+
+            BigDecimal taxes = null;
+            if (secondIdentifier.startsWith("number_")) {
+                String number = secondIdentifier.replace("number_", "");
+
+                BigDecimal amount;
+                if (target != null) {
+                    if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                        return "&cThe multiple-banks module is disabled!";
+
+                    if (!new BankReader(target).exist())
+                        return "The selected bank does not exist.";
+
+                    number = number.replace("{" + target + "}", "");
+                }
+
+                try {
+                    amount = new BigDecimal(number.replace("%", ""));
+                } catch (NumberFormatException e) {
+                    return "Invalid Number!";
+                }
+
+                taxes = amount.multiply(Values.CONFIG.getWithdrawTaxes().divide(BigDecimal.valueOf(100)));
+            }
+
+            if (secondIdentifier.startsWith("percentage_")) {
+                String number = secondIdentifier.replace("percentage_", "");
+
+                BigDecimal amount, balance;
+
+                if (target == null) balance = new SingleEconomyManager(p).getBankBalance();
+                else {
+                    if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                        return "&cThe multiple-banks module is disabled!";
+
+                    if (!new BankReader(target).exist())
+                        return "The selected bank does not exist.";
+
+                    number = number.replace("{" + target + "}", "");
+                    balance = new MultiEconomyManager(p).getBankBalance(target);
+                }
+
+                try {
+                    amount = new BigDecimal(number.replace("%", ""));
+                } catch (NumberFormatException e) {
+                    return "Invalid Number!";
+                }
+
+                BigDecimal percentageBalance = balance.multiply(amount.divide(BigDecimal.valueOf(100)));
+                taxes = percentageBalance.multiply(Values.CONFIG.getWithdrawTaxes().divide(BigDecimal.valueOf(100)));
+            }
+            return getFormat(identifier, taxes);
+        }
+
         Interest interest = BankPlus.INSTANCE.getInterest();
         switch (identifier) {
             case "interest_cooldown":
@@ -265,6 +460,8 @@ public class BPPlaceholders extends PlaceholderExpansion {
     }
 
     private String getFormat(String formatter, BigDecimal value) {
+        if (value == null) return "Invalid number!";
+
         if (formatter.contains("_long")) return String.valueOf(value);
         if (formatter.contains("_formatted")) return BPFormatter.format(value);
         if (formatter.contains("_formatted_long")) return BPFormatter.formatLong(value);

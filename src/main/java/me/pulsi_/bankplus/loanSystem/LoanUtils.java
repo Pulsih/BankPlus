@@ -7,16 +7,21 @@ import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.debt.DebtUtils;
 import me.pulsi_.bankplus.utils.BPFormatter;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -266,7 +271,20 @@ public class LoanUtils {
             if (task != null) task.cancel();
         }
         BankPlus.INSTANCE.getLoanRegistry().getLoans().clear();
-        for (OfflinePlayer p : Bukkit.getOfflinePlayers()) loadPlayerLoans(p);
+
+        File dataFolder = new File(BankPlus.INSTANCE.getDataFolder(), "playerdata");
+        File[] files = dataFolder.listFiles();
+        if (files == null) return;
+
+        for (File file : files) {
+            String name = file.getName().replace(".yml", "");
+            OfflinePlayer p;
+
+            if (Values.CONFIG.isStoringUUIDs()) p = Bukkit.getOfflinePlayer(UUID.fromString(name));
+            else p = Bukkit.getOfflinePlayer(name);
+
+            loadPlayerLoans(p);
+        }
     }
 
     public static void saveLoan(BPLoan loan) {

@@ -98,6 +98,7 @@ Items:
     Lore:
       - ""
       - "&9&l* &aWithdraw &9500$ &afrom your bank."
+      - "&7&o(( Taxes: %bankplus_calculate_withdraw_taxes_number_500% ))"
       - ""
     Glowing: true
     Actions:
@@ -119,6 +120,7 @@ Items:
     Lore:
       - ""
       - "&9&l* &aWithdraw &925% &aof the money from your bank."
+      - "&7&o(( Taxes: %bankplus_calculate_withdraw_taxes_percentage_25% ))"
       - ""
     Glowing: true
     Actions:
@@ -132,6 +134,7 @@ Items:
     Lore:
       - ""
       - "&9&l* &aWithdraw &950% &aof the money from your bank."
+      - "&7&o(( Taxes: %bankplus_calculate_withdraw_taxes_percentage_50% ))"
       - ""
     Glowing: true
     Actions:
@@ -145,6 +148,7 @@ Items:
     Lore:
       - ""
       - "&9&l* &aWithdraw &9ALL &amoney from your bank."
+      - "&7&o(( Taxes: %bankplus_calculate_withdraw_taxes_percentage_100% ))"
       - ""
     Glowing: true
     Actions:
@@ -177,6 +181,7 @@ Items:
       - "&7Wait &a%bankplus_interest_cooldown% &7to get interest!"
       - "&7Expected money from the next interest: &a%bankplus_next_interest_formatted%"
       - "&7Interest rate: &a%bankplus_interest_rate%"
+      - "&7Offline interest rate: &a%bankplus_offline_interest_rate%"
       - ""
       - "&7&o(( %bankplus_withdraw_taxes% Withdraw Taxes. %bankplus_deposit_taxes% Deposit Taxes. ))"
     Glowing: true
@@ -204,8 +209,13 @@ Items:
       - ""
       - "&7Upgrade your bank to the next level!"
       - ""
-      - "&7Current level: &a%bankplus_level%"
+      - "&7Level: &7%bankplus_level% &8-> &a%bankplus_next_level%"
       - "&7Upgrade Cost: &a%bankplus_next_level_cost%"
+      - ""
+      - "New statistics:"
+      - " &8* &aCapacity: &f%bankplus_next_level_capacity%"
+      - " &8* &aInterest: &f%bankplus_next_level_interest_rate%"
+      - " &8* &aOffline interest: &f%bankplus_next_level_offline_interest_rate%"
       - ""
     Glowing: true
     Actions:
@@ -219,6 +229,7 @@ Items:
     Lore:
       - ""
       - "&a&l* &9Deposit &a500$ &9in your bank."
+      - "&7&o(( Taxes: %bankplus_calculate_deposit_taxes_number_500% ))"
       - ""
     Glowing: true
     Actions:
@@ -232,6 +243,7 @@ Items:
     Lore:
       - ""
       - "&a&l* &9Deposit &a25% &9of your money in your bank."
+      - "&7&o(( Taxes: %bankplus_calculate_deposit_taxes_percentage_25% ))"
       - ""
     Glowing: true
     Actions:
@@ -245,6 +257,7 @@ Items:
     Lore:
       - ""
       - "&a&l* &9Deposit &a50% &9of your money in your bank."
+      - "&7&o(( Taxes: %bankplus_calculate_deposit_taxes_percentage_50% ))"
       - ""
     Glowing: true
     Actions:
@@ -258,6 +271,7 @@ Items:
     Lore:
       - ""
       - "&a&l* &9Deposit &aALL &9money in your bank."
+      - "&7&o(( Taxes: %bankplus_calculate_deposit_taxes_percentage_100% ))"
       - ""
     Glowing: true
     Actions:

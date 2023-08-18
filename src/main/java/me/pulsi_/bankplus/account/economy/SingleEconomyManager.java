@@ -282,10 +282,10 @@ public class SingleEconomyManager {
         if (Values.CONFIG.getWithdrawTaxes().doubleValue() > 0 && !p.hasPermission("bankplus.withdraw.bypass-taxes"))
             taxes = amount.multiply(Values.CONFIG.getWithdrawTaxes().divide(BigDecimal.valueOf(100)));
 
-        EconomyResponse withdrawResponse = BankPlus.INSTANCE.getEconomy().depositPlayer(p, amount.doubleValue());
+        EconomyResponse withdrawResponse = BankPlus.INSTANCE.getEconomy().depositPlayer(p, amount.subtract(taxes).doubleValue());
         if (BPMethods.hasFailed(p, withdrawResponse)) return;
 
-        removeBankBalance(amount.add(taxes));
+        removeBankBalance(amount);
         BPMessages.send(p, "Success-Withdraw", BPMethods.placeValues(p, amount.subtract(taxes)), BPMethods.placeValues(taxes, "taxes"));
         BPMethods.playSound("WITHDRAW", p);
     }
@@ -305,7 +305,7 @@ public class SingleEconomyManager {
         }
 
         SingleEconomyManager targetEM = new SingleEconomyManager(target);
-        BigDecimal targetCapacity = new BankReader(Values.CONFIG.getMainGuiName()).getCapacity(target), targetBalance = getBankBalance(), newBalance = amount.add(targetBalance);
+        BigDecimal targetCapacity = new BankReader(Values.CONFIG.getMainGuiName()).getCapacity(target), targetBalance = targetEM.getBankBalance(), newBalance = amount.add(targetBalance);
 
         if (targetBalance.doubleValue() >= targetCapacity.doubleValue()) {
             BPMessages.send(p, "Bank-Full", "%player%$" + target.getName());
