@@ -44,6 +44,7 @@ public class MultiEconomyManager {
         this.p = null;
         this.op = op;
     }
+
     /**
      * Return a list with all player balances.
      *
@@ -274,6 +275,8 @@ public class MultiEconomyManager {
         BigDecimal money = BigDecimal.valueOf(BankPlus.INSTANCE.getEconomy().getBalance(p));
         if (!BPMethods.checkPreRequisites(money, amount, p) || BPMethods.isBankFull(p, bankName)) return;
 
+        if (money.doubleValue() < amount.doubleValue()) amount = money;
+
         BigDecimal maxDepositAmount = Values.CONFIG.getMaxDepositAmount();
         if (maxDepositAmount.doubleValue() != 0 && amount.doubleValue() >= maxDepositAmount.doubleValue())
             amount = maxDepositAmount;
@@ -292,7 +295,6 @@ public class MultiEconomyManager {
         if (capacity.doubleValue() > 0d && newBankBalance.doubleValue() >= capacity.doubleValue()) {
             BigDecimal moneyToFull = capacity.subtract(getBankBalance());
             amount = moneyToFull.add(taxes);
-            if (money.doubleValue() < amount.doubleValue()) amount = money;
         }
 
         EconomyResponse depositResponse = BankPlus.INSTANCE.getEconomy().withdrawPlayer(p, amount.doubleValue());
@@ -319,7 +321,8 @@ public class MultiEconomyManager {
 
         BigDecimal bankBal = getBankBalance(bankName);
         if (!BPMethods.checkPreRequisites(bankBal, amount, p)) return;
-        if (amount.doubleValue() > bankBal.doubleValue()) amount = bankBal;
+
+        if (bankBal.doubleValue() < amount.doubleValue()) amount = bankBal;
 
         BigDecimal maxWithdrawAmount = Values.CONFIG.getMaxWithdrawAmount();
         if (maxWithdrawAmount.doubleValue() > 0 && amount.doubleValue() >= maxWithdrawAmount.doubleValue())
@@ -327,7 +330,7 @@ public class MultiEconomyManager {
 
         BigDecimal taxes = new BigDecimal(0);
         if (Values.CONFIG.getWithdrawTaxes().doubleValue() > 0 && !p.hasPermission("bankplus.withdraw.bypass-taxes"))
-            taxes = amount.multiply(Values.CONFIG.getDepositTaxes().divide(BigDecimal.valueOf(100)));
+            taxes = amount.multiply(Values.CONFIG.getWithdrawTaxes().divide(BigDecimal.valueOf(100)));
 
         EconomyResponse withdrawResponse = BankPlus.INSTANCE.getEconomy().depositPlayer(p, amount.doubleValue());
         if (BPMethods.hasFailed(p, withdrawResponse)) return;
