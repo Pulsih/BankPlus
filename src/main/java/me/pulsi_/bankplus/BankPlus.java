@@ -43,6 +43,7 @@ public final class BankPlus extends JavaPlugin {
 
     private boolean isPlaceholderAPIHooked = false, isEssentialsXHooked = false, isUpdated;
     private String serverVersion;
+    private int serverVersionInt;
 
     private int tries = 1;
 
@@ -78,6 +79,20 @@ public final class BankPlus extends JavaPlugin {
         this.loanRegistry = new LoanRegistry();
 
         this.serverVersion = getServer().getVersion();
+
+        int index = serverVersion.lastIndexOf("MC:");
+        String version = serverVersion.substring(index, serverVersion.length() - 1);
+
+        int number;
+        try {
+            number = Integer.parseInt(version.split("\\.")[1]);
+        } catch (NumberFormatException e) {
+            BPLogger.error("Failed to identify server version, contant the developer if the issue persist!");
+            number = -1;
+        }
+
+        this.serverVersionInt = number;
+
         this.bankTopManager = new BankTopManager(this);
         this.configManager = new ConfigManager(this);
         this.dataManager = new DataManager(this);
@@ -156,6 +171,10 @@ public final class BankPlus extends JavaPlugin {
 
     public String getServerVersion() {
         return serverVersion;
+    }
+
+    public int getServerVersionInt() {
+        return serverVersionInt;
     }
 
     public BankTopManager getBankTopManager() {

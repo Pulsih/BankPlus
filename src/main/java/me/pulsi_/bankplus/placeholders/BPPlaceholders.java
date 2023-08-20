@@ -58,41 +58,24 @@ public class BPPlaceholders extends PlaceholderExpansion {
             target = identifier.substring(identifier.indexOf("{") + 1, identifier.indexOf("}"));
 
         if (identifier.startsWith("capacity")) {
-            BigDecimal capacity = new BankReader(Values.CONFIG.getMainGuiName()).getCapacity(p);
+            BankReader reader;
 
-            if (target != null) {
+            if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
+            else {
                 if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
                     return "&cThe multiple-banks module is disabled!";
 
-                BankReader reader = new BankReader(target);
+                reader = new BankReader(target);
                 if (!reader.exist())
                     return "&cThe selected bank does not exist.";
-
-                capacity = reader.getCapacity(p);
             }
+            BigDecimal capacity = reader.getCapacity(p);
             if (capacity.longValue() <= 0) return Values.CONFIG.getInfiniteCapacityText();
 
             return getFormat(identifier, capacity);
         }
 
         if (identifier.startsWith("level")) {
-            String level = String.valueOf(new BankReader(Values.CONFIG.getMainGuiName()).getCurrentLevel(p));
-
-            if (target != null) {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
-                    return "The multiple-banks module is disabled.";
-
-                BankReader reader = new BankReader(target);
-                if (!reader.exist())
-                    return "&cThe selected bank does not exist.";
-
-                level = String.valueOf(reader.getCurrentLevel(p));
-            }
-
-            return level;
-        }
-
-        if (identifier.startsWith("next_level")) {
             BankReader reader;
 
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
@@ -104,15 +87,12 @@ public class BPPlaceholders extends PlaceholderExpansion {
                 if (!reader.exist())
                     return "&cThe selected bank does not exist.";
             }
-            if (!reader.hasNextLevel(p))
-                return Values.CONFIG.getBankUpgradedMaxPlaceholder();
 
-            return (reader.getCurrentLevel(p) + 1) + "";
+            return String.valueOf(reader.getCurrentLevel(p));
         }
 
         if (identifier.startsWith("next_level_cost")) {
             BankReader reader;
-            BigDecimal cost;
 
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
             else {
@@ -126,14 +106,13 @@ public class BPPlaceholders extends PlaceholderExpansion {
             if (!reader.hasNextLevel(p))
                 return Values.CONFIG.getBankUpgradedMaxPlaceholder();
 
-            cost = reader.getLevelCost(reader.getCurrentLevel(p) + 1);
+            BigDecimal cost = reader.getLevelCost(reader.getCurrentLevel(p) + 1);
 
             return getFormat(identifier, cost);
         }
 
         if (identifier.startsWith("next_level_capacity")) {
             BankReader reader;
-            BigDecimal capacity;
 
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
             else {
@@ -147,7 +126,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
             if (!reader.hasNextLevel(p))
                 return Values.CONFIG.getBankUpgradedMaxPlaceholder();
 
-            capacity = reader.getCapacity(reader.getCurrentLevel(p) + 1);
+            BigDecimal capacity = reader.getCapacity(reader.getCurrentLevel(p) + 1);
             if (capacity.longValue() <= 0) return Values.CONFIG.getInfiniteCapacityText();
 
             return getFormat(identifier, capacity);
@@ -187,6 +166,24 @@ public class BPPlaceholders extends PlaceholderExpansion {
                 return Values.CONFIG.getBankUpgradedMaxPlaceholder();
 
             return reader.getOfflineInterest(reader.getCurrentLevel(p) + 1) + "";
+        }
+
+        if (identifier.startsWith("next_level")) {
+            BankReader reader;
+
+            if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
+            else {
+                if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                    return "The multiple-banks module is disabled.";
+
+                reader = new BankReader(target);
+                if (!reader.exist())
+                    return "&cThe selected bank does not exist.";
+            }
+            if (!reader.hasNextLevel(p))
+                return Values.CONFIG.getBankUpgradedMaxPlaceholder();
+
+            return (reader.getCurrentLevel(p) + 1) + "";
         }
 
         if (identifier.startsWith("debt")) {
@@ -302,7 +299,6 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
         if (identifier.startsWith("interest_rate")) {
             BankReader reader;
-            BigDecimal interestRate;
 
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
             else {
@@ -313,7 +309,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
                 if (!reader.exist())
                     return "The selected bank does not exist.";
             }
-            interestRate = reader.getInterest(p);
+            BigDecimal interestRate = reader.getInterest(p);
 
             return interestRate + "";
         }
