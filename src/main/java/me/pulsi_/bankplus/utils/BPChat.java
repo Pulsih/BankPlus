@@ -8,11 +8,12 @@ import java.util.regex.Pattern;
 
 public class BPChat {
 
+    private final static Pattern pattern = Pattern.compile("#[a-fA-F0-9]{6}");
+
     public static String prefix = "&a&lBank&9&lPlus";
 
     public static String color(String message) {
         if (BankPlus.INSTANCE.getServerVersionInt() >= 16) {
-            Pattern pattern = Pattern.compile("#[a-fA-F0-9]{6}");
             Matcher matcher = pattern.matcher(message);
 
             while (matcher.find()) {

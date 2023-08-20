@@ -211,13 +211,14 @@ public class BPMethods {
     }
 
     public static void sendTitle(String title, Player p) {
-        if (title == null) return;
+        if (title == null || p == null) return;
 
+        title = BPMessages.addPrefix(title);
         if (title.contains(",")) {
             String[] titles = title.split(",");
             String title1 = titles[0], title2 = titles[1];
 
-            if (titles.length == 2) p.sendTitle(BPChat.color(title1), BPChat.color(title2));
+            if (titles.length == 2) p.sendTitle(title1, title2);
             else {
                 int[] values = {20, 20, 20};
                 boolean error = false;
@@ -233,12 +234,12 @@ public class BPMethods {
                     BPLogger.warn("Invalid number in the title fades values! Please correct it as soon as possible! (Title: " + title + "&a)");
 
                 try {
-                    p.sendTitle(BPChat.color(title1), BPChat.color(title2), values[0], values[1], values[2]);
+                    p.sendTitle(title1, title2, values[0], values[1], values[2]);
                 } catch (NoSuchMethodError e) {
-                    p.sendTitle(BPChat.color(title1), BPChat.color(title2));
+                    p.sendTitle(title1, title2);
                 }
             }
-        } else p.sendTitle(BPChat.color(title), "");
+        } else p.sendTitle(title, "");
     }
 
     public static void playSound(String input, Player p) {

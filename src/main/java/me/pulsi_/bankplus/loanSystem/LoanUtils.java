@@ -240,6 +240,8 @@ public class LoanUtils {
     }
 
     public static void loadPlayerLoans(OfflinePlayer p) {
+        if (p == null) return;
+
         BPPlayerFiles files = new BPPlayerFiles(p);
         FileConfiguration config = files.getPlayerConfig();
 
@@ -280,8 +282,13 @@ public class LoanUtils {
             String name = file.getName().replace(".yml", "");
             OfflinePlayer p;
 
-            if (Values.CONFIG.isStoringUUIDs()) p = Bukkit.getOfflinePlayer(UUID.fromString(name));
-            else p = Bukkit.getOfflinePlayer(name);
+            if (Values.CONFIG.isStoringUUIDs()) {
+                try {
+                    p = Bukkit.getOfflinePlayer(UUID.fromString(name));
+                } catch (IllegalArgumentException e) {
+                    continue;
+                }
+            } else p = Bukkit.getOfflinePlayer(name);
 
             loadPlayerLoans(p);
         }
