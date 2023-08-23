@@ -1,17 +1,15 @@
-package me.pulsi_.bankplus.account.economy;
+package me.pulsi_.bankplus.economy;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayerFiles;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.events.BPAfterTransactionEvent;
 import me.pulsi_.bankplus.events.BPPreTransactionEvent;
-import me.pulsi_.bankplus.utils.BPFormatter;
-import me.pulsi_.bankplus.utils.BPLogger;
-import me.pulsi_.bankplus.utils.BPMessages;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.*;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -36,14 +34,9 @@ public class MultiEconomyManager {
     private final Player p;
     private final OfflinePlayer op;
 
-    public MultiEconomyManager(Player p) {
-        this.p = p;
-        this.op = null;
-    }
-
     public MultiEconomyManager(OfflinePlayer op) {
-        this.p = null;
         this.op = op;
+        this.p = op.isOnline() ? Bukkit.getPlayer(op.getUniqueId()) : null;
     }
 
     /**
@@ -94,7 +87,7 @@ public class MultiEconomyManager {
     public void loadBankBalance() {
         if (p == null) return;
         for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
-            if (bankPlayerMoney.containsKey(p.getUniqueId() + "." + bankName)) return;
+            if (bankPlayerMoney.containsKey(p.getUniqueId() + "." + bankName)) continue;
             String bal = new BPPlayerFiles(p).getPlayerConfig().getString("Banks." + bankName + ".Money");
             bankPlayerMoney.putIfAbsent(p.getUniqueId() + "." + bankName, new BigDecimal(bal == null ? "0" : bal));
         }
@@ -106,15 +99,6 @@ public class MultiEconomyManager {
     public void unloadBankBalance() {
         ConfigurationSection section = new BPPlayerFiles(p).getPlayerConfig().getConfigurationSection("Banks");
         if (section != null) section.getKeys(false).forEach(key -> bankPlayerMoney.remove(p.getUniqueId() + "." + key));
-    }
-
-    /**
-     * Save the selected bank balance to the player file.
-     */
-    public void saveBankBalance(String bankName, boolean async) {
-        BPPlayerFiles files = new BPPlayerFiles(p);
-        files.getPlayerConfig().set("Banks." + bankName + ".Money", BPFormatter.formatBigDouble(getBankBalance(bankName)));
-        files.savePlayerFile(async);
     }
 
     /**
@@ -143,7 +127,7 @@ public class MultiEconomyManager {
     }
 
     /**
-     * Get the total player bank balance of all banks.
+     * Get the player bank balance of all banks.
      *
      * @return BidDecimal amount.
      */
@@ -164,100 +148,173 @@ public class MultiEconomyManager {
     }
 
     /**
-     * Set the player bank balance to the selected amount in the selected bank.
+     * Set the selected amount in the selected bank.
      *
-     * @param amount   The new bank balance amount.
+     * @param amount   The amount.
      * @param bankName The bank.
      */
     public void setBankBalance(BigDecimal amount, String bankName) {
-        setBankBalance(amount, bankName, false);
+        setBankBalance(amount, bankName, false, TransactionType.SET);
     }
 
     /**
-     * Set the player bank balance to the selected amount in the selected bank.
+     * Set the selected amount in the selected bank.
+     *
+     * @param amount       The amount.
+     * @param bankName     The bank.
+     * @param ignoreEvents Choose if firing or not the events.
+     */
+    public void setBankBalance(BigDecimal amount, String bankName, boolean ignoreEvents) {
+        setBankBalance(amount, bankName, ignoreEvents, TransactionType.SET);
+    }
+
+    /**
+     * Set the amount in the selected bank.
+     *
+     * @param amount   The amount.
+     * @param bankName The bank.
+     * @param type     Used to override the default transaction type.
+     */
+    public void setBankBalance(BigDecimal amount, String bankName, TransactionType type) {
+        setBankBalance(amount, bankName, false, type);
+    }
+
+    /**
+     * Set the selected amount in the selected bank.
      *
      * @param amount   The new bank balance amount.
      * @param bankName The bank.
      */
-    public void setBankBalance(BigDecimal amount, String bankName, boolean ignoreEvents) {
+    public void setBankBalance(BigDecimal amount, String bankName, boolean ignoreEvents, TransactionType type) {
         Economy economy = BankPlus.INSTANCE.getEconomy();
         if (!ignoreEvents) {
-            BPPreTransactionEvent event = startEvent(BPPreTransactionEvent.TransactionType.SET, economy.getBalance(p), amount, bankName);
+            BPPreTransactionEvent event = startEvent(type, economy.getBalance(op), amount, bankName);
             if (event.isCancelled()) return;
 
             amount = event.getTransactionAmount();
         }
         set(amount, bankName);
 
-        if (!ignoreEvents) endEvent(BPAfterTransactionEvent.TransactionType.SET, economy.getBalance(p), amount, bankName);
+        if (!ignoreEvents) endEvent(type, economy.getBalance(op), amount, bankName);
     }
 
     /**
-     * Add to the player bank balance the selected amount.
+     * Add the selected amount to the selected bank.
      *
      * @param amount   The amount.
      * @param bankName The bank.
      */
     public void addBankBalance(BigDecimal amount, String bankName) {
-        addBankBalance(amount, bankName, false, false);
+        addBankBalance(amount, bankName, false, false, TransactionType.ADD);
     }
 
     /**
-     * Add to the player bank balance the selected amount.
+     * Add the selected amount to the selected bank.
      *
-     * @param amount   The amount.
-     * @param bankName The bank.
+     * @param amount             The amount.
+     * @param bankName           The bank.
+     * @param addOfflineInterest Choose if also adding the offline interest (used, for example, if a player is offline)
      */
     public void addBankBalance(BigDecimal amount, String bankName, boolean addOfflineInterest) {
-        addBankBalance(amount, bankName, addOfflineInterest, false);
+        addBankBalance(amount, bankName, addOfflineInterest, false, TransactionType.ADD);
     }
 
     /**
-     * Add to the offline player bank balance the selected amount.
+     * Add the selected amount to the selected bank.
      *
      * @param amount   The amount.
      * @param bankName The bank.
+     * @param type     Used to override the default transaction type.
+     */
+    public void addBankBalance(BigDecimal amount, String bankName, TransactionType type) {
+        addBankBalance(amount, bankName, false, false, type);
+    }
+
+    /**
+     * Add the selected amount to the selected bank.
+     *
+     * @param amount             The amount.
+     * @param bankName           The bank.
+     * @param addOfflineInterest Choose if also adding the offline interest (used, for example, if a player is offline)
+     * @param ignoreEvents       Choose if firing or not the events.
      */
     public void addBankBalance(BigDecimal amount, String bankName, boolean addOfflineInterest, boolean ignoreEvents) {
+        addBankBalance(amount, bankName, addOfflineInterest, ignoreEvents, TransactionType.ADD);
+    }
+
+    /**
+     * Add the selected amount to the selected bank.
+     *
+     * @param amount             The amount.
+     * @param bankName           The bank.
+     * @param addOfflineInterest Choose if also adding the offline interest (used, for example, if a player is offline)
+     * @param ignoreEvents       Choose if firing or not the events.
+     * @param type               Used to override the default transaction type.
+     */
+    public void addBankBalance(BigDecimal amount, String bankName, boolean addOfflineInterest, boolean ignoreEvents, TransactionType type) {
         Economy economy = BankPlus.INSTANCE.getEconomy();
         if (!ignoreEvents) {
-            BPPreTransactionEvent event = startEvent(BPPreTransactionEvent.TransactionType.ADD, economy.getBalance(p), amount, bankName);
+            BPPreTransactionEvent event = startEvent(type, economy.getBalance(op), amount, bankName);
             if (event.isCancelled()) return;
 
             amount = event.getTransactionAmount();
         }
         set(getBankBalance(bankName).add(amount), bankName, addOfflineInterest);
 
-        if (!ignoreEvents) endEvent(BPAfterTransactionEvent.TransactionType.ADD, economy.getBalance(p), amount, bankName);
+        if (!ignoreEvents) endEvent(type, economy.getBalance(op), amount, bankName);
     }
 
     /**
-     * Remove from the player bank balance the selected amount.
+     * Remove the selected amount.
      *
      * @param amount   The amount.
      * @param bankName The bank.
      */
     public void removeBankBalance(BigDecimal amount, String bankName) {
-        removeBankBalance(amount, bankName, false);
+        removeBankBalance(amount, bankName, false, TransactionType.REMOVE);
     }
 
     /**
-     * Remove from the player bank balance the selected amount.
+     * Remove the selected amount.
+     *
+     * @param amount       The amount.
+     * @param bankName     The bank.
+     * @param ignoreEvents Choose if firing or not the events.
+     */
+    public void removeBankBalance(BigDecimal amount, String bankName, boolean ignoreEvents) {
+        removeBankBalance(amount, bankName, ignoreEvents, TransactionType.REMOVE);
+    }
+
+    /**
+     * Remove the selected amount.
      *
      * @param amount   The amount.
      * @param bankName The bank.
+     * @param type     Used to override the default transaction type.
      */
-    public void removeBankBalance(BigDecimal amount, String bankName, boolean ignoreEvents) {
+    public void removeBankBalance(BigDecimal amount, String bankName, TransactionType type) {
+        removeBankBalance(amount, bankName, false, type);
+    }
+
+    /**
+     * Remove the selected amount.
+     *
+     * @param amount       The amount.
+     * @param bankName     The bank.
+     * @param ignoreEvents Choose if firing or not the events.
+     * @param type         Used to override the default transaction type.
+     */
+    public void removeBankBalance(BigDecimal amount, String bankName, boolean ignoreEvents, TransactionType type) {
         Economy economy = BankPlus.INSTANCE.getEconomy();
         if (!ignoreEvents) {
-            BPPreTransactionEvent event = startEvent(BPPreTransactionEvent.TransactionType.REMOVE, economy.getBalance(p), amount, bankName);
+            BPPreTransactionEvent event = startEvent(type, economy.getBalance(op), amount, bankName);
             if (event.isCancelled()) return;
 
             amount = event.getTransactionAmount();
         }
         set(getBankBalance(bankName).subtract(amount), bankName);
 
-        if (!ignoreEvents) endEvent(BPAfterTransactionEvent.TransactionType.REMOVE, economy.getBalance(p), amount, bankName);
+        if (!ignoreEvents) endEvent(type, economy.getBalance(op), amount, bankName);
     }
 
     /**
@@ -292,13 +349,12 @@ public class MultiEconomyManager {
             BigDecimal offlineInterest = new BigDecimal(BPFormatter.formatBigDouble(amount)).subtract(getBankBalance(bankName));
             if (offlineInterest.doubleValue() > 0) config.set("Offline-Interest", offlineInterest.toString());
         }
-
         files.savePlayerFile(config, true);
     }
 
     public void deposit(BigDecimal amount, String bankName) {
         Economy economy = BankPlus.INSTANCE.getEconomy();
-        BPPreTransactionEvent event = startEvent(BPPreTransactionEvent.TransactionType.DEPOSIT, economy.getBalance(p), amount, bankName);
+        BPPreTransactionEvent event = startEvent(TransactionType.DEPOSIT, economy.getBalance(p), amount, bankName);
         if (event.isCancelled()) return;
 
         amount = event.getTransactionAmount();
@@ -340,12 +396,12 @@ public class MultiEconomyManager {
         BPMessages.send(p, "Success-Deposit", BPMethods.placeValues(p, amount.subtract(taxes)), BPMethods.placeValues(taxes, "taxes"));
         BPMethods.playSound("DEPOSIT", p);
 
-        endEvent(BPAfterTransactionEvent.TransactionType.DEPOSIT, economy.getBalance(p), amount, bankName);
+        endEvent(TransactionType.DEPOSIT, economy.getBalance(p), amount, bankName);
     }
 
     public void withdraw(BigDecimal amount, String bankName) {
         Economy economy = BankPlus.INSTANCE.getEconomy();
-        BPPreTransactionEvent event = startEvent(BPPreTransactionEvent.TransactionType.WITHDRAW, economy.getBalance(p), amount, bankName);
+        BPPreTransactionEvent event = startEvent(TransactionType.WITHDRAW, economy.getBalance(p), amount, bankName);
         if (event.isCancelled()) return;
 
         amount = event.getTransactionAmount();
@@ -375,7 +431,7 @@ public class MultiEconomyManager {
         BPMessages.send(p, "Success-Withdraw", BPMethods.placeValues(p, amount.subtract(taxes)), BPMethods.placeValues(taxes, "taxes"));
         BPMethods.playSound("WITHDRAW", p);
 
-        endEvent(BPAfterTransactionEvent.TransactionType.WITHDRAW, economy.getBalance(p), amount, bankName);
+        endEvent(TransactionType.WITHDRAW, economy.getBalance(p), amount, bankName);
     }
 
     /**
@@ -403,21 +459,21 @@ public class MultiEconomyManager {
         }
 
         if (newBalance.doubleValue() >= targetCapacity.doubleValue() && targetCapacity.doubleValue() > 0d) {
-            removeBankBalance(targetCapacity.subtract(targetBalance), fromBank);
-            targetEM.setBankBalance(targetCapacity, toBank);
+            removeBankBalance(targetCapacity.subtract(targetBalance), fromBank, TransactionType.PAY);
+            targetEM.setBankBalance(targetCapacity, toBank, TransactionType.PAY);
 
             BPMessages.send(p, "Payment-Sent", BPMethods.placeValues(target, amount));
             BPMessages.send(target, "Payment-Received", BPMethods.placeValues(p, amount));
             return;
         }
 
-        removeBankBalance(amount, fromBank);
-        targetEM.addBankBalance(amount, toBank);
+        removeBankBalance(amount, fromBank, TransactionType.PAY);
+        targetEM.addBankBalance(amount, toBank, TransactionType.PAY);
         BPMessages.send(p, "Payment-Sent", BPMethods.placeValues(target, amount));
         BPMessages.send(target, "Payment-Received", BPMethods.placeValues(p, amount));
     }
 
-    private BPPreTransactionEvent startEvent(BPPreTransactionEvent.TransactionType type, double vaultBalance, BigDecimal amount, String bankName) {
+    private BPPreTransactionEvent startEvent(TransactionType type, double vaultBalance, BigDecimal amount, String bankName) {
         BPPreTransactionEvent event = new BPPreTransactionEvent(
                 op, type, getBankBalance(bankName), vaultBalance, amount, false, bankName
         );
@@ -425,7 +481,7 @@ public class MultiEconomyManager {
         return event;
     }
 
-    private void endEvent(BPAfterTransactionEvent.TransactionType type, double vaultBalance, BigDecimal amount, String bankName) {
+    private void endEvent(TransactionType type, double vaultBalance, BigDecimal amount, String bankName) {
         BPAfterTransactionEvent event = new BPAfterTransactionEvent(
                 op, type, getBankBalance(bankName), vaultBalance, amount, false, bankName
         );

@@ -1,5 +1,6 @@
 package me.pulsi_.bankplus.events;
 
+import me.pulsi_.bankplus.utils.TransactionType;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -14,14 +15,6 @@ import java.math.BigDecimal;
  * To get the information AFTER the transaction check {@link BPAfterTransactionEvent this}
  */
 public class  BPPreTransactionEvent extends Event implements Cancellable {
-
-    public enum TransactionType {
-        ADD,
-        DEPOSIT,
-        REMOVE,
-        SET,
-        WITHDRAW
-    }
 
     public static final HandlerList HANDLER_LIST = new HandlerList();
 

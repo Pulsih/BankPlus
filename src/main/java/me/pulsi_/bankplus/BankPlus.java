@@ -1,8 +1,8 @@
 package me.pulsi_.bankplus;
 
 import me.pulsi_.bankplus.account.PlayerRegistry;
-import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
+import me.pulsi_.bankplus.economy.MultiEconomyManager;
+import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankGuiRegistry;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.loanSystem.LoanRegistry;

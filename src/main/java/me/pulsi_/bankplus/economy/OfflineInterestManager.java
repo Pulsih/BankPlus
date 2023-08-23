@@ -1,8 +1,7 @@
-package me.pulsi_.bankplus.account.economy;
+package me.pulsi_.bankplus.economy;
 
 import me.pulsi_.bankplus.account.BPPlayerFiles;
 import me.pulsi_.bankplus.utils.BPFormatter;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 

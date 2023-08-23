@@ -1,14 +1,13 @@
 package me.pulsi_.bankplus.account;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
+import me.pulsi_.bankplus.economy.MultiEconomyManager;
+import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;

@@ -2,8 +2,8 @@ package me.pulsi_.bankplus.listeners.playerChat;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
-import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
+import me.pulsi_.bankplus.economy.MultiEconomyManager;
+import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;

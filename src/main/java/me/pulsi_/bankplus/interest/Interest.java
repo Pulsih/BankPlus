@@ -2,12 +2,13 @@ package me.pulsi_.bankplus.interest;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayerFiles;
-import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
+import me.pulsi_.bankplus.economy.MultiEconomyManager;
+import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.TransactionType;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
@@ -133,12 +134,12 @@ public class Interest {
             }
             if (Values.MESSAGES.isInterestBroadcastEnabled())
                 BPMessages.send(p, Values.MESSAGES.getInterestMoney(), BPMethods.placeValues(p, newAmount), true);
-            singleEconomyManager.setBankBalance(maxBankCapacity);
+            singleEconomyManager.setBankBalance(maxBankCapacity, TransactionType.INTEREST);
             return;
         }
         if (Values.MESSAGES.isInterestBroadcastEnabled())
             BPMessages.send(p, Values.MESSAGES.getInterestMoney(), BPMethods.placeValues(p, interestMoney), true);
-        singleEconomyManager.addBankBalance(interestMoney);
+        singleEconomyManager.addBankBalance(interestMoney, TransactionType.INTEREST);
     }
 
     private void giveMultiInterest(Player p) {
@@ -159,10 +160,10 @@ public class Interest {
                 BigDecimal newAmount = maxBankCapacity.subtract(bankBalance);
                 if (newAmount.doubleValue() <= 0) continue;
                 interestAmount = newAmount;
-                multiEconomyManager.setBankBalance(maxBankCapacity, bankName);
+                multiEconomyManager.setBankBalance(maxBankCapacity, bankName, TransactionType.INTEREST);
                 continue;
             }
-            multiEconomyManager.addBankBalance(interestMoney, bankName);
+            multiEconomyManager.addBankBalance(interestMoney, bankName, TransactionType.INTEREST);
             interestAmount = interestMoney;
         }
         if (Values.MESSAGES.isInterestBroadcastEnabled())
@@ -199,10 +200,10 @@ public class Interest {
             if (maxBankCapacity.doubleValue() != 0 && (bankBalance.add(interestMoney).doubleValue() >= maxBankCapacity.doubleValue())) {
                 BigDecimal newAmount = maxBankCapacity.subtract(bankBalance);
                 if (newAmount.doubleValue() <= 0) continue;
-                singleEconomyManager.addBankBalance(newAmount, true);
+                singleEconomyManager.addBankBalance(newAmount, true, false, TransactionType.INTEREST);
                 continue;
             }
-            singleEconomyManager.addBankBalance(interestMoney, true);
+            singleEconomyManager.addBankBalance(interestMoney, true, false, TransactionType.INTEREST);
         }
     }
 
@@ -239,11 +240,11 @@ public class Interest {
                 if (maxBankCapacity.doubleValue() != 0 && (bankBalance.add(interestMoney).doubleValue() >= maxBankCapacity.doubleValue())) {
                     BigDecimal newAmount = maxBankCapacity.subtract(bankBalance);
                     if (newAmount.doubleValue() <= 0) continue;
-                    multiEconomyManager.addBankBalance(newAmount, bankName, true);
+                    multiEconomyManager.addBankBalance(newAmount, bankName, true, false, TransactionType.INTEREST);
                     hasToSave = true;
                     continue;
                 }
-                multiEconomyManager.addBankBalance(interestMoney, bankName, true);
+                multiEconomyManager.addBankBalance(interestMoney, bankName, true, false, TransactionType.INTEREST);
                 hasToSave = true;
             }
             if (hasToSave) new BPPlayerFiles(p).savePlayerFile(true);

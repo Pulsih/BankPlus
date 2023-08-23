@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.commands.list;
 
-import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
+import me.pulsi_.bankplus.economy.MultiEconomyManager;
+import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.BPMessages;

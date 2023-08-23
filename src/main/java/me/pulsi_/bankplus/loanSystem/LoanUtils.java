@@ -2,26 +2,23 @@ package me.pulsi_.bankplus.loanSystem;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayerFiles;
-import me.pulsi_.bankplus.account.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.account.economy.SingleEconomyManager;
+import me.pulsi_.bankplus.economy.MultiEconomyManager;
+import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.debt.DebtUtils;
 import me.pulsi_.bankplus.utils.BPFormatter;
-import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.TransactionType;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -84,12 +81,12 @@ public class LoanUtils {
 
             // If the bank is full, instead of loosing money they will be added to the vault balance
             if (balance.add(amount).doubleValue() >= capacity.doubleValue() && capacity.doubleValue() > 0d) {
-                em.setBankBalance(capacity, loan.getToBankName());
+                em.setBankBalance(capacity, loan.getToBankName(), TransactionType.LOAN);
                 BigDecimal extra = amount.subtract(capacity.subtract(balance));
                 BankPlus.INSTANCE.getEconomy().depositPlayer(p, extra.doubleValue());
                 BPMessages.send(p, "Loan-Request-Received-Accepted-Full", BPMethods.placeValues(sender, amount), BPMethods.placeValues(extra, "extra"));
             } else {
-                em.addBankBalance(amount, loan.getToBankName());
+                em.addBankBalance(amount, loan.getToBankName(), TransactionType.LOAN);
                 BPMessages.send(p, "Loan-Request-Received-Accepted", BPMethods.placeValues(sender, amount));
             }
 
@@ -100,12 +97,12 @@ public class LoanUtils {
             BigDecimal capacity = new BankReader(loan.getToBankName()).getCapacity(p), balance = em.getBankBalance();
 
             if (balance.add(amount).doubleValue() >= capacity.doubleValue() && capacity.doubleValue() > 0d) {
-                em.setBankBalance(capacity);
+                em.setBankBalance(capacity, TransactionType.LOAN);
                 BigDecimal extra = amount.subtract(capacity.subtract(balance));
                 BankPlus.INSTANCE.getEconomy().depositPlayer(p, extra.doubleValue());
                 BPMessages.send(p, "Loan-Request-Received-Accepted-Full", BPMethods.placeValues(sender, amount), BPMethods.placeValues(extra, "extra"));
             } else {
-                em.addBankBalance(amount);
+                em.addBankBalance(amount, TransactionType.LOAN);
                 BPMessages.send(p, "Loan-Request-Received-Accepted", BPMethods.placeValues(sender, amount));
             }
         }
@@ -167,7 +164,7 @@ public class LoanUtils {
 
             if (sBal.add(amount).doubleValue() >= capacity.doubleValue() && capacity.doubleValue() > 0d) {
                 BigDecimal extra = amount.subtract(capacity.subtract(sBal));
-                sEM.setBankBalance(capacity, loan.getFromBankName());
+                sEM.setBankBalance(capacity, loan.getFromBankName(), TransactionType.LOAN);
 
                 List<String> extraFormatter = new ArrayList<>();
                 extraFormatter.add("%extra%$" + BPFormatter.formatCommas(extra));
@@ -178,7 +175,7 @@ public class LoanUtils {
 
                 BankPlus.INSTANCE.getEconomy().depositPlayer(sender, extra.doubleValue());
             } else {
-                sEM.addBankBalance(amount, loan.getFromBankName());
+                sEM.addBankBalance(amount, loan.getFromBankName(), TransactionType.LOAN);
                 if (sender.isOnline()) BPMessages.send(Bukkit.getPlayer(sender.getUniqueId()), "Loan-Payback", BPMethods.placeValues(target, amount));
             }
 
@@ -186,12 +183,12 @@ public class LoanUtils {
             BigDecimal tBal = tEM.getBankBalance(loan.getToBankName());
             if (tBal.doubleValue() < amount.doubleValue()) {
                 BigDecimal debt = amount.subtract(tBal).add(DebtUtils.getDebt(target));
-                tEM.setBankBalance(BigDecimal.valueOf(0), loan.getToBankName());
+                tEM.setBankBalance(BigDecimal.valueOf(0), loan.getToBankName(), TransactionType.LOAN);
                 if (target.isOnline()) BPMessages.send(Bukkit.getPlayer(target.getUniqueId()), "Loan-Returned-Debt", BPMethods.placeValues(sender, debt));
 
                 DebtUtils.setDebt(target, debt);
             } else {
-                tEM.removeBankBalance(amount, loan.getToBankName());
+                tEM.removeBankBalance(amount, loan.getToBankName(), TransactionType.LOAN);
                 if (target.isOnline()) BPMessages.send(Bukkit.getPlayer(target.getUniqueId()), "Loan-Returned", BPMethods.placeValues(sender, amount));
             }
 
@@ -201,7 +198,7 @@ public class LoanUtils {
 
             if (sBal.add(amount).doubleValue() >= capacity.doubleValue() && capacity.doubleValue() > 0d) {
                 BigDecimal extra = amount.subtract(capacity.subtract(sBal));
-                sEM.setBankBalance(capacity);
+                sEM.setBankBalance(capacity, TransactionType.LOAN);
 
                 List<String> extraFormatter = new ArrayList<>();
                 extraFormatter.add("%extra%$" + BPFormatter.formatCommas(extra));
@@ -212,7 +209,7 @@ public class LoanUtils {
 
                 BankPlus.INSTANCE.getEconomy().depositPlayer(sender, extra.doubleValue());
             } else {
-                sEM.addBankBalance(amount);
+                sEM.addBankBalance(amount, TransactionType.LOAN);
                 if (sender.isOnline()) BPMessages.send(Bukkit.getPlayer(sender.getUniqueId()), "Loan-Payback", BPMethods.placeValues(target, amount));
             }
 
@@ -220,12 +217,12 @@ public class LoanUtils {
             BigDecimal tBal = tEM.getBankBalance();
             if (tBal.doubleValue() < amount.doubleValue()) {
                 BigDecimal debt = amount.subtract(tBal).add(DebtUtils.getDebt(target));
-                tEM.setBankBalance(BigDecimal.valueOf(0));
+                tEM.setBankBalance(BigDecimal.valueOf(0), TransactionType.LOAN);
                 if (target.isOnline()) BPMessages.send(Bukkit.getPlayer(target.getUniqueId()), "Loan-Returned-Debt", BPMethods.placeValues(sender, debt));
 
                 DebtUtils.setDebt(target, debt);
             } else {
-                tEM.removeBankBalance(amount);
+                tEM.removeBankBalance(amount, TransactionType.LOAN);
                 if (target.isOnline()) BPMessages.send(Bukkit.getPlayer(target.getUniqueId()), "Loan-Returned", BPMethods.placeValues(sender, amount));
             }
         }

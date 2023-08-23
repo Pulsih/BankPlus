@@ -29,6 +29,18 @@ public class BPFormatter {
         return setMaxDigits(bal / (amount / 1000d), Values.CONFIG.getMaxDecimalsAmount()) + order[i];
     }
 
+    public static String format(double balance) {
+        int i = 0;
+        double amount = 1000d;
+
+        while (balance >= amount && i < order.length - 1) {
+            i++;
+            amount *= 1000d;
+        }
+
+        return setMaxDigits(balance / (amount / 1000d), Values.CONFIG.getMaxDecimalsAmount()) + order[i];
+    }
+
     public static String formatLong(BigDecimal balance) {
         double bal = balance.doubleValue();
 
@@ -43,7 +55,7 @@ public class BPFormatter {
         return Math.round(bal / (amount / 1000l)) + order[i];
     }
 
-    public static String formatCommas(BigDecimal amount) {
+    public static String formatCommas(Object amount) {
         DecimalFormat formatter = new DecimalFormat("#,###");
         return formatter.format(amount);
     }
