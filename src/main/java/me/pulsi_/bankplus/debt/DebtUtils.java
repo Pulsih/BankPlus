@@ -36,6 +36,7 @@ public class DebtUtils {
             Player op = Bukkit.getPlayer(p.getUniqueId());
             BPPlayer bp = BankPlus.INSTANCE.getPlayerRegistry().get(op);
             BigDecimal debt = bp.getDebt();
+
             if (debt == null) {
                 BPPlayerFiles files = new BPPlayerFiles(p);
                 String sDebt = files.getPlayerConfig().getString("Debt");

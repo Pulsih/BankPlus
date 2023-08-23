@@ -1,7 +1,6 @@
 package me.pulsi_.bankplus.events;
 
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -9,7 +8,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 
-public class BPTransactionEvent extends Event implements Cancellable {
+/**
+ * This event will be fired BEFORE the transaction is done, meaning that you can still edit values like transaction amount and cancel the event.
+ * <p>
+ * To get the information AFTER the transaction check {@link BPAfterTransactionEvent this}
+ */
+public class  BPPreTransactionEvent extends Event implements Cancellable {
 
     public enum TransactionType {
         ADD,
@@ -22,23 +26,19 @@ public class BPTransactionEvent extends Event implements Cancellable {
     public static final HandlerList HANDLER_LIST = new HandlerList();
 
     private boolean isCancelled;
-
     private final OfflinePlayer player;
-
     private final TransactionType transactionType;
-
-    private final BigDecimal oldBalance;
-
+    private final BigDecimal currentBalance;
+    private final double currentVaultBalance;
     private BigDecimal transactionAmount;
-
     private final boolean singleMode;
-
     private final String bankName;
 
-    public BPTransactionEvent(OfflinePlayer player, TransactionType transactionType, BigDecimal oldBalance, BigDecimal transactionAmount, boolean isSingleMode, String bankName) {
+    public BPPreTransactionEvent(OfflinePlayer player, TransactionType transactionType, BigDecimal currentBalance, double currentVaultBalance, BigDecimal transactionAmount, boolean isSingleMode, String bankName) {
         this.player = player;
         this.transactionType = transactionType;
-        this.oldBalance = oldBalance;
+        this.currentBalance = currentBalance;
+        this.currentVaultBalance = currentVaultBalance;
         this.transactionAmount = transactionAmount;
         this.singleMode = isSingleMode;
         this.bankName = bankName;
@@ -54,8 +54,12 @@ public class BPTransactionEvent extends Event implements Cancellable {
         return transactionType;
     }
 
-    public BigDecimal getOldBalance() {
-        return oldBalance;
+    public BigDecimal getCurrentBalance() {
+        return currentBalance;
+    }
+
+    public double getCurrentVaultBalance() {
+        return currentVaultBalance;
     }
 
     public BigDecimal getTransactionAmount() {

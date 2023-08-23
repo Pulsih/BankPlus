@@ -19,7 +19,7 @@ public class ConfigManager {
     private int spacesCount = 0;
     private final String commentIdentifier = "bankplus_comment";
     private final String spaceIdentifier = "bankplus_space";
-    private File configFile, messagesFile, multipleBanksFile, commandsFile, savesFile;
+    private File configFile, messagesFile, multipleBanksFile, commandsFile, savesFile, logFile;
     private FileConfiguration config, messagesConfig, multipleBanksConfig, commandsConfig, savesConfig;
     private boolean autoUpdateFiles, updated = true;
 
@@ -337,6 +337,12 @@ public class ConfigManager {
                 "itself, the old affected files will be",
                 "saved in a folder as backup.");
         validatePath(oldConfig, newConfig, "General-Settings.Auto-Update-Files", true);
+        addSpace(newConfig, "General-Settings");
+
+        addCommentsUnder(newConfig, "General-Settings",
+                "Enable the transaction logger which will save",
+                "player transactions to the logs folder.");
+        validatePath(oldConfig, newConfig, "General-Settings.Log-Transactions", true);
         addSpace(newConfig, "General-Settings");
 
         addCommentsUnder(newConfig, "General-Settings",

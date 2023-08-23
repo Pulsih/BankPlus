@@ -3,14 +3,15 @@ package me.pulsi_.bankplus.account.economy;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayerFiles;
 import me.pulsi_.bankplus.bankSystem.BankReader;
-import me.pulsi_.bankplus.events.BPTransactionEvent;
+import me.pulsi_.bankplus.events.BPAfterTransactionEvent;
+import me.pulsi_.bankplus.events.BPPreTransactionEvent;
 import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPMethods;
 import me.pulsi_.bankplus.values.Values;
+import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -31,7 +32,7 @@ public class MultiEconomyManager {
     /**
      * The main HashMap that holds all player bank balances.
      */
-    public static Map<String, BigDecimal> bankPlayerMoney = new HashMap<>();
+    private static final Map<String, BigDecimal> bankPlayerMoney = new HashMap<>();
     private final Player p;
     private final OfflinePlayer op;
 
@@ -63,7 +64,8 @@ public class MultiEconomyManager {
             try {
                 config.load(file);
             } catch (IOException | InvalidConfigurationException e) {
-                BPLogger.error("An error has occurred while loading a bank file: " + e.getMessage());
+                BPLogger.error(e, "An error has occurred while loading a user file (File name: " + file.getName() + "):");
+                continue;
             }
 
             ConfigurationSection section = config.getConfigurationSection("Banks");
@@ -168,14 +170,26 @@ public class MultiEconomyManager {
      * @param bankName The bank.
      */
     public void setBankBalance(BigDecimal amount, String bankName) {
-        BPTransactionEvent event = new BPTransactionEvent(
-                op, BPTransactionEvent.TransactionType.SET, getBankBalance(bankName), amount, false, bankName
-        );
-        BPMethods.callEvent(event);
+        setBankBalance(amount, bankName, false);
+    }
 
-        if (event.isCancelled()) return;
+    /**
+     * Set the player bank balance to the selected amount in the selected bank.
+     *
+     * @param amount   The new bank balance amount.
+     * @param bankName The bank.
+     */
+    public void setBankBalance(BigDecimal amount, String bankName, boolean ignoreEvents) {
+        Economy economy = BankPlus.INSTANCE.getEconomy();
+        if (!ignoreEvents) {
+            BPPreTransactionEvent event = startEvent(BPPreTransactionEvent.TransactionType.SET, economy.getBalance(p), amount, bankName);
+            if (event.isCancelled()) return;
 
-        set(event.getTransactionAmount(), bankName);
+            amount = event.getTransactionAmount();
+        }
+        set(amount, bankName);
+
+        if (!ignoreEvents) endEvent(BPAfterTransactionEvent.TransactionType.SET, economy.getBalance(p), amount, bankName);
     }
 
     /**
@@ -185,7 +199,17 @@ public class MultiEconomyManager {
      * @param bankName The bank.
      */
     public void addBankBalance(BigDecimal amount, String bankName) {
-        addBankBalance(amount, bankName, false);
+        addBankBalance(amount, bankName, false, false);
+    }
+
+    /**
+     * Add to the player bank balance the selected amount.
+     *
+     * @param amount   The amount.
+     * @param bankName The bank.
+     */
+    public void addBankBalance(BigDecimal amount, String bankName, boolean addOfflineInterest) {
+        addBankBalance(amount, bankName, addOfflineInterest, false);
     }
 
     /**
@@ -194,15 +218,17 @@ public class MultiEconomyManager {
      * @param amount   The amount.
      * @param bankName The bank.
      */
-    public void addBankBalance(BigDecimal amount, String bankName, boolean addOfflineInterest) {
-        BPTransactionEvent event = new BPTransactionEvent(
-                op, BPTransactionEvent.TransactionType.ADD, getBankBalance(bankName), amount, false, bankName
-        );
-        BPMethods.callEvent(event);
+    public void addBankBalance(BigDecimal amount, String bankName, boolean addOfflineInterest, boolean ignoreEvents) {
+        Economy economy = BankPlus.INSTANCE.getEconomy();
+        if (!ignoreEvents) {
+            BPPreTransactionEvent event = startEvent(BPPreTransactionEvent.TransactionType.ADD, economy.getBalance(p), amount, bankName);
+            if (event.isCancelled()) return;
 
-        if (event.isCancelled()) return;
+            amount = event.getTransactionAmount();
+        }
+        set(getBankBalance(bankName).add(amount), bankName, addOfflineInterest);
 
-        set(getBankBalance(bankName).add(event.getTransactionAmount()), bankName, addOfflineInterest);
+        if (!ignoreEvents) endEvent(BPAfterTransactionEvent.TransactionType.ADD, economy.getBalance(p), amount, bankName);
     }
 
     /**
@@ -212,14 +238,26 @@ public class MultiEconomyManager {
      * @param bankName The bank.
      */
     public void removeBankBalance(BigDecimal amount, String bankName) {
-        BPTransactionEvent event = new BPTransactionEvent(
-                op, BPTransactionEvent.TransactionType.REMOVE, getBankBalance(bankName), amount, false, bankName
-        );
-        BPMethods.callEvent(event);
+        removeBankBalance(amount, bankName, false);
+    }
 
-        if (event.isCancelled()) return;
+    /**
+     * Remove from the player bank balance the selected amount.
+     *
+     * @param amount   The amount.
+     * @param bankName The bank.
+     */
+    public void removeBankBalance(BigDecimal amount, String bankName, boolean ignoreEvents) {
+        Economy economy = BankPlus.INSTANCE.getEconomy();
+        if (!ignoreEvents) {
+            BPPreTransactionEvent event = startEvent(BPPreTransactionEvent.TransactionType.REMOVE, economy.getBalance(p), amount, bankName);
+            if (event.isCancelled()) return;
 
-        set(getBankBalance(bankName).subtract(event.getTransactionAmount()), bankName);
+            amount = event.getTransactionAmount();
+        }
+        set(getBankBalance(bankName).subtract(amount), bankName);
+
+        if (!ignoreEvents) endEvent(BPAfterTransactionEvent.TransactionType.REMOVE, economy.getBalance(p), amount, bankName);
     }
 
     /**
@@ -259,10 +297,8 @@ public class MultiEconomyManager {
     }
 
     public void deposit(BigDecimal amount, String bankName) {
-        BPTransactionEvent event = new BPTransactionEvent(
-                op, BPTransactionEvent.TransactionType.DEPOSIT, getBankBalance(bankName), amount, false, bankName
-        );
-        BPMethods.callEvent(event);
+        Economy economy = BankPlus.INSTANCE.getEconomy();
+        BPPreTransactionEvent event = startEvent(BPPreTransactionEvent.TransactionType.DEPOSIT, economy.getBalance(p), amount, bankName);
         if (event.isCancelled()) return;
 
         amount = event.getTransactionAmount();
@@ -300,16 +336,16 @@ public class MultiEconomyManager {
         EconomyResponse depositResponse = BankPlus.INSTANCE.getEconomy().withdrawPlayer(p, amount.doubleValue());
         if (BPMethods.hasFailed(p, depositResponse)) return;
 
-        addBankBalance(amount.subtract(taxes), bankName);
+        addBankBalance(amount.subtract(taxes), bankName, false, true);
         BPMessages.send(p, "Success-Deposit", BPMethods.placeValues(p, amount.subtract(taxes)), BPMethods.placeValues(taxes, "taxes"));
         BPMethods.playSound("DEPOSIT", p);
+
+        endEvent(BPAfterTransactionEvent.TransactionType.DEPOSIT, economy.getBalance(p), amount, bankName);
     }
 
     public void withdraw(BigDecimal amount, String bankName) {
-        BPTransactionEvent event = new BPTransactionEvent(
-                op, BPTransactionEvent.TransactionType.WITHDRAW, getBankBalance(bankName), amount, false, bankName
-        );
-        BPMethods.callEvent(event);
+        Economy economy = BankPlus.INSTANCE.getEconomy();
+        BPPreTransactionEvent event = startEvent(BPPreTransactionEvent.TransactionType.WITHDRAW, economy.getBalance(p), amount, bankName);
         if (event.isCancelled()) return;
 
         amount = event.getTransactionAmount();
@@ -332,12 +368,14 @@ public class MultiEconomyManager {
         if (Values.CONFIG.getWithdrawTaxes().doubleValue() > 0 && !p.hasPermission("bankplus.withdraw.bypass-taxes"))
             taxes = amount.multiply(Values.CONFIG.getWithdrawTaxes().divide(BigDecimal.valueOf(100)));
 
-        EconomyResponse withdrawResponse = BankPlus.INSTANCE.getEconomy().depositPlayer(p, amount.subtract(taxes).doubleValue());
+        EconomyResponse withdrawResponse = economy.depositPlayer(p, amount.subtract(taxes).doubleValue());
         if (BPMethods.hasFailed(p, withdrawResponse)) return;
 
-        removeBankBalance(amount, bankName);
+        removeBankBalance(amount, bankName, true);
         BPMessages.send(p, "Success-Withdraw", BPMethods.placeValues(p, amount.subtract(taxes)), BPMethods.placeValues(taxes, "taxes"));
         BPMethods.playSound("WITHDRAW", p);
+
+        endEvent(BPAfterTransactionEvent.TransactionType.WITHDRAW, economy.getBalance(p), amount, bankName);
     }
 
     /**
@@ -377,5 +415,20 @@ public class MultiEconomyManager {
         targetEM.addBankBalance(amount, toBank);
         BPMessages.send(p, "Payment-Sent", BPMethods.placeValues(target, amount));
         BPMessages.send(target, "Payment-Received", BPMethods.placeValues(p, amount));
+    }
+
+    private BPPreTransactionEvent startEvent(BPPreTransactionEvent.TransactionType type, double vaultBalance, BigDecimal amount, String bankName) {
+        BPPreTransactionEvent event = new BPPreTransactionEvent(
+                op, type, getBankBalance(bankName), vaultBalance, amount, false, bankName
+        );
+        BPMethods.callEvent(event);
+        return event;
+    }
+
+    private void endEvent(BPAfterTransactionEvent.TransactionType type, double vaultBalance, BigDecimal amount, String bankName) {
+        BPAfterTransactionEvent event = new BPAfterTransactionEvent(
+                op, type, getBankBalance(bankName), vaultBalance, amount, false, bankName
+        );
+        BPMethods.callEvent(event);
     }
 }

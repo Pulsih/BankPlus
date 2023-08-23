@@ -24,17 +24,13 @@ public class ConfigValues {
     private String notifyOfflineInterestMessage, interestDelay, interestOfflinePermission, interestMaxAmount, interestMoneyGiven, offlineInterestMoneyGiven;
     private long notifyOfflineInterestDelay, saveBalancedDelay, updateBankTopDelay;
     private int afkPlayersTime, maxDecimalsAmount, bankTopSize;
-    private boolean isReopeningBankAfterChat, isNotifyOfflineInterest, isStoringUUIDs;
+    private boolean isReopeningBankAfterChat, isNotifyOfflineInterest, isStoringUUIDs, logTransactions;
     private boolean isInterestEnabled, isGivingInterestToOfflinePlayers, isOfflineInterestDifferentRate;
     private boolean isOfflineInterestEarnedMessageEnabled, isUpdateCheckerEnabled, isWithdrawSoundEnabled, isDepositSoundEnabled;
     private boolean isViewSoundEnabled, isPersonalSoundEnabled, isIgnoringAfkPlayers, useEssentialsXAFK, useBankBalanceToUpgrade;
     private boolean banktopEnabled, banktopUpdateBroadcastEnabled, banktopUpdateBroadcastOnlyConsole, saveBalancesBroadcast, guiModuleEnabled;
     private String loanMaxAmount, loanInterest;
     private int loanInstalments, loanDelay, loanAcceptTime;
-
-    public static ConfigValues getInstance() {
-        return new ConfigValues();
-    }
 
     public void setupValues() {
         FileConfiguration config = BankPlus.INSTANCE.getConfigManager().getConfig(ConfigManager.Type.CONFIG);
@@ -87,6 +83,7 @@ public class ConfigValues {
         isInterestEnabled = config.getBoolean("Interest.Enabled");
         isNotifyOfflineInterest = config.getBoolean("General-Settings.Offline-Interest-Earned-Message.Enabled");
         isStoringUUIDs = config.getBoolean("General-Settings.Use-UUIDs");
+        logTransactions = config.getBoolean("General-Settings.Log-Transactions");
         isGivingInterestToOfflinePlayers = config.getBoolean("Interest.Give-To-Offline-Players");
         isOfflineInterestDifferentRate = config.getBoolean("Interest.Different-Offline-Rate");
         isOfflineInterestEarnedMessageEnabled = config.getBoolean("General-Settings.Offline-Interest-Earned-Message.Enabled");
@@ -342,10 +339,6 @@ public class ConfigValues {
         return new BigDecimal(interestMoneyGiven.replace("%", ""));
     }
 
-    public String getOfflineInterestMoneyGivenString() {
-        return offlineInterestMoneyGiven;
-    }
-
     public BigDecimal getOfflineInterestMoneyGiven() {
         if (BPMethods.isInvalidNumber(offlineInterestMoneyGiven)) {
             BPLogger.error(DEF_ERROR.replace("%", "Interest.Offline-Money-Given"));
@@ -384,6 +377,10 @@ public class ConfigValues {
 
     public boolean isStoringUUIDs() {
         return isStoringUUIDs;
+    }
+
+    public boolean isLogTransactions() {
+        return logTransactions;
     }
 
     public boolean isGivingInterestToOfflinePlayers() {

@@ -74,7 +74,7 @@ public class BPPlayerFiles {
             file.getParentFile().mkdir();
             file.createNewFile();
         } catch (IOException e) {
-            BPLogger.warn("Something went wrong when registering " + op.getName() + ": " + e.getMessage());
+            BPLogger.warn("Something went wrong while registering " + op.getName() + ": " + e.getMessage());
         }
         return false;
     }

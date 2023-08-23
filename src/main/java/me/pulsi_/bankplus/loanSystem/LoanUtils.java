@@ -280,15 +280,23 @@ public class LoanUtils {
 
         for (File file : files) {
             String name = file.getName().replace(".yml", "");
+
             OfflinePlayer p;
+            UUID uuid;
+
+            try {
+                uuid = UUID.fromString(name);
+            } catch (IllegalArgumentException e) {
+                uuid = null;
+            }
 
             if (Values.CONFIG.isStoringUUIDs()) {
-                try {
-                    p = Bukkit.getOfflinePlayer(UUID.fromString(name));
-                } catch (IllegalArgumentException e) {
-                    continue;
-                }
-            } else p = Bukkit.getOfflinePlayer(name);
+                if (uuid == null) continue;
+                p = Bukkit.getOfflinePlayer(uuid);
+            } else {
+                if (uuid != null) continue;
+                p = Bukkit.getOfflinePlayer(name);
+            }
 
             loadPlayerLoans(p);
         }

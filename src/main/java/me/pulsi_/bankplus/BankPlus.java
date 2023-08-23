@@ -7,6 +7,7 @@ import me.pulsi_.bankplus.bankSystem.BankGuiRegistry;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.loanSystem.LoanRegistry;
 import me.pulsi_.bankplus.loanSystem.LoanUtils;
+import me.pulsi_.bankplus.logSystem.BPLogUtils;
 import me.pulsi_.bankplus.managers.*;
 import me.pulsi_.bankplus.placeholders.BPPlaceholders;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -28,6 +29,7 @@ public final class BankPlus extends JavaPlugin {
     public static BankPlus INSTANCE;
     private boolean wasOnSingleEconomy;
 
+    private BPLogUtils bpLogUtils;
     private PlayerRegistry playerRegistry;
     private BankGuiRegistry bankGuiRegistry;
     private LoanRegistry loanRegistry;
@@ -74,6 +76,7 @@ public final class BankPlus extends JavaPlugin {
         }
         INSTANCE = this;
 
+        this.bpLogUtils = new BPLogUtils();
         this.playerRegistry = new PlayerRegistry();
         this.bankGuiRegistry = new BankGuiRegistry();
         this.loanRegistry = new LoanRegistry();
@@ -175,6 +178,10 @@ public final class BankPlus extends JavaPlugin {
 
     public int getServerVersionInt() {
         return serverVersionInt;
+    }
+
+    public BPLogUtils getBpLogUtils() {
+        return bpLogUtils;
     }
 
     public BankTopManager getBankTopManager() {

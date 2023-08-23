@@ -72,6 +72,7 @@ public class DataManager {
         registerer.resetCmds();
         registerer.registerCmds();
 
+        if (Values.CONFIG.isLogTransactions()) plugin.getBpLogUtils().setupLoggerFile();
         if (Values.CONFIG.isIgnoringAfkPlayers()) plugin.getAfkManager().startCountdown();
         if (Values.CONFIG.isBanktopEnabled()) plugin.getBankTopManager().startUpdateTask();
         if (Values.CONFIG.isGuiModuleEnabled() && !plugin.getBankGuiRegistry().loadBanks()) success = false;
@@ -99,7 +100,10 @@ public class DataManager {
         plManager.registerEvents(new BPTransactionListener(), plugin);
 
 
-        switch (Values.CONFIG.getPlayerChatPriority()) {
+        String chatPriority = Values.CONFIG.getPlayerChatPriority();
+        if (chatPriority == null) {
+            plManager.registerEvents(new PlayerChatNormal(), plugin);
+        } else switch (chatPriority) {
             case "LOWEST":
                 plManager.registerEvents(new PlayerChatLowest(), plugin);
                 break;
@@ -117,7 +121,10 @@ public class DataManager {
                 break;
         }
 
-        switch (Values.CONFIG.getBankClickPriority()) {
+        String bankClickPriority = Values.CONFIG.getBankClickPriority();
+        if (bankClickPriority == null) {
+            plManager.registerEvents(new BankClickNormal(), plugin);
+        } else switch (bankClickPriority) {
             case "LOWEST":
                 plManager.registerEvents(new BankClickLowest(), plugin);
                 break;
