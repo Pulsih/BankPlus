@@ -4,7 +4,7 @@ import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.loanSystem.LoanUtils;
 import me.pulsi_.bankplus.utils.BPMessages;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -73,7 +73,7 @@ public class LoanCmd extends BPCommand {
         }
 
         String num = args[2];
-        if (BPMethods.isInvalidNumber(num, p)) return false;
+        if (BPUtils.isInvalidNumber(num, p)) return false;
         BigDecimal amount = new BigDecimal(num);
 
         String from, to;

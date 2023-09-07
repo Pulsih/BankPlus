@@ -2,21 +2,20 @@ package me.pulsi_.bankplus.interest;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayerFiles;
+import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.managers.BPConfigs;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.TransactionType;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -75,26 +74,12 @@ public class Interest {
         saveInterestSaveFile(config);
     }
 
-    private File getInterestSaveFile() {
-        File file = new File(BankPlus.INSTANCE.getDataFolder(), "saves.yml");
-        return file.exists() ? file : null;
-    }
-
     private FileConfiguration getInterestSaveConfig() {
-        File file = getInterestSaveFile();
-        if (file == null || !file.exists()) return null;
-
-        FileConfiguration config = new YamlConfiguration();
-        try {
-            config.load(file);
-        } catch (IOException | InvalidConfigurationException e) {
-            BPLogger.error("Failed to load the interest-save file! " + e.getMessage());
-        }
-        return config;
+        return BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.SAVES);
     }
 
     private void saveInterestSaveFile(FileConfiguration config) {
-        File file = getInterestSaveFile();
+        File file = BankPlus.INSTANCE.getConfigManager().getFile(BPConfigs.Type.SAVES);
 
         try {
             config.save(file);
@@ -133,12 +118,12 @@ public class Interest {
                 return;
             }
             if (Values.MESSAGES.isInterestBroadcastEnabled())
-                BPMessages.send(p, Values.MESSAGES.getInterestMoney(), BPMethods.placeValues(p, newAmount), true);
+                BPMessages.send(p, Values.MESSAGES.getInterestMoney(), BPUtils.placeValues(p, newAmount), true);
             singleEconomyManager.setBankBalance(maxBankCapacity, TransactionType.INTEREST);
             return;
         }
         if (Values.MESSAGES.isInterestBroadcastEnabled())
-            BPMessages.send(p, Values.MESSAGES.getInterestMoney(), BPMethods.placeValues(p, interestMoney), true);
+            BPMessages.send(p, Values.MESSAGES.getInterestMoney(), BPUtils.placeValues(p, interestMoney), true);
         singleEconomyManager.addBankBalance(interestMoney, TransactionType.INTEREST);
     }
 
@@ -167,33 +152,33 @@ public class Interest {
             interestAmount = interestMoney;
         }
         if (Values.MESSAGES.isInterestBroadcastEnabled())
-            BPMessages.send(p, Values.MESSAGES.getMultiInterestMoney(), BPMethods.placeValues(p, interestAmount), true);
+            BPMessages.send(p, Values.MESSAGES.getMultiInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
     }
 
     private void giveSingleInterest(OfflinePlayer[] players) {
-        String perm = Values.CONFIG.getInterestOfflinePermission();
         Permission permission = BankPlus.INSTANCE.getPermissions();
-        if (!perm.equals("") && permission == null) {
+        if (permission == null) {
             BPLogger.error("Cannot give offline interest, no permission plugin found!");
             return;
         }
 
+        String perm = Values.CONFIG.getInterestOfflinePermission();
         for (OfflinePlayer p : players) {
-            if (p.isOnline()) continue;
+            if ((System.currentTimeMillis() - p.getLastSeen()) > Values.CONFIG.getOfflineInterestLimit()) continue;
 
             boolean hasPermission = false;
             for (World world : Bukkit.getWorlds()) {
-                hasPermission = perm.equals("") || permission.playerHas(world.getName(), p, perm);
+                hasPermission = perm == null || perm.isEmpty() || permission.playerHas(world.getName(), p, perm);
                 if (hasPermission) break;
             }
             if (!hasPermission) continue;
 
             SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
             BigDecimal bankBalance = singleEconomyManager.getBankBalance();
-            BankReader bankReader = new BankReader(Values.CONFIG.getMainGuiName());
-            BigDecimal interest = Values.CONFIG.isOfflineInterestDifferentRate() ? bankReader.getOfflineInterest(p) : bankReader.getInterest(p);
+            BankReader reader = new BankReader(Values.CONFIG.getMainGuiName());
+            BigDecimal interest = Values.CONFIG.isOfflineInterestDifferentRate() ? reader.getOfflineInterest(p) : reader.getInterest(p);
             BigDecimal interestMoney = bankBalance.multiply(interest.divide(BigDecimal.valueOf(100)));
-            BigDecimal maxBankCapacity = bankReader.getCapacity(p), maxAmount = Values.CONFIG.getInterestMaxAmount();
+            BigDecimal maxBankCapacity = reader.getCapacity(p), maxAmount = Values.CONFIG.getInterestMaxAmount();
 
             if (bankBalance.doubleValue() <= 0) continue;
             if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
@@ -208,32 +193,31 @@ public class Interest {
     }
 
     private void giveMultiInterest(OfflinePlayer[] players) {
-        String perm = Values.CONFIG.getInterestOfflinePermission();
         Permission permission = BankPlus.INSTANCE.getPermissions();
-        if (!perm.equals("") && permission == null) {
+        if (permission == null) {
             BPLogger.error("Cannot give offline interest, no permission plugin found!");
             return;
         }
 
+        String perm = Values.CONFIG.getInterestOfflinePermission();
         for (OfflinePlayer p : players) {
+            if ((System.currentTimeMillis() - p.getLastSeen()) > Values.CONFIG.getOfflineInterestLimit()) continue;
+
+            boolean hasPermission = false;
+            for (World world : Bukkit.getWorlds()) {
+                hasPermission = perm == null || perm.isEmpty() || permission.playerHas(world.getName(), p, perm);
+                if (hasPermission) break;
+            }
+            if (!hasPermission) continue;
+
             boolean hasToSave = false;
-
             for (String bankName : new BankReader().getAvailableBanks(p)) {
-                if (p.isOnline()) continue;
-
-                boolean hasPermission = false;
-                for (World world : Bukkit.getWorlds()) {
-                    hasPermission = perm.equals("") || permission.playerHas(world.getName(), p, perm);
-                    if (hasPermission) break;
-                }
-                if (!hasPermission) continue;
-
                 MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
                 BigDecimal bankBalance = multiEconomyManager.getBankBalance(bankName);
-                BankReader bankReader = new BankReader(bankName);
-                BigDecimal interest = Values.CONFIG.isOfflineInterestDifferentRate() ? bankReader.getOfflineInterest(p) : bankReader.getInterest(p);
+                BankReader reader = new BankReader(bankName);
+                BigDecimal interest = Values.CONFIG.isOfflineInterestDifferentRate() ? reader.getOfflineInterest(p) : reader.getInterest(p);
                 BigDecimal interestMoney = bankBalance.multiply(interest.divide(BigDecimal.valueOf(100)));
-                BigDecimal maxBankCapacity = bankReader.getCapacity(p), maxAmount = Values.CONFIG.getInterestMaxAmount();
+                BigDecimal maxBankCapacity = reader.getCapacity(p), maxAmount = Values.CONFIG.getInterestMaxAmount();
 
                 if (bankBalance.doubleValue() <= 0) continue;
                 if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;

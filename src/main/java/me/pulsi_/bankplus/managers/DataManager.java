@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.BPPlayerFiles;
 import me.pulsi_.bankplus.commands.BankTopCmd;
 import me.pulsi_.bankplus.commands.CmdRegisterer;
@@ -14,7 +15,7 @@ import me.pulsi_.bankplus.listeners.playerChat.*;
 import me.pulsi_.bankplus.loanSystem.LoanUtils;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
@@ -57,11 +58,11 @@ public class DataManager {
     public boolean reloadPlugin() {
         boolean success = true;
 
-        ConfigManager configManager = plugin.getConfigManager();
-        if (!configManager.reloadConfig(ConfigManager.Type.COMMANDS)) success = false;
-        if (!configManager.reloadConfig(ConfigManager.Type.CONFIG)) success = false;
-        if (!configManager.reloadConfig(ConfigManager.Type.MESSAGES)) success = false;
-        if (!configManager.reloadConfig(ConfigManager.Type.MULTIPLE_BANKS)) success = false;
+        BPConfigs BPConfigs = plugin.getConfigManager();
+        if (!BPConfigs.reloadConfig(BPConfigs.Type.COMMANDS)) success = false;
+        if (!BPConfigs.reloadConfig(BPConfigs.Type.CONFIG)) success = false;
+        if (!BPConfigs.reloadConfig(BPConfigs.Type.MESSAGES)) success = false;
+        if (!BPConfigs.reloadConfig(BPConfigs.Type.MULTIPLE_BANKS)) success = false;
 
         Values.CONFIG.setupValues();
         Values.MESSAGES.setupValues();
@@ -84,8 +85,14 @@ public class DataManager {
         if (Values.CONFIG.isInterestEnabled() && interest.wasDisabled()) interest.startInterest();
 
         LoanUtils.loadAllLoans();
-        BPMethods.startSavingBalancesTask();
-        Bukkit.getOnlinePlayers().forEach(p -> new BPPlayerFiles(p).checkForFileFixes());
+        BPUtils.startSavingBalancesTask();
+        Bukkit.getOnlinePlayers().forEach(p -> {
+            new BPPlayerFiles(p).checkForFileFixes();
+
+            BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
+            if (player != null && player.getOpenedBank() != null)
+                p.closeInventory();
+        });
         return success;
     }
 

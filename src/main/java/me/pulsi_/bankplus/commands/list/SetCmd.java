@@ -1,12 +1,12 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.commands.BPCommand;
+import me.pulsi_.bankplus.economy.MultiEconomyManager;
+import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.utils.BPMessages;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -54,7 +54,7 @@ public class SetCmd extends BPCommand {
         }
         String num = args[2];
 
-        if (BPMethods.isInvalidNumber(num, s)) return false;
+        if (BPUtils.isInvalidNumber(num, s)) return false;
         BigDecimal amount = new BigDecimal(num);
 
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
@@ -78,12 +78,12 @@ public class SetCmd extends BPCommand {
             if (amount.doubleValue() >= capacity.doubleValue()) {
                 BigDecimal newAmount = capacity.doubleValue() > 0d ? capacity : amount;
 
-                if (!silent) BPMessages.send(s, "Set-Message", BPMethods.placeValues(op, newAmount));
+                if (!silent) BPMessages.send(s, "Set-Message", BPUtils.placeValues(op, newAmount));
                 em.setBankBalance(newAmount, bankName);
                 return true;
             }
 
-            if (!silent) BPMessages.send(s, "Set-Message", BPMethods.placeValues(op, amount));
+            if (!silent) BPMessages.send(s, "Set-Message", BPUtils.placeValues(op, amount));
             em.setBankBalance(amount, bankName);
 
         } else {
@@ -96,12 +96,12 @@ public class SetCmd extends BPCommand {
             if (amount.doubleValue() >= capacity.doubleValue()) {
                 BigDecimal newAmount = capacity.doubleValue() > 0d ? capacity : amount;
 
-                if (!silent) BPMessages.send(s, "Set-Message", BPMethods.placeValues(op, newAmount));
+                if (!silent) BPMessages.send(s, "Set-Message", BPUtils.placeValues(op, newAmount));
                 em.setBankBalance(newAmount);
                 return true;
             }
 
-            if (!silent) BPMessages.send(s, "Set-Message", BPMethods.placeValues(op, amount));
+            if (!silent) BPMessages.send(s, "Set-Message", BPUtils.placeValues(op, amount));
             em.setBankBalance(amount);
         }
         return true;

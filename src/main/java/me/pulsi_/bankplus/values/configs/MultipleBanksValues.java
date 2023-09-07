@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.values.configs;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.managers.ConfigManager;
+import me.pulsi_.bankplus.managers.BPConfigs;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.List;
@@ -19,7 +19,7 @@ public class MultipleBanksValues {
     }
 
     public void setupValues() {
-        FileConfiguration multipleBanks = BankPlus.INSTANCE.getConfigManager().getConfig(ConfigManager.Type.MULTIPLE_BANKS);
+        FileConfiguration multipleBanks = BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.MULTIPLE_BANKS);
 
         multipleBanksModuleEnabled = multipleBanks.getBoolean("Enabled");
         showNotAvailableBanks = multipleBanks.getBoolean("Shows-Not-Available-Banks");

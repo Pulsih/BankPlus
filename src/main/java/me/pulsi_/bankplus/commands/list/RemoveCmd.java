@@ -1,12 +1,12 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.commands.BPCommand;
+import me.pulsi_.bankplus.economy.MultiEconomyManager;
+import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.utils.BPMessages;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -54,7 +54,7 @@ public class RemoveCmd extends BPCommand {
         }
         String num = args[2];
 
-        if (BPMethods.isInvalidNumber(num, s)) return false;
+        if (BPUtils.isInvalidNumber(num, s)) return false;
         BigDecimal amount = new BigDecimal(num);
 
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
@@ -79,12 +79,12 @@ public class RemoveCmd extends BPCommand {
                 return true;
             }
             if (balance.subtract(amount).doubleValue() <= 0) {
-                if (!silent) BPMessages.send(s, "Remove-Message", BPMethods.placeValues(op, balance));
+                if (!silent) BPMessages.send(s, "Remove-Message", BPUtils.placeValues(op, balance));
                 em.setBankBalance(new BigDecimal(0), bankName);
                 return true;
             }
 
-            if (!silent) BPMessages.send(s, "Remove-Message", BPMethods.placeValues(op, amount));
+            if (!silent) BPMessages.send(s, "Remove-Message", BPUtils.placeValues(op, amount));
             em.removeBankBalance(amount, bankName);
 
         } else {
@@ -99,12 +99,12 @@ public class RemoveCmd extends BPCommand {
                 return true;
             }
             if (balance.subtract(amount).doubleValue() <= 0) {
-                if (!silent) BPMessages.send(s, "Remove-Message", BPMethods.placeValues(op, balance));
+                if (!silent) BPMessages.send(s, "Remove-Message", BPUtils.placeValues(op, balance));
                 em.setBankBalance(new BigDecimal(0));
                 return true;
             }
 
-            if (!silent) BPMessages.send(s, "Remove-Message", BPMethods.placeValues(op, amount));
+            if (!silent) BPMessages.send(s, "Remove-Message", BPUtils.placeValues(op, amount));
             em.removeBankBalance(amount);
         }
         return true;

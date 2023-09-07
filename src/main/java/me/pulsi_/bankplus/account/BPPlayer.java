@@ -16,7 +16,6 @@ public class BPPlayer {
     private Bank openedBank;
     private HashMap<String, String> playerBankClickHolder;
     private int banktopPosition = -1;
-
     private BigDecimal debt;
 
     public BPPlayer(Player player, File playerFile, FileConfiguration playerConfig) {

@@ -2,18 +2,19 @@ package me.pulsi_.bankplus.placeholders;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.debt.DebtUtils;
+import me.pulsi_.bankplus.economy.MultiEconomyManager;
+import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.managers.BankTopManager;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPFormatter;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
@@ -104,7 +105,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
                     return "&cThe selected bank does not exist!";
             }
             if (!reader.hasNextLevel(p))
-                return Values.CONFIG.getBankUpgradedMaxPlaceholder();
+                return Values.CONFIG.getUpgradesMaxedPlaceholder();
 
             BigDecimal cost = reader.getLevelCost(reader.getCurrentLevel(p) + 1);
 
@@ -124,12 +125,35 @@ public class BPPlaceholders extends PlaceholderExpansion {
                     return "&cThe selected bank does not exist!";
             }
             if (!reader.hasNextLevel(p))
-                return Values.CONFIG.getBankUpgradedMaxPlaceholder();
+                return Values.CONFIG.getUpgradesMaxedPlaceholder();
 
             BigDecimal capacity = reader.getCapacity(reader.getCurrentLevel(p) + 1);
             if (capacity.longValue() <= 0) return Values.CONFIG.getInfiniteCapacityText();
 
             return getFormat(identifier, capacity);
+        }
+
+        if (identifier.startsWith("next_level_required_items")) {
+            BankReader reader;
+
+            if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
+            else {
+                if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                    return "&cThe multiple-banks module is disabled!";
+
+                reader = new BankReader(target);
+                if (!reader.exist())
+                    return "The selected bank does not exist.";
+            }
+            if (!reader.hasNextLevel(p))
+                return Values.CONFIG.getUpgradesMaxedPlaceholder();
+
+            ItemStack requiredItems = reader.getLevelRequiredItems(reader.getCurrentLevel(p) + 1);
+            if (requiredItems == null) return Values.CONFIG.getUpgradesNoRequiredItems();
+
+            int amount = requiredItems.getAmount();
+            String item = (requiredItems.getType() + (amount > 1 ? "s" : "")).toLowerCase();
+            return amount + " " + item;
         }
 
         if (identifier.startsWith("next_level_interest_rate")) {
@@ -145,9 +169,9 @@ public class BPPlaceholders extends PlaceholderExpansion {
                     return "The selected bank does not exist.";
             }
             if (!reader.hasNextLevel(p))
-                return Values.CONFIG.getBankUpgradedMaxPlaceholder();
+                return Values.CONFIG.getUpgradesMaxedPlaceholder();
 
-            return reader.getInterest(reader.getCurrentLevel(p) + 1) + "";
+            return reader.getInterest(reader.getCurrentLevel(p) + 1) + "%";
         }
 
         if (identifier.startsWith("next_level_offline_interest_rate")) {
@@ -163,9 +187,9 @@ public class BPPlaceholders extends PlaceholderExpansion {
                     return "The selected bank does not exist.";
             }
             if (!reader.hasNextLevel(p))
-                return Values.CONFIG.getBankUpgradedMaxPlaceholder();
+                return Values.CONFIG.getUpgradesMaxedPlaceholder();
 
-            return reader.getOfflineInterest(reader.getCurrentLevel(p) + 1) + "";
+            return reader.getOfflineInterest(reader.getCurrentLevel(p) + 1) + "%";
         }
 
         if (identifier.startsWith("next_level")) {
@@ -181,7 +205,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
                     return "&cThe selected bank does not exist.";
             }
             if (!reader.hasNextLevel(p))
-                return Values.CONFIG.getBankUpgradedMaxPlaceholder();
+                return Values.CONFIG.getUpgradesMaxedPlaceholder();
 
             return (reader.getCurrentLevel(p) + 1) + "";
         }
@@ -311,7 +335,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
             }
             BigDecimal interestRate = reader.getInterest(p);
 
-            return interestRate + "";
+            return interestRate + "%";
         }
 
         if (identifier.startsWith("offline_interest_rate")) {
@@ -329,7 +353,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
             }
             interestRate = reader.getOfflineInterest(p);
 
-            return interestRate + "";
+            return interestRate + "%";
         }
 
         if (identifier.startsWith("calculate_deposit_taxes_")) {
@@ -440,7 +464,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
         Interest interest = BankPlus.INSTANCE.getInterest();
         switch (identifier) {
             case "interest_cooldown":
-                return BPMethods.formatTime(interest.getInterestCooldownMillis());
+                return BPUtils.formatTime(interest.getInterestCooldownMillis());
 
             case "interest_cooldown_millis":
                 return String.valueOf(interest.getInterestCooldownMillis());

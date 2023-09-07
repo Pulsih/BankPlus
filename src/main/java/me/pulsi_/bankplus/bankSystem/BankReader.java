@@ -6,14 +6,16 @@ import me.pulsi_.bankplus.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -24,7 +26,7 @@ import java.util.List;
  * This class is used to receive information from the selected bank and many more usefully methods to manage the bank and the player.
  */
 public class BankReader {
-    
+
     private final Bank bank;
 
     /**
@@ -113,6 +115,7 @@ public class BankReader {
 
     /**
      * Get the current bank capacity based on the bank level of this player.
+     *
      * @param p The player.
      * @return The capacity amount.
      */
@@ -122,6 +125,7 @@ public class BankReader {
 
     /**
      * Get the current bank capacity based on the bank level of this player.
+     *
      * @param p The player.
      * @return The capacity amount.
      */
@@ -131,6 +135,7 @@ public class BankReader {
 
     /**
      * Get the bank capacity of that specified level.
+     *
      * @param level The bank level.
      * @return The capacity amount.
      */
@@ -143,6 +148,7 @@ public class BankReader {
 
     /**
      * Get the interest rate of the player's bank level.
+     *
      * @param p The player.
      * @return The interest amount.
      */
@@ -152,6 +158,7 @@ public class BankReader {
 
     /**
      * Get the interest rate of the player's bank level.
+     *
      * @param p The player.
      * @return The interest amount.
      */
@@ -161,6 +168,7 @@ public class BankReader {
 
     /**
      * Get the interest rate of that bank level.
+     *
      * @param level The bank level.
      * @return The interest amount.
      */
@@ -169,8 +177,9 @@ public class BankReader {
 
         String interest = getUpgrades().getString(level + ".Interest");
 
-        if (BPMethods.isInvalidNumber(interest)) {
-            if (interest != null) BPLogger.error("Invalid interest amount in the " + level + "* upgrades section, file: " + bank.getIdentifier() + ".yml");
+        if (BPUtils.isInvalidNumber(interest)) {
+            if (interest != null)
+                BPLogger.warn("Invalid interest amount in the " + level + "* upgrades section, file: " + bank.getIdentifier() + ".yml");
             return Values.CONFIG.getInterestMoneyGiven();
         }
 
@@ -179,6 +188,7 @@ public class BankReader {
 
     /**
      * Get the offline interest rate of the player's bank level.
+     *
      * @param p The player
      * @return The offline interest amount.
      */
@@ -188,6 +198,7 @@ public class BankReader {
 
     /**
      * Get the offline interest rate of the player's bank level.
+     *
      * @param p The player
      * @return The offline interest amount.
      */
@@ -197,6 +208,7 @@ public class BankReader {
 
     /**
      * Get the offline interest rate of that bank level.
+     *
      * @param level The bank level.
      * @return The offline interest amount.
      */
@@ -205,8 +217,9 @@ public class BankReader {
 
         String interest = getUpgrades().getString(level + ".Offline-Interest");
 
-        if (BPMethods.isInvalidNumber(interest)) {
-            if (interest != null) BPLogger.error("Invalid offline interest amount in the " + level + "* upgrades section, file: " + bank.getIdentifier() + ".yml");
+        if (BPUtils.isInvalidNumber(interest)) {
+            if (interest != null)
+                BPLogger.warn("Invalid offline interest amount in the " + level + "* upgrades section, file: " + bank.getIdentifier() + ".yml");
             return Values.CONFIG.getOfflineInterestMoneyGiven();
         }
 
@@ -214,9 +227,10 @@ public class BankReader {
     }
 
     /**
-     * Get the cost of the selected level of this bank.
+     * Get the cost of this bank level.
+     *
      * @param level The level to check.
-     * @return A BigDecimal number representing the level cost.
+     * @return The cost, zero if no cost is specified.
      */
     public BigDecimal getLevelCost(int level) {
         if (!hasUpgrades()) return new BigDecimal(0);
@@ -226,7 +240,53 @@ public class BankReader {
     }
 
     /**
+     * Get the items required to level up the bank to this level.
+     *
+     * @param level The level to check.
+     * @return The itemstack representing the item needed with its amount set, null if not specified.
+     */
+    public ItemStack getLevelRequiredItems(int level) {
+        if (!hasUpgrades()) return null;
+
+        String items = getUpgrades().getString(level + ".Required-Items");
+        if (items == null || items.isEmpty()) return null;
+
+        ItemStack itemStack = null;
+        int amount = 1;
+        String item;
+
+        if (!items.contains("-")) item = items;
+        else {
+            String[] split = items.split("-");
+            item = split[0];
+            try {
+                amount = Integer.parseInt(split[1]);
+            } catch (NumberFormatException e) {
+                BPLogger.warn("Invalid required items amount in the " + level + "* upgrades section, file: " + bank.getIdentifier() + ".yml");
+            }
+        }
+
+        try {
+            itemStack = new ItemStack(Material.valueOf(item), Math.max(amount, 1));
+        } catch (NumberFormatException e) {
+            BPLogger.warn("Invalid required items material in the " + level + "* upgrades section, file: " + bank.getIdentifier() + ".yml");
+        }
+
+        return itemStack;
+    }
+
+    /**
+     * Check if the plugin should take the required items from the player inventory.
+     *
+     * @param level The level to check.
+     */
+    public boolean removeRequiredItems(int level) {
+        return hasUpgrades() && getUpgrades().getBoolean(level + ".Remove-Required-Items");
+    }
+
+    /**
      * Get a list of all levels that this bank have, if it has none, it will return a list of 1.
+     *
      * @return A string list with all levels.
      */
     public List<String> getLevels() {
@@ -242,6 +302,7 @@ public class BankReader {
 
     /**
      * Get the current bank level for that player.
+     *
      * @param p The player.
      * @return The current level.
      */
@@ -252,6 +313,7 @@ public class BankReader {
 
     /**
      * Get the current bank level for that player.
+     *
      * @param p The player.
      * @return The current level.
      */
@@ -262,6 +324,7 @@ public class BankReader {
 
     /**
      * Check if the bank of that player has a next level.
+     *
      * @param p The player.
      * @return true if it has a next level, false otherwise.
      */
@@ -272,6 +335,7 @@ public class BankReader {
 
     /**
      * Check if the selected bank has another level next the one specified.
+     *
      * @param currentLevel The current level of the bank.
      * @return true if it has a next level, false otherwise.
      */
@@ -282,6 +346,7 @@ public class BankReader {
 
     /**
      * This method does not require to specify a bank in the constructor.
+     *
      * @param p The player.
      * @return A list with all names of available banks for this player. To get a list of ALL banks use the BanksGuiRegistry class through the main class.
      */
@@ -295,6 +360,7 @@ public class BankReader {
 
     /**
      * This method does not require to specify a bank in the constructor.
+     *
      * @param p The player.
      * @return A list with all names of available banks for this player. To get a list of ALL banks use the BanksGuiRegistry class through the main class.
      */
@@ -308,15 +374,18 @@ public class BankReader {
 
     /**
      * Check if this bank is available for the player.
+     *
      * @param p The player
      * @return true if available, false otherwise.
      */
     public boolean isAvailable(Player p) {
-        return !hasPermissionSection() || p.hasPermission(getPermission());
+        if (!hasPermissionSection()) return true;
+        return getPermission().isEmpty() || p.hasPermission(getPermission());
     }
 
     /**
      * Check if this bank is available for the player.
+     *
      * @param p The player
      * @return true if available, false otherwise.
      */
@@ -330,6 +399,7 @@ public class BankReader {
 
     /**
      * Method used to upgrade the selected bank for the specified player.
+     *
      * @param p The player.
      */
     public void upgradeBank(Player p) {
@@ -343,8 +413,29 @@ public class BankReader {
         }
 
         int nextLevel = getCurrentLevel(p) + 1;
-        BigDecimal cost = getLevelCost(nextLevel);
 
+        ItemStack requiredItems = getLevelRequiredItems(nextLevel);
+        if (requiredItems != null) {
+            int amount = requiredItems.getAmount();
+
+            int playerAmount = 0;
+            boolean hasItems = false;
+            for (ItemStack content : p.getInventory().getContents()) {
+                if (content == null || content.getType() != requiredItems.getType()) continue;
+                playerAmount += content.getAmount();
+
+                if (playerAmount < amount) continue;
+                hasItems = true;
+                break;
+            }
+            if (!hasItems) {
+                String item = (requiredItems.getType() + (amount > 1 ? "s" : "")).toLowerCase();
+                BPMessages.send(p, "Insufficient-Items", "%amount%$" + amount, "%item%$" + item);
+                return;
+            }
+        }
+
+        BigDecimal cost = getLevelCost(nextLevel);
         if (Values.CONFIG.useBankBalanceToUpgrade()) {
 
             BigDecimal balance;
@@ -359,6 +450,7 @@ public class BankReader {
                 return;
             }
 
+            if (removeRequiredItems(nextLevel) && requiredItems!= null) p.getInventory().removeItem(requiredItems);
             if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) multiEconomyManager.removeBankBalance(cost, bank.getIdentifier());
             else singleEconomyManager.removeBankBalance(cost);
         } else {
@@ -371,12 +463,14 @@ public class BankReader {
                 return;
             }
 
+            if (removeRequiredItems(nextLevel) && requiredItems!= null) p.getInventory().removeItem(requiredItems);
             economy.withdrawPlayer(p, cost.doubleValue());
         }
 
         BPPlayerFiles files = new BPPlayerFiles(p);
-        files.getPlayerConfig().set("Banks." + bank.getIdentifier() + ".Level", nextLevel);
-        files.savePlayerFile(true);
+        FileConfiguration config = files.getPlayerConfig();
+        config.set("Banks." + bank.getIdentifier() + ".Level", nextLevel);
+        files.savePlayerFile(config, true);
 
         BPMessages.send(p, "Bank-Upgraded");
 
@@ -388,7 +482,7 @@ public class BankReader {
                 String bankName = parts[0];
                 if (!bankName.equals(bank.getIdentifier())) continue;
 
-                for (int i = 1; i < parts.length;i++) {
+                for (int i = 1; i < parts.length; i++) {
                     String cmd = parts[i].replace("%player%", p.getName());
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
                 }
@@ -398,6 +492,7 @@ public class BankReader {
 
     /**
      * Get the bank specified in the constructor.
+     *
      * @return The bank object.
      */
     public Bank getBank() {

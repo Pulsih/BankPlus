@@ -6,7 +6,7 @@ import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPItems;
 import me.pulsi_.bankplus.utils.BPMessages;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
@@ -65,7 +65,7 @@ public class BankUtils {
         if (delay >= 0) baseBank.setInventoryUpdateTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE, () -> updateMeta(bank, p, identifier), delay, delay));
 
         player.setOpenedBank(baseBank);
-        BPMethods.playSound("PERSONAL", p);
+        BPUtils.playSound("PERSONAL", p);
         p.openInventory(bank);
     }
 

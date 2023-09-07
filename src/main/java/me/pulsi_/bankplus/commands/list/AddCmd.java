@@ -1,12 +1,12 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.commands.BPCommand;
+import me.pulsi_.bankplus.economy.MultiEconomyManager;
+import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.utils.BPMessages;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -54,7 +54,7 @@ public class AddCmd extends BPCommand {
         }
         String num = args[2];
 
-        if (BPMethods.isInvalidNumber(num, s)) return false;
+        if (BPUtils.isInvalidNumber(num, s)) return false;
         BigDecimal amount = new BigDecimal(num);
 
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
@@ -82,16 +82,16 @@ public class AddCmd extends BPCommand {
             }
             if (balance.add(amount).doubleValue() >= capacity.doubleValue()) {
                 if (capacity.doubleValue() > 0d) {
-                    if (!silent) BPMessages.send(s, "Add-Message", BPMethods.placeValues(op, capacity.subtract(balance)));
+                    if (!silent) BPMessages.send(s, "Add-Message", BPUtils.placeValues(op, capacity.subtract(balance)));
                     em.setBankBalance(capacity, bankName);
                     return true;
                 }
 
-                if (!silent) BPMessages.send(s, "Add-Message", BPMethods.placeValues(op, amount));
+                if (!silent) BPMessages.send(s, "Add-Message", BPUtils.placeValues(op, amount));
                 em.addBankBalance(amount, bankName);
                 return true;
             }
-            if (!silent) BPMessages.send(s, "Add-Message", BPMethods.placeValues(op, amount));
+            if (!silent) BPMessages.send(s, "Add-Message", BPUtils.placeValues(op, amount));
             em.addBankBalance(amount, bankName);
 
         } else {
@@ -107,17 +107,17 @@ public class AddCmd extends BPCommand {
             }
             if (balance.add(amount).doubleValue() >= capacity.doubleValue()) {
                 if (capacity.doubleValue() > 0d) {
-                    if (!silent) BPMessages.send(s, "Add-Message", BPMethods.placeValues(op, capacity.subtract(balance)));
+                    if (!silent) BPMessages.send(s, "Add-Message", BPUtils.placeValues(op, capacity.subtract(balance)));
                     em.setBankBalance(capacity);
                     return true;
                 }
 
-                if (!silent) BPMessages.send(s, "Add-Message", BPMethods.placeValues(op, amount));
+                if (!silent) BPMessages.send(s, "Add-Message", BPUtils.placeValues(op, amount));
                 em.addBankBalance(amount);
                 return false;
             }
 
-            if (!silent) BPMessages.send(s, "Add-Message", BPMethods.placeValues(op, amount));
+            if (!silent) BPMessages.send(s, "Add-Message", BPUtils.placeValues(op, amount));
             em.addBankBalance(amount);
         }
         return true;

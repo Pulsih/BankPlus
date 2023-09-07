@@ -2,7 +2,6 @@ package me.pulsi_.bankplus.loanSystem;
 
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.math.BigDecimal;

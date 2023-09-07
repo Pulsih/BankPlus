@@ -1,12 +1,12 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.commands.BPCommand;
+import me.pulsi_.bankplus.economy.MultiEconomyManager;
+import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.utils.BPMessages;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -45,8 +45,8 @@ public class ViewCmd extends BPCommand {
 
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
             if (args.length == 2) {
-                if (s instanceof Player) BPMethods.playSound("VIEW", (Player) s);
-                BPMessages.send(s, "Multiple-Bank-Others", BPMethods.placeValues(p, new MultiEconomyManager(p).getBankBalance()));
+                if (s instanceof Player) BPUtils.playSound("VIEW", (Player) s);
+                BPMessages.send(s, "Multiple-Bank-Others", BPUtils.placeValues(p, new MultiEconomyManager(p).getBankBalance()));
             } else {
                 String bankName = args[2];
                 BankReader bankReader = new BankReader(bankName);
@@ -60,13 +60,13 @@ public class ViewCmd extends BPCommand {
                     return false;
                 }
                 if (confirm(s)) return false;
-                if (s instanceof Player) BPMethods.playSound("VIEW", (Player) s);
-                BPMessages.send(s, "Bank-Others", BPMethods.placeValues(p, new MultiEconomyManager(p).getBankBalance(bankName)));
+                if (s instanceof Player) BPUtils.playSound("VIEW", (Player) s);
+                BPMessages.send(s, "Bank-Others", BPUtils.placeValues(p, new MultiEconomyManager(p).getBankBalance(bankName)));
             }
         } else {
             if (confirm(s)) return false;
-            if (s instanceof Player) BPMethods.playSound("VIEW", (Player) s);
-            BPMessages.send(s, "Bank-Others", BPMethods.placeValues(p, new SingleEconomyManager(p).getBankBalance()));
+            if (s instanceof Player) BPUtils.playSound("VIEW", (Player) s);
+            BPMessages.send(s, "Bank-Others", BPUtils.placeValues(p, new SingleEconomyManager(p).getBankBalance()));
         }
         return true;
     }

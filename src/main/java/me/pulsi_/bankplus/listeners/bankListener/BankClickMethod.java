@@ -2,14 +2,14 @@ package me.pulsi_.bankplus.listeners.bankListener;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
-import me.pulsi_.bankplus.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankHolder;
 import me.pulsi_.bankplus.bankSystem.BankListGui;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
+import me.pulsi_.bankplus.economy.MultiEconomyManager;
+import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.utils.BPLogger;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
@@ -106,7 +106,7 @@ public class BankClickMethod {
 
                     case "[DEPOSIT]":
                         if (value.equals("CUSTOM")) {
-                            BPMethods.customDeposit(p, bankName);
+                            BPUtils.customDeposit(p, bankName);
                             continue;
                         }
                         try {
@@ -129,7 +129,7 @@ public class BankClickMethod {
 
                     case "[WITHDRAW]":
                         if (value.equals("CUSTOM")) {
-                            BPMethods.customWithdraw(p, bankName);
+                            BPUtils.customWithdraw(p, bankName);
                             continue;
                         }
                         try {
@@ -169,7 +169,7 @@ public class BankClickMethod {
             case "deposit":
                 switch (actionAmount) {
                     case "custom":
-                        BPMethods.customDeposit(p);
+                        BPUtils.customDeposit(p);
                         break;
 
                     case "all":
@@ -200,7 +200,7 @@ public class BankClickMethod {
             case "withdraw":
                 switch (actionAmount) {
                     case "custom":
-                        BPMethods.customWithdraw(p);
+                        BPUtils.customWithdraw(p);
                         break;
 
                     case "all":

@@ -62,7 +62,7 @@ public class BPPlayerFiles {
             multiEconomyManager.unloadBankBalance();
             singleEconomyManager.loadBankBalance();
         }
-        savePlayerFile(true);
+        savePlayerFile(config, true);
     }
 
     public boolean isPlayerRegistered() {

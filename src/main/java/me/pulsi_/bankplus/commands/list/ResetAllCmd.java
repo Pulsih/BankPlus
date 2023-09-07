@@ -1,9 +1,9 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;

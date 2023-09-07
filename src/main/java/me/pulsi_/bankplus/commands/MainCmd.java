@@ -1,11 +1,11 @@
 package me.pulsi_.bankplus.commands;
 
-import me.pulsi_.bankplus.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankListGui;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
+import me.pulsi_.bankplus.economy.MultiEconomyManager;
+import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.utils.BPMessages;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -31,7 +31,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 0) {
-            if (!BPMethods.hasPermission(s, "bankplus.use")) return true;
+            if (!BPUtils.hasPermission(s, "bankplus.use")) return true;
 
             if (!(s instanceof Player)) {
                 BPMessages.send(s, "Help-Message");
@@ -42,14 +42,14 @@ public class MainCmd implements CommandExecutor, TabCompleter {
             if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
                 if (Values.CONFIG.isGuiModuleEnabled()) BankUtils.openBank(p, BankListGui.multipleBanksGuiID, false);
                 else {
-                    BPMessages.send(p, "Multiple-Personal-Bank", BPMethods.placeValues(p, new MultiEconomyManager(p).getBankBalance()));
-                    BPMethods.playSound("PERSONAL", p);
+                    BPMessages.send(p, "Multiple-Personal-Bank", BPUtils.placeValues(p, new MultiEconomyManager(p).getBankBalance()));
+                    BPUtils.playSound("PERSONAL", p);
                 }
             } else {
                 if (Values.CONFIG.isGuiModuleEnabled()) BankUtils.openBank(p);
                 else {
-                    BPMessages.send(p, "Personal-Bank", BPMethods.placeValues(p, new SingleEconomyManager(p).getBankBalance()));
-                    BPMethods.playSound("PERSONAL", p);
+                    BPMessages.send(p, "Personal-Bank", BPUtils.placeValues(p, new SingleEconomyManager(p).getBankBalance()));
+                    BPUtils.playSound("PERSONAL", p);
                 }
             }
             return true;

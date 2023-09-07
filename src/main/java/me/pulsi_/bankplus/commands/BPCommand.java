@@ -1,9 +1,9 @@
 package me.pulsi_.bankplus.commands;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.managers.ConfigManager;
+import me.pulsi_.bankplus.managers.BPConfigs;
 import me.pulsi_.bankplus.utils.BPMessages;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -34,7 +34,7 @@ public abstract class BPCommand {
         for (int i = 1; i < aliases.length; i++)
             this.aliases[i - 1] = aliases[i];
 
-        FileConfiguration config = BankPlus.INSTANCE.getConfigManager().getConfig(ConfigManager.Type.COMMANDS);
+        FileConfiguration config = BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.COMMANDS);
 
         needConfirm = config.getBoolean(identifier + ".need-confirm");
         hasCooldown = config.getBoolean(identifier + ".has-cooldown");
@@ -118,7 +118,7 @@ public abstract class BPCommand {
     }
 
     public void execute(CommandSender s, String args[]) {
-        if (!BPMethods.hasPermission(s, getPermission()) || (playerOnly() && !BPMethods.isPlayer(s))) return;
+        if (!BPUtils.hasPermission(s, getPermission()) || (playerOnly() && !BPUtils.isPlayer(s))) return;
 
         if (!skipUsageWarn() && args.length == 1) {
             if (getUsage() != null && !getUsage().equals("")) BPMessages.send(s, getUsage(), true);

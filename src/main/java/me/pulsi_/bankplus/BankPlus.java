@@ -1,9 +1,9 @@
 package me.pulsi_.bankplus;
 
 import me.pulsi_.bankplus.account.PlayerRegistry;
+import me.pulsi_.bankplus.bankSystem.BankGuiRegistry;
 import me.pulsi_.bankplus.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.bankSystem.BankGuiRegistry;
 import me.pulsi_.bankplus.interest.Interest;
 import me.pulsi_.bankplus.loanSystem.LoanRegistry;
 import me.pulsi_.bankplus.loanSystem.LoanUtils;
@@ -11,7 +11,6 @@ import me.pulsi_.bankplus.logSystem.BPLogUtils;
 import me.pulsi_.bankplus.managers.*;
 import me.pulsi_.bankplus.placeholders.BPPlaceholders;
 import me.pulsi_.bankplus.utils.BPLogger;
-import me.pulsi_.bankplus.utils.BPVersions;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
@@ -37,7 +36,7 @@ public final class BankPlus extends JavaPlugin {
     private Permission perms = null;
 
     private BankTopManager bankTopManager;
-    private ConfigManager configManager;
+    private BPConfigs BPConfigs;
     private DataManager dataManager;
     private AFKManager afkManager;
     private TaskManager taskManager;
@@ -97,7 +96,7 @@ public final class BankPlus extends JavaPlugin {
         this.serverVersionInt = number;
 
         this.bankTopManager = new BankTopManager(this);
-        this.configManager = new ConfigManager(this);
+        this.BPConfigs = new BPConfigs(this);
         this.dataManager = new DataManager(this);
         this.afkManager = new AFKManager(this);
         this.taskManager = new TaskManager();
@@ -121,9 +120,6 @@ public final class BankPlus extends JavaPlugin {
         if (Values.CONFIG.isUpdateCheckerEnabled())
             Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> isUpdated = isPluginUpdated(), 0, (8 * 1200) * 60 /*8 hours*/);
         wasOnSingleEconomy = !Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled();
-
-        BPVersions.moveBankFileToBanksFolder();
-        BPVersions.changePlayerStoragePosition();
     }
 
     @Override
@@ -188,8 +184,8 @@ public final class BankPlus extends JavaPlugin {
         return bankTopManager;
     }
 
-    public ConfigManager getConfigManager() {
-        return configManager;
+    public BPConfigs getConfigManager() {
+        return BPConfigs;
     }
 
     public DataManager getDataManager() {

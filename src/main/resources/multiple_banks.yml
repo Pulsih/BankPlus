@@ -1,0 +1,77 @@
+# Put this to true to enable the multiple-banks feature.
+#
+# If this feature is enabled, typing /bank won't open the
+# main bank but a gui with a list of all available banks.
+#
+# When enabling this option, many commands will
+# change due to the multiple bank options (Ex: The
+# command to set money will require specifying the
+# bank to set the money in the selected bank)
+#
+# Remember that must specify a main gui in the config file.
+Enabled: false
+
+# Choose if showing or hiding a
+# bank if it's not accessible.
+Shows-Not-Available-Banks: true
+
+# If having only one bank available, this option will
+# make the player directly open that one instead of
+# opening the banks-gui with just the 1 gui available.
+Directly-Open-If-1-Is-Available: false
+
+# This is a new feature used to automatically unlock
+# new banks when a player has maxed the selected bank.
+#
+# The format is "the bank name:the command to run from console"
+# Since the access to banks works with permissions, use
+# your own permission plugin to make the player access the
+# new bank, this action will be run as soon as the
+# player upgrades the selected bank to the max level
+# (In this example, when you max the "bank" bank it will run
+# the "lp user %player% permission set bankplus.bank2" cmd):
+# Auto-Banks-Unlocker:
+# - "bank:lp user %player% permission set bankplus.bank2"
+#
+# You can also use more than 1 cmd:
+# Auto-Banks-Unlocker
+# - "bank:cmd1:cmd2:cmd3"
+Auto-Banks-Unlocker: []
+
+# The gui that contains the different banks.
+#
+# To add more banks, go to the "banks" folder and
+# add more files following the default bank format.
+Banks-Gui:
+  Title: '&a&lBANKS LIST'
+
+  # If the number of banks is higher
+  # than the gui slots, it will
+  # separate the banks in more pages.
+  Lines: 1
+
+  # In ticks.
+  Update-Delay: 20
+
+  Filler:
+    Enabled: true
+    Material: WHITE_STAINED_GLASS_PANE
+    Glowing: false
+
+  Previous-Page:
+    Material: ARROW
+    Displayname: '&aPrevious page &8(&7%previous_page%/%all_pages%&8)'
+    Lore:
+      - '&7Go to the previous page'
+    Glowing: false
+    Slot: 1
+  # It will show the item only if the
+  # banks are more than the empty slots.
+
+  Next-Page:
+    Material: ARROW
+    Displayname: '&aNext page &8(&7%nex_page%/%all_pages%&8)'
+    Lore:
+      - '&7Go to the next page'
+    Glowing: false
+    Slot: 9

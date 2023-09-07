@@ -39,6 +39,11 @@ public class MultiEconomyManager {
         this.p = op.isOnline() ? Bukkit.getPlayer(op.getUniqueId()) : null;
     }
 
+    public MultiEconomyManager(Player p) {
+        this.op = Bukkit.getOfflinePlayer(p.getUniqueId());
+        this.p = p;
+    }
+
     /**
      * Return a list with all player balances.
      *
@@ -69,7 +74,7 @@ public class MultiEconomyManager {
 
             for (String bankName : section.getKeys(false)) {
                 String bal = config.getString("Banks." + bankName + ".Money");
-                if (bal != null && !BPMethods.isInvalidNumber(bal))
+                if (bal != null && !BPUtils.isInvalidNumber(bal))
                     balance = balance.add(new BigDecimal(bal));
             }
             balances.add(balance);
@@ -365,7 +370,7 @@ public class MultiEconomyManager {
         }
 
         BigDecimal money = BigDecimal.valueOf(BankPlus.INSTANCE.getEconomy().getBalance(p));
-        if (!BPMethods.checkPreRequisites(money, amount, p) || BPMethods.isBankFull(p, bankName)) return;
+        if (!BPUtils.checkPreRequisites(money, amount, p) || BPUtils.isBankFull(p, bankName)) return;
 
         if (money.doubleValue() < amount.doubleValue()) amount = money;
 
@@ -390,11 +395,11 @@ public class MultiEconomyManager {
         }
 
         EconomyResponse depositResponse = BankPlus.INSTANCE.getEconomy().withdrawPlayer(p, amount.doubleValue());
-        if (BPMethods.hasFailed(p, depositResponse)) return;
+        if (BPUtils.hasFailed(p, depositResponse)) return;
 
         addBankBalance(amount.subtract(taxes), bankName, false, true);
-        BPMessages.send(p, "Success-Deposit", BPMethods.placeValues(p, amount.subtract(taxes)), BPMethods.placeValues(taxes, "taxes"));
-        BPMethods.playSound("DEPOSIT", p);
+        BPMessages.send(p, "Success-Deposit", BPUtils.placeValues(p, amount.subtract(taxes)), BPUtils.placeValues(taxes, "taxes"));
+        BPUtils.playSound("DEPOSIT", p);
 
         endEvent(TransactionType.DEPOSIT, economy.getBalance(p), amount, bankName);
     }
@@ -412,7 +417,7 @@ public class MultiEconomyManager {
         }
 
         BigDecimal bankBal = getBankBalance(bankName);
-        if (!BPMethods.checkPreRequisites(bankBal, amount, p)) return;
+        if (!BPUtils.checkPreRequisites(bankBal, amount, p)) return;
 
         if (bankBal.doubleValue() < amount.doubleValue()) amount = bankBal;
 
@@ -425,11 +430,11 @@ public class MultiEconomyManager {
             taxes = amount.multiply(Values.CONFIG.getWithdrawTaxes().divide(BigDecimal.valueOf(100)));
 
         EconomyResponse withdrawResponse = economy.depositPlayer(p, amount.subtract(taxes).doubleValue());
-        if (BPMethods.hasFailed(p, withdrawResponse)) return;
+        if (BPUtils.hasFailed(p, withdrawResponse)) return;
 
         removeBankBalance(amount, bankName, true);
-        BPMessages.send(p, "Success-Withdraw", BPMethods.placeValues(p, amount.subtract(taxes)), BPMethods.placeValues(taxes, "taxes"));
-        BPMethods.playSound("WITHDRAW", p);
+        BPMessages.send(p, "Success-Withdraw", BPUtils.placeValues(p, amount.subtract(taxes)), BPUtils.placeValues(taxes, "taxes"));
+        BPUtils.playSound("WITHDRAW", p);
 
         endEvent(TransactionType.WITHDRAW, economy.getBalance(p), amount, bankName);
     }
@@ -462,22 +467,22 @@ public class MultiEconomyManager {
             removeBankBalance(targetCapacity.subtract(targetBalance), fromBank, TransactionType.PAY);
             targetEM.setBankBalance(targetCapacity, toBank, TransactionType.PAY);
 
-            BPMessages.send(p, "Payment-Sent", BPMethods.placeValues(target, amount));
-            BPMessages.send(target, "Payment-Received", BPMethods.placeValues(p, amount));
+            BPMessages.send(p, "Payment-Sent", BPUtils.placeValues(target, amount));
+            BPMessages.send(target, "Payment-Received", BPUtils.placeValues(p, amount));
             return;
         }
 
         removeBankBalance(amount, fromBank, TransactionType.PAY);
         targetEM.addBankBalance(amount, toBank, TransactionType.PAY);
-        BPMessages.send(p, "Payment-Sent", BPMethods.placeValues(target, amount));
-        BPMessages.send(target, "Payment-Received", BPMethods.placeValues(p, amount));
+        BPMessages.send(p, "Payment-Sent", BPUtils.placeValues(target, amount));
+        BPMessages.send(target, "Payment-Received", BPUtils.placeValues(p, amount));
     }
 
     private BPPreTransactionEvent startEvent(TransactionType type, double vaultBalance, BigDecimal amount, String bankName) {
         BPPreTransactionEvent event = new BPPreTransactionEvent(
                 op, type, getBankBalance(bankName), vaultBalance, amount, false, bankName
         );
-        BPMethods.callEvent(event);
+        BPUtils.callEvent(event);
         return event;
     }
 
@@ -485,6 +490,6 @@ public class MultiEconomyManager {
         BPAfterTransactionEvent event = new BPAfterTransactionEvent(
                 op, type, getBankBalance(bankName), vaultBalance, amount, false, bankName
         );
-        BPMethods.callEvent(event);
+        BPUtils.callEvent(event);
     }
 }

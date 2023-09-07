@@ -2,7 +2,7 @@ package me.pulsi_.bankplus.utils;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.managers.ConfigManager;
+import me.pulsi_.bankplus.managers.BPConfigs;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -136,7 +136,7 @@ public class BPMessages {
     public static void loadMessages() {
         messages.clear();
 
-        FileConfiguration config = BankPlus.INSTANCE.getConfigManager().getConfig(ConfigManager.Type.MESSAGES);
+        FileConfiguration config = BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.MESSAGES);
         for (String path : config.getConfigurationSection("").getKeys(false)) {
             if (!path.equals("Update-File") && !path.equals("Enable-Missing-Message-Alert"))
                 messages.put(path, config.getStringList(path).isEmpty() ? Collections.singletonList(config.getString(path)) : config.getStringList(path));

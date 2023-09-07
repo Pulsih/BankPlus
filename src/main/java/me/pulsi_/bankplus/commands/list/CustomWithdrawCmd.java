@@ -4,7 +4,7 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.BPMessages;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -50,7 +50,7 @@ public class CustomWithdrawCmd extends BPCommand {
         }
 
         if (confirm(s)) return false;
-        BPMethods.customWithdraw(p, bankName);
+        BPUtils.customWithdraw(p, bankName);
         return true;
     }
 

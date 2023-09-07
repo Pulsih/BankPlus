@@ -1,12 +1,12 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.commands.BPCommand;
+import me.pulsi_.bankplus.economy.MultiEconomyManager;
+import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.utils.BPMessages;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -39,7 +39,7 @@ public class AddAllCmd extends BPCommand {
     @Override
     public boolean onCommand(CommandSender s, String args[]) {
         String num = args[1];
-        if (BPMethods.isInvalidNumber(num, s)) return false;
+        if (BPUtils.isInvalidNumber(num, s)) return false;
 
         if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
             String bankName = args[2];

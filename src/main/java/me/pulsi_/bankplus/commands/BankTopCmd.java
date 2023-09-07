@@ -18,7 +18,7 @@ public class BankTopCmd implements CommandExecutor {
             BPMessages.send(s, "BankTop-Disabled");
             return false;
         }
-        if (!BPMethods.hasPermission(s, "bankplus.banktop")) return false;
+        if (!BPUtils.hasPermission(s, "bankplus.banktop")) return false;
 
         List<String> format = Values.CONFIG.getBankTopFormat();
         for (String line : format) s.sendMessage(BPChat.color(placeName(placeMoney(line))));

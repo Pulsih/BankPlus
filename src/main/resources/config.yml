@@ -1,0 +1,321 @@
+# Configuration File of BankPlus
+
+# Check for new updates of the plugin.
+Update-Checker: true
+
+# Interest will increase player bank balance
+# by giving a % of their bank money.
+#
+# To restart the interest type /bank restartInterest.
+#
+# Players must have the "bankplus.receive.interest"
+# permission to receive the interest.
+Interest:
+  # Enable or disable the interest feature.
+  Enabled: true
+
+  AFK-Settings:
+    # If a player is AFK, it won't receive the interest.
+    Ignore-AFK-Players: false
+
+    # Choose if using the EssentialsX AFK.
+    # (You will need to install EssentialsX)
+    Use-EssentialsX-AFK: false
+
+    # The time, in minutes, that will pass
+    # before marking a player as AFK
+    AFK-Time: 5
+
+  # The percentage of money given. (Default: 5%)
+  #
+  # IMPORTANT! This amount is defined in the BANK FILE!
+  # This option is only a fallback value in case the
+  # level of the bank does not specify its amount!
+  Money-Given: "5%"
+
+  # This is the interest cooldown.
+  # You can choose the delay between:
+  #   seconds (time s), minutes (time m)
+  #   hours (time h), days (time d)
+  # If no time is specified, it
+  # will automatically choose minutes.
+  # (You must put the space to specify the time!)
+  Delay: "5 m"
+
+  # The max amount that you can receive with interest.
+  Max-Amount: "500000"
+
+  # Choose if also giving interest to offline players.
+  Give-To-Offline-Players: false
+
+  # The time before the offline interest
+  # will stop working if the player doesn't join.
+  # Put 0 to have no limit.
+  #
+  # The format is the same as Interest.Delay
+  Offline-Limit: "3 d"
+
+  # Choose if the interest rate for offline players
+  # will be different from the default one.
+  Different-Offline-Rate: false
+
+  # If 'Different-Offline-Rate' is enabled, the offline players
+  # will receive this interest rate. It works the same as the
+  # "Money-Given" above; you can edit this in the bank file.
+  Offline-Money-Given: "5%"
+
+  # The permission for offline players to receive interest.
+  # You can put "" if you don't want to use a permission.
+  Offline-Permission: "bankplus.receive.interest"
+
+  # If you enable this, all the interest percentages will be
+  # overridden if the player's money is between the 2 specified amounts.
+  Enable-Interest-Limiter: false
+
+  # Format: Amount1-Amount2:InterestRatePercentage
+  Interest-Limiter:
+    - "500-5000:10%"
+    - "50000-100000:4%"
+
+General-Settings:
+  # Choose if automatically update your files
+  # when a new version is downloaded, you can
+  # disable this option if you see that the
+  # plugin is failing at updating the files
+  # itself, the old affected files will be
+  # saved in a folder as backup.
+  Auto-Update-Files: true
+
+  # Enable the transaction logger which will save
+  # player transactions to the logs folder.
+  Log-Transactions: true
+
+  # You need to restart the server
+  # to apply these changes.
+  #
+  # Priorities: LOWEST, LOW, NORMAL, HIGH, HIGHEST
+  Event-Priorities:
+    PlayerChat: "NORMAL"
+    BankClick: "NORMAL"
+
+  # The amount that a player will receive
+  # when joining for the first time
+  Join-Start-Amount: '500'
+
+  # Enable or not the guis module.
+  #
+  # If the module is not enabled, you won't
+  # be able to use the multiple gui and gui
+  # settings features.
+  Enable-Guis: true
+
+  # This is really important; you must have 1
+  # main gui selected, based on the names of
+  # the files in the guis folder.
+  Main-Gui: "bank"
+
+  # Store player's money using UUIDs,
+  # otherwise the plugin will use names.
+  Use-UUIDs: true
+
+  # In minutes, the delay to save all players balances. It is used
+  # to prevent players from losing their money if the server crashes.
+  # Put 0 to disable this option.
+  Save-Delay: 10
+
+  # Choose if sending a message to the console
+  # when the plugin saves all balances. (Only console)
+  Save-Broadcast: true
+
+  # The max amount that a player can deposit, use 0 to disable.
+  #
+  # IMPORTANT! The bank capacity is defined in the BANK FILE!
+  # This option is only a fallback value in case the
+  # level of the bank does not specify its capacity!
+  Max-Bank-Capacity: '500000000'
+
+  # The text displayed when the capacity is 0 (infinite).
+  Infinite-Capacity-Text: "Infinite"
+
+  # The max number of decimals that a player balance can have.
+  #
+  # You can put 0 to use an economy without decimals.
+  Max-Decimals-Amount: 2
+
+  # Enabling this option, it will reopen the bank after
+  # typing in chat when depositing / withdrawing money.
+  Reopen-Bank-After-Chat: true
+
+  # The message that a player has to type
+  # to stop typing the custom amount.
+  Chat-Exit-Message: "exit"
+
+  # In seconds, the time before the custom transaction will end.
+  Chat-Exit-Time: 10
+
+  # These commands will be executed when leaving from typing
+  # in chat while using the custom withdraw / deposit.
+  #
+  # You can put as many commands as you want.
+  Chat-Exit-Commands: []
+  # - "[CONSOLE] tell %player% You typed in chat!"
+  # - "[PLAYER] say I typed in chat!"
+
+  # Worlds where the banks won't work
+  Worlds-Blacklist:
+    - "noBankWorld"
+
+  # Choose if using the bank or the vault
+  # balance to upgrade the bank levels.
+  Use-Bank-Balance-To-Upgrade: true
+
+  # Send an alert message to show the player how
+  # much money has earned while being offline.
+  Offline-Interest-Earned-Message:
+    Enabled: true
+    # In seconds, put 0 to disable the delay.
+    Delay: 2
+    Message: "%prefix% &aYou have earned &f%amount% money &awhile being offline!"
+
+  Withdraw-Sound:
+    Enabled: true
+    # Sound-Type,Volume,Pitch.
+    Sound: "ORB_PICKUP,5,1"
+
+  Deposit-Sound:
+    Enabled: true
+    Sound: "ORB_PICKUP,5,1"
+
+  View-Sound:
+    Enabled: true
+    Sound: "ORB_PICKUP,5,1"
+
+  Personal-Sound:
+    Enabled: true
+    Sound: "ORB_PICKUP,5,1"
+
+# The player needs to have the permission
+# "bankplus.deposit" to be able to deposit.
+Deposit-Settings:
+  # The max amount to deposit per time, use 0 to disable.
+  Max-Deposit-Amount: "0"
+
+  # The minimum amount to deposit per time, use 0 to disable.
+  Minimum-Deposit-Amount: "0"
+
+  # The money that a player will lose for taxes
+  # when depositing, use 0 to disable.
+  #
+  # Use the permission "bankplus.deposit.bypass-taxes"
+  # to bypass the deposit taxes.
+  Deposit-Taxes: "0%"
+
+# The player needs to have the permission
+# "bankplus.withdraw" to be able to deposit.
+Withdraw-Settings:
+  # The max amount to withdraw per time, use 0 to disable.
+  Max-Withdraw-Amount: "0"
+
+  # The minimum amount to withdraw per time, use 0 to disable.
+  Minimum-Withdraw-Amount: "0"
+
+  # The money that a player will lose for taxes
+  # when withdrawing, use 0 to disable.
+  #
+  # Use the permission "bankplus.withdraw.bypass-taxes"
+  # to bypass the deposit taxes.
+  Withdraw-Taxes: "0%"
+
+# Loans are a way to give money to a player and then
+# having them back after a period of time.
+# If a player can't afford to give the money back, he
+# will receive a debt, every money put in the bank
+# with a debt will be removed till the debt reaches 0
+Loan-Settings:
+  # The max amount to give as a loan.
+  Max-Amount: "5000"
+
+  # The default interest for loans.
+  Interest: "5%"
+
+  # In how many times the loan will be repaid.
+  Installments: 3
+
+  # The time in ticks between payments (20 ticks = 1 second).
+  Delay: 1200
+
+  # The time in seconds before the loan request will be deleted.
+  Accept-Time: 5
+
+BankTop:
+  # Enable or not the feature.
+  Enabled: true
+
+  # The size of the banktop.
+  Size: 10
+
+  # In ticks, the delay before the top will update.
+  Update-Delay: 12000
+
+  Update-Broadcast:
+    # Choose if broadcasting to the server
+    # when the plugin updates the banktop.
+    Enabled: true
+
+    # Choose if the broadcast will be sent only to the console.
+    Only-Console: false
+
+    # The message that will be sent when updating.
+    Message: "%prefix% &aThe BankTop has been updated!"
+
+  # The format that will be used to
+  # display the money in the banktop.
+  # You can choose between:
+  #   default_amount, amount_long,
+  #   amount_formatted, amount_formatted_long
+  Money-Format: "amount_formatted"
+
+  # The message to display the banktop.
+  Format:
+    - "&8&m---------&8[&a &lBank&9&lPlus &aBankTop &8]&m---------"
+    - "&61# &6%bankplus_banktop_name_1%&8: &a%bankplus_banktop_money_1%"
+    - "&61# &6%bankplus_banktop_name_2%&8: &a%bankplus_banktop_money_2%"
+    - "&61# &6%bankplus_banktop_name_3%&8: &a%bankplus_banktop_money_3%"
+    - "&61# &6%bankplus_banktop_name_4%&8: &a%bankplus_banktop_money_4%"
+    - "&61# &6%bankplus_banktop_name_5%&8: &a%bankplus_banktop_money_5%"
+    - "&61# &6%bankplus_banktop_name_6%&8: &a%bankplus_banktop_money_6%"
+    - "&61# &6%bankplus_banktop_name_7%&8: &a%bankplus_banktop_money_7%"
+    - "&61# &6%bankplus_banktop_name_8%&8: &a%bankplus_banktop_money_8%"
+    - "&61# &6%bankplus_banktop_name_9%&8: &a%bankplus_banktop_money_9%"
+    - "&61# &6%bankplus_banktop_name_10%&8: &a%bankplus_banktop_money_10%"
+    - "    &7&o(( The BankTop will update every 10m ))"
+
+# You can use color codes.
+Placeholders:
+  Money:
+    Thousands: "K"
+    Millions: "M"
+    Billions: "B"
+    Trillions: "T"
+    Quadrillions: "Q"
+    Quintillions: "QQ"
+
+  Time:
+    Second: "s"
+    Seconds: "s"
+    Minute: "m"
+    Minutes: "m"
+    Hour: "h"
+    Hours: "h"
+    Day: "d"
+    Days: "d"
+    Format: "%d%h%m%s"
+    Separator: ", "
+    Final-Separator: " and "
+
+  Upgrades:
+    Max-Level: "Maxed"
+    No-Required-Items: "None"
+
+  BankTop:
+    Player-Not-Found: "Player not found."

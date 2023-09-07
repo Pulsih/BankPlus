@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.values.configs;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.managers.ConfigManager;
+import me.pulsi_.bankplus.managers.BPConfigs;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class MessageValues {
@@ -14,7 +14,7 @@ public class MessageValues {
     }
 
     public void setupValues() {
-        FileConfiguration messages = BankPlus.INSTANCE.getConfigManager().getConfig(ConfigManager.Type.MESSAGES);
+        FileConfiguration messages = BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.MESSAGES);
 
         isTitleCustomAmountEnabled = messages.getBoolean("Title-Custom-Transaction.Enabled");
         isInterestBroadcastEnabled = messages.getBoolean("Interest-Broadcast.Enabled");

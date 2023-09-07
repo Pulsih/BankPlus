@@ -3,7 +3,7 @@ package me.pulsi_.bankplus.commands.list;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.BPMessages;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.command.CommandSender;
 
@@ -33,7 +33,7 @@ public class InterestCmd extends BPCommand {
             return false;
         }
         if (confirm(s)) return false;
-        BPMessages.send(s, "Interest-Time", "%time%$" + BPMethods.formatTime(BankPlus.INSTANCE.getInterest().getInterestCooldownMillis()));
+        BPMessages.send(s, "Interest-Time", "%time%$" + BPUtils.formatTime(BankPlus.INSTANCE.getInterest().getInterestCooldownMillis()));
         return true;
     }
 

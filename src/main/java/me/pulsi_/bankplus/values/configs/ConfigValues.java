@@ -1,9 +1,9 @@
 package me.pulsi_.bankplus.values.configs;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.managers.ConfigManager;
+import me.pulsi_.bankplus.managers.BPConfigs;
 import me.pulsi_.bankplus.utils.BPLogger;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPUtils;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.math.BigDecimal;
@@ -13,18 +13,18 @@ public class ConfigValues {
 
     private static final String DEF_ERROR = "Invalid number for \"%\", Please correct it in the config as soon as possible!";
 
-    private List<String> worldsBlacklist, exitCommands, bankTopFormat;
-    private String exitMessage, playerChatPriority, bankClickPriority;
+    private List<String> worldsBlacklist, exitCommands, bankTopFormat, interestLimiter;
+    private String chatExitMessage, playerChatPriority, bankClickPriority;
     private String second, seconds, minute, minutes, hour, hours, day, days;
     private String interestTimeSeparator, interestTimeFinalSeparator, interestTimeFormat;
     private String k, m, b, t, q, qq;
     private String infiniteCapacityText, withdrawSound, depositSound, viewSound, personalSound;
     private String maxDepositAmount, maxWithdrawAmount, depositTaxes, withdrawTaxes, depositMinimumAmount, withdrawMinimumAmount, maxBankCapacity, startAmount;
-    private String bankTopMoneyFormat, banktopUpdateBroadcastMessage, bankUpgradedMaxPlaceholder, banktopPlayerNotFoundPlaceholder, mainGuiName;
-    private String notifyOfflineInterestMessage, interestDelay, interestOfflinePermission, interestMaxAmount, interestMoneyGiven, offlineInterestMoneyGiven;
+    private String bankTopMoneyFormat, banktopUpdateBroadcastMessage, upgradesMaxedPlaceholder, upgradesNoRequiredItems, banktopPlayerNotFoundPlaceholder, mainGuiName;
+    private String notifyOfflineInterestMessage, interestDelay, interestOfflinePermission, interestMaxAmount, interestMoneyGiven, offlineInterestMoneyGiven, offlineInterestLimit;
     private long notifyOfflineInterestDelay, saveBalancedDelay, updateBankTopDelay;
-    private int afkPlayersTime, maxDecimalsAmount, bankTopSize;
-    private boolean isReopeningBankAfterChat, isNotifyOfflineInterest, isStoringUUIDs, logTransactions;
+    private int afkPlayersTime, maxDecimalsAmount, bankTopSize, chatExitTime;
+    private boolean isReopeningBankAfterChat, isNotifyOfflineInterest, isStoringUUIDs, logTransactions, enableInterestLimiter;
     private boolean isInterestEnabled, isGivingInterestToOfflinePlayers, isOfflineInterestDifferentRate;
     private boolean isOfflineInterestEarnedMessageEnabled, isUpdateCheckerEnabled, isWithdrawSoundEnabled, isDepositSoundEnabled;
     private boolean isViewSoundEnabled, isPersonalSoundEnabled, isIgnoringAfkPlayers, useEssentialsXAFK, useBankBalanceToUpgrade;
@@ -33,9 +33,10 @@ public class ConfigValues {
     private int loanInstalments, loanDelay, loanAcceptTime;
 
     public void setupValues() {
-        FileConfiguration config = BankPlus.INSTANCE.getConfigManager().getConfig(ConfigManager.Type.CONFIG);
+        FileConfiguration config = BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.CONFIG);
 
-        exitMessage = config.getString("General-Settings.Chat-Exit-Message");
+        chatExitMessage = config.getString("General-Settings.Chat-Exit-Message");
+        chatExitTime = config.getInt("General-Settings.Chat-Exit-Time");
         playerChatPriority = config.getString("General-Settings.Event-Priorities.PlayerChat");
         bankClickPriority = config.getString("General-Settings.Event-Priorities.BankClick");
         second = config.getString("Placeholders.Time.Second");
@@ -75,7 +76,9 @@ public class ConfigValues {
         interestMaxAmount = config.getString("Interest.Max-Amount");
         interestMoneyGiven = config.getString("Interest.Money-Given");
         offlineInterestMoneyGiven = config.getString("Interest.Offline-Money-Given");
-        bankUpgradedMaxPlaceholder = config.getString("Placeholders.Upgrades.Max-Level");
+        offlineInterestLimit = config.getString("Interest.Offline-Limit");
+        upgradesMaxedPlaceholder = config.getString("Placeholders.Upgrades.Max-Level");
+        upgradesNoRequiredItems = config.getString("Placeholders.No-Required-Items");
         banktopPlayerNotFoundPlaceholder = config.getString("Placeholders.BankTop.Player-Not-Found");
         worldsBlacklist = config.getStringList("General-Settings.Worlds-Blacklist");
         exitCommands = config.getStringList("General-Settings.Chat-Exit-Commands");
@@ -84,6 +87,7 @@ public class ConfigValues {
         isNotifyOfflineInterest = config.getBoolean("General-Settings.Offline-Interest-Earned-Message.Enabled");
         isStoringUUIDs = config.getBoolean("General-Settings.Use-UUIDs");
         logTransactions = config.getBoolean("General-Settings.Log-Transactions");
+        enableInterestLimiter = config.getBoolean("Interest.Enable-Interest-Limiter");
         isGivingInterestToOfflinePlayers = config.getBoolean("Interest.Give-To-Offline-Players");
         isOfflineInterestDifferentRate = config.getBoolean("Interest.Different-Offline-Rate");
         isOfflineInterestEarnedMessageEnabled = config.getBoolean("General-Settings.Offline-Interest-Earned-Message.Enabled");
@@ -103,6 +107,7 @@ public class ConfigValues {
         bankTopSize = config.getInt("BankTop.Size");
         bankTopMoneyFormat = config.getString("BankTop.Money-Format");
         bankTopFormat = config.getStringList("BankTop.Format");
+        interestLimiter = config.getStringList("Interest.Interest-Limiter");
         banktopUpdateBroadcastEnabled = config.getBoolean("BankTop.Update-Broadcast.Enabled");
         banktopUpdateBroadcastOnlyConsole = config.getBoolean("BankTop.Update-Broadcast.Only-Console");
         banktopUpdateBroadcastMessage = config.getString("BankTop.Update-Broadcast.Message");
@@ -124,8 +129,12 @@ public class ConfigValues {
         return bankClickPriority;
     }
 
-    public String getExitMessage() {
-        return exitMessage == null ? "exit" : exitMessage;
+    public String getChatExitMessage() {
+        return chatExitMessage == null ? "exit" : chatExitMessage;
+    }
+
+    public int getChatExitTime() {
+        return chatExitTime;
     }
 
     public String getSecond() {
@@ -217,25 +226,25 @@ public class ConfigValues {
     }
 
     public long getInterestDelay() {
-        if (!interestDelay.contains(" ")) return BPMethods.minutesInMilliseconds(Integer.parseInt(interestDelay));
+        if (!interestDelay.contains(" ")) return BPUtils.minutesInMilliseconds(Integer.parseInt(interestDelay));
 
         int delay;
         try {
             delay = Integer.parseInt(interestDelay.split(" ")[0]);
         } catch (NumberFormatException e) {
-            return BPMethods.minutesInMilliseconds(5);
+            return BPUtils.minutesInMilliseconds(5);
         }
 
         String delayType = interestDelay.split(" ")[1];
         switch (delayType) {
             case "s":
-                return BPMethods.secondsInMilliseconds(delay);
+                return BPUtils.secondsInMilliseconds(delay);
             default:
-                return BPMethods.minutesInMilliseconds(delay);
+                return BPUtils.minutesInMilliseconds(delay);
             case "h":
-                return BPMethods.hoursInMilliseconds(delay);
+                return BPUtils.hoursInMilliseconds(delay);
             case "d":
-                return BPMethods.daysInMilliseconds(delay);
+                return BPUtils.daysInMilliseconds(delay);
         }
     }
 
@@ -244,7 +253,7 @@ public class ConfigValues {
     }
 
     public BigDecimal getMaxDepositAmount() {
-        if (BPMethods.isInvalidNumber(maxDepositAmount)) {
+        if (BPUtils.isInvalidNumber(maxDepositAmount)) {
             BPLogger.error(DEF_ERROR.replace("%", "Deposit-Settings.Max-Deposit-Amount"));
             return new BigDecimal(0);
         }
@@ -252,7 +261,7 @@ public class ConfigValues {
     }
 
     public BigDecimal getMaxWithdrawAmount() {
-        if (BPMethods.isInvalidNumber(maxWithdrawAmount)) {
+        if (BPUtils.isInvalidNumber(maxWithdrawAmount)) {
             BPLogger.error(DEF_ERROR.replace("%", "Withdraw-Settings.Max-Withdraw-Amount"));
             return new BigDecimal(0);
         }
@@ -264,7 +273,7 @@ public class ConfigValues {
     }
 
     public BigDecimal getDepositTaxes() {
-        if (BPMethods.isInvalidNumber(depositTaxes)) {
+        if (BPUtils.isInvalidNumber(depositTaxes)) {
             BPLogger.error(DEF_ERROR.replace("%", "Deposit-Settings.Deposit-Taxes"));
             return new BigDecimal(0);
         }
@@ -276,7 +285,7 @@ public class ConfigValues {
     }
 
     public BigDecimal getWithdrawTaxes() {
-        if (BPMethods.isInvalidNumber(withdrawTaxes)) {
+        if (BPUtils.isInvalidNumber(withdrawTaxes)) {
             BPLogger.error(DEF_ERROR.replace("%", "Withdraw-Settings.Withdraw-Taxes"));
             return new BigDecimal(0);
         }
@@ -284,7 +293,7 @@ public class ConfigValues {
     }
 
     public BigDecimal getDepositMinimumAmount() {
-        if (BPMethods.isInvalidNumber(depositMinimumAmount)) {
+        if (BPUtils.isInvalidNumber(depositMinimumAmount)) {
             BPLogger.error(DEF_ERROR.replace("%", "Deposit-Settings.Minimum-Deposit-Amount"));
             return new BigDecimal(0);
         }
@@ -292,7 +301,7 @@ public class ConfigValues {
     }
 
     public BigDecimal getWithdrawMinimumAmount() {
-        if (BPMethods.isInvalidNumber(withdrawMinimumAmount)) {
+        if (BPUtils.isInvalidNumber(withdrawMinimumAmount)) {
             BPLogger.error(DEF_ERROR.replace("%", "Withdraw-Settings.Minimum-Withdraw-Amount"));
             return new BigDecimal(0);
         }
@@ -300,7 +309,7 @@ public class ConfigValues {
     }
 
     public BigDecimal getMaxBankCapacity() {
-        if (BPMethods.isInvalidNumber(maxBankCapacity)) {
+        if (BPUtils.isInvalidNumber(maxBankCapacity)) {
             BPLogger.error(DEF_ERROR.replace("%", "General-Settings.Max-Bank-Capacity"));
             return new BigDecimal(0);
         }
@@ -312,7 +321,7 @@ public class ConfigValues {
     }
 
     public BigDecimal getStartAmount() {
-        if (BPMethods.isInvalidNumber(startAmount)) {
+        if (BPUtils.isInvalidNumber(startAmount)) {
             BPLogger.error(DEF_ERROR.replace("%", "General-Settings.Join-Start-Amount"));
             return new BigDecimal(0);
         }
@@ -324,7 +333,7 @@ public class ConfigValues {
     }
 
     public BigDecimal getInterestMaxAmount() {
-        if (BPMethods.isInvalidNumber(interestMaxAmount)) {
+        if (BPUtils.isInvalidNumber(interestMaxAmount)) {
             BPLogger.error(DEF_ERROR.replace("%", "Interest.Max-Amount"));
             return new BigDecimal(0);
         }
@@ -332,7 +341,7 @@ public class ConfigValues {
     }
 
     public BigDecimal getInterestMoneyGiven() {
-        if (BPMethods.isInvalidNumber(interestMoneyGiven)) {
+        if (BPUtils.isInvalidNumber(interestMoneyGiven)) {
             BPLogger.error(DEF_ERROR.replace("%", "Interest.Money-Given"));
             return new BigDecimal(0);
         }
@@ -340,15 +349,42 @@ public class ConfigValues {
     }
 
     public BigDecimal getOfflineInterestMoneyGiven() {
-        if (BPMethods.isInvalidNumber(offlineInterestMoneyGiven)) {
+        if (BPUtils.isInvalidNumber(offlineInterestMoneyGiven)) {
             BPLogger.error(DEF_ERROR.replace("%", "Interest.Offline-Money-Given"));
             return new BigDecimal(0);
         }
         return new BigDecimal(offlineInterestMoneyGiven.replace("%", ""));
     }
 
-    public String getBankUpgradedMaxPlaceholder() {
-        return bankUpgradedMaxPlaceholder == null ? "&cMaxed" : bankUpgradedMaxPlaceholder;
+    public long getOfflineInterestLimit() {
+        if (!offlineInterestLimit.contains(" ")) return BPUtils.minutesInMilliseconds(Integer.parseInt(interestDelay));
+
+        int delay;
+        try {
+            delay = Integer.parseInt(offlineInterestLimit.split(" ")[0]);
+        } catch (NumberFormatException e) {
+            return BPUtils.daysInMilliseconds(3);
+        }
+
+        String delayType = offlineInterestLimit.split(" ")[1];
+        switch (delayType) {
+            case "s":
+                return BPUtils.secondsInMilliseconds(delay);
+            default:
+                return BPUtils.minutesInMilliseconds(delay);
+            case "h":
+                return BPUtils.hoursInMilliseconds(delay);
+            case "d":
+                return BPUtils.daysInMilliseconds(delay);
+        }
+    }
+
+    public String getUpgradesMaxedPlaceholder() {
+        return upgradesMaxedPlaceholder == null ? "Maxed" : upgradesMaxedPlaceholder;
+    }
+
+    public String getUpgradesNoRequiredItems() {
+        return upgradesNoRequiredItems == null ? "None" : upgradesNoRequiredItems;
     }
 
     public String getBanktopPlayerNotFoundPlaceholder() {
@@ -381,6 +417,10 @@ public class ConfigValues {
 
     public boolean isLogTransactions() {
         return logTransactions;
+    }
+
+    public boolean enableInterestLimiter() {
+        return enableInterestLimiter;
     }
 
     public boolean isGivingInterestToOfflinePlayers() {
@@ -443,6 +483,10 @@ public class ConfigValues {
         return bankTopFormat;
     }
 
+    public List<String> getInterestLimiter() {
+        return interestLimiter;
+    }
+
     public long getSaveBalancedDelay() {
         return saveBalancedDelay;
     }
@@ -484,7 +528,7 @@ public class ConfigValues {
     }
 
     public BigDecimal getLoanMaxAmount() {
-        if (BPMethods.isInvalidNumber(loanMaxAmount)) {
+        if (BPUtils.isInvalidNumber(loanMaxAmount)) {
             BPLogger.error(DEF_ERROR.replace("%", "Loan-Settings.Max-Amount"));
             return new BigDecimal(0);
         }
@@ -492,7 +536,7 @@ public class ConfigValues {
     }
 
     public BigDecimal getLoanInterest() {
-        if (BPMethods.isInvalidNumber(loanInterest)) {
+        if (BPUtils.isInvalidNumber(loanInterest)) {
             BPLogger.error(DEF_ERROR.replace("%", "Loan-Settings.Interest"));
             return new BigDecimal(0);
         }

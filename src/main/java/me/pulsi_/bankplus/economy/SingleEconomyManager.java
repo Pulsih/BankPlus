@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.List;
 
 public class SingleEconomyManager {
 
@@ -34,6 +33,11 @@ public class SingleEconomyManager {
     public SingleEconomyManager(OfflinePlayer op) {
         this.op = op;
         this.p = op.isOnline() ? Bukkit.getPlayer(op.getUniqueId()) : null;
+    }
+
+    public SingleEconomyManager(Player p) {
+        this.op = Bukkit.getOfflinePlayer(p.getUniqueId());
+        this.p = p;
     }
 
     /**
@@ -311,7 +315,7 @@ public class SingleEconomyManager {
         }
 
         BigDecimal money = BigDecimal.valueOf(BankPlus.INSTANCE.getEconomy().getBalance(p));
-        if (!BPMethods.checkPreRequisites(money, amount, p) || BPMethods.isBankFull(p)) return;
+        if (!BPUtils.checkPreRequisites(money, amount, p) || BPUtils.isBankFull(p)) return;
 
         if (money.doubleValue() < amount.doubleValue()) amount = money;
 
@@ -336,11 +340,11 @@ public class SingleEconomyManager {
         }
 
         EconomyResponse depositResponse = BankPlus.INSTANCE.getEconomy().withdrawPlayer(p, amount.doubleValue());
-        if (BPMethods.hasFailed(p, depositResponse)) return;
+        if (BPUtils.hasFailed(p, depositResponse)) return;
 
         addBankBalance(amount.subtract(taxes), false, true);
-        BPMessages.send(p, "Success-Deposit", BPMethods.placeValues(p, amount.subtract(taxes)), BPMethods.placeValues(taxes, "taxes"));
-        BPMethods.playSound("DEPOSIT", p);
+        BPMessages.send(p, "Success-Deposit", BPUtils.placeValues(p, amount.subtract(taxes)), BPUtils.placeValues(taxes, "taxes"));
+        BPUtils.playSound("DEPOSIT", p);
 
         endEvent(TransactionType.DEPOSIT, economy.getBalance(p), amount);
     }
@@ -358,7 +362,7 @@ public class SingleEconomyManager {
         }
 
         BigDecimal bankBal = getBankBalance();
-        if (!BPMethods.checkPreRequisites(bankBal, amount, p)) return;
+        if (!BPUtils.checkPreRequisites(bankBal, amount, p)) return;
 
         if (bankBal.doubleValue() < amount.doubleValue()) amount = bankBal;
 
@@ -371,11 +375,11 @@ public class SingleEconomyManager {
             taxes = amount.multiply(Values.CONFIG.getWithdrawTaxes().divide(BigDecimal.valueOf(100)));
 
         EconomyResponse withdrawResponse = economy.depositPlayer(p, amount.subtract(taxes).doubleValue());
-        if (BPMethods.hasFailed(p, withdrawResponse)) return;
+        if (BPUtils.hasFailed(p, withdrawResponse)) return;
 
         removeBankBalance(amount, true);
-        BPMessages.send(p, "Success-Withdraw", BPMethods.placeValues(p, amount.subtract(taxes)), BPMethods.placeValues(taxes, "taxes"));
-        BPMethods.playSound("WITHDRAW", p);
+        BPMessages.send(p, "Success-Withdraw", BPUtils.placeValues(p, amount.subtract(taxes)), BPUtils.placeValues(taxes, "taxes"));
+        BPUtils.playSound("WITHDRAW", p);
 
         endEvent(TransactionType.WITHDRAW, economy.getBalance(p), amount);
     }
@@ -406,22 +410,22 @@ public class SingleEconomyManager {
             removeBankBalance(targetCapacity.subtract(targetBalance), TransactionType.PAY);
             targetEM.setBankBalance(targetCapacity, TransactionType.PAY);
 
-            BPMessages.send(p, "Payment-Sent", BPMethods.placeValues(target, amount));
-            BPMessages.send(target, "Payment-Received", BPMethods.placeValues(p, amount));
+            BPMessages.send(p, "Payment-Sent", BPUtils.placeValues(target, amount));
+            BPMessages.send(target, "Payment-Received", BPUtils.placeValues(p, amount));
             return;
         }
 
         removeBankBalance(amount, TransactionType.PAY);
         targetEM.addBankBalance(amount, TransactionType.PAY);
-        BPMessages.send(p, "Payment-Sent", BPMethods.placeValues(target, amount));
-        BPMessages.send(target, "Payment-Received", BPMethods.placeValues(p, amount));
+        BPMessages.send(p, "Payment-Sent", BPUtils.placeValues(target, amount));
+        BPMessages.send(target, "Payment-Received", BPUtils.placeValues(p, amount));
     }
 
     private BPPreTransactionEvent startEvent(TransactionType type, double vaultBalance, BigDecimal amount) {
         BPPreTransactionEvent event = new BPPreTransactionEvent(
                 op, type, getBankBalance(), vaultBalance, amount, true, Values.CONFIG.getMainGuiName()
         );
-        BPMethods.callEvent(event);
+        BPUtils.callEvent(event);
         return event;
     }
 
@@ -429,6 +433,6 @@ public class SingleEconomyManager {
         BPAfterTransactionEvent event = new BPAfterTransactionEvent(
                 op, type, getBankBalance(), vaultBalance, amount, true, Values.CONFIG.getMainGuiName()
         );
-        BPMethods.callEvent(event);
+        BPUtils.callEvent(event);
     }
 }

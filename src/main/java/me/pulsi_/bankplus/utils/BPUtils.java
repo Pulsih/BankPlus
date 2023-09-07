@@ -1,10 +1,11 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.bankSystem.BankReader;
-import me.pulsi_.bankplus.managers.ConfigManager;
+import me.pulsi_.bankplus.listeners.playerChat.PlayerChatMethod;
+import me.pulsi_.bankplus.managers.BPConfigs;
 import me.pulsi_.bankplus.managers.TaskManager;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.EconomyResponse;
@@ -20,7 +21,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BPMethods {
+public class BPUtils {
 
     public static String formatTime(long milliseconds) {
         if (!Values.CONFIG.isInterestEnabled()) return BPChat.color("&cInterest disabled.");
@@ -188,11 +189,13 @@ public class BPMethods {
         if (!hasPermission(p, "bankplus.withdraw")) return;
 
         if (Values.MESSAGES.isTitleCustomAmountEnabled())
-            BPMethods.sendTitle(BankPlus.INSTANCE.getConfigManager().getConfig(ConfigManager.Type.MESSAGES).getString("Title-Custom-Transaction.Title-Withdraw"), p);
+            BPUtils.sendTitle(BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.MESSAGES).getString("Title-Custom-Transaction.Title-Withdraw"), p);
         BPMessages.send(p, "Chat-Withdraw");
         BPSets.addPlayerToWithdraw(p);
         p.closeInventory();
         BankPlus.INSTANCE.getPlayerRegistry().get(p).setOpenedBank(BankPlus.INSTANCE.getBankGuiRegistry().getBanks().get(identifier));
+
+        Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> PlayerChatMethod.reopenBank(p, identifier), Values.CONFIG.getChatExitTime() * 20L);
     }
 
     public static void customDeposit(Player p) {
@@ -203,11 +206,12 @@ public class BPMethods {
         if (!hasPermission(p, "bankplus.deposit")) return;
 
         if (Values.MESSAGES.isTitleCustomAmountEnabled())
-            BPMethods.sendTitle(BankPlus.INSTANCE.getConfigManager().getConfig(ConfigManager.Type.MESSAGES).getString("Title-Custom-Transaction.Title-Deposit"), p);
+            BPUtils.sendTitle(BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.MESSAGES).getString("Title-Custom-Transaction.Title-Deposit"), p);
         BPMessages.send(p, "Chat-Deposit");
         BPSets.addPlayerToDeposit(p);
         p.closeInventory();
         BankPlus.INSTANCE.getPlayerRegistry().get(p).setOpenedBank(BankPlus.INSTANCE.getBankGuiRegistry().getBanks().get(identifier));
+        Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> PlayerChatMethod.reopenBank(p, identifier), Values.CONFIG.getChatExitTime() * 20L);
     }
 
     public static void sendTitle(String title, Player p) {
@@ -297,12 +301,12 @@ public class BPMethods {
         }
         String[] pathSlitted = sound.split(",");
         String soundType;
-        int volume, pitch;
+        float volume, pitch;
 
         try {
             soundType = pathSlitted[0];
-            volume = Integer.parseInt(pathSlitted[1]);
-            pitch = Integer.parseInt(pathSlitted[2]);
+            volume = Float.parseFloat(pathSlitted[1]);
+            pitch = Float.parseFloat(pathSlitted[2]);
         } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
             BPLogger.warn("The format of the sound \"" + sound + "\" is wrong! ");
             BPLogger.warn("Please correct it in the config!");

@@ -1,11 +1,11 @@
 package me.pulsi_.bankplus.commands.list;
 
-import me.pulsi_.bankplus.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.commands.BPCommand;
+import me.pulsi_.bankplus.economy.MultiEconomyManager;
+import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.utils.BPMessages;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -49,7 +49,7 @@ public class PayCmd extends BPCommand {
         }
 
         String num = args[2];
-        if (BPMethods.isInvalidNumber(num, s)) return false;
+        if (BPUtils.isInvalidNumber(num, s)) return false;
 
         BigDecimal amount = new BigDecimal(num);
         Player payer = (Player) s;

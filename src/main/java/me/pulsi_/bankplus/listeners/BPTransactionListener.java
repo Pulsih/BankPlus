@@ -1,6 +1,5 @@
 package me.pulsi_.bankplus.listeners;
 
-import javafx.util.Pair;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.debt.DebtUtils;
 import me.pulsi_.bankplus.events.BPAfterTransactionEvent;
@@ -25,6 +24,19 @@ import java.util.UUID;
 
 public class BPTransactionListener implements Listener {
 
+    public static class Pair<K, V> {
+        private final K key;
+        private final V value;
+
+        public K getKey() { return key; }
+        public V getValue() { return value; }
+
+        public Pair(K key, V value) {
+            this.key = key;
+            this.value = value;
+        }
+    }
+
     private final HashMap<UUID, Pair<BigDecimal, Double>> logHolder = new HashMap<>();
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -45,16 +57,16 @@ public class BPTransactionListener implements Listener {
             debtLeft = debt.subtract(e.getTransactionAmount());
 
             BPMessages.send(Bukkit.getPlayer(p.getUniqueId()), "Debt-Money-Taken",
-                    BPMethods.placeValues(e.getTransactionAmount()),
-                    BPMethods.placeValues(debtLeft, "debt")
+                    BPUtils.placeValues(e.getTransactionAmount()),
+                    BPUtils.placeValues(debtLeft, "debt")
             );
         } else {
             newAmount = debtLeft.multiply(BigDecimal.valueOf(-1));
             debtLeft = BigDecimal.valueOf(0);
 
             BPMessages.send(Bukkit.getPlayer(p.getUniqueId()), "Debt-Money-Taken",
-                    BPMethods.placeValues(newAmount),
-                    BPMethods.placeValues(debtLeft, "debt")
+                    BPUtils.placeValues(newAmount),
+                    BPUtils.placeValues(debtLeft, "debt")
             );
         }
 

@@ -1,0 +1,121 @@
+# Messages File of BankPlus
+# Made by Pulsi_, Version v6.0
+
+# * Placeholders *
+# BankPlus messages support placeholderapi, and you can
+# use every type of placeholder inside the messages.
+
+# Enable the alert message when a message is missing in the file.
+Enable-Missing-Message-Alert: true
+
+# The main plugin prefix.
+Prefix: "&a&lBank&9&lPlus"
+
+# You can use a message as single or multiple:
+# MessageIdentifier: "A single message"
+# MessageIdentifier:
+#   - "Multiple messages"
+#   - "in just one! :)"
+#
+# If you don't want a message to show put:
+# Message: '
+
+# System
+Reload-Started: "%prefix% &aThe plugin will not try to reload..."
+Reload-Ended: "%prefix% &2Plugin successfully reloaded! &8(&b%time%ms&8)"
+Reload-Failed: "%prefix% &cFailed reloading task, please check the console for more info. (Usually this is not a bankplus problem!)"
+Interest-Restarted: "%prefix% &aInterest Restarted!"
+Interest-Disabled: "%prefix% &cThe interest is disabled!"
+BankTop-Disabled: "%prefix% &cThe banktop is disabled!"
+
+# Plugin
+Personal-Bank: "%prefix% &aYou have &f%amount_formatted% &amoney in your bank."
+Multiple-Personal-Bank: "%prefix% &aYou have a total amount of &f%amount_formatted% &amoney in your banks."
+Success-Withdraw: "%prefix% &aSuccessfully withdrew &f%amount_formatted% &amoney! (&f%taxes_formatted% &alost in taxes)"
+Success-Deposit: "%prefix% &aSuccessfully deposited &f%amount_formatted% &amoney! (&f%taxes_formatted% &alost in taxes)"
+Bank-Others: "%prefix% &f%player% &ahas &f%amount_formatted% Money &ain their bank!"
+Multiple-Bank-Others: "%prefix% &f%player% &ahas a total amount of &f%amount_formatted% money &ain their banks!"
+Set-Message: "%prefix% &aYou have set &f%player%'s &abank balance to &f%amount_formatted%&a!"
+Add-Message: "%prefix% &aYou have added &f%amount_formatted% Money &ato &f%player%'s &abank balance!"
+Remove-Message: "%prefix% &aYou have removed &f%amount_formatted% &amoney to &f%player%'s &abank balance!"
+Set-Level-Message: "%prefix% &aYou have set &f%player%'s &abank level to &f%level%&a!"
+Pay-Message: "%prefix% &aYou have added &f%amount_formatted% Money &ato &f%player%'s &abank balance!"
+Chat-Deposit: "%prefix% &aType an amount in chat to deposit, type 'exit' to exit"
+Chat-Withdraw: "%prefix% &aType an amount in chat to withdraw, type 'exit' to exit"
+Payment-Sent: "%prefix% &aYou have successfully sent to &f%player% %amount_formatted% &amoney!"
+Payment-Received: "%prefix% &aYou have received &f%amount_formatted% &amoney from &f%player%!"
+Interest-Time: "%prefix% &aWait more &f%time% &ato get the interest."
+Balances-Saved: "%prefix% &aSuccessfully saved all player balances to the file!"
+BankTop-Updated: "%prefix% &aSuccessfully updated the banktop!"
+Bank-Upgraded: "%prefix% &aSuccessfully upgraded the bank!"
+Loan-Request-Sent: "%prefix% &aSuccessfully sent the loan request to &f%player%&a, waiting for a confirm..."
+Loan-Request-Received:
+  - "                       &6&l!! LOAN REQUEST !!"
+  - ""
+  - "         &f%player% &asent you a loan of &f%amount_formatted% &amoney"
+  - "&aType &2/bank loan accept&a to accept or &c/bank loan deny&a to deny."
+  - "&7&o(( The money will be automatically be payed back with 5% interest ))"
+Loan-Request-Sent-Accepted: "%prefix% &f%player% &ahas accepted your loan request!"
+Loan-Request-Received-Accepted: "%prefix% &aSuccessfully accepted &f%player%&a's loan, &f%amount_formatted% &amoney have been added to your bank."
+Loan-Request-Received-Accepted-Full: "%prefix% &aSuccessfully accepted &f%player%&a's loan, &f%amount_formatted% &amoney have been added to your bank but since it was full, &f%extra_formatted% &amoney went to your wallet."
+Loan-Request-Sent-Denied: "%prefix% &f%player% &chas denied your loan request!"
+Loan-Request-Received-Denied: "%prefix% &aSuccessfully denied &f%player%&a's loan."
+Loan-Request-Sent-Cancelled: "%prefix% &aYou have cancelled your loan request."
+Loan-Request-Received-Cancelled: "%prefix% &f%player% &chas cancelled the loan request."
+Loan-Payback: "%prefix% &aYou have received &f%amount_formatted% &afrom the loan given to &f%player%."
+Loan-Payback-Full: "%prefix% &aYou have received &f%amount_formatted% &afrom the loan given to &f%player% &abut your bank was full so &f%extra_formatted% &amoney has been added to your wallet."
+Loan-Returned: "%prefix% &aYou have returned &f%amount_formatted% &amoney to &f%player% &afor his loan."
+Loan-Returned-Debt: "%prefix% &cSadly, you did not have enough money to pay back &f%player%&c, so you are now in debt for &f%amount_formatted%&c."
+Debt-Money-Taken: "%prefix% &cWe took &f%amount_formatted% &cmoney from your bank to pay your debt, which is now: %debt_formatted%"
+
+# Titles
+Title-Custom-Transaction:
+  Enabled: true
+  Title-Deposit: "%prefix% &fType in &achat &fan, amount to &adeposit,10,40,10"
+  Title-Withdraw: "%prefix% &fType in &achat &fan, amount to &awithdraw,10,40,10"
+
+# Interest Messages
+Interest-Broadcast:
+  Enabled: true
+  Message: "%prefix% &aYou have earned &f%amount_formatted% Money &ain interest!"
+  Multi-Message: "%prefix% &aYou have earned a total amount of &f%amount_formatted% Money &ain interest!"
+  No-Money: "%prefix% &aSadly, you received 0 money from interest."
+  Bank-Full: "%prefix% &cYou can't earn anymore money from interest because your bank is full!"
+
+# Help Message
+Help-Message:
+  - "%prefix% &aHelp page"
+  - "&a/bank deposit <amount> &7Deposit an amount of Money."
+  - "&a/bank withdraw <amount> &7Withdraw an amount of Money."
+  - "&a/bank view <player> &7View the balance of a player."
+  - "&7Plugin made by Pulsi_"
+  - "&aRate 5 Star!"
+
+# Errors
+Specify-Number: "%prefix% &cPlease specify a number."
+Specify-Player: "%prefix% &cPlease specify a player."
+Specify-Bank: "%prefix% &cPlease specify a bank."
+Invalid-Number: "%prefix% &cPlease choose a valid number."
+Invalid-Player: "%prefix% &cPlease choose a valid player."
+Invalid-Bank: "%prefix% &cPlease choose a valid bank."
+Invalid-Bank-Level: "%prefix% &cPlease choose a valid bank level."
+Cannot-Deposit-Anymore: "%prefix% &cYou can't deposit anymore money."
+Cannot-Use-Bank-Here: "%prefix% &cSorry, the bank is disabled in this world."
+Cannot-Use-Negative-Number: "%prefix% &cYou can't use a negative number."
+Bank-Full: "%prefix% &cThe bank of %player% is full."
+Bank-Empty: "%prefix% &cThe bank of %player% is empty."
+Cannot-Access-Bank: "%prefix% &cYou can't access to this bank."
+Cannot-Access-Bank-Others: "%prefix% &c%player% can't access to this bank."
+Bank-Max-Level: "%prefix% &cThe bank is already at the max level."
+Minimum-Number: "%prefix% &cPlease use an higher number for this action. ( Minimum: 10 )"
+Not-Player: "%prefix% &cYou are not a player."
+Insufficient-Money: "%prefix% &cYou don't have enough money."
+Insufficient-Items: "%prefix% &cYou need at least &f%amount% %item%&c."
+Gui-Module-Disabled: "%prefix% &cThe gui module is disabled!"
+Internal-Error: "%prefix% &cAn internal error has occurred, try again later."
+Unknown-Command: "%prefix% &cUnknown Command."
+No-Permission: "%prefix% &cYou don't have the permission. (%permission%)"
+No-Loan-Requests: "%prefix% &cYou haven't received any loan requests."
+No-Loan-Sent: "%prefix% &cYou haven't sent any loan."
+Loan-Already-Sent: "%prefix% &cYou have already sent a loan request."
+Cannot-Afford-Loan: "%prefix% &c%player% can't afford for this loan."

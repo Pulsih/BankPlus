@@ -2,11 +2,11 @@ package me.pulsi_.bankplus.listeners.playerChat;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
+import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.utils.BPMessages;
-import me.pulsi_.bankplus.utils.BPMethods;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.BPSets;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -43,12 +43,12 @@ public class PlayerChatMethod {
         SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
         MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
 
-        if (BPMethods.isDepositing(p)) {
+        if (BPUtils.isDepositing(p)) {
             BPSets.removePlayerFromDepositing(p);
             if (isMulti) multiEconomyManager.deposit(amount, identifier);
             else singleEconomyManager.deposit(amount);
         }
-        if (BPMethods.isWithdrawing(p)) {
+        if (BPUtils.isWithdrawing(p)) {
             BPSets.removePlayerFromWithdrawing(p);
             if (isMulti) multiEconomyManager.withdraw(amount, identifier);
             else singleEconomyManager.withdraw(amount);
@@ -57,21 +57,21 @@ public class PlayerChatMethod {
     }
 
     private static boolean hasTypedExit(String message, Player p, AsyncPlayerChatEvent e, String identifier) {
-        if (isTyping(p) && !message.equalsIgnoreCase(Values.CONFIG.getExitMessage())) return false;
+        if (isTyping(p) && !message.toLowerCase().contains(Values.CONFIG.getChatExitMessage().toLowerCase())) return false;
         e.setCancelled(true);
-        BPSets.playerDepositing.remove(p.getUniqueId());
-        BPSets.playerWithdrawing.remove(p.getUniqueId());
         executeExitCommands(p);
         reopenBank(p, identifier);
         return true;
     }
 
     private static boolean isTyping(Player p) {
-        return BPMethods.isDepositing(p) || BPMethods.isWithdrawing(p);
+        return BPUtils.isDepositing(p) || BPUtils.isWithdrawing(p);
     }
 
-    private static void reopenBank(Player p, String identifier) {
+    public static void reopenBank(Player p, String identifier) {
         Bukkit.getScheduler().runTask(BankPlus.INSTANCE, () -> {
+            BPSets.playerDepositing.remove(p.getUniqueId());
+            BPSets.playerWithdrawing.remove(p.getUniqueId());
             if (Values.CONFIG.isReopeningBankAfterChat()) BankUtils.openBank(p, identifier, true);
         });
     }
