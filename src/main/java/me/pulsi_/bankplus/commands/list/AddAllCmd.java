@@ -41,7 +41,7 @@ public class AddAllCmd extends BPCommand {
         String num = args[1];
         if (BPUtils.isInvalidNumber(num, s)) return false;
 
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
             String bankName = args[2];
 
             BankReader reader = new BankReader(bankName);
@@ -70,7 +70,7 @@ public class AddAllCmd extends BPCommand {
             return args1;
         }
 
-        if (args.length == 3 && Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+        if (args.length == 3 && Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
             List<String> args2 = new ArrayList<>();
             for (String arg : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
                 if (arg.startsWith(args[2].toLowerCase())) args2.add(arg);

@@ -43,7 +43,7 @@ public class ViewCmd extends BPCommand {
             return false;
         }
 
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
             if (args.length == 2) {
                 if (s instanceof Player) BPUtils.playSound("VIEW", (Player) s);
                 BPMessages.send(s, "Multiple-Bank-Others", BPUtils.placeValues(p, new MultiEconomyManager(p).getBankBalance()));
@@ -75,7 +75,7 @@ public class ViewCmd extends BPCommand {
     public List<String> tabCompletion(CommandSender s, String args[]) {
         if (!s.hasPermission("bankplus." + identifier)) return null;
 
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
             if (args.length == 3) {
                 List<String> args2 = new ArrayList<>();
                 for (String arg : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())

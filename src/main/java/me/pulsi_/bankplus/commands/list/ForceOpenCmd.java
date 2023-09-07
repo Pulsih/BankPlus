@@ -41,7 +41,7 @@ public class ForceOpenCmd extends BPCommand {
         }
 
         String bankName = Values.CONFIG.getMainGuiName();
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
             if (args.length == 2) {
                 BPMessages.send(s, "Specify-Bank");
                 return false;
@@ -64,7 +64,7 @@ public class ForceOpenCmd extends BPCommand {
     public List<String> tabCompletion(CommandSender s, String args[]) {
         if (!s.hasPermission("bankplus." + identifier)) return null;
 
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() && args.length == 3) {
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled() && args.length == 3) {
             List<String> args2 = new ArrayList<>();
             for (String arg : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
                 if (arg.startsWith(args[2].toLowerCase())) args2.add(arg);

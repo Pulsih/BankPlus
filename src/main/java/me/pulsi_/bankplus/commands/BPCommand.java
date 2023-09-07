@@ -45,10 +45,10 @@ public abstract class BPCommand {
         String singleUsage = config.getString(identifier + ".usage.single");
         String multiUsage = config.getString(identifier + ".usage.multi");
 
-        if ((!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() && singleUsage == null) || (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() && multiUsage == null))
+        if ((!Values.MULTIPLE_BANKS.isMultipleBanksEnabled() && singleUsage == null) || (Values.MULTIPLE_BANKS.isMultipleBanksEnabled() && multiUsage == null))
             usage = config.getString(identifier + ".usage");
         else
-            usage = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() ? multiUsage : singleUsage;
+            usage = Values.MULTIPLE_BANKS.isMultipleBanksEnabled() ? multiUsage : singleUsage;
     }
 
     private final HashMap<String, Long> cooldownMap = new HashMap<>();

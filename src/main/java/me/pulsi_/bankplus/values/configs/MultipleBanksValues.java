@@ -43,7 +43,7 @@ public class MultipleBanksValues {
         fillerGlowing = multipleBanks.getBoolean("Banks-Gui.Filler.Glowing");
     }
 
-    public boolean isMultipleBanksModuleEnabled() {
+    public boolean isMultipleBanksEnabled() {
         return multipleBanksModuleEnabled;
     }
 

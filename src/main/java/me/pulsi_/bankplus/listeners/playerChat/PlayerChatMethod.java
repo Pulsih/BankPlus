@@ -13,6 +13,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.math.BigDecimal;
 
@@ -38,7 +39,7 @@ public class PlayerChatMethod {
         }
         e.setCancelled(true);
 
-        boolean isMulti = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled();
+        boolean isMulti = Values.MULTIPLE_BANKS.isMultipleBanksEnabled();
 
         SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
         MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
@@ -70,6 +71,9 @@ public class PlayerChatMethod {
 
     public static void reopenBank(Player p, String identifier) {
         Bukkit.getScheduler().runTask(BankPlus.INSTANCE, () -> {
+            BukkitTask task = BankPlus.INSTANCE.getPlayerRegistry().get(p).getClosingTask();
+            if (task != null) task.cancel();
+
             BPSets.playerDepositing.remove(p.getUniqueId());
             BPSets.playerWithdrawing.remove(p.getUniqueId());
             if (Values.CONFIG.isReopeningBankAfterChat()) BankUtils.openBank(p, identifier, true);

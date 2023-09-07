@@ -19,7 +19,7 @@ public class PlayerQuitListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
         Player p = e.getPlayer();
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
             MultiEconomyManager economyManager = new MultiEconomyManager(p);
             economyManager.saveBankBalance(true);
             economyManager.unloadBankBalance();

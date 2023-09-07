@@ -22,6 +22,6 @@ public class BPChat {
                 matcher = pattern.matcher(message);
             }
         }
-        return ChatColor.translateAlternateColorCodes('&', message.replace("%prefix%", BPMessages.getPrefix()));
+        return ChatColor.translateAlternateColorCodes('&', message);
     }
 }

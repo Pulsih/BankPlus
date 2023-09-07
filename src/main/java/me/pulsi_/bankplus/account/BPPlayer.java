@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.account;
 import me.pulsi_.bankplus.bankSystem.Bank;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -17,6 +18,7 @@ public class BPPlayer {
     private HashMap<String, String> playerBankClickHolder;
     private int banktopPosition = -1;
     private BigDecimal debt;
+    private BukkitTask closingTask;
 
     public BPPlayer(Player player, File playerFile, FileConfiguration playerConfig) {
         this.player = player;
@@ -52,6 +54,10 @@ public class BPPlayer {
         return debt;
     }
 
+    public BukkitTask getClosingTask() {
+        return closingTask;
+    }
+
     public void setOpenedBank(Bank openedBank) {
         this.openedBank = openedBank;
     }
@@ -66,5 +72,9 @@ public class BPPlayer {
 
     public void setDebt(BigDecimal debt) {
         this.debt = debt;
+    }
+
+    public void setClosingTask(BukkitTask closingTask) {
+        this.closingTask = closingTask;
     }
 }

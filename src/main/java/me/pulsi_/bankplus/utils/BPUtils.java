@@ -1,7 +1,9 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.economy.SingleEconomyManager;
 import me.pulsi_.bankplus.listeners.playerChat.PlayerChatMethod;
@@ -124,7 +126,7 @@ public class BPUtils {
      * @return true if is invalid or false if is not.
      */
     public static boolean isInvalidNumber(String number, CommandSender s) {
-        if (number == null) {
+        if (number == null || number.isEmpty()) {
             BPMessages.send(s, "Invalid-Number");
             return true;
         }
@@ -172,7 +174,7 @@ public class BPUtils {
 
         // Cache the values out the runnable to improve a bit the performance.
         long delay = Values.CONFIG.getSaveBalancedDelay() * 1200L;
-        boolean multi = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled(), saveBroadcast = Values.CONFIG.isSaveBalancesBroadcast();
+        boolean multi = Values.MULTIPLE_BANKS.isMultipleBanksEnabled(), saveBroadcast = Values.CONFIG.isSaveBalancesBroadcast();
 
         tasks.setSavingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE, () -> {
             if (multi) Bukkit.getOnlinePlayers().forEach(p -> new MultiEconomyManager(p).saveBankBalance(true));
@@ -193,9 +195,11 @@ public class BPUtils {
         BPMessages.send(p, "Chat-Withdraw");
         BPSets.addPlayerToWithdraw(p);
         p.closeInventory();
-        BankPlus.INSTANCE.getPlayerRegistry().get(p).setOpenedBank(BankPlus.INSTANCE.getBankGuiRegistry().getBanks().get(identifier));
 
-        Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> PlayerChatMethod.reopenBank(p, identifier), Values.CONFIG.getChatExitTime() * 20L);
+        BPPlayer pl = BankPlus.INSTANCE.getPlayerRegistry().get(p);
+        pl.setOpenedBank(BankPlus.INSTANCE.getBankGuiRegistry().getBanks().get(identifier));
+        pl.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () ->
+                PlayerChatMethod.reopenBank(p, identifier), Values.CONFIG.getChatExitTime() * 20L));
     }
 
     public static void customDeposit(Player p) {
@@ -210,8 +214,11 @@ public class BPUtils {
         BPMessages.send(p, "Chat-Deposit");
         BPSets.addPlayerToDeposit(p);
         p.closeInventory();
-        BankPlus.INSTANCE.getPlayerRegistry().get(p).setOpenedBank(BankPlus.INSTANCE.getBankGuiRegistry().getBanks().get(identifier));
-        Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> PlayerChatMethod.reopenBank(p, identifier), Values.CONFIG.getChatExitTime() * 20L);
+
+        BPPlayer pl = BankPlus.INSTANCE.getPlayerRegistry().get(p);
+        pl.setOpenedBank(BankPlus.INSTANCE.getBankGuiRegistry().getBanks().get(identifier));
+        pl.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () ->
+                PlayerChatMethod.reopenBank(p, identifier), Values.CONFIG.getChatExitTime() * 20L));
     }
 
     public static void sendTitle(String title, Player p) {

@@ -36,7 +36,7 @@ public class BPPlayerFiles {
         MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
         FileConfiguration config = getPlayerConfig();
 
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
             if (!BankPlus.INSTANCE.wasOnSingleEconomy()) return;
 
             BigDecimal bal = singleEconomyManager.getBankBalance();

@@ -68,7 +68,7 @@ public class BankClickMethod {
             }
 
             BigDecimal amount;
-            boolean isMulti = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled();
+            boolean isMulti = Values.MULTIPLE_BANKS.isMultipleBanksEnabled();
             SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
             MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
             Economy economy = BankPlus.INSTANCE.getEconomy();
@@ -161,7 +161,7 @@ public class BankClickMethod {
         actionAmount = actionAmount == null ? "null" : actionAmount.toLowerCase();
 
         BigDecimal amount;
-        boolean isMulti = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled();
+        boolean isMulti = Values.MULTIPLE_BANKS.isMultipleBanksEnabled();
         SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
         MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
         Economy economy = BankPlus.INSTANCE.getEconomy();

@@ -73,7 +73,7 @@ public class ResetAllCmd extends BPCommand {
             }
 
             OfflinePlayer oP = Bukkit.getOfflinePlayers()[count + temp];
-            if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+            if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
 
                 MultiEconomyManager em;
                 if (oP.isOnline()) em = new MultiEconomyManager(Bukkit.getPlayer(oP.getUniqueId()));

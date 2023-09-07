@@ -36,7 +36,7 @@ public class BankTopManager {
             bankTopNames.clear();
 
             List<BigDecimal> balances;
-            if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+            if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
                 balances = MultiEconomyManager.getAllBankBalances();
             else balances = SingleEconomyManager.getAllBankBalances();
             if (balances.isEmpty()) return;

@@ -27,7 +27,7 @@ import java.util.UUID;
 public class LoanUtils {
 
     public static void sendRequest(Player from, Player to, BigDecimal amount, String fromBankName, String toBankName) {
-        BigDecimal fBal = Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() ?
+        BigDecimal fBal = Values.MULTIPLE_BANKS.isMultipleBanksEnabled() ?
                 new MultiEconomyManager(from).getBankBalance(fromBankName) : new SingleEconomyManager(from).getBankBalance();
         if (fBal.doubleValue() < amount.doubleValue()) amount = fBal;
 
@@ -72,7 +72,7 @@ public class LoanUtils {
         BigDecimal amount = loan.getMoneyGiven();
         BPMessages.send(sender, "Loan-Request-Sent-Accepted", "%player%$" + p.getName());
 
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
             new MultiEconomyManager(sender).removeBankBalance(amount, loan.getFromBankName()); // Already checked that the amount isn't > than the balance.
 
             MultiEconomyManager em = new MultiEconomyManager(p);
@@ -157,7 +157,7 @@ public class LoanUtils {
         BigDecimal amount = loan.getMoneyToReturn().divide(BigDecimal.valueOf(loan.getInstalments()));
         OfflinePlayer sender = loan.getSender(), target = loan.getTarget();
 
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
             MultiEconomyManager sEM = sender.isOnline() ? new MultiEconomyManager(sender.getPlayer()) : new MultiEconomyManager(sender);
             BigDecimal sBal = sEM.getBankBalance(loan.getFromBankName()), capacity = new BankReader(loan.getFromBankName()).getCapacity(sender);
 

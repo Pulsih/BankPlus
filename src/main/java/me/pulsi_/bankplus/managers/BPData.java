@@ -20,11 +20,11 @@ import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 
-public class DataManager {
+public class BPData {
 
     private final BankPlus plugin;
 
-    public DataManager(BankPlus plugin) {
+    public BPData(BankPlus plugin) {
         this.plugin = plugin;
     }
 
@@ -58,11 +58,11 @@ public class DataManager {
     public boolean reloadPlugin() {
         boolean success = true;
 
-        BPConfigs BPConfigs = plugin.getConfigManager();
-        if (!BPConfigs.reloadConfig(BPConfigs.Type.COMMANDS)) success = false;
-        if (!BPConfigs.reloadConfig(BPConfigs.Type.CONFIG)) success = false;
-        if (!BPConfigs.reloadConfig(BPConfigs.Type.MESSAGES)) success = false;
-        if (!BPConfigs.reloadConfig(BPConfigs.Type.MULTIPLE_BANKS)) success = false;
+        BPConfigs configs = plugin.getConfigManager();
+        if (!configs.reloadConfig(BPConfigs.Type.COMMANDS)) success = false;
+        if (!configs.reloadConfig(BPConfigs.Type.CONFIG)) success = false;
+        if (!configs.reloadConfig(BPConfigs.Type.MESSAGES)) success = false;
+        if (!configs.reloadConfig(BPConfigs.Type.MULTIPLE_BANKS)) success = false;
 
         Values.CONFIG.setupValues();
         Values.MESSAGES.setupValues();

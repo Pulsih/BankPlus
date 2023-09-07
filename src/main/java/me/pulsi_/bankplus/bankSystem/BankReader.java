@@ -153,7 +153,7 @@ public class BankReader {
      * @return The interest amount.
      */
     public BigDecimal getInterest(Player p) {
-        return getInterest(getCurrentLevel(p));
+        return getInterest(p, getCurrentLevel(p));
     }
 
     /**
@@ -163,7 +163,7 @@ public class BankReader {
      * @return The interest amount.
      */
     public BigDecimal getInterest(OfflinePlayer p) {
-        return getInterest(getCurrentLevel(p));
+        return getInterest(p, getCurrentLevel(p));
     }
 
     /**
@@ -172,7 +172,35 @@ public class BankReader {
      * @param level The bank level.
      * @return The interest amount.
      */
-    public BigDecimal getInterest(int level) {
+    public BigDecimal getInterest(OfflinePlayer p, int level) {
+        if (Values.CONFIG.enableInterestLimiter()) {
+            for (String limiter : Values.CONFIG.getInterestLimiter()) {
+                if (!limiter.contains(":")) continue;
+
+                String[] split1 = limiter.split(":");
+                if (BPUtils.isInvalidNumber(split1[1])) continue;
+
+                String[] split2 = split1[0].split("-");
+                if (BPUtils.isInvalidNumber(split2[0]) || BPUtils.isInvalidNumber(split2[1])) continue;
+
+                String interest = split1[1].replace("%", ""), from = split2[0].replace("%", ""), to = split2[1].replace("%", "");
+                BigDecimal interestRate = new BigDecimal(interest), fromNumber = new BigDecimal(from), toNumber = new BigDecimal(to);
+
+                if (toNumber.compareTo(fromNumber) > 0) {
+                    BigDecimal temp = toNumber;
+                    fromNumber = toNumber;
+                    toNumber = temp;
+                }
+
+                BigDecimal balance = Values.MULTIPLE_BANKS.isMultipleBanksEnabled() ?
+                        new MultiEconomyManager(p).getBankBalance(bank.getIdentifier()) :
+                        new SingleEconomyManager(p).getBankBalance();
+
+                if (fromNumber.compareTo(balance) <= 0 && toNumber.compareTo(balance) >= 0)
+                    return interestRate;
+            }
+        }
+
         if (!hasUpgrades()) return Values.CONFIG.getInterestMoneyGiven();
 
         String interest = getUpgrades().getString(level + ".Interest");
@@ -442,7 +470,7 @@ public class BankReader {
             SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
             MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
 
-            if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) balance = multiEconomyManager.getBankBalance();
+            if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) balance = multiEconomyManager.getBankBalance();
             else balance = singleEconomyManager.getBankBalance();
 
             if (balance.doubleValue() < cost.doubleValue()) {
@@ -451,7 +479,7 @@ public class BankReader {
             }
 
             if (removeRequiredItems(nextLevel) && requiredItems!= null) p.getInventory().removeItem(requiredItems);
-            if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) multiEconomyManager.removeBankBalance(cost, bank.getIdentifier());
+            if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) multiEconomyManager.removeBankBalance(cost, bank.getIdentifier());
             else singleEconomyManager.removeBankBalance(cost);
         } else {
 

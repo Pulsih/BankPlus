@@ -37,7 +37,7 @@ public final class BankPlus extends JavaPlugin {
 
     private BankTopManager bankTopManager;
     private BPConfigs BPConfigs;
-    private DataManager dataManager;
+    private BPData BPData;
     private AFKManager afkManager;
     private TaskManager taskManager;
     private Interest interest;
@@ -97,7 +97,7 @@ public final class BankPlus extends JavaPlugin {
 
         this.bankTopManager = new BankTopManager(this);
         this.BPConfigs = new BPConfigs(this);
-        this.dataManager = new DataManager(this);
+        this.BPData = new BPData(this);
         this.afkManager = new AFKManager(this);
         this.taskManager = new TaskManager();
         this.interest = new Interest();
@@ -105,7 +105,7 @@ public final class BankPlus extends JavaPlugin {
         RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
         if (rsp != null) perms = rsp.getProvider();
 
-        dataManager.setupPlugin();
+        BPData.setupPlugin();
 
         if (plManager.getPlugin("PlaceholderAPI") != null) {
             BPLogger.info("Hooked into PlaceholderAPI!");
@@ -119,17 +119,17 @@ public final class BankPlus extends JavaPlugin {
 
         if (Values.CONFIG.isUpdateCheckerEnabled())
             Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> isUpdated = isPluginUpdated(), 0, (8 * 1200) * 60 /*8 hours*/);
-        wasOnSingleEconomy = !Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled();
+        wasOnSingleEconomy = !Values.MULTIPLE_BANKS.isMultipleBanksEnabled();
     }
 
     @Override
     public void onDisable() {
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) Bukkit.getOnlinePlayers().forEach(p -> new MultiEconomyManager(p).saveBankBalance(false));
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) Bukkit.getOnlinePlayers().forEach(p -> new MultiEconomyManager(p).saveBankBalance(false));
         else Bukkit.getOnlinePlayers().forEach(p -> new SingleEconomyManager(p).saveBankBalance(false));
         if (Values.CONFIG.isInterestEnabled()) interest.saveInterest();
         LoanUtils.saveLoans();
 
-        dataManager.shutdownPlugin();
+        BPData.shutdownPlugin();
     }
 
     public boolean wasOnSingleEconomy() {
@@ -188,8 +188,8 @@ public final class BankPlus extends JavaPlugin {
         return BPConfigs;
     }
 
-    public DataManager getDataManager() {
-        return dataManager;
+    public BPData getDataManager() {
+        return BPData;
     }
 
     public AFKManager getAfkManager() {

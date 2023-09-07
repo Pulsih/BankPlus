@@ -58,7 +58,7 @@ public class Interest {
         boolean offInterest = Values.CONFIG.isGivingInterestToOfflinePlayers();
 
         Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE, () -> {
-            if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+            if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
                 Bukkit.getOnlinePlayers().forEach(this::giveMultiInterest);
                 if (offInterest) giveMultiInterest(Bukkit.getOfflinePlayers());
             } else {
@@ -110,7 +110,7 @@ public class Interest {
             return;
         }
         if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
-        if (maxBankCapacity.doubleValue() != 0 && (bankBalance.add(interestMoney).doubleValue() >= maxBankCapacity.doubleValue())) {
+        if (maxBankCapacity.doubleValue() > 0D && (bankBalance.add(interestMoney).doubleValue() >= maxBankCapacity.doubleValue())) {
             BigDecimal newAmount = maxBankCapacity.subtract(bankBalance);
             if (newAmount.doubleValue() <= 0) {
                 if (Values.MESSAGES.isInterestBroadcastEnabled())
@@ -141,7 +141,7 @@ public class Interest {
 
             if (bankBalance.doubleValue() <= 0) continue;
             if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
-            if (maxBankCapacity.doubleValue() != 0 && (bankBalance.add(interestMoney).doubleValue() >= maxBankCapacity.doubleValue())) {
+            if (maxBankCapacity.doubleValue() > 0D && (bankBalance.add(interestMoney).doubleValue() >= maxBankCapacity.doubleValue())) {
                 BigDecimal newAmount = maxBankCapacity.subtract(bankBalance);
                 if (newAmount.doubleValue() <= 0) continue;
                 interestAmount = newAmount;
@@ -182,7 +182,7 @@ public class Interest {
 
             if (bankBalance.doubleValue() <= 0) continue;
             if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
-            if (maxBankCapacity.doubleValue() != 0 && (bankBalance.add(interestMoney).doubleValue() >= maxBankCapacity.doubleValue())) {
+            if (maxBankCapacity.doubleValue() > 0D && (bankBalance.add(interestMoney).doubleValue() >= maxBankCapacity.doubleValue())) {
                 BigDecimal newAmount = maxBankCapacity.subtract(bankBalance);
                 if (newAmount.doubleValue() <= 0) continue;
                 singleEconomyManager.addBankBalance(newAmount, true, false, TransactionType.INTEREST);
@@ -221,7 +221,7 @@ public class Interest {
 
                 if (bankBalance.doubleValue() <= 0) continue;
                 if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
-                if (maxBankCapacity.doubleValue() != 0 && (bankBalance.add(interestMoney).doubleValue() >= maxBankCapacity.doubleValue())) {
+                if (maxBankCapacity.doubleValue() > 0D && (bankBalance.add(interestMoney).doubleValue() >= maxBankCapacity.doubleValue())) {
                     BigDecimal newAmount = maxBankCapacity.subtract(bankBalance);
                     if (newAmount.doubleValue() <= 0) continue;
                     multiEconomyManager.addBankBalance(newAmount, bankName, true, false, TransactionType.INTEREST);

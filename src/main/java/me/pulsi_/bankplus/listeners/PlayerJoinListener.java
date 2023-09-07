@@ -6,9 +6,7 @@ import me.pulsi_.bankplus.account.BPPlayerFiles;
 import me.pulsi_.bankplus.economy.MultiEconomyManager;
 import me.pulsi_.bankplus.economy.OfflineInterestManager;
 import me.pulsi_.bankplus.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.utils.BPChat;
-import me.pulsi_.bankplus.utils.BPFormatter;
-import me.pulsi_.bankplus.utils.BPLogger;
+import me.pulsi_.bankplus.utils.*;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -49,7 +47,7 @@ public class PlayerJoinListener implements Listener {
             hasChanges = true;
         }
 
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
             for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
                 String sBalance = config.getString("Banks." + bankName + ".Money");
                 String sLevel = config.getString("Banks." + bankName + ".Level");
@@ -92,13 +90,10 @@ public class PlayerJoinListener implements Listener {
         if (offlineInterest.doubleValue() <= 0) return;
 
         long delay = Values.CONFIG.getNotifyOfflineInterestDelay();
-        String message = BPChat.color(Values.CONFIG.getNotifyOfflineInterestMessage()
-                .replace("%amount%", BPFormatter.formatCommas(offlineInterest))
-                .replace("%amount_formatted%", BPFormatter.format(offlineInterest))
-                .replace("%amount_formatted_long%", BPFormatter.formatLong(offlineInterest)));
 
-        if (delay == 0) p.sendMessage(message);
-        else Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> p.sendMessage(message), delay * 20L);
+        if (delay == 0) BPMessages.send(p, Values.CONFIG.getNotifyOfflineInterestMessage(), BPUtils.placeValues(offlineInterest), true);
+        else Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () ->
+                BPMessages.send(p, Values.CONFIG.getNotifyOfflineInterestMessage(), BPUtils.placeValues(offlineInterest), true), delay * 20L);
         interestManager.setOfflineInterest(new BigDecimal(0), true);
     }
 }

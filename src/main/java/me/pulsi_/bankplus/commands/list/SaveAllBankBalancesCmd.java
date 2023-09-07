@@ -31,7 +31,7 @@ public class SaveAllBankBalancesCmd extends BPCommand {
     public boolean onCommand(CommandSender s, String args[]) {
         if (confirm(s)) return false;
 
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
             Bukkit.getOnlinePlayers().forEach(p -> new MultiEconomyManager(p).saveBankBalance(true));
         else
             Bukkit.getOnlinePlayers().forEach(p -> new SingleEconomyManager(p).saveBankBalance(true));

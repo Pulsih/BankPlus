@@ -39,7 +39,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
             }
             Player p = (Player) s;
 
-            if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+            if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
                 if (Values.CONFIG.isGuiModuleEnabled()) BankUtils.openBank(p, BankListGui.multipleBanksGuiID, false);
                 else {
                     BPMessages.send(p, "Multiple-Personal-Bank", BPUtils.placeValues(p, new MultiEconomyManager(p).getBankBalance()));

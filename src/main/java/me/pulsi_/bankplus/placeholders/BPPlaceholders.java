@@ -32,22 +32,22 @@ public class BPPlaceholders extends PlaceholderExpansion {
     }
 
     @Override
-    public @NotNull String getAuthor() {
+    public String getAuthor() {
         return "Pulsi_";
     }
 
     @Override
-    public @NotNull String getIdentifier() {
+    public String getIdentifier() {
         return "bankplus";
     }
 
     @Override
-    public @NotNull String getVersion() {
+    public String getVersion() {
         return BankPlus.INSTANCE.getDescription().getVersion();
     }
 
     @Override
-    public String onPlaceholderRequest(Player p, @NotNull String identifier) {
+    public String onPlaceholderRequest(Player p, String identifier) {
         if (p == null) return "Player not online";
 
         SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
@@ -63,7 +63,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
             else {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
                     return "&cThe multiple-banks module is disabled!";
 
                 reader = new BankReader(target);
@@ -81,7 +81,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
             else {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
                     return "The multiple-banks module is disabled.";
 
                 reader = new BankReader(target);
@@ -97,7 +97,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
             else {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
                     return "&cThe multiple-banks module is disabled!";
 
                 reader = new BankReader(target);
@@ -117,7 +117,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
             else {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
                     return "&cThe multiple-banks module is disabled!";
 
                 reader = new BankReader(target);
@@ -138,7 +138,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
             else {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
                     return "&cThe multiple-banks module is disabled!";
 
                 reader = new BankReader(target);
@@ -161,7 +161,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
             else {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
                     return "&cThe multiple-banks module is disabled!";
 
                 reader = new BankReader(target);
@@ -171,7 +171,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
             if (!reader.hasNextLevel(p))
                 return Values.CONFIG.getUpgradesMaxedPlaceholder();
 
-            return reader.getInterest(reader.getCurrentLevel(p) + 1) + "%";
+            return reader.getInterest(p, reader.getCurrentLevel(p) + 1) + "%";
         }
 
         if (identifier.startsWith("next_level_offline_interest_rate")) {
@@ -179,7 +179,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
             else {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
                     return "&cThe multiple-banks module is disabled!";
 
                 reader = new BankReader(target);
@@ -197,7 +197,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
             else {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
                     return "The multiple-banks module is disabled.";
 
                 reader = new BankReader(target);
@@ -217,11 +217,11 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
         if (identifier.startsWith("balance")) {
             BigDecimal bal;
-            if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) bal = multiEconomyManager.getBankBalance();
+            if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) bal = multiEconomyManager.getBankBalance();
             else bal = singleEconomyManager.getBankBalance();
 
             if (target != null) {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
                     return "&cThe multiple-banks module is disabled!";
 
                 BankReader reader = new BankReader(target);
@@ -243,7 +243,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
                 percentage = reader.getInterest(p).divide(BigDecimal.valueOf(100));
                 balance = singleEconomyManager.getBankBalance();
             } else {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
                     return "&cThe multiple-banks module is disabled!";
 
                 reader = new BankReader(target);
@@ -323,37 +323,32 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
         if (identifier.startsWith("interest_rate")) {
             BankReader reader;
-
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
             else {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
                     return "&cThe multiple-banks module is disabled!";
 
                 reader = new BankReader(target);
                 if (!reader.exist())
                     return "The selected bank does not exist.";
             }
-            BigDecimal interestRate = reader.getInterest(p);
 
-            return interestRate + "%";
+            return reader.getInterest(p) + "%";
         }
 
         if (identifier.startsWith("offline_interest_rate")) {
             BankReader reader;
-            BigDecimal interestRate;
-
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
             else {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
                     return "&cThe multiple-banks module is disabled!";
 
                 reader = new BankReader(target);
                 if (!reader.exist())
                     return "The selected bank does not exist.";
             }
-            interestRate = reader.getOfflineInterest(p);
 
-            return interestRate + "%";
+            return reader.getOfflineInterest(p) + "%";
         }
 
         if (identifier.startsWith("calculate_deposit_taxes_")) {
@@ -365,7 +360,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
                 BigDecimal amount;
                 if (target != null) {
-                    if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                    if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
                         return "&cThe multiple-banks module is disabled!";
 
                     if (!new BankReader(target).exist())
@@ -414,7 +409,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
                 BigDecimal amount;
                 if (target != null) {
-                    if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                    if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
                         return "&cThe multiple-banks module is disabled!";
 
                     if (!new BankReader(target).exist())
@@ -439,7 +434,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
                 if (target == null) balance = new SingleEconomyManager(p).getBankBalance();
                 else {
-                    if (!Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled())
+                    if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
                         return "&cThe multiple-banks module is disabled!";
 
                     if (!new BankReader(target).exist())

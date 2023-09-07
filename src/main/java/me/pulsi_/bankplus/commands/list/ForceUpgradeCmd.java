@@ -39,7 +39,7 @@ public class ForceUpgradeCmd extends BPCommand {
         }
 
         String bankName = Values.CONFIG.getMainGuiName();
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
             if (args.length == 2) {
                 BPMessages.send(s, "Specify-Bank");
                 return false;
@@ -68,7 +68,7 @@ public class ForceUpgradeCmd extends BPCommand {
         if (!(s instanceof Player) || !s.hasPermission("bankplus." + identifier)) return null;
         Player p = (Player) s;
 
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() && args.length == 3) {
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled() && args.length == 3) {
             List<String> args2 = new ArrayList<>();
             for (String arg : new BankReader().getAvailableBanks(p))
                 if (arg.startsWith(args[2].toLowerCase())) args2.add(arg);

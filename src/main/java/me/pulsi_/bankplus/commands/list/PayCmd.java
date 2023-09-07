@@ -54,7 +54,7 @@ public class PayCmd extends BPCommand {
         BigDecimal amount = new BigDecimal(num);
         Player payer = (Player) s;
 
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
             if (args.length == 3 || args.length == 4) {
                 BPMessages.send(s, "Specify-Bank");
                 return false;
@@ -105,7 +105,7 @@ public class PayCmd extends BPCommand {
             return args2;
         }
 
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
             if (args.length == 4) {
                 List<String> args3 = new ArrayList<>();
                 for (String arg : new BankReader().getAvailableBanks(p))

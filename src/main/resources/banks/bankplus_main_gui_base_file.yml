@@ -103,7 +103,7 @@ Items:
   WithdrawButton1:
     Material: "EMERALD"
     Amount: 1
-    Displayname: "&8&l[&9&lWITHDRAW&8&l] &9500$"
+    Displayname: "&8&l[&a&lWITHDRAW&8&l] &f500$"
     Slot: 11
     # You can edit the custom
     # model data of an item.
@@ -112,8 +112,8 @@ Items:
     #CustomModelData: 10
     Lore:
       - ""
-      - "&9&l* &aWithdraw &9500$ &afrom your bank."
-      - "&7&o(( Taxes: %bankplus_calculate_withdraw_taxes_number_500% ))"
+      - "&7Withdraw &a500$ &7from your bank."
+      - "&8Taxes with 500$: &f%bankplus_calculate_withdraw_taxes_number_500%"
       - ""
     Glowing: true
     Actions:
@@ -130,12 +130,12 @@ Items:
   WithdrawButton2:
     Material: "EMERALD"
     Amount: 1
-    Displayname: "&8&l[&9&lWITHDRAW&8&l] &925%"
+    Displayname: "&8&l[&a&lWITHDRAW&8&l] &f25%"
     Slot: 12
     Lore:
       - ""
-      - "&9&l* &aWithdraw &925% &aof the money from your bank."
-      - "&7&o(( Taxes: %bankplus_calculate_withdraw_taxes_percentage_25% ))"
+      - "&7Withdraw &a25% &7of the money from your bank."
+      - "&8Taxes with 25%: &f%bankplus_calculate_withdraw_taxes_percentage_25%"
       - ""
     Glowing: true
     Actions:
@@ -144,12 +144,12 @@ Items:
   WithdrawButton3:
     Material: "EMERALD"
     Amount: 1
-    Displayname: "&8&l[&9&lWITHDRAW&8&l] &950%"
+    Displayname: "&8&l[&a&lWITHDRAW&8&l] &f50%"
     Slot: 21
     Lore:
       - ""
-      - "&9&l* &aWithdraw &950% &aof the money from your bank."
-      - "&7&o(( Taxes: %bankplus_calculate_withdraw_taxes_percentage_50% ))"
+      - "&7Withdraw &a50% &7of the money from your bank."
+      - "&8Taxes with 50%: &f%bankplus_calculate_withdraw_taxes_percentage_50%"
       - ""
     Glowing: true
     Actions:
@@ -159,11 +159,11 @@ Items:
     Material: "EMERALD"
     Amount: 1
     Slot: 20
-    Displayname: "&8&l[&9&lWITHDRAW&8&l] &9ALL"
+    Displayname: "&8&l[&a&lWITHDRAW&8&l] &fALL"
     Lore:
       - ""
-      - "&9&l* &aWithdraw &9ALL &amoney from your bank."
-      - "&7&o(( Taxes: %bankplus_calculate_withdraw_taxes_percentage_100% ))"
+      - "&7Withdraw &aall &7your money from your bank."
+      - "&8Taxes with all money: &f%bankplus_calculate_withdraw_taxes_percentage_100%"
       - ""
     Glowing: true
     Actions:
@@ -173,11 +173,10 @@ Items:
     Material: "EMERALD"
     Amount: 1
     Slot: 30
-    Displayname: "&8&l[&9&lWITHDRAW&8&l] &9CUSTOM"
+    Displayname: "&8&l[&a&lWITHDRAW&8&l] &fCUSTOM"
     Lore:
       - ""
-      - "&9&l* &aWithdraw a &9custom &aamount from"
-      - "      &ayour bank through chat."
+      - "&7Withdraw a &acustom &7amount from your bank &a&nthrough chat&7."
       - ""
     Glowing: true
     Actions:
@@ -185,7 +184,7 @@ Items:
 
   Personal-Info:
     Material: "HEAD-%PLAYER%"
-    Displayname: "&9&l* &a&lPERSONAL"
+    Displayname: "&8&l* &a&lPERSONAL"
     Slot: 14
     Lore:
       - ""
@@ -203,7 +202,7 @@ Items:
 
   How-Does-It-Work:
     Material: "HEAD-<eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzU3NDcwMTBkODRhYTU2NDgzYjc1ZjYyNDNkOTRmMzRjNTM0NjAzNTg0YjJjYzY4YTQ1YmYzNjU4NDAxMDVmZCJ9fX0=>"
-    Displayname: "&9&l* &a&lHOW DOES IT WORK?"
+    Displayname: "&8&l* &a&lHOW DOES IT WORK?"
     Slot: 23
     Lore:
       - ""
@@ -219,7 +218,7 @@ Items:
     Material: "DIAMOND"
     Amount: 1
     Slot: 32
-    Displayname: "&9&l* &a&lUPGRADE BANK"
+    Displayname: "&8&l[&a&lUPGRADE &9&lBANK&8&l]"
     Lore:
       - ""
       - "&7Upgrade your bank to the next level!"
@@ -241,11 +240,11 @@ Items:
     Material: "EMERALD"
     Amount: 1
     Slot: 17
-    Displayname: "&8&l[&a&lDEPOSIT&8&l] &a500$"
+    Displayname: "&8&l[&9&lDEPOSIT&8&l] &f500$"
     Lore:
       - ""
-      - "&a&l* &9Deposit &a500$ &9in your bank."
-      - "&7&o(( Taxes: %bankplus_calculate_deposit_taxes_number_500% ))"
+      - "&7Deposit &a500$ &7in your bank."
+      - "&8Taxes with 500$: &f%bankplus_calculate_deposit_taxes_number_500%"
       - ""
     Glowing: true
     Actions:
@@ -255,11 +254,11 @@ Items:
     Material: "EMERALD"
     Amount: 1
     Slot: 16
-    Displayname: "&8&l[&a&lDEPOSIT&8&l] &a25%"
+    Displayname: "&8&l[&9&lDEPOSIT&8&l] &f25%"
     Lore:
       - ""
-      - "&a&l* &9Deposit &a25% &9of your money in your bank."
-      - "&7&o(( Taxes: %bankplus_calculate_deposit_taxes_percentage_25% ))"
+      - "&7Deposit &a25% &7of the money in your bank."
+      - "&8Taxes with 25%: &f%bankplus_calculate_deposit_taxes_percentage_25%"
       - ""
     Glowing: true
     Actions:
@@ -269,11 +268,11 @@ Items:
     Material: "EMERALD"
     Amount: 1
     Slot: 25
-    Displayname: "&8&l[&a&lDEPOSIT&8&l] &a50%"
+    Displayname: "&8&l[&9&lDEPOSIT&8&l] &f50%"
     Lore:
       - ""
-      - "&a&l* &9Deposit &a50% &9of your money in your bank."
-      - "&7&o(( Taxes: %bankplus_calculate_deposit_taxes_percentage_50% ))"
+      - "&7Deposit &a50% &7of the money in your bank."
+      - "&8Taxes with 50%: &f%bankplus_calculate_deposit_taxes_percentage_25%"
       - ""
     Glowing: true
     Actions:
@@ -283,11 +282,11 @@ Items:
     Material: "EMERALD"
     Amount: 1
     Slot: 26
-    Displayname: "&8&l[&a&lDEPOSIT&8&l] &aALL"
+    Displayname: "&8&l[&9&lDEPOSIT&8&l] &fALL"
     Lore:
       - ""
-      - "&a&l* &9Deposit &aALL &9money in your bank."
-      - "&7&o(( Taxes: %bankplus_calculate_deposit_taxes_percentage_100% ))"
+      - "&7Deposit &aall &7your the in your bank."
+      - "&8Taxes with all money: &f%bankplus_calculate_deposit_taxes_percentage_100%"
       - ""
     Glowing: true
     Actions:
@@ -297,11 +296,10 @@ Items:
     Material: "EMERALD"
     Amount: 1
     Slot: 34
-    Displayname: "&8&l[&a&lDEPOSIT&8&l] &aCUSTOM"
+    Displayname: "&8&l[&9&lDEPOSIT&8&l] &fCUSTOM"
     Lore:
       - ""
-      - "&a&l* &9Deposit a &acustom &9amount in"
-      - "   &9your bank through chat."
+      - "&7Deposit a &acustom &7amount in your bank &a&nthrough chat&7."
       - ""
     Glowing: true
     Actions:

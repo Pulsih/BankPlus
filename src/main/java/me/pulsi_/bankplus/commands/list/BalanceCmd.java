@@ -36,7 +36,7 @@ public class BalanceCmd extends BPCommand {
     public boolean onCommand(CommandSender s, String args[]) {
         Player p = (Player) s;
 
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
             MultiEconomyManager em = new MultiEconomyManager(p);
             if (args.length == 1) {
                 if (confirm(s)) return false;
@@ -62,7 +62,7 @@ public class BalanceCmd extends BPCommand {
         if (!(s instanceof Player) || !s.hasPermission("bankplus." + identifier)) return null;
         Player p = (Player) s;
 
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() && args.length == 2) {
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled() && args.length == 2) {
             List<String> args1 = new ArrayList<>();
             for (String arg : new BankReader().getAvailableBanks(p))
                 if (arg.startsWith(args[1].toLowerCase())) args1.add(arg);

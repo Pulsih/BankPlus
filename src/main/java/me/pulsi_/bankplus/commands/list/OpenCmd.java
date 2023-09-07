@@ -35,7 +35,7 @@ public class OpenCmd extends BPCommand {
         Player p = (Player) s;
 
         String bankName = Values.CONFIG.getMainGuiName();
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
             if (args.length == 1) {
                 if (getUsage() != null && !getUsage().equals("")) BPMessages.send(s, getUsage(), true);
                 return false;
@@ -58,7 +58,7 @@ public class OpenCmd extends BPCommand {
         if (!(s instanceof Player) || !s.hasPermission("bankplus." + identifier)) return null;
         Player p = (Player) s;
 
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() && args.length == 2) {
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled() && args.length == 2) {
             List<String> args1 = new ArrayList<>();
             for (String arg : new BankReader().getAvailableBanks(p))
                 if (arg.startsWith(args[1].toLowerCase())) args1.add(arg);

@@ -57,7 +57,7 @@ public class SetCmd extends BPCommand {
         if (BPUtils.isInvalidNumber(num, s)) return false;
         BigDecimal amount = new BigDecimal(num);
 
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
             if (args.length == 3) {
                 BPMessages.send(s, "Specify-Bank");
                 return false;
@@ -118,7 +118,7 @@ public class SetCmd extends BPCommand {
             return args2;
         }
 
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
             if (args.length == 4) {
                 List<String> args3 = new ArrayList<>();
                 for (String arg : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())

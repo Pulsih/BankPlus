@@ -55,7 +55,7 @@ public class DepositCmd extends BPCommand {
                 amount = new BigDecimal(num);
         }
 
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled()) {
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
             if (args.length == 2) {
                 BPMessages.send(s, "Specify-Bank");
                 return false;
@@ -88,7 +88,7 @@ public class DepositCmd extends BPCommand {
             return args1;
         }
 
-        if (Values.MULTIPLE_BANKS.isMultipleBanksModuleEnabled() && args.length == 3) {
+        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled() && args.length == 3) {
             List<String> args2 = new ArrayList<>();
             for (String arg : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
                 if (arg.startsWith(args[2].toLowerCase())) args2.add(arg);
