@@ -189,7 +189,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
             if (!reader.hasNextLevel(p))
                 return Values.CONFIG.getUpgradesMaxedPlaceholder();
 
-            return reader.getOfflineInterest(reader.getCurrentLevel(p) + 1) + "%";
+            return reader.getOfflineInterest(p, reader.getCurrentLevel(p) + 1) + "%";
         }
 
         if (identifier.startsWith("next_level")) {

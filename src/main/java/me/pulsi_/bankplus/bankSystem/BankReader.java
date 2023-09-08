@@ -174,7 +174,7 @@ public class BankReader {
      */
     public BigDecimal getInterest(OfflinePlayer p, int level) {
         if (Values.CONFIG.enableInterestLimiter()) {
-            for (String limiter : Values.CONFIG.getInterestLimiter()) {
+            for (String limiter : getInterestLimiter(level)) {
                 if (!limiter.contains(":")) continue;
 
                 String[] split1 = limiter.split(":");
@@ -221,7 +221,7 @@ public class BankReader {
      * @return The offline interest amount.
      */
     public BigDecimal getOfflineInterest(Player p) {
-        return getOfflineInterest(getCurrentLevel(p));
+        return getOfflineInterest(p, getCurrentLevel(p));
     }
 
     /**
@@ -231,7 +231,7 @@ public class BankReader {
      * @return The offline interest amount.
      */
     public BigDecimal getOfflineInterest(OfflinePlayer p) {
-        return getOfflineInterest(getCurrentLevel(p));
+        return getOfflineInterest(p, getCurrentLevel(p));
     }
 
     /**
@@ -240,7 +240,35 @@ public class BankReader {
      * @param level The bank level.
      * @return The offline interest amount.
      */
-    public BigDecimal getOfflineInterest(int level) {
+    public BigDecimal getOfflineInterest(OfflinePlayer p, int level) {
+        if (Values.CONFIG.enableInterestLimiter()) {
+            for (String limiter : getInterestLimiter(level)) {
+                if (!limiter.contains(":")) continue;
+
+                String[] split1 = limiter.split(":");
+                if (BPUtils.isInvalidNumber(split1[1])) continue;
+
+                String[] split2 = split1[0].split("-");
+                if (BPUtils.isInvalidNumber(split2[0]) || BPUtils.isInvalidNumber(split2[1])) continue;
+
+                String interest = split1[1].replace("%", ""), from = split2[0].replace("%", ""), to = split2[1].replace("%", "");
+                BigDecimal interestRate = new BigDecimal(interest), fromNumber = new BigDecimal(from), toNumber = new BigDecimal(to);
+
+                if (toNumber.compareTo(fromNumber) > 0) {
+                    BigDecimal temp = toNumber;
+                    fromNumber = toNumber;
+                    toNumber = temp;
+                }
+
+                BigDecimal balance = Values.MULTIPLE_BANKS.isMultipleBanksEnabled() ?
+                        new MultiEconomyManager(p).getBankBalance(bank.getIdentifier()) :
+                        new SingleEconomyManager(p).getBankBalance();
+
+                if (fromNumber.compareTo(balance) <= 0 && toNumber.compareTo(balance) >= 0)
+                    return interestRate;
+            }
+        }
+
         if (!hasUpgrades()) return Values.CONFIG.getOfflineInterestMoneyGiven();
 
         String interest = getUpgrades().getString(level + ".Offline-Interest");
@@ -252,6 +280,17 @@ public class BankReader {
         }
 
         return new BigDecimal(interest.replace("%", ""));
+    }
+
+    /**
+     * Get the list of interest limiter
+     * @param level The bank level.
+     */
+    public List<String> getInterestLimiter(int level) {
+        if (!hasUpgrades()) return Values.CONFIG.getInterestLimiter();
+
+        List<String> limiter = getUpgrades().getStringList(level + ".Interest-Limiter");
+        return limiter.isEmpty() ? Values.CONFIG.getInterestLimiter() : limiter;
     }
 
     /**

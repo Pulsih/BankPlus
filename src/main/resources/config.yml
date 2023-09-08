@@ -73,6 +73,8 @@ Interest:
   Enable-Interest-Limiter: false
 
   # Format: Amount1-Amount2:InterestRatePercentage
+  # You can edit this in the bank.yml just
+  # like interest and offline interest.
   Interest-Limiter:
     - "500-5000:10%"
     - "50000-100000:4%"

@@ -42,6 +42,7 @@ Set-Level-Message: "%prefix% &aYou have set &f%player%'s &abank level to &f%leve
 Pay-Message: "%prefix% &aYou have added &f%amount_formatted% Money &ato &f%player%'s &abank balance!"
 Chat-Deposit: "%prefix% &aType an amount in chat to deposit, type 'exit' to exit"
 Chat-Withdraw: "%prefix% &aType an amount in chat to withdraw, type 'exit' to exit"
+Chat-Time-Expired: "%prefix% &cThe time to type a number has expired."
 Payment-Sent: "%prefix% &aYou have successfully sent to &f%player% %amount_formatted% &amoney!"
 Payment-Received: "%prefix% &aYou have received &f%amount_formatted% &amoney from &f%player%!"
 Interest-Time: "%prefix% &aWait more &f%time% &ato get the interest."

@@ -198,8 +198,10 @@ public class BPUtils {
 
         BPPlayer pl = BankPlus.INSTANCE.getPlayerRegistry().get(p);
         pl.setOpenedBank(BankPlus.INSTANCE.getBankGuiRegistry().getBanks().get(identifier));
-        pl.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () ->
-                PlayerChatMethod.reopenBank(p, identifier), Values.CONFIG.getChatExitTime() * 20L));
+        pl.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> {
+            PlayerChatMethod.reopenBank(p, identifier);
+            BPMessages.send(p, "Chat-Time-Expired");
+        }, Values.CONFIG.getChatExitTime() * 20L));
     }
 
     public static void customDeposit(Player p) {
@@ -217,8 +219,10 @@ public class BPUtils {
 
         BPPlayer pl = BankPlus.INSTANCE.getPlayerRegistry().get(p);
         pl.setOpenedBank(BankPlus.INSTANCE.getBankGuiRegistry().getBanks().get(identifier));
-        pl.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () ->
-                PlayerChatMethod.reopenBank(p, identifier), Values.CONFIG.getChatExitTime() * 20L));
+        pl.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> {
+            PlayerChatMethod.reopenBank(p, identifier);
+            BPMessages.send(p, "Chat-Time-Expired");
+        }, Values.CONFIG.getChatExitTime() * 20L));
     }
 
     public static void sendTitle(String title, Player p) {
