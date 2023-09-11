@@ -75,6 +75,7 @@ public class ConfigValues {
         notifyOfflineInterestDelay = config.getLong("General-Settings.Offline-Interest-Earned-Message.Delay");
         interestMaxAmount = config.getString("Interest.Max-Amount");
         interestMoneyGiven = config.getString("Interest.Money-Given");
+        isOfflineInterestDifferentRate = config.getBoolean("Interest.Different-Offline-Rate");
         offlineInterestMoneyGiven = config.getString("Interest.Offline-Money-Given");
         offlineInterestLimit = config.getString("Interest.Offline-Limit");
         upgradesMaxedPlaceholder = config.getString("Placeholders.Upgrades.Max-Level");
@@ -89,7 +90,6 @@ public class ConfigValues {
         logTransactions = config.getBoolean("General-Settings.Log-Transactions");
         enableInterestLimiter = config.getBoolean("Interest.Enable-Interest-Limiter");
         isGivingInterestToOfflinePlayers = config.getBoolean("Interest.Give-To-Offline-Players");
-        isOfflineInterestDifferentRate = config.getBoolean("Interest.Different-Offline-Rate");
         isOfflineInterestEarnedMessageEnabled = config.getBoolean("General-Settings.Offline-Interest-Earned-Message.Enabled");
         isUpdateCheckerEnabled = config.getBoolean("Update-Checker");
         isWithdrawSoundEnabled = config.getBoolean("General-Settings.Withdraw-Sound.Enabled");
@@ -349,11 +349,19 @@ public class ConfigValues {
     }
 
     public BigDecimal getOfflineInterestMoneyGiven() {
-        if (BPUtils.isInvalidNumber(offlineInterestMoneyGiven)) {
-            BPLogger.error(DEF_ERROR.replace("%", "Interest.Offline-Money-Given"));
-            return new BigDecimal(0);
+        if (isOfflineInterestDifferentRate) {
+            if (BPUtils.isInvalidNumber(offlineInterestMoneyGiven)) {
+                BPLogger.error(DEF_ERROR.replace("%", "Interest.Offline-Money-Given"));
+                return new BigDecimal(0);
+            }
+            return new BigDecimal(offlineInterestMoneyGiven.replace("%", ""));
+        } else {
+            if (BPUtils.isInvalidNumber(interestMoneyGiven)) {
+                BPLogger.error(DEF_ERROR.replace("%", "Interest.Money-Given"));
+                return new BigDecimal(0);
+            }
+            return new BigDecimal(interestMoneyGiven.replace("%", ""));
         }
-        return new BigDecimal(offlineInterestMoneyGiven.replace("%", ""));
     }
 
     public long getOfflineInterestLimit() {
