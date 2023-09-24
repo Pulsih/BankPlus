@@ -25,7 +25,7 @@ public class GiveInterestCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String args[]) {
+    public boolean onCommand(CommandSender s, String[] args) {
         if (!Values.CONFIG.isInterestEnabled()) {
             BPMessages.send(s, "Interest-Disabled");
             return false;
@@ -36,7 +36,7 @@ public class GiveInterestCmd extends BPCommand {
     }
 
     @Override
-    public List<String> tabCompletion(CommandSender s, String args[]) {
+    public List<String> tabCompletion(CommandSender s, String[] args) {
         return null;
     }
 }

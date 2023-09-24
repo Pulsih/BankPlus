@@ -2,9 +2,8 @@ package me.pulsi_.bankplus;
 
 import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.bankSystem.BankGuiRegistry;
-import me.pulsi_.bankplus.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.interest.Interest;
+import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.interest.BPInterest;
 import me.pulsi_.bankplus.loanSystem.LoanRegistry;
 import me.pulsi_.bankplus.loanSystem.LoanUtils;
 import me.pulsi_.bankplus.logSystem.BPLogUtils;
@@ -26,13 +25,14 @@ import java.net.URL;
 public final class BankPlus extends JavaPlugin {
 
     public static BankPlus INSTANCE;
-    private boolean wasOnSingleEconomy;
+
+    private BPEconomy bpEconomy;
 
     private BPLogUtils bpLogUtils;
     private PlayerRegistry playerRegistry;
     private BankGuiRegistry bankGuiRegistry;
     private LoanRegistry loanRegistry;
-    private Economy econ = null;
+    private Economy vaultEconomy = null;
     private Permission perms = null;
 
     private BankTopManager bankTopManager;
@@ -40,7 +40,7 @@ public final class BankPlus extends JavaPlugin {
     private BPData BPData;
     private AFKManager afkManager;
     private TaskManager taskManager;
-    private Interest interest;
+    private BPInterest interest;
 
     private boolean isPlaceholderAPIHooked = false, isEssentialsXHooked = false, isUpdated;
     private String serverVersion;
@@ -79,6 +79,7 @@ public final class BankPlus extends JavaPlugin {
         this.playerRegistry = new PlayerRegistry();
         this.bankGuiRegistry = new BankGuiRegistry();
         this.loanRegistry = new LoanRegistry();
+        this.bpEconomy = new BPEconomy();
 
         this.serverVersion = getServer().getVersion();
 
@@ -100,7 +101,7 @@ public final class BankPlus extends JavaPlugin {
         this.BPData = new BPData(this);
         this.afkManager = new AFKManager(this);
         this.taskManager = new TaskManager();
-        this.interest = new Interest();
+        this.interest = new BPInterest();
 
         RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
         if (rsp != null) perms = rsp.getProvider();
@@ -119,21 +120,19 @@ public final class BankPlus extends JavaPlugin {
 
         if (Values.CONFIG.isUpdateCheckerEnabled())
             Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> isUpdated = isPluginUpdated(), 0, (8 * 1200) * 60 /*8 hours*/);
-        wasOnSingleEconomy = !Values.MULTIPLE_BANKS.isMultipleBanksEnabled();
     }
 
     @Override
     public void onDisable() {
-        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) Bukkit.getOnlinePlayers().forEach(p -> new MultiEconomyManager(p).saveBankBalance(false));
-        else Bukkit.getOnlinePlayers().forEach(p -> new SingleEconomyManager(p).saveBankBalance(false));
+        Bukkit.getOnlinePlayers().forEach(p -> bpEconomy.saveBankBalances(p, false));
         if (Values.CONFIG.isInterestEnabled()) interest.saveInterest();
         LoanUtils.saveLoans();
 
         BPData.shutdownPlugin();
     }
 
-    public boolean wasOnSingleEconomy() {
-        return wasOnSingleEconomy;
+    public static BPEconomy getBPEconomy() {
+        return INSTANCE.bpEconomy;
     }
 
     public PlayerRegistry getPlayerRegistry() {
@@ -148,8 +147,8 @@ public final class BankPlus extends JavaPlugin {
         return loanRegistry;
     }
 
-    public Economy getEconomy() {
-        return econ;
+    public Economy getVaultEconomy() {
+        return vaultEconomy;
     }
 
     public Permission getPermissions() {
@@ -200,7 +199,7 @@ public final class BankPlus extends JavaPlugin {
         return taskManager;
     }
 
-    public Interest getInterest() {
+    public BPInterest getInterest() {
         return interest;
     }
 
@@ -208,7 +207,7 @@ public final class BankPlus extends JavaPlugin {
         if (getServer().getPluginManager().getPlugin("Vault") == null) return false;
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
         if (rsp == null) return false;
-        econ = rsp.getProvider();
+        vaultEconomy = rsp.getProvider();
         return true;
     }
 

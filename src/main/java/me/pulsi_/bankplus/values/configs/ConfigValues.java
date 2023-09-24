@@ -25,7 +25,7 @@ public class ConfigValues {
     private long notifyOfflineInterestDelay, saveBalancedDelay, updateBankTopDelay;
     private int afkPlayersTime, maxDecimalsAmount, bankTopSize, chatExitTime;
     private boolean isReopeningBankAfterChat, isNotifyOfflineInterest, isStoringUUIDs, logTransactions, enableInterestLimiter;
-    private boolean isInterestEnabled, isGivingInterestToOfflinePlayers, isOfflineInterestDifferentRate;
+    private boolean isInterestEnabled, isGivingInterestToOfflinePlayers, isOfflineInterestDifferentRate, notifyRegisteredPlayer;
     private boolean isOfflineInterestEarnedMessageEnabled, isUpdateCheckerEnabled, isWithdrawSoundEnabled, isDepositSoundEnabled;
     private boolean isViewSoundEnabled, isPersonalSoundEnabled, isIgnoringAfkPlayers, useEssentialsXAFK, useBankBalanceToUpgrade;
     private boolean banktopEnabled, banktopUpdateBroadcastEnabled, banktopUpdateBroadcastOnlyConsole, saveBalancesBroadcast, guiModuleEnabled;
@@ -119,6 +119,7 @@ public class ConfigValues {
         loanInstalments = config.getInt("Loan-Settings.Installments");
         loanDelay = config.getInt("Loan-Settings.Delay");
         loanAcceptTime = config.getInt("Loan-Settings.Accept-Time");
+        notifyRegisteredPlayer = config.getBoolean("General-Settings.Notify-Registered-Player");
     }
 
     public String getPlayerChatPriority() {
@@ -561,5 +562,9 @@ public class ConfigValues {
 
     public int getLoanAcceptTime() {
         return loanAcceptTime;
+    }
+
+    public boolean notifyRegisteredPlayer() {
+        return notifyRegisteredPlayer;
     }
 }

@@ -70,7 +70,7 @@ public class BankUtils {
     }
 
     private static void placeHeads(Inventory bank, Player p, String identifier) {
-        ConfigurationSection items = new BankReader(identifier).getItems();
+        ConfigurationSection items = new BankReader(identifier).getBank().getItems();
         if (items == null) return;
 
         for (String item : items.getKeys(false)) {
@@ -89,7 +89,7 @@ public class BankUtils {
     }
 
     private static void updateMeta(Inventory bank, Player p, String identifier) {
-        ConfigurationSection items = new BankReader(identifier).getItems();
+        ConfigurationSection items = new BankReader(identifier).getBank().getItems();
         if (items == null) return;
 
         for (String item : items.getKeys(false)) {

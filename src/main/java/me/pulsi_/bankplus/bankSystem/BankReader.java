@@ -2,8 +2,7 @@ package me.pulsi_.bankplus.bankSystem;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayerFiles;
-import me.pulsi_.bankplus.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.economy.SingleEconomyManager;
+import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
@@ -28,99 +27,38 @@ import java.util.List;
 public class BankReader {
 
     private final Bank bank;
+    private final BPEconomy economy;
 
-    /**
-     * This constructor is used for methods that doesn't require to select a bank, for example #getAvailableBanks();
-     * If you try to access methods that requires the bank object with this constructor you'll get a lot of errors.
-     */
     public BankReader() {
-        this.bank = null;
+        bank = null;
+        economy = BankPlus.getBPEconomy();
     }
 
     public BankReader(String bankName) {
-        this.bank = BankPlus.INSTANCE.getBankGuiRegistry().getBanks().get(bankName);
+        bank = BankPlus.INSTANCE.getBankGuiRegistry().getBanks().get(bankName);
+        economy = BankPlus.getBPEconomy();
+    }
+
+    public Bank getBank() {
+        return bank;
     }
 
     public boolean exist() {
         return bank != null;
     }
 
-    public File getFile() {
-        return bank.getBankFile();
-    }
-
-    public FileConfiguration getConfig() {
-        return bank.getBankConfig();
-    }
-
-    public String getTitle() {
-        return bank.getTitle();
-    }
-
-    public int getLines() {
-        return bank.getSize();
-    }
-
-    public long getUpdateDelay() {
-        return bank.getUpdateDelay();
-    }
-
-    public boolean isFillerEnabled() {
-        return bank.hasFiller();
-    }
-
-    public String getFillerMaterial() {
-        return bank.getFillerMaterial();
-    }
-
-    public boolean isFillerGlowing() {
-        return bank.isFillerGlowing();
-    }
-
-    public boolean hasPermissionSection() {
-        return bank.getPermission() != null;
-    }
-
-    public String getPermission() {
-        return bank.getPermission();
-    }
-
-    public ConfigurationSection getBanksGuiItemSection() {
-        return bank.getBanksListGuiItems();
-    }
-
+    /**
+     * To get the upgrades use {@link Bank}#getUpgrades();
+     */
     public boolean hasUpgrades() {
         return bank.getUpgrades() != null;
     }
 
-    public ConfigurationSection getUpgrades() {
-        return bank.getUpgrades();
-    }
-
-    public boolean hasItems() {
-        return bank.getItems() != null;
-    }
-
-    public ConfigurationSection getItems() {
-        return bank.getItems();
-    }
-
-    public boolean hasSettings() {
-        return bank.getSettings() != null;
-    }
-
-    public ConfigurationSection getSettings() {
-        return bank.getSettings();
-    }
-
     /**
-     * Get the current bank capacity based on the bank level of this player.
-     *
-     * @param p The player.
-     * @return The capacity amount.
+     * To get the upgrades use {@link Bank}#getPermission();
      */
-    public BigDecimal getCapacity(Player p) {
-        return getCapacity(getCurrentLevel(p));
+    public boolean hasPermission() {
+        return bank.getPermission() != null;
     }
 
     /**
@@ -142,18 +80,8 @@ public class BankReader {
     public BigDecimal getCapacity(int level) {
         if (!hasUpgrades()) return Values.CONFIG.getMaxBankCapacity();
 
-        String capacity = getUpgrades().getString(level + ".Capacity");
+        String capacity = bank.getUpgrades().getString(level + ".Capacity");
         return new BigDecimal(capacity == null ? Values.CONFIG.getMaxBankCapacity().toString() : capacity);
-    }
-
-    /**
-     * Get the interest rate of the player's bank level.
-     *
-     * @param p The player.
-     * @return The interest amount.
-     */
-    public BigDecimal getInterest(Player p) {
-        return getInterest(p, getCurrentLevel(p));
     }
 
     /**
@@ -176,7 +104,7 @@ public class BankReader {
         if (Values.CONFIG.enableInterestLimiter()) return getLimiterInterest(p, level, Values.CONFIG.getInterestMoneyGiven());
         if (!hasUpgrades()) return Values.CONFIG.getInterestMoneyGiven();
 
-        String interest = getUpgrades().getString(level + ".Interest");
+        String interest = bank.getUpgrades().getString(level + ".Interest");
 
         if (BPUtils.isInvalidNumber(interest)) {
             if (interest != null)
@@ -217,7 +145,7 @@ public class BankReader {
         if (Values.CONFIG.enableInterestLimiter()) return getLimiterInterest(p, level, Values.CONFIG.getOfflineInterestMoneyGiven());
         if (!hasUpgrades()) return Values.CONFIG.getOfflineInterestMoneyGiven();
 
-        String interest = getUpgrades().getString(level + ".Offline-Interest");
+        String interest = bank.getUpgrades().getString(level + ".Offline-Interest");
 
         if (BPUtils.isInvalidNumber(interest)) {
             if (interest != null)
@@ -235,7 +163,7 @@ public class BankReader {
     public List<String> getInterestLimiter(int level) {
         if (!hasUpgrades()) return Values.CONFIG.getInterestLimiter();
 
-        List<String> limiter = getUpgrades().getStringList(level + ".Interest-Limiter");
+        List<String> limiter = bank.getUpgrades().getStringList(level + ".Interest-Limiter");
         return limiter.isEmpty() ? Values.CONFIG.getInterestLimiter() : limiter;
     }
 
@@ -248,7 +176,7 @@ public class BankReader {
     public BigDecimal getLevelCost(int level) {
         if (!hasUpgrades()) return new BigDecimal(0);
 
-        String cost = getUpgrades().getString(level + ".Cost");
+        String cost = bank.getUpgrades().getString(level + ".Cost");
         return new BigDecimal(cost == null ? "0" : cost);
     }
 
@@ -261,7 +189,7 @@ public class BankReader {
     public ItemStack getLevelRequiredItems(int level) {
         if (!hasUpgrades()) return null;
 
-        String items = getUpgrades().getString(level + ".Required-Items");
+        String items = bank.getUpgrades().getString(level + ".Required-Items");
         if (items == null || items.isEmpty()) return null;
 
         ItemStack itemStack = null;
@@ -294,7 +222,7 @@ public class BankReader {
      * @param level The level to check.
      */
     public boolean removeRequiredItems(int level) {
-        return hasUpgrades() && getUpgrades().getBoolean(level + ".Remove-Required-Items");
+        return hasUpgrades() && bank.getUpgrades().getBoolean(level + ".Remove-Required-Items");
     }
 
     /**
@@ -309,19 +237,8 @@ public class BankReader {
             return levels;
         }
 
-        levels.addAll(getUpgrades().getKeys(false));
+        levels.addAll(bank.getUpgrades().getKeys(false));
         return levels;
-    }
-
-    /**
-     * Get the current bank level for that player.
-     *
-     * @param p The player.
-     * @return The current level.
-     */
-    public int getCurrentLevel(Player p) {
-        FileConfiguration config = new BPPlayerFiles(p).getPlayerConfig();
-        return Math.max(config.getInt("Banks." + bank.getIdentifier() + ".Level"), 1);
     }
 
     /**
@@ -332,7 +249,7 @@ public class BankReader {
      */
     public int getCurrentLevel(OfflinePlayer p) {
         FileConfiguration config = new BPPlayerFiles(p).getPlayerConfig();
-        return Math.max(config.getInt("Banks." + bank.getIdentifier() + ".Level"), 1);
+        return Math.max(config.getInt("banks." + bank.getIdentifier() + ".level"), 1);
     }
 
     /**
@@ -342,8 +259,7 @@ public class BankReader {
      * @return true if it has a next level, false otherwise.
      */
     public boolean hasNextLevel(Player p) {
-        ConfigurationSection section = getUpgrades();
-        return section == null ? false : section.getConfigurationSection(String.valueOf(getCurrentLevel(p) + 1)) != null;
+        return hasNextLevel(getCurrentLevel(p));
     }
 
     /**
@@ -353,22 +269,7 @@ public class BankReader {
      * @return true if it has a next level, false otherwise.
      */
     public boolean hasNextLevel(int currentLevel) {
-        ConfigurationSection section = getUpgrades();
-        return section == null ? false : section.getConfigurationSection(String.valueOf(currentLevel + 1)) != null;
-    }
-
-    /**
-     * This method does not require to specify a bank in the constructor.
-     *
-     * @param p The player.
-     * @return A list with all names of available banks for this player. To get a list of ALL banks use the BanksGuiRegistry class through the main class.
-     */
-    public List<String> getAvailableBanks(Player p) {
-        List<String> availableBanks = new ArrayList<>();
-        for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
-            if (new BankReader(bankName).isAvailable(p)) availableBanks.add(bankName);
-        }
-        return availableBanks;
+        return hasUpgrades() && bank.getUpgrades().getConfigurationSection(String.valueOf(currentLevel + 1)) != null;
     }
 
     /**
@@ -379,8 +280,16 @@ public class BankReader {
      */
     public List<String> getAvailableBanks(OfflinePlayer p) {
         List<String> availableBanks = new ArrayList<>();
-        for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
-            if (new BankReader(bankName).isAvailable(p)) availableBanks.add(bankName);
+        if (p == null) return availableBanks;
+
+        if (p.isOnline()) {
+            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
+                if (new BankReader(bankName).isAvailable(p.getPlayer()))
+                    availableBanks.add(bankName);
+        } else {
+            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
+                if (new BankReader(bankName).isAvailable(p))
+                    availableBanks.add(bankName);
         }
         return availableBanks;
     }
@@ -392,8 +301,7 @@ public class BankReader {
      * @return true if available, false otherwise.
      */
     public boolean isAvailable(Player p) {
-        if (!hasPermissionSection()) return true;
-        return getPermission().isEmpty() || p.hasPermission(getPermission());
+        return !hasPermission() || bank.getPermission().isEmpty() || p.hasPermission(bank.getPermission());
     }
 
     /**
@@ -403,11 +311,18 @@ public class BankReader {
      * @return true if available, false otherwise.
      */
     public boolean isAvailable(OfflinePlayer p) {
-        if (!hasPermissionSection()) return true;
+        if (!hasPermission()) return true;
         else {
             String wName = Bukkit.getWorlds().get(0).getName();
-            return BankPlus.INSTANCE.getPermissions().playerHas(wName, p, getPermission());
+            return BankPlus.INSTANCE.getPermissions().playerHas(wName, p, bank.getPermission());
         }
+    }
+
+    public void setLevel(OfflinePlayer p, int level) {
+        BPPlayerFiles files = new BPPlayerFiles(p);
+        FileConfiguration config = files.getPlayerConfig();
+        config.set("banks." + bank.getIdentifier() + ".level", level);
+        files.savePlayerFile(config, true);
     }
 
     /**
@@ -451,24 +366,17 @@ public class BankReader {
         BigDecimal cost = getLevelCost(nextLevel);
         if (Values.CONFIG.useBankBalanceToUpgrade()) {
 
-            BigDecimal balance;
-            SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
-            MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
-
-            if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) balance = multiEconomyManager.getBankBalance();
-            else balance = singleEconomyManager.getBankBalance();
-
+            BigDecimal balance = economy.getBankBalance(p, bank.getIdentifier());
             if (balance.doubleValue() < cost.doubleValue()) {
                 BPMessages.send(p, "Insufficient-Money");
                 return;
             }
 
             if (removeRequiredItems(nextLevel) && requiredItems!= null) p.getInventory().removeItem(requiredItems);
-            if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) multiEconomyManager.removeBankBalance(cost, bank.getIdentifier());
-            else singleEconomyManager.removeBankBalance(cost);
+            economy.removeBankBalance(p, cost, bank.getIdentifier());
         } else {
 
-            Economy economy = BankPlus.INSTANCE.getEconomy();
+            Economy economy = BankPlus.INSTANCE.getVaultEconomy();
             double balance = economy.getBalance(p);
 
             if (balance < cost.doubleValue()) {
@@ -480,11 +388,7 @@ public class BankReader {
             economy.withdrawPlayer(p, cost.doubleValue());
         }
 
-        BPPlayerFiles files = new BPPlayerFiles(p);
-        FileConfiguration config = files.getPlayerConfig();
-        config.set("Banks." + bank.getIdentifier() + ".Level", nextLevel);
-        files.savePlayerFile(config, true);
-
+        setLevel(p, nextLevel);
         BPMessages.send(p, "Bank-Upgraded");
 
         if (!hasNextLevel(nextLevel)) {
@@ -501,15 +405,6 @@ public class BankReader {
                 }
             }
         }
-    }
-
-    /**
-     * Get the bank specified in the constructor.
-     *
-     * @return The bank object.
-     */
-    public Bank getBank() {
-        return bank;
     }
 
     private BigDecimal getLimiterInterest(OfflinePlayer p, int level, BigDecimal fallBack) {
@@ -531,10 +426,7 @@ public class BankReader {
                 toNumber = temp;
             }
 
-            BigDecimal balance = Values.MULTIPLE_BANKS.isMultipleBanksEnabled() ?
-                    new MultiEconomyManager(p).getBankBalance(bank.getIdentifier()) :
-                    new SingleEconomyManager(p).getBankBalance();
-
+            BigDecimal balance = economy.getBankBalance(p, bank.getIdentifier());
             if (fromNumber.doubleValue() <= balance.doubleValue() && toNumber.doubleValue() >= balance.doubleValue())
                 return interestRate;
         }

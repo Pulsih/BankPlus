@@ -12,30 +12,18 @@ import java.util.HashMap;
 public class BPPlayer {
 
     private final Player player;
-    private final File playerFile;
-    private final FileConfiguration playerConfig;
     private Bank openedBank;
     private HashMap<String, String> playerBankClickHolder;
     private int banktopPosition = -1;
     private BigDecimal debt;
     private BukkitTask closingTask;
 
-    public BPPlayer(Player player, File playerFile, FileConfiguration playerConfig) {
+    public BPPlayer(Player player) {
         this.player = player;
-        this.playerFile = playerFile;
-        this.playerConfig = playerConfig;
     }
 
     public Player getPlayer() {
         return player;
-    }
-
-    public File getPlayerFile() {
-        return playerFile;
-    }
-
-    public FileConfiguration getPlayerConfig() {
-        return playerConfig;
     }
 
     public Bank getOpenedBank() {

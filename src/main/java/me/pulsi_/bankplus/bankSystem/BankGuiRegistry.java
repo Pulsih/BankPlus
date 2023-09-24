@@ -137,7 +137,7 @@ public class BankGuiRegistry {
             bank.setContent(content);
             banks.put(identifier, bank);
         }
-        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) loadMultipleBanksGui();
+        loadMultipleBanksGui();
         return true;
     }
 

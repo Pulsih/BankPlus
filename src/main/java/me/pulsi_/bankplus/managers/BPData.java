@@ -2,13 +2,12 @@ package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
-import me.pulsi_.bankplus.account.BPPlayerFiles;
 import me.pulsi_.bankplus.commands.BankTopCmd;
 import me.pulsi_.bankplus.commands.CmdRegisterer;
 import me.pulsi_.bankplus.commands.MainCmd;
 import me.pulsi_.bankplus.external.UpdateChecker;
 import me.pulsi_.bankplus.external.bStats;
-import me.pulsi_.bankplus.interest.Interest;
+import me.pulsi_.bankplus.interest.BPInterest;
 import me.pulsi_.bankplus.listeners.*;
 import me.pulsi_.bankplus.listeners.bankListener.*;
 import me.pulsi_.bankplus.listeners.playerChat.*;
@@ -81,17 +80,14 @@ public class BPData {
         AFKManager afkManager = plugin.getAfkManager();
         if (!afkManager.isPlayerCountdownActive()) afkManager.startCountdown();
 
-        Interest interest = plugin.getInterest();
+        BPInterest interest = plugin.getInterest();
         if (Values.CONFIG.isInterestEnabled() && interest.wasDisabled()) interest.startInterest();
 
         LoanUtils.loadAllLoans();
         BPUtils.startSavingBalancesTask();
         Bukkit.getOnlinePlayers().forEach(p -> {
-            new BPPlayerFiles(p).checkForFileFixes();
-
             BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
-            if (player != null && player.getOpenedBank() != null)
-                p.closeInventory();
+            if (player != null && player.getOpenedBank() != null) p.closeInventory();
         });
         return success;
     }

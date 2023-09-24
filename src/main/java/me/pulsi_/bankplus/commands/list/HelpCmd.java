@@ -23,14 +23,14 @@ public class HelpCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String args[]) {
+    public boolean onCommand(CommandSender s, String[] args) {
         if (confirm(s)) return false;
         BPMessages.send(s, "Help-Message");
         return true;
     }
 
     @Override
-    public List<String> tabCompletion(CommandSender s, String args[]) {
+    public List<String> tabCompletion(CommandSender s, String[] args) {
         return null;
     }
 }

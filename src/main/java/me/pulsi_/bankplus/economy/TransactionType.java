@@ -1,4 +1,4 @@
-package me.pulsi_.bankplus.utils;
+package me.pulsi_.bankplus.economy;
 
 public enum TransactionType {
     ADD,

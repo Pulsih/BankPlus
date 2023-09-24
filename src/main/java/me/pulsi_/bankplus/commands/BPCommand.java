@@ -28,27 +28,20 @@ public abstract class BPCommand {
 
     public BPCommand(String... aliases) {
         this.identifier = aliases[0];
-        this.permission = "bankplus." + identifier;
+        this.permission = "bankplus." + identifier.toLowerCase();
 
         this.aliases = new String[aliases.length - 1];
-        for (int i = 1; i < aliases.length; i++)
-            this.aliases[i - 1] = aliases[i];
+        System.arraycopy(aliases, 1, this.aliases, 0, aliases.length - 1);
 
         FileConfiguration config = BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.COMMANDS);
 
-        needConfirm = config.getBoolean(identifier + ".need-confirm");
-        hasCooldown = config.getBoolean(identifier + ".has-cooldown");
-        confirmCooldown = config.getInt(identifier + ".confirm-cooldown");
-        cooldown = config.getInt(identifier + ".cooldown");
-        confirmMessage = config.getString(identifier + ".confirm-message");
-        cooldownMessage = config.getString(identifier + ".cooldown-message");
-        String singleUsage = config.getString(identifier + ".usage.single");
-        String multiUsage = config.getString(identifier + ".usage.multi");
-
-        if ((!Values.MULTIPLE_BANKS.isMultipleBanksEnabled() && singleUsage == null) || (Values.MULTIPLE_BANKS.isMultipleBanksEnabled() && multiUsage == null))
-            usage = config.getString(identifier + ".usage");
-        else
-            usage = Values.MULTIPLE_BANKS.isMultipleBanksEnabled() ? multiUsage : singleUsage;
+        needConfirm = config.getBoolean(identifier.toLowerCase() + ".need-confirm");
+        hasCooldown = config.getBoolean(identifier.toLowerCase() + ".has-cooldown");
+        confirmCooldown = config.getInt(identifier.toLowerCase() + ".confirm-cooldown");
+        cooldown = config.getInt(identifier.toLowerCase() + ".cooldown");
+        confirmMessage = config.getString(identifier.toLowerCase() + ".confirm-message");
+        cooldownMessage = config.getString(identifier.toLowerCase() + ".cooldown-message");
+        usage = config.getString(identifier.toLowerCase() + ".usage");
     }
 
     private final HashMap<String, Long> cooldownMap = new HashMap<>();
@@ -92,9 +85,9 @@ public abstract class BPCommand {
     }
 
     public void register() {
-        MainCmd.commands.put(identifier, this);
+        MainCmd.commands.put(identifier.toLowerCase(), this);
         for (String alias : aliases)
-            MainCmd.commands.put(alias, this);
+            MainCmd.commands.put(alias.toLowerCase(), this);
     }
 
     /**

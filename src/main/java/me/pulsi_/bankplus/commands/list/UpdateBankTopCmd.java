@@ -24,7 +24,7 @@ public class UpdateBankTopCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String args[]) {
+    public boolean onCommand(CommandSender s, String[] args) {
         if (confirm(s)) return false;
 
         BankPlus.INSTANCE.getBankTopManager().updateBankTop();
@@ -33,7 +33,7 @@ public class UpdateBankTopCmd extends BPCommand {
     }
 
     @Override
-    public List<String> tabCompletion(CommandSender s, String args[]) {
+    public List<String> tabCompletion(CommandSender s, String[] args) {
         return null;
     }
 }

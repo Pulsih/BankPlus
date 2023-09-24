@@ -1,9 +1,7 @@
 # Put "" to not send the message.
 # The cooldown must be more than 0 to work.
 addall:
-  usage:
-    single: "%prefix% &cUsage: &7/bank addall [amount]"
-    multi: "%prefix% &cUsage: &7/bank addall [amount] [bankName]"
+  usage: "%prefix% &cUsage: &7/bank addall [amount] [bankName]"
   need-confirm: true
   confirm-cooldown: 5
   confirm-message: "%prefix% &cWarning, this command is going to add to every online player (%server_online% players) the specified
@@ -12,9 +10,7 @@ addall:
   cooldown: 0
   cooldown-message: ""
 add:
-  usage:
-    single: "%prefix% &cUsage: &7/bank add [player] [amount]"
-    multi: "%prefix% &cUsage: &7/bank add [player] [amount] [bankName]"
+  usage: "%prefix% &cUsage: &7/bank add [player] [amount] [bankName]"
   need-confirm: false
   confirm-cooldown: 0
   confirm-message: ""
@@ -45,9 +41,7 @@ customwithdraw:
   cooldown: 0
   cooldown-message: ""
 deposit:
-  usage:
-    single: "%prefix% &cUsage: &7/bank deposit [amount]"
-    multi: "%prefix% &cUsage: &7/bank deposit [amount] [bankName]"
+  usage: "%prefix% &cUsage: &7/bank deposit [amount] [bankName]"
   need-confirm: false
   confirm-cooldown: 0
   confirm-message: ""
@@ -55,9 +49,7 @@ deposit:
   cooldown: 0
   cooldown-message: ""
 forceopen:
-  usage:
-    single: "%prefix% &cUsage: &7/bank forceopen [player]"
-    multi: "%prefix% &cUsage: &7/bank forceopen [player] [bankName]"
+  usage: "%prefix% &cUsage: &7/bank forceopen [player] [bankName]"
   need-confirm: false
   confirm-cooldown: 0
   confirm-message: ""
@@ -65,9 +57,7 @@ forceopen:
   cooldown: 0
   cooldown-message: ""
 forceupgrade:
-  usage:
-    single: "%prefix% &cUsage: &7/bank forceupgrade [player]"
-    multi: "%prefix% &cUsage: &7/bank forceupgrade [player] [bankName]"
+  usage: "%prefix% &cUsage: &7/bank forceupgrade [player] [bankName]"
   need-confirm: false
   confirm-cooldown: 0
   confirm-message: ""
@@ -103,9 +93,7 @@ interestmillis:
   cooldown: 0
   cooldown-message: ""
 loan:
-  usage:
-    single: "%prefix% &cUsage: &7/bank loan [player] [amount]"
-    multi: "%prefix% &cUsage: &7/bank loan [player] [amount] [fromBankName] [toBankName]"
+  usage: "%prefix% &cUsage: &7/bank loan [player] [amount] [fromBankName] [toBankName]"
   need-confirm: true
   confirm-cooldown: 5
   confirm-message: "%prefix% &aType again within 5 seconds to confirm your payment."
@@ -121,9 +109,7 @@ open:
   cooldown: 0
   cooldown-message: ""
 pay:
-  usage:
-    single: "%prefix% &cUsage: &7/bank pay [player] [amount]"
-    multi: "%prefix% &cUsage: &7/bank pay [player] [amount] [fromBankName] [toBankName]"
+  usage: "%prefix% &cUsage: &7/bank pay [player] [amount] [fromBankName] [toBankName]"
   need-confirm: true
   confirm-cooldown: 5
   confirm-message: "%prefix% &aType again within 5 seconds to confirm your payment."
@@ -138,9 +124,7 @@ reload:
   cooldown: 0
   cooldown-message: ""
 remove:
-  usage:
-    single: "%prefix% &cUsage: &7/bank remove [player] [amount]"
-    multi: "%prefix% &cUsage: &7/bank remove [player] [amount] [bankName]"
+  usage: "%prefix% &cUsage: &7/bank remove [player] [amount] [bankName]"
   need-confirm: false
   confirm-cooldown: 0
   confirm-message: ""
@@ -172,9 +156,7 @@ saveallbankbalances:
   cooldown: 0
   cooldown-message: ""
 set:
-  usage:
-    single: "%prefix% &cUsage: &7/bank set [player] [amount]"
-    multi: "%prefix% &cUsage: &7/bank set [player] [amount] [bankName]"
+  usage: "%prefix% &cUsage: &7/bank set [player] [amount] [bankName]"
   need-confirm: false
   confirm-cooldown: 0
   confirm-message: ""
@@ -182,9 +164,7 @@ set:
   cooldown: 0
   cooldown-message: ""
 setlevel:
-  usage:
-    single: "%prefix% &cUsage: &7/bank setlevel [level]"
-    multi: "%prefix% &cUsage: &7/bank setlevel [level] [bankName]"
+  usage: "%prefix% &cUsage: &7/bank setlevel [level] [bankName]"
   need-confirm: false
   confirm-cooldown: 0
   confirm-message: ""
@@ -207,9 +187,7 @@ upgrade:
   cooldown: 0
   cooldown-message: ""
 view:
-  usage:
-    single: "%prefix% &cUsage: &7/bank view [player]"
-    multi: "%prefix% &cUsage: &7/bank view [player] <bankName>"
+  usage: "%prefix% &cUsage: &7/bank view [player] <bankName>"
   need-confirm: false
   confirm-cooldown: 0
   confirm-message: ""
@@ -217,9 +195,7 @@ view:
   cooldown: 0
   cooldown-message: ""
 withdraw:
-  usage:
-    single: "%prefix% &cUsage: &7/bank withdraw [amount]"
-    multi: "%prefix% &cUsage: &7/bank withdraw [amount] [bankName]"
+  usage: "%prefix% &cUsage: &7/bank withdraw [amount] [bankName]"
   need-confirm: false
   confirm-cooldown: 0
   confirm-message: ""

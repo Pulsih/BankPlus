@@ -3,9 +3,7 @@ package me.pulsi_.bankplus.utils;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.bankSystem.BankReader;
-import me.pulsi_.bankplus.bankSystem.BankUtils;
-import me.pulsi_.bankplus.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.economy.SingleEconomyManager;
+import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.listeners.playerChat.PlayerChatMethod;
 import me.pulsi_.bankplus.managers.BPConfigs;
 import me.pulsi_.bankplus.managers.TaskManager;
@@ -173,12 +171,12 @@ public class BPUtils {
         if (Values.CONFIG.getSaveBalancedDelay() <= 0) return;
 
         // Cache the values out the runnable to improve a bit the performance.
+        BPEconomy economy = BankPlus.getBPEconomy();
         long delay = Values.CONFIG.getSaveBalancedDelay() * 1200L;
-        boolean multi = Values.MULTIPLE_BANKS.isMultipleBanksEnabled(), saveBroadcast = Values.CONFIG.isSaveBalancesBroadcast();
+        boolean saveBroadcast = Values.CONFIG.isSaveBalancesBroadcast();
 
         tasks.setSavingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE, () -> {
-            if (multi) Bukkit.getOnlinePlayers().forEach(p -> new MultiEconomyManager(p).saveBankBalance(true));
-            else Bukkit.getOnlinePlayers().forEach(p -> new SingleEconomyManager(p).saveBankBalance(true));
+            Bukkit.getOnlinePlayers().forEach(p -> economy.saveBankBalances(p, true));
             if (saveBroadcast) BPLogger.info("All player balances have been saved!");
         }, delay, delay));
     }
@@ -394,22 +392,15 @@ public class BPUtils {
         return values;
     }
 
+    public static boolean isBankFull(Player p) {
+        return isBankFull(p, Values.CONFIG.getMainGuiName());
+    }
+
     public static boolean isBankFull(Player p, String bankName) {
         BigDecimal capacity = new BankReader(bankName).getCapacity(p);
         if (capacity.doubleValue() <= 0d) return false;
 
-        if (new MultiEconomyManager(p).getBankBalance(bankName).doubleValue() >= capacity.doubleValue()) {
-            BPMessages.send(p, "Cannot-Deposit-Anymore");
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean isBankFull(Player p) {
-        BigDecimal capacity = new BankReader(Values.CONFIG.getMainGuiName()).getCapacity(p);
-        if (capacity.doubleValue() <= 0d) return false;
-
-        if (new SingleEconomyManager(p).getBankBalance().doubleValue() >= capacity.doubleValue()) {
+        if (BankPlus.getBPEconomy().getBankBalance(p, bankName).doubleValue() >= capacity.doubleValue()) {
             BPMessages.send(p, "Cannot-Deposit-Anymore");
             return true;
         }

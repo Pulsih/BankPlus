@@ -78,7 +78,7 @@ public class BankListGui {
             Material material;
             ItemStack bankItem;
             boolean glow = false;
-            ConfigurationSection section = reader.getBanksGuiItemSection();
+            ConfigurationSection section = reader.getBank().getBanksGuiItemSection();
 
             if (section == null) material = DEFAULT_MATERIAL;
             else {
@@ -116,9 +116,9 @@ public class BankListGui {
             String displayname = "&c&l* DISPLAYNAME NOT FOUND *";
             List<String> lore = new ArrayList<>();
 
-            ConfigurationSection section = reader.getBanksGuiItemSection();
+            ConfigurationSection section = reader.getBank().getBanksGuiItemSection();
             if (section != null) {
-                String path = (!reader.hasPermissionSection() || p.hasPermission(reader.getPermission())) ? "Available" : "Unavailable";
+                String path = (!reader.hasPermission() || p.hasPermission(reader.getBank().getPermission())) ? "Available" : "Unavailable";
 
                 String dName = section.getString(path + ".Displayname");
                 if (dName != null) displayname = dName;

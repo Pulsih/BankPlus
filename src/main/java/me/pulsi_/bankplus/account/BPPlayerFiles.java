@@ -1,68 +1,22 @@
 package me.pulsi_.bankplus.account;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 
 public class BPPlayerFiles {
 
-    private final Player p;
-    private final OfflinePlayer op;
+    private final OfflinePlayer p;
 
-    public BPPlayerFiles(OfflinePlayer op) {
-        this.op = op;
-        this.p = op.isOnline() ? Bukkit.getPlayer(op.getUniqueId()) : null;
-    }
-
-    public void checkForFileFixes() {
-        if (p == null) {
-            BPLogger.error("Cannot check for file fixes for " + op.getName() + "! The player must be online!");
-            return;
-        }
-
-        SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
-        MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
-        FileConfiguration config = getPlayerConfig();
-
-        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
-            if (!BankPlus.INSTANCE.wasOnSingleEconomy()) return;
-
-            BigDecimal bal = singleEconomyManager.getBankBalance();
-            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
-                String sBalance = config.getString("Banks." + bankName + ".Money");
-                if (Values.CONFIG.getMainGuiName().equals(bankName)) {
-                    config.set("Banks." + bankName + ".Money", BPFormatter.formatBigDouble(bal));
-                    continue;
-                }
-                if (sBalance == null) config.set("Banks." + bankName + ".Money", "0.00");
-            }
-            singleEconomyManager.unloadBankBalance();
-            multiEconomyManager.loadBankBalance();
-        } else {
-            if (BankPlus.INSTANCE.wasOnSingleEconomy()) return;
-
-            BigDecimal amount = new BigDecimal(0);
-            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
-                String sBalance = config.getString("Banks." + bankName + ".Money");
-                if (sBalance != null) amount = amount.add(new BigDecimal(sBalance));
-            }
-            config.set("Money", BPFormatter.formatBigDouble(amount));
-            multiEconomyManager.unloadBankBalance();
-            singleEconomyManager.loadBankBalance();
-        }
-        savePlayerFile(config, true);
+    public BPPlayerFiles(OfflinePlayer p) {
+        this.p = p;
     }
 
     public boolean isPlayerRegistered() {
@@ -73,32 +27,26 @@ public class BPPlayerFiles {
             file.getParentFile().mkdir();
             file.createNewFile();
         } catch (IOException e) {
-            BPLogger.warn("Something went wrong while registering " + op.getName() + ": " + e.getMessage());
+            BPLogger.warn("Something went wrong while registering " + p.getName() + ": " + e.getMessage());
         }
         return false;
     }
 
     public File getPlayerFile() {
-        if (p != null) {
-            BPPlayer bpPlayer = BankPlus.INSTANCE.getPlayerRegistry().get(p);
-            if (bpPlayer != null && bpPlayer.getPlayerFile() != null) return bpPlayer.getPlayerFile();
-        }
-
-        String identifier = (Values.CONFIG.isStoringUUIDs() ? op.getUniqueId().toString() : op.getName());
+        String identifier = (Values.CONFIG.isStoringUUIDs() ? p.getUniqueId().toString() : p.getName());
         return new File(BankPlus.INSTANCE.getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
     }
 
     public FileConfiguration getPlayerConfig() {
-        if (p != null) {
-            BPPlayer bpPlayer = BankPlus.INSTANCE.getPlayerRegistry().get(p);
-            if (bpPlayer != null && bpPlayer.getPlayerConfig() != null) return bpPlayer.getPlayerConfig();
-        }
-
         return YamlConfiguration.loadConfiguration(getPlayerFile());
     }
 
-    public void savePlayerFile(boolean async) {
-        FileConfiguration config = getPlayerConfig();
+    public FileConfiguration getPlayerConfig(File file) {
+        return YamlConfiguration.loadConfiguration(file);
+    }
+
+
+    public void savePlayerFile(FileConfiguration config, boolean async) {
         File file = getPlayerFile();
 
         if (!async) {
@@ -118,9 +66,7 @@ public class BPPlayerFiles {
         }
     }
 
-    public void savePlayerFile(FileConfiguration config, boolean async) {
-        File file = getPlayerFile();
-
+    public void savePlayerFile(FileConfiguration config, File file, boolean async) {
         if (!async) {
             save(config, file);
             return;

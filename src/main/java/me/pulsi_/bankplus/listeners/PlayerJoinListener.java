@@ -3,9 +3,7 @@ package me.pulsi_.bankplus.listeners;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.BPPlayerFiles;
-import me.pulsi_.bankplus.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.economy.OfflineInterestManager;
-import me.pulsi_.bankplus.economy.SingleEconomyManager;
+import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.*;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -19,81 +17,71 @@ import java.math.BigDecimal;
 
 public class PlayerJoinListener implements Listener {
 
+    private final BPEconomy economy;
+
+    public PlayerJoinListener() {
+        economy = BankPlus.getBPEconomy();
+    }
+
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
         BPPlayerFiles files = new BPPlayerFiles(p);
-        if (!files.isPlayerRegistered()) BPLogger.info("Successfully registered " + p.getName() + "!");
+        if (!files.isPlayerRegistered() && Values.CONFIG.notifyRegisteredPlayer()) BPLogger.info("Successfully registered " + p.getName() + "!");
 
-        BPPlayer player = new BPPlayer(p, files.getPlayerFile(), files.getPlayerConfig());
+        BPPlayer player = new BPPlayer(p);
         BankPlus.INSTANCE.getPlayerRegistry().put(p, player);
 
-        FileConfiguration config = player.getPlayerConfig();
-        String sOfflineInterest = config.getString("Offline-Interest");
-        String sName = config.getString("Account-Name");
-        String debt = config.getString("Debt");
+        FileConfiguration config = files.getPlayerConfig();
+        String sOfflineInterest = config.getString("interest");
+        String sName = config.getString("name");
+        String debt = config.getString("debt");
+
         boolean hasChanges = false;
 
         if (Values.CONFIG.isNotifyOfflineInterest() && sOfflineInterest == null) {
-            config.set("Offline-Interest", BPFormatter.formatBigDouble(BigDecimal.valueOf(0)));
+            config.set("interest", "0");
             hasChanges = true;
         }
         if (sName == null) {
-            config.set("Account-Name", p.getName());
+            config.set("name", p.getName());
             hasChanges = true;
         }
         if (debt == null) {
-            config.set("Debt", BPFormatter.formatBigDouble(BigDecimal.valueOf(0)));
+            config.set("debt", BPFormatter.formatBigDouble(BigDecimal.valueOf(0)));
             hasChanges = true;
         }
 
-        if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
-            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
-                String sBalance = config.getString("Banks." + bankName + ".Money");
-                String sLevel = config.getString("Banks." + bankName + ".Level");
-                if (sBalance == null) {
-                    if (!Values.CONFIG.getMainGuiName().equals(bankName)) config.set("Banks." + bankName + ".Money", BPFormatter.formatBigDouble(BigDecimal.valueOf(0)));
-                    else config.set("Banks." + bankName + ".Money", BPFormatter.formatBigDouble(Values.CONFIG.getStartAmount()));
-                    hasChanges = true;
-                }
-                if (sLevel == null) {
-                    config.set("Banks." + bankName + ".Level", 1);
-                    hasChanges = true;
-                }
-            }
-            new MultiEconomyManager(p).loadBankBalance();
-        } else {
-            String sBalance = config.getString("Money");
+        for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
+            String sBalance = config.getString("banks." + bankName + ".money");
+            String sLevel = config.getString("banks." + bankName + ".level");
             if (sBalance == null) {
-                config.set("Money", BPFormatter.formatBigDouble(Values.CONFIG.getStartAmount()));
+                BigDecimal amount = Values.CONFIG.getMainGuiName().equals(bankName) ? Values.CONFIG.getStartAmount() : BigDecimal.valueOf(0);
+                config.set("banks." + bankName + ".money", BPFormatter.formatBigDouble(amount));
                 hasChanges = true;
             }
-            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
-                String sLevel = config.getString("Banks." + bankName + ".Level");
-                if (sLevel == null) {
-                    config.set("Banks." + bankName + ".Level", 1);
-                    hasChanges = true;
-                }
+            if (sLevel == null) {
+                config.set("banks." + bankName + ".level", 1);
+                hasChanges = true;
             }
-            new SingleEconomyManager(p).loadBankBalance();
         }
+
+        if (Values.CONFIG.isNotifyOfflineInterest()) {
+            String amount = config.getString("interest");
+            BigDecimal offlineInterest = new BigDecimal(amount == null ? "0" : amount);
+
+            if (offlineInterest.doubleValue() > 0) {
+                long delay = Values.CONFIG.getNotifyOfflineInterestDelay();
+
+                if (delay == 0)
+                    BPMessages.send(p, Values.CONFIG.getNotifyOfflineInterestMessage(), BPUtils.placeValues(offlineInterest), true);
+                else Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () ->
+                        BPMessages.send(p, Values.CONFIG.getNotifyOfflineInterestMessage(), BPUtils.placeValues(offlineInterest), true), delay * 20L);
+                config.set("interest", "0");
+            }
+        }
+
+        economy.loadBankBalance(p, config);
         if (hasChanges) files.savePlayerFile(config, true);
-
-        offlineInterestMessage(p);
-    }
-
-    private void offlineInterestMessage(Player p) {
-        if (!Values.CONFIG.isNotifyOfflineInterest()) return;
-
-        OfflineInterestManager interestManager = new OfflineInterestManager(p);
-        BigDecimal offlineInterest = interestManager.getOfflineInterest();
-        if (offlineInterest.doubleValue() <= 0) return;
-
-        long delay = Values.CONFIG.getNotifyOfflineInterestDelay();
-
-        if (delay == 0) BPMessages.send(p, Values.CONFIG.getNotifyOfflineInterestMessage(), BPUtils.placeValues(offlineInterest), true);
-        else Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () ->
-                BPMessages.send(p, Values.CONFIG.getNotifyOfflineInterestMessage(), BPUtils.placeValues(offlineInterest), true), delay * 20L);
-        interestManager.setOfflineInterest(new BigDecimal(0), true);
     }
 }

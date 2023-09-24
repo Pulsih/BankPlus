@@ -166,7 +166,7 @@ public class Bank {
         this.upgrades = upgrades;
     }
 
-    public ConfigurationSection getBanksListGuiItems() {
+    public ConfigurationSection getBanksGuiItemSection() {
         return banksListGuiItems;
     }
 

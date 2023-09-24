@@ -2,10 +2,10 @@ package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.commands.BPCommand;
-import me.pulsi_.bankplus.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.economy.SingleEconomyManager;
+import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.values.Values;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -64,6 +64,8 @@ public class ResetAllCmd extends BPCommand {
     }
 
     private void resetAll(CommandSender s, int count, String mode) {
+        BPEconomy economy = BankPlus.getBPEconomy();
+        Economy vaultEconomy = BankPlus.INSTANCE.getVaultEconomy();
 
         int temp = 0;
         for (int i = 0; i < 60; i++) {
@@ -72,33 +74,14 @@ public class ResetAllCmd extends BPCommand {
                 return;
             }
 
-            OfflinePlayer oP = Bukkit.getOfflinePlayers()[count + temp];
-            if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
-
-                MultiEconomyManager em;
-                if (oP.isOnline()) em = new MultiEconomyManager(Bukkit.getPlayer(oP.getUniqueId()));
-                else em = new MultiEconomyManager(oP);
-
-                if (mode.equalsIgnoreCase("maintain")) {
-                    BigDecimal bal = em.getBankBalance();
-                    BankPlus.INSTANCE.getEconomy().depositPlayer(oP, bal.doubleValue());
-                }
-
-                for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
-                    em.setBankBalance(BigDecimal.valueOf(0), bankName);
-            } else {
-
-                SingleEconomyManager em;
-                if (oP.isOnline()) em = new SingleEconomyManager(Bukkit.getPlayer(oP.getUniqueId()));
-                else em = new SingleEconomyManager(oP);
-
-                if (mode.equalsIgnoreCase("maintain")) {
-                    BigDecimal bal = em.getBankBalance();
-                    BankPlus.INSTANCE.getEconomy().depositPlayer(oP, bal.doubleValue());
-                }
-
-                em.setBankBalance(BigDecimal.valueOf(0));
+            OfflinePlayer p = Bukkit.getOfflinePlayers()[count + temp];
+            if (mode.equalsIgnoreCase("maintain")) {
+                BigDecimal bal = economy.getBankBalance(p);
+                vaultEconomy.depositPlayer(p, bal.doubleValue());
             }
+
+            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
+                economy.setBankBalance(p, BigDecimal.valueOf(0), bankName);
             temp++;
         }
 

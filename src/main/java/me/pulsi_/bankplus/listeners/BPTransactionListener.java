@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.debt.DebtUtils;
+import me.pulsi_.bankplus.economy.TransactionType;
 import me.pulsi_.bankplus.events.BPAfterTransactionEvent;
 import me.pulsi_.bankplus.events.BPPreTransactionEvent;
 import me.pulsi_.bankplus.logSystem.BPLogUtils;

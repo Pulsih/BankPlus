@@ -4,9 +4,8 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.debt.DebtUtils;
-import me.pulsi_.bankplus.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.economy.SingleEconomyManager;
-import me.pulsi_.bankplus.interest.Interest;
+import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.interest.BPInterest;
 import me.pulsi_.bankplus.managers.BankTopManager;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPFormatter;
@@ -15,11 +14,16 @@ import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 
 public class BPPlaceholders extends PlaceholderExpansion {
+
+    private final BPEconomy economy;
+
+    public BPPlaceholders() {
+        economy = BankPlus.getBPEconomy();
+    }
 
     @Override
     public boolean persist() {
@@ -50,8 +54,6 @@ public class BPPlaceholders extends PlaceholderExpansion {
     public String onPlaceholderRequest(Player p, String identifier) {
         if (p == null) return "Player not online";
 
-        SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
-        MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
         BankTopManager bankTop = BankPlus.INSTANCE.getBankTopManager();
 
         String target = null;
@@ -63,9 +65,6 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
             else {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
-                    return "&cThe multiple-banks module is disabled!";
-
                 reader = new BankReader(target);
                 if (!reader.exist())
                     return "&cThe selected bank does not exist.";
@@ -81,9 +80,6 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
             else {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
-                    return "The multiple-banks module is disabled.";
-
                 reader = new BankReader(target);
                 if (!reader.exist())
                     return "&cThe selected bank does not exist.";
@@ -97,9 +93,6 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
             else {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
-                    return "&cThe multiple-banks module is disabled!";
-
                 reader = new BankReader(target);
                 if (!reader.exist())
                     return "&cThe selected bank does not exist!";
@@ -117,9 +110,6 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
             else {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
-                    return "&cThe multiple-banks module is disabled!";
-
                 reader = new BankReader(target);
                 if (!reader.exist())
                     return "&cThe selected bank does not exist!";
@@ -138,9 +128,6 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
             else {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
-                    return "&cThe multiple-banks module is disabled!";
-
                 reader = new BankReader(target);
                 if (!reader.exist())
                     return "The selected bank does not exist.";
@@ -161,9 +148,6 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
             else {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
-                    return "&cThe multiple-banks module is disabled!";
-
                 reader = new BankReader(target);
                 if (!reader.exist())
                     return "The selected bank does not exist.";
@@ -179,9 +163,6 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
             else {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
-                    return "&cThe multiple-banks module is disabled!";
-
                 reader = new BankReader(target);
                 if (!reader.exist())
                     return "The selected bank does not exist.";
@@ -197,9 +178,6 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
             else {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
-                    return "The multiple-banks module is disabled.";
-
                 reader = new BankReader(target);
                 if (!reader.exist())
                     return "&cThe selected bank does not exist.";
@@ -216,19 +194,14 @@ public class BPPlaceholders extends PlaceholderExpansion {
         }
 
         if (identifier.startsWith("balance")) {
-            BigDecimal bal;
-            if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) bal = multiEconomyManager.getBankBalance();
-            else bal = singleEconomyManager.getBankBalance();
+            BigDecimal bal = economy.getBankBalance(p);
 
             if (target != null) {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
-                    return "&cThe multiple-banks module is disabled!";
-
                 BankReader reader = new BankReader(target);
                 if (!reader.exist())
                     return "&cThe selected bank does not exist!";
 
-                bal = multiEconomyManager.getBankBalance(target);
+                bal = economy.getBankBalance(p, target);
             }
 
             return getFormat(identifier, bal);
@@ -241,17 +214,14 @@ public class BPPlaceholders extends PlaceholderExpansion {
             if (target == null) {
                 reader = new BankReader(Values.CONFIG.getMainGuiName());
                 percentage = reader.getInterest(p).divide(BigDecimal.valueOf(100));
-                balance = singleEconomyManager.getBankBalance();
+                balance = economy.getBankBalance(p);
             } else {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
-                    return "&cThe multiple-banks module is disabled!";
-
                 reader = new BankReader(target);
                 if (!reader.exist())
                     return "The selected bank does not exist.";
 
                 percentage = reader.getInterest(p).divide(BigDecimal.valueOf(100));
-                balance = multiEconomyManager.getBankBalance(target);
+                balance = economy.getBankBalance(p, target);
             }
             interestMoney = new BigDecimal(Math.min(Values.CONFIG.getInterestMaxAmount().doubleValue(), balance.multiply(percentage).doubleValue()));
 
@@ -325,9 +295,6 @@ public class BPPlaceholders extends PlaceholderExpansion {
             BankReader reader;
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
             else {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
-                    return "&cThe multiple-banks module is disabled!";
-
                 reader = new BankReader(target);
                 if (!reader.exist())
                     return "The selected bank does not exist.";
@@ -340,9 +307,6 @@ public class BPPlaceholders extends PlaceholderExpansion {
             BankReader reader;
             if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
             else {
-                if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
-                    return "&cThe multiple-banks module is disabled!";
-
                 reader = new BankReader(target);
                 if (!reader.exist())
                     return "The selected bank does not exist.";
@@ -360,9 +324,6 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
                 BigDecimal amount;
                 if (target != null) {
-                    if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
-                        return "&cThe multiple-banks module is disabled!";
-
                     if (!new BankReader(target).exist())
                         return "The selected bank does not exist.";
 
@@ -383,7 +344,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
                 BigDecimal amount, balance;
                 try {
-                    balance = BigDecimal.valueOf(BankPlus.INSTANCE.getEconomy().getBalance(p));
+                    balance = BigDecimal.valueOf(BankPlus.INSTANCE.getVaultEconomy().getBalance(p));
                 } catch (NumberFormatException e) {
                     return "Invalid vault balance!";
                 }
@@ -409,9 +370,6 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
                 BigDecimal amount;
                 if (target != null) {
-                    if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
-                        return "&cThe multiple-banks module is disabled!";
-
                     if (!new BankReader(target).exist())
                         return "The selected bank does not exist.";
 
@@ -432,16 +390,13 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
                 BigDecimal amount, balance;
 
-                if (target == null) balance = new SingleEconomyManager(p).getBankBalance();
+                if (target == null) balance = economy.getBankBalance(p);
                 else {
-                    if (!Values.MULTIPLE_BANKS.isMultipleBanksEnabled())
-                        return "&cThe multiple-banks module is disabled!";
-
                     if (!new BankReader(target).exist())
                         return "The selected bank does not exist.";
 
                     number = number.replace("{" + target + "}", "");
-                    balance = new MultiEconomyManager(p).getBankBalance(target);
+                    balance = economy.getBankBalance(p, target);
                 }
 
                 try {
@@ -456,7 +411,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
             return getFormat(identifier, taxes);
         }
 
-        Interest interest = BankPlus.INSTANCE.getInterest();
+        BPInterest interest = BankPlus.INSTANCE.getInterest();
         switch (identifier) {
             case "interest_cooldown":
                 return BPUtils.formatTime(interest.getInterestCooldownMillis());

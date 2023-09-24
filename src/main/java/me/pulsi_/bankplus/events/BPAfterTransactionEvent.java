@@ -1,6 +1,6 @@
 package me.pulsi_.bankplus.events;
 
-import me.pulsi_.bankplus.utils.TransactionType;
+import me.pulsi_.bankplus.economy.TransactionType;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;

@@ -6,8 +6,7 @@ import me.pulsi_.bankplus.bankSystem.BankHolder;
 import me.pulsi_.bankplus.bankSystem.BankListGui;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
-import me.pulsi_.bankplus.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.economy.SingleEconomyManager;
+import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
@@ -49,29 +48,23 @@ public class BankClickMethod {
         }
 
         BankReader bankReader = new BankReader(bankName);
-        ConfigurationSection items = bankReader.getItems();
+        ConfigurationSection items = bankReader.getBank().getItems();
         if (items == null) return;
 
-        FileConfiguration config = bankReader.getConfig();
-        if (config == null) return;
-
         for (String key : items.getKeys(false)) {
-            ConfigurationSection itemValues = config.getConfigurationSection("Items." + key);
+            ConfigurationSection itemValues = items.getConfigurationSection(key);
             if (itemValues == null || slot + 1 != itemValues.getInt("Slot")) continue;
 
             List<String> actions = itemValues.getStringList("Actions");
             if (actions.isEmpty()) {
                 // Check if they are still using the old methods, still process it and invite them to update it.
                 if (processOldClickMethod(itemValues, bankName, p))
-                    BPLogger.warn("Warning! You are using an old format for the item action! Check out the BankPlus wiki and update it ");
+                    BPLogger.warn("Warning! You are using an old format for the item action! Check out the BankPlus wiki and update it!");
                 continue;
             }
 
-            BigDecimal amount;
-            boolean isMulti = Values.MULTIPLE_BANKS.isMultipleBanksEnabled();
-            SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
-            MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
-            Economy economy = BankPlus.INSTANCE.getEconomy();
+            BPEconomy economy = BankPlus.getBPEconomy();
+            Economy vaultEconomy = BankPlus.INSTANCE.getVaultEconomy();
 
             for (String actionType : actions) {
                 String[] parts = actionType.split(" ");
@@ -100,51 +93,54 @@ public class BankClickMethod {
                 }
 
                 switch (identifier) {
-                    case "[CONSOLE]":
+                    case "[CONSOLE]": {
                         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), value);
-                        break;
+                    }
+                    break;
 
-                    case "[DEPOSIT]":
+                    case "[DEPOSIT]": {
                         if (value.equals("CUSTOM")) {
                             BPUtils.customDeposit(p, bankName);
                             continue;
                         }
+                        BigDecimal amount;
                         try {
                             if (!value.endsWith("%")) amount = new BigDecimal(value);
                             else {
                                 BigDecimal percentage = new BigDecimal(value.replace("%", "")).divide(BigDecimal.valueOf(100));
-                                amount = BigDecimal.valueOf(economy.getBalance(p)).multiply(percentage);
+                                amount = BigDecimal.valueOf(vaultEconomy.getBalance(p)).multiply(percentage);
                             }
                         } catch (NumberFormatException ex) {
                             BPLogger.warn("Invalid deposit number! (Button: " + key + ", Number: " + value + ")");
                             continue;
                         }
-                        if (!isMulti) singleEconomyManager.deposit(amount);
-                        else multiEconomyManager.deposit(amount, bankName);
-                        break;
+                        economy.deposit(p, amount, bankName);
+                    }
+                    break;
 
-                    case "[PLAYER]":
+                    case "[PLAYER]": {
                         p.chat(value);
-                        break;
+                    }
+                    break;
 
-                    case "[WITHDRAW]":
+                    case "[WITHDRAW]": {
                         if (value.equals("CUSTOM")) {
                             BPUtils.customWithdraw(p, bankName);
                             continue;
                         }
+                        BigDecimal amount;
                         try {
                             if (!value.endsWith("%")) amount = new BigDecimal(value);
                             else {
                                 BigDecimal percentage = new BigDecimal(value.replace("%", "")).divide(BigDecimal.valueOf(100));
-                                if (!isMulti) amount = singleEconomyManager.getBankBalance().multiply(percentage);
-                                else amount = multiEconomyManager.getBankBalance(bankName).multiply(percentage);
+                                amount = economy.getBankBalance(p, bankName).multiply(percentage);
                             }
                         } catch (NumberFormatException ex) {
                             BPLogger.warn("Invalid withdraw number! (Button: " + key + ", Number: " + value + ")");
                             continue;
                         }
-                        if (!isMulti) singleEconomyManager.withdraw(amount);
-                        else multiEconomyManager.withdraw(amount, bankName);
+                        economy.withdraw(p, amount, bankName);
+                    }
                 }
             }
         }
@@ -160,11 +156,8 @@ public class BankClickMethod {
         actionType = actionType.toLowerCase();
         actionAmount = actionAmount == null ? "null" : actionAmount.toLowerCase();
 
-        BigDecimal amount;
-        boolean isMulti = Values.MULTIPLE_BANKS.isMultipleBanksEnabled();
-        SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
-        MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
-        Economy economy = BankPlus.INSTANCE.getEconomy();
+        BPEconomy economy = BankPlus.getBPEconomy();
+        Economy vaultEconomy = BankPlus.INSTANCE.getVaultEconomy();
         switch (actionType) {
             case "deposit":
                 switch (actionAmount) {
@@ -173,26 +166,22 @@ public class BankClickMethod {
                         break;
 
                     case "all":
-                        amount = BigDecimal.valueOf(economy.getBalance(p));
-                        if (isMulti) multiEconomyManager.deposit(amount, bankName);
-                        else singleEconomyManager.deposit(amount);
+                        economy.deposit(p, BigDecimal.valueOf(vaultEconomy.getBalance(p)), bankName);
                         break;
 
                     case "half":
-                        amount = BigDecimal.valueOf(economy.getBalance(p) / 2);
-                        if (isMulti) multiEconomyManager.deposit(amount, bankName);
-                        else singleEconomyManager.deposit(amount);
+                        economy.deposit(p, BigDecimal.valueOf(vaultEconomy.getBalance(p) / 2), bankName);
                         break;
 
                     default:
+                        BigDecimal amount;
                         try {
                             amount = new BigDecimal(actionAmount);
                         } catch (NumberFormatException ex) {
                             BPLogger.error("Invalid deposit number! (Path: " + itemValues + ", Number: " + actionAmount + ")");
                             return true;
                         }
-                        if (isMulti) multiEconomyManager.deposit(amount, bankName);
-                        else singleEconomyManager.deposit(amount);
+                        economy.deposit(p, amount, bankName);
                         break;
                 }
                 break;
@@ -204,34 +193,22 @@ public class BankClickMethod {
                         break;
 
                     case "all":
-                        if (isMulti) {
-                            amount = multiEconomyManager.getBankBalance(bankName);
-                            multiEconomyManager.withdraw(amount, bankName);
-                        } else {
-                            amount = singleEconomyManager.getBankBalance();
-                            singleEconomyManager.withdraw(amount);
-                        }
+                        economy.withdraw(p, economy.getBankBalance(p, bankName), bankName);
                         break;
 
                     case "half":
-                        if (isMulti) {
-                            amount = multiEconomyManager.getBankBalance(bankName).divide(BigDecimal.valueOf(2));
-                            multiEconomyManager.withdraw(amount, bankName);
-                        } else {
-                            amount = singleEconomyManager.getBankBalance().divide(BigDecimal.valueOf(2));
-                            singleEconomyManager.withdraw(amount);
-                        }
+                        economy.withdraw(p, economy.getBankBalance(p, bankName).divide(BigDecimal.valueOf(2)), bankName);
                         break;
 
                     default:
+                        BigDecimal amount;
                         try {
                             amount = new BigDecimal(actionAmount);
                         } catch (NumberFormatException ex) {
                             BPLogger.error("Invalid withdraw number! (Path: " + itemValues + ", Number: " + actionAmount + ")");
                             return true;
                         }
-                        if (isMulti) multiEconomyManager.withdraw(amount, bankName);
-                        else singleEconomyManager.withdraw(amount);
+                        economy.withdraw(p, amount, bankName);
                         break;
                 }
                 break;

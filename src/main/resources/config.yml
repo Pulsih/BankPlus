@@ -92,6 +92,9 @@ General-Settings:
   # player transactions to the logs folder.
   Log-Transactions: true
 
+  # Notify with a console message when bankplus register a new player.
+  Notify-Registered-Player: true
+
   # You need to restart the server
   # to apply these changes.
   #
@@ -280,16 +283,16 @@ BankTop:
   # The message to display the banktop.
   Format:
     - "&8&m---------&8[&a &lBank&9&lPlus &aBankTop &8]&m---------"
-    - "&61# &6%bankplus_banktop_name_1%&8: &a%bankplus_banktop_money_1%"
-    - "&61# &6%bankplus_banktop_name_2%&8: &a%bankplus_banktop_money_2%"
-    - "&61# &6%bankplus_banktop_name_3%&8: &a%bankplus_banktop_money_3%"
-    - "&61# &6%bankplus_banktop_name_4%&8: &a%bankplus_banktop_money_4%"
-    - "&61# &6%bankplus_banktop_name_5%&8: &a%bankplus_banktop_money_5%"
-    - "&61# &6%bankplus_banktop_name_6%&8: &a%bankplus_banktop_money_6%"
-    - "&61# &6%bankplus_banktop_name_7%&8: &a%bankplus_banktop_money_7%"
-    - "&61# &6%bankplus_banktop_name_8%&8: &a%bankplus_banktop_money_8%"
-    - "&61# &6%bankplus_banktop_name_9%&8: &a%bankplus_banktop_money_9%"
-    - "&61# &6%bankplus_banktop_name_10%&8: &a%bankplus_banktop_money_10%"
+    - "&61# &f%bankplus_banktop_name_1%&8: &a%bankplus_banktop_money_1%"
+    - "&a2# &f%bankplus_banktop_name_2%&8: &a%bankplus_banktop_money_2%"
+    - "&b3# &f%bankplus_banktop_name_3%&8: &a%bankplus_banktop_money_3%"
+    - "&74# &f%bankplus_banktop_name_4%&8: &a%bankplus_banktop_money_4%"
+    - "&75# &f%bankplus_banktop_name_5%&8: &a%bankplus_banktop_money_5%"
+    - "&76# &f%bankplus_banktop_name_6%&8: &a%bankplus_banktop_money_6%"
+    - "&77# &f%bankplus_banktop_name_7%&8: &a%bankplus_banktop_money_7%"
+    - "&78# &f%bankplus_banktop_name_8%&8: &a%bankplus_banktop_money_8%"
+    - "&79# &f%bankplus_banktop_name_9%&8: &a%bankplus_banktop_money_9%"
+    - "&710# &f%bankplus_banktop_name_10%&8: &a%bankplus_banktop_money_10%"
     - "    &7&o(( The BankTop will update every 10m ))"
 
 # You can use color codes.

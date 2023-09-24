@@ -1,9 +1,10 @@
 package me.pulsi_.bankplus.commands;
 
+import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankListGui;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
-import me.pulsi_.bankplus.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.economy.SingleEconomyManager;
+import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
@@ -39,18 +40,12 @@ public class MainCmd implements CommandExecutor, TabCompleter {
             }
             Player p = (Player) s;
 
-            if (Values.MULTIPLE_BANKS.isMultipleBanksEnabled()) {
-                if (Values.CONFIG.isGuiModuleEnabled()) BankUtils.openBank(p, BankListGui.multipleBanksGuiID, false);
-                else {
-                    BPMessages.send(p, "Multiple-Personal-Bank", BPUtils.placeValues(p, new MultiEconomyManager(p).getBankBalance()));
-                    BPUtils.playSound("PERSONAL", p);
-                }
+            if (Values.CONFIG.isGuiModuleEnabled()) {
+                if (BankPlus.INSTANCE.getBankGuiRegistry().getBanks().size() <= 1) BankUtils.openBank(p);
+                else BankUtils.openBank(p, BankListGui.multipleBanksGuiID, false);
             } else {
-                if (Values.CONFIG.isGuiModuleEnabled()) BankUtils.openBank(p);
-                else {
-                    BPMessages.send(p, "Personal-Bank", BPUtils.placeValues(p, new SingleEconomyManager(p).getBankBalance()));
-                    BPUtils.playSound("PERSONAL", p);
-                }
+                BPMessages.send(p, "Multiple-Personal-Bank", BPUtils.placeValues(p, BankPlus.getBPEconomy().getBankBalance(p)));
+                BPUtils.playSound("PERSONAL", p);
             }
             return true;
         }
@@ -69,22 +64,26 @@ public class MainCmd implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender s, Command command, String alias, String[] args) {
+        if (args.length == 0) return null;
+
+        String args0 = args[0].toLowerCase();
+
         if (args.length == 1) {
             List<String> cmds = new ArrayList<>();
-            for (String identifier : commands.keySet())
-                if (s.hasPermission("bankplus." + identifier)) cmds.add(identifier);
+            for (BPCommand cmd : commands.values())
+                if (s.hasPermission("bankplus." + cmd.getIdentifier().toLowerCase())) cmds.add(cmd.getIdentifier());
 
-            List<String> args0 = new ArrayList<>();
+            List<String> result = new ArrayList<>();
             for (String arg : cmds)
-                if (arg.startsWith(args[0].toLowerCase())) args0.add(arg);
-
-            return args0;
+                if (arg.toLowerCase().startsWith(args0)) result.add(arg);
+            return result;
         }
 
-        String identifier = args[0].toLowerCase();
-        if (!commands.containsKey(identifier)) return null;
+        if (!commands.containsKey(args0) || !s.hasPermission("bankplus." + args0)) return null;
 
-        BPCommand cmd = commands.get(identifier);
+        BPCommand cmd = commands.get(args0);
+        if (cmd.playerOnly() && !(s instanceof Player)) return null;
+
         return cmd.tabCompletion(s, args);
     }
 }

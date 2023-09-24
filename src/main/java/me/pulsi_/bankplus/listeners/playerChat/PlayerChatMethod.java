@@ -3,8 +3,7 @@ package me.pulsi_.bankplus.listeners.playerChat;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
-import me.pulsi_.bankplus.economy.MultiEconomyManager;
-import me.pulsi_.bankplus.economy.SingleEconomyManager;
+import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.BPSets;
@@ -39,20 +38,15 @@ public class PlayerChatMethod {
         }
         e.setCancelled(true);
 
-        boolean isMulti = Values.MULTIPLE_BANKS.isMultipleBanksEnabled();
-
-        SingleEconomyManager singleEconomyManager = new SingleEconomyManager(p);
-        MultiEconomyManager multiEconomyManager = new MultiEconomyManager(p);
+        BPEconomy economy = BankPlus.getBPEconomy();
 
         if (BPUtils.isDepositing(p)) {
             BPSets.removePlayerFromDepositing(p);
-            if (isMulti) multiEconomyManager.deposit(amount, identifier);
-            else singleEconomyManager.deposit(amount);
+            economy.deposit(p, amount, identifier);
         }
         if (BPUtils.isWithdrawing(p)) {
             BPSets.removePlayerFromWithdrawing(p);
-            if (isMulti) multiEconomyManager.withdraw(amount, identifier);
-            else singleEconomyManager.withdraw(amount);
+            economy.withdraw(p, amount, identifier);
         }
         reopenBank(p, identifier);
     }
