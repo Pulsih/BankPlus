@@ -2,7 +2,6 @@ package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.utils.BPLogger;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -15,9 +14,8 @@ import java.util.Scanner;
 
 public class BPConfigs {
 
-    private File configFile, messagesFile, multipleBanksFile, commandsFile, savesFile;
-    private FileConfiguration config, messagesConfig, multipleBanksConfig, commandsConfig, savesConfig;
-    private boolean autoUpdateFiles, updated = true;
+    private static boolean updated = false;
+    private boolean autoUpdateFiles;
 
     public enum Type {
         CONFIG("config.yml"),
@@ -26,8 +24,7 @@ public class BPConfigs {
         SAVES("saves.yml"),
         COMMANDS("commands.yml");
 
-        public String name;
-
+        public final String name;
         Type(String name) {
             this.name = name;
         }
@@ -40,114 +37,16 @@ public class BPConfigs {
     }
 
     public void setupConfigs() {
-        savesFile = new File(plugin.getDataFolder(), Type.SAVES.name);
-
-        commandsFile = new File(plugin.getDataFolder(), Type.COMMANDS.name);
-        configFile = new File(plugin.getDataFolder(), Type.CONFIG.name);
-        messagesFile = new File(plugin.getDataFolder(), Type.MESSAGES.name);
-        multipleBanksFile = new File(plugin.getDataFolder(), Type.MULTIPLE_BANKS.name);
-
-        savesConfig = new YamlConfiguration();
-
-        commandsConfig = new YamlConfiguration();
-        config = new YamlConfiguration();
-        messagesConfig = new YamlConfiguration();
-        multipleBanksConfig = new YamlConfiguration();
-
         setupSavesFile();
-
         setupCommands();
         setupConfig();
         setupMessages();
         setupMultipleBanks();
     }
 
-    public File getFile(Type type) {
-        switch (type) {
-            case CONFIG:
-                return configFile;
-            case MESSAGES:
-                return messagesFile;
-            case MULTIPLE_BANKS:
-                return multipleBanksFile;
-            case COMMANDS:
-                return commandsFile;
-            case SAVES:
-                return savesFile;
-            default:
-                return null;
-        }
-    }
-
-    public FileConfiguration getConfig(Type type) {
-        switch (type) {
-            case CONFIG:
-                return config;
-            case MESSAGES:
-                return messagesConfig;
-            case MULTIPLE_BANKS:
-                return multipleBanksConfig;
-            case COMMANDS:
-                return commandsConfig;
-            case SAVES:
-                return savesConfig;
-            default:
-                return null;
-        }
-    }
-
-    public boolean reloadConfig(Type type) {
-        switch (type) {
-            case CONFIG:
-                try {
-                    config.load(configFile);
-                } catch (IOException | InvalidConfigurationException e) {
-                    BPLogger.error("Could not load " + type.name() + " config! (Error: " + e.getMessage().replace("\n", "") + ")");
-                    return false;
-                }
-                break;
-
-            case MESSAGES:
-                try {
-                    messagesConfig.load(messagesFile);
-                } catch (IOException | InvalidConfigurationException e) {
-                    BPLogger.error("Could not load " + type.name() + " config! (Error: " + e.getMessage().replace("\n", "") + ")");
-                    return false;
-                }
-                break;
-
-            case MULTIPLE_BANKS:
-                try {
-                    multipleBanksConfig.load(multipleBanksFile);
-                } catch (IOException | InvalidConfigurationException e) {
-                    BPLogger.error("Could not load " + type.name() + " config! (Error: " + e.getMessage().replace("\n", "") + ")");
-                    return false;
-                }
-                break;
-
-            case COMMANDS:
-                try {
-                    commandsConfig.load(commandsFile);
-                } catch (IOException | InvalidConfigurationException e) {
-                    BPLogger.error("Could not load " + type.name() + " config! (Error: " + e.getMessage().replace("\n", "") + ")");
-                    return false;
-                }
-                break;
-
-            case SAVES:
-                try {
-                    savesConfig.load(savesFile);
-                } catch (IOException | InvalidConfigurationException e) {
-                    BPLogger.error("Could not load " + type.name() + " config! (Error: " + e.getMessage().replace("\n", "") + ")");
-                    return false;
-                }
-        }
-        return true;
-    }
-
     public void setupSavesFile() {
-        if (!savesFile.exists()) {
-            File file = new File(BankPlus.INSTANCE.getDataFolder(), Type.SAVES.name);
+        File file = new File(BankPlus.INSTANCE.getDataFolder(), Type.SAVES.name);
+        if (!file.exists()) {
             try {
                 file.getParentFile().mkdir();
                 file.createNewFile();
@@ -157,24 +56,23 @@ public class BPConfigs {
             updated = false;
         }
 
-        reloadConfig(Type.SAVES);
+        FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+        if (updated) updated = config.getString("version") != null && config.getString("version").equals(plugin.getDescription().getVersion());
 
-        if (updated) updated = savesConfig.get("version") != null && savesConfig.getString("version").equals(plugin.getDescription().getVersion());
-
-        savesConfig.options().header("DO NOT EDIT / REMOVE THIS FILE OR BANKPLUS MAY GET RESET!");
-        savesConfig.set("version", plugin.getDescription().getVersion());
+        config.options().header("DO NOT EDIT / REMOVE THIS FILE OR BANKPLUS MAY GET RESET!");
+        config.set("version", plugin.getDescription().getVersion());
 
         try {
-            savesConfig.save(savesFile);
+            config.save(file);
         } catch (IOException e) {
             BPLogger.error("Could not save \"saves\" file! (Error: " + e.getMessage().replace("\n", "") + ")");
         }
     }
 
     public void setupConfig() {
-        boolean updateFile = true, alreadyExist = configFile.exists();
+        boolean updateFile = true, alreadyExist = getFile(Type.CONFIG.name).exists();
         if (alreadyExist) {
-            reloadConfig(Type.CONFIG);
+            FileConfiguration config = getConfig(Type.CONFIG.name);
 
             autoUpdateFiles = config.get("General-Settings.Auto-Update-Files") == null || config.getBoolean("General-Settings.Auto-Update-Files");
             updateFile = !updated && autoUpdateFiles;
@@ -184,24 +82,25 @@ public class BPConfigs {
     }
 
     public void setupMessages() {
-        boolean updateFile = true, alreadyExist = messagesFile.exists();
+        boolean updateFile = true, alreadyExist = getFile(Type.MESSAGES.name).exists();
         if (alreadyExist) updateFile = !updated && autoUpdateFiles;
 
         if (updateFile) setupFile(Type.MESSAGES);
     }
 
     public void setupMultipleBanks() {
-        boolean updateFile = true, alreadyExist = multipleBanksFile.exists();
+        boolean updateFile = true, alreadyExist = getFile(Type.MULTIPLE_BANKS.name).exists();
         if (alreadyExist) updateFile = !updated && autoUpdateFiles;
 
         if (updateFile) setupFile(Type.MULTIPLE_BANKS);
     }
 
     public void setupCommands() {
-        if (!commandsFile.exists()) plugin.saveResource("commands.yml", true);
+        File file = getFile(Type.COMMANDS.name);
+        if (!file.exists()) plugin.saveResource("commands.yml", true);
 
         InputStreamReader internalFile = new InputStreamReader(BankPlus.INSTANCE.getResource("commands.yml"), StandardCharsets.UTF_8);
-        YamlConfiguration internalConfig = YamlConfiguration.loadConfiguration(internalFile), externalConfig = YamlConfiguration.loadConfiguration(commandsFile);
+        YamlConfiguration internalConfig = YamlConfiguration.loadConfiguration(internalFile), externalConfig = YamlConfiguration.loadConfiguration(file);
 
         boolean hasChanges = false;
         for (String key : internalConfig.getKeys(true)) {
@@ -214,18 +113,29 @@ public class BPConfigs {
         if (!hasChanges) return;
 
         try {
-            externalConfig.save(commandsFile);
+            externalConfig.save(file);
         } catch (Exception e) {
             BPLogger.error("Could not save file changes to commands.yml! (Error: " + e.getMessage() + ")");
         }
     }
 
+    public File getFile(String path) {
+        return new File(plugin.getDataFolder(), path);
+    }
+
+    public FileConfiguration getConfig(File file) {
+        return YamlConfiguration.loadConfiguration(file);
+    }
+
+    public FileConfiguration getConfig(String path) {
+        return YamlConfiguration.loadConfiguration(getFile(path));
+    }
+
     public void setupFile(Type type) {
         String fileName = type.name;
-        File folderFile = getFile(type);
+        File folderFile = getFile(type.name);
         if (!folderFile.exists()) {
             plugin.saveResource(fileName, true);
-            reloadConfig(type);
             return;
         }
 
@@ -264,11 +174,7 @@ public class BPConfigs {
             folderConfig.set(key, jarConfig.get(key));
             hasChanges = true;
         }
-
-        if (!hasChanges) {
-            reloadConfig(type);
-            return;
-        }
+        if (!hasChanges) return;
 
         StringBuilder builder = new StringBuilder();
         HashMap<Integer, String> headers = new HashMap<>();
@@ -329,7 +235,7 @@ public class BPConfigs {
                     builder.append("\n");
                     for (String listLine : value) {
                         for (int i = 0; i < spaces; i++) builder.append(" ");
-                        builder.append("- ").append(listLine).append("\n");
+                        builder.append("- \"").append(listLine).append("\"\n");
                     }
                 }
                 continue;
@@ -338,7 +244,6 @@ public class BPConfigs {
             builder.append(line).append("\n");
         }
         recreateFile(folderFile, builder.toString());
-        reloadConfig(type);
     }
 
     public void recreateFile(File file, String fileBuilder) {
@@ -351,6 +256,14 @@ public class BPConfigs {
         } catch (IOException e) {
             BPLogger.error(e, e.getMessage());
         }
+    }
+
+    private void backupFile() {
+
+    }
+
+    public static boolean isUpdated() {
+        return updated;
     }
 
     private boolean isComment(String s) {

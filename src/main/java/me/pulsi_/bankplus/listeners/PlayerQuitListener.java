@@ -8,7 +8,6 @@ import me.pulsi_.bankplus.debt.DebtUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPSets;
-import me.pulsi_.bankplus.values.Values;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

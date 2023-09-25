@@ -3,11 +3,11 @@ package me.pulsi_.bankplus.interest;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.economy.TransactionType;
 import me.pulsi_.bankplus.managers.BPConfigs;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
-import me.pulsi_.bankplus.economy.TransactionType;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
@@ -20,6 +20,7 @@ import org.bukkit.scheduler.BukkitTask;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.List;
 
 public class BPInterest {
 
@@ -74,11 +75,11 @@ public class BPInterest {
     }
 
     private FileConfiguration getInterestSaveConfig() {
-        return BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.SAVES);
+        return BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.SAVES.name);
     }
 
     private void saveInterestSaveFile(FileConfiguration config) {
-        File file = BankPlus.INSTANCE.getConfigManager().getFile(BPConfigs.Type.SAVES);
+        File file = BankPlus.INSTANCE.getConfigManager().getFile(BPConfigs.Type.SAVES.name);
 
         try {
             config.save(file);
@@ -100,9 +101,9 @@ public class BPInterest {
         for (String bankName : new BankReader().getAvailableBanks(p)) {
 
             BigDecimal bankBalance = economy.getBankBalance(p, bankName);
-            BankReader bankReader = new BankReader(bankName);
-            BigDecimal interestMoney = bankBalance.multiply(bankReader.getInterest(p).divide(BigDecimal.valueOf(100)));
-            BigDecimal maxBankCapacity = bankReader.getCapacity(p), maxAmount = Values.CONFIG.getInterestMaxAmount();
+            BankReader reader = new BankReader(bankName);
+            BigDecimal interestMoney = getInterestMoney(p, bankBalance, reader.getInterest(p), reader);
+            BigDecimal maxBankCapacity = reader.getCapacity(p), maxAmount = Values.CONFIG.getInterestMaxAmount();
 
             if (bankBalance.doubleValue() <= 0) continue;
             if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
@@ -141,8 +142,9 @@ public class BPInterest {
             for (String bankName : new BankReader().getAvailableBanks(p)) {
                 BigDecimal bankBalance = economy.getBankBalance(p, bankName);
                 BankReader reader = new BankReader(bankName);
-                BigDecimal interest = Values.CONFIG.isOfflineInterestDifferentRate() ? reader.getOfflineInterest(p) : reader.getInterest(p);
-                BigDecimal interestMoney = bankBalance.multiply(interest.divide(BigDecimal.valueOf(100)));
+                BigDecimal interestMoney = Values.CONFIG.isOfflineInterestDifferentRate() ?
+                        getInterestMoney(p, bankBalance, reader.getOfflineInterest(p), reader) :
+                        getInterestMoney(p, bankBalance, reader.getInterest(p), reader);
                 BigDecimal maxBankCapacity = reader.getCapacity(p), maxAmount = Values.CONFIG.getInterestMaxAmount();
 
                 if (bankBalance.doubleValue() <= 0) continue;
@@ -158,6 +160,38 @@ public class BPInterest {
                 economy.setOfflineInterest(p, economy.getOfflineInterest(p).add(interestMoney), false);
                 economy.addBankBalance(p, interestMoney, bankName, TransactionType.INTEREST);
             }
+        }
+    }
+
+    private BigDecimal getInterestMoney(OfflinePlayer p, BigDecimal balance, BigDecimal defaultInterest, BankReader reader) {
+        if (!Values.CONFIG.enableInterestLimiter() || !Values.CONFIG.accumulateInterestLimiter())
+            return balance.multiply(defaultInterest.divide(BigDecimal.valueOf(100)));
+        else {
+            List<String> limiter = reader.getInterestLimiter(reader.getCurrentLevel(p));
+            BigDecimal result = new BigDecimal(0), count = balance;
+            for (String line : limiter) {
+                if (!line.contains(":")) continue;
+
+                String[] split1 = line.split(":");
+                if (BPUtils.isInvalidNumber(split1[1])) continue;
+
+                String[] split2 = split1[0].split("-");
+                if (BPUtils.isInvalidNumber(split2[0]) || BPUtils.isInvalidNumber(split2[1])) continue;
+
+                String interest = split1[1].replace("%", ""), from = split2[0], to = split2[1];
+                BigDecimal interestRate = new BigDecimal(interest), fromNumber = new BigDecimal(from), toNumber = new BigDecimal(to);
+
+                if (fromNumber.doubleValue() > toNumber.doubleValue()) toNumber = fromNumber;
+
+                if (toNumber.doubleValue() < count.doubleValue()) {
+                    result = result.add(toNumber.multiply(interestRate).divide(BigDecimal.valueOf(100)));
+                    count = count.subtract(toNumber);
+                } else {
+                    result = result.add(count.multiply(interestRate).divide(BigDecimal.valueOf(100)));
+                    return result;
+                }
+            }
+            return result;
         }
     }
 

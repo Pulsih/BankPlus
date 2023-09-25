@@ -1,11 +1,9 @@
 package me.pulsi_.bankplus.account;
 
 import me.pulsi_.bankplus.bankSystem.Bank;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.util.HashMap;
 

@@ -1,24 +1,16 @@
-# Put this to true to enable the multiple-banks feature.
-#
-# If this feature is enabled, typing /bank won't open the
-# main bank but a gui with a list of all available banks.
-#
-# When enabling this option, many commands will
-# change due to the multiple bank options (Ex: The
-# command to set money will require specifying the
-# bank to set the money in the selected bank)
-#
-# Remember that must specify a main gui in the config file.
-Enabled: false
+# If this feature is enabled, typing /bank will open a
+# gui with a list of all available banks, otherwise will
+# open the main bank even if there are more banks.
+# (You can always open other banks with /bank open <bank>)
+Enabled: true
 
-# Choose if showing or hiding a
-# bank if it's not accessible.
+# Choose if showing or hiding a bank if it's not accessible.
 Shows-Not-Available-Banks: true
 
 # If having only one bank available, this option will
 # make the player directly open that one instead of
 # opening the banks-gui with just the 1 gui available.
-Directly-Open-If-1-Is-Available: false
+Directly-Open-If-1-Is-Available: true
 
 # This is a new feature used to automatically unlock
 # new banks when a player has maxed the selected bank.

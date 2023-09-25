@@ -4,7 +4,6 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.managers.BPConfigs;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
-import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -33,7 +32,7 @@ public abstract class BPCommand {
         this.aliases = new String[aliases.length - 1];
         System.arraycopy(aliases, 1, this.aliases, 0, aliases.length - 1);
 
-        FileConfiguration config = BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.COMMANDS);
+        FileConfiguration config = BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.COMMANDS.name);
 
         needConfirm = config.getBoolean(identifier.toLowerCase() + ".need-confirm");
         hasCooldown = config.getBoolean(identifier.toLowerCase() + ".has-cooldown");

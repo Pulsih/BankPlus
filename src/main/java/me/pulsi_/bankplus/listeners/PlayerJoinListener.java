@@ -4,7 +4,10 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.BPPlayerFiles;
 import me.pulsi_.bankplus.economy.BPEconomy;
-import me.pulsi_.bankplus.utils.*;
+import me.pulsi_.bankplus.utils.BPFormatter;
+import me.pulsi_.bankplus.utils.BPLogger;
+import me.pulsi_.bankplus.utils.BPMessages;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -39,7 +42,7 @@ public class PlayerJoinListener implements Listener {
 
         boolean hasChanges = false;
 
-        if (Values.CONFIG.isNotifyOfflineInterest() && sOfflineInterest == null) {
+        if (Values.CONFIG.notifyOfflineInterest() && sOfflineInterest == null) {
             config.set("interest", "0");
             hasChanges = true;
         }
@@ -48,7 +51,7 @@ public class PlayerJoinListener implements Listener {
             hasChanges = true;
         }
         if (debt == null) {
-            config.set("debt", BPFormatter.formatBigDouble(BigDecimal.valueOf(0)));
+            config.set("debt", "0");
             hasChanges = true;
         }
 
@@ -66,7 +69,7 @@ public class PlayerJoinListener implements Listener {
             }
         }
 
-        if (Values.CONFIG.isNotifyOfflineInterest()) {
+        if (Values.CONFIG.notifyOfflineInterest()) {
             String amount = config.getString("interest");
             BigDecimal offlineInterest = new BigDecimal(amount == null ? "0" : amount);
 

@@ -25,6 +25,10 @@ public class BankUtils {
         openBank(p, Values.CONFIG.getMainGuiName(), false);
     }
 
+    public static void openBank(Player p, String identifier) {
+        openBank(p, identifier, false);
+    }
+
     public static void openBank(Player p, String identifier, boolean bypass) {
         BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
         BankGuiRegistry registry = BankPlus.INSTANCE.getBankGuiRegistry();

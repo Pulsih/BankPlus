@@ -6,7 +6,10 @@ import me.pulsi_.bankplus.bankSystem.BankGuiRegistry;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.events.BPAfterTransactionEvent;
 import me.pulsi_.bankplus.events.BPPreTransactionEvent;
-import me.pulsi_.bankplus.utils.*;
+import me.pulsi_.bankplus.utils.BPFormatter;
+import me.pulsi_.bankplus.utils.BPLogger;
+import me.pulsi_.bankplus.utils.BPMessages;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
@@ -20,7 +23,10 @@ import org.bukkit.entity.Player;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class BPEconomy {
 

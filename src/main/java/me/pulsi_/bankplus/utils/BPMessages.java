@@ -136,7 +136,7 @@ public class BPMessages {
     public static void loadMessages() {
         messages.clear();
 
-        FileConfiguration config = BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.MESSAGES);
+        FileConfiguration config = BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.MESSAGES.name);
         for (String path : config.getConfigurationSection("").getKeys(false)) {
             if (!path.equals("Update-File") && !path.equals("Enable-Missing-Message-Alert"))
                 messages.put(path, config.getStringList(path).isEmpty() ? Collections.singletonList(config.getString(path)) : config.getStringList(path));

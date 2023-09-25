@@ -8,7 +8,7 @@ import java.util.List;
 
 public class MultipleBanksValues {
 
-    private boolean showNotAvailableBanks, directlyOpenIf1IsAvailable, previousItemGlowing, nextItemGlowing;
+    private boolean enableMultipleBanksModule, showNotAvailableBanks, directlyOpenIf1IsAvailable, previousItemGlowing, nextItemGlowing;
     private String banksGuiTitle, previousItemMaterial, nextItemMaterial, previousItemDisplayname, nextItemDisplayname, fillerMaterial;
     private List<String> previousItemLore, nextItemLore, autoBanksUnlocker;
     private int banksGuiLines, previousItemSlot, nextItemSlot, updateDelay;
@@ -19,8 +19,9 @@ public class MultipleBanksValues {
     }
 
     public void setupValues() {
-        FileConfiguration multipleBanks = BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.MULTIPLE_BANKS);
+        FileConfiguration multipleBanks = BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.MULTIPLE_BANKS.name);
 
+        enableMultipleBanksModule = multipleBanks.getBoolean("Enabled");
         showNotAvailableBanks = multipleBanks.getBoolean("Shows-Not-Available-Banks");
         directlyOpenIf1IsAvailable = multipleBanks.getBoolean("Directly-Open-If-1-Is-Available");
         autoBanksUnlocker = multipleBanks.getStringList("Auto-Banks-Unlocker");
@@ -40,6 +41,10 @@ public class MultipleBanksValues {
         updateDelay = multipleBanks.getInt("Banks-Gui.Update-Delay");
         fillerEnabled = multipleBanks.getBoolean("Banks-Gui.Filler.Enabled");
         fillerGlowing = multipleBanks.getBoolean("Banks-Gui.Filler.Glowing");
+    }
+
+    public boolean enableMultipleBanksModule() {
+        return enableMultipleBanksModule;
     }
 
     public boolean isShowNotAvailableBanks() {

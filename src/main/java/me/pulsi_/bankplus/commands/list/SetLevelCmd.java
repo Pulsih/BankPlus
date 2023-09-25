@@ -1,20 +1,14 @@
 package me.pulsi_.bankplus.commands.list;
 
-import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BPPlayerFiles;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.commands.BPCommand;
-import me.pulsi_.bankplus.commands.MainCmd;
 import me.pulsi_.bankplus.utils.BPArgs;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
-import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class SetLevelCmd extends BPCommand {

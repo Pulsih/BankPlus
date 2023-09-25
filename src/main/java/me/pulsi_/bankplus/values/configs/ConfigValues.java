@@ -25,15 +25,15 @@ public class ConfigValues {
     private long notifyOfflineInterestDelay, saveBalancedDelay, updateBankTopDelay;
     private int afkPlayersTime, maxDecimalsAmount, bankTopSize, chatExitTime;
     private boolean isReopeningBankAfterChat, isNotifyOfflineInterest, isStoringUUIDs, logTransactions, enableInterestLimiter;
-    private boolean isInterestEnabled, isGivingInterestToOfflinePlayers, isOfflineInterestDifferentRate, notifyRegisteredPlayer;
-    private boolean isOfflineInterestEarnedMessageEnabled, isUpdateCheckerEnabled, isWithdrawSoundEnabled, isDepositSoundEnabled;
+    private boolean isInterestEnabled, isGivingInterestToOfflinePlayers, isOfflineInterestDifferentRate, notifyRegisteredPlayer, silentInfoMessages;
+    private boolean isOfflineInterestEarnedMessageEnabled, isUpdateCheckerEnabled, isWithdrawSoundEnabled, isDepositSoundEnabled, accumulateInterestLimiter;
     private boolean isViewSoundEnabled, isPersonalSoundEnabled, isIgnoringAfkPlayers, useEssentialsXAFK, useBankBalanceToUpgrade;
-    private boolean banktopEnabled, banktopUpdateBroadcastEnabled, banktopUpdateBroadcastOnlyConsole, saveBalancesBroadcast, guiModuleEnabled;
+    private boolean banktopEnabled, banktopUpdateBroadcastEnabled, banktopUpdateBroadcastSilentConsole, saveBalancesBroadcast, guiModuleEnabled;
     private String loanMaxAmount, loanInterest;
     private int loanInstalments, loanDelay, loanAcceptTime;
 
     public void setupValues() {
-        FileConfiguration config = BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.CONFIG);
+        FileConfiguration config = BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.CONFIG.name);
 
         chatExitMessage = config.getString("General-Settings.Chat-Exit-Message");
         chatExitTime = config.getInt("General-Settings.Chat-Exit-Time");
@@ -109,7 +109,7 @@ public class ConfigValues {
         bankTopFormat = config.getStringList("BankTop.Format");
         interestLimiter = config.getStringList("Interest.Interest-Limiter");
         banktopUpdateBroadcastEnabled = config.getBoolean("BankTop.Update-Broadcast.Enabled");
-        banktopUpdateBroadcastOnlyConsole = config.getBoolean("BankTop.Update-Broadcast.Only-Console");
+        banktopUpdateBroadcastSilentConsole = config.getBoolean("BankTop.Update-Broadcast.Silent-Console");
         banktopUpdateBroadcastMessage = config.getString("BankTop.Update-Broadcast.Message");
         saveBalancesBroadcast = config.getBoolean("General-Settings.Save-Broadcast");
         guiModuleEnabled = config.getBoolean("General-Settings.Enable-Guis");
@@ -120,6 +120,8 @@ public class ConfigValues {
         loanDelay = config.getInt("Loan-Settings.Delay");
         loanAcceptTime = config.getInt("Loan-Settings.Accept-Time");
         notifyRegisteredPlayer = config.getBoolean("General-Settings.Notify-Registered-Player");
+        silentInfoMessages = config.getBoolean("General-Settings.Silent-Info-Messages");
+        accumulateInterestLimiter = config.getBoolean("Interest.Accumulate-Interest-Limiter");
     }
 
     public String getPlayerChatPriority() {
@@ -416,7 +418,7 @@ public class ConfigValues {
         return isInterestEnabled;
     }
 
-    public boolean isNotifyOfflineInterest() {
+    public boolean notifyOfflineInterest() {
         return isNotifyOfflineInterest;
     }
 
@@ -520,8 +522,8 @@ public class ConfigValues {
         return banktopUpdateBroadcastEnabled;
     }
 
-    public boolean isBanktopUpdateBroadcastOnlyConsole() {
-        return banktopUpdateBroadcastOnlyConsole;
+    public boolean isBanktopUpdateBroadcastSilentConsole() {
+        return banktopUpdateBroadcastSilentConsole;
     }
 
     public boolean isSaveBalancesBroadcast() {
@@ -566,5 +568,13 @@ public class ConfigValues {
 
     public boolean notifyRegisteredPlayer() {
         return notifyRegisteredPlayer;
+    }
+
+    public boolean silentInfoMessages() {
+        return silentInfoMessages;
+    }
+
+    public boolean accumulateInterestLimiter() {
+        return accumulateInterestLimiter;
     }
 }

@@ -4,7 +4,6 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPMessages;
-import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;

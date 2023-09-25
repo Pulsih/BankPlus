@@ -2,7 +2,6 @@ package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
-import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.values.Values;
@@ -11,7 +10,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 public class BankTopManager {
 
@@ -49,9 +51,9 @@ public class BankTopManager {
 
             if (!Values.CONFIG.isBanktopUpdateBroadcastEnabled()) return;
 
-            String message = BPMessages.addPrefix(Values.CONFIG.getBanktopUpdateBroadcastMessage());
-            if (Values.CONFIG.isBanktopUpdateBroadcastOnlyConsole()) BPLogger.log(message);
-            else Bukkit.broadcastMessage(message);
+            String message = Values.CONFIG.getBanktopUpdateBroadcastMessage();
+            if (!Values.CONFIG.isBanktopUpdateBroadcastSilentConsole()) BPLogger.log(message);
+            for (Player p : Bukkit.getOnlinePlayers()) BPMessages.send(p, message, true);
         });
     }
 

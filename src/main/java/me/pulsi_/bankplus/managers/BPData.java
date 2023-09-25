@@ -56,13 +56,6 @@ public class BPData {
 
     public boolean reloadPlugin() {
         boolean success = true;
-
-        BPConfigs configs = plugin.getConfigManager();
-        if (!configs.reloadConfig(BPConfigs.Type.COMMANDS)) success = false;
-        if (!configs.reloadConfig(BPConfigs.Type.CONFIG)) success = false;
-        if (!configs.reloadConfig(BPConfigs.Type.MESSAGES)) success = false;
-        if (!configs.reloadConfig(BPConfigs.Type.MULTIPLE_BANKS)) success = false;
-
         Values.CONFIG.setupValues();
         Values.MESSAGES.setupValues();
         Values.MULTIPLE_BANKS.setupValues();

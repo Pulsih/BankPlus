@@ -10,6 +10,7 @@ import me.pulsi_.bankplus.logSystem.BPLogUtils;
 import me.pulsi_.bankplus.managers.*;
 import me.pulsi_.bankplus.placeholders.BPPlaceholders;
 import me.pulsi_.bankplus.utils.BPLogger;
+import me.pulsi_.bankplus.utils.BPVersions;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
@@ -36,8 +37,8 @@ public final class BankPlus extends JavaPlugin {
     private Permission perms = null;
 
     private BankTopManager bankTopManager;
-    private BPConfigs BPConfigs;
-    private BPData BPData;
+    private BPConfigs bpConfigs;
+    private BPData bpData;
     private AFKManager afkManager;
     private TaskManager taskManager;
     private BPInterest interest;
@@ -97,8 +98,8 @@ public final class BankPlus extends JavaPlugin {
         this.serverVersionInt = number;
 
         this.bankTopManager = new BankTopManager(this);
-        this.BPConfigs = new BPConfigs(this);
-        this.BPData = new BPData(this);
+        this.bpConfigs = new BPConfigs(this);
+        this.bpData = new BPData(this);
         this.afkManager = new AFKManager(this);
         this.taskManager = new TaskManager();
         this.interest = new BPInterest();
@@ -106,7 +107,7 @@ public final class BankPlus extends JavaPlugin {
         RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
         if (rsp != null) perms = rsp.getProvider();
 
-        BPData.setupPlugin();
+        bpData.setupPlugin();
 
         if (plManager.getPlugin("PlaceholderAPI") != null) {
             BPLogger.info("Hooked into PlaceholderAPI!");
@@ -120,6 +121,8 @@ public final class BankPlus extends JavaPlugin {
 
         if (Values.CONFIG.isUpdateCheckerEnabled())
             Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> isUpdated = isPluginUpdated(), 0, (8 * 1200) * 60 /*8 hours*/);
+
+        if (!BPConfigs.isUpdated()) BPVersions.convertPlayerFilesToNewStyle();
     }
 
     @Override
@@ -128,7 +131,7 @@ public final class BankPlus extends JavaPlugin {
         if (Values.CONFIG.isInterestEnabled()) interest.saveInterest();
         LoanUtils.saveLoans();
 
-        BPData.shutdownPlugin();
+        bpData.shutdownPlugin();
     }
 
     public static BPEconomy getBPEconomy() {
@@ -184,11 +187,11 @@ public final class BankPlus extends JavaPlugin {
     }
 
     public BPConfigs getConfigManager() {
-        return BPConfigs;
+        return bpConfigs;
     }
 
     public BPData getDataManager() {
-        return BPData;
+        return bpData;
     }
 
     public AFKManager getAfkManager() {
@@ -212,17 +215,28 @@ public final class BankPlus extends JavaPlugin {
     }
 
     private boolean isPluginUpdated() {
+        String version = getDescription().getVersion();
+        String newVersion = version;
         boolean updated;
         try {
-            String newVersion = new BufferedReader(new InputStreamReader(
-                    new URL("https://api.spigotmc.org/legacy/update.php?resource=93130").openConnection().getInputStream())).readLine();
-            updated = getDescription().getVersion().equals(newVersion);
+            newVersion = new BufferedReader(new InputStreamReader(
+                    new URL("https://api.spigotmc.org/legacy/update.php?resource=93130").openConnection().getInputStream()
+            )).readLine();
         } catch (Exception e) {
-            updated = true;
+            BPLogger.warn("Could not check for updates! (" + e.getMessage() + ")");
         }
 
-        if (updated) BPLogger.info("The plugin is updated!");
-        else BPLogger.info("The plugin is outdated! Please download the latest version here: https://www.spigotmc.org/resources/%E2%9C%A8-bankplus-%E2%9C%A8.93130/");
+        if (!version.toLowerCase().contains("-alpha")) updated = version.equals(newVersion);
+        else {
+            if (!Values.CONFIG.silentInfoMessages()) BPLogger.info("You are using an alpha version of the plugin, please report any bug or problem found in my discord!");
+            String number = version.split("-")[0];
+            updated = version.equals(number);
+        }
+
+        if (!Values.CONFIG.silentInfoMessages()) {
+            if (updated) BPLogger.info("The plugin is updated!");
+            else BPLogger.info("The plugin is outdated! Please download the latest version here: https://www.spigotmc.org/resources/%E2%9C%A8-bankplus-%E2%9C%A8.93130/");
+        }
 
         return updated;
     }
