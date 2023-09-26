@@ -14,7 +14,7 @@ public class BPPlayer {
     private HashMap<String, String> playerBankClickHolder;
     private int banktopPosition = -1;
     private BigDecimal debt;
-    private BukkitTask closingTask;
+    private BukkitTask bankUpdatingTask, closingTask;
 
     public BPPlayer(Player player) {
         this.player = player;
@@ -40,6 +40,10 @@ public class BPPlayer {
         return debt;
     }
 
+    public BukkitTask getBankUpdatingTask() {
+        return bankUpdatingTask;
+    }
+
     public BukkitTask getClosingTask() {
         return closingTask;
     }
@@ -58,6 +62,10 @@ public class BPPlayer {
 
     public void setDebt(BigDecimal debt) {
         this.debt = debt;
+    }
+
+    public void setBankUpdatingTask(BukkitTask bankUpdatingTask) {
+        this.bankUpdatingTask = bankUpdatingTask;
     }
 
     public void setClosingTask(BukkitTask closingTask) {

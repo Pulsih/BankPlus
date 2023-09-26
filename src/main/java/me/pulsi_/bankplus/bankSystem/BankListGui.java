@@ -31,11 +31,8 @@ public class BankListGui {
     public static void openMultipleBanksGui(Player p) {
         BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
 
-        Bank openedBank = player.getOpenedBank();
-        if (openedBank != null) {
-            BukkitTask task = openedBank.getInventoryUpdateTask();
-            if (task != null) task.cancel();
-        }
+        BukkitTask updating = player.getBankUpdatingTask();
+        if (updating != null) updating.cancel();
 
         if (Values.MULTIPLE_BANKS.isDirectlyOpenIf1IsAvailable()) {
             BankReader reader = new BankReader();
@@ -59,7 +56,7 @@ public class BankListGui {
 
         long delay = Values.MULTIPLE_BANKS.getUpdateDelay();
         if (delay >= 0)
-            baseBanksListGui.setInventoryUpdateTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE, () -> updateMeta(banksListGui, p), delay, delay));
+            player.setBankUpdatingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE, () -> updateMeta(banksListGui, p), delay, delay));
 
         player.setOpenedBank(baseBanksListGui);
         BPUtils.playSound("PERSONAL", p);

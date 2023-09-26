@@ -26,11 +26,8 @@ public class PlayerQuitListener implements Listener {
         savePlayer(p);
         BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().remove(p);
 
-        Bank openedBank = player.getOpenedBank();
-        if (openedBank != null) {
-            BukkitTask task = openedBank.getInventoryUpdateTask();
-            if (task != null) task.cancel();
-        }
+        BukkitTask updating = player.getBankUpdatingTask();
+        if (updating != null) updating.cancel();
 
         BPSets.removePlayerFromDepositing(p);
         BPSets.removePlayerFromWithdrawing(p);

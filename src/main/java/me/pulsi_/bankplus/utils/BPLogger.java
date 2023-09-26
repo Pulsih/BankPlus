@@ -56,6 +56,6 @@ public class BPLogger {
     }
 
     public static void log(String message) {
-        Bukkit.getConsoleSender().getServer().getConsoleSender().sendMessage(BPChat.color(message));
+        Bukkit.getConsoleSender().getServer().getConsoleSender().sendMessage(BPMessages.addPrefix(message));
     }
 }

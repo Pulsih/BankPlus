@@ -48,11 +48,8 @@ public class BankUtils {
             return;
         }
 
-        Bank openedBank = player.getOpenedBank();
-        if (openedBank != null) {
-            BukkitTask task = openedBank.getInventoryUpdateTask();
-            if (task != null) task.cancel();
-        }
+        BukkitTask updating = player.getBankUpdatingTask();
+        if (updating != null) updating.cancel();
 
         Bank baseBank = registry.getBanks().get(identifier);
 
@@ -66,7 +63,7 @@ public class BankUtils {
         updateMeta(bank, p, identifier);
 
         long delay = baseBank.getUpdateDelay();
-        if (delay >= 0) baseBank.setInventoryUpdateTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE, () -> updateMeta(bank, p, identifier), delay, delay));
+        if (delay >= 0) player.setBankUpdatingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE, () -> updateMeta(bank, p, identifier), delay, delay));
 
         player.setOpenedBank(baseBank);
         BPUtils.playSound("PERSONAL", p);
@@ -93,6 +90,7 @@ public class BankUtils {
     }
 
     private static void updateMeta(Inventory bank, Player p, String identifier) {
+        Bukkit.broadcastMessage("UPDATE");
         ConfigurationSection items = new BankReader(identifier).getBank().getItems();
         if (items == null) return;
 

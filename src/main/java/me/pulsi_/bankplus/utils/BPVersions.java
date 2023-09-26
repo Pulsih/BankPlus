@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.managers.BPConfigs;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -16,6 +17,8 @@ import java.io.IOException;
 public class BPVersions {
 
     public static void convertPlayerFilesToNewStyle() {
+        if (BPConfigs.isUpdated()) return;
+
         File dataFolder = new File(BankPlus.INSTANCE.getDataFolder(), "playerdata");
         File[] files = dataFolder.listFiles();
         if (files == null) return;

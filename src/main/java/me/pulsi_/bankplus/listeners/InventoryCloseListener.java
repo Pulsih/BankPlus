@@ -18,11 +18,9 @@ public class InventoryCloseListener implements Listener {
         BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
         if (player == null) return;
 
-        Bank openedBank = player.getOpenedBank();
-        if (openedBank != null) {
-            BukkitTask task = openedBank.getInventoryUpdateTask();
-            if (task != null) task.cancel();
-        }
+        BukkitTask updating = player.getBankUpdatingTask();
+        if (updating != null) updating.cancel();
+
         player.setOpenedBank(null);
     }
 }
