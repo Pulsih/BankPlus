@@ -13,80 +13,60 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class BPItems {
 
     public static final ItemStack UNKNOWN_ITEM = new ItemStack(Material.STONE);
-    public static final Material UNKNOWN_MATERIAL = Material.STONE;
 
-    public static ItemStack createItemStack(ConfigurationSection itemValues) {
-        String material = itemValues.getString("Material");
+    public static ItemStack createItemStack(ConfigurationSection values) {
+        String material = values.getString("Material");
+
+        ItemStack result = UNKNOWN_ITEM;
+        if (material == null) result = UNKNOWN_ITEM;
+        else {
+            if (material.startsWith("HEAD")) result = getHead(material);
+            else {
+                if (!material.contains(":")) result = new ItemStack(Material.valueOf(material));
+                else {
+                    String[] itemData = material.split(":");
+                    try {
+                        result = new ItemStack(Material.valueOf(itemData[0]), 1, Byte.parseByte(itemData[1]));
+                    } catch (IllegalArgumentException e) {
+                        BPLogger.warn("Could not update item because \"" + itemData[0] + "\" is not a valid material!");
+                    }
+                }
+            }
+        }
+
+        int amount = values.getInt("amount");
+        if (amount > 1) result.setAmount(amount);
+        return result;
+    }
+
+    public static ItemStack getHead(String material) {
         if (material == null) return UNKNOWN_ITEM;
 
+        ItemStack item = UNKNOWN_ITEM;
+        if (material.startsWith("HEAD[")) {
+            String player = material.replace("HEAD[", "").replace("]", "");
+            try {
+                item = BPHeads.getNameHead(player, new ItemStack(Material.PLAYER_HEAD));
+            } catch (NoSuchFieldError er) {
+                item = BPHeads.getNameHead(player, new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()));
+            }
+        } else if (material.startsWith("HEAD-<")) {
+            String textureValue = material.replace("HEAD-<", "").replace(">", "");
+            try {
+                item = BPHeads.getValueHead(new ItemStack(Material.PLAYER_HEAD), textureValue);
+            } catch (NoSuchFieldError er) {
+                item = BPHeads.getValueHead(new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()), textureValue);
+            }
+        }
+        return item;
+    }
+
+    public static ItemStack getHead(Player p) {
         ItemStack item;
         try {
-            if (material.contains(":")) {
-                String[] itemData = material.split(":");
-                item = new ItemStack(Material.valueOf(itemData[0]), 1, Byte.parseByte(itemData[1]));
-            } else item = new ItemStack(Material.valueOf(material));
-        } catch (IllegalArgumentException e) {
-            item = UNKNOWN_ITEM;
-        }
-
-        int amount = itemValues.getInt("Amount");
-        if (amount > 1) item.setAmount(amount);
-
-        return item;
-    }
-
-    public static ItemStack getHead(ConfigurationSection itemValues) {
-        String material = itemValues.getString("Material");
-        if (material == null) return null;
-        ItemStack item = null;
-        try {
-            if (material.startsWith("HEAD[")) {
-                String player = material.replace("HEAD[", "").replace("]", "");
-                try {
-                    item = BPHeads.getNameHead(player, new ItemStack(Material.PLAYER_HEAD));
-                } catch (NoSuchFieldError er) {
-                    item = BPHeads.getNameHead(player, new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()));
-                }
-            } else if (material.startsWith("HEAD-<")) {
-                String textureValue = material.replace("HEAD-<", "").replace(">", "");
-                try {
-                    item = BPHeads.getValueHead(new ItemStack(Material.PLAYER_HEAD), textureValue);
-                } catch (NoSuchFieldError er) {
-                    item = BPHeads.getValueHead(new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()), textureValue);
-                }
-            }
-        } catch (IllegalArgumentException e) {
-            item = UNKNOWN_ITEM;
-        }
-        return item;
-    }
-
-    public static ItemStack getHead(String material, Player p) {
-        ItemStack item = null;
-        try {
-            if (material.equals("HEAD-%PLAYER%")) {
-                try {
-                    item = BPHeads.getNameHead(p.getName(), new ItemStack(Material.PLAYER_HEAD));
-                } catch (NoSuchFieldError er) {
-                    item = BPHeads.getNameHead(p.getName(), new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()));
-                }
-            } else if (material.startsWith("HEAD[")) {
-                String playerName = material.replace("HEAD[", "").replace("]", "");
-                try {
-                    item = BPHeads.getNameHead(playerName, new ItemStack(Material.PLAYER_HEAD));
-                } catch (NoSuchFieldError er) {
-                    item = BPHeads.getNameHead(playerName, new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()));
-                }
-            } else if (material.startsWith("HEAD-<")) {
-                String textureValue = material.replace("HEAD-<", "").replace(">", "");
-                try {
-                    item = BPHeads.getValueHead(new ItemStack(Material.PLAYER_HEAD), textureValue);
-                } catch (NoSuchFieldError er) {
-                    item = BPHeads.getValueHead(new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()), textureValue);
-                }
-            }
-        } catch (IllegalArgumentException e) {
-            item = UNKNOWN_ITEM;
+            item = BPHeads.getNameHead(p.getName(), new ItemStack(Material.PLAYER_HEAD));
+        } catch (NoSuchFieldError er) {
+            item = BPHeads.getNameHead(p.getName(), new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()));
         }
         return item;
     }
@@ -103,7 +83,7 @@ public class BPItems {
         }
 
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(BPChat.color("&f"));
+        meta.setDisplayName("");
 
         if (glowing) {
             meta.addEnchant(Enchantment.DURABILITY, 1, true);

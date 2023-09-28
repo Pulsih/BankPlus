@@ -26,7 +26,6 @@ import java.util.List;
 public class BankListGui {
 
     public static final String multipleBanksGuiID = "MultipleBanksGui";
-    private static final Material DEFAULT_MATERIAL = Material.CHEST;
 
     public static void openMultipleBanksGui(Player p) {
         BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
@@ -72,22 +71,20 @@ public class BankListGui {
             BankReader reader = new BankReader(bankName);
             if (Values.MULTIPLE_BANKS.isShowNotAvailableBanks() && !reader.isAvailable(p)) continue;
 
-            Material material;
             ItemStack bankItem;
             boolean glow = false;
             ConfigurationSection section = reader.getBank().getBanksGuiItemSection();
 
-            if (section == null) material = DEFAULT_MATERIAL;
+            if (section == null) bankItem = BPItems.UNKNOWN_ITEM;
             else {
                 String path = reader.isAvailable(p) ? "Available" : "Unavailable";
                 glow = section.getBoolean(path + ".Glowing");
                 try {
-                    material = Material.valueOf(section.getString(path + ".Material"));
+                    bankItem = new ItemStack(Material.valueOf(section.getString(path + ".Material")));
                 } catch (IllegalArgumentException e) {
-                    material = BPItems.UNKNOWN_MATERIAL;
+                    bankItem = BPItems.UNKNOWN_ITEM;
                 }
             }
-            bankItem = new ItemStack(material);
 
             if (glow) glow(bankItem);
             banksListGui.setItem(slot, bankItem);
@@ -101,7 +98,6 @@ public class BankListGui {
         int slot = 0;
         for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
             BankReader reader = new BankReader(bankName);
-
             if (Values.MULTIPLE_BANKS.isShowNotAvailableBanks() && !reader.isAvailable(p)) continue;
 
             ItemStack item = banksList.getItem(slot);

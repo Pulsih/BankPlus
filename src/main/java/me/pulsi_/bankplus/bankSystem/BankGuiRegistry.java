@@ -83,18 +83,17 @@ public class BankGuiRegistry {
             ItemStack[] content = null;
             ConfigurationSection items = bankConfig.getConfigurationSection("Items");
             if (items != null) {
-                Inventory inv = Bukkit.createInventory(null, bank.getSize(), "");
+                Inventory inv = Bukkit.createInventory(null, bank.getSize());
+
                 for (String item : items.getKeys(false)) {
                     ConfigurationSection itemValues = items.getConfigurationSection(item);
                     if (itemValues == null) continue;
 
-                    String material = itemValues.getString("Material");
-                    if (material == null) continue;
-
                     ItemStack guiItem;
-                    if (material.startsWith("HEAD")) guiItem = BPItems.getHead(itemValues);
+                    String material = itemValues.getString("Material");
+
+                    if (material.startsWith("HEAD")) guiItem = BPItems.getHead(material);
                     else guiItem = BPItems.createItemStack(itemValues);
-                    if (guiItem == null) continue;
 
                     ItemMeta meta = guiItem.getItemMeta();
                     String displayname = itemValues.getString("Displayname");

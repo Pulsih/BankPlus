@@ -59,19 +59,19 @@ public class BankUtils {
 
         Inventory bank = Bukkit.createInventory(new BankHolder(), baseBank.getSize(), title);
         bank.setContents(baseBank.getContent());
-        placeHeads(bank, p, identifier);
-        updateMeta(bank, p, identifier);
+        placeHeads(bank, p, baseBank);
+        updateMeta(bank, p, baseBank);
 
         long delay = baseBank.getUpdateDelay();
-        if (delay >= 0) player.setBankUpdatingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE, () -> updateMeta(bank, p, identifier), delay, delay));
+        if (delay >= 0) player.setBankUpdatingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE, () -> updateMeta(bank, p, baseBank), delay, delay));
 
         player.setOpenedBank(baseBank);
         BPUtils.playSound("PERSONAL", p);
         p.openInventory(bank);
     }
 
-    private static void placeHeads(Inventory bank, Player p, String identifier) {
-        ConfigurationSection items = new BankReader(identifier).getBank().getItems();
+    private static void placeHeads(Inventory bank, Player p, Bank baseBank) {
+        ConfigurationSection items = baseBank.getItems();
         if (items == null) return;
 
         for (String item : items.getKeys(false)) {
@@ -79,19 +79,18 @@ public class BankUtils {
             if (itemValues == null) continue;
 
             String material = itemValues.getString("Material");
-            if (material == null || !material.startsWith("HEAD")) continue;
+            if (material == null || !material.equals("HEAD-%PLAYER%")) continue;
 
             try {
-                bank.setItem(itemValues.getInt("Slot") - 1, BPItems.getHead(material, p));
+                bank.setItem(itemValues.getInt("Slot") - 1, BPItems.getHead(p));
             } catch (ArrayIndexOutOfBoundsException e) {
-                bank.addItem(BPItems.getHead(material, p));
+                bank.addItem(BPItems.getHead(p));
             }
         }
     }
 
-    private static void updateMeta(Inventory bank, Player p, String identifier) {
-        Bukkit.broadcastMessage("UPDATE");
-        ConfigurationSection items = new BankReader(identifier).getBank().getItems();
+    private static void updateMeta(Inventory bank, Player p, Bank baseBank) {
+        ConfigurationSection items = baseBank.getItems();
         if (items == null) return;
 
         for (String item : items.getKeys(false)) {
