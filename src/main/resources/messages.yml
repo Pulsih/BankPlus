@@ -2,7 +2,7 @@
 # Made by Pulsi_, Version v6.0
 
 # * Placeholders *
-# BankPlus messages support placeholderapi, and you can
+# BankPlus messages support PlaceholderApi, and you can
 # use every type of placeholder inside the messages.
 
 # Enable the alert message when a message is missing in the file.
@@ -38,6 +38,7 @@ Multiple-Bank-Others: "%prefix% &f%player% &ahas a total amount of &f%amount_for
 Set-Message: "%prefix% &aYou have set &f%player%'s &abank balance to &f%amount_formatted%&a!"
 Add-Message: "%prefix% &aYou have added &f%amount_formatted% Money &ato &f%player%'s &abank balance!"
 Remove-Message: "%prefix% &aYou have removed &f%amount_formatted% &amoney to &f%player%'s &abank balance!"
+Force-Open: "%prefix% &aSuccessfully forced &f%player% &ato open their &f%bank% &abank!"
 Set-Level-Message: "%prefix% &aYou have set &f%player%'s &abank level to &f%level%&a!"
 Pay-Message: "%prefix% &aYou have added &f%amount_formatted% Money &ato &f%player%'s &abank balance!"
 Chat-Deposit: "%prefix% &aType an amount in chat to deposit, type 'exit' to exit"

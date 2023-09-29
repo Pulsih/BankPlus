@@ -34,17 +34,17 @@ public class LoanCmd extends BPCommand {
         Player p = (Player) s;
 
         if (args.length > 1) {
-            if (args[1].toLowerCase().equals("accept")) {
+            if (args[1].equalsIgnoreCase("accept")) {
                 LoanUtils.acceptRequest(p);
                 return false;
             }
 
-            if (args[1].toLowerCase().equals("deny")) {
+            if (args[1].equalsIgnoreCase("deny")) {
                 LoanUtils.denyRequest(p);
                 return false;
             }
 
-            if (args[1].toLowerCase().equals("cancel")) {
+            if (args[1].equalsIgnoreCase("cancel")) {
                 LoanUtils.cancelRequest(p);
                 return false;
             }
@@ -111,11 +111,11 @@ public class LoanCmd extends BPCommand {
         Player target = args.length > 1 ? Bukkit.getPlayerExact(args[1]) : null;
 
         if (args.length == 2) {
-            if (LoanUtils.hasRequest(p))
-                return BPArgs.getArgs(args, "accept", "deny");
-
             if (LoanUtils.sentRequest(p))
                 return BPArgs.getArgs(args, "cancel");
+
+            if (LoanUtils.hasRequest(p))
+                return BPArgs.getArgs(args, "accept", "deny");
             return null;
         }
 

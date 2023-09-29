@@ -94,11 +94,13 @@ public class BPInterest {
         BankPlus.INSTANCE.getTaskManager().setInterestTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, this::loopInterest, 10L));
     }
 
-    private void giveInterest(Player p) {
+    public void giveInterest(Player p) {
         if (!p.hasPermission("bankplus.receive.interest") || (Values.CONFIG.isIgnoringAfkPlayers() && BankPlus.INSTANCE.getAfkManager().isAFK(p))) return;
 
         BigDecimal interestAmount = new BigDecimal(0);
-        for (String bankName : new BankReader().getAvailableBanks(p)) {
+        List<String> availableBanks = new BankReader().getAvailableBanks(p);
+
+        for (String bankName : availableBanks) {
 
             BigDecimal bankBalance = economy.getBankBalance(p, bankName);
             BankReader reader = new BankReader(bankName);
@@ -117,11 +119,13 @@ public class BPInterest {
             economy.addBankBalance(p, interestMoney, bankName, TransactionType.INTEREST);
             interestAmount = interestMoney;
         }
-        if (Values.MESSAGES.isInterestBroadcastEnabled())
-            BPMessages.send(p, Values.MESSAGES.getMultiInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
+        if (!Values.MESSAGES.isInterestBroadcastEnabled()) return;
+
+        if (availableBanks.size() > 1) BPMessages.send(p, Values.MESSAGES.getMultiInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
+        else BPMessages.send(p, Values.MESSAGES.getInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
     }
 
-    private void giveInterest(OfflinePlayer[] players) {
+    public void giveInterest(OfflinePlayer[] players) {
         Permission permission = BankPlus.INSTANCE.getPermissions();
         if (permission == null) {
             BPLogger.warn("Cannot give offline interest, no permission plugin found!");
@@ -130,7 +134,7 @@ public class BPInterest {
 
         String perm = Values.CONFIG.getInterestOfflinePermission();
         for (OfflinePlayer p : players) {
-            if ((System.currentTimeMillis() - p.getLastSeen()) > Values.CONFIG.getOfflineInterestLimit()) continue;
+            if (p.isOnline() || (System.currentTimeMillis() - p.getLastSeen()) > Values.CONFIG.getOfflineInterestLimit()) continue;
 
             boolean hasPermission = false;
             for (World world : Bukkit.getWorlds()) {

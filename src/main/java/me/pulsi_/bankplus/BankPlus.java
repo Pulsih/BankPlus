@@ -25,6 +25,8 @@ import java.net.URL;
 
 public final class BankPlus extends JavaPlugin {
 
+    private final String actualVersion = "5.9";
+
     public static BankPlus INSTANCE;
 
     private BPEconomy bpEconomy;
@@ -226,7 +228,7 @@ public final class BankPlus extends JavaPlugin {
             BPLogger.warn("Could not check for updates! (" + e.getMessage() + ")");
         }
 
-        if (!version.toLowerCase().contains("-alpha")) updated = version.equals(newVersion);
+        if (!version.toLowerCase().contains("-alpha")) updated = actualVersion.equals(newVersion);
         else {
             if (!Values.CONFIG.silentInfoMessages()) BPLogger.info("You are using an alpha version of the plugin, please report any bug or problem found in my discord!");
             String number = version.split("-")[0];
