@@ -24,8 +24,7 @@ public class HelpCmd extends BPCommand {
 
     @Override
     public boolean onCommand(CommandSender s, String[] args) {
-        if (confirm(s)) return false;
-        BPMessages.send(s, "Help-Message");
+        if (!confirm(s)) BPMessages.send(s, "Help-Message");
         return true;
     }
 

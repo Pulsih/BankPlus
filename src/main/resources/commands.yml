@@ -1,7 +1,7 @@
 # Put "" to not send the message.
 # The cooldown must be more than 0 to work.
 addall:
-  usage: "%prefix% &cUsage: &7/bank addall [amount] [bankName]"
+  usage: "%prefix% &cUsage: &7/bank addall [amount] <bankName>"
   need-confirm: true
   confirm-cooldown: 5
   confirm-message: "%prefix% &cWarning, this command is going to add to every online player (%server_online% players) the specified
@@ -10,7 +10,7 @@ addall:
   cooldown: 0
   cooldown-message: ""
 add:
-  usage: "%prefix% &cUsage: &7/bank add [player] [amount] [bankName]"
+  usage: "%prefix% &cUsage: &7/bank add [player] [amount] <bankName>"
   need-confirm: false
   confirm-cooldown: 0
   confirm-message: ""
@@ -25,7 +25,7 @@ balance:
   cooldown: 0
   cooldown-message: ""
 customdeposit:
-  usage: "%prefix% &cUsage: &7/bank customdeposit [bankName]"
+  usage: "%prefix% &cUsage: &7/bank customdeposit <bankName>"
   need-confirm: false
   confirm-cooldown: 0
   confirm-message: ""
@@ -33,7 +33,7 @@ customdeposit:
   cooldown: 0
   cooldown-message: ""
 customwithdraw:
-  usage: "%prefix% &cUsage: &7/bank customwithdraw [bankName]"
+  usage: "%prefix% &cUsage: &7/bank customwithdraw <bankName>"
   need-confirm: false
   confirm-cooldown: 0
   confirm-message: ""
@@ -41,7 +41,7 @@ customwithdraw:
   cooldown: 0
   cooldown-message: ""
 deposit:
-  usage: "%prefix% &cUsage: &7/bank deposit [amount] [bankName]"
+  usage: "%prefix% &cUsage: &7/bank deposit [amount] <bankName>"
   need-confirm: false
   confirm-cooldown: 0
   confirm-message: ""
@@ -49,7 +49,7 @@ deposit:
   cooldown: 0
   cooldown-message: ""
 forceopen:
-  usage: "%prefix% &cUsage: &7/bank forceopen [player] [bankName]"
+  usage: "%prefix% &cUsage: &7/bank forceopen [player] <bankName>"
   need-confirm: false
   confirm-cooldown: 0
   confirm-message: ""
@@ -57,7 +57,7 @@ forceopen:
   cooldown: 0
   cooldown-message: ""
 forceupgrade:
-  usage: "%prefix% &cUsage: &7/bank forceupgrade [player] [bankName]"
+  usage: "%prefix% &cUsage: &7/bank forceupgrade [player] <bankName>"
   need-confirm: false
   confirm-cooldown: 0
   confirm-message: ""
@@ -117,14 +117,14 @@ pay:
   cooldown: 0
   cooldown-message: ""
 reload:
-  need-confirm: true
-  confirm-cooldown: 5
-  confirm-message: "%prefix% &cAre you sure to reload the plugin? This is not a simple operation and many reloads could be heavy for your server."
+  need-confirm: false
+  confirm-cooldown: 0
+  confirm-message: ""
   has-cooldown: false
   cooldown: 0
   cooldown-message: ""
 remove:
-  usage: "%prefix% &cUsage: &7/bank remove [player] [amount] [bankName]"
+  usage: "%prefix% &cUsage: &7/bank remove [player] [amount] <bankName>"
   need-confirm: false
   confirm-cooldown: 0
   confirm-message: ""
@@ -156,7 +156,7 @@ saveallbankbalances:
   cooldown: 0
   cooldown-message: ""
 set:
-  usage: "%prefix% &cUsage: &7/bank set [player] [amount] [bankName]"
+  usage: "%prefix% &cUsage: &7/bank set [player] [amount] <bankName>"
   need-confirm: false
   confirm-cooldown: 0
   confirm-message: ""
@@ -164,7 +164,7 @@ set:
   cooldown: 0
   cooldown-message: ""
 setlevel:
-  usage: "%prefix% &cUsage: &7/bank setlevel [level] [bankName]"
+  usage: "%prefix% &cUsage: &7/bank setlevel [level] <bankName>"
   need-confirm: false
   confirm-cooldown: 0
   confirm-message: ""
@@ -179,7 +179,7 @@ updatebanktop:
   cooldown: 0
   cooldown-message: ""
 upgrade:
-  usage: "%prefix% &cUsage: &7/bank upgrade [bankName]"
+  usage: "%prefix% &cUsage: &7/bank upgrade <bankName>"
   need-confirm: false
   confirm-cooldown: 0
   confirm-message: ""
@@ -195,7 +195,7 @@ view:
   cooldown: 0
   cooldown-message: ""
 withdraw:
-  usage: "%prefix% &cUsage: &7/bank withdraw [amount] [bankName]"
+  usage: "%prefix% &cUsage: &7/bank withdraw [amount] <bankName>"
   need-confirm: false
   confirm-cooldown: 0
   confirm-message: ""

@@ -5,6 +5,7 @@ import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.BPArgs;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
+import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -43,11 +44,8 @@ public class SetLevelCmd extends BPCommand {
         String level = args[2];
         if (BPUtils.isInvalidNumber(level, s)) return false;
 
-        if (args.length == 3) {
-            BPMessages.send(s, "Specify-Bank");
-            return false;
-        }
-        String bankName = args[3];
+        String bankName = Values.CONFIG.getMainGuiName();
+        if (args.length > 3) bankName = args[3];
 
         BankReader reader = new BankReader(bankName);
         if (!reader.exist()) {

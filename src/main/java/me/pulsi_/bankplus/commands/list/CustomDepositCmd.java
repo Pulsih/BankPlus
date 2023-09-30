@@ -5,6 +5,7 @@ import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.BPArgs;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
+import me.pulsi_.bankplus.values.Values;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -35,7 +36,9 @@ public class CustomDepositCmd extends BPCommand {
             return false;
         }
 
-        String bankName = args[1];
+        String bankName = Values.CONFIG.getMainGuiName();
+        if (args.length > 1) bankName = args[1];
+
         if (!new BankReader(bankName).exist()) {
             BPMessages.send(s, "Invalid-Bank");
             return false;

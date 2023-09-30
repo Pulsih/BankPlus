@@ -44,6 +44,10 @@ public class BPVersions {
             ConfigurationSection section = oldConfig.getConfigurationSection("Banks");
             if (section != null) {
                 for (String bankName : section.getKeys(false)) {
+                    if (Values.CONFIG.getMainGuiName().equals(bankName)) {
+                        newConfig.set("banks." + bankName + ".money", oldConfig.get("Money"));
+                        newConfig.set("banks." + bankName + ".level", oldConfig.get("Banks." + bankName + ".Level"));
+                    }
                     newConfig.set("banks." + bankName + ".money", oldConfig.get("Banks." + bankName + ".Money"));
                     newConfig.set("banks." + bankName + ".level", oldConfig.get("Banks." + bankName + ".Level"));
                 }

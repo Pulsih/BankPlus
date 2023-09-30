@@ -30,8 +30,7 @@ public class InterestMillisCmd extends BPCommand {
             BPMessages.send(s, "Interest-Disabled");
             return false;
         }
-        if (confirm(s)) return false;
-        BPMessages.send(s, "Interest-Time", "%time%$" + BankPlus.INSTANCE.getInterest().getInterestCooldownMillis());
+        if (!confirm(s)) BPMessages.send(s, "Interest-Time", "%time%$" + BankPlus.INSTANCE.getInterest().getInterestCooldownMillis());
         return true;
     }
 

@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.commands.list;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.utils.BPArgs;
 import me.pulsi_.bankplus.utils.BPMessages;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
@@ -13,14 +14,17 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public class ResetAllCmd extends BPCommand {
 
-    private final String identifier;
+    private final BPEconomy economy;
+    private final Economy vaultEconomy;
 
     public ResetAllCmd(String... aliases) {
         super(aliases);
-        this.identifier = aliases[0];
+        economy = BankPlus.getBPEconomy();
+        vaultEconomy = BankPlus.INSTANCE.getVaultEconomy();
     }
 
     @Override
@@ -34,57 +38,40 @@ public class ResetAllCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String args[]) {
+    public boolean onCommand(CommandSender s, String[] args) {
         String mode = args[1];
         if (!mode.equalsIgnoreCase("delete") && !mode.equalsIgnoreCase("maintain")) {
-            BPMessages.send(s,
-                    BPMessages.getPrefix() + " &cInvalid reset mode! Choose one between &a\"delete\" &cand &a\"maintain\"&c."
-                    , true);
+            BPMessages.send(s, "%prefix% &cInvalid reset mode! Choose one between &a\"delete\" &cand &a\"maintain\"&c.", true);
             return false;
         }
 
         if (confirm(s)) return false;
-        resetAll(s, 0, mode);
+
+        BPMessages.send(s, "%prefix% &aSuccessfully reset all players money! &8(&aWith &f" + mode + " &amode&8)", true);
+        resetAll(Arrays.asList(Bukkit.getOfflinePlayers()), mode);
         return true;
     }
 
     @Override
-    public List<String> tabCompletion(CommandSender s, String args[]) {
-        if (!s.hasPermission("bankplus." + identifier)) return null;
-
-        if (args.length == 2) {
-            List<String> args1 = new ArrayList<>();
-
-            for (String arg : Arrays.asList("delete", "maintain"))
-                if (arg.startsWith(args[1].toLowerCase())) args1.add(arg);
-            return args1;
-        }
+    public List<String> tabCompletion(CommandSender s, String[] args) {
+        if (args.length == 2)
+            return BPArgs.getArgs(args, "delete", "maintain");
         return null;
     }
 
-    private void resetAll(CommandSender s, int count, String mode) {
-        BPEconomy economy = BankPlus.getBPEconomy();
-        Economy vaultEconomy = BankPlus.INSTANCE.getVaultEconomy();
+    private void resetAll(List<OfflinePlayer> offlinePlayers, String mode) {
+        List<OfflinePlayer> copy = new ArrayList<>(offlinePlayers);
+        Set<String> banks = BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet();
 
-        int temp = 0;
-        for (int i = 0; i < 60; i++) {
-            if (count + temp >= Bukkit.getOfflinePlayers().length) {
-                BPMessages.send(s, BPMessages.getPrefix() + " &2Task finished!", true);
-                return;
-            }
+        for (int i = 0; i < 80; i++) {
+            if (copy.isEmpty()) return;
+            OfflinePlayer p = copy.remove(0);
 
-            OfflinePlayer p = Bukkit.getOfflinePlayers()[count + temp];
-            if (mode.equalsIgnoreCase("maintain")) {
-                BigDecimal bal = economy.getBankBalance(p);
-                vaultEconomy.depositPlayer(p, bal.doubleValue());
-            }
-
-            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
-                economy.setBankBalance(p, BigDecimal.valueOf(0), bankName);
-            temp++;
+            if (mode.equalsIgnoreCase("maintain")) vaultEconomy.depositPlayer(p, economy.getBankBalance(p).doubleValue());
+            for (String bankName : banks) economy.setBankBalance(p, BigDecimal.valueOf(0), bankName);
         }
 
-        int finalTemp = temp + 1;
-        Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> resetAll(s, count + finalTemp, mode), 2);
+        if (!copy.isEmpty())
+            Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> resetAll(copy, mode), 1);
     }
 }

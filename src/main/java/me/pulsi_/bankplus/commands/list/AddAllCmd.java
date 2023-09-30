@@ -7,6 +7,7 @@ import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPArgs;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
+import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -17,8 +18,11 @@ import java.util.List;
 
 public class AddAllCmd extends BPCommand {
 
+    private final BPEconomy economy;
+
     public AddAllCmd(String... aliases) {
         super(aliases);
+        economy = BankPlus.getBPEconomy();
     }
 
     @Override
@@ -32,10 +36,12 @@ public class AddAllCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String args[]) {
+    public boolean onCommand(CommandSender s, String[] args) {
         String num = args[1];
         if (BPUtils.isInvalidNumber(num, s)) return false;
-        String bankName = args[2];
+
+        String bankName = Values.CONFIG.getMainGuiName();
+        if (args.length > 2) bankName = args[2];
 
         BankReader reader = new BankReader(bankName);
         if (!reader.exist()) {
@@ -44,7 +50,9 @@ public class AddAllCmd extends BPCommand {
         }
 
         if (confirm(s)) return false;
-        multiAddAll(s, new ArrayList<>(Bukkit.getOnlinePlayers()), new BankReader(bankName), new BigDecimal(num), bankName);
+
+        BPMessages.send(s, "%prefix% &aSuccessfully added &f" + num + " &amoney to all online players!", true);
+        addAll(new ArrayList<>(Bukkit.getOnlinePlayers()), new BigDecimal(num), reader);
         return true;
     }
 
@@ -58,30 +66,22 @@ public class AddAllCmd extends BPCommand {
         return null;
     }
 
-    private void multiAddAll(CommandSender s, List<Player> players, BankReader reader, BigDecimal amount, String bankName) {
-        if (players.size() == 0) {
-            BPMessages.send(s, BPMessages.getPrefix() + " &2Task finished!", true);
-            return;
-        }
+    private void addAll(List<Player> onlinePlayers, BigDecimal amount, BankReader reader) {
+        List<Player> copy = new ArrayList<>(onlinePlayers);
+        String bankName = reader.getBank().getIdentifier();
 
-        List<Player> newPlayers = new ArrayList<>(players);
+        for (int i = 0; i < 80; i++) {
+            if (copy.isEmpty()) return;
+            Player p = copy.remove(0);
 
-        int count = 1;
-        for (Player p : players) {
-            if (count >= 30) {
-                Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> multiAddAll(s, newPlayers, reader, amount, bankName), 1);
-                return;
-            }
-
-            BPEconomy economy = BankPlus.getBPEconomy();
             BigDecimal capacity = reader.getCapacity(p), balance = economy.getBankBalance(p, bankName);
+            if (capacity.subtract(balance).doubleValue() <= 0) continue;
 
-            if (capacity.subtract(balance).doubleValue() > 0) {
-                if (balance.add(amount).doubleValue() < capacity.doubleValue()) economy.addBankBalance(p, amount, bankName);
-                else economy.setBankBalance(p, capacity, bankName);
-            }
-            count++;
+            if (balance.add(amount).doubleValue() < capacity.doubleValue()) economy.addBankBalance(p, amount, bankName);
+            else economy.setBankBalance(p, capacity, bankName);
         }
-        BPMessages.send(s, BPMessages.getPrefix() + " &2Task finished!", true);
+
+        if (!onlinePlayers.isEmpty())
+            Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> addAll(copy, amount, reader), 1);
     }
 }
