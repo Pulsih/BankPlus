@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class BPPlaceholders extends PlaceholderExpansion {
 
@@ -135,12 +136,9 @@ public class BPPlaceholders extends PlaceholderExpansion {
             if (!reader.hasNextLevel(p))
                 return Values.CONFIG.getUpgradesMaxedPlaceholder();
 
-            ItemStack requiredItems = reader.getLevelRequiredItems(reader.getCurrentLevel(p) + 1);
+            List<ItemStack> requiredItems = reader.getLevelRequiredItems(reader.getCurrentLevel(p) + 1);
             if (requiredItems == null) return Values.CONFIG.getUpgradesNoRequiredItems();
-
-            int amount = requiredItems.getAmount();
-            String item = (requiredItems.getType() + (amount > 1 ? "s" : "")).toLowerCase();
-            return amount + " " + item;
+            return BPUtils.getRequiredItems(requiredItems);
         }
 
         if (identifier.startsWith("next_level_interest_rate")) {

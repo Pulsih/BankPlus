@@ -25,7 +25,7 @@ import java.net.URL;
 
 public final class BankPlus extends JavaPlugin {
 
-    private final String actualVersion = "5.9";
+    public static final String actualVersion = "5.9";
 
     public static BankPlus INSTANCE;
 

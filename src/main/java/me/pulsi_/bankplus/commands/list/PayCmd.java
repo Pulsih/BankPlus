@@ -6,6 +6,7 @@ import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.BPArgs;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
+import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -48,13 +49,10 @@ public class PayCmd extends BPCommand {
         BigDecimal amount = new BigDecimal(num);
         Player payer = (Player) s;
 
-        if (args.length == 3 || args.length == 4) {
-            BPMessages.send(s, "Specify-Bank");
-            return false;
-        }
+        String fromBankName = Values.CONFIG.getMainGuiName();
+        if (args.length > 3) fromBankName = args[3];
 
-        String fromBank = args[3];
-        BankReader fromReader = new BankReader(fromBank);
+        BankReader fromReader = new BankReader(fromBankName);
         if (fromReader.exist()) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
@@ -64,8 +62,10 @@ public class PayCmd extends BPCommand {
             return false;
         }
 
-        String toBank = args[4];
-        BankReader toReader = new BankReader(toBank);
+        String toBankName = Values.CONFIG.getMainGuiName();
+        if (args.length > 4) toBankName = args[4];
+
+        BankReader toReader = new BankReader(toBankName);
         if (toReader.exist()) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
@@ -75,8 +75,7 @@ public class PayCmd extends BPCommand {
             return false;
         }
 
-        if (confirm(s)) return false;
-        BankPlus.getBPEconomy().pay((Player) s, target, amount, fromBank, toBank);
+        if (!confirm(s)) BankPlus.getBPEconomy().pay((Player) s, target, amount, fromBankName, toBankName);
         return true;
     }
 

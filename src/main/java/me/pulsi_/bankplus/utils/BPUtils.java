@@ -15,6 +15,7 @@ import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.math.BigDecimal;
@@ -419,5 +420,20 @@ public class BPUtils {
 
     public static void callEvent(Event event) {
         Bukkit.getScheduler().runTask(BankPlus.INSTANCE, () -> Bukkit.getPluginManager().callEvent(event));
+    }
+
+    public static String getRequiredItems(List<ItemStack> requiredItems) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < requiredItems.size(); i++) {
+            ItemStack item = requiredItems.get(i);
+            int amount = item.getAmount();
+            String material = (item.getType() + (amount > 1 ? "s" : "")).toLowerCase();
+
+            builder.append(amount).append(" ").append(material);
+            if (i == requiredItems.size() - 1) continue;
+            if (i + 1 == requiredItems.size() - 1) builder.append(" and ");
+            else builder.append(", ");
+        }
+        return builder.toString();
     }
 }

@@ -27,16 +27,15 @@ public class PlayerChatMethod {
         String message = ChatColor.stripColor(e.getMessage());
 
         if (hasTypedExit(message, p, e, identifier)) return;
+        e.setCancelled(true);
 
         BigDecimal amount;
         try {
             amount = new BigDecimal(message);
         } catch (NumberFormatException ex) {
-            e.setCancelled(true);
             BPMessages.send(p, "Invalid-Number");
             return;
         }
-        e.setCancelled(true);
 
         BPEconomy economy = BankPlus.getBPEconomy();
 

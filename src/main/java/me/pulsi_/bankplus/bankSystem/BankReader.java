@@ -17,6 +17,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -184,34 +185,46 @@ public class BankReader {
      * @param level The level to check.
      * @return The itemstack representing the item needed with its amount set, null if not specified.
      */
-    public ItemStack getLevelRequiredItems(int level) {
-        if (!hasUpgrades()) return null;
+    public List<ItemStack> getLevelRequiredItems(int level) {
+        List<ItemStack> items = new ArrayList<>();
+        if (!hasUpgrades()) return items;
 
-        String items = bank.getUpgrades().getString(level + ".Required-Items");
-        if (items == null || items.isEmpty()) return null;
+        String requiredItemsString = bank.getUpgrades().getString(level + ".Required-Items");
+        if (requiredItemsString == null || requiredItemsString.isEmpty()) return items;
 
-        ItemStack itemStack = null;
-        int amount = 1;
-        String item;
+        List<String> configItems = new ArrayList<>();
+        if (!requiredItemsString.contains(",")) configItems.add(requiredItemsString);
+        else configItems.addAll(Arrays.asList(requiredItemsString.split(",")));
 
-        if (!items.contains("-")) item = items;
-        else {
-            String[] split = items.split("-");
-            item = split[0];
-            try {
-                amount = Integer.parseInt(split[1]);
-            } catch (NumberFormatException e) {
-                BPLogger.warn("Invalid required items amount in the " + level + "* upgrades section, file: " + bank.getIdentifier() + ".yml");
+        for (String splitItem : configItems) {
+            if (!splitItem.contains("-")) {
+                try {
+                    items.add(new ItemStack(Material.valueOf(splitItem)));
+                } catch (IllegalArgumentException e) {
+                    BPLogger.warn("The bank \"" + bank.getIdentifier() + "\" contains an invalid item in the \"Required-Items\" path at level *" + level + ".");
+                }
+            } else {
+                String[] split = splitItem.split("-");
+                ItemStack item;
+                try {
+                    item = new ItemStack(Material.valueOf(split[0]));
+                } catch (IllegalArgumentException e) {
+                    BPLogger.warn("The bank \"" + bank.getIdentifier() + "\" contains an invalid item in the \"Required-Items\" path at level *" + level + ".");
+                    continue;
+                }
+                int amount = 1;
+                try {
+                    amount = Integer.parseInt(split[1]);
+                } catch (NumberFormatException e) {
+                    BPLogger.warn("The bank \"" + bank.getIdentifier() + "\" contains an invalid number in the \"Required-Items\" path at level *" + level + ".");
+                }
+
+                item.setAmount(amount);
+                items.add(item);
             }
         }
 
-        try {
-            itemStack = new ItemStack(Material.valueOf(item), Math.max(amount, 1));
-        } catch (NumberFormatException e) {
-            BPLogger.warn("Invalid required items material in the " + level + "* upgrades section, file: " + bank.getIdentifier() + ".yml");
-        }
-
-        return itemStack;
+        return items;
     }
 
     /**
@@ -340,23 +353,31 @@ public class BankReader {
 
         int nextLevel = getCurrentLevel(p) + 1;
 
-        ItemStack requiredItems = getLevelRequiredItems(nextLevel);
-        if (requiredItems != null) {
-            int amount = requiredItems.getAmount();
-
-            int playerAmount = 0;
+        List<ItemStack> requiredItems = getLevelRequiredItems(nextLevel);
+        if (!requiredItems.isEmpty()) {
             boolean hasItems = false;
-            for (ItemStack content : p.getInventory().getContents()) {
-                if (content == null || content.getType() != requiredItems.getType()) continue;
-                playerAmount += content.getAmount();
 
-                if (playerAmount < amount) continue;
+            for (ItemStack item : requiredItems) {
+                int amount = item.getAmount();
+                int playerAmount = 0;
+
+                boolean hasItem = false;
+                for (ItemStack content : p.getInventory().getContents()) {
+                    if (content == null || content.getType() != item.getType()) continue;
+                    playerAmount += content.getAmount();
+
+                    if (playerAmount < amount) continue;
+                    hasItem = true;
+                    break;
+                }
+                if (!hasItem) {
+                    hasItems = false;
+                    break;
+                }
                 hasItems = true;
-                break;
             }
             if (!hasItems) {
-                String item = (requiredItems.getType() + (amount > 1 ? "s" : "")).toLowerCase();
-                BPMessages.send(p, "Insufficient-Items", "%amount%$" + amount, "%item%$" + item);
+                BPMessages.send(p, "Insufficient-Items", "%items%$" + BPUtils.getRequiredItems(requiredItems));
                 return;
             }
         }
@@ -370,7 +391,7 @@ public class BankReader {
                 return;
             }
 
-            if (removeRequiredItems(nextLevel) && requiredItems!= null) p.getInventory().removeItem(requiredItems);
+            if (removeRequiredItems(nextLevel) && !requiredItems.isEmpty()) for (ItemStack item : requiredItems) p.getInventory().removeItem(item);
             economy.removeBankBalance(p, cost, bank.getIdentifier());
         } else {
 
@@ -382,7 +403,7 @@ public class BankReader {
                 return;
             }
 
-            if (removeRequiredItems(nextLevel) && requiredItems!= null) p.getInventory().removeItem(requiredItems);
+            if (removeRequiredItems(nextLevel) && !requiredItems.isEmpty()) for (ItemStack item : requiredItems) p.getInventory().removeItem(item);
             economy.withdrawPlayer(p, cost.doubleValue());
         }
 

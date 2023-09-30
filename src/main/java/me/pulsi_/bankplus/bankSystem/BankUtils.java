@@ -98,16 +98,28 @@ public class BankUtils {
             if (itemValues == null) continue;
 
             ItemStack i = bank.getItem(itemValues.getInt("Slot") - 1);
-            if (i != null) setMeta(itemValues, i, p);
+            if (i != null) setMeta(itemValues, i, p, baseBank);
         }
     }
 
-    private static void setMeta(ConfigurationSection itemValues, ItemStack item, Player p) {
+    private static void setMeta(ConfigurationSection itemValues, ItemStack item, Player p, Bank baseBank) {
         ItemMeta meta = item.getItemMeta();
 
         String displayName = itemValues.getString("Displayname") == null ? "&c&l*CANNOT FIND DISPLAYNAME*" : itemValues.getString("Displayname");
         List<String> lore = new ArrayList<>();
-        for (String lines : itemValues.getStringList("Lore")) lore.add(BPChat.color(lines));
+
+        List<String> configLore = itemValues.getStringList("Lore");
+        if (!configLore.isEmpty()) for (String line : configLore) lore.add(BPChat.color(line));
+        else {
+            ConfigurationSection loreSection = itemValues.getConfigurationSection("Lore");
+            if (loreSection != null) {
+                int level = new BankReader(baseBank.getIdentifier()).getCurrentLevel(p);
+                List<String> defaultLore = loreSection.getStringList("Default"), leveLore = loreSection.getStringList(level + "");
+
+                if (!leveLore.isEmpty()) for (String line : leveLore) lore.add(BPChat.color(line));
+                else if (!defaultLore.isEmpty()) for (String line : defaultLore) lore.add(BPChat.color(line));
+            }
+        }
 
         if (BankPlus.INSTANCE.isPlaceholderAPIHooked()) {
             meta.setDisplayName(PlaceholderAPI.setPlaceholders(p, BPChat.color(displayName)));

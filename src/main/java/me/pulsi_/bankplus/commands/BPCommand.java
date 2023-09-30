@@ -98,8 +98,8 @@ public abstract class BPCommand {
     public boolean confirm(CommandSender s) {
         if (needConfirm()) {
             if (!confirm.contains(s.getName())) {
-                Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> confirm.remove(s.getName()), getConfirmCooldown() * 20);
-                if (getConfirmMessage() != null && !getConfirmMessage().equals(""))
+                Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> confirm.remove(s.getName()), getConfirmCooldown() * 20L);
+                if (getConfirmMessage() != null && !getConfirmMessage().isEmpty())
                     BPMessages.send(s, getConfirmMessage(), true);
                 confirm.add(s.getName());
                 return true;
@@ -109,11 +109,11 @@ public abstract class BPCommand {
         return false;
     }
 
-    public void execute(CommandSender s, String args[]) {
+    public void execute(CommandSender s, String[] args) {
         if (!BPUtils.hasPermission(s, getPermission()) || (playerOnly() && !BPUtils.isPlayer(s))) return;
 
         if (!skipUsageWarn() && args.length == 1) {
-            if (getUsage() != null && !getUsage().equals("")) BPMessages.send(s, getUsage(), true);
+            if (getUsage() != null && !getUsage().isEmpty()) BPMessages.send(s, getUsage(), true);
             return;
         }
 
@@ -121,12 +121,12 @@ public abstract class BPCommand {
 
         if (hasCooldown() && getCooldown() > 0 && !(s instanceof ConsoleCommandSender)) {
             if (cooldownMap.containsKey(s.getName()) && cooldownMap.get(s.getName()) > System.currentTimeMillis()) {
-                if (getCooldownMessage() != null && !getCooldownMessage().equals(""))
+                if (getCooldownMessage() != null && !getCooldownMessage().isEmpty())
                     BPMessages.send(s, getCooldownMessage(), true);
                 return;
             }
-            cooldownMap.put(s.getName(), System.currentTimeMillis() + (getCooldown() * 1000));
-            Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> cooldownMap.remove(s.getName()), getCooldown() * 20);
+            cooldownMap.put(s.getName(), System.currentTimeMillis() + (getCooldown() * 1000L));
+            Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> cooldownMap.remove(s.getName()), getCooldown() * 20L);
         }
     }
 
@@ -134,7 +134,7 @@ public abstract class BPCommand {
 
     public abstract boolean skipUsageWarn();
 
-    public abstract boolean onCommand(CommandSender s, String args[]);
+    public abstract boolean onCommand(CommandSender s, String[] args);
 
-    public abstract List<String> tabCompletion(CommandSender s, String args[]);
+    public abstract List<String> tabCompletion(CommandSender s, String[] args);
 }

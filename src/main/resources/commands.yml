@@ -93,7 +93,7 @@ interestmillis:
   cooldown: 0
   cooldown-message: ""
 loan:
-  usage: "%prefix% &cUsage: &7/bank loan [player] [amount] [fromBankName] [toBankName]"
+  usage: "%prefix% &cUsage: &7/bank loan [player] [amount] <fromBankName> <toBankName>"
   need-confirm: true
   confirm-cooldown: 5
   confirm-message: "%prefix% &aType again within 5 seconds to confirm your payment."
@@ -109,7 +109,7 @@ open:
   cooldown: 0
   cooldown-message: ""
 pay:
-  usage: "%prefix% &cUsage: &7/bank pay [player] [amount] [fromBankName] [toBankName]"
+  usage: "%prefix% &cUsage: &7/bank pay [player] [amount] <fromBankName> <toBankName>"
   need-confirm: true
   confirm-cooldown: 5
   confirm-message: "%prefix% &aType again within 5 seconds to confirm your payment."

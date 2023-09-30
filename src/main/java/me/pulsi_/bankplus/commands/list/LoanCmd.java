@@ -6,6 +6,7 @@ import me.pulsi_.bankplus.loanSystem.LoanUtils;
 import me.pulsi_.bankplus.utils.BPArgs;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
+import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -71,12 +72,9 @@ public class LoanCmd extends BPCommand {
         if (BPUtils.isInvalidNumber(num, p)) return false;
         BigDecimal amount = new BigDecimal(num);
 
-        if (args.length == 3 || args.length == 4) {
-            BPMessages.send(p, "Specify-Bank");
-            return false;
-        }
+        String fromBankName = Values.CONFIG.getMainGuiName();
+        if (args.length > 3) fromBankName = args[3];
 
-        String fromBankName = args[3];
         BankReader fromReader = new BankReader(fromBankName);
         if (!fromReader.exist()) {
             BPMessages.send(p, "Invalid-Bank");
@@ -87,7 +85,9 @@ public class LoanCmd extends BPCommand {
             return false;
         }
 
-        String toBankName = args[4];
+        String toBankName = Values.CONFIG.getMainGuiName();
+        if (args.length > 4) toBankName = args[4];
+
         BankReader toReader = new BankReader(toBankName);
         if (!toReader.exist()) {
             BPMessages.send(p, "Invalid-Bank");
@@ -98,8 +98,7 @@ public class LoanCmd extends BPCommand {
             return false;
         }
 
-        if (confirm(s)) return false;
-        LoanUtils.sendRequest(p, target, amount, fromBankName, toBankName);
+        if (!confirm(s)) LoanUtils.sendRequest(p, target, amount, fromBankName, toBankName);
         return true;
     }
 
