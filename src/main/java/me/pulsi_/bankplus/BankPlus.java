@@ -228,18 +228,14 @@ public final class BankPlus extends JavaPlugin {
             BPLogger.warn("Could not check for updates! (" + e.getMessage() + ")");
         }
 
-        if (!version.toLowerCase().contains("-alpha")) updated = actualVersion.equals(newVersion);
-        else {
-            if (!Values.CONFIG.silentInfoMessages()) BPLogger.info("You are using an alpha version of the plugin, please report any bug or problem found in my discord!");
-            String number = version.split("-")[0];
-            updated = version.equals(number);
-        }
+        if (version.toLowerCase().contains("-alpha") && !Values.CONFIG.silentInfoMessages())
+            BPLogger.info("You are using an alpha version of the plugin, please report any bug or problem found in my discord!");
+        updated = actualVersion.equals(newVersion);
 
         if (!Values.CONFIG.silentInfoMessages()) {
             if (updated) BPLogger.info("The plugin is updated!");
             else BPLogger.info("The plugin is outdated! Please download the latest version here: https://www.spigotmc.org/resources/%E2%9C%A8-bankplus-%E2%9C%A8.93130/");
         }
-
         return updated;
     }
 }

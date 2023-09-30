@@ -1,5 +1,6 @@
 package me.pulsi_.bankplus.utils;
 
+import com.google.common.collect.EnumMultiset;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.managers.BPConfigs;
 import me.pulsi_.bankplus.values.Values;
@@ -41,16 +42,10 @@ public class BPVersions {
             if (Values.CONFIG.notifyOfflineInterest()) newConfig.set("interest", interest);
             newConfig.set("debt", debt);
 
-            ConfigurationSection section = oldConfig.getConfigurationSection("Banks");
-            if (section != null) {
-                for (String bankName : section.getKeys(false)) {
-                    if (Values.CONFIG.getMainGuiName().equals(bankName)) {
-                        newConfig.set("banks." + bankName + ".money", oldConfig.get("Money"));
-                        newConfig.set("banks." + bankName + ".level", oldConfig.get("Banks." + bankName + ".Level"));
-                    }
-                    newConfig.set("banks." + bankName + ".money", oldConfig.get("Banks." + bankName + ".Money"));
-                    newConfig.set("banks." + bankName + ".level", oldConfig.get("Banks." + bankName + ".Level"));
-                }
+            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
+                if (Values.CONFIG.getMainGuiName().equals(bankName)) newConfig.set("banks." + bankName + ".money", oldConfig.get("Money") == null ? Values.CONFIG.getStartAmount() : oldConfig.get("Money"));
+                else newConfig.set("banks." + bankName + ".money", oldConfig.get("Banks." + bankName + ".Money") == null ? "0" : oldConfig.get("Banks." + bankName + ".Money"));
+                newConfig.set("banks." + bankName + ".level", oldConfig.get("Banks." + bankName + ".Level") == null ? "1" : oldConfig.get("Banks." + bankName + ".Level"));
             }
 
             try {
