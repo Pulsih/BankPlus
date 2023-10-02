@@ -1,6 +1,3 @@
-# Messages File of BankPlus
-# Made by Pulsi_, Version v6.0
-
 # * Placeholders *
 # BankPlus messages support PlaceholderApi, and you can
 # use every type of placeholder inside the messages.
@@ -18,7 +15,7 @@ Prefix: "&a&lBank&9&lPlus"
 #   - "in just one! :)"
 #
 # If you don't want a message to show put:
-# Message: '
+# Message: ""
 
 # System
 Reload-Started: "%prefix% &aThe plugin will not try to reload..."
@@ -39,6 +36,7 @@ Set-Message: "%prefix% &aYou have set &f%player%'s &abank balance to &f%amount_f
 Add-Message: "%prefix% &aYou have added &f%amount_formatted% Money &ato &f%player%'s &abank balance!"
 Remove-Message: "%prefix% &aYou have removed &f%amount_formatted% &amoney to &f%player%'s &abank balance!"
 Force-Open: "%prefix% &aSuccessfully forced &f%player% &ato open their &f%bank% &abank!"
+Force-Upgrade: "%prefix% &aSuccessfully forced &f%player% &ato upgrade their &f%bank% &abank!"
 Set-Level-Message: "%prefix% &aYou have set &f%player%'s &abank level to &f%level%&a!"
 Pay-Message: "%prefix% &aYou have added &f%amount_formatted% Money &ato &f%player%'s &abank balance!"
 Chat-Deposit: "%prefix% &aType an amount in chat to deposit, type 'exit' to exit"

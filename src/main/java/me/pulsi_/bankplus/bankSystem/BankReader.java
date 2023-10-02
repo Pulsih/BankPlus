@@ -15,6 +15,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -331,9 +332,10 @@ public class BankReader {
 
     public void setLevel(OfflinePlayer p, int level) {
         BPPlayerFiles files = new BPPlayerFiles(p);
-        FileConfiguration config = files.getPlayerConfig();
+        File file = files.getPlayerFile();
+        FileConfiguration config = files.getPlayerConfig(file);
         config.set("banks." + bank.getIdentifier() + ".level", level);
-        files.savePlayerFile(config, true);
+        files.savePlayerFile(config, file, true);
     }
 
     /**
@@ -342,10 +344,6 @@ public class BankReader {
      * @param p The player.
      */
     public void upgradeBank(Player p) {
-        if (!isAvailable(p)) {
-            BPMessages.send(p, "Cannot-Access-Bank");
-            return;
-        }
         if (!hasNextLevel(p)) {
             BPMessages.send(p, "Bank-Max-Level");
             return;

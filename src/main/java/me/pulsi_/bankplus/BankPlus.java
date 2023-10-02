@@ -129,10 +129,7 @@ public final class BankPlus extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        Bukkit.getOnlinePlayers().forEach(p -> bpEconomy.saveBankBalances(p, false));
         if (Values.CONFIG.isInterestEnabled()) interest.saveInterest();
-        LoanUtils.saveLoans();
-
         bpData.shutdownPlugin();
     }
 

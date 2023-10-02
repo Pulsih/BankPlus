@@ -45,27 +45,6 @@ public class BPPlayerFiles {
         return YamlConfiguration.loadConfiguration(file);
     }
 
-
-    public void savePlayerFile(FileConfiguration config, boolean async) {
-        File file = getPlayerFile();
-
-        if (!async) {
-            save(config, file);
-            return;
-        }
-        try {
-            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE, () -> {
-                try {
-                    config.save(file);
-                } catch (Exception e) {
-                    Bukkit.getScheduler().runTask(BankPlus.INSTANCE, () -> save(config, file));
-                }
-            });
-        } catch (Exception e) {
-            save(config, file);
-        }
-    }
-
     public void savePlayerFile(FileConfiguration config, File file, boolean async) {
         if (!async) {
             save(config, file);

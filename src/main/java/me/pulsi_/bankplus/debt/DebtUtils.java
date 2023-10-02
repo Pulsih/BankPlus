@@ -27,28 +27,17 @@ public class DebtUtils {
         files.savePlayerFile(config, file, true);
     }
 
-    public static void saveDebt(Player p) {
-        BPPlayerFiles files = new BPPlayerFiles(p);
-        File file = files.getPlayerFile();
-        FileConfiguration config = files.getPlayerConfig(file);
-        config.set("debt", BPFormatter.formatBigDouble(getDebt(p)));
-        files.savePlayerFile(config, file, true);
-    }
-
     public static BigDecimal getDebt(OfflinePlayer p) {
-        if (p.isOnline()) {
-            BPPlayer bp = BankPlus.INSTANCE.getPlayerRegistry().get(p.getPlayer());
-            BigDecimal debt = bp.getDebt();
+        BPPlayer bp = BankPlus.INSTANCE.getPlayerRegistry().get(p.getPlayer());
+        BigDecimal debt = null;
 
-            if (debt == null) {
-                BPPlayerFiles files = new BPPlayerFiles(p);
-                String sDebt = files.getPlayerConfig().getString("debt");
-                bp.setDebt(new BigDecimal(sDebt == null ? "0" : sDebt));
-            }
-            return bp.getDebt();
+        if (bp != null) debt = bp.getDebt();
+        if (debt == null) {
+            BPPlayerFiles files = new BPPlayerFiles(p);
+            String sDebt = files.getPlayerConfig().getString("debt");
+            debt = new BigDecimal(sDebt == null ? "0" : sDebt);
+            if (bp != null) bp.setDebt(debt);
         }
-        BPPlayerFiles files = new BPPlayerFiles(p);
-        String sDebt = files.getPlayerConfig().getString("debt");
-        return new BigDecimal(sDebt == null ? "0" : sDebt);
+        return debt;
     }
 }

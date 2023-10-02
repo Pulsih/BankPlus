@@ -187,8 +187,6 @@ public class BPUtils {
     }
 
     public static void customWithdraw(Player p, String identifier) {
-        if (!hasPermission(p, "bankplus.withdraw")) return;
-
         if (Values.MESSAGES.isTitleCustomAmountEnabled())
             BPUtils.sendTitle(BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.MESSAGES.name).getString("Title-Custom-Transaction.Title-Withdraw"), p);
         BPMessages.send(p, "Chat-Withdraw");
@@ -208,8 +206,6 @@ public class BPUtils {
     }
 
     public static void customDeposit(Player p, String identifier) {
-        if (!hasPermission(p, "bankplus.deposit")) return;
-
         if (Values.MESSAGES.isTitleCustomAmountEnabled())
             BPUtils.sendTitle(BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.MESSAGES.name).getString("Title-Custom-Transaction.Title-Deposit"), p);
         BPMessages.send(p, "Chat-Deposit");

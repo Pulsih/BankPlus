@@ -26,8 +26,8 @@ public class ConfigValues {
     private int afkPlayersTime, maxDecimalsAmount, bankTopSize, chatExitTime;
     private boolean isReopeningBankAfterChat, isNotifyOfflineInterest, isStoringUUIDs, logTransactions, enableInterestLimiter;
     private boolean isInterestEnabled, isGivingInterestToOfflinePlayers, isOfflineInterestDifferentRate, notifyRegisteredPlayer, silentInfoMessages;
-    private boolean isOfflineInterestEarnedMessageEnabled, isUpdateCheckerEnabled, isWithdrawSoundEnabled, isDepositSoundEnabled, accumulateInterestLimiter;
-    private boolean isViewSoundEnabled, isPersonalSoundEnabled, isIgnoringAfkPlayers, useEssentialsXAFK, useBankBalanceToUpgrade;
+    private boolean isUpdateCheckerEnabled, isWithdrawSoundEnabled, isDepositSoundEnabled, accumulateInterestLimiter;
+    private boolean isViewSoundEnabled, isPersonalSoundEnabled, isIgnoringAfkPlayers, useEssentialsXAFK, useBankBalanceToUpgrade, guiActionsNeedPermissions;
     private boolean banktopEnabled, banktopUpdateBroadcastEnabled, banktopUpdateBroadcastSilentConsole, saveBalancesBroadcast, guiModuleEnabled;
     private String loanMaxAmount, loanInterest;
     private int loanInstalments, loanDelay, loanAcceptTime;
@@ -90,7 +90,6 @@ public class ConfigValues {
         logTransactions = config.getBoolean("General-Settings.Log-Transactions");
         enableInterestLimiter = config.getBoolean("Interest.Enable-Interest-Limiter");
         isGivingInterestToOfflinePlayers = config.getBoolean("Interest.Give-To-Offline-Players");
-        isOfflineInterestEarnedMessageEnabled = config.getBoolean("General-Settings.Offline-Interest-Earned-Message.Enabled");
         isUpdateCheckerEnabled = config.getBoolean("Update-Checker");
         isWithdrawSoundEnabled = config.getBoolean("General-Settings.Withdraw-Sound.Enabled");
         isDepositSoundEnabled = config.getBoolean("General-Settings.Deposit-Sound.Enabled");
@@ -99,6 +98,7 @@ public class ConfigValues {
         isIgnoringAfkPlayers = config.getBoolean("Interest.AFK-Settings.Ignore-AFK-Players");
         useEssentialsXAFK = config.getBoolean("Interest.AFK-Settings.Use-EssentialsX-AFK");
         useBankBalanceToUpgrade = config.getBoolean("General-Settings.Use-Bank-Balance-To-Upgrade");
+        guiActionsNeedPermissions = config.getBoolean("General-Settings.Gui-Actions-Need-Permissions");
         afkPlayersTime = config.getInt("Interest.AFK-Settings.AFK-Time");
         maxDecimalsAmount = config.getInt("General-Settings.Max-Decimals-Amount");
         saveBalancedDelay = config.getLong("General-Settings.Save-Delay");
@@ -442,10 +442,6 @@ public class ConfigValues {
         return isOfflineInterestDifferentRate;
     }
 
-    public boolean isOfflineInterestEarnedMessageEnabled() {
-        return isOfflineInterestEarnedMessageEnabled;
-    }
-
     public boolean isUpdateCheckerEnabled() {
         return isUpdateCheckerEnabled;
     }
@@ -476,6 +472,10 @@ public class ConfigValues {
 
     public boolean useBankBalanceToUpgrade() {
         return useBankBalanceToUpgrade;
+    }
+
+    public boolean isGuiActionsNeedPermissions() {
+        return guiActionsNeedPermissions;
     }
 
     public int getAfkPlayersTime() {

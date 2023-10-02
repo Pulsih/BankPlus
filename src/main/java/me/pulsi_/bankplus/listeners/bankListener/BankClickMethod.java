@@ -9,6 +9,7 @@ import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
+import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
@@ -72,6 +73,8 @@ public class BankClickMethod {
                 if (identifier == null) continue;
 
                 if (identifier.equals("[UPGRADE]")) {
+                    if (Values.CONFIG.isGuiActionsNeedPermissions() && !BPUtils.hasPermission(p, "bankplus.upgrade")) return;
+
                     bankReader.upgradeBank(p);
                     continue;
                 }
@@ -97,6 +100,8 @@ public class BankClickMethod {
                     break;
 
                     case "[DEPOSIT]": {
+                        if (Values.CONFIG.isGuiActionsNeedPermissions() && !BPUtils.hasPermission(p, "bankplus.deposit")) return;
+
                         if (value.equals("CUSTOM")) {
                             BPUtils.customDeposit(p, bankName);
                             continue;
@@ -122,6 +127,8 @@ public class BankClickMethod {
                     break;
 
                     case "[WITHDRAW]": {
+                        if (Values.CONFIG.isGuiActionsNeedPermissions() && !BPUtils.hasPermission(p, "bankplus.withdraw")) return;
+
                         if (value.equals("CUSTOM")) {
                             BPUtils.customWithdraw(p, bankName);
                             continue;

@@ -47,7 +47,7 @@ public class LoanUtils {
         Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> {
             BankPlus.INSTANCE.getLoanRegistry().getRequestsReceived().remove(to.getUniqueId());
             BankPlus.INSTANCE.getLoanRegistry().getRequestsSent().remove(from.getUniqueId());
-        }, Values.CONFIG.getLoanAcceptTime() * 20l);
+        }, Values.CONFIG.getLoanAcceptTime() * 20L);
 
     }
 
@@ -240,7 +240,7 @@ public class LoanUtils {
     public static void saveLoan(BPLoan loan) {
         BPPlayerFiles files = new BPPlayerFiles(loan.getTarget());
 
-        String path = "loans." + (Values.CONFIG.isStoringUUIDs() ? loan.getSender().getUniqueId() : loan.getSender().getName()) + ".";
+        /*String path = "loans." + (Values.CONFIG.isStoringUUIDs() ? loan.getSender().getUniqueId() : loan.getSender().getName()) + ".";
 
         FileConfiguration config = files.getPlayerConfig();
         config.set(path + "amount", BPFormatter.formatBigDouble(loan.getMoneyGiven()));
@@ -250,7 +250,7 @@ public class LoanUtils {
         config.set(path + "instalments_point", loan.instalmentPoint);
         config.set(path + "time_left", loan.timeLeft - System.currentTimeMillis());
 
-        files.savePlayerFile(config, true);
+        files.savePlayerFile(config, true);*/
     }
 
     public static void saveLoans() {

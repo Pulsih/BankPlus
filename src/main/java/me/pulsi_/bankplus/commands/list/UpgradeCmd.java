@@ -39,8 +39,12 @@ public class UpgradeCmd extends BPCommand {
             return false;
         }
 
-        if (confirm(s)) return false;
-        reader.upgradeBank(p);
+        if (!reader.isAvailable(p)) {
+            BPMessages.send(p, "Cannot-Access-Bank");
+            return false;
+        }
+
+        if (!confirm(s)) reader.upgradeBank(p);
         return true;
     }
 

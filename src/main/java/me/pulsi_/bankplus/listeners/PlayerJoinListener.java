@@ -16,6 +16,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
+import java.io.File;
 import java.math.BigDecimal;
 
 public class PlayerJoinListener implements Listener {
@@ -35,7 +36,8 @@ public class PlayerJoinListener implements Listener {
         BPPlayer player = new BPPlayer(p);
         BankPlus.INSTANCE.getPlayerRegistry().put(p, player);
 
-        FileConfiguration config = files.getPlayerConfig();
+        File file = files.getPlayerFile();
+        FileConfiguration config = files.getPlayerConfig(file);
         String sOfflineInterest = config.getString("interest");
         String sName = config.getString("name");
         String debt = config.getString("debt");
@@ -85,6 +87,6 @@ public class PlayerJoinListener implements Listener {
         }
 
         economy.loadBankBalance(p, config);
-        if (hasChanges) files.savePlayerFile(config, true);
+        if (hasChanges) files.savePlayerFile(config, file, true);
     }
 }

@@ -124,19 +124,14 @@ public class BPEconomy {
     /**
      * Save all bank balances to the player file.
      */
-    public void saveBankBalances(Player p) {
-        saveBankBalances(p, true);
-    }
-
-    /**
-     * Save all bank balances to the player file.
-     */
     public void saveBankBalances(Player p, boolean async) {
         BPPlayerFiles files = new BPPlayerFiles(p);
         File file = files.getPlayerFile();
         FileConfiguration config = files.getPlayerConfig(file);
+
         for (String bankName : registry.getBanks().keySet())
             config.set("banks." + bankName + ".money", BPFormatter.formatBigDouble(getBankBalance(p, bankName)));
+
         files.savePlayerFile(config, file, async);
     }
 

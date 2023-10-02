@@ -167,7 +167,7 @@ public class BPInterest {
         }
     }
 
-    private BigDecimal getInterestMoney(OfflinePlayer p, BigDecimal balance, BigDecimal defaultInterest, BankReader reader) {
+    public BigDecimal getInterestMoney(OfflinePlayer p, BigDecimal balance, BigDecimal defaultInterest, BankReader reader) {
         if (!Values.CONFIG.enableInterestLimiter() || !Values.CONFIG.accumulateInterestLimiter())
             return balance.multiply(defaultInterest.divide(BigDecimal.valueOf(100)));
         else {

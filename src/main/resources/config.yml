@@ -106,6 +106,17 @@ General-Settings:
   # (Example: Update message)
   Silent-Info-Messages: false
 
+  # Enable this option if you want to make a player execute
+  # gui actions only if he has the correct permissions.
+  # (Example: If true the player will only be able to
+  # withdraw if he has the permission bankplus.withdraw,
+  # otherwise he will be able to withdraw without the
+  # permission but only through the gui)
+  #
+  # This is useful if you want to make a player use the bank only through
+  # the gui (usually with an NPC) and prevent him to use all other commands.
+  Gui-Actions-Need-Permissions: false
+
   # You need to restart the server
   # to apply these changes.
   #

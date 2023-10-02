@@ -29,27 +29,31 @@ public class ForceUpgradeCmd extends BPCommand {
 
     @Override
     public boolean onCommand(CommandSender s, String[] args) {
-        Player target = Bukkit.getPlayerExact(args[1]);
-        if (target == null) {
+        Player p = Bukkit.getPlayerExact(args[1]);
+        if (p == null) {
             BPMessages.send(s, "Invalid-Player");
             return false;
         }
 
         String bankName = Values.CONFIG.getMainGuiName();
         if (args.length > 2) bankName = args[2];
+        boolean silent = args.length > 3 && args[3].toLowerCase().contains("true");
 
         BankReader reader = new BankReader(bankName);
         if (!reader.exist()) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }
-        if (!reader.isAvailable(target)) {
-            BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
+
+        if (!reader.isAvailable(p)) {
+            BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + p.getName());
             return false;
         }
 
         if (confirm(s)) return false;
-        reader.upgradeBank(target);
+
+        reader.upgradeBank(p);
+        if (!silent) BPMessages.send(s, "Force-Upgrade", "%player%$" + p.getName(), "%bank%$" + bankName);
         return true;
     }
 
@@ -59,6 +63,9 @@ public class ForceUpgradeCmd extends BPCommand {
 
         if (args.length == 3)
             return BPArgs.getArgs(args, new BankReader().getAvailableBanks(p));
+
+        if (args.length == 4)
+            return BPArgs.getArgs(args, "silent=true", "silent=false");
         return null;
     }
 }

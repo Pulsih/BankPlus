@@ -104,8 +104,6 @@ public class LoanCmd extends BPCommand {
 
     @Override
     public List<String> tabCompletion(CommandSender s, String[] args) {
-        if (!(s instanceof Player)) return null;
-
         Player p = (Player) s;
         Player target = args.length > 1 ? Bukkit.getPlayerExact(args[1]) : null;
 

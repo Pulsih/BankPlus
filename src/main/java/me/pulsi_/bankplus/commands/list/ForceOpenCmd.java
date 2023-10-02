@@ -38,6 +38,7 @@ public class ForceOpenCmd extends BPCommand {
 
         String bankName = Values.CONFIG.getMainGuiName();
         if (args.length > 2) bankName = args[2];
+        boolean silent = args.length > 3 && args[3].toLowerCase().contains("true");
 
         if (!new BankReader(bankName).exist()) {
             BPMessages.send(s, "Invalid-Bank");
@@ -47,7 +48,7 @@ public class ForceOpenCmd extends BPCommand {
         if (confirm(s)) return false;
 
         BankUtils.openBank(p, bankName, true);
-        BPMessages.send(s, "Force-Open", "%player%$" + p.getName(), "%bank%$" + bankName);
+        if (!silent) BPMessages.send(s, "Force-Open", "%player%$" + p.getName(), "%bank%$" + bankName);
         return true;
     }
 
@@ -55,6 +56,9 @@ public class ForceOpenCmd extends BPCommand {
     public List<String> tabCompletion(CommandSender s, String[] args) {
         if (args.length == 3)
             return BPArgs.getBanks(args);
+
+        if (args.length == 4)
+            return BPArgs.getArgs(args, "silent=true", "silent=false");
         return null;
     }
 }
