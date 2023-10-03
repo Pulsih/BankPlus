@@ -5,7 +5,6 @@ import me.pulsi_.bankplus.bankSystem.BankGuiRegistry;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.interest.BPInterest;
 import me.pulsi_.bankplus.loanSystem.LoanRegistry;
-import me.pulsi_.bankplus.loanSystem.LoanUtils;
 import me.pulsi_.bankplus.logSystem.BPLogUtils;
 import me.pulsi_.bankplus.managers.*;
 import me.pulsi_.bankplus.placeholders.BPPlaceholders;

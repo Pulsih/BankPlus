@@ -2,8 +2,6 @@ package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.PlayerRegistry;
-import me.pulsi_.bankplus.utils.BPLogger;
-import me.pulsi_.bankplus.utils.BPSets;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -11,7 +9,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
-import org.bukkit.scheduler.BukkitTask;
 
 public class CmdListener implements Listener {
 
