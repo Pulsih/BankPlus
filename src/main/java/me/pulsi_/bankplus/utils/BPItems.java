@@ -18,8 +18,7 @@ public class BPItems {
         String material = values.getString("Material");
 
         ItemStack result = UNKNOWN_ITEM;
-        if (material == null) result = UNKNOWN_ITEM;
-        else {
+        if (material != null) {
             if (material.startsWith("HEAD")) result = getHead(material);
             else {
                 if (!material.contains(":")) result = new ItemStack(Material.valueOf(material));

@@ -4,9 +4,11 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.utils.BPLogger;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.util.FileUtil;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,7 +59,10 @@ public class BPConfigs {
         }
 
         FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-        if (updated) updated = config.getString("version") != null && config.getString("version").equals(plugin.getDescription().getVersion());
+        if (updated) {
+            String v = config.getString("version");
+            updated = v != null && v.equals(plugin.getDescription().getVersion());
+        }
 
         config.options().header("DO NOT EDIT / REMOVE THIS FILE OR BANKPLUS MAY GET RESET!");
         config.set("version", plugin.getDescription().getVersion());
@@ -78,21 +83,21 @@ public class BPConfigs {
             updateFile = !updated && autoUpdateFiles;
         }
 
-        if (updateFile) setupFile(Type.CONFIG);
+        if (updateFile) setupFile(Type.CONFIG, alreadyExist);
     }
 
     public void setupMessages() {
         boolean updateFile = true, alreadyExist = getFile(Type.MESSAGES.name).exists();
         if (alreadyExist) updateFile = !updated && autoUpdateFiles;
 
-        if (updateFile) setupFile(Type.MESSAGES);
+        if (updateFile) setupFile(Type.MESSAGES, alreadyExist);
     }
 
     public void setupMultipleBanks() {
         boolean updateFile = true, alreadyExist = getFile(Type.MULTIPLE_BANKS.name).exists();
         if (alreadyExist) updateFile = !updated && autoUpdateFiles;
 
-        if (updateFile) setupFile(Type.MULTIPLE_BANKS);
+        if (updateFile) setupFile(Type.MULTIPLE_BANKS, alreadyExist);
     }
 
     public void setupCommands() {
@@ -123,20 +128,29 @@ public class BPConfigs {
         return new File(plugin.getDataFolder(), path);
     }
 
-    public FileConfiguration getConfig(File file) {
-        return YamlConfiguration.loadConfiguration(file);
-    }
-
     public FileConfiguration getConfig(String path) {
         return YamlConfiguration.loadConfiguration(getFile(path));
     }
 
-    public void setupFile(Type type) {
+    public void setupFile(Type type, boolean backup) {
         String fileName = type.name;
         File folderFile = getFile(type.name);
         if (!folderFile.exists()) {
             plugin.saveResource(fileName, true);
             return;
+        }
+
+        if (backup) {
+            File copyFile = new File(BankPlus.INSTANCE.getDataFolder(), "backups" + File.separator + fileName);
+            if (!copyFile.exists()) {
+                try {
+                    copyFile.getParentFile().mkdirs();
+                    copyFile.createNewFile();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            FileUtil.copy(folderFile, copyFile);
         }
 
         HashMap<Integer, FileLine> file = new HashMap<>();
@@ -258,7 +272,7 @@ public class BPConfigs {
         }
     }
 
-    private void backupFile() {
+    public void backupFile() {
 
     }
 

@@ -94,7 +94,7 @@ public class BPData {
         plManager.registerEvents(new AFKListener(plugin), plugin);
         plManager.registerEvents(new InventoryCloseListener(), plugin);
         plManager.registerEvents(new BPTransactionListener(), plugin);
-
+        plManager.registerEvents(new CmdListener(), plugin);
 
         String chatPriority = Values.CONFIG.getPlayerChatPriority();
         if (chatPriority == null) {

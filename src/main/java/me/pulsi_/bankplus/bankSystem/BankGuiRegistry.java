@@ -127,9 +127,11 @@ public class BankGuiRegistry {
                         inv.addItem(guiItem);
                     }
                 }
+
                 if (bank.hasFiller())
                     for (int i = 0; i < inv.getSize(); i++)
                         if (inv.getItem(i) == null) inv.setItem(i, BPItems.getFiller(bank));
+
                 content = inv.getContents();
             }
 

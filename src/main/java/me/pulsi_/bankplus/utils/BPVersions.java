@@ -22,7 +22,7 @@ public class BPVersions {
 
         File dataFolder = new File(BankPlus.INSTANCE.getDataFolder(), "playerdata");
         File[] files = dataFolder.listFiles();
-        if (files == null) return;
+        if (files == null || files.length == 0) return;
 
         BPLogger.info("Found playerdata folder, starting to convert the files to the new format.");
         for (File file : files) {
