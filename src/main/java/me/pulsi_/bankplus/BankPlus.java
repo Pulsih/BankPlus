@@ -104,7 +104,7 @@ public final class BankPlus extends JavaPlugin {
         this.bpData = new BPData(this);
         this.afkManager = new AFKManager(this);
         this.taskManager = new TaskManager();
-        this.interest = new BPInterest();
+        this.interest = new BPInterest(this);
 
         RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
         if (rsp != null) perms = rsp.getProvider();
@@ -129,7 +129,6 @@ public final class BankPlus extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        if (Values.CONFIG.isInterestEnabled()) interest.saveInterest();
         bpData.shutdownPlugin();
     }
 
@@ -185,7 +184,7 @@ public final class BankPlus extends JavaPlugin {
         return bankTopManager;
     }
 
-    public BPConfigs getConfigManager() {
+    public BPConfigs getConfigs() {
         return bpConfigs;
     }
 

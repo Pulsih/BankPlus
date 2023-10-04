@@ -170,122 +170,154 @@ public class BPEconomy {
 
     /**
      * Set the selected amount in the selected bank.
+     *
+     * @return Number representing the actual amount set.
      */
-    public void setBankBalance(OfflinePlayer p, BigDecimal amount, String bankName) {
-        setBankBalance(p, amount, bankName, TransactionType.SET);
+    public BigDecimal setBankBalance(OfflinePlayer p, BigDecimal amount, String bankName) {
+        return setBankBalance(p, amount, bankName, TransactionType.SET);
     }
 
     /**
      * Set the selected amount in the selected bank.
      *
      * @param ignoreEvents Choose if ignoring or not the bankplus transaction event.
+     * @return Number representing the actual amount set.
      */
-    public void setBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, boolean ignoreEvents) {
-        Economy economy = BankPlus.INSTANCE.getVaultEconomy();
-        if (!ignoreEvents) {
-            BPPreTransactionEvent event = startEvent(p, TransactionType.SET, economy.getBalance(p), amount, bankName);
-            if (event.isCancelled()) return;
-
-            amount = event.getTransactionAmount();
-        }
-        set(p, amount, bankName);
-
-        if (!ignoreEvents) endEvent(p, TransactionType.SET, economy.getBalance(p), amount, bankName);
+    public BigDecimal setBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, boolean ignoreEvents) {
+        return setBankBalance(p, amount, bankName, ignoreEvents, TransactionType.SET);
     }
 
     /**
      * Set the selected amount in the selected bank.
      *
      * @param type Override the transaction type with the one you choose.
+     * @return Number representing the actual amount set.
      */
-    public void setBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, TransactionType type) {
+    public BigDecimal setBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, TransactionType type) {
+        return setBankBalance(p, amount, bankName, false, type);
+    }
+
+    private BigDecimal setBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, boolean ignoreEvents, TransactionType type) {
         Economy economy = BankPlus.INSTANCE.getVaultEconomy();
-        BPPreTransactionEvent event = startEvent(p, type, economy.getBalance(p), amount, bankName);
-        if (event.isCancelled()) return;
-        amount = event.getTransactionAmount();
+        BigDecimal result = new BigDecimal(0);
 
-        set(p, amount, bankName);
+        if (!ignoreEvents) {
+            BPPreTransactionEvent event = startEvent(p, type, economy.getBalance(p), amount, bankName);
+            if (event.isCancelled()) return result;
 
-        endEvent(p, type, economy.getBalance(p), amount, bankName);
+            amount = event.getTransactionAmount();
+        }
+
+        result = result.max(amount.min(new BankReader(bankName).getCapacity(p)));
+        set(p, result, bankName);
+
+        if (!ignoreEvents) endEvent(p, type, economy.getBalance(p), amount, bankName);
+        return result;
     }
 
     /**
      * Add the selected amount to the selected bank.
+     *
+     * @return Number representing the actual amount added.
      */
-    public void addBankBalance(OfflinePlayer p, BigDecimal amount, String bankName) {
-        addBankBalance(p, amount, bankName, TransactionType.ADD);
+    public BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount, String bankName) {
+        return addBankBalance(p, amount, bankName, false, TransactionType.ADD);
     }
 
-    public void addBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, boolean ignoreEvents) {
-        Economy economy = BankPlus.INSTANCE.getVaultEconomy();
-        if (!ignoreEvents) {
-            BPPreTransactionEvent event = startEvent(p, TransactionType.ADD, economy.getBalance(p), amount, bankName);
-            if (event.isCancelled()) return;
-
-            amount = event.getTransactionAmount();
-        }
-        set(p, getBankBalance(p, bankName).add(amount), bankName);
-
-        if (!ignoreEvents) endEvent(p, TransactionType.ADD, economy.getBalance(p), amount, bankName);
+    /**
+     * Add the selected amount to the selected bank.
+     *
+     * @param ignoreEvents Choose if ignoring or not the bankplus transaction event.
+     * @return Number representing the actual amount added.
+     */
+    public BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, boolean ignoreEvents) {
+        return addBankBalance(p, amount, bankName, ignoreEvents, TransactionType.ADD);
     }
 
     /**
      * Add the selected amount to the selected bank.
      *
      * @param type Override the transaction type with the one you choose.
+     * @return Number representing the actual amount added.
      */
-    public void addBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, TransactionType type) {
+    public BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, TransactionType type) {
+        return addBankBalance(p, amount, bankName, false, type);
+    }
+
+    private BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, boolean ignoreEvents, TransactionType type) {
         Economy economy = BankPlus.INSTANCE.getVaultEconomy();
+        BigDecimal result = new BigDecimal(0);
 
-        BPPreTransactionEvent event = startEvent(p, type, economy.getBalance(p), amount, bankName);
-        if (event.isCancelled()) return;
-        amount = event.getTransactionAmount();
+        if (!ignoreEvents) {
+            BPPreTransactionEvent event = startEvent(p, type, economy.getBalance(p), amount, bankName);
+            if (event.isCancelled()) return result;
 
-        set(p, getBankBalance(p, bankName).add(amount), bankName);
+            amount = event.getTransactionAmount();
+        }
 
-        endEvent(p, type, economy.getBalance(p), amount, bankName);
+        BigDecimal capacity = new BankReader(bankName).getCapacity(p), balance = getBankBalance(p, bankName);
+        if (capacity.doubleValue() <= 0D || balance.add(amount).doubleValue() < capacity.doubleValue()) {
+            result = amount;
+            set(p, balance.add(result), bankName);
+        } else {
+            result = capacity.subtract(balance);
+            set(p, capacity, bankName);
+        }
+
+        if (!ignoreEvents) endEvent(p, type, economy.getBalance(p), amount, bankName);
+        return result;
     }
 
     /**
      * Remove the selected amount.
+     *
+     * @return Number representing the actual amount removed.
      */
-    public void removeBankBalance(OfflinePlayer p, BigDecimal amount, String bankName) {
-        removeBankBalance(p, amount, bankName, TransactionType.REMOVE);
+    public BigDecimal removeBankBalance(OfflinePlayer p, BigDecimal amount, String bankName) {
+        return removeBankBalance(p, amount, bankName, TransactionType.REMOVE);
     }
 
     /**
      * Remove the selected amount.
      *
      * @param ignoreEvents Choose if ignoring or not the bankplus transaction event.
+     * @return Number representing the actual amount removed.
      */
-    public void removeBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, boolean ignoreEvents) {
-        Economy economy = BankPlus.INSTANCE.getVaultEconomy();
-        if (!ignoreEvents) {
-            BPPreTransactionEvent event = startEvent(p, TransactionType.REMOVE, economy.getBalance(p), amount, bankName);
-            if (event.isCancelled()) return;
-
-            amount = event.getTransactionAmount();
-        }
-        set(p, getBankBalance(p, bankName).subtract(amount), bankName);
-
-        if (!ignoreEvents) endEvent(p, TransactionType.REMOVE, economy.getBalance(p), amount, bankName);
+    public BigDecimal removeBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, boolean ignoreEvents) {
+        return removeBankBalance(p, amount, bankName, ignoreEvents, TransactionType.REMOVE);
     }
 
     /**
      * Remove the selected amount.
      *
      * @param type Override the transaction type with the one you choose.
+     * @return Number representing the actual amount removed.
      */
-    public void removeBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, TransactionType type) {
+    public BigDecimal removeBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, TransactionType type) {
+        return removeBankBalance(p, amount, bankName, false, type);
+    }
+
+    private BigDecimal removeBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, boolean ignoreEvents, TransactionType type) {
         Economy economy = BankPlus.INSTANCE.getVaultEconomy();
+        BigDecimal result = new BigDecimal(0);
+        if (!ignoreEvents) {
+            BPPreTransactionEvent event = startEvent(p, type, economy.getBalance(p), amount, bankName);
+            if (event.isCancelled()) return result;
 
-        BPPreTransactionEvent event = startEvent(p, type, economy.getBalance(p), amount, bankName);
-        if (event.isCancelled()) return;
-        amount = event.getTransactionAmount();
+            amount = event.getTransactionAmount();
+        }
 
-        set(p, getBankBalance(p, bankName).subtract(amount), bankName);
+        BigDecimal balance = getBankBalance(p, bankName);
+        if (balance.subtract(amount).doubleValue() < 0D) {
+            result = balance;
+            set(p, new BigDecimal(0), bankName);
+        } else {
+            result = amount;
+            set(p, balance.subtract(result), bankName);
+        }
 
-        endEvent(p, type, economy.getBalance(p), amount, bankName);
+        if (!ignoreEvents) endEvent(p, type, economy.getBalance(p), amount, bankName);
+        return result;
     }
 
     /**
@@ -413,8 +445,8 @@ public class BPEconomy {
     /**
      * Method used to execute the pay transaction.
      *
-     * @param from The player that will give the money.
-     * @param to   The player that will receive your money.
+     * @param from     The player that will give the money.
+     * @param to       The player that will receive your money.
      * @param amount   How much money you want to pay.
      * @param fromBank The bank where the money will be taken.
      * @param toBank   The bank where the money will be added.

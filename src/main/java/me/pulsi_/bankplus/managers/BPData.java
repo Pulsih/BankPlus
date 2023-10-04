@@ -11,13 +11,16 @@ import me.pulsi_.bankplus.interest.BPInterest;
 import me.pulsi_.bankplus.listeners.*;
 import me.pulsi_.bankplus.listeners.bankListener.*;
 import me.pulsi_.bankplus.listeners.playerChat.*;
-import me.pulsi_.bankplus.loanSystem.LoanUtils;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.PluginManager;
+
+import java.io.File;
+import java.io.IOException;
 
 public class BPData {
 
@@ -37,8 +40,10 @@ public class BPData {
 
         BPLogger.log("    &aSetting up the plugin...");
         new bStats(plugin);
-        plugin.getConfigManager().setupConfigs();
+        plugin.getConfigs().setupConfigs();
         reloadPlugin();
+        plugin.getLoanRegistry().loadAllLoans();
+
         registerEvents();
         setupCommands();
 
@@ -49,6 +54,19 @@ public class BPData {
     }
 
     public void shutdownPlugin() {
+        BPConfigs configs = plugin.getConfigs();
+        File file = configs.getFile(BPConfigs.Type.SAVES.name);
+        FileConfiguration savesConfig = configs.getConfig(BPConfigs.Type.SAVES.name);
+
+        plugin.getLoanRegistry().saveAllLoans(savesConfig);
+        if (Values.CONFIG.isInterestEnabled()) plugin.getInterest().saveInterest(savesConfig);
+
+        try {
+            savesConfig.save(file);
+        } catch (IOException e) {
+            BPLogger.error(e, "Failed to save \"saves.yml\" file! " + e.getMessage());
+        }
+
         BPLogger.log("");
         BPLogger.log("    &a&lBank&9&lPlus &cPlugin successfully disabled!");
         BPLogger.log("");
@@ -76,7 +94,6 @@ public class BPData {
         BPInterest interest = plugin.getInterest();
         if (Values.CONFIG.isInterestEnabled() && interest.wasDisabled()) interest.startInterest();
 
-        LoanUtils.loadAllLoans();
         BPUtils.startSavingBalancesTask();
         Bukkit.getOnlinePlayers().forEach(p -> {
             BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);

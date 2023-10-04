@@ -14,7 +14,7 @@ public class MessageValues {
     }
 
     public void setupValues() {
-        FileConfiguration messages = BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.MESSAGES.name);
+        FileConfiguration messages = BankPlus.INSTANCE.getConfigs().getConfig(BPConfigs.Type.MESSAGES.name);
 
         isTitleCustomAmountEnabled = messages.getBoolean("Title-Custom-Transaction.Enabled");
         isInterestBroadcastEnabled = messages.getBoolean("Interest-Broadcast.Enabled");

@@ -17,7 +17,7 @@ public class BPItems {
     public static ItemStack createItemStack(ConfigurationSection values) {
         String material = values.getString("Material");
 
-        ItemStack result = UNKNOWN_ITEM;
+        ItemStack result = UNKNOWN_ITEM.clone();
         if (material != null) {
             if (material.startsWith("HEAD")) result = getHead(material);
             else {
@@ -39,9 +39,9 @@ public class BPItems {
     }
 
     public static ItemStack getHead(String material) {
-        if (material == null) return UNKNOWN_ITEM;
+        if (material == null) return UNKNOWN_ITEM.clone();
 
-        ItemStack item = UNKNOWN_ITEM;
+        ItemStack item = UNKNOWN_ITEM.clone();
         if (material.startsWith("HEAD[")) {
             String player = material.replace("HEAD[", "").replace("]", "");
             try {
@@ -78,7 +78,7 @@ public class BPItems {
                 item = new ItemStack(Material.valueOf(itemData[0]), 1, Byte.parseByte(itemData[1]));
             } else item = new ItemStack(Material.valueOf(material));
         } catch (IllegalArgumentException e) {
-            item = UNKNOWN_ITEM;
+            item = UNKNOWN_ITEM.clone();
         }
 
         ItemMeta meta = item.getItemMeta();
@@ -101,7 +101,7 @@ public class BPItems {
                 item = new ItemStack(Material.valueOf(itemData[0]), 1, Byte.parseByte(itemData[1]));
             } else item = new ItemStack(Material.valueOf(material));
         } catch (IllegalArgumentException e) {
-            item = UNKNOWN_ITEM;
+            item = UNKNOWN_ITEM.clone();
         }
 
         ItemMeta meta = item.getItemMeta();

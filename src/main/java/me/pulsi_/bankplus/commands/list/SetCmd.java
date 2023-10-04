@@ -56,22 +56,13 @@ public class SetCmd extends BPCommand {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }
-        if (confirm(s)) return false;
 
-        BPEconomy economy = BankPlus.getBPEconomy();
         boolean silent = args.length > 4 && args[4].toLowerCase().contains("true");
 
-        BigDecimal capacity = reader.getCapacity(p);
-        if (amount.doubleValue() >= capacity.doubleValue()) {
-            BigDecimal newAmount = capacity.doubleValue() > 0d ? capacity : amount;
+        if (confirm(s)) return false;
 
-            if (!silent) BPMessages.send(s, "Set-Message", BPUtils.placeValues(p, newAmount));
-            economy.setBankBalance(p, newAmount, bankName);
-            return true;
-        }
-
-        if (!silent) BPMessages.send(s, "Set-Message", BPUtils.placeValues(p, amount));
-        economy.setBankBalance(p, amount, bankName);
+        BigDecimal set = BankPlus.getBPEconomy().removeBankBalance(p, amount, bankName);
+        if (!silent) BPMessages.send(s, "Set-Message", BPUtils.placeValues(p, set));
         return true;
     }
 

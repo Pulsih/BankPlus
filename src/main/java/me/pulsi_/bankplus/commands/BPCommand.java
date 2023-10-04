@@ -32,7 +32,7 @@ public abstract class BPCommand {
         this.aliases = new String[aliases.length - 1];
         System.arraycopy(aliases, 1, this.aliases, 0, aliases.length - 1);
 
-        FileConfiguration config = BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.COMMANDS.name);
+        FileConfiguration config = BankPlus.INSTANCE.getConfigs().getConfig(BPConfigs.Type.COMMANDS.name);
 
         needConfirm = config.getBoolean(identifier.toLowerCase() + ".need-confirm");
         hasCooldown = config.getBoolean(identifier.toLowerCase() + ".has-cooldown");

@@ -55,24 +55,16 @@ public class RemoveCmd extends BPCommand {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }
-        if (confirm(s)) return false;
 
-        BPEconomy economy = BankPlus.getBPEconomy();
         boolean silent = args.length > 4 && args[4].toLowerCase().contains("true");
 
-        BigDecimal balance = economy.getBankBalance(p, bankName);
-        if (balance.doubleValue() <= 0) {
-            if (!silent) BPMessages.send(s, "Bank-Empty", "%player%$" + p.getName());
-            return true;
-        }
-        if (balance.subtract(amount).doubleValue() <= 0) {
-            if (!silent) BPMessages.send(s, "Remove-Message", BPUtils.placeValues(p, balance));
-            economy.setBankBalance(p, new BigDecimal(0), bankName);
-            return true;
-        }
+        if (confirm(s)) return false;
 
-        if (!silent) BPMessages.send(s, "Remove-Message", BPUtils.placeValues(p, amount));
-        economy.removeBankBalance(p, amount, bankName);
+        BigDecimal removed = BankPlus.getBPEconomy().removeBankBalance(p, amount, bankName);
+        if (silent) return true;
+
+        if (removed.doubleValue() <= 0D) BPMessages.send(s, "Bank-Empty", "%player%$" + p.getName());
+        else BPMessages.send(s, "Remove-Message", BPUtils.placeValues(p, removed));
         return true;
     }
 

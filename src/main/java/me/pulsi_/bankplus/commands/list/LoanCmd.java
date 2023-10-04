@@ -51,7 +51,7 @@ public class LoanCmd extends BPCommand {
             }
         }
 
-        if (LoanUtils.sentRequest(p)) {
+        if (LoanUtils.hasSentRequest(p)) {
             BPMessages.send(p, "Loan-Already-Sent");
             return false;
         }
@@ -108,7 +108,7 @@ public class LoanCmd extends BPCommand {
         Player target = args.length > 1 ? Bukkit.getPlayerExact(args[1]) : null;
 
         if (args.length == 2) {
-            if (LoanUtils.sentRequest(p))
+            if (LoanUtils.hasSentRequest(p))
                 return BPArgs.getArgs(args, "cancel");
 
             if (LoanUtils.hasRequest(p))

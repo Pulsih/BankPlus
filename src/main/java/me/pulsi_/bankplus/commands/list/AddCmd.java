@@ -56,30 +56,16 @@ public class AddCmd extends BPCommand {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }
-        if (confirm(s)) return false;
 
-        BPEconomy economy = BankPlus.getBPEconomy();
         boolean silent = args.length > 4 && args[4].toLowerCase().contains("true");
 
-        BigDecimal capacity = reader.getCapacity(p), balance = economy.getBankBalance(p, bankName);
+        if (confirm(s)) return false;
 
-        if (capacity.doubleValue() > 0d && capacity.subtract(balance).doubleValue() <= 0) {
-            if (!silent) BPMessages.send(s, "Bank-Full", "%player%$" + p.getName());
-            return true;
-        }
-        if (balance.add(amount).doubleValue() >= capacity.doubleValue()) {
-            if (capacity.doubleValue() > 0d) {
-                if (!silent) BPMessages.send(s, "Add-Message", BPUtils.placeValues(p, capacity.subtract(balance)));
-                economy.setBankBalance(p, capacity, bankName);
-                return true;
-            }
+        BigDecimal added = BankPlus.getBPEconomy().addBankBalance(p, amount, bankName);
+        if (silent) return true;
 
-            if (!silent) BPMessages.send(s, "Add-Message", BPUtils.placeValues(p, amount));
-            economy.addBankBalance(p, amount, bankName);
-            return true;
-        }
-        if (!silent) BPMessages.send(s, "Add-Message", BPUtils.placeValues(p, amount));
-        economy.addBankBalance(p, amount, bankName);
+        if (added.doubleValue() <= 0D) BPMessages.send(s, "Bank-Full", "%player%$" + p.getName());
+        else BPMessages.send(s, "Add-Message", BPUtils.placeValues(p, added));
         return true;
     }
 

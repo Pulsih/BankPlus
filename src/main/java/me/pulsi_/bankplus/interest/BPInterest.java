@@ -28,20 +28,18 @@ public class BPInterest {
     private boolean wasDisabled = true;
 
     private final BPEconomy economy;
+    private final BankPlus plugin;
 
-    public BPInterest() {
+    public BPInterest(BankPlus plugin) {
         economy = BankPlus.getBPEconomy();
+        this.plugin = plugin;
     }
 
     public void startInterest() {
         long interestSave = 0;
 
-        FileConfiguration config = getInterestSaveConfig();
-        if (config != null) {
-            interestSave = config.getLong("interest-save");
-            config.set("interest-save", null);
-            saveInterestSaveFile(config);
-        }
+        FileConfiguration config = plugin.getConfigs().getConfig(BPConfigs.Type.SAVES.name);
+        if (config != null) interestSave = config.getLong("interest-save");
 
         if (interestSave > 0) cooldown = System.currentTimeMillis() + interestSave;
         else cooldown = System.currentTimeMillis() + Values.CONFIG.getInterestDelay();
@@ -68,24 +66,8 @@ public class BPInterest {
         });
     }
 
-    public void saveInterest() {
-        FileConfiguration config = getInterestSaveConfig();
-        config.set("interest-save", getInterestCooldownMillis());
-        saveInterestSaveFile(config);
-    }
-
-    private FileConfiguration getInterestSaveConfig() {
-        return BankPlus.INSTANCE.getConfigManager().getConfig(BPConfigs.Type.SAVES.name);
-    }
-
-    private void saveInterestSaveFile(FileConfiguration config) {
-        File file = BankPlus.INSTANCE.getConfigManager().getFile(BPConfigs.Type.SAVES.name);
-
-        try {
-            config.save(file);
-        } catch (IOException e) {
-            BPLogger.error("Failed to save the interest-save file! " + e.getMessage());
-        }
+    public void saveInterest(FileConfiguration savesConfig) {
+        savesConfig.set("interest-save", getInterestCooldownMillis());
     }
 
     private void loopInterest() {
@@ -101,23 +83,15 @@ public class BPInterest {
         List<String> availableBanks = new BankReader().getAvailableBanks(p);
 
         for (String bankName : availableBanks) {
-
             BigDecimal bankBalance = economy.getBankBalance(p, bankName);
             BankReader reader = new BankReader(bankName);
-            BigDecimal interestMoney = getInterestMoney(p, bankBalance, reader.getInterest(p), reader);
-            BigDecimal maxBankCapacity = reader.getCapacity(p), maxAmount = Values.CONFIG.getInterestMaxAmount();
+            BigDecimal interestMoney = getInterestMoney(p, bankBalance, reader.getInterest(p), reader), maxAmount = Values.CONFIG.getInterestMaxAmount();
 
             if (bankBalance.doubleValue() <= 0) continue;
             if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
-            if (maxBankCapacity.doubleValue() > 0D && (bankBalance.add(interestMoney).doubleValue() >= maxBankCapacity.doubleValue())) {
-                BigDecimal newAmount = maxBankCapacity.subtract(bankBalance);
-                if (newAmount.doubleValue() <= 0) continue;
-                interestAmount = newAmount;
-                economy.setBankBalance(p, maxBankCapacity, bankName, TransactionType.INTEREST);
-                continue;
-            }
-            economy.addBankBalance(p, interestMoney, bankName, TransactionType.INTEREST);
-            interestAmount = interestMoney;
+
+            BigDecimal amount = economy.addBankBalance(p, interestMoney, bankName, TransactionType.INTEREST);
+            interestAmount = interestAmount.add(amount);
         }
         if (!Values.MESSAGES.isInterestBroadcastEnabled()) return;
 
@@ -146,23 +120,17 @@ public class BPInterest {
             for (String bankName : new BankReader().getAvailableBanks(p)) {
                 BigDecimal bankBalance = economy.getBankBalance(p, bankName);
                 BankReader reader = new BankReader(bankName);
-                BigDecimal interestMoney = Values.CONFIG.isOfflineInterestDifferentRate() ?
+                BigDecimal maxAmount = Values.CONFIG.getInterestMaxAmount(),
+                        interestMoney = Values.CONFIG.isOfflineInterestDifferentRate() ?
                         getInterestMoney(p, bankBalance, reader.getOfflineInterest(p), reader) :
                         getInterestMoney(p, bankBalance, reader.getInterest(p), reader);
-                BigDecimal maxBankCapacity = reader.getCapacity(p), maxAmount = Values.CONFIG.getInterestMaxAmount();
 
                 if (bankBalance.doubleValue() <= 0) continue;
                 if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
-                if (maxBankCapacity.doubleValue() > 0D && (bankBalance.add(interestMoney).doubleValue() >= maxBankCapacity.doubleValue())) {
-                    BigDecimal newAmount = maxBankCapacity.subtract(bankBalance);
-                    if (newAmount.doubleValue() <= 0) continue;
 
-                    economy.setOfflineInterest(p, economy.getOfflineInterest(p).add(newAmount), false);
-                    economy.addBankBalance(p, newAmount, bankName, TransactionType.INTEREST);
-                    continue;
-                }
                 economy.setOfflineInterest(p, economy.getOfflineInterest(p).add(interestMoney), false);
-                economy.addBankBalance(p, interestMoney, bankName, TransactionType.INTEREST);
+                BigDecimal finalInterestMoney = interestMoney;
+                Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> economy.addBankBalance(p, finalInterestMoney, bankName, TransactionType.INTEREST), 2L);
             }
         }
     }

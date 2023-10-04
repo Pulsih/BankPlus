@@ -75,14 +75,14 @@ public class BankListGui {
             boolean glow = false;
             ConfigurationSection section = reader.getBank().getBanksGuiItemSection();
 
-            if (section == null) bankItem = BPItems.UNKNOWN_ITEM;
+            if (section == null) bankItem = BPItems.UNKNOWN_ITEM.clone();
             else {
                 String path = reader.isAvailable(p) ? "Available" : "Unavailable";
                 glow = section.getBoolean(path + ".Glowing");
                 try {
                     bankItem = new ItemStack(Material.valueOf(section.getString(path + ".Material")));
                 } catch (IllegalArgumentException e) {
-                    bankItem = BPItems.UNKNOWN_ITEM;
+                    bankItem = BPItems.UNKNOWN_ITEM.clone();
                 }
             }
 
