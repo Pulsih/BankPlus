@@ -25,7 +25,7 @@ balance:
   cooldown: 0
   cooldown-message: ""
 customdeposit:
-  usage: "%prefix% &cUsage: &7/bank customdeposit <bankName>"
+  usage: ""
   need-confirm: false
   confirm-cooldown: 0
   confirm-message: ""
@@ -33,7 +33,7 @@ customdeposit:
   cooldown: 0
   cooldown-message: ""
 customwithdraw:
-  usage: "%prefix% &cUsage: &7/bank customwithdraw <bankName>"
+  usage: ""
   need-confirm: false
   confirm-cooldown: 0
   confirm-message: ""
@@ -93,7 +93,15 @@ interestmillis:
   cooldown: 0
   cooldown-message: ""
 loan:
-  usage: "%prefix% &cUsage: &7/bank loan [player] [amount] <fromBankName> <toBankName>"
+  usage:
+  - "%prefix% &cUsage: &7/bank loan [action] [playerName] [amount] <fromBankName> <toBankName>"
+  - ""
+  - "&7Possible actions:"
+  - " &8* &aGive"
+  - " &8* &aRequest"
+  - " &8* &aAccept"
+  - " &8* &aDeny"
+  - " &8* &aCancel"
   need-confirm: true
   confirm-cooldown: 5
   confirm-message: "%prefix% &aType again within 5 seconds to confirm your payment."

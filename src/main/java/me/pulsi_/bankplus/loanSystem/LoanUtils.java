@@ -21,17 +21,24 @@ import java.util.UUID;
 
 public class LoanUtils {
 
-    public static void sendRequest(Player from, Player to, BigDecimal amount, String fromBankName, String toBankName) {
+    public static void sendRequest(Player from, Player to, BigDecimal amount, String fromBankName, String toBankName, String action) {
         BigDecimal fBal = BankPlus.getBPEconomy().getBankBalance(from, fromBankName);
         if (fBal.doubleValue() < amount.doubleValue()) amount = fBal;
 
         BPLoan loan = new BPLoan(from, to, amount, fromBankName, toBankName);
-        BankReader reader = new BankReader(loan.getToBankName());
-        BigDecimal capacity = reader.getCapacity(to);
 
-        if (loan.getMoneyToReturn().doubleValue() > capacity.doubleValue()) {
-            BPMessages.send(from, "Cannot-Afford-Loan", "%player%$" + to.getName());
-            return;
+        if (action.equals("give")) {
+            BigDecimal capacity = new BankReader(loan.getToBankName()).getCapacity(to);
+            if (loan.getMoneyToReturn().doubleValue() > capacity.doubleValue()) {
+                BPMessages.send(from, "Cannot-Afford-Loan-Others", "%player%$" + to.getName());
+                return;
+            }
+        } else {
+            BigDecimal capacity = new BankReader(loan.getFromBankName()).getCapacity(from);
+            if (loan.getMoneyToReturn().doubleValue() > capacity.doubleValue()) {
+                BPMessages.send(from, "Cannot-Afford-Loan");
+                return;
+            }
         }
 
         BPMessages.send(to, "Loan-Request-Received", BPUtils.placeValues(from, amount));

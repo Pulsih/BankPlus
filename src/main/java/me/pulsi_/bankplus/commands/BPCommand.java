@@ -23,7 +23,8 @@ public abstract class BPCommand {
 
     private final int confirmCooldown, cooldown;
 
-    private final String confirmMessage, cooldownMessage, usage;
+    private final String confirmMessage, cooldownMessage;
+    private final List<String> usage;
 
     public BPCommand(String... aliases) {
         this.identifier = aliases[0];
@@ -40,7 +41,7 @@ public abstract class BPCommand {
         cooldown = config.getInt(identifier.toLowerCase() + ".cooldown");
         confirmMessage = config.getString(identifier.toLowerCase() + ".confirm-message");
         cooldownMessage = config.getString(identifier.toLowerCase() + ".cooldown-message");
-        usage = config.getString(identifier.toLowerCase() + ".usage");
+        usage = BPMessages.getPossibleMessages(config, identifier.toLowerCase() + ".usage");
     }
 
     private final HashMap<String, Long> cooldownMap = new HashMap<>();
@@ -71,7 +72,7 @@ public abstract class BPCommand {
         return permission;
     }
 
-    public String getUsage() {
+    public List<String> getUsage() {
         return usage;
     }
 
@@ -113,7 +114,7 @@ public abstract class BPCommand {
         if (!BPUtils.hasPermission(s, getPermission()) || (playerOnly() && !BPUtils.isPlayer(s))) return;
 
         if (!skipUsageWarn() && args.length == 1) {
-            if (getUsage() != null && !getUsage().isEmpty()) BPMessages.send(s, getUsage(), true);
+            if (!getUsage().isEmpty()) for (String usage : getUsage()) BPMessages.send(s, usage, true);
             return;
         }
 

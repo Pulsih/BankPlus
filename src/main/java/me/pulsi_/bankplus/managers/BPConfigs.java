@@ -156,7 +156,32 @@ public class BPConfigs {
         int positions = 1;
 
         List<String> fileAsList = new ArrayList<>();
-        Scanner scanner = new Scanner(new InputStreamReader(plugin.getResource(fileName)));
+
+        File fileToScan;
+        try {
+            fileToScan = File.createTempFile(fileName, null);
+            fileToScan.deleteOnExit();
+        } catch (IOException e) {
+            BPLogger.warn(e, "Could not load \"" + fileName + "\" file!");
+            return;
+        }
+
+        FileOutputStream out;
+        try {
+            out = new FileOutputStream(fileToScan);
+        } catch (FileNotFoundException e) {
+            BPLogger.warn(e, "Could not load \"" + fileName + "\" file!");
+            return;
+        }
+        copyStream(plugin.getResource(fileName), out);
+
+        Scanner scanner;
+        try {
+            scanner = new Scanner(fileToScan, "UTF-8");
+        } catch (FileNotFoundException e) {
+            BPLogger.warn(e, "Could not find \"" + fileName + "\" file!");
+            return;
+        }
         while (scanner.hasNext()) fileAsList.add(scanner.nextLine());
 
         for (int i = 0; i < fileAsList.size(); i++) {
@@ -178,7 +203,7 @@ public class BPConfigs {
             positions++;
         }
 
-        YamlConfiguration folderConfig = YamlConfiguration.loadConfiguration(folderFile), jarConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(plugin.getResource(fileName)));
+        YamlConfiguration folderConfig = YamlConfiguration.loadConfiguration(folderFile), jarConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(plugin.getResource(fileName), StandardCharsets.UTF_8));
 
         boolean hasChanges = false;
         for (String key : jarConfig.getKeys(true)) {
@@ -285,6 +310,17 @@ public class BPConfigs {
 
     private boolean isListContent(String s) {
         return s.replace(" ", "").startsWith("-");
+    }
+
+    private void copyStream(InputStream in, OutputStream out) {
+        try {
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = in.read(buffer)) != -1)
+                out.write(buffer, 0, read);
+        } catch (Exception e) {
+            BPLogger.warn(e, "Could not copy stream!");
+        }
     }
 
     private static class FileLine {

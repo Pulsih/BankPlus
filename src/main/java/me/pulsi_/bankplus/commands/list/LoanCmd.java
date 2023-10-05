@@ -32,80 +32,93 @@ public class LoanCmd extends BPCommand {
 
     @Override
     public boolean onCommand(CommandSender s, String[] args) {
-        Player p = (Player) s;
+        Player sender = (Player) s;
 
-        if (args.length > 1) {
-            if (args[1].equalsIgnoreCase("accept")) {
-                LoanUtils.acceptRequest(p);
-                return false;
-            }
-
-            if (args[1].equalsIgnoreCase("deny")) {
-                LoanUtils.denyRequest(p);
-                return false;
-            }
-
-            if (args[1].equalsIgnoreCase("cancel")) {
-                LoanUtils.cancelRequest(p);
-                return false;
-            }
-        }
-
-        if (LoanUtils.hasSentRequest(p)) {
-            BPMessages.send(p, "Loan-Already-Sent");
+        if (args.length == 1) {
+            BPMessages.send(sender, "Specify-Action");
             return false;
         }
 
-        Player target = Bukkit.getPlayerExact(args[1]);
+        String action = args[1].toLowerCase();
+        switch (action) {
+            case "accept":
+                LoanUtils.acceptRequest(sender);
+                return true;
+
+            case "deny":
+                LoanUtils.denyRequest(sender);
+                return true;
+
+            case "cancel":
+                LoanUtils.cancelRequest(sender);
+                return true;
+        }
+
+        if (LoanUtils.hasSentRequest(sender)) {
+            BPMessages.send(sender, "Loan-Already-Sent");
+            return false;
+        }
+
+        if (!action.equals("give") && !action.equals("request")) {
+            BPMessages.send(sender, "Invalid-Action");
+            return false;
+        }
+
+        if (args.length == 2) {
+            BPMessages.send(sender, "Specify-Player");
+            return false;
+        }
+
+        Player target = Bukkit.getPlayerExact(args[2]);
 
         if (target == null || target.equals(s)) {
             BPMessages.send(s, "Invalid-Player");
             return false;
         }
 
-        if (args.length == 2) {
-            BPMessages.send(p, "Specify-Number");
+        if (args.length == 3) {
+            BPMessages.send(sender, "Specify-Number");
             return false;
         }
 
-        String num = args[2];
-        if (BPUtils.isInvalidNumber(num, p)) return false;
+        String num = args[3];
+        if (BPUtils.isInvalidNumber(num, sender)) return false;
         BigDecimal amount = new BigDecimal(num);
 
         String fromBankName = Values.CONFIG.getMainGuiName();
-        if (args.length > 3) fromBankName = args[3];
+        if (args.length > 4) fromBankName = args[4];
 
         BankReader fromReader = new BankReader(fromBankName);
         if (!fromReader.exist()) {
-            BPMessages.send(p, "Invalid-Bank");
+            BPMessages.send(sender, "Invalid-Bank");
             return false;
         }
-        if (!fromReader.isAvailable(p)) {
-            BPMessages.send(p, "Cannot-Access-Bank");
+        if (!fromReader.isAvailable(sender)) {
+            BPMessages.send(sender, "Cannot-Access-Bank");
             return false;
         }
 
         String toBankName = Values.CONFIG.getMainGuiName();
-        if (args.length > 4) toBankName = args[4];
+        if (args.length > 5) toBankName = args[5];
 
         BankReader toReader = new BankReader(toBankName);
         if (!toReader.exist()) {
-            BPMessages.send(p, "Invalid-Bank");
+            BPMessages.send(sender, "Invalid-Bank");
             return false;
         }
         if (!toReader.isAvailable(target)) {
-            BPMessages.send(p, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
+            BPMessages.send(sender, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
             return false;
         }
 
-        if (!confirm(s)) LoanUtils.sendRequest(p, target, amount, fromBankName, toBankName);
+        if (!confirm(s)) LoanUtils.sendRequest(sender, target, amount, fromBankName, toBankName, action);
         return true;
     }
 
     @Override
     public List<String> tabCompletion(CommandSender s, String[] args) {
         Player p = (Player) s;
-        Player target = args.length > 1 ? Bukkit.getPlayerExact(args[1]) : null;
+        Player target = args.length > 3 ? Bukkit.getPlayerExact(args[3]) : null;
 
         if (args.length == 2) {
             if (LoanUtils.hasSentRequest(p))
@@ -113,16 +126,17 @@ public class LoanCmd extends BPCommand {
 
             if (LoanUtils.hasRequest(p))
                 return BPArgs.getArgs(args, "accept", "deny");
-            return null;
+
+            return BPArgs.getArgs(args, "give", "request");
         }
 
-        if (args.length == 3)
+        if (args.length == 4)
             return BPArgs.getArgs(args, "1", "2", "3");
 
-        if (args.length == 4)
+        if (args.length == 5)
             return BPArgs.getArgs(args, new BankReader().getAvailableBanks(p));
 
-        if (args.length == 5)
+        if (args.length == 6)
             return BPArgs.getArgs(args, new BankReader().getAvailableBanks(target));
 
         return null;

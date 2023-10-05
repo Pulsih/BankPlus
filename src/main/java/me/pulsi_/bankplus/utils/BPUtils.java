@@ -356,7 +356,7 @@ public class BPUtils {
             BPMessages.send(p, "Cannot-Use-Negative-Number");
             return false;
         }
-        if (money.doubleValue() <= 0) {
+        if (money.doubleValue() == 0) {
             BPMessages.send(p, "Insufficient-Money");
             return false;
         }

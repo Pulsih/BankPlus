@@ -168,7 +168,7 @@ public class BPMessages {
         FileConfiguration config = BankPlus.INSTANCE.getConfigs().getConfig(BPConfigs.Type.MESSAGES.name);
         for (String path : config.getConfigurationSection("").getKeys(false)) {
             if (!path.equals("Update-File") && !path.equals("Enable-Missing-Message-Alert"))
-                messages.put(path, config.getStringList(path).isEmpty() ? Collections.singletonList(config.getString(path)) : config.getStringList(path));
+                messages.put(path, getPossibleMessages(config, path));
         }
 
         if (messages.containsKey("Prefix")) {
@@ -176,6 +176,11 @@ public class BPMessages {
             prefix = prefixes.isEmpty() ? BPChat.prefix : prefixes.get(0);
         } else prefix = BPChat.prefix;
         enableMissingMessageAlert = config.getBoolean("Enable-Missing-Message-Alert");
+    }
+
+    public static List<String> getPossibleMessages(FileConfiguration config, String path) {
+        List<String> messages = config.getStringList(path);
+        return messages.isEmpty() ? Collections.singletonList(config.getString(path)) : messages;
     }
 
     public static String addPrefix(String message) {

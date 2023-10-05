@@ -24,16 +24,14 @@ public class  BPPreTransactionEvent extends Event implements Cancellable {
     private final BigDecimal currentBalance;
     private final double currentVaultBalance;
     private BigDecimal transactionAmount;
-    private final boolean singleMode;
     private final String bankName;
 
-    public BPPreTransactionEvent(OfflinePlayer player, TransactionType transactionType, BigDecimal currentBalance, double currentVaultBalance, BigDecimal transactionAmount, boolean isSingleMode, String bankName) {
+    public BPPreTransactionEvent(OfflinePlayer player, TransactionType transactionType, BigDecimal currentBalance, double currentVaultBalance, BigDecimal transactionAmount, String bankName) {
         this.player = player;
         this.transactionType = transactionType;
         this.currentBalance = currentBalance;
         this.currentVaultBalance = currentVaultBalance;
         this.transactionAmount = transactionAmount;
-        this.singleMode = isSingleMode;
         this.bankName = bankName;
 
         this.isCancelled = false;
@@ -57,10 +55,6 @@ public class  BPPreTransactionEvent extends Event implements Cancellable {
 
     public BigDecimal getTransactionAmount() {
         return transactionAmount;
-    }
-
-    public boolean isSingleMode() {
-        return singleMode;
     }
 
     public String getBankName() {

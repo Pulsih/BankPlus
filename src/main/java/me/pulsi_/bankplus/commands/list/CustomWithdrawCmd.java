@@ -24,17 +24,12 @@ public class CustomWithdrawCmd extends BPCommand {
 
     @Override
     public boolean skipUsageWarn() {
-        return false;
+        return true;
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String args[]) {
+    public boolean onCommand(CommandSender s, String[] args) {
         Player p = (Player) s;
-
-        if (args.length == 1) {
-            if (getUsage() != null && !getUsage().equals("")) BPMessages.send(s, getUsage(), true);
-            return false;
-        }
 
         String bankName = Values.CONFIG.getMainGuiName();
         if (args.length > 1) bankName = args[1];

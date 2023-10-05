@@ -21,16 +21,14 @@ public class BPAfterTransactionEvent extends Event {
     private final BigDecimal newBalance;
     private final double newVaultBalance;
     private final BigDecimal transactionAmount;
-    private final boolean singleMode;
     private final String bankName;
 
-    public BPAfterTransactionEvent(OfflinePlayer player, TransactionType transactionType, BigDecimal newBalance, double newVaultBalance, BigDecimal transactionAmount, boolean isSingleMode, String bankName) {
+    public BPAfterTransactionEvent(OfflinePlayer player, TransactionType transactionType, BigDecimal newBalance, double newVaultBalance, BigDecimal transactionAmount, String bankName) {
         this.player = player;
         this.transactionType = transactionType;
         this.newBalance = newBalance;
         this.newVaultBalance = newVaultBalance;
         this.transactionAmount = transactionAmount;
-        this.singleMode = isSingleMode;
         this.bankName = bankName;
     }
 
@@ -52,10 +50,6 @@ public class BPAfterTransactionEvent extends Event {
 
     public BigDecimal getTransactionAmount() {
         return transactionAmount;
-    }
-
-    public boolean isSingleMode() {
-        return singleMode;
     }
 
     public String getBankName() {

@@ -454,36 +454,28 @@ public class BPEconomy {
     public void pay(Player from, Player to, BigDecimal amount, String fromBank, String toBank) {
         BigDecimal senderBalance = getBankBalance(from, fromBank);
 
+        // Check if the sender has at least more than 0 money
         if (senderBalance.doubleValue() < amount.doubleValue()) {
             BPMessages.send(from, "Insufficient-Money");
             return;
         }
 
-        BigDecimal targetCapacity = new BankReader(toBank).getCapacity(to), targetBalance = getBankBalance(to, toBank), newBalance = amount.add(targetBalance);
-
-        if (targetBalance.doubleValue() >= targetCapacity.doubleValue()) {
+        // Check if the receiver of the payment has the bank full
+        if (getBankBalance(to, toBank).doubleValue() >= new BankReader(toBank).getCapacity(to).doubleValue()) {
             BPMessages.send(from, "Bank-Full", "%player%$" + to.getName());
             return;
         }
 
-        if (newBalance.doubleValue() >= targetCapacity.doubleValue() && targetCapacity.doubleValue() > 0d) {
-            removeBankBalance(from, targetCapacity.subtract(targetBalance), fromBank, TransactionType.PAY);
-            setBankBalance(to, targetCapacity, toBank, TransactionType.PAY);
+        BigDecimal added = addBankBalance(to, amount, toBank, TransactionType.PAY), extra = amount.subtract(added);
+        BPMessages.send(to, "Payment-Received", BPUtils.placeValues(from, added));
 
-            BPMessages.send(from, "Payment-Sent", BPUtils.placeValues(to, amount));
-            BPMessages.send(to, "Payment-Received", BPUtils.placeValues(from, amount));
-            return;
-        }
-
-        removeBankBalance(from, amount, fromBank, TransactionType.PAY);
-        addBankBalance(to, amount, toBank, TransactionType.PAY);
-        BPMessages.send(from, "Payment-Sent", BPUtils.placeValues(to, amount));
-        BPMessages.send(to, "Payment-Received", BPUtils.placeValues(from, amount));
+        BigDecimal removed = removeBankBalance(from, amount.subtract(extra), fromBank, TransactionType.PAY);
+        BPMessages.send(from, "Payment-Sent", BPUtils.placeValues(to, removed));
     }
 
     private BPPreTransactionEvent startEvent(OfflinePlayer p, TransactionType type, double vaultBalance, BigDecimal amount, String bankName) {
         BPPreTransactionEvent event = new BPPreTransactionEvent(
-                p, type, getBankBalance(p, bankName), vaultBalance, amount, false, bankName
+                p, type, getBankBalance(p, bankName), vaultBalance, amount, bankName
         );
         BPUtils.callEvent(event);
         return event;
@@ -491,7 +483,7 @@ public class BPEconomy {
 
     private void endEvent(OfflinePlayer p, TransactionType type, double vaultBalance, BigDecimal amount, String bankName) {
         BPAfterTransactionEvent event = new BPAfterTransactionEvent(
-                p, type, getBankBalance(p, bankName), vaultBalance, amount, false, bankName
+                p, type, getBankBalance(p, bankName), vaultBalance, amount, bankName
         );
         BPUtils.callEvent(event);
     }
