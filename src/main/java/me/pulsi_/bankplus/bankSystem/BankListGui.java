@@ -45,7 +45,7 @@ public class BankListGui {
         Bank baseBanksListGui = BankPlus.INSTANCE.getBankGuiRegistry().bankListGui;
 
         String title = baseBanksListGui.getTitle();
-        if (!BankPlus.INSTANCE.isPlaceholderAPIHooked()) title = BPChat.color(title);
+        if (!BankPlus.INSTANCE.isPlaceholderApiHooked()) title = BPChat.color(title);
         else title = PlaceholderAPI.setPlaceholders(p, BPChat.color(title));
 
         Inventory banksListGui = Bukkit.createInventory(new BankHolder(), baseBanksListGui.getSize(), title);
@@ -136,7 +136,7 @@ public class BankListGui {
         List<String> newLore = new ArrayList<>();
         for (String lines : lore) newLore.add(BPChat.color(lines));
 
-        if (BankPlus.INSTANCE.isPlaceholderAPIHooked()) {
+        if (BankPlus.INSTANCE.isPlaceholderApiHooked()) {
             meta.setDisplayName(PlaceholderAPI.setPlaceholders(p, BPChat.color(displayname)));
             meta.setLore(PlaceholderAPI.setPlaceholders(p, newLore));
         } else {

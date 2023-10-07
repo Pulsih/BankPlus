@@ -296,10 +296,6 @@ public class BPConfigs {
         }
     }
 
-    public void backupFile() {
-
-    }
-
     public static boolean isUpdated() {
         return updated;
     }

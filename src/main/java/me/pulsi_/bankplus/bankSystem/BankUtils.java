@@ -54,7 +54,7 @@ public class BankUtils {
         Bank baseBank = registry.getBanks().get(identifier);
 
         String title = baseBank.getTitle();
-        if (!BankPlus.INSTANCE.isPlaceholderAPIHooked()) title = BPChat.color(title);
+        if (!BankPlus.INSTANCE.isPlaceholderApiHooked()) title = BPChat.color(title);
         else title = PlaceholderAPI.setPlaceholders(p, BPChat.color(title));
 
         Inventory bank = Bukkit.createInventory(new BankHolder(), baseBank.getSize(), title);
@@ -121,7 +121,7 @@ public class BankUtils {
             }
         }
 
-        if (BankPlus.INSTANCE.isPlaceholderAPIHooked()) {
+        if (BankPlus.INSTANCE.isPlaceholderApiHooked()) {
             meta.setDisplayName(PlaceholderAPI.setPlaceholders(p, BPChat.color(displayName)));
             meta.setLore(PlaceholderAPI.setPlaceholders(p, lore));
         } else {

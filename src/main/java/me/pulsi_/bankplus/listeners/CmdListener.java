@@ -22,6 +22,7 @@ public class CmdListener implements Listener {
         if (BankPlus.isShuttingDown || ((!cmdL.startsWith(rCmd) || !s.hasPermission(restart)) && ((!cmdL.startsWith(sCmd1) && !cmdL.startsWith(sCmd2)) || !s.hasPermission(this.stop)))) return;
         e.setCancelled(true);
         BankPlus.isShuttingDown = true;
+        Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> BankPlus.isShuttingDown = false, 5L);
 
         savePlayers();
         Bukkit.dispatchCommand(e.getSender(), cmd);
@@ -35,6 +36,7 @@ public class CmdListener implements Listener {
         if (BankPlus.isShuttingDown || ((!cmdL.startsWith("/" + rCmd) || !p.hasPermission(restart)) && ((!cmdL.startsWith("/" + sCmd1) && !cmdL.startsWith("/" + sCmd2)) || !p.hasPermission(stop)))) return;
         e.setCancelled(true);
         BankPlus.isShuttingDown = true;
+        Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> BankPlus.isShuttingDown = false, 5L);
 
         savePlayers();
         p.chat(cmd);

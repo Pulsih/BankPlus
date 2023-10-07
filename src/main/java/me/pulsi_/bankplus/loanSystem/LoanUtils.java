@@ -33,16 +33,16 @@ public class LoanUtils {
                 BPMessages.send(from, "Cannot-Afford-Loan-Others", "%player%$" + to.getName());
                 return;
             }
+            BPMessages.send(to, "Loan-Give-Request-Received", BPUtils.placeValues(from, amount));
         } else {
             BigDecimal capacity = new BankReader(loan.getFromBankName()).getCapacity(from);
             if (loan.getMoneyToReturn().doubleValue() > capacity.doubleValue()) {
                 BPMessages.send(from, "Cannot-Afford-Loan");
                 return;
             }
+            BPMessages.send(to, "Loan-Request-Received", BPUtils.placeValues(from, amount));
         }
-
-        BPMessages.send(to, "Loan-Request-Received", BPUtils.placeValues(from, amount));
-        BPMessages.send(from, "Loan-Request-Sent", "%player%$" + to.getName());
+        BPMessages.send(from, "Request-Sent", "%player%$" + to.getName());
 
         BankPlus.INSTANCE.getLoanRegistry().getRequestsReceived().put(to.getUniqueId(), from.getUniqueId());
         BankPlus.INSTANCE.getLoanRegistry().getRequestsSent().put(from.getUniqueId(), loan);

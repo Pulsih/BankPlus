@@ -192,7 +192,7 @@ public class BPMessages {
     }
 
     private static String format(Player p, String text) {
-        return BankPlus.INSTANCE.isPlaceholderAPIHooked() ? PlaceholderAPI.setPlaceholders(p, addPrefix(text)) : addPrefix(text);
+        return BankPlus.INSTANCE.isPlaceholderApiHooked() ? PlaceholderAPI.setPlaceholders(p, addPrefix(text)) : addPrefix(text);
     }
 
     private static String format(CommandSender s, String text) {

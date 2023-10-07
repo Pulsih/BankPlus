@@ -45,7 +45,7 @@ public final class BankPlus extends JavaPlugin {
     private TaskManager taskManager;
     private BPInterest interest;
 
-    private boolean isPlaceholderAPIHooked = false, isEssentialsXHooked = false, isUpdated;
+    private boolean isPlaceholderApiHooked = false, isEssentialsXHooked = false, isUpdated;
     private String serverVersion;
     private int serverVersionInt;
 
@@ -114,7 +114,7 @@ public final class BankPlus extends JavaPlugin {
         if (plManager.getPlugin("PlaceholderAPI") != null) {
             BPLogger.info("Hooked into PlaceholderAPI!");
             new BPPlaceholders().register();
-            isPlaceholderAPIHooked = true;
+            isPlaceholderApiHooked = true;
         }
         if (plManager.getPlugin("Essentials") != null) {
             BPLogger.info("Hooked into Essentials!");
@@ -156,8 +156,8 @@ public final class BankPlus extends JavaPlugin {
         return perms;
     }
 
-    public boolean isPlaceholderAPIHooked() {
-        return isPlaceholderAPIHooked;
+    public boolean isPlaceholderApiHooked() {
+        return isPlaceholderApiHooked;
     }
 
     public boolean isEssentialsXHooked() {
