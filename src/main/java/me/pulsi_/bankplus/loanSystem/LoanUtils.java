@@ -1,9 +1,7 @@
 package me.pulsi_.bankplus.loanSystem;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BPPlayerFiles;
 import me.pulsi_.bankplus.bankSystem.BankReader;
-import me.pulsi_.bankplus.debt.DebtUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.economy.TransactionType;
 import me.pulsi_.bankplus.utils.BPMessages;
@@ -11,10 +9,8 @@ import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.UUID;
@@ -153,7 +149,7 @@ public class LoanUtils {
         if (debt.doubleValue() <= 0D) BPMessages.send(target, "Loan-Returned", BPUtils.placeValues(sender, amount));
         else {
             BPMessages.send(target, "Loan-Returned-Debt", BPUtils.placeValues(sender, debt));
-            DebtUtils.setDebt(target, debt);
+            BankPlus.getBPEconomy().setDebt(target, debt);
         }
 
         // Was the loan at his final instalment?

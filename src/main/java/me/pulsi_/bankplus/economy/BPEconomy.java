@@ -1,7 +1,9 @@
 package me.pulsi_.bankplus.economy;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.BPPlayerFiles;
+import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.bankSystem.BankGuiRegistry;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.events.BPAfterTransactionEvent;
@@ -33,10 +35,12 @@ public class BPEconomy {
 
     private final Map<UUID, HashMap<String, BigDecimal>> playerBalances = new HashMap<>();
 
-    private final BankGuiRegistry registry;
+    private final PlayerRegistry playerRegistry;
+    private final BankGuiRegistry banksRegistry;
 
     public BPEconomy() {
-        registry = BankPlus.INSTANCE.getBankGuiRegistry();
+        playerRegistry = BankPlus.INSTANCE.getPlayerRegistry();
+        banksRegistry = BankPlus.INSTANCE.getBankGuiRegistry();
     }
 
     /**
@@ -80,6 +84,20 @@ public class BPEconomy {
     }
 
     /**
+     * Unload the player bank balances from the server.
+     */
+    public void unloadBankBalance(UUID playerUUID) {
+        playerBalances.remove(playerUUID);
+    }
+
+    /**
+     * Unload the player bank balances from the server.
+     */
+    public void unloadBankBalance(Player p) {
+        playerBalances.remove(p.getUniqueId());
+    }
+
+    /**
      * Load the player bank balances. This cannot be an offline player!
      */
     public void loadBankBalance(Player p) {
@@ -96,7 +114,7 @@ public class BPEconomy {
         if (playerBalances.containsKey(p.getUniqueId())) balances = playerBalances.get(p.getUniqueId());
 
         boolean changes = false;
-        for (String bankName : registry.getBanks().keySet()) {
+        for (String bankName : banksRegistry.getBanks().keySet()) {
             if (balances.containsKey(bankName)) continue;
 
             String bal = config.getString("banks." + bankName + ".money");
@@ -116,13 +134,6 @@ public class BPEconomy {
     }
 
     /**
-     * Unload the player bank balances.
-     */
-    public void unloadBankBalance(Player p) {
-        playerBalances.remove(p.getUniqueId());
-    }
-
-    /**
      * Save all bank balances to the player file.
      */
     public void saveBankBalances(Player p, boolean async) {
@@ -130,7 +141,7 @@ public class BPEconomy {
         File file = files.getPlayerFile();
         FileConfiguration config = files.getPlayerConfig(file);
 
-        for (String bankName : registry.getBanks().keySet())
+        for (String bankName : banksRegistry.getBanks().keySet())
             config.set("banks." + bankName + ".money", BPFormatter.formatBigDouble(getBankBalance(p, bankName)));
 
         files.savePlayerFile(config, file, async);
@@ -147,11 +158,10 @@ public class BPEconomy {
      * Get the player bank balance of the selected bank.
      */
     public BigDecimal getBankBalance(OfflinePlayer p, String bankName) {
-        if (!p.isOnline()) {
+        if (!playerBalances.containsKey(p.getUniqueId())) {
             String bal = new BPPlayerFiles(p).getPlayerConfig().getString("banks." + bankName + ".money");
             return new BigDecimal(bal == null ? "0" : bal);
         }
-        loadBankBalance(p.getPlayer());
         return playerBalances.get(p.getUniqueId()).get(bankName);
     }
 
@@ -159,19 +169,18 @@ public class BPEconomy {
      * Get the player bank balance of all the existing bank.
      */
     public BigDecimal getBankBalance(OfflinePlayer p) {
-        if (!p.isOnline()) {
+        if (!playerBalances.containsKey(p.getUniqueId())) {
             BigDecimal amount = new BigDecimal(0);
             FileConfiguration config = new BPPlayerFiles(p).getPlayerConfig();
-            for (String bankName : registry.getBanks().keySet()) {
+            for (String bankName : banksRegistry.getBanks().keySet()) {
                 String num = config.getString("banks." + bankName + ".money");
                 amount = amount.add(new BigDecimal(num == null ? "0" : num));
             }
             return amount;
         }
 
-        loadBankBalance(p.getPlayer());
         BigDecimal amount = new BigDecimal(0);
-        for (String bankName : registry.getBanks().keySet())
+        for (String bankName : banksRegistry.getBanks().keySet())
             amount = amount.add(playerBalances.get(p.getUniqueId()).get(bankName));
         return amount;
     }
@@ -347,11 +356,50 @@ public class BPEconomy {
         files.savePlayerFile(config, file, async);
     }
 
+    public void setDebt(OfflinePlayer p, BigDecimal amount) {
+        Player onlinePlayer = p.getPlayer();
+
+        if (onlinePlayer != null) {
+            BPPlayer bp = playerRegistry.get(onlinePlayer);
+            if (bp != null) {
+                bp.setDebt(amount);
+                return;
+            }
+        }
+
+        BPPlayerFiles files = new BPPlayerFiles(p);
+        File file = files.getPlayerFile();
+        FileConfiguration config = files.getPlayerConfig(file);
+        config.set("debt", BPFormatter.formatBigDouble(amount));
+        files.savePlayerFile(config, file, true);
+    }
+
+    public BigDecimal getDebt(UUID playerUUID) {
+        return getDebt(Bukkit.getOfflinePlayer(playerUUID));
+    }
+
+    public BigDecimal getDebt(OfflinePlayer p) {
+        Player onlinePlayer = p.getPlayer();
+        BigDecimal debt = null;
+
+        if (onlinePlayer != null) {
+            BPPlayer bp = playerRegistry.get(onlinePlayer);
+            if (bp != null) debt = bp.getDebt();
+        }
+
+        if (debt == null) {
+            BPPlayerFiles files = new BPPlayerFiles(p);
+            String sDebt = files.getPlayerConfig().getString("debt");
+            debt = new BigDecimal(sDebt == null ? "0" : sDebt);
+        }
+        return debt;
+    }
+
     /**
      * Method internally used to simplify the transactions.
      */
     private void set(OfflinePlayer p, BigDecimal amount, String bankName) {
-        if (p.isOnline()) {
+        if (playerBalances.containsKey(p.getUniqueId())) {
             BigDecimal amountFormatted = new BigDecimal(BPFormatter.formatBigDouble(amount));
 
             HashMap<String, BigDecimal> balances = playerBalances.get(p.getUniqueId());

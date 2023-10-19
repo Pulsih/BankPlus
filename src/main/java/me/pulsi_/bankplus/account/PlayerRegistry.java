@@ -1,9 +1,7 @@
 package me.pulsi_.bankplus.account;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.debt.DebtUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
-import me.pulsi_.bankplus.managers.TaskManager;
 import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.Values;
@@ -35,6 +33,10 @@ public class PlayerRegistry {
         return players.get(p.getUniqueId());
     }
 
+    public BPPlayer remove(UUID playerUUID) {
+        return players.remove(playerUUID);
+    }
+
     public BPPlayer remove(Player p) {
         return players.remove(p.getUniqueId());
     }
@@ -53,9 +55,12 @@ public class PlayerRegistry {
         for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
             config.set("banks." + bankName + ".money", BPFormatter.formatBigDouble(economy.getBankBalance(uuid, bankName)));
 
-        config.set("debt", BPFormatter.formatBigDouble(DebtUtils.getDebt(uuid)));
+        config.set("debt", BPFormatter.formatBigDouble(BankPlus.getBPEconomy().getDebt(uuid)));
 
         files.savePlayerFile(config, file, async);
+
+        BankPlus.getBPEconomy().unloadBankBalance(uuid);
+        remove(uuid);
     }
 
     public void forceSave(boolean async) {

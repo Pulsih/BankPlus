@@ -3,7 +3,6 @@ package me.pulsi_.bankplus.placeholders;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankReader;
-import me.pulsi_.bankplus.debt.DebtUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.interest.BPInterest;
 import me.pulsi_.bankplus.managers.BankTopManager;
@@ -190,7 +189,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
         if (identifier.startsWith("debt")) {
             String formatter = identifier.replace("debt", "");
-            return getFormat(formatter, DebtUtils.getDebt(p));
+            return getFormat(formatter, BankPlus.getBPEconomy().getDebt(p));
         }
 
         if (identifier.startsWith("balance")) {

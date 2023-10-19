@@ -1,7 +1,6 @@
 package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.debt.DebtUtils;
 import me.pulsi_.bankplus.economy.TransactionType;
 import me.pulsi_.bankplus.events.BPAfterTransactionEvent;
 import me.pulsi_.bankplus.events.BPPreTransactionEvent;
@@ -50,7 +49,7 @@ public class BPTransactionListener implements Listener {
         if (Values.CONFIG.isLogTransactions())
             logHolder.put(p.getUniqueId(), new Pair<>(e.getCurrentBalance(), e.getCurrentVaultBalance()));
 
-        BigDecimal debt = DebtUtils.getDebt(p);
+        BigDecimal debt = BankPlus.getBPEconomy().getDebt(p);
         TransactionType type = e.getTransactionType();
         if (debt.doubleValue() <= 0d || (!type.equals(TransactionType.ADD) && !type.equals(TransactionType.DEPOSIT) && !type.equals(TransactionType.SET))) return;
 
@@ -74,7 +73,7 @@ public class BPTransactionListener implements Listener {
             );
         }
 
-        DebtUtils.setDebt(p, debtLeft);
+        BankPlus.getBPEconomy().setDebt(p, debtLeft);
         e.setTransactionAmount(newAmount);
     }
 
