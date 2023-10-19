@@ -5,14 +5,13 @@ import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.values.Values;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
 
-public class SaveAllBankBalancesCmd extends BPCommand {
+public class SaveAllDataCmd extends BPCommand {
 
-    public SaveAllBankBalancesCmd(String... aliases) {
+    public SaveAllDataCmd(String... aliases) {
         super(aliases);
     }
 
@@ -30,9 +29,9 @@ public class SaveAllBankBalancesCmd extends BPCommand {
     public boolean onCommand(CommandSender s, String[] args) {
         if (confirm(s)) return false;
 
-        Bukkit.getOnlinePlayers().forEach(p -> BankPlus.getBPEconomy().saveBankBalances(p, true));
-        BPMessages.send(s, "Balances-Saved");
-        if (Values.CONFIG.isSaveBalancesBroadcast()) BPLogger.info("All player balances have been saved!");
+        BankPlus.INSTANCE.getPlayerRegistry().forceSave(true);
+        if (Values.CONFIG.isSaveBalancesBroadcast()) BPLogger.info("All player data have been saved!");
+        BPMessages.send(s, "%prefix% &aSuccessfully saved all player data!", true);
         return true;
     }
 

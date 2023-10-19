@@ -20,9 +20,11 @@ import java.util.List;
 
 public class BPPlaceholders extends PlaceholderExpansion {
 
+    private final BPInterest interest;
     private final BPEconomy economy;
 
     public BPPlaceholders() {
+        interest = BankPlus.INSTANCE.getInterest();
         economy = BankPlus.getBPEconomy();
     }
 
@@ -206,24 +208,27 @@ public class BPPlaceholders extends PlaceholderExpansion {
         }
 
         if (identifier.startsWith("next_interest")) {
-            BankReader reader;
-            BigDecimal percentage, interestMoney, balance;
+            BankReader reader = new BankReader(Values.CONFIG.getMainGuiName());
 
-            if (target == null) {
-                reader = new BankReader(Values.CONFIG.getMainGuiName());
-                percentage = reader.getInterest(p).divide(BigDecimal.valueOf(100));
-                balance = economy.getBankBalance(p);
-            } else {
+            if (target != null) {
                 reader = new BankReader(target);
                 if (!reader.exist())
                     return "The selected bank does not exist.";
-
-                percentage = reader.getInterest(p).divide(BigDecimal.valueOf(100));
-                balance = economy.getBankBalance(p, target);
             }
-            interestMoney = new BigDecimal(Math.min(Values.CONFIG.getInterestMaxAmount().doubleValue(), balance.multiply(percentage).doubleValue()));
 
-            return getFormat(identifier, interestMoney);
+            return getFormat(identifier, interest.getInterestMoney(p, reader.getInterest(p), reader));
+        }
+
+        if (identifier.startsWith("next_offline_interest")) {
+            BankReader reader = new BankReader(Values.CONFIG.getMainGuiName());
+
+            if (target != null) {
+                reader = new BankReader(target);
+                if (!reader.exist())
+                    return "The selected bank does not exist.";
+            }
+
+            return getFormat(identifier, interest.getInterestMoney(p, reader.getOfflineInterest(p), reader));
         }
 
         if (identifier.startsWith("banktop_money_")) {
@@ -290,9 +295,9 @@ public class BPPlaceholders extends PlaceholderExpansion {
         }
 
         if (identifier.startsWith("interest_rate")) {
-            BankReader reader;
-            if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
-            else {
+            BankReader reader = new BankReader(Values.CONFIG.getMainGuiName());
+
+            if (target != null) {
                 reader = new BankReader(target);
                 if (!reader.exist())
                     return "The selected bank does not exist.";
@@ -302,9 +307,9 @@ public class BPPlaceholders extends PlaceholderExpansion {
         }
 
         if (identifier.startsWith("offline_interest_rate")) {
-            BankReader reader;
-            if (target == null) reader = new BankReader(Values.CONFIG.getMainGuiName());
-            else {
+            BankReader reader = new BankReader(Values.CONFIG.getMainGuiName());
+
+            if (target != null) {
                 reader = new BankReader(target);
                 if (!reader.exist())
                     return "The selected bank does not exist.";

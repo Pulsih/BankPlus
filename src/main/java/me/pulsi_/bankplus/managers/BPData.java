@@ -54,6 +54,8 @@ public class BPData {
     }
 
     public void shutdownPlugin() {
+        plugin.getPlayerRegistry().saveEveryone(false);
+
         BPConfigs configs = plugin.getConfigs();
         File file = configs.getFile(BPConfigs.Type.SAVES.name);
         FileConfiguration savesConfig = configs.getConfig(BPConfigs.Type.SAVES.name);
@@ -64,7 +66,7 @@ public class BPData {
         try {
             savesConfig.save(file);
         } catch (IOException e) {
-            BPLogger.error(e, "Failed to save \"saves.yml\" file! " + e.getMessage());
+            BPLogger.error(e, "Failed to save changes to \"saves.yml\" file! " + e.getMessage());
         }
 
         BPLogger.log("");
@@ -94,7 +96,6 @@ public class BPData {
         BPInterest interest = plugin.getInterest();
         if (Values.CONFIG.isInterestEnabled() && interest.wasDisabled()) interest.startInterest();
 
-        BPUtils.startSavingBalancesTask();
         Bukkit.getOnlinePlayers().forEach(p -> {
             BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
             if (player != null && player.getOpenedBank() != null) p.closeInventory();
@@ -111,12 +112,10 @@ public class BPData {
         plManager.registerEvents(new AFKListener(plugin), plugin);
         plManager.registerEvents(new InventoryCloseListener(), plugin);
         plManager.registerEvents(new BPTransactionListener(), plugin);
-        plManager.registerEvents(new CmdListener(), plugin);
 
         String chatPriority = Values.CONFIG.getPlayerChatPriority();
-        if (chatPriority == null) {
-            plManager.registerEvents(new PlayerChatNormal(), plugin);
-        } else switch (chatPriority) {
+        if (chatPriority == null) plManager.registerEvents(new PlayerChatNormal(), plugin);
+        else switch (chatPriority) {
             case "LOWEST":
                 plManager.registerEvents(new PlayerChatLowest(), plugin);
                 break;
@@ -135,9 +134,8 @@ public class BPData {
         }
 
         String bankClickPriority = Values.CONFIG.getBankClickPriority();
-        if (bankClickPriority == null) {
-            plManager.registerEvents(new BankClickNormal(), plugin);
-        } else switch (bankClickPriority) {
+        if (bankClickPriority == null) plManager.registerEvents(new BankClickNormal(), plugin);
+        else switch (bankClickPriority) {
             case "LOWEST":
                 plManager.registerEvents(new BankClickLowest(), plugin);
                 break;

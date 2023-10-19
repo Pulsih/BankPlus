@@ -85,7 +85,7 @@ public class BPInterest {
         for (String bankName : availableBanks) {
             BigDecimal bankBalance = economy.getBankBalance(p, bankName);
             BankReader reader = new BankReader(bankName);
-            BigDecimal interestMoney = getInterestMoney(p, bankBalance, reader.getInterest(p), reader), maxAmount = Values.CONFIG.getInterestMaxAmount();
+            BigDecimal interestMoney = getInterestMoney(p, reader.getInterest(p), reader), maxAmount = Values.CONFIG.getInterestMaxAmount();
 
             if (bankBalance.doubleValue() <= 0) continue;
             if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
@@ -122,8 +122,8 @@ public class BPInterest {
                 BankReader reader = new BankReader(bankName);
                 BigDecimal maxAmount = Values.CONFIG.getInterestMaxAmount(),
                         interestMoney = Values.CONFIG.isOfflineInterestDifferentRate() ?
-                        getInterestMoney(p, bankBalance, reader.getOfflineInterest(p), reader) :
-                        getInterestMoney(p, bankBalance, reader.getInterest(p), reader);
+                        getInterestMoney(p, reader.getOfflineInterest(p), reader) :
+                        getInterestMoney(p, reader.getInterest(p), reader);
 
                 if (bankBalance.doubleValue() <= 0) continue;
                 if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
@@ -135,36 +135,37 @@ public class BPInterest {
         }
     }
 
-    public BigDecimal getInterestMoney(OfflinePlayer p, BigDecimal balance, BigDecimal defaultInterest, BankReader reader) {
+    public BigDecimal getInterestMoney(OfflinePlayer p, BigDecimal defaultInterest, BankReader reader) {
+        BigDecimal balance = BankPlus.getBPEconomy().getBankBalance(p, reader.getBank().getIdentifier());
+
         if (!Values.CONFIG.enableInterestLimiter() || !Values.CONFIG.accumulateInterestLimiter())
             return balance.multiply(defaultInterest.divide(BigDecimal.valueOf(100)));
-        else {
-            List<String> limiter = reader.getInterestLimiter(reader.getCurrentLevel(p));
-            BigDecimal result = new BigDecimal(0), count = balance;
-            for (String line : limiter) {
-                if (!line.contains(":")) continue;
 
-                String[] split1 = line.split(":");
-                if (BPUtils.isInvalidNumber(split1[1])) continue;
+        List<String> limiter = reader.getInterestLimiter(reader.getCurrentLevel(p));
+        BigDecimal result = new BigDecimal(0), count = balance;
+        for (String line : limiter) {
+            if (!line.contains(":")) continue;
 
-                String[] split2 = split1[0].split("-");
-                if (BPUtils.isInvalidNumber(split2[0]) || BPUtils.isInvalidNumber(split2[1])) continue;
+            String[] split1 = line.split(":");
+            if (BPUtils.isInvalidNumber(split1[1])) continue;
 
-                String interest = split1[1].replace("%", ""), from = split2[0], to = split2[1];
-                BigDecimal interestRate = new BigDecimal(interest), fromNumber = new BigDecimal(from), toNumber = new BigDecimal(to);
+            String[] split2 = split1[0].split("-");
+            if (BPUtils.isInvalidNumber(split2[0]) || BPUtils.isInvalidNumber(split2[1])) continue;
 
-                if (fromNumber.doubleValue() > toNumber.doubleValue()) toNumber = fromNumber;
+            String interest = split1[1].replace("%", ""), from = split2[0], to = split2[1];
+            BigDecimal interestRate = new BigDecimal(interest), fromNumber = new BigDecimal(from), toNumber = new BigDecimal(to);
 
-                if (toNumber.doubleValue() < count.doubleValue()) {
-                    result = result.add(toNumber.multiply(interestRate).divide(BigDecimal.valueOf(100)));
-                    count = count.subtract(toNumber);
-                } else {
-                    result = result.add(count.multiply(interestRate).divide(BigDecimal.valueOf(100)));
-                    return result;
-                }
+            if (fromNumber.doubleValue() > toNumber.doubleValue()) toNumber = fromNumber;
+
+            if (toNumber.doubleValue() < count.doubleValue()) {
+                result = result.add(toNumber.multiply(interestRate).divide(BigDecimal.valueOf(100)));
+                count = count.subtract(toNumber);
+            } else {
+                result = result.add(count.multiply(interestRate).divide(BigDecimal.valueOf(100)));
+                return result;
             }
-            return result;
         }
+        return result;
     }
 
     private boolean isInterestActive() {

@@ -10,6 +10,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.UUID;
 
 public class BPPlayerFiles {
 
@@ -17,6 +18,10 @@ public class BPPlayerFiles {
 
     public BPPlayerFiles(OfflinePlayer p) {
         this.p = p;
+    }
+
+    public BPPlayerFiles(UUID uuid) {
+        this.p = Bukkit.getOfflinePlayer(uuid);
     }
 
     public boolean isPlayerRegistered() {

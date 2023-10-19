@@ -13,6 +13,7 @@ import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -133,6 +134,13 @@ public class BPEconomy {
             config.set("banks." + bankName + ".money", BPFormatter.formatBigDouble(getBankBalance(p, bankName)));
 
         files.savePlayerFile(config, file, async);
+    }
+
+    /**
+     * Get the player bank balance of the selected bank.
+     */
+    public BigDecimal getBankBalance(UUID playerUUID, String bankName) {
+        return getBankBalance(Bukkit.getOfflinePlayer(playerUUID), bankName);
     }
 
     /**

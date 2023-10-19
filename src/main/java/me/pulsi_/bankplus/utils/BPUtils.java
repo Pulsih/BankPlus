@@ -164,24 +164,6 @@ public class BPUtils {
         return false;
     }
 
-    public static void startSavingBalancesTask() {
-        TaskManager tasks = BankPlus.INSTANCE.getTaskManager();
-        BukkitTask task = tasks.getSavingTask();
-        if (task != null) task.cancel();
-
-        if (Values.CONFIG.getSaveBalancedDelay() <= 0) return;
-
-        // Cache the values out the runnable to improve a bit the performance.
-        BPEconomy economy = BankPlus.getBPEconomy();
-        long delay = Values.CONFIG.getSaveBalancedDelay() * 1200L;
-        boolean saveBroadcast = Values.CONFIG.isSaveBalancesBroadcast();
-
-        tasks.setSavingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE, () -> {
-            Bukkit.getOnlinePlayers().forEach(p -> economy.saveBankBalances(p, true));
-            if (saveBroadcast) BPLogger.info("All player balances have been saved!");
-        }, delay, delay));
-    }
-
     public static void customWithdraw(Player p) {
         customWithdraw(p, Values.CONFIG.getMainGuiName());
     }

@@ -24,7 +24,7 @@ public class CmdRegisterer {
         new RemoveCmd("remove").register();
         new ResetAllCmd("resetAll").register();
         new RestartInterestCmd("restartInterest").register();
-        new SaveAllBankBalancesCmd("saveAllBankBalances").register();
+        new SaveAllDataCmd("saveAllData").register();
         new SetCmd("set").register();
         new SetLevelCmd("setLevel").register();
         new UpdateBankTopCmd("updateBankTop").register();

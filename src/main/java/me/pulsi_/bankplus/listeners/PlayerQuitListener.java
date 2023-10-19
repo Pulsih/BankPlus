@@ -11,19 +11,20 @@ import org.bukkit.scheduler.BukkitTask;
 
 public class PlayerQuitListener implements Listener {
 
+    private final PlayerRegistry registry;
+
+    public PlayerQuitListener() {
+        this.registry = BankPlus.INSTANCE.getPlayerRegistry();
+    }
+
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
-        if (BankPlus.isShuttingDown) return;
         Player p = e.getPlayer();
 
-        PlayerRegistry registry = BankPlus.INSTANCE.getPlayerRegistry();
-        registry.savePlayer(p);
-
-        BukkitTask updating = registry.remove(p).getBankUpdatingTask();
+        BukkitTask updating = registry.get(p).getBankUpdatingTask();
         if (updating != null) updating.cancel();
 
         BPSets.removePlayerFromDepositing(p);
         BPSets.removePlayerFromWithdrawing(p);
-        BankPlus.getBPEconomy().unloadBankBalance(p);
     }
 }
