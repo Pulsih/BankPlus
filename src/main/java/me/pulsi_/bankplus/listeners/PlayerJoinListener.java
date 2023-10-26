@@ -71,18 +71,15 @@ public class PlayerJoinListener implements Listener {
             }
         }
 
-        if (Values.CONFIG.notifyOfflineInterest()) {
-            String amount = config.getString("interest");
-            BigDecimal offlineInterest = new BigDecimal(amount == null ? "0" : amount);
-
+        if (Values.CONFIG.notifyOfflineInterest() && sOfflineInterest != null) {
+            BigDecimal offlineInterest = new BigDecimal(sOfflineInterest);
             if (offlineInterest.doubleValue() > 0) {
-                long delay = Values.CONFIG.getNotifyOfflineInterestDelay();
+                Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () ->
+                        BPMessages.send(p, Values.CONFIG.getNotifyOfflineInterestMessage(), BPUtils.placeValues(offlineInterest), true),
+                        Values.CONFIG.getNotifyOfflineInterestDelay() * 20L);
 
-                if (delay == 0)
-                    BPMessages.send(p, Values.CONFIG.getNotifyOfflineInterestMessage(), BPUtils.placeValues(offlineInterest), true);
-                else Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () ->
-                        BPMessages.send(p, Values.CONFIG.getNotifyOfflineInterestMessage(), BPUtils.placeValues(offlineInterest), true), delay * 20L);
                 config.set("interest", "0");
+                hasChanges = true;
             }
         }
 
