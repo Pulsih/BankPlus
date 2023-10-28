@@ -1,5 +1,7 @@
 package me.pulsi_.bankplus.commands.list;
 
+import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.bankSystem.BankGuiRegistry;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.loanSystem.LoanUtils;
@@ -12,12 +14,19 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 public class LoanCmd extends BPCommand {
 
+    private final BankReader reader;
+    private final BankGuiRegistry registry;
+
     public LoanCmd(String... aliases) {
         super(aliases);
+
+        reader = new BankReader();
+        registry = BankPlus.INSTANCE.getBankGuiRegistry();
     }
 
     @Override
@@ -69,8 +78,15 @@ public class LoanCmd extends BPCommand {
             return false;
         }
 
-        Player target = Bukkit.getPlayerExact(args[2]);
+        String targetName = args[2];
+        if (action.equalsIgnoreCase("request") && registry.getBanks().containsKey(targetName)) {
 
+            // Add the ability to request loans to the bank
+
+            return true;
+        }
+
+        Player target = Bukkit.getPlayerExact(targetName);
         if (target == null || target.equals(s)) {
             BPMessages.send(s, "Invalid-Player");
             return false;
@@ -118,7 +134,6 @@ public class LoanCmd extends BPCommand {
     @Override
     public List<String> tabCompletion(CommandSender s, String[] args) {
         Player p = (Player) s;
-        Player target = args.length > 3 ? Bukkit.getPlayerExact(args[3]) : null;
 
         if (args.length == 2) {
             if (LoanUtils.hasSentRequest(p))
@@ -130,14 +145,22 @@ public class LoanCmd extends BPCommand {
             return BPArgs.getArgs(args, "give", "request");
         }
 
+        if (args.length == 3) {
+            List<String> availableBanks = new ArrayList<>();
+            if (args[1].equalsIgnoreCase("request")) availableBanks.addAll(reader.getAvailableBanks(p));
+
+            availableBanks.addAll(BPArgs.getOnlinePlayers(args));
+            BPArgs.getArgs(args, availableBanks);
+        }
+
         if (args.length == 4)
             return BPArgs.getArgs(args, "1", "2", "3");
 
         if (args.length == 5)
-            return BPArgs.getArgs(args, new BankReader().getAvailableBanks(p));
+            return BPArgs.getArgs(args, reader.getAvailableBanks(p));
 
         if (args.length == 6)
-            return BPArgs.getArgs(args, new BankReader().getAvailableBanks(target));
+            return BPArgs.getArgs(args, reader.getAvailableBanks(Bukkit.getPlayerExact(args[3])));
 
         return null;
     }

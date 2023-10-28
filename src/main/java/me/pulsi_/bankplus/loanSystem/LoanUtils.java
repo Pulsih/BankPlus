@@ -40,12 +40,13 @@ public class LoanUtils {
         }
         BPMessages.send(from, "Request-Sent", "%player%$" + to.getName());
 
-        BankPlus.INSTANCE.getLoanRegistry().getRequestsReceived().put(to.getUniqueId(), from.getUniqueId());
-        BankPlus.INSTANCE.getLoanRegistry().getRequestsSent().put(from.getUniqueId(), loan);
+        LoanRegistry registry = BankPlus.INSTANCE.getLoanRegistry();
+        registry.getRequestsReceived().put(to.getUniqueId(), from.getUniqueId());
+        registry.getRequestsSent().put(from.getUniqueId(), loan);
 
         Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> {
-            BankPlus.INSTANCE.getLoanRegistry().getRequestsReceived().remove(to.getUniqueId());
-            BankPlus.INSTANCE.getLoanRegistry().getRequestsSent().remove(from.getUniqueId());
+            registry.getRequestsReceived().remove(to.getUniqueId());
+            registry.getRequestsSent().remove(from.getUniqueId());
         }, Values.CONFIG.getLoanAcceptTime() * 20L);
     }
 
