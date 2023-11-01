@@ -60,7 +60,7 @@ public class SetCmd extends BPCommand {
 
         if (confirm(s)) return false;
 
-        BigDecimal set = BankPlus.getBPEconomy().removeBankBalance(p, amount, bankName);
+        BigDecimal set = BankPlus.getBPEconomy().setBankBalance(p, amount, bankName);
         if (!silent) BPMessages.send(s, "Set-Message", BPUtils.placeValues(p, set));
         return true;
     }

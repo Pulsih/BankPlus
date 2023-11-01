@@ -127,6 +127,10 @@ public class BPConfigs {
         return new File(plugin.getDataFolder(), path);
     }
 
+    public FileConfiguration getConfig(File file) {
+        return YamlConfiguration.loadConfiguration(file);
+    }
+
     public FileConfiguration getConfig(String path) {
         return YamlConfiguration.loadConfiguration(getFile(path));
     }

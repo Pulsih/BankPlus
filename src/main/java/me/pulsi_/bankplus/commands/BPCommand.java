@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.commands;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.managers.BPConfigs;
+import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
 import org.bukkit.Bukkit;
@@ -100,8 +101,7 @@ public abstract class BPCommand {
         if (needConfirm()) {
             if (!confirm.contains(s.getName())) {
                 Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> confirm.remove(s.getName()), getConfirmCooldown() * 20L);
-                if (getConfirmMessage() != null && !getConfirmMessage().isEmpty())
-                    BPMessages.send(s, getConfirmMessage(), true);
+                BPMessages.send(s, getConfirmMessage(), true);
                 confirm.add(s.getName());
                 return true;
             }
@@ -114,21 +114,23 @@ public abstract class BPCommand {
         if (!BPUtils.hasPermission(s, getPermission()) || (playerOnly() && !BPUtils.isPlayer(s))) return;
 
         if (!skipUsageWarn() && args.length == 1) {
-            if (!getUsage().isEmpty()) for (String usage : getUsage()) BPMessages.send(s, usage, true);
+            for (String usage : getUsage()) BPMessages.send(s, usage, true);
             return;
         }
+        if (isInCooldown(s)) return;
 
         if (!onCommand(s, args)) return;
 
         if (hasCooldown() && getCooldown() > 0 && !(s instanceof ConsoleCommandSender)) {
-            if (cooldownMap.containsKey(s.getName()) && cooldownMap.get(s.getName()) > System.currentTimeMillis()) {
-                if (getCooldownMessage() != null && !getCooldownMessage().isEmpty())
-                    BPMessages.send(s, getCooldownMessage(), true);
-                return;
-            }
             cooldownMap.put(s.getName(), System.currentTimeMillis() + (getCooldown() * 1000L));
             Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> cooldownMap.remove(s.getName()), getCooldown() * 20L);
         }
+    }
+
+    public boolean isInCooldown(CommandSender s) {
+        if (!cooldownMap.containsKey(s.getName()) || cooldownMap.get(s.getName()) <= System.currentTimeMillis()) return false;
+        BPMessages.send(s, getCooldownMessage().replace("%time%", BPUtils.formatTime(cooldownMap.get(s.getName()) - System.currentTimeMillis())), true);
+        return true;
     }
 
     public abstract boolean playerOnly();

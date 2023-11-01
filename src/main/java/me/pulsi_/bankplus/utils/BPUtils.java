@@ -343,23 +343,33 @@ public class BPUtils {
     }
 
     public static List<String> placeValues(BigDecimal amount) {
-        return placeValues(null, amount, "amount");
+        return placeValues(null, null, amount, "amount");
+    }
+
+    public static List<String> placeValues(String bank, BigDecimal amount) {
+        return placeValues(null, bank, amount, "amount");
     }
 
     public static List<String> placeValues(OfflinePlayer p, BigDecimal amount) {
-        return placeValues(p, amount, "amount");
+        return placeValues(p, null, amount, "amount");
     }
 
     public static List<String> placeValues(BigDecimal amount, String newIdentifier) {
-        return placeValues(null, amount, newIdentifier);
+        return placeValues(null, null, amount, newIdentifier);
     }
 
     public static List<String> placeValues(OfflinePlayer p, BigDecimal amount, String newIdentifier) {
+        return placeValues(p, null, amount, newIdentifier);
+    }
+
+    public static List<String> placeValues(OfflinePlayer p, String bank, BigDecimal amount, String newIdentifier) {
         List<String> values = new ArrayList<>();
         if (p != null) {
             values.add("%player%$" + p.getName());
             values.add("%player_name%$" + p.getName());
         }
+
+        if (bank != null) values.add("%bank%$" + bank);
 
         values.add("%" + newIdentifier + "%$" + BPFormatter.formatCommas(amount));
         values.add("%" + newIdentifier + "_long%$" + amount);

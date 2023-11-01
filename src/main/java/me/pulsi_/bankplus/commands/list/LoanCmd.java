@@ -77,20 +77,7 @@ public class LoanCmd extends BPCommand {
             BPMessages.send(sender, "Specify-Player");
             return false;
         }
-
         String targetName = args[2];
-        if (action.equalsIgnoreCase("request") && registry.getBanks().containsKey(targetName)) {
-
-            // Add the ability to request loans to the bank
-
-            return true;
-        }
-
-        Player target = Bukkit.getPlayerExact(targetName);
-        if (target == null || target.equals(s)) {
-            BPMessages.send(s, "Invalid-Player");
-            return false;
-        }
 
         if (args.length == 3) {
             BPMessages.send(sender, "Specify-Number");
@@ -100,6 +87,21 @@ public class LoanCmd extends BPCommand {
         String num = args[3];
         if (BPUtils.isInvalidNumber(num, sender)) return false;
         BigDecimal amount = new BigDecimal(num);
+
+        if (action.equals("request") && registry.getBanks().containsKey(targetName)) {
+            if (!new BankReader(targetName).isAvailable(sender)) {
+                BPMessages.send(sender, "Cannot-Access-Bank");
+                return false;
+            }
+            LoanUtils.sendLoan(sender, targetName, amount);
+            return true;
+        }
+
+        Player target = Bukkit.getPlayerExact(targetName);
+        if (target == null || target.equals(s)) {
+            BPMessages.send(s, "Invalid-Player");
+            return false;
+        }
 
         String fromBankName = Values.CONFIG.getMainGuiName();
         if (args.length > 4) fromBankName = args[4];
@@ -150,7 +152,7 @@ public class LoanCmd extends BPCommand {
             if (args[1].equalsIgnoreCase("request")) availableBanks.addAll(reader.getAvailableBanks(p));
 
             availableBanks.addAll(BPArgs.getOnlinePlayers(args));
-            BPArgs.getArgs(args, availableBanks);
+            return BPArgs.getArgs(args, availableBanks);
         }
 
         if (args.length == 4)

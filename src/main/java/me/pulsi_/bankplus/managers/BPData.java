@@ -57,10 +57,10 @@ public class BPData {
 
         BPConfigs configs = plugin.getConfigs();
         File file = configs.getFile(BPConfigs.Type.SAVES.name);
-        FileConfiguration savesConfig = configs.getConfig(BPConfigs.Type.SAVES.name);
+        FileConfiguration savesConfig = configs.getConfig(file);
 
-        plugin.getLoanRegistry().saveAllLoans(savesConfig);
         if (Values.CONFIG.isInterestEnabled()) plugin.getInterest().saveInterest(savesConfig);
+        plugin.getLoanRegistry().saveAllLoans(savesConfig);
 
         try {
             savesConfig.save(file);

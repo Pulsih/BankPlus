@@ -51,7 +51,7 @@ public class BPMessages {
      * The "fromString" parameter means that if it's true, it will send a custom message and won't search it from the loaded messages.
      */
     public static void send(Player p, String message, List<String> stringsToReplace, boolean fromString) {
-        if (p == null) return;
+        if (p == null || message == null || message.isEmpty()) return;
 
         if (!fromString) {
             send(p, message, stringsToReplace);
@@ -71,7 +71,7 @@ public class BPMessages {
      * The "fromString" parameter means that if it's true, it will send a custom message and won't search it from the loaded messages.
      */
     public static void send(CommandSender s, String message, List<String> stringsToReplace, boolean fromString) {
-        if (s == null) return;
+        if (s == null || message == null || message.isEmpty()) return;
 
         if (!fromString) {
             send(s, message, stringsToReplace);
@@ -104,12 +104,12 @@ public class BPMessages {
     }
 
     public static void send(OfflinePlayer op, String identifier, List<String>... stringsToReplace) {
-        if (op == null || op.isOnline()) return;
+        if (op == null || !op.isOnline()) return;
         send(op.getPlayer(), identifier, stringsToReplace);
     }
 
     public static void send(Player p, String identifier, List<String>... stringsToReplace) {
-        if (p == null) return;
+        if (p == null || identifier == null || identifier.isEmpty()) return;
 
         if (!messages.containsKey(identifier)) {
             if (enableMissingMessageAlert)
@@ -140,7 +140,7 @@ public class BPMessages {
     }
 
     public static void send(CommandSender s, String identifier, List<String>... stringsToReplace) {
-        if (s == null) return;
+        if (s == null || identifier == null || identifier.isEmpty()) return;
 
         if (!messages.containsKey(identifier)) {
             if (enableMissingMessageAlert)

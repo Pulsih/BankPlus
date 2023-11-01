@@ -107,7 +107,7 @@ loan:
   confirm-message: "%prefix% &aType again within 5 seconds to confirm your payment."
   has-cooldown: true
   cooldown: 5
-  cooldown-message: "%prefix% &cWait 5 seconds before using that command again."
+  cooldown-message: "%prefix% &cWait %time% before using that command again."
 open:
   usage: "%prefix% &cUsage: &7/bank open [bankName]"
   need-confirm: false

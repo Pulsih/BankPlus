@@ -47,7 +47,10 @@ Payment-Received: "%prefix% &aYou have received &f%amount_formatted% &amoney fro
 Interest-Time: "%prefix% &aWait more &f%time% &ato get the interest."
 BankTop-Updated: "%prefix% &aSuccessfully updated the banktop!"
 Bank-Upgraded: "%prefix% &aSuccessfully upgraded the bank!"
-Request-Sent: "%prefix% &aSuccessfully sent the request to &f%player%&a, waiting for a confirm..."
+Debt-Money-Taken: "%prefix% &cWe took &f%amount_formatted% &cmoney from your bank to pay your debt, which is now: %debt_formatted%"
+
+# Loans
+Loan-Request-Sent: "%prefix% &aSuccessfully sent the loan request to &f%player%&a, waiting for a confirm..."
 Loan-Request-Received:
   - "                       &6&l!! LOAN REQUEST !!"
   - ""
@@ -60,18 +63,22 @@ Loan-Give-Request-Received:
   - "      &f%player% &ais offering you a loan of &f%amount_formatted% &amoney"
   - "&aType &2/bank loan accept&a to accept or &c/bank loan deny&a to deny."
   - "&7&o(( The money will be automatically be payed back with 5% interest ))"
-Loan-Request-Sent-Accepted: "%prefix% &f%player% &ahas accepted your loan request!"
-Loan-Request-Received-Accepted: "%prefix% &aSuccessfully accepted &f%player%&a's loan, &f%amount_formatted% &amoney have been added to your bank."
-Loan-Request-Received-Accepted-Full: "%prefix% &aSuccessfully accepted &f%player%&a's loan, &f%amount_formatted% &amoney have been added to your bank but since it was full, &f%extra_formatted% &amoney went to your wallet."
+
+Received-Loan: "%prefix% &aSuccessfully received &aa loan of &f%amount_formatted% &amoney from &f%player%&a."
+Received-Loan-Full: "%prefix% &aSuccessfully received &aa loan of &f%amount_formatted% &amoney from &f%player%&a, but since your bank was full, &f%extra_formatted% &amoney went to your wallet."
+Received-Loan-Bank: "%prefix% &aSuccessfully received &aa loan of &f%amount_formatted% &amoney from the bank &f\"%bank%\"&a."
+Received-Loan-Full-Bank: "%prefix% &aSuccessfully received &aa loan of &f%amount_formatted% &amoney from the bank &f\"%bank%\"&a, but since your bank was full, &f%extra_formatted% &amoney went to your wallet."
+Given-Loan: "%prefix% &aSuccessfully sent to &f%player% &aa loan of &f%amount_formatted% &amoney."
 Loan-Request-Sent-Denied: "%prefix% &f%player% &chas denied your loan request!"
-Loan-Request-Received-Denied: "%prefix% &aSuccessfully denied &f%player%&a's loan."
 Loan-Request-Sent-Cancelled: "%prefix% &aYou have cancelled your loan request."
+Loan-Request-Received-Denied: "%prefix% &aSuccessfully denied &f%player%&a's loan."
 Loan-Request-Received-Cancelled: "%prefix% &f%player% &chas cancelled the loan request."
 Loan-Payback: "%prefix% &aYou have received &f%amount_formatted% &afrom the loan given to &f%player%."
-Loan-Payback-Full: "%prefix% &aYou have received &f%amount_formatted% &afrom the loan given to &f%player% &abut your bank was full so &f%extra_formatted% &amoney has been added to your wallet."
+Loan-Payback-Full: "%prefix% &aYou have received &f%amount_formatted% &afrom the loan given to &f%player%&a, but since your bank was full, &f%extra_formatted% &amoney has been added to your wallet."
 Loan-Returned: "%prefix% &aYou have returned &f%amount_formatted% &amoney to &f%player% &afor his loan."
 Loan-Returned-Debt: "%prefix% &cSadly, you did not have enough money to pay back &f%player%&c, so you are now in debt for &f%amount_formatted%&c."
-Debt-Money-Taken: "%prefix% &cWe took &f%amount_formatted% &cmoney from your bank to pay your debt, which is now: %debt_formatted%"
+Loan-Returned-Bank: "%prefix% &aYou have returned &f%amount_formatted% &amoney the &f\"%bank%\"&a bank for his loan."
+Loan-Returned-Debt-Bank: "%prefix% &cSadly, you did not have enough money to return to the bank &f\"%bank%\"&c, so you are now in debt for &f%amount_formatted%&c."
 
 # Titles
 Title-Custom-Transaction:

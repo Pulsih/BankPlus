@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -20,8 +21,7 @@ import java.util.UUID;
 public class LoanRegistry {
 
     private final List<BPLoan> loans = new ArrayList<>();
-    private final HashMap<UUID, UUID> requestsReceived = new HashMap<>();
-    private final HashMap<UUID, BPLoan> requestsSent = new HashMap<>();
+    private final HashMap<UUID, BPRequest> requests = new HashMap<>();
 
     /**
      * List to track each loan made by players.
@@ -31,21 +31,8 @@ public class LoanRegistry {
         return loans;
     }
 
-    /**
-     * Used to track the player who sent the request, with the player that received the loan request as key, and the player that sent the request as value.
-     * @return List of player's UUIDs
-     */
-    public HashMap<UUID, UUID> getRequestsReceived() {
-        return requestsReceived;
-    }
-
-    /**
-     * A hashmap holding all player requests, with the sender as key, and loan request as value.
-     * The loan will contain useful information such as loan target, amount and other..
-     * @return
-     */
-    public HashMap<UUID, BPLoan> getRequestsSent() {
-        return requestsSent;
+    public HashMap<UUID, BPRequest> getRequests() {
+        return requests;
     }
 
     public void loadAllLoans() {
@@ -74,22 +61,34 @@ public class LoanRegistry {
                 continue;
             }
 
-            String fromBank = Values.CONFIG.getMainGuiName(), toBank = Values.CONFIG.getMainGuiName();
-            String fromBankString = values.getString("from"), toBankString = values.getString("to");
+            BPLoan loan;
 
-            if (fromBankString == null) BPLogger.warn("The loan \"" + receiverUUID + "\" did not specify a bank to take the money, using the main bank.");
-            else {
-                if (new BankReader(fromBankString).exist()) fromBank = fromBankString;
+            String requestedBank = values.getString("requested-bank");
+            if (requestedBank != null) {
+                if (new BankReader(requestedBank).exist()) requestedBank = Values.CONFIG.getMainGuiName();
                 else BPLogger.warn("The loan \"" + receiverUUID + "\" specified an invalid bank to take the money, using the main bank.");
+
+                loan = new BPLoan(receiver, requestedBank);
+            } else {
+
+                String fromBank = Values.CONFIG.getMainGuiName(), toBank = Values.CONFIG.getMainGuiName();
+                String fromBankString = values.getString("from"), toBankString = values.getString("to");
+
+                if (fromBankString == null) BPLogger.warn("The loan \"" + receiverUUID + "\" did not specify a bank to take the money, using the main bank.");
+                else {
+                    if (new BankReader(fromBankString).exist()) fromBank = fromBankString;
+                    else BPLogger.warn("The loan \"" + receiverUUID + "\" specified an invalid bank to take the money, using the main bank.");
+                }
+
+                if (toBankString == null) BPLogger.warn("The loan \"" + receiverUUID + "\" did not specify a bank to give the money, using the main bank.");
+                else {
+                    if (new BankReader(toBankString).exist()) toBank = toBankString;
+                    else BPLogger.warn("The loan \"" + receiverUUID + "\" specified an invalid bank to give the money, using the main bank.");
+                }
+
+                loan = new BPLoan(sender, receiver, fromBank, toBank);
             }
 
-            if (toBankString == null) BPLogger.warn("The loan \"" + receiverUUID + "\" did not specify a bank to give the money, using the main bank.");
-            else {
-                if (new BankReader(toBankString).exist()) toBank = toBankString;
-                else BPLogger.warn("The loan \"" + receiverUUID + "\" specified an invalid bank to give the money, using the main bank.");
-            }
-
-            BPLoan loan = new BPLoan(sender, receiver, fromBank, toBank);
             loan.setMoneyToReturn(new BigDecimal(moneyToReturn));
             loan.setInstalments(values.getInt("instalments"));
             loan.setInstalmentsPoint(values.getInt("instalments-point"));
@@ -102,13 +101,56 @@ public class LoanRegistry {
         for (BPLoan loan : loans) {
             String path = "loans." + loan.getReceiver().getUniqueId() + ".";
 
-            savesConfig.set(path + "sender", loan.getSender().getUniqueId());
+            if (loan.getSender() != null) savesConfig.set(path + "sender", loan.getSender().getUniqueId());
             savesConfig.set(path + "money-to-return", loan.getMoneyToReturn());
             savesConfig.set(path + "instalments", loan.getInstalments());
             savesConfig.set(path + "instalments-point", loan.getInstalmentsPoint());
             savesConfig.set(path + "time-left", loan.getTimeLeft());
             savesConfig.set(path + "from", loan.getFromBankName());
             savesConfig.set(path + "to", loan.getToBankName());
+            savesConfig.set(path + "requested-bank", loan.getRequestedBank());
+        }
+    }
+
+    public static class BPRequest {
+        private boolean isLoanSender;
+        private Player sender, target;
+        private BPLoan loan;
+
+        /**
+         * If is not the loan sender, it will be the receiver.
+         * @return true if the player is the loan sender.
+         */
+        public boolean isLoanSender() {
+            return isLoanSender;
+        }
+
+        public Player getSender() {
+            return sender;
+        }
+
+        public Player getTarget() {
+            return target;
+        }
+
+        public BPLoan getLoan() {
+            return loan;
+        }
+
+        public void setLoanSender(boolean loanSender) {
+            isLoanSender = loanSender;
+        }
+
+        public void setSender(Player sender) {
+            this.sender = sender;
+        }
+
+        public void setTarget(Player target) {
+            this.target = target;
+        }
+
+        public void setLoan(BPLoan loan) {
+            this.loan = loan;
         }
     }
 }

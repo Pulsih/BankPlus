@@ -8,14 +8,14 @@ import java.math.BigDecimal;
 
 public class BPLoan {
 
-    private final OfflinePlayer sender, receiver;
-    private final String fromBankName, toBankName;
-
+    private OfflinePlayer sender, receiver;
+    private final String fromBankName, toBankName, requestedBank;
     private BigDecimal moneyGiven, moneyToReturn;
     private BukkitTask task;
     private long timeLeft;
     private int instalments, instalmentsPoint;
 
+    // Used for loans from player to player
     public BPLoan(OfflinePlayer sender, OfflinePlayer receiver, BigDecimal amount, String fromBankName, String toBankName) {
         this.sender = sender;
         this.receiver = receiver;
@@ -24,6 +24,19 @@ public class BPLoan {
         this.fromBankName = fromBankName;
         this.toBankName = toBankName;
         this.instalments = Values.CONFIG.getLoanInstalments();
+        this.requestedBank = null;
+    }
+
+    // Used for loans from player to bank
+    public BPLoan(OfflinePlayer receiver, String bank, BigDecimal amount) {
+        this.sender = null; // The sender would be the bank.
+        this.receiver = receiver;
+        this.moneyGiven = amount;
+        this.moneyToReturn = amount.add(amount.divide(BigDecimal.valueOf(100)).multiply(Values.CONFIG.getLoanInterest()));
+        this.fromBankName = null;
+        this.toBankName = null;
+        this.instalments = Values.CONFIG.getLoanInstalments();
+        this.requestedBank = bank;
     }
 
     public BPLoan(OfflinePlayer sender, OfflinePlayer receiver, String fromBankName, String toBankName) {
@@ -31,6 +44,15 @@ public class BPLoan {
         this.receiver = receiver;
         this.fromBankName = fromBankName;
         this.toBankName = toBankName;
+        this.requestedBank = null;
+    }
+
+    public BPLoan(OfflinePlayer receiver, String requestedBank) {
+        this.sender = null;
+        this.receiver = receiver;
+        this.fromBankName = null;
+        this.toBankName = null;
+        this.requestedBank = requestedBank;
     }
 
     public OfflinePlayer getSender() {
@@ -49,6 +71,9 @@ public class BPLoan {
         return toBankName;
     }
 
+    public String getRequestedBank() {
+        return requestedBank;
+    }
 
     public BigDecimal getMoneyGiven() {
         return moneyGiven;
@@ -72,6 +97,14 @@ public class BPLoan {
 
     public int getInstalmentsPoint() {
         return instalmentsPoint;
+    }
+
+    public void setSender(OfflinePlayer sender) {
+        this.sender = sender;
+    }
+
+    public void setReceiver(OfflinePlayer receiver) {
+        this.receiver = receiver;
     }
 
     public void setMoneyToReturn(BigDecimal moneyToReturn) {
