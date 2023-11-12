@@ -92,7 +92,7 @@ public final class BankPlus extends JavaPlugin {
         try {
             number = Integer.parseInt(version.split("\\.")[1]);
         } catch (NumberFormatException e) {
-            BPLogger.error("Failed to identify server version, contant the developer if the issue persist!");
+            BPLogger.error("Failed to identify server version, contact the developer if the issue persist!");
             number = -1;
         }
 

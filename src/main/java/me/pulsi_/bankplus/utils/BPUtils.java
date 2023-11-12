@@ -22,8 +22,6 @@ import java.util.List;
 public class BPUtils {
 
     public static String formatTime(long milliseconds) {
-        if (!Values.CONFIG.isInterestEnabled()) return BPChat.color("&cInterest disabled.");
-
         long seconds = milliseconds / 1000;
         long minutes = seconds / 60;
         long hours = minutes / 60;

@@ -416,10 +416,10 @@ public class BPPlaceholders extends PlaceholderExpansion {
         BPInterest interest = BankPlus.INSTANCE.getInterest();
         switch (identifier) {
             case "interest_cooldown":
-                return BPUtils.formatTime(interest.getInterestCooldownMillis());
+                return Values.CONFIG.isInterestEnabled() ? BPUtils.formatTime(interest.getInterestCooldownMillis()) : "Interest disabled.";
 
             case "interest_cooldown_millis":
-                return String.valueOf(interest.getInterestCooldownMillis());
+                return Values.CONFIG.isInterestEnabled() ? String.valueOf(interest.getInterestCooldownMillis()) : "Interest disabled.";
 
             case "withdraw_taxes":
                 return Values.CONFIG.getWithdrawTaxesString();
