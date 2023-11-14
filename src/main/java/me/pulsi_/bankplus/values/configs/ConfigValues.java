@@ -22,13 +22,14 @@ public class ConfigValues {
     private String maxDepositAmount, maxWithdrawAmount, depositTaxes, withdrawTaxes, depositMinimumAmount, withdrawMinimumAmount, maxBankCapacity, startAmount;
     private String bankTopMoneyFormat, banktopUpdateBroadcastMessage, upgradesMaxedPlaceholder, upgradesNoRequiredItems, banktopPlayerNotFoundPlaceholder, mainGuiName;
     private String notifyOfflineInterestMessage, interestDelay, interestOfflinePermission, interestMaxAmount, interestMoneyGiven, offlineInterestMoneyGiven, offlineInterestLimit;
+    private String sqlHost, sqlPort, sqpDatabase, sqlUsername, sqlPassword;
     private long notifyOfflineInterestDelay, saveBalancedDelay, updateBankTopDelay;
     private int afkPlayersTime, maxDecimalsAmount, bankTopSize, chatExitTime;
     private boolean isReopeningBankAfterChat, isNotifyOfflineInterest, isStoringUUIDs, logTransactions, enableInterestLimiter;
     private boolean isInterestEnabled, isGivingInterestToOfflinePlayers, isOfflineInterestDifferentRate, notifyRegisteredPlayer, silentInfoMessages;
     private boolean isUpdateCheckerEnabled, isWithdrawSoundEnabled, isDepositSoundEnabled, accumulateInterestLimiter;
     private boolean isViewSoundEnabled, isPersonalSoundEnabled, isIgnoringAfkPlayers, useEssentialsXAFK, useBankBalanceToUpgrade, guiActionsNeedPermissions;
-    private boolean banktopEnabled, banktopUpdateBroadcastEnabled, banktopUpdateBroadcastSilentConsole, saveBalancesBroadcast, guiModuleEnabled;
+    private boolean banktopEnabled, banktopUpdateBroadcastEnabled, banktopUpdateBroadcastSilentConsole, saveBalancesBroadcast, guiModuleEnabled, sqlEnabled, sqlUseSSL;
     private String loanMaxAmount, loanInterest;
     private int loanInstalments, loanDelay, loanAcceptTime;
 
@@ -78,6 +79,13 @@ public class ConfigValues {
         isOfflineInterestDifferentRate = config.getBoolean("Interest.Different-Offline-Rate");
         offlineInterestMoneyGiven = config.getString("Interest.Offline-Money-Given");
         offlineInterestLimit = config.getString("Interest.Offline-Limit");
+        sqlEnabled = config.getBoolean("MySQL.Enabled");
+        sqlUseSSL = config.getBoolean("MySQL.Use-SSL");
+        sqlHost = config.getString("MySQL.Host");
+        sqlPort = config.getString("MySQL.Port");
+        sqpDatabase = config.getString("MySQL.Database");
+        sqlUsername = config.getString("MySQL.Username");
+        sqlPassword = config.getString("MySQL.Password");
         upgradesMaxedPlaceholder = config.getString("Placeholders.Upgrades.Max-Level");
         upgradesNoRequiredItems = config.getString("Placeholders.No-Required-Items");
         banktopPlayerNotFoundPlaceholder = config.getString("Placeholders.BankTop.Player-Not-Found");
@@ -576,5 +584,33 @@ public class ConfigValues {
 
     public boolean accumulateInterestLimiter() {
         return accumulateInterestLimiter;
+    }
+
+    public boolean isSqlEnabled() {
+        return sqlEnabled;
+    }
+
+    public boolean isSqlUseSSL() {
+        return sqlUseSSL;
+    }
+
+    public String getSqlHost() {
+        return sqlHost;
+    }
+
+    public String getSqlPort() {
+        return sqlPort;
+    }
+
+    public String getSqpDatabase() {
+        return sqpDatabase;
+    }
+
+    public String getSqlUsername() {
+        return sqlUsername;
+    }
+
+    public String getSqlPassword() {
+        return sqlPassword;
     }
 }

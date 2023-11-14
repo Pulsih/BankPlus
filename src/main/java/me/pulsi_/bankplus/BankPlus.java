@@ -7,6 +7,7 @@ import me.pulsi_.bankplus.interest.BPInterest;
 import me.pulsi_.bankplus.loanSystem.LoanRegistry;
 import me.pulsi_.bankplus.logSystem.BPLogUtils;
 import me.pulsi_.bankplus.managers.*;
+import me.pulsi_.bankplus.mySQL.BPSQL;
 import me.pulsi_.bankplus.placeholders.BPPlaceholders;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPVersions;
@@ -43,6 +44,8 @@ public final class BankPlus extends JavaPlugin {
     private AFKManager afkManager;
     private TaskManager taskManager;
     private BPInterest interest;
+
+    private BPSQL sql;
 
     private boolean isPlaceholderApiHooked = false, isEssentialsXHooked = false, isUpdated;
     private String serverVersion;
@@ -104,6 +107,8 @@ public final class BankPlus extends JavaPlugin {
         this.afkManager = new AFKManager(this);
         this.taskManager = new TaskManager();
         this.interest = new BPInterest(this);
+
+        this.sql = new BPSQL();
 
         RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
         if (rsp != null) perms = rsp.getProvider();
@@ -201,6 +206,10 @@ public final class BankPlus extends JavaPlugin {
 
     public BPInterest getInterest() {
         return interest;
+    }
+
+    public BPSQL getSql() {
+        return sql;
     }
 
     private boolean setupEconomy() {

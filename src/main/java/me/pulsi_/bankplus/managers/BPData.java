@@ -41,7 +41,9 @@ public class BPData {
         new bStats(plugin);
         plugin.getConfigs().setupConfigs();
         reloadPlugin();
+
         plugin.getLoanRegistry().loadAllLoans();
+        if (Values.CONFIG.isSqlEnabled()) plugin.getSql().setupMySQL();
 
         registerEvents();
         setupCommands();

@@ -3,88 +3,6 @@
 # Check for new updates of the plugin.
 Update-Checker: true
 
-# Interest will increase player bank balance
-# by giving a % of their bank money.
-#
-# To restart the interest type /bank restartInterest.
-#
-# Players must have the "bankplus.receive.interest"
-# permission to receive the interest.
-Interest:
-  # Enable or disable the interest feature.
-  Enabled: true
-
-  AFK-Settings:
-    # If a player is AFK, it won't receive the interest.
-    Ignore-AFK-Players: false
-
-    # Choose if using the EssentialsX AFK.
-    # (You will need to install EssentialsX)
-    Use-EssentialsX-AFK: false
-
-    # The time, in minutes, that will pass
-    # before marking a player as AFK
-    AFK-Time: 5
-
-  # The percentage of money given. (Default: 5%)
-  #
-  # IMPORTANT! This amount is defined in the BANK FILE!
-  # This option is only a fallback value in case the
-  # level of the bank does not specify its amount!
-  Money-Given: "5%"
-
-  # This is the interest cooldown.
-  # You can choose the delay between:
-  #   seconds (time s), minutes (time m)
-  #   hours (time h), days (time d)
-  # If no time is specified, it
-  # will automatically choose minutes.
-  # (You must put the space to specify the time!)
-  Delay: "5 m"
-
-  # The max amount that you can receive with interest.
-  Max-Amount: "500000"
-
-  # Choose if also giving interest to offline players.
-  Give-To-Offline-Players: false
-
-  # The time before the offline interest
-  # will stop working if the player doesn't join.
-  # Put 0 to have no limit.
-  #
-  # The format is the same as Interest.Delay
-  Offline-Limit: "3 d"
-
-  # Choose if the interest rate for offline players
-  # will be different from the default one.
-  Different-Offline-Rate: false
-
-  # If 'Different-Offline-Rate' is enabled, the offline players
-  # will receive this interest rate. It works the same as the
-  # "Money-Given" above; you can edit this in the bank file.
-  Offline-Money-Given: "5%"
-
-  # The permission for offline players to receive interest.
-  # You can put "" if you don't want to use a permission.
-  Offline-Permission: "bankplus.receive.interest"
-
-  # If you enable this, all the interest percentages will be
-  # overridden if the player's money is between the 2 specified amounts.
-  Enable-Interest-Limiter: false
-
-  # Format: Amount1-Amount2:InterestRatePercentage
-  # You can edit this in the bank.yml just
-  # like interest and offline interest.
-  Interest-Limiter:
-    - "500-5000:10%"
-    - "50000-100000:4%"
-
-  # Enable this option to accumulate the interest limiter,
-  # otherwise it will just give you the selected percentage.
-  # Example: Having 100000 money will give you 10% of 5000 + 4% of 100000
-  # (Based on the default interest limiter configuration)
-  Accumulate-Interest-Limiter: false
-
 General-Settings:
   # Choose if automatically update your files
   # when a new version is downloaded, you can
@@ -105,6 +23,19 @@ General-Settings:
   # if you don't want to see them or to not spamm the console.
   # (Example: Update message)
   Silent-Info-Messages: false
+
+  # Settings to enable and manage MySQL
+  MySQL:
+    # Enabling this option will stop BankPlus from storing data in
+    # the player files and will start storing it in the database.
+    Enabled: false
+
+    Host: "localhost"
+    Port: 3306
+    Database: "bankplus"
+    Username: "root"
+    Password: "bankplusbestplugin"
+    Use-SSL: false
 
   # Enable this option if you want to make a player execute
   # gui actions only if he has the correct permissions.
@@ -220,6 +151,88 @@ General-Settings:
   Personal-Sound:
     Enabled: true
     Sound: "ORB_PICKUP,5,1"
+
+# Interest will increase player bank balance
+# by giving a % of their bank money.
+#
+# To restart the interest type /bank restartInterest.
+#
+# Players must have the "bankplus.receive.interest"
+# permission to receive the interest.
+Interest:
+  # Enable or disable the interest feature.
+  Enabled: true
+
+  AFK-Settings:
+    # If a player is AFK, it won't receive the interest.
+    Ignore-AFK-Players: false
+
+    # Choose if using the EssentialsX AFK.
+    # (You will need to install EssentialsX)
+    Use-EssentialsX-AFK: false
+
+    # The time, in minutes, that will pass
+    # before marking a player as AFK
+    AFK-Time: 5
+
+  # The percentage of money given. (Default: 5%)
+  #
+  # IMPORTANT! This amount is defined in the BANK FILE!
+  # This option is only a fallback value in case the
+  # level of the bank does not specify its amount!
+  Money-Given: "5%"
+
+  # This is the interest cooldown.
+  # You can choose the delay between:
+  #   seconds (time s), minutes (time m)
+  #   hours (time h), days (time d)
+  # If no time is specified, it
+  # will automatically choose minutes.
+  # (You must put the space to specify the time!)
+  Delay: "5 m"
+
+  # The max amount that you can receive with interest.
+  Max-Amount: "500000"
+
+  # Choose if also giving interest to offline players.
+  Give-To-Offline-Players: false
+
+  # The time before the offline interest
+  # will stop working if the player doesn't join.
+  # Put 0 to have no limit.
+  #
+  # The format is the same as Interest.Delay
+  Offline-Limit: "3 d"
+
+  # Choose if the interest rate for offline players
+  # will be different from the default one.
+  Different-Offline-Rate: false
+
+  # If 'Different-Offline-Rate' is enabled, the offline players
+  # will receive this interest rate. It works the same as the
+  # "Money-Given" above; you can edit this in the bank file.
+  Offline-Money-Given: "5%"
+
+  # The permission for offline players to receive interest.
+  # You can put "" if you don't want to use a permission.
+  Offline-Permission: "bankplus.receive.interest"
+
+  # If you enable this, all the interest percentages will be
+  # overridden if the player's money is between the 2 specified amounts.
+  Enable-Interest-Limiter: false
+
+  # Format: Amount1-Amount2:InterestRatePercentage
+  # You can edit this in the bank.yml just
+  # like interest and offline interest.
+  Interest-Limiter:
+    - "500-5000:10%"
+    - "50000-100000:4%"
+
+  # Enable this option to accumulate the interest limiter,
+  # otherwise it will just give you the selected percentage.
+  # Example: Having 100000 money will give you 10% of 5000 + 4% of 100000
+  # (Based on the default interest limiter configuration)
+  Accumulate-Interest-Limiter: false
 
 # The player needs to have the permission
 # "bankplus.deposit" to be able to deposit.
