@@ -15,13 +15,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-public class BankTopManager {
+public class BPBankTop {
 
     private final HashMap<Integer, BankTopPlayer> bankTop = new HashMap<>();
 
     private final BankPlus plugin;
 
-    public BankTopManager(BankPlus plugin) {
+    public BPBankTop(BankPlus plugin) {
         this.plugin = plugin;
     }
 

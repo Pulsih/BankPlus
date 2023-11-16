@@ -5,7 +5,7 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankReader;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.interest.BPInterest;
-import me.pulsi_.bankplus.managers.BankTopManager;
+import me.pulsi_.bankplus.managers.BPBankTop;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPUtils;
@@ -56,7 +56,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
     public String onPlaceholderRequest(Player p, String identifier) {
         if (p == null) return "Player not online";
 
-        BankTopManager bankTop = BankPlus.INSTANCE.getBankTopManager();
+        BPBankTop bankTop = BankPlus.INSTANCE.getBankTopManager();
 
         String target = null;
         if (identifier.contains("{") && identifier.endsWith("}"))

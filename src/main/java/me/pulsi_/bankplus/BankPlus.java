@@ -38,10 +38,10 @@ public final class BankPlus extends JavaPlugin {
     private Economy vaultEconomy = null;
     private Permission perms = null;
 
-    private BankTopManager bankTopManager;
+    private BPBankTop bankTopManager;
     private BPConfigs bpConfigs;
     private BPData bpData;
-    private AFKManager afkManager;
+    private BPAFK BPAFK;
     private TaskManager taskManager;
     private BPInterest interest;
 
@@ -101,10 +101,10 @@ public final class BankPlus extends JavaPlugin {
 
         this.serverVersionInt = number;
 
-        this.bankTopManager = new BankTopManager(this);
+        this.bankTopManager = new BPBankTop(this);
         this.bpConfigs = new BPConfigs(this);
         this.bpData = new BPData(this);
-        this.afkManager = new AFKManager(this);
+        this.BPAFK = new BPAFK(this);
         this.taskManager = new TaskManager();
         this.interest = new BPInterest(this);
 
@@ -184,7 +184,7 @@ public final class BankPlus extends JavaPlugin {
         return bpLogUtils;
     }
 
-    public BankTopManager getBankTopManager() {
+    public BPBankTop getBankTopManager() {
         return bankTopManager;
     }
 
@@ -196,8 +196,8 @@ public final class BankPlus extends JavaPlugin {
         return bpData;
     }
 
-    public AFKManager getAfkManager() {
-        return afkManager;
+    public BPAFK getAfkManager() {
+        return BPAFK;
     }
 
     public TaskManager getTaskManager() {

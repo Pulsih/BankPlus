@@ -43,7 +43,10 @@ public class BPData {
         reloadPlugin();
 
         plugin.getLoanRegistry().loadAllLoans();
-        if (Values.CONFIG.isSqlEnabled()) plugin.getSql().setupMySQL();
+        if (Values.CONFIG.isSqlEnabled()) {
+            plugin.getSql().setupMySQL();
+            plugin.getSql().connect();
+        }
 
         registerEvents();
         setupCommands();
@@ -91,8 +94,8 @@ public class BPData {
         if (Values.CONFIG.isBanktopEnabled()) plugin.getBankTopManager().startUpdateTask();
         if (Values.CONFIG.isGuiModuleEnabled() && !plugin.getBankGuiRegistry().loadBanks()) success = false;
 
-        AFKManager afkManager = plugin.getAfkManager();
-        if (!afkManager.isPlayerCountdownActive()) afkManager.startCountdown();
+        BPAFK BPAFK = plugin.getAfkManager();
+        if (!BPAFK.isPlayerCountdownActive()) BPAFK.startCountdown();
 
         BPInterest interest = plugin.getInterest();
         if (Values.CONFIG.isInterestEnabled() && interest.wasDisabled()) interest.startInterest();

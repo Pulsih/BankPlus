@@ -7,10 +7,14 @@ import java.sql.*;
 
 public class BPSQL {
 
+    private final BPSQLMethods sqlMethods;
     private String host, port, database, username, password, url;
     private boolean useSSL;
-
     private Connection connection;
+
+    public BPSQL() {
+        sqlMethods = new BPSQLMethods(this);
+    }
 
     public void setupMySQL() {
         host = Values.CONFIG.getSqlHost();
@@ -31,6 +35,7 @@ public class BPSQL {
         if (isConnected()) return;
         try {
             connection = DriverManager.getConnection(url, username, password);
+            sqlMethods.connectToDatabase();
         } catch (SQLException e) {
             BPLogger.warn(e, "Could not connect bankplus to it's database!");
         }
@@ -43,5 +48,13 @@ public class BPSQL {
         } catch (SQLException e) {
             BPLogger.warn(e, "Could not disconnect bankplus from his database!");
         }
+    }
+
+    public Connection getConnection() {
+        return connection;
+    }
+
+    public BPSQLMethods getSqlMethods() {
+        return sqlMethods;
     }
 }
