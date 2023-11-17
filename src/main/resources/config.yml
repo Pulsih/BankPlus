@@ -28,6 +28,12 @@ General-Settings:
   MySQL:
     # Enabling this option will stop BankPlus from storing data in
     # the player files and will start storing it in the database.
+    #
+    # WARNING!
+    # This will reset the bankplus data! It won't delete the data in the files, but will start
+    # using the data of the database that will be empty if that's your first time enabling it!
+    #
+    # To transfer the data from the files to the database type the command "/bankplus transferData filesToDatabase"
     Enabled: false
 
     Host: "localhost"

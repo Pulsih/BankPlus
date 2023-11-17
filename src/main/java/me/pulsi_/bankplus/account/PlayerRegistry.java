@@ -47,7 +47,7 @@ public class PlayerRegistry {
 
     public void savePlayer(UUID uuid, boolean async) {
         BPEconomy economy = BankPlus.getBPEconomy();
-        BPPlayerFiles files = new BPPlayerFiles(uuid);
+        BPPlayerManager files = new BPPlayerManager(uuid);
 
         File file = files.getPlayerFile();
         FileConfiguration config = files.getPlayerConfig(file);

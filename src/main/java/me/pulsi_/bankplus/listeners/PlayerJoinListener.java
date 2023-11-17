@@ -2,7 +2,7 @@ package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
-import me.pulsi_.bankplus.account.BPPlayerFiles;
+import me.pulsi_.bankplus.account.BPPlayerManager;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -30,7 +30,7 @@ public class PlayerJoinListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
-        BPPlayerFiles files = new BPPlayerFiles(p);
+        BPPlayerManager files = new BPPlayerManager(p);
         if (!files.isPlayerRegistered() && Values.CONFIG.notifyRegisteredPlayer()) BPLogger.info("Successfully registered " + p.getName() + "!");
 
         BPPlayer player = new BPPlayer(p);

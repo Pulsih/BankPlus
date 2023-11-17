@@ -23,29 +23,41 @@ public class BPSQLMethods {
      */
     public void createTable(String tableName, String... args) {
         if (!isConnected()) return;
-        StringBuilder argsString;
-        for (int i = 0; i < args.length; i++) {
 
+        StringBuilder argsString = new StringBuilder();
+        for (int i = 0; i < args.length; i++) {
+            argsString.append(args[i]);
+            if (i + 1 < args.length) argsString.append(",");
         }
+
         try {
-            PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + tableName + " (" + args + ")");
-            statement.executeUpdate();
+            connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + tableName + " (" + argsString + ")").executeUpdate();
         } catch (SQLException e) {
             BPLogger.error(e, "Could not create the table \"" + tableName + "\"!");
         }
     }
 
+    /**
+     * Delete a database table.
+     * @param tableName The table to delete.
+     */
     public void deleteTable(String tableName) {
         if (!isConnected()) return;
         try {
-            PreparedStatement statement = connection.prepareStatement("DROP TABLE " + tableName);
-            statement.executeUpdate();
+            connection.prepareStatement("DROP TABLE " + tableName).executeUpdate();
         } catch (SQLException e) {
             BPLogger.error(e, "Could not create the table \"" + tableName + "\"!");
         }
     }
 
-    public void insertInto(String tableName, String args, String... values) {
+    /**
+     * Insert the specified element in the selected table.
+     * <p>
+     * Make sure to put the values in the same order of the database.
+     * @param tableName The selected table.
+     * @param values The values of the element.
+     */
+    public void insertInto(String tableName, String... values) {
         if (!isConnected()) return;
 
         StringBuilder valuesString = new StringBuilder("?");
@@ -53,23 +65,37 @@ public class BPSQLMethods {
             for (int i = 1; i < values.length; i++) valuesString.append(",?");
 
         try {
-            PreparedStatement statement = connection.prepareStatement("INSERT INTO " + tableName + " (" + args + ") VALUES (" + valuesString + ")");
+            PreparedStatement statement = connection.prepareStatement("INSERT INTO " + tableName + " VALUES (" + valuesString + ")");
+            for (int i = 1; i <= values.length; i++)
+                statement.setString(i, values[i - 1]);
+
             statement.executeUpdate();
         } catch (SQLException e) {
             BPLogger.error(e, "Could not create the table \"" + tableName + "\"!");
         }
     }
 
-    public void removeFrom(String tableName, String args) {
+    /**
+     * Remove an element from the table.
+     * Example: Removing from the table "test" the element that is named "TestName" in the "Names" row.
+     * <p>
+     * #removeFrom("test", "Names", "TestName");
+     * @param tableName The name of the table to remove the elemt.
+     * @param argumentName The name of the argument to check in [identifier].
+     * @param identifier The name that has to be removed from the table.
+     */
+    public void removeFrom(String tableName, String argumentName, String identifier) {
         if (!isConnected()) return;
         try {
-            PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + tableName + " (" + args + ")");
-            statement.executeUpdate();
+            connection.prepareStatement("REMOVE FROM " + tableName + " WHERE " + argumentName + "=" + identifier).executeUpdate();
         } catch (SQLException e) {
             BPLogger.error(e, "Could not create the table \"" + tableName + "\"!");
         }
     }
 
+    /**
+     * Assign the database connection when the database has been connected successfully.
+     */
     public void connectToDatabase() {
         connection = sql.getConnection();
     }

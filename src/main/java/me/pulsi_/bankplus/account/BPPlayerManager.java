@@ -12,15 +12,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 
-public class BPPlayerFiles {
+public class BPPlayerManager {
 
     private final OfflinePlayer p;
 
-    public BPPlayerFiles(OfflinePlayer p) {
+    public BPPlayerManager(OfflinePlayer p) {
         this.p = p;
     }
 
-    public BPPlayerFiles(UUID uuid) {
+    public BPPlayerManager(UUID uuid) {
         this.p = Bukkit.getOfflinePlayer(uuid);
     }
 

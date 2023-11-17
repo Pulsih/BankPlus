@@ -8,8 +8,7 @@ import java.sql.*;
 public class BPSQL {
 
     private final BPSQLMethods sqlMethods;
-    private String host, port, database, username, password, url;
-    private boolean useSSL;
+    private String username, password, url;
     private Connection connection;
 
     public BPSQL() {
@@ -17,14 +16,13 @@ public class BPSQL {
     }
 
     public void setupMySQL() {
-        host = Values.CONFIG.getSqlHost();
-        port = Values.CONFIG.getSqlPort();
-        database = Values.CONFIG.getSqpDatabase();
+        String host = Values.CONFIG.getSqlHost();
+        String port = Values.CONFIG.getSqlPort();
+        String database = Values.CONFIG.getSqpDatabase();
         username = Values.CONFIG.getSqlUsername();
         password = Values.CONFIG.getSqlPassword();
-        useSSL = Values.CONFIG.isSqlUseSSL();
 
-        url = "jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=" + useSSL;
+        url = "jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=" + Values.CONFIG.isSqlUseSSL();
     }
 
     public boolean isConnected() {

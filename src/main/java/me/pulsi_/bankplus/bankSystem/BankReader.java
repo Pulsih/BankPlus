@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.bankSystem;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BPPlayerFiles;
+import me.pulsi_.bankplus.account.BPPlayerManager;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
@@ -260,7 +260,7 @@ public class BankReader {
      * @return The current level.
      */
     public int getCurrentLevel(OfflinePlayer p) {
-        FileConfiguration config = new BPPlayerFiles(p).getPlayerConfig();
+        FileConfiguration config = new BPPlayerManager(p).getPlayerConfig();
         return Math.max(config.getInt("banks." + bank.getIdentifier() + ".level"), 1);
     }
 
@@ -331,7 +331,7 @@ public class BankReader {
     }
 
     public void setLevel(OfflinePlayer p, int level) {
-        BPPlayerFiles files = new BPPlayerFiles(p);
+        BPPlayerManager files = new BPPlayerManager(p);
         File file = files.getPlayerFile();
         FileConfiguration config = files.getPlayerConfig(file);
         config.set("banks." + bank.getIdentifier() + ".level", level);

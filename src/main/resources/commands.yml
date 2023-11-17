@@ -156,7 +156,7 @@ restartinterest:
   has-cooldown: false
   cooldown: 0
   cooldown-message: ""
-saveallbankbalances:
+savealldata:
   need-confirm: false
   confirm-cooldown: 0
   confirm-message: ""

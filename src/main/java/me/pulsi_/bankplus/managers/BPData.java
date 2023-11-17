@@ -11,6 +11,7 @@ import me.pulsi_.bankplus.interest.BPInterest;
 import me.pulsi_.bankplus.listeners.*;
 import me.pulsi_.bankplus.listeners.bankListener.*;
 import me.pulsi_.bankplus.listeners.playerChat.*;
+import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.values.Values;
@@ -33,7 +34,7 @@ public class BPData {
         long startTime = System.currentTimeMillis();
 
         BPLogger.log("");
-        BPLogger.log("    &a&lBank&9&lPlus &2Enabling plugin...");
+        BPLogger.log("    " + BPChat.prefix + " &2Enabling plugin...");
         BPLogger.log("    &aRunning on version &f" + plugin.getDescription().getVersion() + "&a!");
         BPLogger.log("    &aDetected server version: &f" + plugin.getServerVersion());
 
@@ -74,7 +75,7 @@ public class BPData {
         }
 
         BPLogger.log("");
-        BPLogger.log("    &a&lBank&9&lPlus &cPlugin successfully disabled!");
+        BPLogger.log("    " + BPChat.prefix + " &cPlugin successfully disabled!");
         BPLogger.log("");
     }
 

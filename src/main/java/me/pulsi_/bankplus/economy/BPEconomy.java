@@ -2,7 +2,7 @@ package me.pulsi_.bankplus.economy;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
-import me.pulsi_.bankplus.account.BPPlayerFiles;
+import me.pulsi_.bankplus.account.BPPlayerManager;
 import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.bankSystem.BankGuiRegistry;
 import me.pulsi_.bankplus.bankSystem.BankReader;
@@ -101,7 +101,7 @@ public class BPEconomy {
      * Load the player bank balances. This cannot be an offline player!
      */
     public void loadBankBalance(Player p) {
-        loadBankBalance(p, new BPPlayerFiles(p).getPlayerConfig());
+        loadBankBalance(p, new BPPlayerManager(p).getPlayerConfig());
     }
 
     /**
@@ -137,7 +137,7 @@ public class BPEconomy {
      * Save all bank balances to the player file.
      */
     public void saveBankBalances(Player p, boolean async) {
-        BPPlayerFiles files = new BPPlayerFiles(p);
+        BPPlayerManager files = new BPPlayerManager(p);
         File file = files.getPlayerFile();
         FileConfiguration config = files.getPlayerConfig(file);
 
@@ -159,7 +159,7 @@ public class BPEconomy {
      */
     public BigDecimal getBankBalance(OfflinePlayer p, String bankName) {
         if (!playerBalances.containsKey(p.getUniqueId())) {
-            String bal = new BPPlayerFiles(p).getPlayerConfig().getString("banks." + bankName + ".money");
+            String bal = new BPPlayerManager(p).getPlayerConfig().getString("banks." + bankName + ".money");
             return new BigDecimal(bal == null ? "0" : bal);
         }
         return playerBalances.get(p.getUniqueId()).get(bankName);
@@ -171,7 +171,7 @@ public class BPEconomy {
     public BigDecimal getBankBalance(OfflinePlayer p) {
         if (!playerBalances.containsKey(p.getUniqueId())) {
             BigDecimal amount = new BigDecimal(0);
-            FileConfiguration config = new BPPlayerFiles(p).getPlayerConfig();
+            FileConfiguration config = new BPPlayerManager(p).getPlayerConfig();
             for (String bankName : banksRegistry.getBanks().keySet()) {
                 String num = config.getString("banks." + bankName + ".money");
                 amount = amount.add(new BigDecimal(num == null ? "0" : num));
@@ -341,7 +341,7 @@ public class BPEconomy {
      * Get the received offline interest of a player while being offline.
      */
     public BigDecimal getOfflineInterest(OfflinePlayer p) {
-        String interest = new BPPlayerFiles(p).getPlayerConfig().getString("interest");
+        String interest = new BPPlayerManager(p).getPlayerConfig().getString("interest");
         return new BigDecimal(interest == null ? "0" : interest);
     }
 
@@ -349,7 +349,7 @@ public class BPEconomy {
      * Set the player's offline interest to the selected amount.
      */
     public void setOfflineInterest(OfflinePlayer p, BigDecimal amount, boolean async) {
-        BPPlayerFiles files = new BPPlayerFiles(p);
+        BPPlayerManager files = new BPPlayerManager(p);
         File file = files.getPlayerFile();
         FileConfiguration config = files.getPlayerConfig();
         config.set("interest", BPFormatter.formatBigDouble(amount));
@@ -367,7 +367,7 @@ public class BPEconomy {
             }
         }
 
-        BPPlayerFiles files = new BPPlayerFiles(p);
+        BPPlayerManager files = new BPPlayerManager(p);
         File file = files.getPlayerFile();
         FileConfiguration config = files.getPlayerConfig(file);
         config.set("debt", BPFormatter.formatBigDouble(amount));
@@ -388,7 +388,7 @@ public class BPEconomy {
         }
 
         if (debt == null) {
-            BPPlayerFiles files = new BPPlayerFiles(p);
+            BPPlayerManager files = new BPPlayerManager(p);
             String sDebt = files.getPlayerConfig().getString("debt");
             debt = new BigDecimal(sDebt == null ? "0" : sDebt);
         }
@@ -409,7 +409,7 @@ public class BPEconomy {
             return;
         }
 
-        BPPlayerFiles files = new BPPlayerFiles(p);
+        BPPlayerManager files = new BPPlayerManager(p);
         File file = files.getPlayerFile();
         FileConfiguration config = files.getPlayerConfig();
         config.set("banks." + bankName + ".money", BPFormatter.formatBigDouble(amount));
