@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.account;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.mySQL.BPSQL;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -25,6 +26,16 @@ public class BPPlayerManager {
     }
 
     public boolean isPlayerRegistered() {
+        if (Values.CONFIG.isSqlEnabled()) {
+            BPSQL sql = BankPlus.INSTANCE.getSql();
+            if (sql.isConnected()) {
+                boolean registered = sql.isPlayerRegistered(p);
+                sql.registerPlayer(p);
+
+                return registered;
+            }
+        }
+
         File file = getPlayerFile();
         if (file.exists()) return true;
 

@@ -30,14 +30,14 @@ public class PlayerJoinListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
-        BPPlayerManager files = new BPPlayerManager(p);
-        if (!files.isPlayerRegistered() && Values.CONFIG.notifyRegisteredPlayer()) BPLogger.info("Successfully registered " + p.getName() + "!");
+        BPPlayerManager pManager = new BPPlayerManager(p);
+        if (!pManager.isPlayerRegistered() && Values.CONFIG.notifyRegisteredPlayer()) BPLogger.info("Successfully registered " + p.getName() + "!");
 
         BPPlayer player = new BPPlayer(p);
         BankPlus.INSTANCE.getPlayerRegistry().put(p, player);
 
-        File file = files.getPlayerFile();
-        FileConfiguration config = files.getPlayerConfig(file);
+        File file = pManager.getPlayerFile();
+        FileConfiguration config = pManager.getPlayerConfig(file);
         String sOfflineInterest = config.getString("interest");
         String sName = config.getString("name");
         String debt = config.getString("debt");
@@ -84,6 +84,6 @@ public class PlayerJoinListener implements Listener {
         }
 
         economy.loadBankBalance(p, config);
-        if (hasChanges) files.savePlayerFile(config, file, true);
+        if (hasChanges) pManager.savePlayerFile(config, file, true);
     }
 }

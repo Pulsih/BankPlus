@@ -2,8 +2,10 @@ package me.pulsi_.bankplus.listeners.playerChat;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
+import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPSets;
 import me.pulsi_.bankplus.utils.BPUtils;
@@ -23,7 +25,16 @@ public class PlayerChatMethod {
         if (!isTyping(p)) return;
 
         BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
-        String identifier = player.getOpenedBank().getIdentifier();
+
+        Bank openedBank = player.getOpenedBank();
+        if (openedBank == null) {
+            BPLogger.warn("BankPlus chat-transaction failed for player " + p.getName() + ", he did not have an opened bank. (Try again and if the problem persist contact the developer)");
+            BPSets.removePlayerFromDepositing(p);
+            BPSets.removePlayerFromWithdrawing(p);
+            return;
+        }
+
+        String identifier = openedBank.getIdentifier();
         String message = ChatColor.stripColor(e.getMessage());
 
         if (hasTypedExit(message, p, e, identifier)) return;

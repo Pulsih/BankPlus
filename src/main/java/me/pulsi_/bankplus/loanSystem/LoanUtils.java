@@ -199,7 +199,7 @@ public class LoanUtils {
         } else {
             if (isPlayerToBank) BPMessages.send(receiver, "Loan-Returned-Debt-Bank", BPUtils.placeValues(loan.getRequestedBank(), debt));
             else BPMessages.send(receiver, "Loan-Returned-Debt", BPUtils.placeValues(sender, debt));
-            BankPlus.getBPEconomy().setDebt(receiver, debt);
+            BankPlus.getBPEconomy().setDebt(receiver, debt, loan.getRequestedBank());
         }
 
         // Was the loan at his final instalment?

@@ -49,7 +49,7 @@ public class BPTransactionListener implements Listener {
         if (Values.CONFIG.isLogTransactions())
             logHolder.put(p.getUniqueId(), new Pair<>(e.getCurrentBalance(), e.getCurrentVaultBalance()));
 
-        BigDecimal debt = BankPlus.getBPEconomy().getDebt(p);
+        BigDecimal debt = BankPlus.getBPEconomy().getDebt(p, e.getBankName());
         TransactionType type = e.getTransactionType();
         if (debt.doubleValue() <= 0d || (!type.equals(TransactionType.ADD) && !type.equals(TransactionType.DEPOSIT) && !type.equals(TransactionType.SET))) return;
 
@@ -73,7 +73,7 @@ public class BPTransactionListener implements Listener {
             );
         }
 
-        BankPlus.getBPEconomy().setDebt(p, debtLeft);
+        BankPlus.getBPEconomy().setDebt(p, debtLeft, e.getBankName());
         e.setTransactionAmount(newAmount);
     }
 

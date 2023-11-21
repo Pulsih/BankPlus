@@ -55,7 +55,7 @@ public class PlayerRegistry {
         for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
             config.set("banks." + bankName + ".money", BPFormatter.formatBigDouble(economy.getBankBalance(uuid, bankName)));
 
-        config.set("debt", BPFormatter.formatBigDouble(BankPlus.getBPEconomy().getDebt(uuid)));
+        config.set("debt", BPFormatter.formatBigDouble(BankPlus.getBPEconomy().getDebts(uuid)));
 
         files.savePlayerFile(config, file, async);
 

@@ -11,6 +11,7 @@ import me.pulsi_.bankplus.interest.BPInterest;
 import me.pulsi_.bankplus.listeners.*;
 import me.pulsi_.bankplus.listeners.bankListener.*;
 import me.pulsi_.bankplus.listeners.playerChat.*;
+import me.pulsi_.bankplus.mySQL.BPSQL;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
@@ -44,10 +45,6 @@ public class BPData {
         reloadPlugin();
 
         plugin.getLoanRegistry().loadAllLoans();
-        if (Values.CONFIG.isSqlEnabled()) {
-            plugin.getSql().setupMySQL();
-            plugin.getSql().connect();
-        }
 
         registerEvents();
         setupCommands();
@@ -100,6 +97,14 @@ public class BPData {
 
         BPInterest interest = plugin.getInterest();
         if (Values.CONFIG.isInterestEnabled() && interest.wasDisabled()) interest.startInterest();
+
+        if (Values.CONFIG.isSqlEnabled()) {
+            BPSQL sql = plugin.getSql();
+            sql.disconnect();
+            sql.setupMySQL();
+            sql.connect();
+            sql.setupTables();
+        }
 
         Bukkit.getOnlinePlayers().forEach(p -> {
             BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);

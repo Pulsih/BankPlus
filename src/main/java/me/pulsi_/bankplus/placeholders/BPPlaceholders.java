@@ -189,7 +189,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
         if (identifier.startsWith("debt")) {
             String formatter = identifier.replace("debt", "");
-            return getFormat(formatter, BankPlus.getBPEconomy().getDebt(p));
+            return getFormat(formatter, BankPlus.getBPEconomy().getDebts(p));
         }
 
         if (identifier.startsWith("balance")) {

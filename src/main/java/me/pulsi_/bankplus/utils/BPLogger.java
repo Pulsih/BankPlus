@@ -1,5 +1,6 @@
 package me.pulsi_.bankplus.utils;
 
+import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 
 public class BPLogger {
@@ -51,6 +52,8 @@ public class BPLogger {
     }
 
     public static void info(String info) {
+        if (Values.CONFIG.silentInfoMessages()) return;
+
         if (info == null) info = "null";
         log(BPChat.prefix + " &8[&9INFO&8] &9" + info);
     }
