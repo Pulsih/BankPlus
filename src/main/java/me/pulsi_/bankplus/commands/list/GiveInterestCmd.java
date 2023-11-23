@@ -30,7 +30,10 @@ public class GiveInterestCmd extends BPCommand {
             BPMessages.send(s, "Interest-Disabled");
             return false;
         }
-        if (!confirm(s)) BankPlus.INSTANCE.getInterest().giveInterestToEveryone();
+        if (confirm(s)) return false;
+
+        BPMessages.send(s, "%prefix% &2Successfully given the interest! The countdown has been restarted.", true);
+        BankPlus.INSTANCE.getInterest().giveInterestToEveryone();
         return true;
     }
 

@@ -126,9 +126,8 @@ public class BPInterest {
                 if (bankBalance.doubleValue() <= 0) continue;
                 if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
 
-                economy.setOfflineInterest(p, economy.getOfflineInterest(p).add(interestMoney), false);
                 BigDecimal finalInterestMoney = interestMoney;
-                Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> economy.addBankBalance(p, finalInterestMoney, bankName, TransactionType.INTEREST), 2L);
+                economy.addBankBalance(p, finalInterestMoney, bankName, TransactionType.INTEREST, true);
             }
         }
     }

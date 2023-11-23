@@ -36,6 +36,11 @@ public class PlayerJoinListener implements Listener {
         BPPlayer player = new BPPlayer(p);
         BankPlus.INSTANCE.getPlayerRegistry().put(p, player);
 
+        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE.getSql().isConnected()) {
+            economy.loadBankBalanceFromDatabase(p);
+            return;
+        }
+
         File file = pManager.getPlayerFile();
         FileConfiguration config = pManager.getPlayerConfig(file);
         String sOfflineInterest = config.getString("interest");

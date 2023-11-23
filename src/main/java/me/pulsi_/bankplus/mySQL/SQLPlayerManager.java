@@ -22,7 +22,8 @@ public class SQLPlayerManager {
     }
 
     public BigDecimal getMoney(String bankName) {
-        return new BigDecimal(methods.get(bankName, "uuid", uuid, "money"));
+        String money = methods.get(bankName, "uuid", uuid, "money");
+        return new BigDecimal(money == null ? "0" : money);
     }
 
     public void setDebt(BigDecimal amount, String bankName) {
@@ -30,7 +31,17 @@ public class SQLPlayerManager {
     }
 
     public BigDecimal getDebt(String bankName) {
-        return new BigDecimal(methods.get(bankName, "uuid", uuid, "debt"));
+        String debt = methods.get(bankName, "uuid", uuid, "debt");
+        return new BigDecimal(debt == null ? "0" : debt);
+    }
+
+    public void setOfflineInterest(BigDecimal amount, String bankName) {
+        methods.update(bankName, "uuid", uuid, "interest", amount.toString());
+    }
+
+    public BigDecimal getOfflineInterest(String bankName) {
+        String interest = methods.get(bankName, "uuid", uuid, "interest");
+        return new BigDecimal(interest == null ? "0" : interest);
     }
 
     public void saveBankBalance(BigDecimal money, String bankName) {

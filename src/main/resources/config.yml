@@ -36,10 +36,10 @@ General-Settings:
     # To transfer the data from the files to the database type the command "/bankplus transferData filesToDatabase"
     Enabled: false
 
+    Username: "root"
     Host: "localhost"
     Port: 3306
     Database: "bankplus"
-    Username: "root"
     Password: "bankplusbestplugin"
     Use-SSL: false
 

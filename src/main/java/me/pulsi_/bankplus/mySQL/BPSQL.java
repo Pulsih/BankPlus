@@ -46,13 +46,21 @@ public class BPSQL {
 
         for (String bankName : bankRegistry.getBanks().keySet()) {
             if (!getSqlMethods().exist(bankName, "uuid", uuid))
-                getSqlMethods().insertInto(bankName, uuid, p.getName(), economy.getBankBalance(p, bankName).toString(), economy.getDebts(p).toString());
+                getSqlMethods().insertInto(bankName, uuid, p.getName(), Values.CONFIG.getStartAmount().toString(), economy.getOfflineInterest(p).toString(), economy.getDebts(p).toString());
         }
     }
 
     public void setupTables() {
         for (String bankName : bankRegistry.getBanks().keySet())
-           getSqlMethods().createTable(bankName, "uuid varchar(100)", "account_name varchar(100)", "money varchar(100)", "interest varchar(100)", "debt varchar(100)", "PRIMARY KEY (uuid)");
+           getSqlMethods().createTable(
+                   bankName,
+                   "uuid varchar(100)",
+                   "account_name varchar(100)",
+                   "money varchar(100)",
+                   "interest varchar(100)",
+                   "debt varchar(100)",
+                   "PRIMARY KEY (uuid)"
+           );
     }
 
     public boolean isConnected() {
@@ -74,6 +82,7 @@ public class BPSQL {
         if (!isConnected()) return;
         try {
             connection.close();
+            connection = null;
             BPLogger.info("Database successfully disconnected!");
         } catch (SQLException e) {
             BPLogger.warn(e, "Could not disconnect bankplus from his database!");

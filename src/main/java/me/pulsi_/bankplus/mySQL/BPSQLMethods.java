@@ -114,7 +114,9 @@ public class BPSQLMethods {
         try {
             PreparedStatement statement = connection.prepareStatement("SELECT " + valueNameToGet + " FROM " + tableName + " WHERE " + columnName + "=?");
             statement.setString(1, elementToCheck);
-            return statement.executeQuery().getString(valueNameToGet);
+            ResultSet set = statement.executeQuery();
+
+            return (set.next() ? set.getString(valueNameToGet) : null);
         } catch (SQLException e) {
             BPLogger.error(e, "Could not get the value \"" + valueNameToGet + "\" from the table \"" + tableName + "\"!");
             return null;
@@ -154,7 +156,9 @@ public class BPSQLMethods {
     public boolean exist(String tableName, String columnName, String valueNameToCheck) {
         if (!isConnected()) return false;
         try {
-            return connection.createStatement().executeQuery("SELECT * FROM " + tableName + " WHERE " + columnName + "=" + valueNameToCheck).next();
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM " + tableName + " WHERE " + columnName + "=?");
+            statement.setString(1, valueNameToCheck);
+            return statement.executeQuery().next();
         } catch (SQLException e) {
             BPLogger.error(e, "Could not check for existence of the value \"" + valueNameToCheck + "\" in the table \"" + tableName + "\"!");
         }
