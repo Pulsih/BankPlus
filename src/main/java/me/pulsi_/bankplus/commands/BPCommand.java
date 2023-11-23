@@ -2,7 +2,6 @@ package me.pulsi_.bankplus.commands;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.managers.BPConfigs;
-import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
 import org.bukkit.Bukkit;

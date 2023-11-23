@@ -2,7 +2,10 @@ package me.pulsi_.bankplus.mySQL;
 
 import me.pulsi_.bankplus.utils.BPLogger;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class BPSQLMethods {
 

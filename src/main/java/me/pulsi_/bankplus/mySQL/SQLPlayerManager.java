@@ -1,9 +1,11 @@
 package me.pulsi_.bankplus.mySQL;
 
 import me.pulsi_.bankplus.BankPlus;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 public class SQLPlayerManager {
 
@@ -14,6 +16,12 @@ public class SQLPlayerManager {
     public SQLPlayerManager(OfflinePlayer p) {
         this.p = p;
         this.uuid = p.getUniqueId().toString();
+        this.methods = BankPlus.INSTANCE.getSql().getSqlMethods();
+    }
+
+    public SQLPlayerManager(UUID uuid) {
+        this.p = Bukkit.getOfflinePlayer(uuid);
+        this.uuid = uuid.toString();
         this.methods = BankPlus.INSTANCE.getSql().getSqlMethods();
     }
 
@@ -47,5 +55,10 @@ public class SQLPlayerManager {
     public void saveBankBalance(BigDecimal money, String bankName) {
         if (!methods.exist(bankName, "uuid", uuid)) methods.insertInto(bankName, uuid, p.getName());
         else methods.update(bankName, uuid, p.getName(), "money", money.toString());
+    }
+
+    public void saveDebt(BigDecimal amount, String bankName) {
+        if (!methods.exist(bankName, "uuid", uuid)) methods.insertInto(bankName, uuid, p.getName());
+        else methods.update(bankName, uuid, p.getName(), "debt", amount.toString());
     }
 }

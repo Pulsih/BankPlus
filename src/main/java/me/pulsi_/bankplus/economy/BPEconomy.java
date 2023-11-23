@@ -84,15 +84,15 @@ public class BPEconomy {
     /**
      * Unload the player bank balances from the server.
      */
-    public void unloadBankBalance(UUID playerUUID) {
-        playerBalances.remove(playerUUID);
+    public void unloadBankBalance(Player p) {
+        unloadBankBalance(p.getUniqueId());
     }
 
     /**
      * Unload the player bank balances from the server.
      */
-    public void unloadBankBalance(Player p) {
-        playerBalances.remove(p.getUniqueId());
+    public void unloadBankBalance(UUID playerUUID) {
+        playerBalances.remove(playerUUID);
     }
 
     /**
@@ -434,6 +434,15 @@ public class BPEconomy {
         FileConfiguration config = files.getPlayerConfig(file);
         config.set("banks." + bankName + ".debt", BPFormatter.formatBigDouble(amount));
         files.savePlayerFile(config, file, true);
+    }
+
+    /**
+     * Get the player bank debt of the selected bank.
+     * @param uuid The player UUID.
+     * @param bankName The bank where to get the balance.
+     */
+    public BigDecimal getDebt(UUID uuid, String bankName) {
+        return getDebt(Bukkit.getOfflinePlayer(uuid), bankName);
     }
 
     /**

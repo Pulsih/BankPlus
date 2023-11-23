@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.account;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
 import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.Values;
@@ -47,19 +48,26 @@ public class PlayerRegistry {
 
     public void savePlayer(UUID uuid, boolean async) {
         BPEconomy economy = BankPlus.getBPEconomy();
-        BPPlayerManager files = new BPPlayerManager(uuid);
 
-        File file = files.getPlayerFile();
-        FileConfiguration config = files.getPlayerConfig(file);
+        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE.getSql().isConnected()) {
+            SQLPlayerManager pManager = new SQLPlayerManager(uuid);
+            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
+                pManager.saveBankBalance(economy.getBankBalance(uuid, bankName), bankName);
+                pManager.saveDebt(economy.getDebt(uuid, bankName), bankName);
+            }
+        } else {
+            BPPlayerManager files = new BPPlayerManager(uuid);
 
-        for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
-            config.set("banks." + bankName + ".money", BPFormatter.formatBigDouble(economy.getBankBalance(uuid, bankName)));
+            File file = files.getPlayerFile();
+            FileConfiguration config = files.getPlayerConfig(file);
 
-        config.set("debt", BPFormatter.formatBigDouble(BankPlus.getBPEconomy().getDebts(uuid)));
-
-        files.savePlayerFile(config, file, async);
-
-        BankPlus.getBPEconomy().unloadBankBalance(uuid);
+            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
+                config.set("banks." + bankName + ".money", BPFormatter.formatBigDouble(economy.getBankBalance(uuid, bankName)));
+                config.set("banks." + bankName + ".debt", BPFormatter.formatBigDouble(economy.getDebt(uuid, bankName)));
+            }
+            files.savePlayerFile(config, file, async);
+        }
+        economy.unloadBankBalance(uuid);
         remove(uuid);
     }
 
