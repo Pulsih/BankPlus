@@ -54,6 +54,7 @@ public class PlayerRegistry {
             for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
                 pManager.saveBankBalance(economy.getBankBalance(uuid, bankName), bankName);
                 pManager.saveDebt(economy.getDebt(uuid, bankName), bankName);
+                pManager.saveOfflineInterest(economy.getDebt(uuid, bankName), bankName);
             }
         } else {
             BPPlayerManager files = new BPPlayerManager(uuid);
@@ -64,11 +65,11 @@ public class PlayerRegistry {
             for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
                 config.set("banks." + bankName + ".money", BPFormatter.formatBigDouble(economy.getBankBalance(uuid, bankName)));
                 config.set("banks." + bankName + ".debt", BPFormatter.formatBigDouble(economy.getDebt(uuid, bankName)));
+                config.set("banks." + bankName + ".interest", BPFormatter.formatBigDouble(economy.getOfflineInterest(uuid, bankName)));
             }
             files.savePlayerFile(config, file, async);
         }
         economy.unloadBankBalance(uuid);
-        remove(uuid);
     }
 
     public void forceSave(boolean async) {
@@ -93,10 +94,11 @@ public class PlayerRegistry {
         for (UUID uuid : new ArrayList<>(players.keySet())) {
             Player p = Bukkit.getPlayer(uuid);
 
-            if (p == null) savePlayer(uuid, async);
-            else economy.saveBankBalances(p, async);
-
-            players.remove(uuid);
+            if (p != null) economy.saveBankBalances(p, async);
+            else {
+                savePlayer(uuid, async);
+                remove(uuid);
+            }
         }
     }
 }

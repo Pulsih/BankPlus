@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +24,11 @@ public class BPPlayerManager {
 
     public BPPlayerManager(UUID uuid) {
         this.p = Bukkit.getOfflinePlayer(uuid);
+    }
+
+    public void loadPlayer() {
+        Player oP = p.getPlayer();
+        if (oP != null) BankPlus.INSTANCE.getPlayerRegistry().put(oP, new BPPlayer(oP));
     }
 
     public boolean isPlayerRegistered() {

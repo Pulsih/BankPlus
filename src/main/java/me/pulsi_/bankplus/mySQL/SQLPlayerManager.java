@@ -54,11 +54,16 @@ public class SQLPlayerManager {
 
     public void saveBankBalance(BigDecimal money, String bankName) {
         if (!methods.exist(bankName, "uuid", uuid)) methods.insertInto(bankName, uuid, p.getName());
-        else methods.update(bankName, uuid, p.getName(), "money", money.toString());
+        else methods.update(bankName, "uuid", uuid, "money", money.toString());
     }
 
     public void saveDebt(BigDecimal amount, String bankName) {
         if (!methods.exist(bankName, "uuid", uuid)) methods.insertInto(bankName, uuid, p.getName());
-        else methods.update(bankName, uuid, p.getName(), "debt", amount.toString());
+        else methods.update(bankName, "uuid", uuid, "debt", amount.toString());
+    }
+
+    public void saveOfflineInterest(BigDecimal amount, String bankName) {
+        if (!methods.exist(bankName, "uuid", uuid)) methods.insertInto(bankName, uuid, p.getName());
+        else methods.update(bankName, "uuid", uuid, "interest", amount.toString());
     }
 }

@@ -106,7 +106,7 @@ public class BPInterest {
 
         String perm = Values.CONFIG.getInterestOfflinePermission();
         for (OfflinePlayer p : players) {
-            if (p.isOnline() || (System.currentTimeMillis() - p.getLastSeen()) > Values.CONFIG.getOfflineInterestLimit()) continue;
+            if (p.isOnline() || ((Values.CONFIG.getOfflineInterestLimit() > 0L) && System.currentTimeMillis() - p.getLastSeen() > Values.CONFIG.getOfflineInterestLimit())) continue;
 
             boolean hasPermission = false;
             for (World world : Bukkit.getWorlds()) {
@@ -126,8 +126,7 @@ public class BPInterest {
                 if (bankBalance.doubleValue() <= 0) continue;
                 if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
 
-                BigDecimal finalInterestMoney = interestMoney;
-                economy.addBankBalance(p, finalInterestMoney, bankName, TransactionType.INTEREST, true);
+                economy.addBankBalance(p, interestMoney, bankName, TransactionType.INTEREST, true);
             }
         }
     }
