@@ -26,6 +26,12 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.UUID;
 
+/**
+ * BankPlus main core class to manage the entire server economy.
+ * In this class, you'll find many useful methods that will help you get, modify and set player's balances.
+ * <p>
+ * To access this class, use the method {@link BankPlus#getBPEconomy()};
+ */
 public class BPEconomy {
 
     private final BankGuiRegistry banksRegistry;

@@ -45,7 +45,6 @@ public class BPSQL {
 
     public void registerPlayer(OfflinePlayer p) {
         String uuid = p.getUniqueId().toString();
-        BPEconomy economy = BankPlus.getBPEconomy();
 
         for (String bankName : bankRegistry.getBanks().keySet()) {
             if (!getSqlMethods().exist(bankName, "uuid", uuid))
@@ -53,10 +52,10 @@ public class BPSQL {
                         bankName,
                         uuid,
                         p.getName(),
-                        "" + new BankManager().getCurrentLevel(p),
+                        "1",
                         Values.CONFIG.getStartAmount().toString(),
-                        economy.getOfflineInterest(p).toString(),
-                        economy.getDebts(p).toString()
+                        "0",
+                        "0"
                 );
         }
     }

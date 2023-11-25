@@ -26,8 +26,8 @@ public class SQLPlayerManager {
     }
 
     public int getLevel(String bankName) {
-        String money = get("bank_level", bankName);
-        return Integer.parseInt(money == null ? "1" : money);
+        String level = get("bank_level", bankName);
+        return Integer.parseInt(level == null ? "1" : level);
     }
 
     public BigDecimal getMoney(String bankName) {

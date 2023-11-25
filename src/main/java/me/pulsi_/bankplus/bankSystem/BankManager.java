@@ -12,6 +12,7 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -24,93 +25,100 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * This class is used to receive information from the selected bank and many more usefully methods to manage the bank and the player.
+ * BankPlus main core class to manage the entire server economy.
+ * In this class, you'll find many useful methods that will help you get, modify and set player's balances.
+ * <p>
+ * To access this class, use the method {@link BankPlus#getBankManager()};
  */
 public class BankManager {
 
-    private final Bank bank;
     private final BPEconomy economy;
+    private final BankGuiRegistry registry;
 
     public BankManager() {
-        bank = null;
         economy = BankPlus.getBPEconomy();
+        registry = BankPlus.INSTANCE.getBankGuiRegistry();
     }
 
-    public BankManager(String bankName) {
-        bank = BankPlus.INSTANCE.getBankGuiRegistry().getBanks().get(bankName);
-        economy = BankPlus.getBPEconomy();
+    public Bank getBank(String bankName) {
+        return registry.getBanks().get(bankName);
     }
 
-    public Bank getBank() {
-        return bank;
-    }
-
-    public boolean exist() {
-        return bank != null;
+    public boolean exist(String bankName) {
+        return registry.getBanks().containsKey(bankName);
     }
 
     /**
-     * To get the upgrades use {@link Bank}#getUpgrades();
-     */
-    public boolean hasUpgrades() {
-        return bank.getUpgrades() != null;
-    }
-
-    /**
-     * To get the upgrades use {@link Bank}#getPermission();
-     */
-    public boolean hasPermission() {
-        return bank.getPermission() != null;
-    }
-
-    /**
-     * Get the current bank capacity based on the bank level of this player.
+     * Get the bank capacity based on the bank level of the selected player.
      *
      * @param p The player.
      * @return The capacity amount.
      */
-    public BigDecimal getCapacity(OfflinePlayer p) {
-        return getCapacity(getCurrentLevel(p));
+    public BigDecimal getCapacity(String bankName, OfflinePlayer p) {
+        return getCapacity(bankName, getCurrentLevel(p));
+    }
+
+    /**
+     * Get the bank capacity at level 1.
+     *
+     * @param bankName The bank name.
+     * @return The capacity amount.
+     */
+    public BigDecimal getCapacity(String bankName) {
+        return getCapacity(bankName, 1);
     }
 
     /**
      * Get the bank capacity of that specified level.
      *
-     * @param level The bank level.
+     * @param bankName The bank name.
+     * @param level The level to check.
      * @return The capacity amount.
      */
-    public BigDecimal getCapacity(int level) {
-        if (!hasUpgrades()) return Values.CONFIG.getMaxBankCapacity();
+    public BigDecimal getCapacity(String bankName, int level) {
+        ConfigurationSection upgrades = getBank(bankName).getUpgrades();
+        if (upgrades == null) return Values.CONFIG.getMaxBankCapacity();
 
-        String capacity = bank.getUpgrades().getString(level + ".Capacity");
-        return new BigDecimal(capacity == null ? Values.CONFIG.getMaxBankCapacity().toString() : capacity);
+        String capacity = upgrades.getString((Math.max(level, 1)) + ".Capacity");
+        return (capacity == null ? Values.CONFIG.getMaxBankCapacity() : new BigDecimal(capacity));
     }
 
     /**
-     * Get the interest rate of the player's bank level.
+     * Get the bank interest rate based on the bank level of the selected player.
+     * This method requires specifying a player because it needs his money to make calculations.
+     * It also already checks if the interest limiter is enabled and returns an amount based on that.
      *
+     * @param bankName The bank name.
      * @param p The player.
      * @return The interest amount.
      */
-    public BigDecimal getInterest(OfflinePlayer p) {
-        return getInterest(p, getCurrentLevel(p));
+    public BigDecimal getInterest(String bankName, OfflinePlayer p) {
+        return getInterest(bankName, p, getCurrentLevel(p));
     }
 
     /**
-     * Get the interest rate of that bank level.
+     * Get the bank interest rate at the selected level.
+     * This method requires specifying a player because it needs his money to make calculations.
+     * It also already checks if the interest limiter is enabled and returns an amount based on that.
      *
-     * @param level The bank level.
+     * @param bankName The bank name.
+     * @param p The player.
+     * @param level The level to check.
      * @return The interest amount.
      */
-    public BigDecimal getInterest(OfflinePlayer p, int level) {
+    public BigDecimal getInterest(String bankName, OfflinePlayer p, int level) {
         if (Values.CONFIG.enableInterestLimiter()) return getLimiterInterest(p, level, Values.CONFIG.getInterestMoneyGiven());
-        if (!hasUpgrades()) return Values.CONFIG.getInterestMoneyGiven();
 
-        String interest = bank.getUpgrades().getString(level + ".Interest");
+        Bank bank = getBank(bankName);
+        ConfigurationSection upgrades = bank.getUpgrades();
+        if (upgrades == null) return Values.CONFIG.getInterestMoneyGiven();
 
+        level = Math.max(level, 1);
+        String interest = upgrades.getString(level + ".Interest");
         if (BPUtils.isInvalidNumber(interest)) {
+            // Check this before to avoid spamming warns if the user does not specify an interest in an upgrade.
             if (interest != null)
-                BPLogger.warn("Invalid interest amount in the " + level + "* upgrades section, file: " + bank.getIdentifier() + ".yml");
+                BPLogger.warn("Invalid interest amount in the " + level + "* upgrades section, file: " + bankName + ".yml");
             return Values.CONFIG.getInterestMoneyGiven();
         }
 
@@ -118,40 +126,41 @@ public class BankManager {
     }
 
     /**
-     * Get the offline interest rate of the player's bank level.
+     * Get the bank offline interest rate based on the bank level of the selected player.
+     * This method requires specifying a player because it needs his money to make calculations.
+     * It also already checks if the interest limiter is enabled and returns an amount based on that.
      *
-     * @param p The player
-     * @return The offline interest amount.
+     * @param bankName The bank name.
+     * @param p The player.
+     * @return The interest amount.
      */
-    public BigDecimal getOfflineInterest(Player p) {
-        return getOfflineInterest(p, getCurrentLevel(p));
+    public BigDecimal getOfflineInterest(String bankName, OfflinePlayer p) {
+        return getOfflineInterest(bankName, p, getCurrentLevel(p));
     }
 
     /**
-     * Get the offline interest rate of the player's bank level.
+     * Get the bank offline interest rate at the selected level.
+     * This method requires specifying a player because it needs his money to make calculations.
+     * It also already checks if the interest limiter is enabled and returns an amount based on that.
      *
-     * @param p The player
-     * @return The offline interest amount.
+     * @param bankName The bank name.
+     * @param p The player.
+     * @param level The level to check.
+     * @return The interest amount.
      */
-    public BigDecimal getOfflineInterest(OfflinePlayer p) {
-        return getOfflineInterest(p, getCurrentLevel(p));
-    }
-
-    /**
-     * Get the offline interest rate of that bank level.
-     *
-     * @param level The bank level.
-     * @return The offline interest amount.
-     */
-    public BigDecimal getOfflineInterest(OfflinePlayer p, int level) {
+    public BigDecimal getOfflineInterest(String bankName, OfflinePlayer p, int level) {
         if (Values.CONFIG.enableInterestLimiter()) return getLimiterInterest(p, level, Values.CONFIG.getOfflineInterestMoneyGiven());
-        if (!hasUpgrades()) return Values.CONFIG.getOfflineInterestMoneyGiven();
 
-        String interest = bank.getUpgrades().getString(level + ".Offline-Interest");
+        Bank bank = getBank(bankName);
+        ConfigurationSection upgrades = bank.getUpgrades();
+        if (upgrades == null) return Values.CONFIG.getOfflineInterestMoneyGiven();
 
+        level = Math.max(level, 1);
+        String interest = upgrades.getString(level + ".Offline-Interest");
         if (BPUtils.isInvalidNumber(interest)) {
+            // Check this before to avoid spamming warns if the user does not specify an interest in an upgrade.
             if (interest != null)
-                BPLogger.warn("Invalid offline interest amount in the " + level + "* upgrades section, file: " + bank.getIdentifier() + ".yml");
+                BPLogger.warn("Invalid offline interest amount in the " + level + "* upgrades section, file: " + bankName + ".yml");
             return Values.CONFIG.getOfflineInterestMoneyGiven();
         }
 
