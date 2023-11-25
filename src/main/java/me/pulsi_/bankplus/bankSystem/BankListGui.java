@@ -34,7 +34,7 @@ public class BankListGui {
         if (updating != null) updating.cancel();
 
         if (Values.MULTIPLE_BANKS.isDirectlyOpenIf1IsAvailable()) {
-            BankReader reader = new BankReader();
+            BankManager reader = new BankManager();
 
             if (reader.getAvailableBanks(p).size() == 1) {
                 BankUtils.openBank(p, reader.getAvailableBanks(p).get(0), false);
@@ -68,7 +68,7 @@ public class BankListGui {
         int slot = 0;
 
         for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
-            BankReader reader = new BankReader(bankName);
+            BankManager reader = new BankManager(bankName);
             if (Values.MULTIPLE_BANKS.isShowNotAvailableBanks() && !reader.isAvailable(p)) continue;
 
             ItemStack bankItem;
@@ -97,7 +97,7 @@ public class BankListGui {
     private static void updateMeta(Inventory banksList, Player p) {
         int slot = 0;
         for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
-            BankReader reader = new BankReader(bankName);
+            BankManager reader = new BankManager(bankName);
             if (Values.MULTIPLE_BANKS.isShowNotAvailableBanks() && !reader.isAvailable(p)) continue;
 
             ItemStack item = banksList.getItem(slot);

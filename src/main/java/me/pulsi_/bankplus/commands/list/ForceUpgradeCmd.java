@@ -1,6 +1,6 @@
 package me.pulsi_.bankplus.commands.list;
 
-import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.BPArgs;
 import me.pulsi_.bankplus.utils.BPMessages;
@@ -39,7 +39,7 @@ public class ForceUpgradeCmd extends BPCommand {
         if (args.length > 2) bankName = args[2];
         boolean silent = args.length > 3 && args[3].toLowerCase().contains("true");
 
-        BankReader reader = new BankReader(bankName);
+        BankManager reader = new BankManager(bankName);
         if (!reader.exist()) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
@@ -62,7 +62,7 @@ public class ForceUpgradeCmd extends BPCommand {
         Player p = args.length > 1 ? Bukkit.getPlayer(args[1]) : null;
 
         if (args.length == 3)
-            return BPArgs.getArgs(args, new BankReader().getAvailableBanks(p));
+            return BPArgs.getArgs(args, new BankManager().getAvailableBanks(p));
 
         if (args.length == 4)
             return BPArgs.getArgs(args, "silent=true", "silent=false");

@@ -2,7 +2,7 @@ package me.pulsi_.bankplus.commands;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankListGui;
-import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
@@ -44,7 +44,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                 else {
                     if (!Values.MULTIPLE_BANKS.isDirectlyOpenIf1IsAvailable()) BankUtils.openBank(p, BankListGui.multipleBanksGuiID);
                     else {
-                        List<String> availableBanks = new BankReader().getAvailableBanks(p);
+                        List<String> availableBanks = new BankManager().getAvailableBanks(p);
                         if (availableBanks.size() == 1) BankUtils.openBank(p, availableBanks.get(0));
                         else BankUtils.openBank(p, BankListGui.multipleBanksGuiID);
                     }

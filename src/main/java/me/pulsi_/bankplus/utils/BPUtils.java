@@ -2,7 +2,7 @@ package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
-import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.listeners.playerChat.PlayerChatMethod;
 import me.pulsi_.bankplus.managers.BPConfigs;
 import me.pulsi_.bankplus.values.Values;
@@ -381,7 +381,7 @@ public class BPUtils {
     }
 
     public static boolean isBankFull(Player p, String bankName) {
-        BigDecimal capacity = new BankReader(bankName).getCapacity(p);
+        BigDecimal capacity = new BankManager(bankName).getCapacity(p);
         if (capacity.doubleValue() <= 0d) return false;
 
         if (BankPlus.getBPEconomy().getBankBalance(p, bankName).doubleValue() >= capacity.doubleValue()) {

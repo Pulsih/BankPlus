@@ -28,20 +28,22 @@ public abstract class BPCommand {
 
     public BPCommand(String... aliases) {
         this.identifier = aliases[0];
-        this.permission = "bankplus." + identifier.toLowerCase();
+
+        String id = identifier.toLowerCase();
+        this.permission = "bankplus." + id;
 
         this.aliases = new String[aliases.length - 1];
         System.arraycopy(aliases, 1, this.aliases, 0, aliases.length - 1);
 
         FileConfiguration config = BankPlus.INSTANCE.getConfigs().getConfig(BPConfigs.Type.COMMANDS.name);
 
-        needConfirm = config.getBoolean(identifier.toLowerCase() + ".need-confirm");
-        hasCooldown = config.getBoolean(identifier.toLowerCase() + ".has-cooldown");
-        confirmCooldown = config.getInt(identifier.toLowerCase() + ".confirm-cooldown");
-        cooldown = config.getInt(identifier.toLowerCase() + ".cooldown");
-        confirmMessage = config.getString(identifier.toLowerCase() + ".confirm-message");
-        cooldownMessage = config.getString(identifier.toLowerCase() + ".cooldown-message");
-        usage = BPMessages.getPossibleMessages(config, identifier.toLowerCase() + ".usage");
+        needConfirm = config.getBoolean(id + ".need-confirm");
+        hasCooldown = config.getBoolean(id + ".has-cooldown");
+        confirmCooldown = config.getInt(id + ".confirm-cooldown");
+        cooldown = config.getInt(id + ".cooldown");
+        confirmMessage = config.getString(id + ".confirm-message");
+        cooldownMessage = config.getString(id + ".cooldown-message");
+        usage = BPMessages.getPossibleMessages(config, id + ".usage");
     }
 
     private final HashMap<String, Long> cooldownMap = new HashMap<>();
@@ -93,8 +95,8 @@ public abstract class BPCommand {
     /**
      * Call this function when the command is ready to run to make the confirmation, if this
      * function is not called, even if the confirmation in the config is set to true, it won't work.
-     * @param s The command sender
-     * @return true if it has to confirm, false otherwise
+     * @param s The command sender.
+     * @return true if it has to confirm, false otherwise.
      */
     public boolean confirm(CommandSender s) {
         if (needConfirm()) {

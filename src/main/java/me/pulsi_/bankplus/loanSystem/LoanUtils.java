@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.loanSystem;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.economy.TransactionType;
 import me.pulsi_.bankplus.utils.BPMessages;
@@ -32,7 +32,7 @@ public class LoanUtils {
         request.setLoan(loan);
 
         if (action.equals("give")) {
-            BigDecimal capacity = new BankReader(loan.getToBankName()).getCapacity(to);
+            BigDecimal capacity = new BankManager(loan.getToBankName()).getCapacity(to);
             if (loan.getMoneyToReturn().doubleValue() > capacity.doubleValue()) {
                 BPMessages.send(from, "Cannot-Afford-Loan-Others", "%player%$" + to.getName());
                 return;
@@ -40,7 +40,7 @@ public class LoanUtils {
             BPMessages.send(to, "Loan-Give-Request-Received", BPUtils.placeValues(from, amount));
             request.setLoanSender(true);
         } else {
-            BigDecimal capacity = new BankReader(loan.getFromBankName()).getCapacity(from);
+            BigDecimal capacity = new BankManager(loan.getFromBankName()).getCapacity(from);
             if (loan.getMoneyToReturn().doubleValue() > capacity.doubleValue()) {
                 BPMessages.send(from, "Cannot-Afford-Loan");
                 return;
@@ -82,7 +82,7 @@ public class LoanUtils {
 
         economy.removeBankBalance(sender, amount, loan.getFromBankName()); // Already checked that the amount isn't > than the balance.
 
-        BigDecimal capacity = new BankReader(loan.getToBankName()).getCapacity(p), balance = economy.getBankBalance(p, loan.getToBankName());
+        BigDecimal capacity = new BankManager(loan.getToBankName()).getCapacity(p), balance = economy.getBankBalance(p, loan.getToBankName());
         // If the bank is full, instead of loosing money they will be added to the vault balance
         if (balance.add(amount).doubleValue() >= capacity.doubleValue() && capacity.doubleValue() > 0d) {
             economy.setBankBalance(p, capacity, loan.getToBankName(), TransactionType.LOAN);
@@ -140,7 +140,7 @@ public class LoanUtils {
 
         BPLoan loan = new BPLoan(receiver, fromBank, amount);
 
-        BigDecimal capacity = new BankReader(fromBank).getCapacity(receiver);
+        BigDecimal capacity = new BankManager(fromBank).getCapacity(receiver);
         if (loan.getMoneyToReturn().doubleValue() > capacity.doubleValue()) {
             BPMessages.send(receiver, "Cannot-Afford-Loan");
             return;

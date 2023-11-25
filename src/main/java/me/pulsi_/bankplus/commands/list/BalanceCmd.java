@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPArgs;
@@ -38,7 +38,7 @@ public class BalanceCmd extends BPCommand {
             BPMessages.send(p, "Multiple-Personal-Bank", BPUtils.placeValues(p, economy.getBankBalance(p)));
         } else {
             String bankName = args[1];
-            if (!new BankReader(bankName).exist()) {
+            if (!new BankManager(bankName).exist()) {
                 BPMessages.send(s, "Invalid-Bank");
                 return false;
             }
@@ -53,7 +53,7 @@ public class BalanceCmd extends BPCommand {
         Player p = (Player) s;
 
         if (args.length == 2)
-            return BPArgs.getArgs(args, new BankReader().getAvailableBanks(p));
+            return BPArgs.getArgs(args, new BankManager().getAvailableBanks(p));
         return null;
     }
 }

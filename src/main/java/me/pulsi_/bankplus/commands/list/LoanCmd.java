@@ -2,7 +2,7 @@ package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankGuiRegistry;
-import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.loanSystem.LoanUtils;
 import me.pulsi_.bankplus.utils.BPArgs;
@@ -19,13 +19,13 @@ import java.util.List;
 
 public class LoanCmd extends BPCommand {
 
-    private final BankReader reader;
+    private final BankManager reader;
     private final BankGuiRegistry registry;
 
     public LoanCmd(String... aliases) {
         super(aliases);
 
-        reader = new BankReader();
+        reader = new BankManager();
         registry = BankPlus.INSTANCE.getBankGuiRegistry();
     }
 
@@ -89,7 +89,7 @@ public class LoanCmd extends BPCommand {
         BigDecimal amount = new BigDecimal(num);
 
         if (action.equals("request") && registry.getBanks().containsKey(targetName)) {
-            if (!new BankReader(targetName).isAvailable(sender)) {
+            if (!new BankManager(targetName).isAvailable(sender)) {
                 BPMessages.send(sender, "Cannot-Access-Bank");
                 return false;
             }
@@ -106,7 +106,7 @@ public class LoanCmd extends BPCommand {
         String fromBankName = Values.CONFIG.getMainGuiName();
         if (args.length > 4) fromBankName = args[4];
 
-        BankReader fromReader = new BankReader(fromBankName);
+        BankManager fromReader = new BankManager(fromBankName);
         if (!fromReader.exist()) {
             BPMessages.send(sender, "Invalid-Bank");
             return false;
@@ -119,7 +119,7 @@ public class LoanCmd extends BPCommand {
         String toBankName = Values.CONFIG.getMainGuiName();
         if (args.length > 5) toBankName = args[5];
 
-        BankReader toReader = new BankReader(toBankName);
+        BankManager toReader = new BankManager(toBankName);
         if (!toReader.exist()) {
             BPMessages.send(sender, "Invalid-Bank");
             return false;

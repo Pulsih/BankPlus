@@ -1,6 +1,6 @@
 package me.pulsi_.bankplus.commands.list;
 
-import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.BPArgs;
@@ -40,7 +40,7 @@ public class ForceOpenCmd extends BPCommand {
         if (args.length > 2) bankName = args[2];
         boolean silent = args.length > 3 && args[3].toLowerCase().contains("true");
 
-        if (!new BankReader(bankName).exist()) {
+        if (!new BankManager(bankName).exist()) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }

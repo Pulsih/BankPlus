@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.BPArgs;
 import me.pulsi_.bankplus.utils.BPMessages;
@@ -52,7 +52,7 @@ public class PayCmd extends BPCommand {
         String fromBankName = Values.CONFIG.getMainGuiName();
         if (args.length > 3) fromBankName = args[3];
 
-        BankReader fromReader = new BankReader(fromBankName);
+        BankManager fromReader = new BankManager(fromBankName);
         if (fromReader.exist()) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
@@ -65,7 +65,7 @@ public class PayCmd extends BPCommand {
         String toBankName = Values.CONFIG.getMainGuiName();
         if (args.length > 4) toBankName = args[4];
 
-        BankReader toReader = new BankReader(toBankName);
+        BankManager toReader = new BankManager(toBankName);
         if (toReader.exist()) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
@@ -89,10 +89,10 @@ public class PayCmd extends BPCommand {
             return BPArgs.getArgs(args, "1", "2", "3");
 
         if (args.length == 4)
-            return BPArgs.getArgs(args, new BankReader().getAvailableBanks(p));
+            return BPArgs.getArgs(args, new BankManager().getAvailableBanks(p));
 
         if (args.length == 5)
-            return BPArgs.getArgs(args, new BankReader().getAvailableBanks(target));
+            return BPArgs.getArgs(args, new BankManager().getAvailableBanks(target));
         return null;
     }
 }

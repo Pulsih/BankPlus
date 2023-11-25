@@ -4,12 +4,11 @@
 Update-Checker: true
 
 General-Settings:
-  # Choose if automatically update your files
-  # when a new version is downloaded, you can
-  # disable this option if you see that the
-  # plugin is failing at updating the files
-  # itself, the old affected files will be
-  # saved in a folder as backup.
+  # Choose if automatically update your
+  # files when a new version is downloaded.
+  # You can disable this option if you see that the
+  # plugin is failing at updating the files itself.
+  # The old affected files will be saved in a folder as backup.
   Auto-Update-Files: true
 
   # Enable the transaction logger which will save
@@ -20,7 +19,7 @@ General-Settings:
   Notify-Registered-Player: true
 
   # Silent some messages that are sent to the console for info
-  # if you don't want to see them or to not spamm the console.
+  # if you don't want to see them or to not spam the console.
   # (Example: Update message)
   Silent-Info-Messages: false
 
@@ -40,6 +39,7 @@ General-Settings:
     Host: "localhost"
     Port: 3306
     Database: "bankplus"
+    # If you are not using one, put ""
     Password: "bankplusbestplugin"
     Use-SSL: false
 

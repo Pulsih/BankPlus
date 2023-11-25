@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.bankSystem;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayerManager;
 import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
@@ -20,21 +21,22 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * This class is used to receive information from the selected bank and many more usefully methods to manage the bank and the player.
  */
-public class BankReader {
+public class BankManager {
 
     private final Bank bank;
     private final BPEconomy economy;
 
-    public BankReader() {
+    public BankManager() {
         bank = null;
         economy = BankPlus.getBPEconomy();
     }
 
-    public BankReader(String bankName) {
+    public BankManager(String bankName) {
         bank = BankPlus.INSTANCE.getBankGuiRegistry().getBanks().get(bankName);
         economy = BankPlus.getBPEconomy();
     }
@@ -256,10 +258,23 @@ public class BankReader {
     /**
      * Get the current bank level for that player.
      *
+     * @param uuid The player UUID.
+     * @return The current level.
+     */
+    public int getCurrentLevel(UUID uuid) {
+        return getCurrentLevel(Bukkit.getOfflinePlayer(uuid));
+    }
+
+    /**
+     * Get the current bank level for that player.
+     *
      * @param p The player.
      * @return The current level.
      */
     public int getCurrentLevel(OfflinePlayer p) {
+        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE.getSql().isConnected())
+            return new SQLPlayerManager(p).getLevel(bank.getIdentifier());
+
         FileConfiguration config = new BPPlayerManager(p).getPlayerConfig();
         return Math.max(config.getInt("banks." + bank.getIdentifier() + ".level"), 1);
     }
@@ -296,11 +311,11 @@ public class BankReader {
 
         if (p.isOnline()) {
             for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
-                if (new BankReader(bankName).isAvailable(p.getPlayer()))
+                if (new BankManager(bankName).isAvailable(p.getPlayer()))
                     availableBanks.add(bankName);
         } else {
             for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
-                if (new BankReader(bankName).isAvailable(p))
+                if (new BankManager(bankName).isAvailable(p))
                     availableBanks.add(bankName);
         }
         return availableBanks;

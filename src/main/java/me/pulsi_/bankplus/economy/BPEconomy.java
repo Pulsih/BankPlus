@@ -1,15 +1,15 @@
 package me.pulsi_.bankplus.economy;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.BPPlayerManager;
 import me.pulsi_.bankplus.bankSystem.BankGuiRegistry;
-import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.events.BPAfterTransactionEvent;
 import me.pulsi_.bankplus.events.BPPreTransactionEvent;
 import me.pulsi_.bankplus.mySQL.BPSQL;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
 import me.pulsi_.bankplus.utils.BPFormatter;
-import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
@@ -17,23 +17,16 @@ import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class BPEconomy {
-
-    private final Map<UUID, HashMap<String, BankBalance>> playerBalances = new HashMap<>();
 
     private final BankGuiRegistry banksRegistry;
 
@@ -49,189 +42,13 @@ public class BPEconomy {
     public LinkedHashMap<String, BigDecimal> getAllBankBalances() {
         LinkedHashMap<String, BigDecimal> balances = new LinkedHashMap<>();
 
-        File dataFolder = new File(BankPlus.INSTANCE.getDataFolder(), "playerdata");
-        File[] files = dataFolder.listFiles();
-        if (files == null) return balances;
-
-        for (File file : files) {
-            FileConfiguration config = new YamlConfiguration();
-
-            try {
-                config.load(file);
-            } catch (IOException | InvalidConfigurationException e) {
-                BPLogger.error(e, "An error has occurred while loading a user file (File name: " + file.getName() + "):");
-                continue;
-            }
-
-            String name = config.getString("name");
-            if (name == null) continue;
-
-            ConfigurationSection section = config.getConfigurationSection("banks");
+        for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
             BigDecimal balance = new BigDecimal(0);
-
-            if (section != null) {
-                for (String bankName : section.getKeys(false)) {
-                    String bal = config.getString("banks." + bankName + ".money");
-                    if (bal != null && !BPUtils.isInvalidNumber(bal))
-                        balance = balance.add(new BigDecimal(bal));
-                }
-            }
-            balances.put(name, balance);
+            for (String bankName : new BankManager().getAvailableBanks(p))
+                balance = balance.add(getBankBalance(p, bankName));
+            balances.put(p.getName(), balance);
         }
         return balances;
-    }
-
-    /**
-     * Unload the player bank balances from the server.
-     */
-    public void unloadBankBalance(Player p) {
-        unloadBankBalance(p.getUniqueId());
-    }
-
-    /**
-     * Unload the player bank balances from the server.
-     */
-    public void unloadBankBalance(UUID playerUUID) {
-        playerBalances.remove(playerUUID);
-    }
-
-    /**
-     * Load the player balance from the connected database.
-     * @param p The player.
-     */
-    public void loadBankBalanceFromDatabase(Player p) {
-        if (p == null) return;
-
-        HashMap<String, BankBalance> balances = new HashMap<>();
-        // If the player is already loaded, put the loaded map in the "balances" map.
-        if (playerBalances.containsKey(p.getUniqueId())) balances = playerBalances.get(p.getUniqueId());
-
-        boolean changes = false;
-        SQLPlayerManager pManager = new SQLPlayerManager(p);
-        for (String bankName : banksRegistry.getBanks().keySet()) {
-            if (balances.containsKey(bankName)) continue;
-
-            balances.put(bankName, new BankBalance(pManager.getMoney(bankName), pManager.getDebt(bankName), pManager.getOfflineInterest(bankName)));
-            changes = true;
-        }
-        if (changes) playerBalances.put(p.getUniqueId(), balances);
-    }
-
-    /**
-     * Check if the player file has any errors and fix them.
-     * @param p The player to check.
-     */
-    public FileConfiguration checkForFileFixes(OfflinePlayer p, BPPlayerManager pManager) {
-        File file = pManager.getPlayerFile();
-        FileConfiguration config = pManager.getPlayerConfig(file);
-        boolean hasChanges = false;
-
-        String sName = config.getString("name");
-        if (sName == null) {
-            config.set("name", p.getName());
-            hasChanges = true;
-        }
-
-        for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
-            String sBalance = config.getString("banks." + bankName + ".money");
-            String sLevel = config.getString("banks." + bankName + ".level");
-            String sDebt = config.getString("banks." + bankName + ".debt");
-
-            if (sBalance == null) {
-                BigDecimal amount = Values.CONFIG.getMainGuiName().equals(bankName) ? Values.CONFIG.getStartAmount() : BigDecimal.valueOf(0);
-                config.set("banks." + bankName + ".money", BPFormatter.formatBigDouble(amount));
-                hasChanges = true;
-            }
-            if (sLevel == null) {
-                config.set("banks." + bankName + ".level", 1);
-                hasChanges = true;
-            }
-            if (sDebt == null) {
-                config.set("banks." + bankName + ".debt", "0");
-                hasChanges = true;
-            }
-            if (Values.CONFIG.notifyOfflineInterest()) {
-                String sInterest = config.getString("banks." + bankName + ".interest");
-                if (sInterest == null) {
-                    config.set("banks." + bankName + ".interest", "0");
-                    hasChanges = true;
-                }
-            }
-        }
-
-        if (hasChanges) pManager.savePlayerFile(config, file, true);
-        return config;
-    }
-
-    /**
-     * Load the player balance from the playerdata folder.
-     * @param p The player.
-     * @param config Player's config.
-     */
-    public void loadBankBalance(Player p, FileConfiguration config) {
-        if (p == null) return;
-
-        HashMap<String, BankBalance> balances = new HashMap<>();
-        // If the player is already loaded, put the loaded map in the "balances" map.
-        if (playerBalances.containsKey(p.getUniqueId())) balances = playerBalances.get(p.getUniqueId());
-
-        boolean changes = false;
-        for (String bankName : banksRegistry.getBanks().keySet()) {
-            // If the "balances" map already contains the bank values, skip.
-            if (balances.containsKey(bankName)) continue;
-
-            String bal = config.getString("banks." + bankName + ".money"),
-                    debt = config.getString("banks." + bankName + ".debt"),
-                    interest = config.getString("banks." + bankName + ".interest");
-            BigDecimal balAmount = new BigDecimal(0), debtAmount = new BigDecimal(0), interestAmount = new BigDecimal(0);
-
-            if (bal != null) {
-                try {
-                    balAmount = new BigDecimal(bal);
-                } catch (NumberFormatException e) {
-                    BPLogger.warn("Could not get \"" + bankName + "\" bank balance for " + p.getName() + " because it contains an invalid number! (Using 0 as default)");
-                }
-            }
-            if (debt != null) {
-                try {
-                    debtAmount = new BigDecimal(debt);
-                } catch (NumberFormatException e) {
-                    BPLogger.warn("Could not get \"" + bankName + "\" bank debt for " + p.getName() + " because it contains an invalid number! (Using 0 as default)");
-                }
-            }
-            if (interest != null) {
-                try {
-                    interestAmount = new BigDecimal(interest);
-                } catch (NumberFormatException e) {
-                    BPLogger.warn("Could not get \"" + bankName + "\" bank debt for " + p.getName() + " because it contains an invalid number! (Using 0 as default)");
-                }
-            }
-            balances.put(bankName, new BankBalance(balAmount, debtAmount, interestAmount));
-            changes = true;
-        }
-        // If any changes have been made, update the hashmap with the new edits.
-        if (changes) playerBalances.put(p.getUniqueId(), balances);
-    }
-
-    /**
-     * Save all bank balances of the player.
-     */
-    public void saveBankBalances(Player p, boolean async) {
-        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE.getSql().isConnected()) {
-            SQLPlayerManager pManager = new SQLPlayerManager(p);
-            for (String bankName : banksRegistry.getBanks().keySet())
-                pManager.saveBankBalance(getBankBalance(p, bankName), bankName);
-            return;
-        }
-
-        BPPlayerManager pManager = new BPPlayerManager(p);
-        File file = pManager.getPlayerFile();
-        FileConfiguration config = pManager.getPlayerConfig(file);
-
-        for (String bankName : banksRegistry.getBanks().keySet())
-            config.set("banks." + bankName + ".money", BPFormatter.formatBigDouble(getBankBalance(p, bankName)));
-
-        pManager.savePlayerFile(config, file, async);
     }
 
     /**
@@ -249,14 +66,17 @@ public class BPEconomy {
      * @param bankName The bank where to get the balance.
      */
     public BigDecimal getBankBalance(OfflinePlayer p, String bankName) {
-        if (!playerBalances.containsKey(p.getUniqueId())) {
-            if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE.getSql().isConnected())
-                return new SQLPlayerManager(p).getMoney(bankName);
-
-            String bal = new BPPlayerManager(p).getPlayerConfig().getString("banks." + bankName + ".money");
-            return new BigDecimal(bal == null ? "0" : bal);
+        HashMap<String, BPPlayer.PlayerBank> bankInformation = new BPPlayerManager(p).getBankInformation();
+        if (bankInformation != null) {
+            BPPlayer.PlayerBank info = bankInformation.get(bankName);
+            if (info != null) return info.getBalance();
         }
-        return playerBalances.get(p.getUniqueId()).get(bankName).getBankBalance();
+
+        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE.getSql().isConnected())
+            return new SQLPlayerManager(p).getMoney(bankName);
+
+        String bal = new BPPlayerManager(p).getPlayerConfig().getString("banks." + bankName + ".money");
+        return new BigDecimal(bal == null ? "0" : bal);
     }
 
     /**
@@ -309,7 +129,7 @@ public class BPEconomy {
             amount = event.getTransactionAmount();
         }
 
-        result = result.max(amount.min(new BankReader(bankName).getCapacity(p)));
+        result = result.max(amount.min(new BankManager(bankName).getCapacity(p)));
         set(p, result, bankName);
 
         if (!ignoreEvents) endEvent(p, type, economy.getBalance(p), amount, bankName);
@@ -367,7 +187,7 @@ public class BPEconomy {
             amount = event.getTransactionAmount();
         }
 
-        BigDecimal capacity = new BankReader(bankName).getCapacity(p), balance = getBankBalance(p, bankName);
+        BigDecimal capacity = new BankManager(bankName).getCapacity(p), balance = getBankBalance(p, bankName);
         if (capacity.doubleValue() <= 0D || balance.add(amount).doubleValue() < capacity.doubleValue()) {
             result = amount;
             BigDecimal moneyToAdd = balance.add(result);
@@ -464,8 +284,11 @@ public class BPEconomy {
      * @return Offline interest.
      */
     public BigDecimal getOfflineInterest(OfflinePlayer p, String bankName) {
-        if (playerBalances.containsKey(p.getUniqueId()))
-            return playerBalances.get(p.getUniqueId()).get(bankName).getInterest();
+        HashMap<String, BPPlayer.PlayerBank> bankInformation = new BPPlayerManager(p).getBankInformation();
+        if (bankInformation != null) {
+            BPPlayer.PlayerBank info = bankInformation.get(bankName);
+            if (info != null) return info.getInterest();
+        }
 
         if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE.getSql().isConnected())
             return new SQLPlayerManager(p).getOfflineInterest(bankName);
@@ -482,9 +305,13 @@ public class BPEconomy {
      */
     public void setOfflineInterest(OfflinePlayer p, BigDecimal amount, String bankName) {
         amount = new BigDecimal(BPFormatter.formatBigDouble(amount)).max(BigDecimal.valueOf(0));
-        if (playerBalances.containsKey(p.getUniqueId())) {
-            playerBalances.get(p.getUniqueId()).get(bankName).setInterest(amount);
-            return;
+        HashMap<String, BPPlayer.PlayerBank> bankInformation = new BPPlayerManager(p).getBankInformation();
+        if (bankInformation != null) {
+            BPPlayer.PlayerBank info = bankInformation.get(bankName);
+            if (info != null) {
+                info.setInterest(amount);
+                return;
+            }
         }
 
         if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE.getSql().isConnected()) {
@@ -507,9 +334,13 @@ public class BPEconomy {
      */
     public void setDebt(OfflinePlayer p, BigDecimal amount, String bankName) {
         amount = new BigDecimal(BPFormatter.formatBigDouble(amount)).max(BigDecimal.valueOf(0));
-        if (playerBalances.containsKey(p.getUniqueId())) {
-            playerBalances.get(p.getUniqueId()).get(bankName).setBankDebt(amount);
-            return;
+        HashMap<String, BPPlayer.PlayerBank> bankInformation = new BPPlayerManager(p).getBankInformation();
+        if (bankInformation != null) {
+            BPPlayer.PlayerBank info = bankInformation.get(bankName);
+            if (info != null) {
+                info.setDebt(amount);
+                return;
+            }
         }
 
         if (Values.CONFIG.isSqlEnabled()) {
@@ -542,8 +373,11 @@ public class BPEconomy {
      * @param bankName The bank where to get the balance.
      */
     public BigDecimal getDebt(OfflinePlayer p, String bankName) {
-        if (playerBalances.containsKey(p.getUniqueId()))
-            return playerBalances.get(p.getUniqueId()).get(bankName).getBankDebt();
+        HashMap<String, BPPlayer.PlayerBank> bankInformation = new BPPlayerManager(p).getBankInformation();
+        if (bankInformation != null) {
+            BPPlayer.PlayerBank info = bankInformation.get(bankName);
+            if (info != null) return info.getDebt();
+        }
 
         if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE.getSql().isConnected())
             return new SQLPlayerManager(p).getDebt(bankName);
@@ -581,16 +415,18 @@ public class BPEconomy {
      * Method internally used to simplify the transactions.
      */
     private void set(OfflinePlayer p, BigDecimal amount, BigDecimal offlineInterest, String bankName) {
+        HashMap<String, BPPlayer.PlayerBank> bankInformation = new BPPlayerManager(p).getBankInformation();
         amount = new BigDecimal(BPFormatter.formatBigDouble(amount)).max(BigDecimal.valueOf(0));
         offlineInterest = new BigDecimal(BPFormatter.formatBigDouble(offlineInterest)).max(BigDecimal.valueOf(0));
 
         boolean changeOfflineInterest = offlineInterest.doubleValue() != 0d;
-        if (playerBalances.containsKey(p.getUniqueId())) {
-            BankBalance balance = playerBalances.get(p.getUniqueId()).get(bankName);
-            balance.setBankBalance(amount);
-            if (changeOfflineInterest) balance.setInterest(offlineInterest);
-
-            return;
+        if (bankInformation != null) {
+            BPPlayer.PlayerBank info = bankInformation.get(bankName);
+            if (info != null) {
+                info.setBalance(amount);
+                if (changeOfflineInterest) info.setInterest(offlineInterest);
+                return;
+            }
         }
 
         if (Values.CONFIG.isSqlEnabled()) {
@@ -636,7 +472,7 @@ public class BPEconomy {
         if (Values.CONFIG.getDepositTaxes().doubleValue() > 0 && !p.hasPermission("bankplus.deposit.bypass-taxes"))
             taxes = amount.multiply(Values.CONFIG.getDepositTaxes().divide(BigDecimal.valueOf(100)));
 
-        BigDecimal capacity = new BankReader(bankName).getCapacity(p);
+        BigDecimal capacity = new BankManager(bankName).getCapacity(p);
         BigDecimal newBankBalance = getBankBalance(p, bankName).add(amount);
 
         /*
@@ -712,7 +548,7 @@ public class BPEconomy {
         }
 
         // Check if the receiver of the payment has the bank full
-        if (getBankBalance(to, toBank).doubleValue() >= new BankReader(toBank).getCapacity(to).doubleValue()) {
+        if (getBankBalance(to, toBank).doubleValue() >= new BankManager(toBank).getCapacity(to).doubleValue()) {
             BPMessages.send(from, "Bank-Full", "%player%$" + to.getName());
             return;
         }
@@ -737,39 +573,5 @@ public class BPEconomy {
                 p, type, getBankBalance(p, bankName), vaultBalance, amount, bankName
         );
         BPUtils.callEvent(event);
-    }
-
-    public static class BankBalance {
-        private BigDecimal bankBalance, bankDebt, interest;
-
-        public BankBalance(BigDecimal bankBalance, BigDecimal bankDebt, BigDecimal interest) {
-            this.bankBalance = bankBalance;
-            this.bankDebt = bankDebt;
-            this.interest = interest;
-        }
-
-        public BigDecimal getBankBalance() {
-            return bankBalance;
-        }
-
-        public BigDecimal getBankDebt() {
-            return bankDebt;
-        }
-
-        public BigDecimal getInterest() {
-            return interest;
-        }
-
-        public void setBankBalance(BigDecimal bankBalance) {
-            this.bankBalance = bankBalance;
-        }
-
-        public void setBankDebt(BigDecimal bankDebt) {
-            this.bankDebt = bankDebt;
-        }
-
-        public void setInterest(BigDecimal interest) {
-            this.interest = interest;
-        }
     }
 }

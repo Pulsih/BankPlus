@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.interest;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.economy.TransactionType;
 import me.pulsi_.bankplus.managers.BPConfigs;
@@ -78,11 +78,11 @@ public class BPInterest {
         if (!p.hasPermission("bankplus.receive.interest") || (Values.CONFIG.isIgnoringAfkPlayers() && BankPlus.INSTANCE.getAfkManager().isAFK(p))) return;
 
         BigDecimal interestAmount = new BigDecimal(0);
-        List<String> availableBanks = new BankReader().getAvailableBanks(p);
+        List<String> availableBanks = new BankManager().getAvailableBanks(p);
 
         for (String bankName : availableBanks) {
             BigDecimal bankBalance = economy.getBankBalance(p, bankName);
-            BankReader reader = new BankReader(bankName);
+            BankManager reader = new BankManager(bankName);
             BigDecimal interestMoney = getInterestMoney(p, reader.getInterest(p), reader), maxAmount = Values.CONFIG.getInterestMaxAmount();
 
             if (bankBalance.doubleValue() <= 0) continue;
@@ -115,9 +115,9 @@ public class BPInterest {
             }
             if (!hasPermission) continue;
 
-            for (String bankName : new BankReader().getAvailableBanks(p)) {
+            for (String bankName : new BankManager().getAvailableBanks(p)) {
                 BigDecimal bankBalance = economy.getBankBalance(p, bankName);
-                BankReader reader = new BankReader(bankName);
+                BankManager reader = new BankManager(bankName);
                 BigDecimal maxAmount = Values.CONFIG.getInterestMaxAmount(),
                         interestMoney = Values.CONFIG.isOfflineInterestDifferentRate() ?
                         getInterestMoney(p, reader.getOfflineInterest(p), reader) :
@@ -131,7 +131,7 @@ public class BPInterest {
         }
     }
 
-    public BigDecimal getInterestMoney(OfflinePlayer p, BigDecimal defaultInterest, BankReader reader) {
+    public BigDecimal getInterestMoney(OfflinePlayer p, BigDecimal defaultInterest, BankManager reader) {
         BigDecimal balance = BankPlus.getBPEconomy().getBankBalance(p, reader.getBank().getIdentifier());
 
         if (!Values.CONFIG.enableInterestLimiter() || !Values.CONFIG.accumulateInterestLimiter())

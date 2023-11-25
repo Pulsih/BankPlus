@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPArgs;
@@ -44,7 +44,7 @@ public class ViewCmd extends BPCommand {
             BPMessages.send(s, "Multiple-Bank-Others", BPUtils.placeValues(p, economy.getBankBalance(p)));
         } else {
             String bankName = args[2];
-            BankReader bankReader = new BankReader(bankName);
+            BankManager bankReader = new BankManager(bankName);
             if (!bankReader.exist()) {
                 BPMessages.send(s, "Invalid-Bank");
                 return false;

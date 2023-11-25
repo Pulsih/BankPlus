@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.BPArgs;
 import me.pulsi_.bankplus.utils.BPMessages;
@@ -52,7 +52,7 @@ public class WithdrawCmd extends BPCommand {
         String bankName = Values.CONFIG.getMainGuiName();
         if (args.length > 2) bankName = args[2];
 
-        if (!new BankReader(bankName).exist()) {
+        if (!new BankManager(bankName).exist()) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }

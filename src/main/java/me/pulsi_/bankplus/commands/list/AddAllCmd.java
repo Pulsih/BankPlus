@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPArgs;
@@ -43,7 +43,7 @@ public class AddAllCmd extends BPCommand {
         String bankName = Values.CONFIG.getMainGuiName();
         if (args.length > 2) bankName = args[2];
 
-        BankReader reader = new BankReader(bankName);
+        BankManager reader = new BankManager(bankName);
         if (!reader.exist()) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
@@ -66,7 +66,7 @@ public class AddAllCmd extends BPCommand {
         return null;
     }
 
-    private void addAll(List<Player> onlinePlayers, BigDecimal amount, BankReader reader) {
+    private void addAll(List<Player> onlinePlayers, BigDecimal amount, BankManager reader) {
         List<Player> copy = new ArrayList<>(onlinePlayers);
         String bankName = reader.getBank().getIdentifier();
 

@@ -25,45 +25,48 @@ public class SQLPlayerManager {
         this.methods = BankPlus.INSTANCE.getSql().getSqlMethods();
     }
 
-    public void setMoney(BigDecimal amount, String bankName) {
-        methods.update(bankName, "uuid", uuid, "money", amount.toString());
+    public int getLevel(String bankName) {
+        String money = get("bank_level", bankName);
+        return Integer.parseInt(money == null ? "1" : money);
     }
 
     public BigDecimal getMoney(String bankName) {
-        String money = methods.get(bankName, "uuid", uuid, "money");
+        String money = get("money", bankName);
         return new BigDecimal(money == null ? "0" : money);
     }
 
-    public void setDebt(BigDecimal amount, String bankName) {
-        methods.update(bankName, "uuid", uuid, "debt", amount.toString());
-    }
-
     public BigDecimal getDebt(String bankName) {
-        String debt = methods.get(bankName, "uuid", uuid, "debt");
+        String debt = get("debt", bankName);
         return new BigDecimal(debt == null ? "0" : debt);
     }
 
-    public void setOfflineInterest(BigDecimal amount, String bankName) {
-        methods.update(bankName, "uuid", uuid, "interest", amount.toString());
-    }
-
     public BigDecimal getOfflineInterest(String bankName) {
-        String interest = methods.get(bankName, "uuid", uuid, "interest");
+        String interest = get("interest", bankName);
         return new BigDecimal(interest == null ? "0" : interest);
     }
 
-    public void saveBankBalance(BigDecimal money, String bankName) {
-        if (!methods.exist(bankName, "uuid", uuid)) methods.insertInto(bankName, uuid, p.getName());
-        else methods.update(bankName, "uuid", uuid, "money", money.toString());
+    public void setLevel(int size, String bankName) {
+        set("bank_level", "" + size, bankName);
     }
 
-    public void saveDebt(BigDecimal amount, String bankName) {
-        if (!methods.exist(bankName, "uuid", uuid)) methods.insertInto(bankName, uuid, p.getName());
-        else methods.update(bankName, "uuid", uuid, "debt", amount.toString());
+    public void setMoney(BigDecimal amount, String bankName) {
+        set("money", amount.toString(), bankName);
     }
 
-    public void saveOfflineInterest(BigDecimal amount, String bankName) {
+    public void setDebt(BigDecimal amount, String bankName) {
+        set("debt", amount.toString(), bankName);
+    }
+
+    public void setOfflineInterest(BigDecimal amount, String bankName) {
+        set("interest", amount.toString(), bankName);
+    }
+
+    public void set(String valueName, String newValue, String bankName) {
         if (!methods.exist(bankName, "uuid", uuid)) methods.insertInto(bankName, uuid, p.getName());
-        else methods.update(bankName, "uuid", uuid, "interest", amount.toString());
+        methods.update(bankName, "uuid", uuid, valueName, newValue);
+    }
+
+    public String get(String valueName, String bankName) {
+        return methods.get(bankName, "uuid", uuid, valueName);
     }
 }

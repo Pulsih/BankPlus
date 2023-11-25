@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.mySQL;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankGuiRegistry;
+import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.Values;
@@ -48,7 +49,15 @@ public class BPSQL {
 
         for (String bankName : bankRegistry.getBanks().keySet()) {
             if (!getSqlMethods().exist(bankName, "uuid", uuid))
-                getSqlMethods().insertInto(bankName, uuid, p.getName(), Values.CONFIG.getStartAmount().toString(), economy.getOfflineInterest(p).toString(), economy.getDebts(p).toString());
+                getSqlMethods().insertInto(
+                        bankName,
+                        uuid,
+                        p.getName(),
+                        "" + new BankManager().getCurrentLevel(p),
+                        Values.CONFIG.getStartAmount().toString(),
+                        economy.getOfflineInterest(p).toString(),
+                        economy.getDebts(p).toString()
+                );
         }
     }
 
@@ -58,6 +67,7 @@ public class BPSQL {
                    bankName,
                    "uuid varchar(100)",
                    "account_name varchar(100)",
+                   "bank_level varchar(100)",
                    "money varchar(100)",
                    "interest varchar(100)",
                    "debt varchar(100)",

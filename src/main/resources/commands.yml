@@ -179,6 +179,16 @@ setlevel:
   has-cooldown: false
   cooldown: 0
   cooldown-message: ""
+transfer:
+  usage:
+    - "%prefix% &cUsage: &7/bank transfer [mode] | Specify a mode between &a\"filesToDatabase\" &7and &a\"databaseToFiles\"&7."
+    - "&7Use this command to &a&ntransfer&7 the playerdata from a place to another in case you &a&nswitch&7 saving mode."
+  need-confirm: true
+  confirm-cooldown: 5
+  confirm-message: "%prefix% &cType the command again within 5 seconds to confirm this action."
+  has-cooldown: false
+  cooldown: 0
+  cooldown-message: ""
 updatebanktop:
   need-confirm: false
   confirm-cooldown: 0

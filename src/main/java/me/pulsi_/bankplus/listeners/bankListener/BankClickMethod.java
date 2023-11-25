@@ -4,7 +4,7 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.bankSystem.BankHolder;
 import me.pulsi_.bankplus.bankSystem.BankListGui;
-import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -46,7 +46,7 @@ public class BankClickMethod {
             return;
         }
 
-        BankReader bankReader = new BankReader(bankName);
+        BankManager bankReader = new BankManager(bankName);
         ConfigurationSection items = bankReader.getBank().getItems();
         if (items == null) return;
 
@@ -155,7 +155,7 @@ public class BankClickMethod {
         String actionType = itemValues.getString("Action.Action-Type");
         if (actionType == null) return false;
 
-        BankReader bankReader = new BankReader(bankName);
+        BankManager bankReader = new BankManager(bankName);
         String actionAmount = itemValues.getString("Action.Amount");
 
         actionType = actionType.toLowerCase();

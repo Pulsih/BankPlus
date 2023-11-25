@@ -27,6 +27,7 @@ public class CmdRegisterer {
         new SaveAllDataCmd("saveAllData").register();
         new SetCmd("set").register();
         new SetLevelCmd("setLevel").register();
+        new TransferCmd("transfer").register();
         new UpdateBankTopCmd("updateBankTop").register();
         new UpgradeCmd("upgrade").register();
         new ViewCmd("view").register();

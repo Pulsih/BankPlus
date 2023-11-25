@@ -4,15 +4,18 @@ import me.pulsi_.bankplus.bankSystem.Bank;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 
 public class BPPlayer {
 
     private final Player player;
+
     private Bank openedBank;
     private HashMap<String, String> playerBankClickHolder;
     private int banktopPosition = -1;
     private BukkitTask bankUpdatingTask, closingTask;
+    private HashMap<String, PlayerBank> bankInformation = new HashMap<>();
 
     public BPPlayer(Player player) {
         this.player = player;
@@ -42,6 +45,10 @@ public class BPPlayer {
         return closingTask;
     }
 
+    public HashMap<String, PlayerBank> getBankInformation() {
+        return bankInformation;
+    }
+
     public void setOpenedBank(Bank openedBank) {
         this.openedBank = openedBank;
     }
@@ -60,5 +67,53 @@ public class BPPlayer {
 
     public void setClosingTask(BukkitTask closingTask) {
         this.closingTask = closingTask;
+    }
+
+    public void setBankInformation(HashMap<String, PlayerBank> bankInformation) {
+        this.bankInformation = bankInformation;
+    }
+
+    public static class PlayerBank {
+        private int level;
+        private BigDecimal balance, debt, interest;
+
+        public PlayerBank(int level, BigDecimal bankBalance, BigDecimal bankDebt, BigDecimal interest) {
+            this.level = level;
+            this.balance = bankBalance;
+            this.debt = bankDebt;
+            this.interest = interest;
+        }
+
+        public int getLevel() {
+            return level;
+        }
+
+        public BigDecimal getBalance() {
+            return balance;
+        }
+
+        public BigDecimal getDebt() {
+            return debt;
+        }
+
+        public BigDecimal getInterest() {
+            return interest;
+        }
+
+        public void setLevel(int level) {
+            this.level = level;
+        }
+
+        public void setBalance(BigDecimal balance) {
+            this.balance = balance;
+        }
+
+        public void setDebt(BigDecimal debt) {
+            this.debt = debt;
+        }
+
+        public void setInterest(BigDecimal interest) {
+            this.interest = interest;
+        }
     }
 }

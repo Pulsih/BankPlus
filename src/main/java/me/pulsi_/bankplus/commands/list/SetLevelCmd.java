@@ -1,6 +1,6 @@
 package me.pulsi_.bankplus.commands.list;
 
-import me.pulsi_.bankplus.bankSystem.BankReader;
+import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.BPArgs;
 import me.pulsi_.bankplus.utils.BPMessages;
@@ -47,7 +47,7 @@ public class SetLevelCmd extends BPCommand {
         String bankName = Values.CONFIG.getMainGuiName();
         if (args.length > 3) bankName = args[3];
 
-        BankReader reader = new BankReader(bankName);
+        BankManager reader = new BankManager(bankName);
         if (!reader.exist()) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
@@ -58,7 +58,7 @@ public class SetLevelCmd extends BPCommand {
         }
         if (confirm(s)) return false;
 
-        new BankReader(bankName).setLevel(p, Integer.parseInt(level));
+        new BankManager(bankName).setLevel(p, Integer.parseInt(level));
         BPMessages.send(s, "Set-Level-Message", "%player%$" + p.getName(), "%level%$" + level);
         return true;
     }
