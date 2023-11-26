@@ -24,7 +24,7 @@ public class PlayerChatMethod {
         Player p = e.getPlayer();
         if (!isTyping(p)) return;
 
-        BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
+        BPPlayer player = BankPlus.INSTANCE().getPlayerRegistry().get(p);
 
         Bank openedBank = player.getOpenedBank();
         if (openedBank == null) {
@@ -74,8 +74,8 @@ public class PlayerChatMethod {
     }
 
     public static void reopenBank(Player p, String identifier) {
-        Bukkit.getScheduler().runTask(BankPlus.INSTANCE, () -> {
-            BukkitTask task = BankPlus.INSTANCE.getPlayerRegistry().get(p).getClosingTask();
+        Bukkit.getScheduler().runTask(BankPlus.INSTANCE(), () -> {
+            BukkitTask task = BankPlus.INSTANCE().getPlayerRegistry().get(p).getClosingTask();
             if (task != null) task.cancel();
 
             BPSets.playerDepositing.remove(p.getUniqueId());
@@ -85,7 +85,7 @@ public class PlayerChatMethod {
     }
 
     private static void executeExitCommands(Player p) {
-        Bukkit.getScheduler().runTask(BankPlus.INSTANCE, () -> {
+        Bukkit.getScheduler().runTask(BankPlus.INSTANCE(), () -> {
             for (String cmd : Values.CONFIG.getExitCommands()) {
                 if (cmd.startsWith("[CONSOLE]")) {
                     String s = cmd.replace("[CONSOLE] ", "").replace("%player%", p.getName());

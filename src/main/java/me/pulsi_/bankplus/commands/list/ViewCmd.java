@@ -44,13 +44,13 @@ public class ViewCmd extends BPCommand {
             BPMessages.send(s, "Multiple-Bank-Others", BPUtils.placeValues(p, economy.getBankBalance(p)));
         } else {
             String bankName = args[2];
-            BankManager bankReader = new BankManager(bankName);
-            if (!bankReader.exist()) {
+            BankManager manager = BankPlus.getBankManager();
+            if (!manager.exist(bankName)) {
                 BPMessages.send(s, "Invalid-Bank");
                 return false;
             }
 
-            if (!bankReader.isAvailable(p)) {
+            if (!manager.isAvailable(bankName, p)) {
                 BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + p.getName());
                 return false;
             }

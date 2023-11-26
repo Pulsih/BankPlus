@@ -28,13 +28,13 @@ public class BankListGui {
     public static final String multipleBanksGuiID = "MultipleBanksGui";
 
     public static void openMultipleBanksGui(Player p) {
-        BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
+        BPPlayer player = BankPlus.INSTANCE().getPlayerRegistry().get(p);
 
         BukkitTask updating = player.getBankUpdatingTask();
         if (updating != null) updating.cancel();
 
         if (Values.MULTIPLE_BANKS.isDirectlyOpenIf1IsAvailable()) {
-            BankManager reader = new BankManager();
+            BankManager reader = BankPlus.getBankManager();;
 
             if (reader.getAvailableBanks(p).size() == 1) {
                 BankUtils.openBank(p, reader.getAvailableBanks(p).get(0), false);
@@ -42,10 +42,10 @@ public class BankListGui {
             }
         }
 
-        Bank baseBanksListGui = BankPlus.INSTANCE.getBankGuiRegistry().bankListGui;
+        Bank baseBanksListGui = BankPlus.INSTANCE().getBankGuiRegistry().bankListGui;
 
         String title = baseBanksListGui.getTitle();
-        if (!BankPlus.INSTANCE.isPlaceholderApiHooked()) title = BPChat.color(title);
+        if (!BankPlus.INSTANCE().isPlaceholderApiHooked()) title = BPChat.color(title);
         else title = PlaceholderAPI.setPlaceholders(p, BPChat.color(title));
 
         Inventory banksListGui = Bukkit.createInventory(new BankHolder(), baseBanksListGui.getSize(), title);
@@ -55,7 +55,7 @@ public class BankListGui {
 
         long delay = Values.MULTIPLE_BANKS.getUpdateDelay();
         if (delay >= 0)
-            player.setBankUpdatingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE, () -> updateMeta(banksListGui, p), delay, delay));
+            player.setBankUpdatingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE(), () -> updateMeta(banksListGui, p), delay, delay));
 
         player.setOpenedBank(baseBanksListGui);
         BPUtils.playSound("PERSONAL", p);
@@ -63,21 +63,21 @@ public class BankListGui {
     }
 
     private static void placeBanks(Inventory banksListGui, Player p) {
-        BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
+        BPPlayer player = BankPlus.INSTANCE().getPlayerRegistry().get(p);
         HashMap<String, String> banksClickHolder = new HashMap<>();
         int slot = 0;
 
-        for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
-            BankManager reader = new BankManager(bankName);
-            if (Values.MULTIPLE_BANKS.isShowNotAvailableBanks() && !reader.isAvailable(p)) continue;
+        for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) {
+            BankManager manager = BankPlus.getBankManager();
+            if (Values.MULTIPLE_BANKS.isShowNotAvailableBanks() && !manager.isAvailable(bankName, p)) continue;
 
             ItemStack bankItem;
             boolean glow = false;
-            ConfigurationSection section = reader.getBank().getBanksGuiItemSection();
+            ConfigurationSection section = manager.getBank(bankName).getBanksGuiItemSection();
 
             if (section == null) bankItem = BPItems.UNKNOWN_ITEM.clone();
             else {
-                String path = reader.isAvailable(p) ? "Available" : "Unavailable";
+                String path = manager.isAvailable(bankName, p) ? "Available" : "Unavailable";
                 glow = section.getBoolean(path + ".Glowing");
                 try {
                     bankItem = new ItemStack(Material.valueOf(section.getString(path + ".Material")));
@@ -96,9 +96,9 @@ public class BankListGui {
 
     private static void updateMeta(Inventory banksList, Player p) {
         int slot = 0;
-        for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
-            BankManager reader = new BankManager(bankName);
-            if (Values.MULTIPLE_BANKS.isShowNotAvailableBanks() && !reader.isAvailable(p)) continue;
+        for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) {
+            BankManager manager = BankPlus.getBankManager();
+            if (Values.MULTIPLE_BANKS.isShowNotAvailableBanks() && !manager.isAvailable(bankName, p)) continue;
 
             ItemStack item = banksList.getItem(slot);
             slot++;
@@ -109,9 +109,11 @@ public class BankListGui {
             String displayname = "&c&l* DISPLAYNAME NOT FOUND *";
             List<String> lore = new ArrayList<>();
 
-            ConfigurationSection section = reader.getBank().getBanksGuiItemSection();
+            Bank bank = manager.getBank(bankName);
+            ConfigurationSection section = bank.getBanksGuiItemSection();
             if (section != null) {
-                String path = (!reader.hasPermission() || p.hasPermission(reader.getBank().getPermission())) ? "Available" : "Unavailable";
+                String permission = bank.getPermission();
+                String path = (permission == null || p.hasPermission(permission)) ? "Available" : "Unavailable";
 
                 String dName = section.getString(path + ".Displayname");
                 if (dName != null) displayname = dName;
@@ -136,7 +138,7 @@ public class BankListGui {
         List<String> newLore = new ArrayList<>();
         for (String lines : lore) newLore.add(BPChat.color(lines));
 
-        if (BankPlus.INSTANCE.isPlaceholderApiHooked()) {
+        if (BankPlus.INSTANCE().isPlaceholderApiHooked()) {
             meta.setDisplayName(PlaceholderAPI.setPlaceholders(p, BPChat.color(displayname)));
             meta.setLore(PlaceholderAPI.setPlaceholders(p, newLore));
         } else {

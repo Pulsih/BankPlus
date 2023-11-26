@@ -29,7 +29,7 @@ public class BankClickMethod {
         if (bank == null || bank.getHolder() == null || !(bank.getHolder() instanceof BankHolder)) return;
         e.setCancelled(true);
 
-        BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
+        BPPlayer player = BankPlus.INSTANCE().getPlayerRegistry().get(p);
         if (player.getOpenedBank() == null) return;
 
         int slot = e.getSlot();
@@ -46,8 +46,8 @@ public class BankClickMethod {
             return;
         }
 
-        BankManager bankReader = new BankManager(bankName);
-        ConfigurationSection items = bankReader.getBank().getItems();
+        BankManager bankReader = BankPlus.getBankManager();
+        ConfigurationSection items = bankReader.getBank(bankName).getItems();
         if (items == null) return;
 
         for (String key : items.getKeys(false)) {
@@ -63,7 +63,7 @@ public class BankClickMethod {
             }
 
             BPEconomy economy = BankPlus.getBPEconomy();
-            Economy vaultEconomy = BankPlus.INSTANCE.getVaultEconomy();
+            Economy vaultEconomy = BankPlus.INSTANCE().getVaultEconomy();
 
             for (String actionType : actions) {
                 String[] parts = actionType.split(" ");
@@ -75,7 +75,7 @@ public class BankClickMethod {
                 if (identifier.equals("[UPGRADE]")) {
                     if (Values.CONFIG.isGuiActionsNeedPermissions() && !BPUtils.hasPermission(p, "bankplus.upgrade")) return;
 
-                    bankReader.upgradeBank(p);
+                    bankReader.upgradeBank(bankName, p);
                     continue;
                 }
 
@@ -155,14 +155,14 @@ public class BankClickMethod {
         String actionType = itemValues.getString("Action.Action-Type");
         if (actionType == null) return false;
 
-        BankManager bankReader = new BankManager(bankName);
+        BankManager bankReader = BankPlus.getBankManager();
         String actionAmount = itemValues.getString("Action.Amount");
 
         actionType = actionType.toLowerCase();
         actionAmount = actionAmount == null ? "null" : actionAmount.toLowerCase();
 
         BPEconomy economy = BankPlus.getBPEconomy();
-        Economy vaultEconomy = BankPlus.INSTANCE.getVaultEconomy();
+        Economy vaultEconomy = BankPlus.INSTANCE().getVaultEconomy();
         switch (actionType) {
             case "deposit":
                 switch (actionAmount) {
@@ -219,7 +219,7 @@ public class BankClickMethod {
                 break;
 
             case "upgrade":
-                bankReader.upgradeBank(p);
+                bankReader.upgradeBank(bankName, p);
                 break;
         }
         return true;

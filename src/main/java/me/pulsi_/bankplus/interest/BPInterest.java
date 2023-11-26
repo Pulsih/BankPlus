@@ -49,7 +49,7 @@ public class BPInterest {
     }
 
     public void restartInterest() {
-        BukkitTask task = BankPlus.INSTANCE.getTaskManager().getInterestTask();
+        BukkitTask task = BankPlus.INSTANCE().getTaskManager().getInterestTask();
         if (task != null) task.cancel();
         startInterest();
     }
@@ -58,7 +58,7 @@ public class BPInterest {
         cooldown = System.currentTimeMillis() + Values.CONFIG.getInterestDelay();
         boolean isOfflineInterestEnabled = Values.CONFIG.isGivingInterestToOfflinePlayers();
 
-        Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE, () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
             Bukkit.getOnlinePlayers().forEach(this::giveInterest);
             if (isOfflineInterestEnabled) giveInterest(Bukkit.getOfflinePlayers());
         });
@@ -71,19 +71,18 @@ public class BPInterest {
     private void loopInterest() {
         if (!isInterestActive()) return;
         if (getInterestCooldownMillis() <= 0) giveInterestToEveryone();
-        BankPlus.INSTANCE.getTaskManager().setInterestTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, this::loopInterest, 10L));
+        BankPlus.INSTANCE().getTaskManager().setInterestTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), this::loopInterest, 10L));
     }
 
     public void giveInterest(Player p) {
-        if (!p.hasPermission("bankplus.receive.interest") || (Values.CONFIG.isIgnoringAfkPlayers() && BankPlus.INSTANCE.getAfkManager().isAFK(p))) return;
+        if (!p.hasPermission("bankplus.receive.interest") || (Values.CONFIG.isIgnoringAfkPlayers() && BankPlus.INSTANCE().getAfkManager().isAFK(p))) return;
 
         BigDecimal interestAmount = new BigDecimal(0);
-        List<String> availableBanks = new BankManager().getAvailableBanks(p);
+        List<String> availableBanks = BankPlus.getBankManager().getAvailableBanks(p);
 
         for (String bankName : availableBanks) {
             BigDecimal bankBalance = economy.getBankBalance(p, bankName);
-            BankManager reader = new BankManager(bankName);
-            BigDecimal interestMoney = getInterestMoney(p, reader.getInterest(p), reader), maxAmount = Values.CONFIG.getInterestMaxAmount();
+            BigDecimal interestMoney = getInterestMoney(bankName, p, BankPlus.getBankManager().getInterestRate(bankName, p)), maxAmount = Values.CONFIG.getInterestMaxAmount();
 
             if (bankBalance.doubleValue() <= 0) continue;
             if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
@@ -98,7 +97,7 @@ public class BPInterest {
     }
 
     public void giveInterest(OfflinePlayer[] players) {
-        Permission permission = BankPlus.INSTANCE.getPermissions();
+        Permission permission = BankPlus.INSTANCE().getPermissions();
         if (permission == null) {
             BPLogger.warn("Cannot give offline interest, no permission plugin found!");
             return;
@@ -110,18 +109,20 @@ public class BPInterest {
 
             boolean hasPermission = false;
             for (World world : Bukkit.getWorlds()) {
-                hasPermission = perm == null || perm.isEmpty() || permission.playerHas(world.getName(), p, perm);
-                if (hasPermission) break;
+                if (perm == null || perm.isEmpty() || permission.playerHas(world.getName(), p, perm)) {
+                    hasPermission = true;
+                    break;
+                }
             }
             if (!hasPermission) continue;
 
-            for (String bankName : new BankManager().getAvailableBanks(p)) {
+            BankManager manager = BankPlus.getBankManager();
+            for (String bankName : manager.getAvailableBanks(p)) {
                 BigDecimal bankBalance = economy.getBankBalance(p, bankName);
-                BankManager reader = new BankManager(bankName);
                 BigDecimal maxAmount = Values.CONFIG.getInterestMaxAmount(),
                         interestMoney = Values.CONFIG.isOfflineInterestDifferentRate() ?
-                        getInterestMoney(p, reader.getOfflineInterest(p), reader) :
-                        getInterestMoney(p, reader.getInterest(p), reader);
+                        getInterestMoney(bankName, p, manager.getOfflineInterestRate(bankName, p)) :
+                        getInterestMoney(bankName, p, manager.getInterestRate(bankName, p));
 
                 if (bankBalance.doubleValue() <= 0) continue;
                 if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
@@ -131,14 +132,15 @@ public class BPInterest {
         }
     }
 
-    public BigDecimal getInterestMoney(OfflinePlayer p, BigDecimal defaultInterest, BankManager reader) {
-        BigDecimal balance = BankPlus.getBPEconomy().getBankBalance(p, reader.getBank().getIdentifier());
+    public BigDecimal getInterestMoney(String bankName, OfflinePlayer p, BigDecimal defaultInterest) {
+        BigDecimal playerBalance = BankPlus.getBPEconomy().getBankBalance(p, bankName);
 
         if (!Values.CONFIG.enableInterestLimiter() || !Values.CONFIG.accumulateInterestLimiter())
-            return balance.multiply(defaultInterest.divide(BigDecimal.valueOf(100)));
+            return playerBalance.multiply(defaultInterest.divide(BigDecimal.valueOf(100)));
 
-        List<String> limiter = reader.getInterestLimiter(reader.getCurrentLevel(p));
-        BigDecimal result = new BigDecimal(0), count = balance;
+        BankManager manager = BankPlus.getBankManager();
+        List<String> limiter = manager.getInterestLimiter(bankName, manager.getCurrentLevel(bankName, p));
+        BigDecimal result = new BigDecimal(0), count = playerBalance;
         for (String line : limiter) {
             if (!line.contains(":")) continue;
 
@@ -166,7 +168,7 @@ public class BPInterest {
 
     private boolean isInterestActive() {
         if (!Values.CONFIG.isInterestEnabled()) {
-            BukkitTask task = BankPlus.INSTANCE.getTaskManager().getInterestTask();
+            BukkitTask task = BankPlus.INSTANCE().getTaskManager().getInterestTask();
             if (task != null) task.cancel();
             wasDisabled = true;
             return false;

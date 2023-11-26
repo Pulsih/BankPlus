@@ -19,14 +19,12 @@ import java.util.List;
 
 public class LoanCmd extends BPCommand {
 
-    private final BankManager reader;
     private final BankGuiRegistry registry;
 
     public LoanCmd(String... aliases) {
         super(aliases);
 
-        reader = new BankManager();
-        registry = BankPlus.INSTANCE.getBankGuiRegistry();
+        registry = BankPlus.INSTANCE().getBankGuiRegistry();
     }
 
     @Override
@@ -88,8 +86,9 @@ public class LoanCmd extends BPCommand {
         if (BPUtils.isInvalidNumber(num, sender)) return false;
         BigDecimal amount = new BigDecimal(num);
 
+        BankManager manager = BankPlus.getBankManager();
         if (action.equals("request") && registry.getBanks().containsKey(targetName)) {
-            if (!new BankManager(targetName).isAvailable(sender)) {
+            if (!manager.isAvailable(targetName, sender)) {
                 BPMessages.send(sender, "Cannot-Access-Bank");
                 return false;
             }
@@ -106,12 +105,11 @@ public class LoanCmd extends BPCommand {
         String fromBankName = Values.CONFIG.getMainGuiName();
         if (args.length > 4) fromBankName = args[4];
 
-        BankManager fromReader = new BankManager(fromBankName);
-        if (!fromReader.exist()) {
+        if (!manager.exist(fromBankName)) {
             BPMessages.send(sender, "Invalid-Bank");
             return false;
         }
-        if (!fromReader.isAvailable(sender)) {
+        if (!manager.isAvailable(fromBankName, sender)) {
             BPMessages.send(sender, "Cannot-Access-Bank");
             return false;
         }
@@ -119,12 +117,11 @@ public class LoanCmd extends BPCommand {
         String toBankName = Values.CONFIG.getMainGuiName();
         if (args.length > 5) toBankName = args[5];
 
-        BankManager toReader = new BankManager(toBankName);
-        if (!toReader.exist()) {
+        if (!manager.exist(toBankName)) {
             BPMessages.send(sender, "Invalid-Bank");
             return false;
         }
-        if (!toReader.isAvailable(target)) {
+        if (!manager.isAvailable(toBankName, target)) {
             BPMessages.send(sender, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
             return false;
         }
@@ -149,7 +146,7 @@ public class LoanCmd extends BPCommand {
 
         if (args.length == 3) {
             List<String> availableBanks = new ArrayList<>();
-            if (args[1].equalsIgnoreCase("request")) availableBanks.addAll(reader.getAvailableBanks(p));
+            if (args[1].equalsIgnoreCase("request")) availableBanks.addAll(BankPlus.getBankManager().getAvailableBanks(p));
 
             availableBanks.addAll(BPArgs.getOnlinePlayers(args));
             return BPArgs.getArgs(args, availableBanks);
@@ -159,10 +156,10 @@ public class LoanCmd extends BPCommand {
             return BPArgs.getArgs(args, "1", "2", "3");
 
         if (args.length == 5)
-            return BPArgs.getArgs(args, reader.getAvailableBanks(p));
+            return BPArgs.getArgs(args, BankPlus.getBankManager().getAvailableBanks(p));
 
         if (args.length == 6)
-            return BPArgs.getArgs(args, reader.getAvailableBanks(Bukkit.getPlayerExact(args[3])));
+            return BPArgs.getArgs(args, BankPlus.getBankManager().getAvailableBanks(Bukkit.getPlayerExact(args[3])));
 
         return null;
     }

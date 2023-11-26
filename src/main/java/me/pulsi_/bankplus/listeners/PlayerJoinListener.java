@@ -31,7 +31,7 @@ public class PlayerJoinListener implements Listener {
 
         BigDecimal amount = new BigDecimal(0);
         BPEconomy economy = BankPlus.getBPEconomy();
-        for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
+        for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) {
             BigDecimal offlineInterest = economy.getOfflineInterest(p, bankName);
             amount = amount.add(offlineInterest);
             if (offlineInterest.doubleValue() > 0d) economy.setOfflineInterest(p, BigDecimal.valueOf(0), bankName);
@@ -39,7 +39,7 @@ public class PlayerJoinListener implements Listener {
 
         BigDecimal finalAmount = amount;
         if (finalAmount.doubleValue() > 0d)
-            Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () ->
+            Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () ->
                             BPMessages.send(p, Values.CONFIG.getNotifyOfflineInterestMessage(), BPUtils.placeValues(finalAmount), true),
                     Values.CONFIG.getNotifyOfflineInterestDelay() * 20L);
     }

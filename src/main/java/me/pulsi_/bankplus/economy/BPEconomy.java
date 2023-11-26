@@ -36,21 +36,23 @@ public class BPEconomy {
 
     private final BankGuiRegistry banksRegistry;
 
-    public BPEconomy() {
-        banksRegistry = BankPlus.INSTANCE.getBankGuiRegistry();
+    public BPEconomy() throws Exception {
+        if (BankPlus.isMainClassesInitialized())
+            throw new Exception("This class may not be be called as an instance, access to it trough the main class.");
+        banksRegistry = BankPlus.INSTANCE().getBankGuiRegistry();
     }
 
     /**
      * Return a list with all player balances.
      *
-     * @return A hashmap with the player name as key and the sum of all the player bank balances as value.
+     * @return A hashmap with the player name as KEY and the sum of all the player bank balances as VALUE.
      */
     public LinkedHashMap<String, BigDecimal> getAllBankBalances() {
         LinkedHashMap<String, BigDecimal> balances = new LinkedHashMap<>();
 
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
             BigDecimal balance = new BigDecimal(0);
-            for (String bankName : new BankManager().getAvailableBanks(p))
+            for (String bankName : BankPlus.getBankManager().getAvailableBanks(p))
                 balance = balance.add(getBankBalance(p, bankName));
             balances.put(p.getName(), balance);
         }
@@ -78,7 +80,7 @@ public class BPEconomy {
             if (info != null) return info.getBalance();
         }
 
-        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE.getSql().isConnected())
+        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE().getSql().isConnected())
             return new SQLPlayerManager(p).getMoney(bankName);
 
         String bal = new BPPlayerManager(p).getPlayerConfig().getString("banks." + bankName + ".money");
@@ -125,7 +127,7 @@ public class BPEconomy {
     }
 
     private BigDecimal setBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, boolean ignoreEvents, TransactionType type) {
-        Economy economy = BankPlus.INSTANCE.getVaultEconomy();
+        Economy economy = BankPlus.INSTANCE().getVaultEconomy();
         BigDecimal result = new BigDecimal(0);
 
         if (!ignoreEvents) {
@@ -135,7 +137,7 @@ public class BPEconomy {
             amount = event.getTransactionAmount();
         }
 
-        result = result.max(amount.min(new BankManager(bankName).getCapacity(p)));
+        result = result.max(amount.min(BankPlus.getBankManager().getCapacity(bankName, p)));
         set(p, result, bankName);
 
         if (!ignoreEvents) endEvent(p, type, economy.getBalance(p), amount, bankName);
@@ -183,7 +185,7 @@ public class BPEconomy {
     }
 
     private BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, boolean ignoreEvents, TransactionType type, boolean addOfflineInterest) {
-        Economy economy = BankPlus.INSTANCE.getVaultEconomy();
+        Economy economy = BankPlus.INSTANCE().getVaultEconomy();
         BigDecimal result = new BigDecimal(0);
 
         if (!ignoreEvents) {
@@ -193,7 +195,7 @@ public class BPEconomy {
             amount = event.getTransactionAmount();
         }
 
-        BigDecimal capacity = new BankManager(bankName).getCapacity(p), balance = getBankBalance(p, bankName);
+        BigDecimal capacity = BankPlus.getBankManager().getCapacity(bankName, p), balance = getBankBalance(p, bankName);
         if (capacity.doubleValue() <= 0D || balance.add(amount).doubleValue() < capacity.doubleValue()) {
             result = amount;
             BigDecimal moneyToAdd = balance.add(result);
@@ -240,7 +242,7 @@ public class BPEconomy {
     }
 
     private BigDecimal removeBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, boolean ignoreEvents, TransactionType type) {
-        Economy economy = BankPlus.INSTANCE.getVaultEconomy();
+        Economy economy = BankPlus.INSTANCE().getVaultEconomy();
         BigDecimal result = new BigDecimal(0);
         if (!ignoreEvents) {
             BPPreTransactionEvent event = startEvent(p, type, economy.getBalance(p), amount, bankName);
@@ -296,7 +298,7 @@ public class BPEconomy {
             if (info != null) return info.getInterest();
         }
 
-        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE.getSql().isConnected())
+        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE().getSql().isConnected())
             return new SQLPlayerManager(p).getOfflineInterest(bankName);
 
         String interest = new BPPlayerManager(p).getPlayerConfig().getString("banks." + bankName + ".interest");
@@ -320,7 +322,7 @@ public class BPEconomy {
             }
         }
 
-        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE.getSql().isConnected()) {
+        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE().getSql().isConnected()) {
             new SQLPlayerManager(p).setOfflineInterest(amount, bankName);
             return;
         }
@@ -350,7 +352,7 @@ public class BPEconomy {
         }
 
         if (Values.CONFIG.isSqlEnabled()) {
-            BPSQL sql = BankPlus.INSTANCE.getSql();
+            BPSQL sql = BankPlus.INSTANCE().getSql();
             if (sql.isConnected()) {
                 new SQLPlayerManager(p).setDebt(amount, bankName);
                 return;
@@ -385,7 +387,7 @@ public class BPEconomy {
             if (info != null) return info.getDebt();
         }
 
-        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE.getSql().isConnected())
+        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE().getSql().isConnected())
             return new SQLPlayerManager(p).getDebt(bankName);
 
         String bal = new BPPlayerManager(p).getPlayerConfig().getString("banks." + bankName + ".debt");
@@ -436,7 +438,7 @@ public class BPEconomy {
         }
 
         if (Values.CONFIG.isSqlEnabled()) {
-            BPSQL sql = BankPlus.INSTANCE.getSql();
+            BPSQL sql = BankPlus.INSTANCE().getSql();
             if (sql.isConnected()) {
                 SQLPlayerManager pManager = new SQLPlayerManager(p);
                 pManager.setMoney(amount, bankName);
@@ -454,7 +456,7 @@ public class BPEconomy {
     }
 
     public void deposit(Player p, BigDecimal amount, String bankName) {
-        Economy economy = BankPlus.INSTANCE.getVaultEconomy();
+        Economy economy = BankPlus.INSTANCE().getVaultEconomy();
         BPPreTransactionEvent event = startEvent(p, TransactionType.DEPOSIT, economy.getBalance(p), amount, bankName);
         if (event.isCancelled()) return;
 
@@ -465,7 +467,7 @@ public class BPEconomy {
             return;
         }
 
-        BigDecimal money = BigDecimal.valueOf(BankPlus.INSTANCE.getVaultEconomy().getBalance(p));
+        BigDecimal money = BigDecimal.valueOf(BankPlus.INSTANCE().getVaultEconomy().getBalance(p));
         if (!BPUtils.checkPreRequisites(money, amount, p) || BPUtils.isBankFull(p, bankName)) return;
 
         if (money.doubleValue() < amount.doubleValue()) amount = money;
@@ -478,7 +480,7 @@ public class BPEconomy {
         if (Values.CONFIG.getDepositTaxes().doubleValue() > 0 && !p.hasPermission("bankplus.deposit.bypass-taxes"))
             taxes = amount.multiply(Values.CONFIG.getDepositTaxes().divide(BigDecimal.valueOf(100)));
 
-        BigDecimal capacity = new BankManager(bankName).getCapacity(p);
+        BigDecimal capacity = BankPlus.getBankManager().getCapacity(bankName, p);
         BigDecimal newBankBalance = getBankBalance(p, bankName).add(amount);
 
         /*
@@ -490,7 +492,7 @@ public class BPEconomy {
             amount = moneyToFull.add(taxes);
         }
 
-        EconomyResponse depositResponse = BankPlus.INSTANCE.getVaultEconomy().withdrawPlayer(p, amount.doubleValue());
+        EconomyResponse depositResponse = BankPlus.INSTANCE().getVaultEconomy().withdrawPlayer(p, amount.doubleValue());
         if (BPUtils.hasFailed(p, depositResponse)) return;
 
         addBankBalance(p, amount.subtract(taxes), bankName, true);
@@ -501,7 +503,7 @@ public class BPEconomy {
     }
 
     public void withdraw(Player p, BigDecimal amount, String bankName) {
-        Economy economy = BankPlus.INSTANCE.getVaultEconomy();
+        Economy economy = BankPlus.INSTANCE().getVaultEconomy();
         BPPreTransactionEvent event = startEvent(p, TransactionType.WITHDRAW, economy.getBalance(p), amount, bankName);
         if (event.isCancelled()) return;
 
@@ -554,7 +556,7 @@ public class BPEconomy {
         }
 
         // Check if the receiver of the payment has the bank full
-        if (getBankBalance(to, toBank).doubleValue() >= new BankManager(toBank).getCapacity(to).doubleValue()) {
+        if (getBankBalance(to, toBank).doubleValue() >= BankPlus.getBankManager().getCapacity(toBank, to).doubleValue()) {
             BPMessages.send(from, "Bank-Full", "%player%$" + to.getName());
             return;
         }

@@ -1,5 +1,6 @@
 package me.pulsi_.bankplus.commands.list;
 
+import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.BPArgs;
@@ -34,7 +35,7 @@ public class CustomDepositCmd extends BPCommand {
         String bankName = Values.CONFIG.getMainGuiName();
         if (args.length > 1) bankName = args[1];
 
-        if (!new BankManager(bankName).exist()) {
+        if (!BankPlus.getBankManager().exist(bankName)) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }

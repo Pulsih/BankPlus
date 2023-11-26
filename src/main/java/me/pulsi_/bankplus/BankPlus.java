@@ -10,6 +10,7 @@ import me.pulsi_.bankplus.logSystem.BPLogUtils;
 import me.pulsi_.bankplus.managers.*;
 import me.pulsi_.bankplus.mySQL.BPSQL;
 import me.pulsi_.bankplus.placeholders.BPPlaceholders;
+import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPVersions;
 import me.pulsi_.bankplus.values.Values;
@@ -27,8 +28,8 @@ import java.net.URL;
 public final class BankPlus extends JavaPlugin {
 
     public static final String actualVersion = "5.9";
-
-    public static BankPlus INSTANCE;
+    private static BankPlus INSTANCE;
+    private static boolean mainClassesInitialized = false;
 
     private BPEconomy bpEconomy;
     private BankManager bankManager;
@@ -60,7 +61,7 @@ public final class BankPlus extends JavaPlugin {
         PluginManager plManager = Bukkit.getPluginManager();
         if (plManager.getPlugin("Vault") == null) {
             BPLogger.log("");
-            BPLogger.log("&cCannot load &a&lBank&9&lPlus&c, Vault is not installed!");
+            BPLogger.log("&cCannot load " + BPChat.prefix + "&c, Vault is not installed!");
             BPLogger.log("&cPlease download it in order to use this plugin!");
             BPLogger.log("");
             getServer().getPluginManager().disablePlugin(this);
@@ -74,7 +75,7 @@ public final class BankPlus extends JavaPlugin {
                 return;
             }
             BPLogger.log("");
-            BPLogger.log("&cCannot load &a&lBank&9&lPlus&c, No economy plugin found!");
+            BPLogger.log("&cCannot load " + BPChat.prefix + ", No economy plugin found!");
             BPLogger.log("&cPlease download an economy plugin to use BankPlus!");
             BPLogger.log("");
             getServer().getPluginManager().disablePlugin(this);
@@ -87,8 +88,14 @@ public final class BankPlus extends JavaPlugin {
         this.bankGuiRegistry = new BankGuiRegistry();
         this.loanRegistry = new LoanRegistry();
 
-        this.bpEconomy = new BPEconomy();
-        this.bankManager = new BankManager();
+        try {
+            this.bpEconomy = new BPEconomy();
+            this.bankManager = new BankManager();
+        } catch (Exception e) {
+            BPLogger.warn("It looks like someone tried to re-enable bankplus with another plugin, bankplus does not support this action and it may cause several problems, please restart the server if you have any issues.");
+            return;
+        }
+        mainClassesInitialized = true;
 
         this.serverVersion = getServer().getVersion();
 
@@ -138,6 +145,14 @@ public final class BankPlus extends JavaPlugin {
     @Override
     public void onDisable() {
         bpData.shutdownPlugin();
+    }
+
+    public static BankPlus INSTANCE() {
+        return INSTANCE;
+    }
+
+    public static boolean isMainClassesInitialized() {
+        return mainClassesInitialized;
     }
 
     public static BPEconomy getBPEconomy() {

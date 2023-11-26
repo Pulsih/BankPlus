@@ -27,7 +27,7 @@ public class UpdateBankTopCmd extends BPCommand {
     public boolean onCommand(CommandSender s, String[] args) {
         if (confirm(s)) return false;
 
-        BankPlus.INSTANCE.getBankTopManager().updateBankTop();
+        BankPlus.INSTANCE().getBankTopManager().updateBankTop();
         BPMessages.send(s, "BankTop-Updated");
         return true;
     }

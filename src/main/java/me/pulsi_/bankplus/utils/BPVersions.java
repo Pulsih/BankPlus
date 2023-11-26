@@ -18,7 +18,7 @@ public class BPVersions {
     public static void convertPlayerFilesToNewStyle() {
         if (BPConfigs.isUpdated()) return;
 
-        File dataFolder = new File(BankPlus.INSTANCE.getDataFolder(), "playerdata");
+        File dataFolder = new File(BankPlus.INSTANCE().getDataFolder(), "playerdata");
         File[] files = dataFolder.listFiles();
         if (files == null || files.length == 0) return;
 
@@ -40,7 +40,7 @@ public class BPVersions {
             if (Values.CONFIG.notifyOfflineInterest()) newConfig.set("interest", interest);
             newConfig.set("debt", debt);
 
-            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
+            for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) {
                 if (Values.CONFIG.getMainGuiName().equals(bankName)) newConfig.set("banks." + bankName + ".money", oldConfig.get("Money") == null ? Values.CONFIG.getStartAmount() : oldConfig.get("Money"));
                 else newConfig.set("banks." + bankName + ".money", oldConfig.get("Banks." + bankName + ".Money") == null ? "0" : oldConfig.get("Banks." + bankName + ".Money"));
                 newConfig.set("banks." + bankName + ".level", oldConfig.get("Banks." + bankName + ".Level") == null ? "1" : oldConfig.get("Banks." + bankName + ".Level"));

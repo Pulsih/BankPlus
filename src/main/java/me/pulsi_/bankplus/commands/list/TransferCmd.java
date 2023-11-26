@@ -62,7 +62,7 @@ public class TransferCmd extends BPCommand {
     }
 
     private void moveData(CommandSender s) {
-        File folder = new File(BankPlus.INSTANCE.getDataFolder(), "playerdata");
+        File folder = new File(BankPlus.INSTANCE().getDataFolder(), "playerdata");
         File[] files = folder.listFiles();
         if (files == null) {
             BPMessages.send(s, "%prefix% &cNo files found in playerdata folder!");
@@ -76,7 +76,7 @@ public class TransferCmd extends BPCommand {
             FileConfiguration config = pManager.getPlayerConfig();
             SQLPlayerManager sqlManager = new SQLPlayerManager(p);
 
-            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
+            for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) {
                 String level = config.getString("banks." + bankName + ".level");
                 String money = config.getString("banks." + bankName + ".money");
                 String debt = config.getString("banks." + bankName + ".debt");

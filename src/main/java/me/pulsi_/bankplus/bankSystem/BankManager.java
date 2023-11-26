@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.bankSystem;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.BPPlayerManager;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
@@ -9,9 +10,11 @@ import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -19,10 +22,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * BankPlus main core class to manage the entire server economy.
@@ -35,9 +35,11 @@ public class BankManager {
     private final BPEconomy economy;
     private final BankGuiRegistry registry;
 
-    public BankManager() {
+    public BankManager() throws Exception {
+        if (BankPlus.isMainClassesInitialized())
+            throw new Exception("This class may not be be called as an instance, access to it trough the main class.");
         economy = BankPlus.getBPEconomy();
-        registry = BankPlus.INSTANCE.getBankGuiRegistry();
+        registry = BankPlus.INSTANCE().getBankGuiRegistry();
     }
 
     public Bank getBank(String bankName) {
@@ -55,24 +57,14 @@ public class BankManager {
      * @return The capacity amount.
      */
     public BigDecimal getCapacity(String bankName, OfflinePlayer p) {
-        return getCapacity(bankName, getCurrentLevel(p));
-    }
-
-    /**
-     * Get the bank capacity at level 1.
-     *
-     * @param bankName The bank name.
-     * @return The capacity amount.
-     */
-    public BigDecimal getCapacity(String bankName) {
-        return getCapacity(bankName, 1);
+        return getCapacity(bankName, getCurrentLevel(bankName, p));
     }
 
     /**
      * Get the bank capacity of that specified level.
      *
      * @param bankName The bank name.
-     * @param level The level to check.
+     * @param level    The level to check.
      * @return The capacity amount.
      */
     public BigDecimal getCapacity(String bankName, int level) {
@@ -89,11 +81,11 @@ public class BankManager {
      * It also already checks if the interest limiter is enabled and returns an amount based on that.
      *
      * @param bankName The bank name.
-     * @param p The player.
+     * @param p        The player.
      * @return The interest amount.
      */
-    public BigDecimal getInterest(String bankName, OfflinePlayer p) {
-        return getInterest(bankName, p, getCurrentLevel(p));
+    public BigDecimal getInterestRate(String bankName, OfflinePlayer p) {
+        return getInterestRate(bankName, p, getCurrentLevel(bankName, p));
     }
 
     /**
@@ -102,12 +94,13 @@ public class BankManager {
      * It also already checks if the interest limiter is enabled and returns an amount based on that.
      *
      * @param bankName The bank name.
-     * @param p The player.
-     * @param level The level to check.
+     * @param p        The player.
+     * @param level    The level to check.
      * @return The interest amount.
      */
-    public BigDecimal getInterest(String bankName, OfflinePlayer p, int level) {
-        if (Values.CONFIG.enableInterestLimiter()) return getLimiterInterest(p, level, Values.CONFIG.getInterestMoneyGiven());
+    public BigDecimal getInterestRate(String bankName, OfflinePlayer p, int level) {
+        if (Values.CONFIG.enableInterestLimiter())
+            return getLimitedInterest(bankName, p, level, Values.CONFIG.getInterestMoneyGiven());
 
         Bank bank = getBank(bankName);
         ConfigurationSection upgrades = bank.getUpgrades();
@@ -131,11 +124,11 @@ public class BankManager {
      * It also already checks if the interest limiter is enabled and returns an amount based on that.
      *
      * @param bankName The bank name.
-     * @param p The player.
+     * @param p        The player.
      * @return The interest amount.
      */
-    public BigDecimal getOfflineInterest(String bankName, OfflinePlayer p) {
-        return getOfflineInterest(bankName, p, getCurrentLevel(p));
+    public BigDecimal getOfflineInterestRate(String bankName, OfflinePlayer p) {
+        return getOfflineInterestRate(bankName, p, getCurrentLevel(bankName, p));
     }
 
     /**
@@ -144,12 +137,13 @@ public class BankManager {
      * It also already checks if the interest limiter is enabled and returns an amount based on that.
      *
      * @param bankName The bank name.
-     * @param p The player.
-     * @param level The level to check.
+     * @param p        The player.
+     * @param level    The level to check.
      * @return The interest amount.
      */
-    public BigDecimal getOfflineInterest(String bankName, OfflinePlayer p, int level) {
-        if (Values.CONFIG.enableInterestLimiter()) return getLimiterInterest(p, level, Values.CONFIG.getOfflineInterestMoneyGiven());
+    public BigDecimal getOfflineInterestRate(String bankName, OfflinePlayer p, int level) {
+        if (Values.CONFIG.enableInterestLimiter())
+            return getLimitedInterest(bankName, p, level, Values.CONFIG.getOfflineInterestMoneyGiven());
 
         Bank bank = getBank(bankName);
         ConfigurationSection upgrades = bank.getUpgrades();
@@ -168,40 +162,53 @@ public class BankManager {
     }
 
     /**
-     * Get the list of interest limiter
-     * @param level The bank level.
+     * Get the bank interest limiter at the selected level.
+     *
+     * @param bankName The bank name.
+     * @param level    The level to check.
+     * @return A list representing the interest limiter.
      */
-    public List<String> getInterestLimiter(int level) {
-        if (!hasUpgrades()) return Values.CONFIG.getInterestLimiter();
+    public List<String> getInterestLimiter(String bankName, int level) {
+        Bank bank = getBank(bankName);
+        ConfigurationSection upgrades = bank.getUpgrades();
+        if (upgrades == null) return Values.CONFIG.getInterestLimiter();
 
-        List<String> limiter = bank.getUpgrades().getStringList(level + ".Interest-Limiter");
+        List<String> limiter = upgrades.getStringList(Math.max(level, 1) + ".Interest-Limiter");
         return limiter.isEmpty() ? Values.CONFIG.getInterestLimiter() : limiter;
     }
 
     /**
-     * Get the cost of this bank level.
+     * Get the bank cost at the selected level.
      *
-     * @param level The level to check.
-     * @return The cost, zero if no cost is specified.
+     * @param bankName The bank name.
+     * @param level    The level to check.
+     * @return The cost amount.
      */
-    public BigDecimal getLevelCost(int level) {
-        if (!hasUpgrades()) return new BigDecimal(0);
+    public BigDecimal getLevelCost(String bankName, int level) {
+        Bank bank = getBank(bankName);
+        ConfigurationSection upgrades = bank.getUpgrades();
+        if (upgrades == null) return new BigDecimal(0);
 
-        String cost = bank.getUpgrades().getString(level + ".Cost");
+        String cost = upgrades.getString(Math.max(level, 1) + ".Cost");
         return new BigDecimal(cost == null ? "0" : cost);
     }
 
     /**
-     * Get the items required to level up the bank to this level.
+     * Get a list of required items to level up the bank to the selected level.
      *
-     * @param level The level to check.
-     * @return The itemstack representing the item needed with its amount set, null if not specified.
+     * @param bankName The bank name.
+     * @param level    The level to check.
+     * @return A list of itemstack representing the required items with its amount set, null if not specified.
      */
-    public List<ItemStack> getLevelRequiredItems(int level) {
+    public List<ItemStack> getRequiredItems(String bankName, int level) {
         List<ItemStack> items = new ArrayList<>();
-        if (!hasUpgrades()) return items;
 
-        String requiredItemsString = bank.getUpgrades().getString(level + ".Required-Items");
+        Bank bank = getBank(bankName);
+        ConfigurationSection upgrades = bank.getUpgrades();
+        if (upgrades == null) return items;
+
+        level = Math.max(level, 1);
+        String requiredItemsString = upgrades.getString(level + ".Required-Items");
         if (requiredItemsString == null || requiredItemsString.isEmpty()) return items;
 
         List<String> configItems = new ArrayList<>();
@@ -213,7 +220,7 @@ public class BankManager {
                 try {
                     items.add(new ItemStack(Material.valueOf(splitItem)));
                 } catch (IllegalArgumentException e) {
-                    BPLogger.warn("The bank \"" + bank.getIdentifier() + "\" contains an invalid item in the \"Required-Items\" path at level *" + level + ".");
+                    BPLogger.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + level + ".");
                 }
             } else {
                 String[] split = splitItem.split("-");
@@ -221,161 +228,197 @@ public class BankManager {
                 try {
                     item = new ItemStack(Material.valueOf(split[0]));
                 } catch (IllegalArgumentException e) {
-                    BPLogger.warn("The bank \"" + bank.getIdentifier() + "\" contains an invalid item in the \"Required-Items\" path at level *" + level + ".");
+                    BPLogger.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + level + ".");
                     continue;
                 }
                 int amount = 1;
                 try {
                     amount = Integer.parseInt(split[1]);
                 } catch (NumberFormatException e) {
-                    BPLogger.warn("The bank \"" + bank.getIdentifier() + "\" contains an invalid number in the \"Required-Items\" path at level *" + level + ".");
+                    BPLogger.warn("The bank \"" + bankName + "\" contains an invalid number in the \"Required-Items\" path at level *" + level + ".");
                 }
 
                 item.setAmount(amount);
                 items.add(item);
             }
         }
-
         return items;
     }
 
     /**
-     * Check if the plugin should take the required items from the player inventory.
+     * Check if the bank at the selected level takes from the player inventory the required items when upgrading.
      *
-     * @param level The level to check.
+     * @param bankName The bank name.
+     * @param level    The level to check.
+     * @return true if in the selected bank level is specified to remove the items, false otherwise.
      */
-    public boolean removeRequiredItems(int level) {
-        return hasUpgrades() && bank.getUpgrades().getBoolean(level + ".Remove-Required-Items");
+    public boolean isRemovingRequiredItems(String bankName, int level) {
+        ConfigurationSection upgrades = getBank(bankName).getUpgrades();
+        return upgrades != null && upgrades.getBoolean(Math.max(level, 1) + ".Remove-Required-Items");
     }
 
     /**
-     * Get a list of all levels that this bank have, if it has none, it will return a list of 1.
+     * Get a list of all registered levels in the selected bank.
      *
-     * @return A string list with all levels.
+     * @param bankName The bank name.
+     * @return A list of available levels.
      */
-    public List<String> getLevels() {
+    public List<String> getLevels(String bankName) {
         List<String> levels = new ArrayList<>();
-        if (!hasUpgrades()) {
+
+        ConfigurationSection upgrades = getBank(bankName).getUpgrades();
+        if (upgrades == null) {
             levels.add("1");
             return levels;
         }
 
-        levels.addAll(bank.getUpgrades().getKeys(false));
+        levels.addAll(upgrades.getKeys(false));
         return levels;
     }
 
     /**
-     * Get the current bank level for that player.
+     * Get the current bank level of the selected player.
      *
-     * @param uuid The player UUID.
-     * @return The current level.
+     * @param bankName The bank name.
+     * @param uuid     The player UUID.
+     * @return The player bank level of the selected bank.
      */
-    public int getCurrentLevel(UUID uuid) {
-        return getCurrentLevel(Bukkit.getOfflinePlayer(uuid));
+    public int getCurrentLevel(String bankName, UUID uuid) {
+        return getCurrentLevel(bankName, Bukkit.getOfflinePlayer(uuid));
     }
 
     /**
-     * Get the current bank level for that player.
+     * Get the current bank level of the selected player.
+     *
+     * @param bankName The bank name.
+     * @param p        The player.
+     * @return The player bank level of the selected bank.
+     */
+    public int getCurrentLevel(String bankName, OfflinePlayer p) {
+        HashMap<String, BPPlayer.PlayerBank> bankInformation = new BPPlayerManager(p).getBankInformation();
+        if (bankInformation != null) {
+            BPPlayer.PlayerBank info = bankInformation.get(bankName);
+            if (info != null) return info.getLevel();
+        }
+
+        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE().getSql().isConnected())
+            return new SQLPlayerManager(p).getLevel(bankName);
+
+        return Math.max(new BPPlayerManager(p).getPlayerConfig().getInt("banks." + bankName + ".level"), 1);
+    }
+
+    /**
+     * Check if the selected bank has a level next the player current bank level.
+     *
+     * @param bankName The bank name.
+     * @param p        The player.
+     * @return true if the bank has another level, false otherwise.
+     */
+    public boolean hasNextLevel(String bankName, OfflinePlayer p) {
+        return hasNextLevel(bankName, getCurrentLevel(bankName, p));
+    }
+
+    /**
+     * Check if the selected bank has a level next the one specified.
+     *
+     * @param bankName     The bank name.
+     * @param currentLevel The level.
+     * @return true if the bank has another level, false otherwise.
+     */
+    public boolean hasNextLevel(String bankName, int currentLevel) {
+        ConfigurationSection upgrades = getBank(bankName).getUpgrades();
+        return upgrades != null && upgrades.getConfigurationSection(String.valueOf(currentLevel + 1)) != null;
+    }
+
+    /**
+     * Get a list of all available banks for that player.
      *
      * @param p The player.
-     * @return The current level.
-     */
-    public int getCurrentLevel(OfflinePlayer p) {
-        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE.getSql().isConnected())
-            return new SQLPlayerManager(p).getLevel(bank.getIdentifier());
-
-        FileConfiguration config = new BPPlayerManager(p).getPlayerConfig();
-        return Math.max(config.getInt("banks." + bank.getIdentifier() + ".level"), 1);
-    }
-
-    /**
-     * Check if the bank of that player has a next level.
-     *
-     * @param p The player.
-     * @return true if it has a next level, false otherwise.
-     */
-    public boolean hasNextLevel(Player p) {
-        return hasNextLevel(getCurrentLevel(p));
-    }
-
-    /**
-     * Check if the selected bank has another level next the one specified.
-     *
-     * @param currentLevel The current level of the bank.
-     * @return true if it has a next level, false otherwise.
-     */
-    public boolean hasNextLevel(int currentLevel) {
-        return hasUpgrades() && bank.getUpgrades().getConfigurationSection(String.valueOf(currentLevel + 1)) != null;
-    }
-
-    /**
-     * This method does not require to specify a bank in the constructor.
-     *
-     * @param p The player.
-     * @return A list with all names of available banks for this player. To get a list of ALL banks use the BanksGuiRegistry class through the main class.
+     * @return A list of available bank names.
      */
     public List<String> getAvailableBanks(OfflinePlayer p) {
         List<String> availableBanks = new ArrayList<>();
         if (p == null) return availableBanks;
 
-        if (p.isOnline()) {
-            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
-                if (new BankManager(bankName).isAvailable(p.getPlayer()))
-                    availableBanks.add(bankName);
-        } else {
-            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet())
-                if (new BankManager(bankName).isAvailable(p))
-                    availableBanks.add(bankName);
-        }
+        for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet())
+            if (isAvailable(bankName, p))
+                availableBanks.add(bankName);
+
         return availableBanks;
     }
 
     /**
-     * Check if this bank is available for the player.
+     * Check if the selected bank is available for the selected player.
      *
-     * @param p The player
+     * @param bankName The bank name.
+     * @param p        The player.
      * @return true if available, false otherwise.
      */
-    public boolean isAvailable(Player p) {
-        return !hasPermission() || bank.getPermission().isEmpty() || p.hasPermission(bank.getPermission());
+    public boolean isAvailable(String bankName, OfflinePlayer p) {
+        Bank bank = getBank(bankName);
+        String permission = bank.getPermission();
+        if (permission == null) return true;
+
+        Player oP = p.getPlayer();
+        if (oP != null) return permission.isEmpty() || oP.hasPermission(permission);
+
+        boolean available = false;
+        Permission perm = BankPlus.INSTANCE().getPermissions();
+        for (World world : Bukkit.getWorlds()) {
+            if (!perm.playerHas(world.getName(), p, permission)) continue;
+            available = true;
+            break;
+        }
+        return available;
     }
 
     /**
-     * Check if this bank is available for the player.
+     * Set a new level to the selected bank for the selected player.
      *
-     * @param p The player
-     * @return true if available, false otherwise.
+     * @param bankName The bank name.
+     * @param p        The player
+     * @param level    The new level.
      */
-    public boolean isAvailable(OfflinePlayer p) {
-        if (!hasPermission()) return true;
-        else {
-            String wName = Bukkit.getWorlds().get(0).getName();
-            return BankPlus.INSTANCE.getPermissions().playerHas(wName, p, bank.getPermission());
+    public void setLevel(String bankName, OfflinePlayer p, int level) {
+        HashMap<String, BPPlayer.PlayerBank> bankInformation = new BPPlayerManager(p).getBankInformation();
+        if (bankInformation != null) {
+            BPPlayer.PlayerBank info = bankInformation.get(bankName);
+            if (info != null) {
+                info.setLevel(level);
+                return;
+            }
         }
-    }
 
-    public void setLevel(OfflinePlayer p, int level) {
+        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE().getSql().isConnected()) {
+            new SQLPlayerManager(p).setLevel(level, bankName);
+            return;
+        }
+
         BPPlayerManager files = new BPPlayerManager(p);
         File file = files.getPlayerFile();
         FileConfiguration config = files.getPlayerConfig(file);
-        config.set("banks." + bank.getIdentifier() + ".level", level);
+        config.set("banks." + bankName + ".level", level);
         files.savePlayerFile(config, file, true);
     }
 
     /**
-     * Method used to upgrade the selected bank for the specified player.
+     * Method to upgrade the selected bank for the selected player,
+     * the player must be online because of the possible required
+     * items and values that are required to upgrade, to set the
+     * level of the bank to an offline player use {@link BankManager#setLevel(String, OfflinePlayer, int)}
      *
-     * @param p The player.
+     * @param bankName The bank name.
+     * @param p        The player.
      */
-    public void upgradeBank(Player p) {
-        if (!hasNextLevel(p)) {
+    public void upgradeBank(String bankName, Player p) {
+        if (!hasNextLevel(bankName, p)) {
             BPMessages.send(p, "Bank-Max-Level");
             return;
         }
 
-        int nextLevel = getCurrentLevel(p) + 1;
+        int nextLevel = getCurrentLevel(bankName, p) + 1;
 
-        List<ItemStack> requiredItems = getLevelRequiredItems(nextLevel);
+        List<ItemStack> requiredItems = getRequiredItems(bankName, nextLevel);
         if (!requiredItems.isEmpty()) {
             boolean hasItems = false;
 
@@ -404,20 +447,21 @@ public class BankManager {
             }
         }
 
-        BigDecimal cost = getLevelCost(nextLevel);
+        BigDecimal cost = getLevelCost(bankName, nextLevel);
         if (Values.CONFIG.useBankBalanceToUpgrade()) {
 
-            BigDecimal balance = economy.getBankBalance(p, bank.getIdentifier());
+            BigDecimal balance = economy.getBankBalance(p, bankName);
             if (balance.doubleValue() < cost.doubleValue()) {
                 BPMessages.send(p, "Insufficient-Money");
                 return;
             }
 
-            if (removeRequiredItems(nextLevel) && !requiredItems.isEmpty()) for (ItemStack item : requiredItems) p.getInventory().removeItem(item);
-            economy.removeBankBalance(p, cost, bank.getIdentifier());
+            if (isRemovingRequiredItems(bankName, nextLevel) && !requiredItems.isEmpty())
+                for (ItemStack item : requiredItems) p.getInventory().removeItem(item);
+            economy.removeBankBalance(p, cost, bankName);
         } else {
 
-            Economy economy = BankPlus.INSTANCE.getVaultEconomy();
+            Economy economy = BankPlus.INSTANCE().getVaultEconomy();
             double balance = economy.getBalance(p);
 
             if (balance < cost.doubleValue()) {
@@ -425,20 +469,21 @@ public class BankManager {
                 return;
             }
 
-            if (removeRequiredItems(nextLevel) && !requiredItems.isEmpty()) for (ItemStack item : requiredItems) p.getInventory().removeItem(item);
+            if (isRemovingRequiredItems(bankName, nextLevel) && !requiredItems.isEmpty())
+                for (ItemStack item : requiredItems) p.getInventory().removeItem(item);
             economy.withdrawPlayer(p, cost.doubleValue());
         }
 
-        setLevel(p, nextLevel);
+        setLevel(bankName, p, nextLevel);
         BPMessages.send(p, "Bank-Upgraded");
 
-        if (!hasNextLevel(nextLevel)) {
+        if (!hasNextLevel(bankName, nextLevel)) {
             for (String line : Values.MULTIPLE_BANKS.getAutoBanksUnlocker()) {
                 if (!line.contains(":")) continue;
 
                 String[] parts = line.split(":");
-                String bankName = parts[0];
-                if (!bankName.equals(bank.getIdentifier())) continue;
+                String name = parts[0];
+                if (!name.equals(bankName)) continue;
 
                 for (int i = 1; i < parts.length; i++) {
                     String cmd = parts[i].replace("%player%", p.getName());
@@ -448,8 +493,8 @@ public class BankManager {
         }
     }
 
-    private BigDecimal getLimiterInterest(OfflinePlayer p, int level, BigDecimal fallBack) {
-        for (String limiter : getInterestLimiter(level)) {
+    private BigDecimal getLimitedInterest(String bankName, OfflinePlayer p, int level, BigDecimal fallBack) {
+        for (String limiter : getInterestLimiter(bankName, level)) {
             if (!limiter.contains(":")) continue;
 
             String[] split1 = limiter.split(":");
@@ -467,7 +512,7 @@ public class BankManager {
                 toNumber = temp;
             }
 
-            BigDecimal balance = economy.getBankBalance(p, bank.getIdentifier());
+            BigDecimal balance = economy.getBankBalance(p, bankName);
             if (fromNumber.doubleValue() <= balance.doubleValue() && toNumber.doubleValue() >= balance.doubleValue())
                 return interestRate;
         }

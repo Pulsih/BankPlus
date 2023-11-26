@@ -36,11 +36,11 @@ public class DepositCmd extends BPCommand {
         BigDecimal amount;
         switch (args[1]) {
             case "all":
-                amount = BigDecimal.valueOf(BankPlus.INSTANCE.getVaultEconomy().getBalance(p));
+                amount = BigDecimal.valueOf(BankPlus.INSTANCE().getVaultEconomy().getBalance(p));
                 break;
 
             case "half":
-                amount = BigDecimal.valueOf(BankPlus.INSTANCE.getVaultEconomy().getBalance(p) / 2);
+                amount = BigDecimal.valueOf(BankPlus.INSTANCE().getVaultEconomy().getBalance(p) / 2);
                 break;
 
             default:
@@ -52,7 +52,7 @@ public class DepositCmd extends BPCommand {
         String bankName = Values.CONFIG.getMainGuiName();
         if (args.length > 2) bankName = args[2];
 
-        if (!new BankManager(bankName).exist()) {
+        if (!BankPlus.getBankManager().exist(bankName)) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }

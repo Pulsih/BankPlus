@@ -107,7 +107,7 @@ public class BPData {
         }
 
         Bukkit.getOnlinePlayers().forEach(p -> {
-            BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
+            BPPlayer player = BankPlus.INSTANCE().getPlayerRegistry().get(p);
             if (player != null && player.getOpenedBank() != null) p.closeInventory();
         });
         return success;

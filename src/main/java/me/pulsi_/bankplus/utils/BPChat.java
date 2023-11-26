@@ -13,7 +13,7 @@ public class BPChat {
     public static String prefix = "&a&lBank&9&lPlus";
 
     public static String color(String message) {
-        if (BankPlus.INSTANCE.getServerVersionInt() >= 16) {
+        if (BankPlus.INSTANCE().getServerVersionInt() >= 16) {
             Matcher matcher = pattern.matcher(message);
 
             while (matcher.find()) {

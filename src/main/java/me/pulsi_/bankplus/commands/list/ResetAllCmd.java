@@ -24,7 +24,7 @@ public class ResetAllCmd extends BPCommand {
     public ResetAllCmd(String... aliases) {
         super(aliases);
         economy = BankPlus.getBPEconomy();
-        vaultEconomy = BankPlus.INSTANCE.getVaultEconomy();
+        vaultEconomy = BankPlus.INSTANCE().getVaultEconomy();
     }
 
     @Override
@@ -61,7 +61,7 @@ public class ResetAllCmd extends BPCommand {
 
     private void resetAll(List<OfflinePlayer> offlinePlayers, String mode) {
         List<OfflinePlayer> copy = new ArrayList<>(offlinePlayers);
-        Set<String> banks = BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet();
+        Set<String> banks = BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet();
 
         for (int i = 0; i < 80; i++) {
             if (copy.isEmpty()) return;
@@ -72,6 +72,6 @@ public class ResetAllCmd extends BPCommand {
         }
 
         if (!copy.isEmpty())
-            Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> resetAll(copy, mode), 1);
+            Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> resetAll(copy, mode), 1);
     }
 }

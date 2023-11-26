@@ -46,7 +46,7 @@ public class BPConfigs {
     }
 
     public void setupSavesFile() {
-        File file = new File(BankPlus.INSTANCE.getDataFolder(), Type.SAVES.name);
+        File file = new File(BankPlus.INSTANCE().getDataFolder(), Type.SAVES.name);
         if (!file.exists()) {
             try {
                 file.getParentFile().mkdir();
@@ -103,7 +103,7 @@ public class BPConfigs {
         File file = getFile(Type.COMMANDS.name);
         if (!file.exists()) plugin.saveResource("commands.yml", true);
 
-        InputStreamReader internalFile = new InputStreamReader(BankPlus.INSTANCE.getResource("commands.yml"), StandardCharsets.UTF_8);
+        InputStreamReader internalFile = new InputStreamReader(BankPlus.INSTANCE().getResource("commands.yml"), StandardCharsets.UTF_8);
         YamlConfiguration internalConfig = YamlConfiguration.loadConfiguration(internalFile), externalConfig = YamlConfiguration.loadConfiguration(file);
 
         boolean hasChanges = false;
@@ -144,7 +144,7 @@ public class BPConfigs {
         }
 
         if (backup) {
-            File copyFile = new File(BankPlus.INSTANCE.getDataFolder(), "backups" + File.separator + fileName);
+            File copyFile = new File(BankPlus.INSTANCE().getDataFolder(), "backups" + File.separator + fileName);
             if (!copyFile.exists()) {
                 try {
                     copyFile.getParentFile().mkdirs();

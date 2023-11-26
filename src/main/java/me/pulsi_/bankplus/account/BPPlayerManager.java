@@ -42,9 +42,9 @@ public class BPPlayerManager {
         HashMap<String, BPPlayer.PlayerBank> bankInformation = getBankInformation();
         if (bankInformation != null) information = bankInformation;
 
-        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE.getSql().isConnected()) {
+        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE().getSql().isConnected()) {
             SQLPlayerManager pManager = new SQLPlayerManager(p);
-            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
+            for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) {
                 if (information.containsKey(bankName)) continue;
 
                 information.put(bankName, new BPPlayer.PlayerBank(
@@ -58,7 +58,7 @@ public class BPPlayerManager {
 
         } else {
             FileConfiguration config = getPlayerConfig();
-            for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
+            for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) {
                 // If the "balances" map already contains the bank values, skip.
                 if (information.containsKey(bankName)) continue;
 
@@ -109,7 +109,7 @@ public class BPPlayerManager {
         }
         if (changes) player.setBankInformation(information);
 
-        BankPlus.INSTANCE.getPlayerRegistry().put(oP, new BPPlayer(oP));
+        BankPlus.INSTANCE().getPlayerRegistry().put(oP, new BPPlayer(oP));
     }
 
     /**
@@ -127,7 +127,7 @@ public class BPPlayerManager {
             hasChanges = true;
         }
 
-        for (String bankName : BankPlus.INSTANCE.getBankGuiRegistry().getBanks().keySet()) {
+        for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) {
             String sBalance = config.getString("banks." + bankName + ".money");
             String sLevel = config.getString("banks." + bankName + ".level");
             String sDebt = config.getString("banks." + bankName + ".debt");
@@ -160,7 +160,7 @@ public class BPPlayerManager {
 
     public boolean isPlayerRegistered() {
         if (Values.CONFIG.isSqlEnabled()) {
-            BPSQL sql = BankPlus.INSTANCE.getSql();
+            BPSQL sql = BankPlus.INSTANCE().getSql();
             if (sql.isConnected()) return sql.isPlayerRegistered(p);
         }
 
@@ -170,7 +170,7 @@ public class BPPlayerManager {
 
     public void registerPlayer() {
         if (Values.CONFIG.isSqlEnabled()) {
-            BPSQL sql = BankPlus.INSTANCE.getSql();
+            BPSQL sql = BankPlus.INSTANCE().getSql();
             if (sql.isConnected()) sql.registerPlayer(p);
         }
 
@@ -187,7 +187,7 @@ public class BPPlayerManager {
 
     public File getPlayerFile() {
         String identifier = (Values.CONFIG.isStoringUUIDs() ? p.getUniqueId().toString() : p.getName());
-        return new File(BankPlus.INSTANCE.getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
+        return new File(BankPlus.INSTANCE().getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
     }
 
     public FileConfiguration getPlayerConfig() {
@@ -204,11 +204,11 @@ public class BPPlayerManager {
             return;
         }
         try {
-            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE, () -> {
+            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
                 try {
                     config.save(file);
                 } catch (Exception e) {
-                    Bukkit.getScheduler().runTask(BankPlus.INSTANCE, () -> save(config, file));
+                    Bukkit.getScheduler().runTask(BankPlus.INSTANCE(), () -> save(config, file));
                 }
             });
         } catch (Exception e) {
@@ -217,7 +217,7 @@ public class BPPlayerManager {
     }
 
     public HashMap<String, BPPlayer.PlayerBank> getBankInformation() {
-        BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
+        BPPlayer player = BankPlus.INSTANCE().getPlayerRegistry().get(p);
         return (player == null ? null : player.getBankInformation());
     }
 

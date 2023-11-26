@@ -40,7 +40,7 @@ public class Bank {
 
     public Bank(String identifier) {
         this.identifier = identifier;
-        File file = new File(BankPlus.INSTANCE.getDataFolder(), "banks" + File.separator + identifier + ".yml");
+        File file = new File(BankPlus.INSTANCE().getDataFolder(), "banks" + File.separator + identifier + ".yml");
         if (!file.exists()) {
             BPLogger.error("The bank named \"" + identifier + "\" does not exist!");
             this.title = "&c&l* TITLE NOT FOUND *";

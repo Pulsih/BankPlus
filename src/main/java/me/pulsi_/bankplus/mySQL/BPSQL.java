@@ -21,7 +21,7 @@ public class BPSQL {
 
     public BPSQL() {
         sqlMethods = new BPSQLMethods(this);
-        bankRegistry = BankPlus.INSTANCE.getBankGuiRegistry();
+        bankRegistry = BankPlus.INSTANCE().getBankGuiRegistry();
     }
 
     public void setupMySQL() {

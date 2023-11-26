@@ -43,8 +43,7 @@ public class AddAllCmd extends BPCommand {
         String bankName = Values.CONFIG.getMainGuiName();
         if (args.length > 2) bankName = args[2];
 
-        BankManager reader = new BankManager(bankName);
-        if (!reader.exist()) {
+        if (!BankPlus.getBankManager().exist(bankName)) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }
@@ -52,7 +51,7 @@ public class AddAllCmd extends BPCommand {
         if (confirm(s)) return false;
 
         BPMessages.send(s, "%prefix% &aSuccessfully added &f" + num + " &amoney to all online players!", true);
-        addAll(new ArrayList<>(Bukkit.getOnlinePlayers()), new BigDecimal(num), reader);
+        addAll(new ArrayList<>(Bukkit.getOnlinePlayers()), new BigDecimal(num), bankName);
         return true;
     }
 
@@ -66,15 +65,14 @@ public class AddAllCmd extends BPCommand {
         return null;
     }
 
-    private void addAll(List<Player> onlinePlayers, BigDecimal amount, BankManager reader) {
+    private void addAll(List<Player> onlinePlayers, BigDecimal amount, String bankName) {
         List<Player> copy = new ArrayList<>(onlinePlayers);
-        String bankName = reader.getBank().getIdentifier();
-
+      
         for (int i = 0; i < 80; i++) {
             if (copy.isEmpty()) return;
             Player p = copy.remove(0);
 
-            BigDecimal capacity = reader.getCapacity(p), balance = economy.getBankBalance(p, bankName);
+            BigDecimal capacity = BankPlus.getBankManager().getCapacity(bankName, p), balance = economy.getBankBalance(p, bankName);
             if (capacity.subtract(balance).doubleValue() <= 0) continue;
 
             if (balance.add(amount).doubleValue() < capacity.doubleValue()) economy.addBankBalance(p, amount, bankName);
@@ -82,6 +80,6 @@ public class AddAllCmd extends BPCommand {
         }
 
         if (!onlinePlayers.isEmpty())
-            Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> addAll(copy, amount, reader), 1);
+            Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> addAll(copy, amount, bankName), 1);
     }
 }

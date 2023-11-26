@@ -36,7 +36,7 @@ public class LoanRegistry {
     }
 
     public void loadAllLoans() {
-        FileConfiguration saves = BankPlus.INSTANCE.getConfigs().getConfig(BPConfigs.Type.SAVES.name);
+        FileConfiguration saves = BankPlus.INSTANCE().getConfigs().getConfig(BPConfigs.Type.SAVES.name);
 
         ConfigurationSection section = saves.getConfigurationSection("loans");
         if (section == null) return;
@@ -65,7 +65,7 @@ public class LoanRegistry {
 
             String requestedBank = values.getString("requested-bank");
             if (requestedBank != null) {
-                if (new BankManager(requestedBank).exist()) requestedBank = Values.CONFIG.getMainGuiName();
+                if (BankPlus.getBankManager().exist(requestedBank)) requestedBank = Values.CONFIG.getMainGuiName();
                 else BPLogger.warn("The loan \"" + receiverUUID + "\" specified an invalid bank to take the money, using the main bank.");
 
                 loan = new BPLoan(receiver, requestedBank);
@@ -76,13 +76,13 @@ public class LoanRegistry {
 
                 if (fromBankString == null) BPLogger.warn("The loan \"" + receiverUUID + "\" did not specify a bank to take the money, using the main bank.");
                 else {
-                    if (new BankManager(fromBankString).exist()) fromBank = fromBankString;
+                    if (BankPlus.getBankManager().exist(fromBankString)) fromBank = fromBankString;
                     else BPLogger.warn("The loan \"" + receiverUUID + "\" specified an invalid bank to take the money, using the main bank.");
                 }
 
                 if (toBankString == null) BPLogger.warn("The loan \"" + receiverUUID + "\" did not specify a bank to give the money, using the main bank.");
                 else {
-                    if (new BankManager(toBankString).exist()) toBank = toBankString;
+                    if (BankPlus.getBankManager().exist(toBankString)) toBank = toBankString;
                     else BPLogger.warn("The loan \"" + receiverUUID + "\" specified an invalid bank to give the money, using the main bank.");
                 }
 

@@ -1,5 +1,6 @@
 package me.pulsi_.bankplus.commands.list;
 
+import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
@@ -37,7 +38,7 @@ public class OpenCmd extends BPCommand {
         String bankName = Values.CONFIG.getMainGuiName();
         if (args.length > 1) bankName = args[1];
 
-        if (!new BankManager(bankName).exist()) {
+        if (!BankPlus.getBankManager().exist(bankName)) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }
@@ -51,7 +52,7 @@ public class OpenCmd extends BPCommand {
         Player p = (Player) s;
 
         if (args.length == 2)
-            return BPArgs.getArgs(args, new BankManager().getAvailableBanks(p));
+            return BPArgs.getArgs(args, BankPlus.getBankManager().getAvailableBanks(p));
         return null;
     }
 }

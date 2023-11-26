@@ -16,13 +16,13 @@ public class SQLPlayerManager {
     public SQLPlayerManager(OfflinePlayer p) {
         this.p = p;
         this.uuid = p.getUniqueId().toString();
-        this.methods = BankPlus.INSTANCE.getSql().getSqlMethods();
+        this.methods = BankPlus.INSTANCE().getSql().getSqlMethods();
     }
 
     public SQLPlayerManager(UUID uuid) {
         this.p = Bukkit.getOfflinePlayer(uuid);
         this.uuid = uuid.toString();
-        this.methods = BankPlus.INSTANCE.getSql().getSqlMethods();
+        this.methods = BankPlus.INSTANCE().getSql().getSqlMethods();
     }
 
     public int getLevel(String bankName) {
@@ -45,8 +45,8 @@ public class SQLPlayerManager {
         return new BigDecimal(interest == null ? "0" : interest);
     }
 
-    public void setLevel(int size, String bankName) {
-        set("bank_level", "" + size, bankName);
+    public void setLevel(int level, String bankName) {
+        set("bank_level", "" + level, bankName);
     }
 
     public void setMoney(BigDecimal amount, String bankName) {

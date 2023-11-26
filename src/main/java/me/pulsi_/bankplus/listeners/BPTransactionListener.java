@@ -83,7 +83,7 @@ public class BPTransactionListener implements Listener {
     }
 
     private void log(BPAfterTransactionEvent e) {
-        BPLogUtils logUtils = BankPlus.INSTANCE.getBpLogUtils();
+        BPLogUtils logUtils = BankPlus.INSTANCE().getBpLogUtils();
         File logFile = logUtils.getLogFile();
 
         OfflinePlayer p = e.getPlayer();

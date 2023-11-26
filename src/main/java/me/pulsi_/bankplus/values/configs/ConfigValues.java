@@ -34,7 +34,7 @@ public class ConfigValues {
     private int loanInstalments, loanDelay, loanAcceptTime;
 
     public void setupValues() {
-        FileConfiguration config = BankPlus.INSTANCE.getConfigs().getConfig(BPConfigs.Type.CONFIG.name);
+        FileConfiguration config = BankPlus.INSTANCE().getConfigs().getConfig(BPConfigs.Type.CONFIG.name);
 
         chatExitMessage = config.getString("General-Settings.Chat-Exit-Message");
         chatExitTime = config.getInt("General-Settings.Chat-Exit-Time");
@@ -475,7 +475,7 @@ public class ConfigValues {
     }
 
     public boolean useEssentialsXAFK() {
-        return BankPlus.INSTANCE.isEssentialsXHooked() && useEssentialsXAFK;
+        return BankPlus.INSTANCE().isEssentialsXHooked() && useEssentialsXAFK;
     }
 
     public boolean useBankBalanceToUpgrade() {

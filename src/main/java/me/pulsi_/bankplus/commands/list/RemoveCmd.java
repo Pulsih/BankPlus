@@ -50,7 +50,7 @@ public class RemoveCmd extends BPCommand {
         String bankName = Values.CONFIG.getMainGuiName();
         if (args.length > 3) bankName = args[3];
 
-        if (!new BankManager(bankName).exist()) {
+        if (!BankPlus.getBankManager().exist(bankName)) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }

@@ -35,7 +35,7 @@ public abstract class BPCommand {
         this.aliases = new String[aliases.length - 1];
         System.arraycopy(aliases, 1, this.aliases, 0, aliases.length - 1);
 
-        FileConfiguration config = BankPlus.INSTANCE.getConfigs().getConfig(BPConfigs.Type.COMMANDS.name);
+        FileConfiguration config = BankPlus.INSTANCE().getConfigs().getConfig(BPConfigs.Type.COMMANDS.name);
 
         needConfirm = config.getBoolean(id + ".need-confirm");
         hasCooldown = config.getBoolean(id + ".has-cooldown");
@@ -101,7 +101,7 @@ public abstract class BPCommand {
     public boolean confirm(CommandSender s) {
         if (needConfirm()) {
             if (!confirm.contains(s.getName())) {
-                Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> confirm.remove(s.getName()), getConfirmCooldown() * 20L);
+                Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> confirm.remove(s.getName()), getConfirmCooldown() * 20L);
                 BPMessages.send(s, getConfirmMessage(), true);
                 confirm.add(s.getName());
                 return true;
@@ -124,7 +124,7 @@ public abstract class BPCommand {
 
         if (hasCooldown() && getCooldown() > 0 && !(s instanceof ConsoleCommandSender)) {
             cooldownMap.put(s.getName(), System.currentTimeMillis() + (getCooldown() * 1000L));
-            Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE, () -> cooldownMap.remove(s.getName()), getCooldown() * 20L);
+            Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> cooldownMap.remove(s.getName()), getCooldown() * 20L);
         }
     }
 

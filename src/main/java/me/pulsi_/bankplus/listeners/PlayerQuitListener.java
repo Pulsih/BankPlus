@@ -14,7 +14,7 @@ public class PlayerQuitListener implements Listener {
     private final PlayerRegistry registry;
 
     public PlayerQuitListener() {
-        this.registry = BankPlus.INSTANCE.getPlayerRegistry();
+        this.registry = BankPlus.INSTANCE().getPlayerRegistry();
     }
 
     @EventHandler

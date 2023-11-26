@@ -46,7 +46,7 @@ public class BankTopCmd implements CommandExecutor {
         }
 
         String stringToReplace;
-        BigDecimal money = BankPlus.INSTANCE.getBankTopManager().getBankTopBalancePlayer(position);
+        BigDecimal money = BankPlus.INSTANCE().getBankTopManager().getBankTopBalancePlayer(position);
         switch (Values.CONFIG.getBankTopMoneyFormat()) {
             case "default_amount":
                 stringToReplace = BPFormatter.formatCommas(money);
@@ -84,7 +84,7 @@ public class BankTopCmd implements CommandExecutor {
             return message;
         }
 
-        String name = BankPlus.INSTANCE.getBankTopManager().getBankTopNamePlayer(position);
+        String name = BankPlus.INSTANCE().getBankTopManager().getBankTopNamePlayer(position);
         return message.replace("%bankplus_banktop_name_" + position + "%", name);
     }
 }

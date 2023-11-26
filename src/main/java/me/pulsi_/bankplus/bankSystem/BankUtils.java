@@ -29,21 +29,21 @@ public class BankUtils {
         openBank(p, identifier, false);
     }
 
-    public static void openBank(Player p, String identifier, boolean bypass) {
-        BPPlayer player = BankPlus.INSTANCE.getPlayerRegistry().get(p);
-        BankGuiRegistry registry = BankPlus.INSTANCE.getBankGuiRegistry();
+    public static void openBank(Player p, String bankName, boolean bypass) {
+        BPPlayer player = BankPlus.INSTANCE().getPlayerRegistry().get(p);
+        BankGuiRegistry registry = BankPlus.INSTANCE().getBankGuiRegistry();
 
-        if (identifier.equals(BankListGui.multipleBanksGuiID)) {
+        if (bankName.equals(BankListGui.multipleBanksGuiID)) {
             BankListGui.openMultipleBanksGui(p);
             return;
         }
 
-        if (!registry.getBanks().containsKey(identifier)) {
+        if (!registry.getBanks().containsKey(bankName)) {
             BPMessages.send(p, "Invalid-Bank");
             return;
         }
 
-        if (!new BankManager(identifier).isAvailable(p) && !bypass) {
+        if (!BankPlus.getBankManager().isAvailable(bankName, p) && !bypass) {
             BPMessages.send(p, "Cannot-Access-Bank");
             return;
         }
@@ -51,10 +51,10 @@ public class BankUtils {
         BukkitTask updating = player.getBankUpdatingTask();
         if (updating != null) updating.cancel();
 
-        Bank baseBank = registry.getBanks().get(identifier);
+        Bank baseBank = registry.getBanks().get(bankName);
 
         String title = baseBank.getTitle();
-        if (!BankPlus.INSTANCE.isPlaceholderApiHooked()) title = BPChat.color(title);
+        if (!BankPlus.INSTANCE().isPlaceholderApiHooked()) title = BPChat.color(title);
         else title = PlaceholderAPI.setPlaceholders(p, BPChat.color(title));
 
         Inventory bank = Bukkit.createInventory(new BankHolder(), baseBank.getSize(), title);
@@ -63,7 +63,7 @@ public class BankUtils {
         updateMeta(bank, p, baseBank);
 
         long delay = baseBank.getUpdateDelay();
-        if (delay >= 0) player.setBankUpdatingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE, () -> updateMeta(bank, p, baseBank), delay, delay));
+        if (delay >= 0) player.setBankUpdatingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE(), () -> updateMeta(bank, p, baseBank), delay, delay));
 
         player.setOpenedBank(baseBank);
         BPUtils.playSound("PERSONAL", p);
@@ -98,11 +98,11 @@ public class BankUtils {
             if (itemValues == null) continue;
 
             ItemStack i = bank.getItem(itemValues.getInt("Slot") - 1);
-            if (i != null) setMeta(itemValues, i, p, baseBank);
+            if (i != null) setMeta(itemValues, i, p, baseBank.getIdentifier());
         }
     }
 
-    private static void setMeta(ConfigurationSection itemValues, ItemStack item, Player p, Bank baseBank) {
+    private static void setMeta(ConfigurationSection itemValues, ItemStack item, Player p, String bankName) {
         ItemMeta meta = item.getItemMeta();
 
         String displayName = itemValues.getString("Displayname") == null ? "&c&l*CANNOT FIND DISPLAYNAME*" : itemValues.getString("Displayname");
@@ -113,7 +113,7 @@ public class BankUtils {
         else {
             ConfigurationSection loreSection = itemValues.getConfigurationSection("Lore");
             if (loreSection != null) {
-                int level = new BankManager(baseBank.getIdentifier()).getCurrentLevel(p);
+                int level = BankPlus.getBankManager().getCurrentLevel(bankName, p);
                 List<String> defaultLore = loreSection.getStringList("Default"), leveLore = loreSection.getStringList(level + "");
 
                 if (!leveLore.isEmpty()) for (String line : leveLore) lore.add(BPChat.color(line));
@@ -121,7 +121,7 @@ public class BankUtils {
             }
         }
 
-        if (BankPlus.INSTANCE.isPlaceholderApiHooked()) {
+        if (BankPlus.INSTANCE().isPlaceholderApiHooked()) {
             meta.setDisplayName(PlaceholderAPI.setPlaceholders(p, BPChat.color(displayName)));
             meta.setLore(PlaceholderAPI.setPlaceholders(p, lore));
         } else {

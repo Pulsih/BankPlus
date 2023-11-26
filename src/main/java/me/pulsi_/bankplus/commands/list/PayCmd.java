@@ -47,17 +47,17 @@ public class PayCmd extends BPCommand {
         if (BPUtils.isInvalidNumber(num, s)) return false;
 
         BigDecimal amount = new BigDecimal(num);
-        Player payer = (Player) s;
+        Player player = (Player) s;
 
         String fromBankName = Values.CONFIG.getMainGuiName();
         if (args.length > 3) fromBankName = args[3];
 
-        BankManager fromReader = new BankManager(fromBankName);
-        if (fromReader.exist()) {
+        BankManager manager = BankPlus.getBankManager();
+        if (manager.exist(fromBankName)) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }
-        if (!fromReader.isAvailable(payer)) {
+        if (!manager.isAvailable(fromBankName, player)) {
             BPMessages.send(s, "Cannot-Access-Bank");
             return false;
         }
@@ -65,12 +65,11 @@ public class PayCmd extends BPCommand {
         String toBankName = Values.CONFIG.getMainGuiName();
         if (args.length > 4) toBankName = args[4];
 
-        BankManager toReader = new BankManager(toBankName);
-        if (toReader.exist()) {
+        if (manager.exist(toBankName)) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }
-        if (!toReader.isAvailable(target)) {
+        if (!manager.isAvailable(toBankName, target)) {
             BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
             return false;
         }
@@ -89,10 +88,10 @@ public class PayCmd extends BPCommand {
             return BPArgs.getArgs(args, "1", "2", "3");
 
         if (args.length == 4)
-            return BPArgs.getArgs(args, new BankManager().getAvailableBanks(p));
+            return BPArgs.getArgs(args, BankPlus.getBankManager().getAvailableBanks(p));
 
         if (args.length == 5)
-            return BPArgs.getArgs(args, new BankManager().getAvailableBanks(target));
+            return BPArgs.getArgs(args, BankPlus.getBankManager().getAvailableBanks(target));
         return null;
     }
 }

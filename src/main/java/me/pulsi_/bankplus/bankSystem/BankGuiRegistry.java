@@ -31,18 +31,18 @@ public class BankGuiRegistry {
     public Bank bankListGui;
 
     public boolean loadBanks() {
-        File file = new File(BankPlus.INSTANCE.getDataFolder(), "banks");
+        File file = new File(BankPlus.INSTANCE().getDataFolder(), "banks");
         File[] files = file.listFiles();
 
         banks.clear();
         List<File> bankFiles;
 
         if (files == null || files.length == 0) {
-            File defaultBankFile = new File(BankPlus.INSTANCE.getDataFolder(), "banks" + File.separator + Values.CONFIG.getMainGuiName() + ".yml");
+            File defaultBankFile = new File(BankPlus.INSTANCE().getDataFolder(), "banks" + File.separator + Values.CONFIG.getMainGuiName() + ".yml");
 
             if (!defaultBankFile.exists()) {
-                BankPlus.INSTANCE.saveResource("banks" + File.separator + "bankplus_main_gui_base_file.yml", false);
-                File newMainFile = new File(BankPlus.INSTANCE.getDataFolder(), "banks" + File.separator + "bankplus_main_gui_base_file.yml");
+                BankPlus.INSTANCE().saveResource("banks" + File.separator + "bankplus_main_gui_base_file.yml", false);
+                File newMainFile = new File(BankPlus.INSTANCE().getDataFolder(), "banks" + File.separator + "bankplus_main_gui_base_file.yml");
                 newMainFile.renameTo(defaultBankFile);
             }
             bankFiles = new ArrayList<>(Collections.singletonList(defaultBankFile));
@@ -57,11 +57,11 @@ public class BankGuiRegistry {
             }
             if (!theresMainGui) {
                 BPLogger.info("The main gui was missing, creating the file...");
-                File defaultBankFile = new File(BankPlus.INSTANCE.getDataFolder(), "banks" + File.separator + Values.CONFIG.getMainGuiName() + ".yml");
+                File defaultBankFile = new File(BankPlus.INSTANCE().getDataFolder(), "banks" + File.separator + Values.CONFIG.getMainGuiName() + ".yml");
                 defaultBankFile.getParentFile().mkdir();
 
-                BankPlus.INSTANCE.saveResource("banks" + File.separator + "bankplus_main_gui_base_file.yml", false);
-                File newMainFile = new File(BankPlus.INSTANCE.getDataFolder(), "banks" + File.separator + "bankplus_main_gui_base_file.yml");
+                BankPlus.INSTANCE().saveResource("banks" + File.separator + "bankplus_main_gui_base_file.yml", false);
+                File newMainFile = new File(BankPlus.INSTANCE().getDataFolder(), "banks" + File.separator + "bankplus_main_gui_base_file.yml");
                 newMainFile.renameTo(defaultBankFile);
 
                 bankFiles.add(defaultBankFile);
@@ -155,6 +155,6 @@ public class BankGuiRegistry {
         Bank multipleBanksGui = new Bank(
                 BankListGui.multipleBanksGuiID, title, Values.MULTIPLE_BANKS.getBanksGuiLines(), Values.MULTIPLE_BANKS.getUpdateDelay(), gui.getContents()
         );
-        BankPlus.INSTANCE.getBankGuiRegistry().bankListGui = multipleBanksGui;
+        BankPlus.INSTANCE().getBankGuiRegistry().bankListGui = multipleBanksGui;
     }
 }

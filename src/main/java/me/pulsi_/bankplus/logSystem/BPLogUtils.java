@@ -16,7 +16,7 @@ public class BPLogUtils {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         day = format.format(System.currentTimeMillis());
 
-        logFile = new File(BankPlus.INSTANCE.getDataFolder() + File.separator + "logs", day + ".txt");
+        logFile = new File(BankPlus.INSTANCE().getDataFolder() + File.separator + "logs", day + ".txt");
 
         if (logFile.exists()) return;
 

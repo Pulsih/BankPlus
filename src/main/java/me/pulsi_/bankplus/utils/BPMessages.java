@@ -165,7 +165,7 @@ public class BPMessages {
     public static void loadMessages() {
         messages.clear();
 
-        FileConfiguration config = BankPlus.INSTANCE.getConfigs().getConfig(BPConfigs.Type.MESSAGES.name);
+        FileConfiguration config = BankPlus.INSTANCE().getConfigs().getConfig(BPConfigs.Type.MESSAGES.name);
         for (String path : config.getConfigurationSection("").getKeys(false)) {
             if (!path.equals("Update-File") && !path.equals("Enable-Missing-Message-Alert"))
                 messages.put(path, getPossibleMessages(config, path));
@@ -192,7 +192,7 @@ public class BPMessages {
     }
 
     private static String format(Player p, String text) {
-        return BankPlus.INSTANCE.isPlaceholderApiHooked() ? PlaceholderAPI.setPlaceholders(p, addPrefix(text)) : addPrefix(text);
+        return BankPlus.INSTANCE().isPlaceholderApiHooked() ? PlaceholderAPI.setPlaceholders(p, addPrefix(text)) : addPrefix(text);
     }
 
     private static String format(CommandSender s, String text) {

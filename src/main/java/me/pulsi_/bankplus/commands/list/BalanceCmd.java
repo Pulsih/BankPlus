@@ -38,7 +38,7 @@ public class BalanceCmd extends BPCommand {
             BPMessages.send(p, "Multiple-Personal-Bank", BPUtils.placeValues(p, economy.getBankBalance(p)));
         } else {
             String bankName = args[1];
-            if (!new BankManager(bankName).exist()) {
+            if (!BankPlus.getBankManager().exist(bankName)) {
                 BPMessages.send(s, "Invalid-Bank");
                 return false;
             }
@@ -53,7 +53,7 @@ public class BalanceCmd extends BPCommand {
         Player p = (Player) s;
 
         if (args.length == 2)
-            return BPArgs.getArgs(args, new BankManager().getAvailableBanks(p));
+            return BPArgs.getArgs(args, BankPlus.getBankManager().getAvailableBanks(p));
         return null;
     }
 }
