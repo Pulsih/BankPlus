@@ -6,6 +6,7 @@ import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
 import me.pulsi_.bankplus.utils.BPArgs;
 import me.pulsi_.bankplus.utils.BPMessages;
+import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -41,16 +42,21 @@ public class TransferCmd extends BPCommand {
         }
         if (confirm(s)) return false;
 
-        switch (mode) {
-            case "filestodatabase": {
-
-            }
-            break;
-
-            case "databasetofiles": {
-
-            }
+        if (!Values.CONFIG.isSqlEnabled()) {
+            BPMessages.send(s, "%prefix% &cCould not initialize the task, MySQL hasn't been enabled in the config file!", true);
+            return false;
         }
+
+        if (!BankPlus.INSTANCE().getSql().isConnected()) {
+            BPMessages.send(s, "%prefix% &cCould not initialize the task, MySQL hasn't been connected to it's database yet! &8(Try typing /bp reload)", true);
+            return false;
+        }
+
+        BPMessages.send(s, "%prefix% &7Task initialized, wait a few moments...", true);
+        if (mode.equals("filestodatabase")) filesToDatabase();
+        else databaseToFile();
+
+        BPMessages.send(s, "%prefix% &2Task finished!", true);
         return true;
     }
 
@@ -61,13 +67,11 @@ public class TransferCmd extends BPCommand {
         return null;
     }
 
-    private void moveData(CommandSender s) {
+    private void filesToDatabase() {
         File folder = new File(BankPlus.INSTANCE().getDataFolder(), "playerdata");
         File[] files = folder.listFiles();
-        if (files == null) {
-            BPMessages.send(s, "%prefix% &cNo files found in playerdata folder!");
-            return;
-        }
+        if (files == null) return;
+
 
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
             BPPlayerManager pManager = new BPPlayerManager(p);
@@ -87,6 +91,30 @@ public class TransferCmd extends BPCommand {
                 sqlManager.setDebt(new BigDecimal(debt == null ? "0" : debt), bankName);
                 sqlManager.setOfflineInterest(new BigDecimal(interest == null ? "0" : interest), bankName);
             }
+        }
+    }
+
+    private void databaseToFile() {
+        for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
+            BPPlayerManager pManager = new BPPlayerManager(p);
+            if (!pManager.isPlayerRegistered()) continue;
+
+            FileConfiguration config = pManager.getPlayerConfig();
+            SQLPlayerManager sqlManager = new SQLPlayerManager(p);
+
+            for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) {
+                int level = sqlManager.getLevel(bankName);
+                String money = sqlManager.getMoney(bankName).toString();
+                String debt = sqlManager.getDebt(bankName).toString();
+                String interest = sqlManager.getOfflineInterest(bankName).toString();
+
+                config.set("banks." + bankName + ".level", level);
+                config.set("banks." + bankName + ".money", money);
+                config.set("banks." + bankName + ".debt", debt);
+                config.set("banks." + bankName + ".interest", interest);
+            }
+
+            pManager.savePlayerFile(config, pManager.getPlayerFile(), true);
         }
     }
 }

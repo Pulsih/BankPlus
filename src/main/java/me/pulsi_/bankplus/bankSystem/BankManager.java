@@ -5,6 +5,7 @@ import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.BPPlayerManager;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
+import me.pulsi_.bankplus.placeholders.BPPlaceholders;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
@@ -341,8 +342,7 @@ public class BankManager {
         if (p == null) return availableBanks;
 
         for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet())
-            if (isAvailable(bankName, p))
-                availableBanks.add(bankName);
+            if (isAvailable(bankName, p)) availableBanks.add(bankName);
 
         return availableBanks;
     }
