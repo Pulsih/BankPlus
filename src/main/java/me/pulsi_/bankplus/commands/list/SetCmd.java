@@ -1,8 +1,8 @@
 package me.pulsi_.bankplus.commands.list;
 
-import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.commands.BPCommand;
+import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPArgs;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
@@ -50,7 +50,7 @@ public class SetCmd extends BPCommand {
         String bankName = Values.CONFIG.getMainGuiName();
         if (args.length > 3) bankName = args[3];
 
-        if (!BankPlus.getBankManager().exist(bankName)) {
+        if (!BankManager.exist(bankName)) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }
@@ -59,7 +59,7 @@ public class SetCmd extends BPCommand {
 
         if (confirm(s)) return false;
 
-        BigDecimal set = BankPlus.getBPEconomy().setBankBalance(p, amount, bankName);
+        BigDecimal set = BPEconomy.setBankBalance(p, amount, bankName);
         if (!silent) BPMessages.send(s, "Set-Message", BPUtils.placeValues(p, set));
         return true;
     }

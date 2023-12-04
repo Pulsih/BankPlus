@@ -1,6 +1,5 @@
 package me.pulsi_.bankplus.commands.list;
 
-import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
@@ -32,33 +31,40 @@ public class ViewCmd extends BPCommand {
 
     @Override
     public boolean onCommand(CommandSender s, String[] args) {
-        OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
-        if (!p.hasPlayedBefore()) {
+        OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
+        if (!target.hasPlayedBefore()) {
             BPMessages.send(s, "Invalid-Player");
             return false;
         }
 
-        BPEconomy economy = BankPlus.getBPEconomy();
         if (args.length == 2) {
-            if (s instanceof Player) BPUtils.playSound("VIEW", (Player) s);
-            BPMessages.send(s, "Multiple-Bank-Others", BPUtils.placeValues(p, economy.getBankBalance(p)));
-        } else {
-            String bankName = args[2];
-            BankManager manager = BankPlus.getBankManager();
-            if (!manager.exist(bankName)) {
-                BPMessages.send(s, "Invalid-Bank");
-                return false;
-            }
-
-            if (!manager.isAvailable(bankName, p)) {
-                BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + p.getName());
-                return false;
-            }
-
             if (confirm(s)) return false;
+
             if (s instanceof Player) BPUtils.playSound("VIEW", (Player) s);
-            BPMessages.send(s, "Bank-Others", BPUtils.placeValues(p, economy.getBankBalance(p, bankName)));
+
+            List<String> availableBanks = BankManager.getAvailableBanks(target);
+            if (availableBanks.size() > 1) BPMessages.send(target, "Multiple-Bank-Others", BPUtils.placeValues(target, BPEconomy.getBankBalance(target)));
+            else {
+                String name = availableBanks.get(0);
+                BPMessages.send(s, "Bank-Others", BPUtils.placeValues(target, BPEconomy.getBankBalance(target, name), BankManager.getCurrentLevel(name, target)));
+            }
+            return true;
         }
+
+        String bankName = args[2];
+        if (!BankManager.exist(bankName)) {
+            BPMessages.send(s, "Invalid-Bank");
+            return false;
+        }
+
+        if (!BankManager.isAvailable(bankName, target)) {
+            BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
+            return false;
+        }
+
+        if (confirm(s)) return false;
+        if (s instanceof Player) BPUtils.playSound("VIEW", (Player) s);
+        BPMessages.send(s, "Bank-Others", BPUtils.placeValues(target, BPEconomy.getBankBalance(target, bankName), BankManager.getCurrentLevel(bankName, target)));
         return true;
     }
 

@@ -25,16 +25,16 @@ public class PlayerJoinListener implements Listener {
             pManager.registerPlayer();
             if (Values.CONFIG.notifyRegisteredPlayer()) BPLogger.info("Successfully registered " + p.getName() + "!");
         }
+        pManager.checkForFileFixes(p, pManager);
         pManager.loadPlayer();
 
         if (!Values.CONFIG.notifyOfflineInterest()) return;
 
         BigDecimal amount = new BigDecimal(0);
-        BPEconomy economy = BankPlus.getBPEconomy();
         for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) {
-            BigDecimal offlineInterest = economy.getOfflineInterest(p, bankName);
+            BigDecimal offlineInterest = BPEconomy.getOfflineInterest(p, bankName);
             amount = amount.add(offlineInterest);
-            if (offlineInterest.doubleValue() > 0d) economy.setOfflineInterest(p, BigDecimal.valueOf(0), bankName);
+            if (offlineInterest.doubleValue() > 0d) BPEconomy.setOfflineInterest(p, BigDecimal.valueOf(0), bankName);
         }
 
         BigDecimal finalAmount = amount;

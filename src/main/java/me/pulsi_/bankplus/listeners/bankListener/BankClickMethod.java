@@ -46,8 +46,7 @@ public class BankClickMethod {
             return;
         }
 
-        BankManager bankReader = BankPlus.getBankManager();
-        ConfigurationSection items = bankReader.getBank(bankName).getItems();
+        ConfigurationSection items = BankManager.getBank(bankName).getItems();
         if (items == null) return;
 
         for (String key : items.getKeys(false)) {
@@ -62,7 +61,6 @@ public class BankClickMethod {
                 continue;
             }
 
-            BPEconomy economy = BankPlus.getBPEconomy();
             Economy vaultEconomy = BankPlus.INSTANCE().getVaultEconomy();
 
             for (String actionType : actions) {
@@ -75,7 +73,7 @@ public class BankClickMethod {
                 if (identifier.equals("[UPGRADE]")) {
                     if (Values.CONFIG.isGuiActionsNeedPermissions() && !BPUtils.hasPermission(p, "bankplus.upgrade")) return;
 
-                    bankReader.upgradeBank(bankName, p);
+                    BankManager.upgradeBank(bankName, p);
                     continue;
                 }
 
@@ -117,7 +115,7 @@ public class BankClickMethod {
                             BPLogger.warn("Invalid deposit number! (Button: " + key + ", Number: " + value + ")");
                             continue;
                         }
-                        economy.deposit(p, amount, bankName);
+                        BPEconomy.deposit(p, amount, bankName);
                     }
                     break;
 
@@ -138,13 +136,13 @@ public class BankClickMethod {
                             if (!value.endsWith("%")) amount = new BigDecimal(value);
                             else {
                                 BigDecimal percentage = new BigDecimal(value.replace("%", "")).divide(BigDecimal.valueOf(100));
-                                amount = economy.getBankBalance(p, bankName).multiply(percentage);
+                                amount = BPEconomy.getBankBalance(p, bankName).multiply(percentage);
                             }
                         } catch (NumberFormatException ex) {
                             BPLogger.warn("Invalid withdraw number! (Button: " + key + ", Number: " + value + ")");
                             continue;
                         }
-                        economy.withdraw(p, amount, bankName);
+                        BPEconomy.withdraw(p, amount, bankName);
                     }
                 }
             }
@@ -155,13 +153,11 @@ public class BankClickMethod {
         String actionType = itemValues.getString("Action.Action-Type");
         if (actionType == null) return false;
 
-        BankManager bankReader = BankPlus.getBankManager();
         String actionAmount = itemValues.getString("Action.Amount");
 
         actionType = actionType.toLowerCase();
         actionAmount = actionAmount == null ? "null" : actionAmount.toLowerCase();
 
-        BPEconomy economy = BankPlus.getBPEconomy();
         Economy vaultEconomy = BankPlus.INSTANCE().getVaultEconomy();
         switch (actionType) {
             case "deposit":
@@ -171,11 +167,11 @@ public class BankClickMethod {
                         break;
 
                     case "all":
-                        economy.deposit(p, BigDecimal.valueOf(vaultEconomy.getBalance(p)), bankName);
+                        BPEconomy.deposit(p, BigDecimal.valueOf(vaultEconomy.getBalance(p)), bankName);
                         break;
 
                     case "half":
-                        economy.deposit(p, BigDecimal.valueOf(vaultEconomy.getBalance(p) / 2), bankName);
+                        BPEconomy.deposit(p, BigDecimal.valueOf(vaultEconomy.getBalance(p) / 2), bankName);
                         break;
 
                     default:
@@ -186,7 +182,7 @@ public class BankClickMethod {
                             BPLogger.error("Invalid deposit number! (Path: " + itemValues + ", Number: " + actionAmount + ")");
                             return true;
                         }
-                        economy.deposit(p, amount, bankName);
+                        BPEconomy.deposit(p, amount, bankName);
                         break;
                 }
                 break;
@@ -198,11 +194,11 @@ public class BankClickMethod {
                         break;
 
                     case "all":
-                        economy.withdraw(p, economy.getBankBalance(p, bankName), bankName);
+                        BPEconomy.withdraw(p, BPEconomy.getBankBalance(p, bankName), bankName);
                         break;
 
                     case "half":
-                        economy.withdraw(p, economy.getBankBalance(p, bankName).divide(BigDecimal.valueOf(2)), bankName);
+                        BPEconomy.withdraw(p, BPEconomy.getBankBalance(p, bankName).divide(BigDecimal.valueOf(2)), bankName);
                         break;
 
                     default:
@@ -213,13 +209,13 @@ public class BankClickMethod {
                             BPLogger.error("Invalid withdraw number! (Path: " + itemValues + ", Number: " + actionAmount + ")");
                             return true;
                         }
-                        economy.withdraw(p, amount, bankName);
+                        BPEconomy.withdraw(p, amount, bankName);
                         break;
                 }
                 break;
 
             case "upgrade":
-                bankReader.upgradeBank(bankName, p);
+                BankManager.upgradeBank(bankName, p);
                 break;
         }
         return true;

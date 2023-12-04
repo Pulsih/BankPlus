@@ -5,6 +5,7 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.managers.BPConfigs;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
@@ -13,6 +14,7 @@ import java.util.*;
 public class BPMessages {
 
     private static final Map<String, List<String>> messages = new HashMap<>();
+    private static String[] identifiersToSkip = {"Enable-Missing-Message-Alert", "Title-Custom-Transaction", "Interest-Broadcast"};
 
     private static String prefix = BPChat.prefix;
 
@@ -166,15 +168,25 @@ public class BPMessages {
         messages.clear();
 
         FileConfiguration config = BankPlus.INSTANCE().getConfigs().getConfig(BPConfigs.Type.MESSAGES.name);
-        for (String path : config.getConfigurationSection("").getKeys(false)) {
-            if (!path.equals("Update-File") && !path.equals("Enable-Missing-Message-Alert"))
-                messages.put(path, getPossibleMessages(config, path));
+        ConfigurationSection messagesSection = config.getConfigurationSection("");
+        if (messagesSection == null) {
+            BPLogger.warn("Could not load bankplus messages! (Is the file missing?)");
+            return;
+        }
+
+        for (String path : messagesSection.getKeys(false)) {
+            boolean skip = false;
+            for (String identifier : identifiersToSkip) {
+                if (path.equals(identifier)) continue;
+                skip = true;
+            }
+            if (!skip) messages.put(path, getPossibleMessages(config, path));
         }
 
         if (messages.containsKey("Prefix")) {
-            List<String> prefixes = messages.get("Prefix");
-            prefix = prefixes.isEmpty() ? BPChat.prefix : prefixes.get(0);
-        } else prefix = BPChat.prefix;
+            List<String> configPrefix = messages.get("Prefix");
+            if (!configPrefix.isEmpty()) prefix = configPrefix.get(0);
+        }
         enableMissingMessageAlert = config.getBoolean("Enable-Missing-Message-Alert");
     }
 

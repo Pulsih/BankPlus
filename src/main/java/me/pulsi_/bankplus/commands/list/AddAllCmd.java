@@ -18,11 +18,8 @@ import java.util.List;
 
 public class AddAllCmd extends BPCommand {
 
-    private final BPEconomy economy;
-
     public AddAllCmd(String... aliases) {
         super(aliases);
-        economy = BankPlus.getBPEconomy();
     }
 
     @Override
@@ -43,7 +40,7 @@ public class AddAllCmd extends BPCommand {
         String bankName = Values.CONFIG.getMainGuiName();
         if (args.length > 2) bankName = args[2];
 
-        if (!BankPlus.getBankManager().exist(bankName)) {
+        if (!BankManager.exist(bankName)) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }
@@ -70,13 +67,7 @@ public class AddAllCmd extends BPCommand {
       
         for (int i = 0; i < 80; i++) {
             if (copy.isEmpty()) return;
-            Player p = copy.remove(0);
-
-            BigDecimal capacity = BankPlus.getBankManager().getCapacity(bankName, p), balance = economy.getBankBalance(p, bankName);
-            if (capacity.subtract(balance).doubleValue() <= 0) continue;
-
-            if (balance.add(amount).doubleValue() < capacity.doubleValue()) economy.addBankBalance(p, amount, bankName);
-            else economy.setBankBalance(p, capacity, bankName);
+            BPEconomy.addBankBalance(copy.remove(0), amount, bankName);
         }
 
         if (!onlinePlayers.isEmpty())

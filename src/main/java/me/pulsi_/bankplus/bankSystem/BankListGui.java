@@ -34,10 +34,8 @@ public class BankListGui {
         if (updating != null) updating.cancel();
 
         if (Values.MULTIPLE_BANKS.isDirectlyOpenIf1IsAvailable()) {
-            BankManager reader = BankPlus.getBankManager();;
-
-            if (reader.getAvailableBanks(p).size() == 1) {
-                BankUtils.openBank(p, reader.getAvailableBanks(p).get(0), false);
+            if (BankManager.getAvailableBanks(p).size() == 1) {
+                BankUtils.openBank(p, BankManager.getAvailableBanks(p).get(0), false);
                 return;
             }
         }
@@ -68,16 +66,15 @@ public class BankListGui {
         int slot = 0;
 
         for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) {
-            BankManager manager = BankPlus.getBankManager();
-            if (Values.MULTIPLE_BANKS.isShowNotAvailableBanks() && !manager.isAvailable(bankName, p)) continue;
+            if (Values.MULTIPLE_BANKS.isShowNotAvailableBanks() && !BankManager.isAvailable(bankName, p)) continue;
 
             ItemStack bankItem;
             boolean glow = false;
-            ConfigurationSection section = manager.getBank(bankName).getBanksGuiItemSection();
+            ConfigurationSection section = BankManager.getBank(bankName).getBanksGuiItemSection();
 
             if (section == null) bankItem = BPItems.UNKNOWN_ITEM.clone();
             else {
-                String path = manager.isAvailable(bankName, p) ? "Available" : "Unavailable";
+                String path = BankManager.isAvailable(bankName, p) ? "Available" : "Unavailable";
                 glow = section.getBoolean(path + ".Glowing");
                 try {
                     bankItem = new ItemStack(Material.valueOf(section.getString(path + ".Material")));
@@ -97,8 +94,7 @@ public class BankListGui {
     private static void updateMeta(Inventory banksList, Player p) {
         int slot = 0;
         for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) {
-            BankManager manager = BankPlus.getBankManager();
-            if (Values.MULTIPLE_BANKS.isShowNotAvailableBanks() && !manager.isAvailable(bankName, p)) continue;
+            if (Values.MULTIPLE_BANKS.isShowNotAvailableBanks() && !BankManager.isAvailable(bankName, p)) continue;
 
             ItemStack item = banksList.getItem(slot);
             slot++;
@@ -109,7 +105,7 @@ public class BankListGui {
             String displayname = "&c&l* DISPLAYNAME NOT FOUND *";
             List<String> lore = new ArrayList<>();
 
-            Bank bank = manager.getBank(bankName);
+            Bank bank = BankManager.getBank(bankName);
             ConfigurationSection section = bank.getBanksGuiItemSection();
             if (section != null) {
                 String permission = bank.getPermission();

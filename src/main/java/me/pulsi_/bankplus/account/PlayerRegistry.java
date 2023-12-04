@@ -49,15 +49,13 @@ public class PlayerRegistry {
     }
 
     public void savePlayer(UUID uuid, boolean async) {
-        BPEconomy economy = BankPlus.getBPEconomy();
-
         if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE().getSql().isConnected()) {
             SQLPlayerManager pManager = new SQLPlayerManager(uuid);
             for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) {
-                pManager.setLevel(BankPlus.getBankManager().getCurrentLevel(bankName, uuid), bankName);
-                pManager.setMoney(economy.getBankBalance(uuid, bankName), bankName);
-                pManager.setDebt(economy.getDebt(uuid, bankName), bankName);
-                pManager.setOfflineInterest(economy.getOfflineInterest(uuid, bankName), bankName);
+                pManager.setLevel(BankManager.getCurrentLevel(bankName, uuid), bankName);
+                pManager.setMoney(BPEconomy.getBankBalance(uuid, bankName), bankName);
+                pManager.setDebt(BPEconomy.getDebt(uuid, bankName), bankName);
+                pManager.setOfflineInterest(BPEconomy.getOfflineInterest(uuid, bankName), bankName);
             }
         } else {
             BPPlayerManager files = new BPPlayerManager(uuid);
@@ -66,10 +64,10 @@ public class PlayerRegistry {
             FileConfiguration config = files.getPlayerConfig(file);
 
             for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) {
-                config.set("banks." + bankName + ".level", BankPlus.getBankManager().getCurrentLevel(bankName, uuid));
-                config.set("banks." + bankName + ".money", BPFormatter.formatBigDouble(economy.getBankBalance(uuid, bankName)));
-                config.set("banks." + bankName + ".debt", BPFormatter.formatBigDouble(economy.getDebt(uuid, bankName)));
-                config.set("banks." + bankName + ".interest", BPFormatter.formatBigDouble(economy.getOfflineInterest(uuid, bankName)));
+                config.set("banks." + bankName + ".level", BankManager.getCurrentLevel(bankName, uuid));
+                config.set("banks." + bankName + ".money", BPFormatter.formatBigDouble(BPEconomy.getBankBalance(uuid, bankName)));
+                config.set("banks." + bankName + ".debt", BPFormatter.formatBigDouble(BPEconomy.getDebt(uuid, bankName)));
+                config.set("banks." + bankName + ".interest", BPFormatter.formatBigDouble(BPEconomy.getOfflineInterest(uuid, bankName)));
             }
             files.savePlayerFile(config, file, async);
         }
@@ -95,7 +93,10 @@ public class PlayerRegistry {
     public void saveEveryone(boolean async) {
         for (UUID uuid : new ArrayList<>(players.keySet())) {
             savePlayer(uuid, async);
-            if (Bukkit.getPlayer(uuid) == null) remove(uuid);
+            if (Bukkit.getPlayer(uuid) == null) {
+                remove(uuid);
+                OnlineInfoHolder.unloadInfo(uuid);
+            }
         }
     }
 }

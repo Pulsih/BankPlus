@@ -2,12 +2,14 @@ package me.pulsi_.bankplus;
 
 import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.bankSystem.BankGuiRegistry;
-import me.pulsi_.bankplus.bankSystem.BankManager;
-import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.bankTop.BPBankTop;
 import me.pulsi_.bankplus.interest.BPInterest;
 import me.pulsi_.bankplus.loanSystem.LoanRegistry;
 import me.pulsi_.bankplus.logSystem.BPLogUtils;
-import me.pulsi_.bankplus.managers.*;
+import me.pulsi_.bankplus.managers.BPAFK;
+import me.pulsi_.bankplus.managers.BPConfigs;
+import me.pulsi_.bankplus.managers.BPData;
+import me.pulsi_.bankplus.managers.TaskManager;
 import me.pulsi_.bankplus.mySQL.BPSQL;
 import me.pulsi_.bankplus.placeholders.BPPlaceholders;
 import me.pulsi_.bankplus.utils.BPChat;
@@ -29,10 +31,6 @@ public final class BankPlus extends JavaPlugin {
 
     public static final String actualVersion = "6.0";
     private static BankPlus INSTANCE;
-    private static boolean mainClassesInitialized = false;
-
-    private BPEconomy bpEconomy;
-    private BankManager bankManager;
 
     private BPLogUtils bpLogUtils;
     private PlayerRegistry playerRegistry;
@@ -88,15 +86,6 @@ public final class BankPlus extends JavaPlugin {
         this.bankGuiRegistry = new BankGuiRegistry();
         this.loanRegistry = new LoanRegistry();
 
-        try {
-            this.bpEconomy = new BPEconomy();
-            this.bankManager = new BankManager();
-        } catch (Exception e) {
-            BPLogger.warn("It looks like someone tried to re-enable bankplus with another plugin, bankplus does not support this action and it may cause several problems, please restart the server if you have any issues.");
-            return;
-        }
-        mainClassesInitialized = true;
-
         this.serverVersion = getServer().getVersion();
 
         int index = serverVersion.lastIndexOf("MC:");
@@ -149,18 +138,6 @@ public final class BankPlus extends JavaPlugin {
 
     public static BankPlus INSTANCE() {
         return INSTANCE;
-    }
-
-    public static boolean isMainClassesInitialized() {
-        return mainClassesInitialized;
-    }
-
-    public static BPEconomy getBPEconomy() {
-        return INSTANCE.bpEconomy;
-    }
-
-    public static BankManager getBankManager() {
-        return INSTANCE.bankManager;
     }
 
     public PlayerRegistry getPlayerRegistry() {

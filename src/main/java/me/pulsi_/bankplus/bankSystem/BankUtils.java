@@ -43,7 +43,7 @@ public class BankUtils {
             return;
         }
 
-        if (!BankPlus.getBankManager().isAvailable(bankName, p) && !bypass) {
+        if (!BankManager.isAvailable(bankName, p) && !bypass) {
             BPMessages.send(p, "Cannot-Access-Bank");
             return;
         }
@@ -113,7 +113,7 @@ public class BankUtils {
         else {
             ConfigurationSection loreSection = itemValues.getConfigurationSection("Lore");
             if (loreSection != null) {
-                int level = BankPlus.getBankManager().getCurrentLevel(bankName, p);
+                int level = BankManager.getCurrentLevel(bankName, p);
                 List<String> defaultLore = loreSection.getStringList("Default"), leveLore = loreSection.getStringList(level + "");
 
                 if (!leveLore.isEmpty()) for (String line : leveLore) lore.add(BPChat.color(line));

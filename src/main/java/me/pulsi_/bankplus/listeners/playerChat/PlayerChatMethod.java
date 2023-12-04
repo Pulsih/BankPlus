@@ -48,15 +48,13 @@ public class PlayerChatMethod {
             return;
         }
 
-        BPEconomy economy = BankPlus.getBPEconomy();
-
         if (BPUtils.isDepositing(p)) {
             BPSets.removePlayerFromDepositing(p);
-            economy.deposit(p, amount, identifier);
+            BPEconomy.deposit(p, amount, identifier);
         }
         if (BPUtils.isWithdrawing(p)) {
             BPSets.removePlayerFromWithdrawing(p);
-            economy.withdraw(p, amount, identifier);
+            BPEconomy.withdraw(p, amount, identifier);
         }
         reopenBank(p, identifier);
     }

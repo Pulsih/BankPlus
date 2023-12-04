@@ -18,12 +18,10 @@ import java.util.Set;
 
 public class ResetAllCmd extends BPCommand {
 
-    private final BPEconomy economy;
     private final Economy vaultEconomy;
 
     public ResetAllCmd(String... aliases) {
         super(aliases);
-        economy = BankPlus.getBPEconomy();
         vaultEconomy = BankPlus.INSTANCE().getVaultEconomy();
     }
 
@@ -67,8 +65,8 @@ public class ResetAllCmd extends BPCommand {
             if (copy.isEmpty()) return;
             OfflinePlayer p = copy.remove(0);
 
-            if (mode.equalsIgnoreCase("maintain")) vaultEconomy.depositPlayer(p, economy.getBankBalance(p).doubleValue());
-            for (String bankName : banks) economy.setBankBalance(p, BigDecimal.valueOf(0), bankName);
+            if (mode.equalsIgnoreCase("maintain")) vaultEconomy.depositPlayer(p, BPEconomy.getBankBalance(p).doubleValue());
+            for (String bankName : banks) BPEconomy.setBankBalance(p, BigDecimal.valueOf(0), bankName);
         }
 
         if (!copy.isEmpty())

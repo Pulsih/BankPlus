@@ -2,8 +2,6 @@ package me.pulsi_.bankplus.mySQL;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankGuiRegistry;
-import me.pulsi_.bankplus.bankSystem.BankManager;
-import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.OfflinePlayer;

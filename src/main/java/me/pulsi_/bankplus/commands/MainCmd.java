@@ -1,9 +1,9 @@
 package me.pulsi_.bankplus.commands;
 
-import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankListGui;
 import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
+import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
@@ -44,13 +44,13 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                 else {
                     if (!Values.MULTIPLE_BANKS.isDirectlyOpenIf1IsAvailable()) BankUtils.openBank(p, BankListGui.multipleBanksGuiID);
                     else {
-                        List<String> availableBanks = BankPlus.getBankManager().getAvailableBanks(p);
+                        List<String> availableBanks = BankManager.getAvailableBanks(p);
                         if (availableBanks.size() == 1) BankUtils.openBank(p, availableBanks.get(0));
                         else BankUtils.openBank(p, BankListGui.multipleBanksGuiID);
                     }
                 }
             } else {
-                BPMessages.send(p, "Multiple-Personal-Bank", BPUtils.placeValues(p, BankPlus.getBPEconomy().getBankBalance(p)));
+                BPMessages.send(p, "Multiple-Personal-Bank", BPUtils.placeValues(p, BPEconomy.getBankBalance(p)));
                 BPUtils.playSound("PERSONAL", p);
             }
             return true;

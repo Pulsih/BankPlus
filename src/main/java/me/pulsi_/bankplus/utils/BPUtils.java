@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.utils;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.bankSystem.BankManager;
+import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.listeners.playerChat.PlayerChatMethod;
 import me.pulsi_.bankplus.managers.BPConfigs;
 import me.pulsi_.bankplus.values.Values;
@@ -341,26 +342,30 @@ public class BPUtils {
     }
 
     public static List<String> placeValues(BigDecimal amount) {
-        return placeValues(null, null, amount, "amount");
+        return placeValues(null, null, amount, "amount", 0);
     }
 
     public static List<String> placeValues(String bank, BigDecimal amount) {
-        return placeValues(null, bank, amount, "amount");
+        return placeValues(null, bank, amount, "amount", 0);
     }
 
     public static List<String> placeValues(OfflinePlayer p, BigDecimal amount) {
-        return placeValues(p, null, amount, "amount");
+        return placeValues(p, null, amount, "amount", 0);
     }
 
-    public static List<String> placeValues(BigDecimal amount, String newIdentifier) {
-        return placeValues(null, null, amount, newIdentifier);
+    public static List<String> placeValues(OfflinePlayer p, BigDecimal amount, int level) {
+        return placeValues(p, null, amount, "amount", level);
     }
 
-    public static List<String> placeValues(OfflinePlayer p, BigDecimal amount, String newIdentifier) {
-        return placeValues(p, null, amount, newIdentifier);
+    public static List<String> placeValues(BigDecimal amount, String identifier) {
+        return placeValues(null, null, amount, identifier, 0);
     }
 
-    public static List<String> placeValues(OfflinePlayer p, String bank, BigDecimal amount, String newIdentifier) {
+    public static List<String> placeValues(OfflinePlayer p, BigDecimal amount, String identifier) {
+        return placeValues(p, null, amount, identifier, 0);
+    }
+
+    public static List<String> placeValues(OfflinePlayer p, String bank, BigDecimal amount, String identifier, int level) {
         List<String> values = new ArrayList<>();
         if (p != null) {
             values.add("%player%$" + p.getName());
@@ -369,10 +374,12 @@ public class BPUtils {
 
         if (bank != null) values.add("%bank%$" + bank);
 
-        values.add("%" + newIdentifier + "%$" + BPFormatter.formatCommas(amount));
-        values.add("%" + newIdentifier + "_long%$" + amount);
-        values.add("%" + newIdentifier + "_formatted%$" + BPFormatter.format(amount));
-        values.add("%" + newIdentifier + "_formatted_long%$" + BPFormatter.formatLong(amount));
+        values.add("%" + identifier + "%$" + BPFormatter.formatCommas(amount));
+        values.add("%" + identifier + "_long%$" + amount);
+        values.add("%" + identifier + "_formatted%$" + BPFormatter.format(amount));
+        values.add("%" + identifier + "_formatted_long%$" + BPFormatter.formatLong(amount));
+
+        if (level > 0) values.add("%level%$" + level);
         return values;
     }
 
@@ -381,10 +388,10 @@ public class BPUtils {
     }
 
     public static boolean isBankFull(Player p, String bankName) {
-        BigDecimal capacity = BankPlus.getBankManager().getCapacity(bankName, p);
+        BigDecimal capacity = BankManager.getCapacity(bankName, p);
         if (capacity.doubleValue() <= 0d) return false;
 
-        if (BankPlus.getBPEconomy().getBankBalance(p, bankName).doubleValue() >= capacity.doubleValue()) {
+        if (BPEconomy.getBankBalance(p, bankName).doubleValue() >= capacity.doubleValue()) {
             BPMessages.send(p, "Cannot-Deposit-Anymore");
             return true;
         }

@@ -1,11 +1,14 @@
-package me.pulsi_.bankplus.managers;
+package me.pulsi_.bankplus.bankTop;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
+import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.managers.TaskManager;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -29,22 +32,25 @@ public class BPBankTop {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             bankTop.clear();
 
-            HashMap<String, BigDecimal> balances = BankPlus.getBPEconomy().getAllBankBalances();
-
+            HashMap<String, BigDecimal> balances = BPEconomy.getAllBankBalances();
             List<BigDecimal> amounts = new ArrayList<>(balances.values());
             List<String> names = new ArrayList<>(balances.keySet());
 
             Collections.sort(amounts);
 
-            for (int i = 0; i < Values.CONFIG.getBankTopSize() && i < balances.size(); i++) {
+            for (int i = balances.size() - 1, a = 0; i >= 0 && a < Values.CONFIG.getBankTopSize(); i--, a++) {
                 BigDecimal amount = amounts.get(i);
+
                 for (String name : names) {
                     if (!balances.get(name).equals(amount)) continue;
+
                     BankTopPlayer player = new BankTopPlayer();
                     player.setBalance(amount);
                     player.setName(name);
+                    bankTop.put(a + 1, player);
 
-                    bankTop.put(i, player);
+                    amounts.remove(amount);
+                    names.remove(name);
                     break;
                 }
             }
@@ -67,46 +73,29 @@ public class BPBankTop {
     }
 
     public BigDecimal getBankTopBalancePlayer(int position) {
-        if (position < 1 || position > bankTop.size()) return new BigDecimal(0);
-        return bankTop.get(position - 1).getBalance();
+        BankTopPlayer p = bankTop.get(Math.min(bankTop.size(), Math.max(1, position)));
+        return (p == null ? new BigDecimal(0) : p.getBalance());
     }
 
     public String getBankTopNamePlayer(int position) {
-        if (position < 1 || position > bankTop.size()) return Values.CONFIG.getBanktopPlayerNotFoundPlaceholder();
-        return bankTop.get(position - 1).getName();
+        BankTopPlayer p = bankTop.get(Math.min(bankTop.size(), Math.max(1, position)));
+        return (p == null ? Values.CONFIG.getBanktopPlayerNotFoundPlaceholder() : p.getName());
     }
 
-    public int getPlayerBankTopPosition(Player p) {
+    public int getPlayerBankTopPosition(OfflinePlayer p) {
         BPPlayer player = plugin.getPlayerRegistry().get(p);
-        if (player.getBanktopPosition() == -1) {
-            for (int i = 0; i < bankTop.size(); i++) {
-                if (!bankTop.get(i).getName().equals(p.getName())) continue;
-                player.setBanktopPosition(i + 1);
-                break;
-            }
+        if (player != null) {
+            if (player.getBanktopPosition() == -1)
+                player.setBanktopPosition(getPlayerBankTopPosition(p.getName()));
+            return player.getBanktopPosition();
         }
-        return player.getBanktopPosition();
+        return getPlayerBankTopPosition(p.getName());
     }
 
-    private static class BankTopPlayer {
-
-        private BigDecimal balance;
-        private String name;
-
-        public BigDecimal getBalance() {
-            return balance;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setBalance(BigDecimal balance) {
-            this.balance = balance;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
+    public int getPlayerBankTopPosition(String name) {
+        int position = -1;
+        for (int i = 1; i <= bankTop.size(); i++)
+            if (bankTop.get(i).getName().equals(name)) return i;
+        return position;
     }
 }

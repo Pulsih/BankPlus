@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class BPPlayerManager {
@@ -34,12 +35,10 @@ public class BPPlayerManager {
         Player oP = p.getPlayer();
         if (oP == null) return;
 
-        BPPlayer player = new BPPlayer(oP);
-
         boolean changes = false;
-        HashMap<String, BPPlayer.PlayerBank> information = new HashMap<>();
+        HashMap<String, OnlineInfoHolder.BankInfo> information = new HashMap<>();
         // If the player is already loaded, put the loaded map in the "balances" map.
-        HashMap<String, BPPlayer.PlayerBank> bankInformation = getBankInformation();
+        HashMap<String, OnlineInfoHolder.BankInfo> bankInformation = OnlineInfoHolder.getBankInfo().get(p.getUniqueId());
         if (bankInformation != null) information = bankInformation;
 
         if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE().getSql().isConnected()) {
@@ -47,7 +46,7 @@ public class BPPlayerManager {
             for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) {
                 if (information.containsKey(bankName)) continue;
 
-                information.put(bankName, new BPPlayer.PlayerBank(
+                information.put(bankName, new OnlineInfoHolder.BankInfo(
                         pManager.getLevel(bankName),
                         pManager.getMoney(bankName),
                         pManager.getDebt(bankName),
@@ -98,7 +97,7 @@ public class BPPlayerManager {
                         BPLogger.warn("Could not get \"" + bankName + "\" bank interest for " + p.getName() + " because it contains an invalid number! (Using 0 as default)");
                     }
                 }
-                information.put(bankName, new BPPlayer.PlayerBank(
+                information.put(bankName, new OnlineInfoHolder.BankInfo(
                         level,
                         balAmount,
                         debtAmount,
@@ -107,8 +106,7 @@ public class BPPlayerManager {
                 changes = true;
             }
         }
-        if (changes) player.setBankInformation(information);
-
+        if (changes) OnlineInfoHolder.updatePlayerInfo(p, information);
         BankPlus.INSTANCE().getPlayerRegistry().put(oP, new BPPlayer(oP));
     }
 
@@ -214,11 +212,6 @@ public class BPPlayerManager {
         } catch (Exception e) {
             save(config, file);
         }
-    }
-
-    public HashMap<String, BPPlayer.PlayerBank> getBankInformation() {
-        BPPlayer player = BankPlus.INSTANCE().getPlayerRegistry().get(p);
-        return (player == null ? null : player.getBankInformation());
     }
 
     private void save(FileConfiguration config, File file) {

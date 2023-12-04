@@ -3,9 +3,9 @@ package me.pulsi_.bankplus.placeholders;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankManager;
+import me.pulsi_.bankplus.bankTop.BPBankTop;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.interest.BPInterest;
-import me.pulsi_.bankplus.managers.BPBankTop;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPUtils;
@@ -20,11 +20,9 @@ import java.util.List;
 public class BPPlaceholders extends PlaceholderExpansion {
 
     private final BPInterest interest;
-    private final BPEconomy economy;
 
     public BPPlaceholders() {
         interest = BankPlus.INSTANCE().getInterest();
-        economy = BankPlus.getBPEconomy();
     }
 
     @Override
@@ -63,168 +61,158 @@ public class BPPlaceholders extends PlaceholderExpansion {
             target = identifier.substring(identifier.indexOf("{") + 1, identifier.indexOf("}"));
 
         if (identifier.startsWith("capacity")) {
-            BankManager reader = BankPlus.getBankManager();
             String bankName = Values.CONFIG.getMainGuiName();
 
             if (target != null) {
                 bankName = target;
-                if (!reader.exist(bankName)) return "&cThe selected bank does not exist.";
+                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
             }
 
-            BigDecimal capacity = reader.getCapacity(bankName, p);
+            BigDecimal capacity = BankManager.getCapacity(bankName, p);
             if (capacity.longValue() <= 0) return Values.CONFIG.getInfiniteCapacityText();
 
             return getFormat(identifier, capacity);
         }
 
         if (identifier.startsWith("level")) {
-            BankManager manager = BankPlus.getBankManager();
             String bankName = Values.CONFIG.getMainGuiName();
 
             if (target != null) {
                 bankName = target;
-                if (!manager.exist(bankName)) return "&cThe selected bank does not exist.";
+                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
             }
 
-            return String.valueOf(manager.getCurrentLevel(bankName, p));
+            return String.valueOf(BankManager.getCurrentLevel(bankName, p));
         }
 
         if (identifier.startsWith("next_level_cost")) {
-            BankManager manager = BankPlus.getBankManager();
             String bankName = Values.CONFIG.getMainGuiName();
 
             if (target != null) {
                 bankName = target;
-                if (!manager.exist(bankName)) return "&cThe selected bank does not exist.";
+                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
             }
 
-            if (!manager.hasNextLevel(bankName, p))
+            if (!BankManager.hasNextLevel(bankName, p))
                 return Values.CONFIG.getUpgradesMaxedPlaceholder();
 
-            BigDecimal cost = manager.getLevelCost(bankName, manager.getCurrentLevel(bankName, p) + 1);
+            BigDecimal cost = BankManager.getLevelCost(bankName, BankManager.getCurrentLevel(bankName, p) + 1);
 
             return getFormat(identifier, cost);
         }
 
         if (identifier.startsWith("next_level_capacity")) {
-            BankManager manager = BankPlus.getBankManager();
             String bankName = Values.CONFIG.getMainGuiName();
 
             if (target != null) {
                 bankName = target;
-                if (!manager.exist(bankName)) return "&cThe selected bank does not exist.";
+                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
             }
 
-            if (!manager.hasNextLevel(bankName, p))
+            if (!BankManager.hasNextLevel(bankName, p))
                 return Values.CONFIG.getUpgradesMaxedPlaceholder();
 
-            BigDecimal capacity = manager.getCapacity(bankName, manager.getCurrentLevel(bankName, p) + 1);
+            BigDecimal capacity = BankManager.getCapacity(bankName, BankManager.getCurrentLevel(bankName, p) + 1);
             if (capacity.longValue() <= 0) return Values.CONFIG.getInfiniteCapacityText();
 
             return getFormat(identifier, capacity);
         }
 
         if (identifier.startsWith("next_level_required_items")) {
-            BankManager manager = BankPlus.getBankManager();
             String bankName = Values.CONFIG.getMainGuiName();
 
             if (target != null) {
                 bankName = target;
-                if (!manager.exist(bankName)) return "&cThe selected bank does not exist.";
+                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
             }
 
-            if (!manager.hasNextLevel(bankName, p))
+            if (!BankManager.hasNextLevel(bankName, p))
                 return Values.CONFIG.getUpgradesMaxedPlaceholder();
 
-            List<ItemStack> requiredItems = manager.getRequiredItems(bankName, manager.getCurrentLevel(bankName, p) + 1);
+            List<ItemStack> requiredItems = BankManager.getRequiredItems(bankName, BankManager.getCurrentLevel(bankName, p) + 1);
             if (requiredItems == null) return Values.CONFIG.getUpgradesNoRequiredItems();
             return BPUtils.getRequiredItems(requiredItems);
         }
 
         if (identifier.startsWith("next_level_interest_rate")) {
-            BankManager manager = BankPlus.getBankManager();
             String bankName = Values.CONFIG.getMainGuiName();
 
             if (target != null) {
                 bankName = target;
-                if (!manager.exist(bankName)) return "&cThe selected bank does not exist.";
+                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
             }
 
-            if (!manager.hasNextLevel(bankName, p))
+            if (!BankManager.hasNextLevel(bankName, p))
                 return Values.CONFIG.getUpgradesMaxedPlaceholder();
 
-            return manager.getInterestRate(bankName, p, manager.getCurrentLevel(bankName, p) + 1) + "%";
+            return BankManager.getInterestRate(bankName, p, BankManager.getCurrentLevel(bankName, p) + 1) + "%";
         }
 
         if (identifier.startsWith("next_level_offline_interest_rate")) {
-            BankManager manager = BankPlus.getBankManager();
             String bankName = Values.CONFIG.getMainGuiName();
 
             if (target != null) {
                 bankName = target;
-                if (!manager.exist(bankName)) return "&cThe selected bank does not exist.";
+                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
             }
 
-            if (!manager.hasNextLevel(bankName, p))
+            if (!BankManager.hasNextLevel(bankName, p))
                 return Values.CONFIG.getUpgradesMaxedPlaceholder();
 
-            return manager.getOfflineInterestRate(bankName, p, manager.getCurrentLevel(bankName, p) + 1) + "%";
+            return BankManager.getOfflineInterestRate(bankName, p, BankManager.getCurrentLevel(bankName, p) + 1) + "%";
         }
 
         if (identifier.startsWith("next_level")) {
-            BankManager manager = BankPlus.getBankManager();
             String bankName = Values.CONFIG.getMainGuiName();
 
             if (target != null) {
                 bankName = target;
-                if (!manager.exist(bankName)) return "&cThe selected bank does not exist.";
+                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
             }
 
-            if (!manager.hasNextLevel(bankName, p))
+            if (!BankManager.hasNextLevel(bankName, p))
                 return Values.CONFIG.getUpgradesMaxedPlaceholder();
 
-            return (manager.getCurrentLevel(bankName, p) + 1) + "";
+            return (BankManager.getCurrentLevel(bankName, p) + 1) + "";
         }
 
         if (identifier.startsWith("debt")) {
             String formatter = identifier.replace("debt", "");
-            return getFormat(formatter, BankPlus.getBPEconomy().getDebts(p));
+            return getFormat(formatter, BPEconomy.getDebts(p));
         }
 
         if (identifier.startsWith("balance")) {
-            BigDecimal bal = economy.getBankBalance(p);
+            BigDecimal bal = BPEconomy.getBankBalance(p);
 
             if (target != null) {
-                if (!BankPlus.getBankManager().exist(target))
+                if (!BankManager.exist(target))
                     return "&cThe selected bank does not exist.";
-                bal = economy.getBankBalance(p, target);
+                bal = BPEconomy.getBankBalance(p, target);
             }
 
             return getFormat(identifier, bal);
         }
 
         if (identifier.startsWith("next_interest")) {
-            BankManager manager = BankPlus.getBankManager();
             String bankName = Values.CONFIG.getMainGuiName();
 
             if (target != null) {
                 bankName = target;
-                if (!manager.exist(bankName)) return "&cThe selected bank does not exist.";
+                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
             }
 
-            return getFormat(identifier, interest.getInterestMoney(bankName, p, manager.getInterestRate(bankName, p)));
+            return getFormat(identifier, interest.getInterestMoney(bankName, p, BankManager.getInterestRate(bankName, p)));
         }
 
         if (identifier.startsWith("next_offline_interest")) {
-            BankManager manager = BankPlus.getBankManager();
             String bankName = Values.CONFIG.getMainGuiName();
 
             if (target != null) {
                 bankName = target;
-                if (!manager.exist(bankName)) return "&cThe selected bank does not exist.";
+                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
             }
 
-            return getFormat(identifier, interest.getInterestMoney(bankName, p, manager.getOfflineInterestRate(bankName, p)));
+            return getFormat(identifier, interest.getInterestMoney(bankName, p, BankManager.getOfflineInterestRate(bankName, p)));
         }
 
         if (identifier.startsWith("banktop_money_")) {
@@ -291,27 +279,25 @@ public class BPPlaceholders extends PlaceholderExpansion {
         }
 
         if (identifier.startsWith("interest_rate")) {
-            BankManager manager = BankPlus.getBankManager();
             String bankName = Values.CONFIG.getMainGuiName();
 
             if (target != null) {
                 bankName = target;
-                if (!manager.exist(bankName)) return "&cThe selected bank does not exist.";
+                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
             }
 
-            return manager.getInterestRate(bankName, p) + "%";
+            return BankManager.getInterestRate(bankName, p) + "%";
         }
 
         if (identifier.startsWith("offline_interest_rate")) {
-            BankManager manager = BankPlus.getBankManager();
             String bankName = Values.CONFIG.getMainGuiName();
 
             if (target != null) {
                 bankName = target;
-                if (!manager.exist(bankName)) return "&cThe selected bank does not exist.";
+                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
             }
 
-            return manager.getOfflineInterestRate(bankName, p) + "%";
+            return BankManager.getOfflineInterestRate(bankName, p) + "%";
         }
 
         if (identifier.startsWith("calculate_deposit_taxes_")) {
@@ -323,7 +309,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
                 BigDecimal amount;
                 if (target != null) {
-                    if (!BankPlus.getBankManager().exist(target))
+                    if (!BankManager.exist(target))
                         return "The selected bank does not exist.";
 
                     number = number.replace("{" + target + "}", "");
@@ -369,7 +355,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
                 BigDecimal amount;
                 if (target != null) {
-                    if (!BankPlus.getBankManager().exist(target))
+                    if (!BankManager.exist(target))
                         return "The selected bank does not exist.";
 
                     number = number.replace("{" + target + "}", "");
@@ -389,13 +375,13 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
                 BigDecimal amount, balance;
 
-                if (target == null) balance = economy.getBankBalance(p);
+                if (target == null) balance = BPEconomy.getBankBalance(p);
                 else {
-                    if (!BankPlus.getBankManager().exist(target))
+                    if (!BankManager.exist(target))
                         return "The selected bank does not exist.";
 
                     number = number.replace("{" + target + "}", "");
-                    balance = economy.getBankBalance(p, target);
+                    balance = BPEconomy.getBankBalance(p, target);
                 }
 
                 try {

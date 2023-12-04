@@ -1,8 +1,8 @@
 package me.pulsi_.bankplus.commands.list;
 
-import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.commands.BPCommand;
+import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPArgs;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
@@ -50,7 +50,7 @@ public class AddCmd extends BPCommand {
         String bankName = Values.CONFIG.getMainGuiName();
         if (args.length > 3) bankName = args[3];
 
-        if (!BankPlus.getBankManager().exist(bankName)) {
+        if (!BankManager.exist(bankName)) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }
@@ -59,7 +59,7 @@ public class AddCmd extends BPCommand {
 
         if (confirm(s)) return false;
 
-        BigDecimal added = BankPlus.getBPEconomy().addBankBalance(p, amount, bankName);
+        BigDecimal added = BPEconomy.addBankBalance(p, amount, bankName);
         if (silent) return true;
 
         if (added.doubleValue() <= 0D) BPMessages.send(s, "Bank-Full", "%player%$" + p.getName());

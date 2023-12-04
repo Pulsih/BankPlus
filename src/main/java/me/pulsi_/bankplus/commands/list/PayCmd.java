@@ -1,8 +1,8 @@
 package me.pulsi_.bankplus.commands.list;
 
-import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.commands.BPCommand;
+import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPArgs;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
@@ -52,12 +52,11 @@ public class PayCmd extends BPCommand {
         String fromBankName = Values.CONFIG.getMainGuiName();
         if (args.length > 3) fromBankName = args[3];
 
-        BankManager manager = BankPlus.getBankManager();
-        if (manager.exist(fromBankName)) {
+        if (BankManager.exist(fromBankName)) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }
-        if (!manager.isAvailable(fromBankName, player)) {
+        if (!BankManager.isAvailable(fromBankName, player)) {
             BPMessages.send(s, "Cannot-Access-Bank");
             return false;
         }
@@ -65,16 +64,16 @@ public class PayCmd extends BPCommand {
         String toBankName = Values.CONFIG.getMainGuiName();
         if (args.length > 4) toBankName = args[4];
 
-        if (manager.exist(toBankName)) {
+        if (BankManager.exist(toBankName)) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }
-        if (!manager.isAvailable(toBankName, target)) {
+        if (!BankManager.isAvailable(toBankName, target)) {
             BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
             return false;
         }
 
-        if (!confirm(s)) BankPlus.getBPEconomy().pay((Player) s, target, amount, fromBankName, toBankName);
+        if (!confirm(s)) BPEconomy.pay((Player) s, target, amount, fromBankName, toBankName);
         return true;
     }
 
@@ -88,10 +87,10 @@ public class PayCmd extends BPCommand {
             return BPArgs.getArgs(args, "1", "2", "3");
 
         if (args.length == 4)
-            return BPArgs.getArgs(args, BankPlus.getBankManager().getAvailableBanks(p));
+            return BPArgs.getArgs(args, BankManager.getAvailableBanks(p));
 
         if (args.length == 5)
-            return BPArgs.getArgs(args, BankPlus.getBankManager().getAvailableBanks(target));
+            return BPArgs.getArgs(args, BankManager.getAvailableBanks(target));
         return null;
     }
 }

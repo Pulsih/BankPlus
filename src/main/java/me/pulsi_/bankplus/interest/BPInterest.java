@@ -25,11 +25,9 @@ public class BPInterest {
     private long cooldown = 0;
     private boolean wasDisabled = true;
 
-    private final BPEconomy economy;
     private final BankPlus plugin;
 
     public BPInterest(BankPlus plugin) {
-        economy = BankPlus.getBPEconomy();
         this.plugin = plugin;
     }
 
@@ -78,16 +76,16 @@ public class BPInterest {
         if (!p.hasPermission("bankplus.receive.interest") || (Values.CONFIG.isIgnoringAfkPlayers() && BankPlus.INSTANCE().getAfkManager().isAFK(p))) return;
 
         BigDecimal interestAmount = new BigDecimal(0);
-        List<String> availableBanks = BankPlus.getBankManager().getAvailableBanks(p);
+        List<String> availableBanks = BankManager.getAvailableBanks(p);
 
         for (String bankName : availableBanks) {
-            BigDecimal bankBalance = economy.getBankBalance(p, bankName);
-            BigDecimal interestMoney = getInterestMoney(bankName, p, BankPlus.getBankManager().getInterestRate(bankName, p)), maxAmount = Values.CONFIG.getInterestMaxAmount();
+            BigDecimal bankBalance = BPEconomy.getBankBalance(p, bankName);
+            BigDecimal interestMoney = getInterestMoney(bankName, p, BankManager.getInterestRate(bankName, p)), maxAmount = Values.CONFIG.getInterestMaxAmount();
 
             if (bankBalance.doubleValue() <= 0) continue;
             if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
 
-            BigDecimal amount = economy.addBankBalance(p, interestMoney, bankName, TransactionType.INTEREST);
+            BigDecimal amount = BPEconomy.addBankBalance(p, interestMoney, bankName, TransactionType.INTEREST);
             interestAmount = interestAmount.add(amount);
         }
         if (!Values.MESSAGES.isInterestBroadcastEnabled()) return;
@@ -116,30 +114,28 @@ public class BPInterest {
             }
             if (!hasPermission) continue;
 
-            BankManager manager = BankPlus.getBankManager();
-            for (String bankName : manager.getAvailableBanks(p)) {
-                BigDecimal bankBalance = economy.getBankBalance(p, bankName);
+            for (String bankName : BankManager.getAvailableBanks(p)) {
+                BigDecimal bankBalance = BPEconomy.getBankBalance(p, bankName);
                 BigDecimal maxAmount = Values.CONFIG.getInterestMaxAmount(),
                         interestMoney = Values.CONFIG.isOfflineInterestDifferentRate() ?
-                        getInterestMoney(bankName, p, manager.getOfflineInterestRate(bankName, p)) :
-                        getInterestMoney(bankName, p, manager.getInterestRate(bankName, p));
+                        getInterestMoney(bankName, p, BankManager.getOfflineInterestRate(bankName, p)) :
+                        getInterestMoney(bankName, p, BankManager.getInterestRate(bankName, p));
 
                 if (bankBalance.doubleValue() <= 0) continue;
                 if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
 
-                economy.addBankBalance(p, interestMoney, bankName, TransactionType.INTEREST, true);
+                BPEconomy.addBankBalance(p, interestMoney, bankName, TransactionType.INTEREST, true);
             }
         }
     }
 
     public BigDecimal getInterestMoney(String bankName, OfflinePlayer p, BigDecimal defaultInterest) {
-        BigDecimal playerBalance = BankPlus.getBPEconomy().getBankBalance(p, bankName);
+        BigDecimal playerBalance = BPEconomy.getBankBalance(p, bankName);
 
         if (!Values.CONFIG.enableInterestLimiter() || !Values.CONFIG.accumulateInterestLimiter())
             return playerBalance.multiply(defaultInterest.divide(BigDecimal.valueOf(100)));
 
-        BankManager manager = BankPlus.getBankManager();
-        List<String> limiter = manager.getInterestLimiter(bankName, manager.getCurrentLevel(bankName, p));
+        List<String> limiter = BankManager.getInterestLimiter(bankName, BankManager.getCurrentLevel(bankName, p));
         BigDecimal result = new BigDecimal(0), count = playerBalance;
         for (String line : limiter) {
             if (!line.contains(":")) continue;

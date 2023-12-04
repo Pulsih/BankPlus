@@ -1,6 +1,5 @@
 package me.pulsi_.bankplus.commands.list;
 
-import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
@@ -32,18 +31,23 @@ public class BalanceCmd extends BPCommand {
     public boolean onCommand(CommandSender s, String[] args) {
         Player p = (Player) s;
 
-        BPEconomy economy = BankPlus.getBPEconomy();
         if (args.length == 1) {
             if (confirm(s)) return false;
-            BPMessages.send(p, "Multiple-Personal-Bank", BPUtils.placeValues(p, economy.getBankBalance(p)));
+
+            List<String> availableBanks = BankManager.getAvailableBanks(p);
+            if (availableBanks.size() > 1) BPMessages.send(p, "Multiple-Personal-Bank", BPUtils.placeValues(p, BPEconomy.getBankBalance(p)));
+            else {
+                String name = availableBanks.get(0);
+                BPMessages.send(p, "Personal-Bank", BPUtils.placeValues(p, BPEconomy.getBankBalance(p, name), BankManager.getCurrentLevel(name, p)));
+            }
         } else {
             String bankName = args[1];
-            if (!BankPlus.getBankManager().exist(bankName)) {
+            if (!BankManager.exist(bankName)) {
                 BPMessages.send(s, "Invalid-Bank");
                 return false;
             }
             if (confirm(s)) return false;
-            BPMessages.send(p, "Personal-Bank", BPUtils.placeValues(p, economy.getBankBalance(p, bankName)));
+            BPMessages.send(p, "Personal-Bank", BPUtils.placeValues(p, BPEconomy.getBankBalance(p, bankName), BankManager.getCurrentLevel(bankName, p)));
         }
         return true;
     }
@@ -53,7 +57,7 @@ public class BalanceCmd extends BPCommand {
         Player p = (Player) s;
 
         if (args.length == 2)
-            return BPArgs.getArgs(args, BankPlus.getBankManager().getAvailableBanks(p));
+            return BPArgs.getArgs(args, BankManager.getAvailableBanks(p));
         return null;
     }
 }
