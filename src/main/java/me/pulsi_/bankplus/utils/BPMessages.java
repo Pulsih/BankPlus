@@ -14,7 +14,7 @@ import java.util.*;
 public class BPMessages {
 
     private static final Map<String, List<String>> messages = new HashMap<>();
-    private static String[] identifiersToSkip = {"Enable-Missing-Message-Alert", "Title-Custom-Transaction", "Interest-Broadcast"};
+    private static final String[] identifiersToSkip = {"Enable-Missing-Message-Alert", "Title-Custom-Transaction", "Interest-Broadcast"};
 
     private static String prefix = BPChat.prefix;
 
@@ -177,7 +177,7 @@ public class BPMessages {
         for (String path : messagesSection.getKeys(false)) {
             boolean skip = false;
             for (String identifier : identifiersToSkip) {
-                if (path.equals(identifier)) continue;
+                if (!path.equals(identifier)) continue;
                 skip = true;
             }
             if (!skip) messages.put(path, getPossibleMessages(config, path));
