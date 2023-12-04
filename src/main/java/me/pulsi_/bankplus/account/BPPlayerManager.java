@@ -16,7 +16,6 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class BPPlayerManager {
@@ -112,9 +111,10 @@ public class BPPlayerManager {
 
     /**
      * Check if the player file has any errors and fix them.
+     *
      * @param p The player to check.
      */
-    public FileConfiguration checkForFileFixes(OfflinePlayer p, BPPlayerManager pManager) {
+    public void checkForFileFixes(OfflinePlayer p, BPPlayerManager pManager) {
         File file = pManager.getPlayerFile();
         FileConfiguration config = pManager.getPlayerConfig(file);
         boolean hasChanges = false;
@@ -153,7 +153,6 @@ public class BPPlayerManager {
         }
 
         if (hasChanges) pManager.savePlayerFile(config, file, true);
-        return config;
     }
 
     public boolean isPlayerRegistered() {
