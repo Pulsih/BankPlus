@@ -193,9 +193,10 @@ public class LoanUtils {
             if (isPlayerToBank) BPMessages.send(receiver, "Loan-Returned-Bank", BPUtils.placeValues(loan.getRequestedBank(), amount));
             else BPMessages.send(receiver, "Loan-Returned", BPUtils.placeValues(sender, amount));
         } else {
-            if (isPlayerToBank) BPMessages.send(receiver, "Loan-Returned-Debt-Bank", BPUtils.placeValues(loan.getRequestedBank(), debt));
-            else BPMessages.send(receiver, "Loan-Returned-Debt", BPUtils.placeValues(sender, debt));
-            BPEconomy.setDebt(receiver, debt, loan.getRequestedBank());
+            BigDecimal newDebt = BPEconomy.getDebt(receiver, loan.getRequestedBank()).add(debt);
+            if (isPlayerToBank) BPMessages.send(receiver, "Loan-Returned-Debt-Bank", BPUtils.placeValues(loan.getRequestedBank(), newDebt));
+            else BPMessages.send(receiver, "Loan-Returned-Debt", BPUtils.placeValues(sender, newDebt));
+            BPEconomy.setDebt(receiver, newDebt, loan.getRequestedBank());
         }
 
         // Was the loan at his final instalment?

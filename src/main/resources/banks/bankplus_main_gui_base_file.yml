@@ -194,8 +194,8 @@ Items:
       - ""
       - "&7Wait &a%bankplus_interest_cooldown% &7to get interest!"
       - "&7Expected money from the next interest: &a%bankplus_next_interest_formatted%"
-      - "&7Interest rate: &a%bankplus_interest_rate%"
-      - "&7Offline interest rate: &a%bankplus_offline_interest_rate%"
+      - "&7Interest rate: &a%bankplus_interest_rate%%"
+      - "&7Offline interest rate: &a%bankplus_offline_interest_rate%%"
       - ""
       - "&7&o(( %bankplus_withdraw_taxes% Withdraw Taxes. %bankplus_deposit_taxes% Deposit Taxes. ))"
     Glowing: true

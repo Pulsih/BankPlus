@@ -47,35 +47,30 @@ public class BPTransactionListener implements Listener {
     public void processDebt(BPPreTransactionEvent e) {
         OfflinePlayer p = e.getPlayer();
 
-        if (Values.CONFIG.isLogTransactions())
-            logHolder.put(p.getUniqueId(), new Pair<>(e.getCurrentBalance(), e.getCurrentVaultBalance()));
-
         BigDecimal debt = BPEconomy.getDebt(p, e.getBankName());
         TransactionType type = e.getTransactionType();
-        if (debt.doubleValue() <= 0d || (!type.equals(TransactionType.ADD) && !type.equals(TransactionType.DEPOSIT) && !type.equals(TransactionType.SET))) return;
+        if (debt.doubleValue() <= 0d || (type != TransactionType.ADD && type != TransactionType.DEPOSIT && type != TransactionType.INTEREST && type != TransactionType.SET)) return;
 
-        BigDecimal debtLeft = debt.subtract(e.getTransactionAmount()), newAmount;
+        BigDecimal debtLeft = new BigDecimal(0), newTransactionAmount = e.getTransactionAmount().subtract(debt);
 
-        if (debtLeft.doubleValue() > 0d) {
-            newAmount = BigDecimal.valueOf(0);
-            debtLeft = debt.subtract(e.getTransactionAmount());
-
-            BPMessages.send(Bukkit.getPlayer(p.getUniqueId()), "Debt-Money-Taken",
-                    BPUtils.placeValues(e.getTransactionAmount()),
-                    BPUtils.placeValues(debtLeft, "debt")
-            );
-        } else {
-            newAmount = debtLeft.multiply(BigDecimal.valueOf(-1));
-            debtLeft = BigDecimal.valueOf(0);
-
-            BPMessages.send(Bukkit.getPlayer(p.getUniqueId()), "Debt-Money-Taken",
-                    BPUtils.placeValues(newAmount),
-                    BPUtils.placeValues(debtLeft, "debt")
-            );
+        if (newTransactionAmount.doubleValue() < 0d) {
+            debtLeft = newTransactionAmount.abs();
+            newTransactionAmount = BigDecimal.valueOf(0);
         }
 
+        BPMessages.send(Bukkit.getPlayer(p.getUniqueId()), "Debt-Money-Taken",
+                BPUtils.placeValues(e.getTransactionAmount().min(debt)),
+                BPUtils.placeValues(debtLeft, "debt")
+        );
+
         BPEconomy.setDebt(p, debtLeft, e.getBankName());
-        e.setTransactionAmount(newAmount);
+        e.setTransactionAmount(newTransactionAmount);
+    }
+
+    @EventHandler
+    public void onTransactionStart(BPPreTransactionEvent e) {
+        if (Values.CONFIG.isLogTransactions())
+            logHolder.put(e.getPlayer().getUniqueId(), new Pair<>(e.getCurrentBalance(), e.getCurrentVaultBalance()));
     }
 
     @EventHandler

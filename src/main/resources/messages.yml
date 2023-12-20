@@ -53,7 +53,7 @@ Payment-Received: "%prefix% &aYou have received &f%amount_formatted% &amoney fro
 Interest-Time: "%prefix% &aWait more &f%time% &ato get the interest."
 BankTop-Updated: "%prefix% &aSuccessfully updated the banktop!"
 Bank-Upgraded: "%prefix% &aSuccessfully upgraded the bank!"
-Debt-Money-Taken: "%prefix% &cWe took &f%amount_formatted% &cmoney from your bank to pay your debt, which is now: %debt_formatted%"
+Debt-Money-Taken: "%prefix% &cWe took &f%amount_formatted% &cmoney from your bank to pay your debt, which is now: &f%debt_formatted%&c."
 
 # Loans
 Loan-Request-Sent: "%prefix% &aSuccessfully sent the loan request to &f%player%&a, waiting for a confirm..."

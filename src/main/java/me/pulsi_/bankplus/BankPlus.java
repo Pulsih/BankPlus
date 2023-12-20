@@ -56,6 +56,8 @@ public final class BankPlus extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        INSTANCE = this;
+
         PluginManager plManager = Bukkit.getPluginManager();
         if (plManager.getPlugin("Vault") == null) {
             BPLogger.log("");
@@ -79,7 +81,6 @@ public final class BankPlus extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        INSTANCE = this;
 
         this.bpLogUtils = new BPLogUtils();
         this.playerRegistry = new PlayerRegistry();
@@ -117,7 +118,9 @@ public final class BankPlus extends JavaPlugin {
 
         if (plManager.getPlugin("PlaceholderAPI") != null) {
             BPLogger.info("Hooked into PlaceholderAPI!");
-            new BPPlaceholders().register();
+            BPPlaceholders placeholders = new BPPlaceholders();
+            placeholders.registerPlaceholders();
+            placeholders.register();
             isPlaceholderApiHooked = true;
         }
         if (plManager.getPlugin("Essentials") != null) {

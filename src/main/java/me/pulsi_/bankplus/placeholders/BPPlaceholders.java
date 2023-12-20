@@ -2,28 +2,16 @@ package me.pulsi_.bankplus.placeholders;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.bankSystem.BankManager;
-import me.pulsi_.bankplus.bankTop.BPBankTop;
-import me.pulsi_.bankplus.economy.BPEconomy;
-import me.pulsi_.bankplus.interest.BPInterest;
-import me.pulsi_.bankplus.utils.BPChat;
-import me.pulsi_.bankplus.utils.BPFormatter;
-import me.pulsi_.bankplus.utils.BPUtils;
+import me.pulsi_.bankplus.placeholders.list.*;
 import me.pulsi_.bankplus.values.Values;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
-import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 public class BPPlaceholders extends PlaceholderExpansion {
 
-    private final BPInterest interest;
-
-    public BPPlaceholders() {
-        interest = BankPlus.INSTANCE().getInterest();
-    }
+    private final List<BPPlaceholder> placeholders = new ArrayList<>();
 
     @Override
     public boolean persist() {
@@ -54,372 +42,63 @@ public class BPPlaceholders extends PlaceholderExpansion {
     public String onPlaceholderRequest(Player p, String identifier) {
         if (p == null) return "Player not online";
 
-        BPBankTop bankTop = BankPlus.INSTANCE().getBankTopManager();
-
-        String target = null;
+        String target = Values.CONFIG.getMainGuiName();
         if (identifier.contains("{") && identifier.endsWith("}"))
             target = identifier.substring(identifier.indexOf("{") + 1, identifier.indexOf("}"));
 
-        if (identifier.startsWith("capacity")) {
-            String bankName = Values.CONFIG.getMainGuiName();
-
-            if (target != null) {
-                bankName = target;
-                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
-            }
-
-            BigDecimal capacity = BankManager.getCapacity(bankName, p);
-            if (capacity.longValue() <= 0) return Values.CONFIG.getInfiniteCapacityText();
-
-            return getFormat(identifier, capacity);
+        for (BPPlaceholder placeholder : placeholders) {
+            if (identifier.toLowerCase().startsWith(placeholder.getIdentifier().toLowerCase()))
+                return placeholder.getPlaceholder(p, target, identifier);
         }
-
-        if (identifier.startsWith("level")) {
-            String bankName = Values.CONFIG.getMainGuiName();
-
-            if (target != null) {
-                bankName = target;
-                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
-            }
-
-            return String.valueOf(BankManager.getCurrentLevel(bankName, p));
-        }
-
-        if (identifier.startsWith("next_level_cost")) {
-            String bankName = Values.CONFIG.getMainGuiName();
-
-            if (target != null) {
-                bankName = target;
-                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
-            }
-
-            if (!BankManager.hasNextLevel(bankName, p))
-                return Values.CONFIG.getUpgradesMaxedPlaceholder();
-
-            BigDecimal cost = BankManager.getLevelCost(bankName, BankManager.getCurrentLevel(bankName, p) + 1);
-
-            return getFormat(identifier, cost);
-        }
-
-        if (identifier.startsWith("next_level_capacity")) {
-            String bankName = Values.CONFIG.getMainGuiName();
-
-            if (target != null) {
-                bankName = target;
-                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
-            }
-
-            if (!BankManager.hasNextLevel(bankName, p))
-                return Values.CONFIG.getUpgradesMaxedPlaceholder();
-
-            BigDecimal capacity = BankManager.getCapacity(bankName, BankManager.getCurrentLevel(bankName, p) + 1);
-            if (capacity.longValue() <= 0) return Values.CONFIG.getInfiniteCapacityText();
-
-            return getFormat(identifier, capacity);
-        }
-
-        if (identifier.startsWith("next_level_required_items")) {
-            String bankName = Values.CONFIG.getMainGuiName();
-
-            if (target != null) {
-                bankName = target;
-                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
-            }
-
-            if (!BankManager.hasNextLevel(bankName, p))
-                return Values.CONFIG.getUpgradesMaxedPlaceholder();
-
-            List<ItemStack> requiredItems = BankManager.getRequiredItems(bankName, BankManager.getCurrentLevel(bankName, p) + 1);
-            if (requiredItems == null) return Values.CONFIG.getUpgradesNoRequiredItems();
-            return BPUtils.getRequiredItems(requiredItems);
-        }
-
-        if (identifier.startsWith("next_level_interest_rate")) {
-            String bankName = Values.CONFIG.getMainGuiName();
-
-            if (target != null) {
-                bankName = target;
-                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
-            }
-
-            if (!BankManager.hasNextLevel(bankName, p))
-                return Values.CONFIG.getUpgradesMaxedPlaceholder();
-
-            return BankManager.getInterestRate(bankName, p, BankManager.getCurrentLevel(bankName, p) + 1) + "%";
-        }
-
-        if (identifier.startsWith("next_level_offline_interest_rate")) {
-            String bankName = Values.CONFIG.getMainGuiName();
-
-            if (target != null) {
-                bankName = target;
-                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
-            }
-
-            if (!BankManager.hasNextLevel(bankName, p))
-                return Values.CONFIG.getUpgradesMaxedPlaceholder();
-
-            return BankManager.getOfflineInterestRate(bankName, p, BankManager.getCurrentLevel(bankName, p) + 1) + "%";
-        }
-
-        if (identifier.startsWith("next_level")) {
-            String bankName = Values.CONFIG.getMainGuiName();
-
-            if (target != null) {
-                bankName = target;
-                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
-            }
-
-            if (!BankManager.hasNextLevel(bankName, p))
-                return Values.CONFIG.getUpgradesMaxedPlaceholder();
-
-            return (BankManager.getCurrentLevel(bankName, p) + 1) + "";
-        }
-
-        if (identifier.startsWith("debt")) {
-            String formatter = identifier.replace("debt", "");
-            return getFormat(formatter, BPEconomy.getDebts(p));
-        }
-
-        if (identifier.startsWith("balance")) {
-            BigDecimal bal = BPEconomy.getBankBalance(p);
-
-            if (target != null) {
-                if (!BankManager.exist(target))
-                    return "&cThe selected bank does not exist.";
-                bal = BPEconomy.getBankBalance(p, target);
-            }
-
-            return getFormat(identifier, bal);
-        }
-
-        if (identifier.startsWith("next_interest")) {
-            String bankName = Values.CONFIG.getMainGuiName();
-
-            if (target != null) {
-                bankName = target;
-                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
-            }
-
-            return getFormat(identifier, interest.getInterestMoney(bankName, p, BankManager.getInterestRate(bankName, p)));
-        }
-
-        if (identifier.startsWith("next_offline_interest")) {
-            String bankName = Values.CONFIG.getMainGuiName();
-
-            if (target != null) {
-                bankName = target;
-                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
-            }
-
-            return getFormat(identifier, interest.getInterestMoney(bankName, p, BankManager.getOfflineInterestRate(bankName, p)));
-        }
-
-        if (identifier.startsWith("banktop_money_")) {
-            if (!Values.CONFIG.isBanktopEnabled())
-                return BPChat.color("&cThe banktop is not enabled!");
-
-            String number = identifier.replace("banktop_money_", "");
-            int position;
-            try {
-                position = Integer.parseInt(number);
-            } catch (NumberFormatException e) {
-                return "&cInvalid banktop number!";
-            }
-
-            if (position > Values.CONFIG.getBankTopSize())
-                return "&cThe banktop limit is " + Values.CONFIG.getBankTopSize() + "!";
-
-            BigDecimal money = bankTop.getBankTopBalancePlayer(position);
-            switch (Values.CONFIG.getBankTopMoneyFormat()) {
-                case "default_amount":
-                    return BPFormatter.formatCommas(money);
-                case "amount_long":
-                    return String.valueOf(money);
-                default:
-                    return BPFormatter.format(money);
-                case "amount_formatted_long":
-                    return BPFormatter.formatLong(money);
-            }
-        }
-
-        if (identifier.startsWith("banktop_name_")) {
-            if (!Values.CONFIG.isBanktopEnabled())
-                return BPChat.color("&cThe banktop is not enabled!");
-
-            String number = identifier.replace("banktop_name_", "");
-            int position;
-            try {
-                position = Integer.parseInt(number);
-            } catch (NumberFormatException e) {
-                return "&cInvalid banktop number!";
-            }
-
-            if (position > Values.CONFIG.getBankTopSize())
-                return "&cThe banktop limit is " + Values.CONFIG.getBankTopSize() + "!";
-
-            return bankTop.getBankTopNamePlayer(position);
-        }
-
-        if (identifier.startsWith("banktop_position")) {
-            if (!Values.CONFIG.isBanktopEnabled())
-                return BPChat.color("&cThe banktop is not enabled!");
-
-            Player result = p;
-            if (target != null) {
-                Player pTarget = Bukkit.getPlayer(target);
-
-                if (pTarget == null)
-                    return "&cThe selected player does not exist!";
-
-                result = pTarget;
-            }
-
-            return bankTop.getPlayerBankTopPosition(result) + "";
-        }
-
-        if (identifier.startsWith("interest_rate")) {
-            String bankName = Values.CONFIG.getMainGuiName();
-
-            if (target != null) {
-                bankName = target;
-                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
-            }
-
-            return BankManager.getInterestRate(bankName, p) + "%";
-        }
-
-        if (identifier.startsWith("offline_interest_rate")) {
-            String bankName = Values.CONFIG.getMainGuiName();
-
-            if (target != null) {
-                bankName = target;
-                if (!BankManager.exist(bankName)) return "&cThe selected bank does not exist.";
-            }
-
-            return BankManager.getOfflineInterestRate(bankName, p) + "%";
-        }
-
-        if (identifier.startsWith("calculate_deposit_taxes_")) {
-            String secondIdentifier = identifier.replace("calculate_deposit_taxes_", "");
-
-            BigDecimal taxes = null;
-            if (secondIdentifier.startsWith("number_")) {
-                String number = secondIdentifier.replace("number_", "");
-
-                BigDecimal amount;
-                if (target != null) {
-                    if (!BankManager.exist(target))
-                        return "The selected bank does not exist.";
-
-                    number = number.replace("{" + target + "}", "");
-                }
-
-                try {
-                    amount = new BigDecimal(number.replace("%", ""));
-                } catch (NumberFormatException e) {
-                    return "Invalid Number!";
-                }
-
-                taxes = amount.multiply(Values.CONFIG.getDepositTaxes().divide(BigDecimal.valueOf(100)));
-            }
-
-            if (secondIdentifier.startsWith("percentage_")) {
-                String number = secondIdentifier.replace("percentage_", "");
-
-                BigDecimal amount, balance;
-                try {
-                    balance = BigDecimal.valueOf(BankPlus.INSTANCE().getVaultEconomy().getBalance(p));
-                } catch (NumberFormatException e) {
-                    return "Invalid vault balance!";
-                }
-
-                try {
-                    amount = new BigDecimal(number.replace("%", ""));
-                } catch (NumberFormatException e) {
-                    return "Invalid Number!";
-                }
-
-                BigDecimal percentageBalance = balance.multiply(amount.divide(BigDecimal.valueOf(100)));
-                taxes = percentageBalance.multiply(Values.CONFIG.getDepositTaxes().divide(BigDecimal.valueOf(100)));
-            }
-            return getFormat(identifier, taxes);
-        }
-
-        if (identifier.startsWith("calculate_withdraw_taxes_")) {
-            String secondIdentifier = identifier.replace("calculate_withdraw_taxes_", "");
-
-            BigDecimal taxes = null;
-            if (secondIdentifier.startsWith("number_")) {
-                String number = secondIdentifier.replace("number_", "");
-
-                BigDecimal amount;
-                if (target != null) {
-                    if (!BankManager.exist(target))
-                        return "The selected bank does not exist.";
-
-                    number = number.replace("{" + target + "}", "");
-                }
-
-                try {
-                    amount = new BigDecimal(number.replace("%", ""));
-                } catch (NumberFormatException e) {
-                    return "Invalid Number!";
-                }
-
-                taxes = amount.multiply(Values.CONFIG.getWithdrawTaxes().divide(BigDecimal.valueOf(100)));
-            }
-
-            if (secondIdentifier.startsWith("percentage_")) {
-                String number = secondIdentifier.replace("percentage_", "");
-
-                BigDecimal amount, balance;
-
-                if (target == null) balance = BPEconomy.getBankBalance(p);
-                else {
-                    if (!BankManager.exist(target))
-                        return "The selected bank does not exist.";
-
-                    number = number.replace("{" + target + "}", "");
-                    balance = BPEconomy.getBankBalance(p, target);
-                }
-
-                try {
-                    amount = new BigDecimal(number.replace("%", ""));
-                } catch (NumberFormatException e) {
-                    return "Invalid Number!";
-                }
-
-                BigDecimal percentageBalance = balance.multiply(amount.divide(BigDecimal.valueOf(100)));
-                taxes = percentageBalance.multiply(Values.CONFIG.getWithdrawTaxes().divide(BigDecimal.valueOf(100)));
-            }
-            return getFormat(identifier, taxes);
-        }
-
-        BPInterest interest = BankPlus.INSTANCE().getInterest();
-        switch (identifier) {
-            case "interest_cooldown":
-                return Values.CONFIG.isInterestEnabled() ? BPUtils.formatTime(interest.getInterestCooldownMillis()) : "Interest disabled.";
-
-            case "interest_cooldown_millis":
-                return Values.CONFIG.isInterestEnabled() ? String.valueOf(interest.getInterestCooldownMillis()) : "Interest disabled.";
-
-            case "withdraw_taxes":
-                return Values.CONFIG.getWithdrawTaxesString();
-
-            case "deposit_taxes":
-                return Values.CONFIG.getDepositTaxesString();
-        }
-
         return null;
     }
 
-    private String getFormat(String formatter, BigDecimal value) {
-        if (value == null) return "Invalid number!";
+    public void registerPlaceholders() {
+        placeholders.clear();
 
-        if (formatter.contains("_long")) return String.valueOf(value);
-        if (formatter.contains("_formatted")) return BPFormatter.format(value);
-        if (formatter.contains("_formatted_long")) return BPFormatter.formatLong(value);
-        return BPFormatter.formatCommas(value);
+        placeholders.add(new BalancePlaceholder());
+        placeholders.add(new BankTopMoneyPlaceholder());
+        placeholders.add(new BankTopNamePlaceholder());
+        placeholders.add(new CalculateDepositTaxesPlaceholder());
+        placeholders.add(new CalculateWithdrawTaxesPlaceholder());
+        placeholders.add(new CapacityPlaceholder());
+        placeholders.add(new DebtPlaceholder());
+        placeholders.add(new DepositTaxesPlaceholder());
+        placeholders.add(new InterestCooldownMillisPlaceholder());
+        placeholders.add(new InterestCooldownPlaceholder());
+        placeholders.add(new InterestRatePlaceholder());
+        placeholders.add(new LevelPlaceholder());
+        placeholders.add(new NextInterestPlaceholder());
+        placeholders.add(new NextLevelCapacityPlaceholder());
+        placeholders.add(new NextLevelCostPlaceholder());
+        placeholders.add(new NextLevelInterestRatePlaceholder());
+        placeholders.add(new NextLevelOfflineInterestRatePlaceholder());
+        placeholders.add(new NextLevelPlaceholder());
+        placeholders.add(new NextLevelRequiredItemsPlaceholder());
+        placeholders.add(new NextOfflineInterestPlaceholder());
+        placeholders.add(new OfflineInterestRatePlaceholder());
+        placeholders.add(new WithdrawTaxesPlaceholder());
+
+        List<BPPlaceholder> orderedPlaceholders = new ArrayList<>(), copy = new ArrayList<>(placeholders);
+        while (!copy.isEmpty()) {
+            BPPlaceholder longest = null;
+
+            int highestLength = 0;
+            for (BPPlaceholder placeholder : copy) {
+                String identifier = placeholder.getIdentifier();
+                int length = identifier.length();
+
+                if (length > highestLength) {
+                    highestLength = length;
+                    longest = placeholder;
+                }
+            }
+
+            orderedPlaceholders.add(longest);
+            copy.remove(longest);
+        }
+
+        placeholders.clear();
+        placeholders.addAll(orderedPlaceholders);
     }
 }
