@@ -59,6 +59,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
         placeholders.add(new BalancePlaceholder());
         placeholders.add(new BankTopMoneyPlaceholder());
         placeholders.add(new BankTopNamePlaceholder());
+        placeholders.add(new BankTopPositionPlaceholder());
         placeholders.add(new CalculateDepositTaxesPlaceholder());
         placeholders.add(new CalculateWithdrawTaxesPlaceholder());
         placeholders.add(new CapacityPlaceholder());
@@ -100,5 +101,11 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
         placeholders.clear();
         placeholders.addAll(orderedPlaceholders);
+    }
+
+    public List<String> getRegisteredPlaceholders() {
+        List<String> placeholders = new ArrayList<>();
+        for (BPPlaceholder placeholder : this.placeholders) placeholders.add(placeholder.getIdentifier());
+        return placeholders;
     }
 }

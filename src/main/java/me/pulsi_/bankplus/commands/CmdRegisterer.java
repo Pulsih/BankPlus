@@ -20,6 +20,7 @@ public class CmdRegisterer {
         new LoanCmd("loan").register();
         new OpenCmd("open").register();
         new PayCmd("pay").register();
+        new PlaceholdersCmd("placeholders").register();
         new ReloadCmd("reload").register();
         new RemoveCmd("remove").register();
         new ResetAllCmd("resetAll").register();

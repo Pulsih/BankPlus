@@ -45,6 +45,7 @@ public final class BankPlus extends JavaPlugin {
     private BPAFK BPAFK;
     private TaskManager taskManager;
     private BPInterest interest;
+    private BPPlaceholders bpPlaceholders;
 
     private BPSQL sql;
 
@@ -118,9 +119,9 @@ public final class BankPlus extends JavaPlugin {
 
         if (plManager.getPlugin("PlaceholderAPI") != null) {
             BPLogger.info("Hooked into PlaceholderAPI!");
-            BPPlaceholders placeholders = new BPPlaceholders();
-            placeholders.registerPlaceholders();
-            placeholders.register();
+            bpPlaceholders = new BPPlaceholders();
+            bpPlaceholders.registerPlaceholders();
+            bpPlaceholders.register();
             isPlaceholderApiHooked = true;
         }
         if (plManager.getPlugin("Essentials") != null) {
@@ -209,6 +210,10 @@ public final class BankPlus extends JavaPlugin {
 
     public BPInterest getInterest() {
         return interest;
+    }
+
+    public BPPlaceholders getBpPlaceholders() {
+        return bpPlaceholders;
     }
 
     public BPSQL getSql() {

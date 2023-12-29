@@ -74,12 +74,12 @@ public class BPBankTop {
 
     public BigDecimal getBankTopBalancePlayer(int position) {
         BankTopPlayer p = bankTop.get(Math.min(bankTop.size(), Math.max(1, position)));
-        return (p == null ? new BigDecimal(0) : p.getBalance());
+        return (p == null || p.getBalance() == null ? new BigDecimal(0) : p.getBalance());
     }
 
     public String getBankTopNamePlayer(int position) {
         BankTopPlayer p = bankTop.get(Math.min(bankTop.size(), Math.max(1, position)));
-        return (p == null ? Values.CONFIG.getBanktopPlayerNotFoundPlaceholder() : p.getName());
+        return (p == null || p.getName() == null ? Values.CONFIG.getBanktopPlayerNotFoundPlaceholder() : p.getName());
     }
 
     public int getPlayerBankTopPosition(OfflinePlayer p) {
@@ -94,8 +94,10 @@ public class BPBankTop {
 
     public int getPlayerBankTopPosition(String name) {
         int position = -1;
-        for (int i = 1; i <= bankTop.size(); i++)
-            if (bankTop.get(i).getName().equals(name)) return i;
+        for (int i = 1; i <= bankTop.size(); i++) {
+            BankTopPlayer p = bankTop.get(i);
+            if (p != null && p.getName() != null && p.getName().equals(name)) return i;
+        }
         return position;
     }
 }
