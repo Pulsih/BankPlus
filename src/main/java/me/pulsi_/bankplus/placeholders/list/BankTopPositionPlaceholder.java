@@ -4,7 +4,6 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.placeholders.BPPlaceholder;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.values.Values;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public class BankTopPositionPlaceholder extends BPPlaceholder {
@@ -19,16 +18,6 @@ public class BankTopPositionPlaceholder extends BPPlaceholder {
         if (!Values.CONFIG.isBanktopEnabled())
             return BPChat.color("&cThe banktop is not enabled!");
 
-        Player result = p;
-        if (target != null) {
-            Player pTarget = Bukkit.getPlayer(target);
-
-            if (pTarget == null)
-                return "&cThe selected player does not exist!";
-
-            result = pTarget;
-        }
-
-        return BankPlus.INSTANCE().getBankTopManager().getPlayerBankTopPosition(result) + "";
+        return BankPlus.INSTANCE().getBankTopManager().getPlayerBankTopPosition(p) + "";
     }
 }
