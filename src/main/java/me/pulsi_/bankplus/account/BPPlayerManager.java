@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.account;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.mySQL.BPSQL;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
 import me.pulsi_.bankplus.utils.BPFormatter;
@@ -15,7 +16,6 @@ import org.bukkit.entity.Player;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.UUID;
 
 public class BPPlayerManager {
@@ -34,78 +34,18 @@ public class BPPlayerManager {
         Player oP = p.getPlayer();
         if (oP == null) return;
 
-        boolean changes = false;
-        HashMap<String, OnlineInfoHolder.BankInfo> information = new HashMap<>();
-        // If the player is already loaded, put the loaded map in the "balances" map.
-        HashMap<String, OnlineInfoHolder.BankInfo> bankInformation = OnlineInfoHolder.getBankInfo().get(p.getUniqueId());
-        if (bankInformation != null) information = bankInformation;
-
-        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE().getSql().isConnected()) {
+        if (BankPlus.INSTANCE().getMySql().isConnected()) {
             SQLPlayerManager pManager = new SQLPlayerManager(p);
-            for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) {
-                if (information.containsKey(bankName)) continue;
-
-                information.put(bankName, new OnlineInfoHolder.BankInfo(
-                        pManager.getLevel(bankName),
-                        pManager.getMoney(bankName),
-                        pManager.getDebt(bankName),
-                        pManager.getOfflineInterest(bankName)
-                ));
-                changes = true;
+            for (BPEconomy economy : BPEconomy.list()) {
+                if (!economy.isPlayerLoaded(p)) economy.loadPlayer(p, pManager.getMoney(economyName));
             }
-
         } else {
             FileConfiguration config = getPlayerConfig();
-            for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) {
-                // If the "balances" map already contains the bank values, skip.
-                if (information.containsKey(bankName)) continue;
-
-                String sLevel = config.getString("banks." + bankName + ".level"),
-                        bal = config.getString("banks." + bankName + ".money"),
-                        debt = config.getString("banks." + bankName + ".debt"),
-                        interest = config.getString("banks." + bankName + ".interest");
-
-                int level = 1;
-                BigDecimal balAmount = new BigDecimal(0), debtAmount = new BigDecimal(0), interestAmount = new BigDecimal(0);
-
-                if (sLevel != null) {
-                    try {
-                        level = Integer.parseInt(sLevel);
-                    } catch (NumberFormatException e) {
-                        BPLogger.warn("Could not get \"" + bankName + "\" bank level for " + p.getName() + " because it contains an invalid number! (Using 0 as default)");
-                    }
-                }
-                if (bal != null) {
-                    try {
-                        balAmount = new BigDecimal(bal);
-                    } catch (NumberFormatException e) {
-                        BPLogger.warn("Could not get \"" + bankName + "\" bank balance for " + p.getName() + " because it contains an invalid number! (Using 0 as default)");
-                    }
-                }
-                if (debt != null) {
-                    try {
-                        debtAmount = new BigDecimal(debt);
-                    } catch (NumberFormatException e) {
-                        BPLogger.warn("Could not get \"" + bankName + "\" bank debt for " + p.getName() + " because it contains an invalid number! (Using 0 as default)");
-                    }
-                }
-                if (interest != null) {
-                    try {
-                        interestAmount = new BigDecimal(interest);
-                    } catch (NumberFormatException e) {
-                        BPLogger.warn("Could not get \"" + bankName + "\" bank interest for " + p.getName() + " because it contains an invalid number! (Using 0 as default)");
-                    }
-                }
-                information.put(bankName, new OnlineInfoHolder.BankInfo(
-                        level,
-                        balAmount,
-                        debtAmount,
-                        interestAmount
-                ));
-                changes = true;
+            for (String economyName : PEEconomy.nameList()) {
+                PEEconomy economy = PEEconomy.get(economyName);
+                if (!economy.isPlayerLoaded(p)) economy.loadPlayer(p, BigDecimal.valueOf(config.getLong(economyName)));
             }
         }
-        if (changes) OnlineInfoHolder.updatePlayerInfo(p, information);
         BankPlus.INSTANCE().getPlayerRegistry().put(oP, new BPPlayer(oP));
     }
 
@@ -136,7 +76,7 @@ public class BPPlayerManager {
             }
             if (sBalance == null) {
                 BigDecimal amount = Values.CONFIG.getMainGuiName().equals(bankName) ? Values.CONFIG.getStartAmount() : BigDecimal.valueOf(0);
-                config.set("banks." + bankName + ".money", BPFormatter.formatBigDouble(amount));
+                config.set("banks." + bankName + ".money", BPFormatter.formatBigDecimal(amount));
                 hasChanges = true;
             }
             if (sDebt == null) {
@@ -157,7 +97,7 @@ public class BPPlayerManager {
 
     public boolean isPlayerRegistered() {
         if (Values.CONFIG.isSqlEnabled()) {
-            BPSQL sql = BankPlus.INSTANCE().getSql();
+            BPSQL sql = BankPlus.INSTANCE().getMySql();
             if (sql.isConnected()) return sql.isPlayerRegistered(p);
         }
 
@@ -167,8 +107,9 @@ public class BPPlayerManager {
 
     public void registerPlayer() {
         if (Values.CONFIG.isSqlEnabled()) {
-            BPSQL sql = BankPlus.INSTANCE().getSql();
+            BPSQL sql = BankPlus.INSTANCE().getMySql();
             if (sql.isConnected()) sql.registerPlayer(p);
+            return;
         }
 
         File file = getPlayerFile();

@@ -3,6 +3,7 @@ package me.pulsi_.bankplus;
 import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.bankSystem.BankGuiRegistry;
 import me.pulsi_.bankplus.bankTop.BPBankTop;
+import me.pulsi_.bankplus.economy.EconomyRegistry;
 import me.pulsi_.bankplus.interest.BPInterest;
 import me.pulsi_.bankplus.loanSystem.LoanRegistry;
 import me.pulsi_.bankplus.logSystem.BPLogUtils;
@@ -32,22 +33,22 @@ public final class BankPlus extends JavaPlugin {
     public static final String actualVersion = "6.1";
     private static BankPlus INSTANCE;
 
-    private BPLogUtils bpLogUtils;
-    private PlayerRegistry playerRegistry;
-    private BankGuiRegistry bankGuiRegistry;
-    private LoanRegistry loanRegistry;
+    private final BPLogUtils bpLogUtils = new BPLogUtils();
+    private final PlayerRegistry playerRegistry = new PlayerRegistry();
+    private final EconomyRegistry economyRegistry = new EconomyRegistry();
+    private final BankGuiRegistry bankGuiRegistry = new BankGuiRegistry();
+    private final LoanRegistry loanRegistry = new LoanRegistry();
     private Economy vaultEconomy = null;
     private Permission perms = null;
 
+    private final TaskManager taskManager = new TaskManager();
+    private final BPPlaceholders bpPlaceholders = new BPPlaceholders();
+    private final BPSQL sql = new BPSQL();
     private BPBankTop bankTopManager;
     private BPConfigs bpConfigs;
     private BPData bpData;
     private BPAFK BPAFK;
-    private TaskManager taskManager;
     private BPInterest interest;
-    private BPPlaceholders bpPlaceholders;
-
-    private BPSQL sql;
 
     private boolean isPlaceholderApiHooked = false, isEssentialsXHooked = false, isUpdated;
     private String serverVersion;
@@ -83,11 +84,6 @@ public final class BankPlus extends JavaPlugin {
             return;
         }
 
-        this.bpLogUtils = new BPLogUtils();
-        this.playerRegistry = new PlayerRegistry();
-        this.bankGuiRegistry = new BankGuiRegistry();
-        this.loanRegistry = new LoanRegistry();
-
         this.serverVersion = getServer().getVersion();
 
         int index = serverVersion.lastIndexOf("MC:");
@@ -107,10 +103,7 @@ public final class BankPlus extends JavaPlugin {
         this.bpConfigs = new BPConfigs(this);
         this.bpData = new BPData(this);
         this.BPAFK = new BPAFK(this);
-        this.taskManager = new TaskManager();
         this.interest = new BPInterest(this);
-
-        this.sql = new BPSQL();
 
         RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
         if (rsp != null) perms = rsp.getProvider();
@@ -119,7 +112,6 @@ public final class BankPlus extends JavaPlugin {
 
         if (plManager.getPlugin("PlaceholderAPI") != null) {
             BPLogger.info("Hooked into PlaceholderAPI!");
-            bpPlaceholders = new BPPlaceholders();
             bpPlaceholders.registerPlaceholders();
             bpPlaceholders.register();
             isPlaceholderApiHooked = true;
@@ -146,6 +138,10 @@ public final class BankPlus extends JavaPlugin {
 
     public PlayerRegistry getPlayerRegistry() {
         return playerRegistry;
+    }
+
+    public EconomyRegistry getEconomyRegistry() {
+        return economyRegistry;
     }
 
     public BankGuiRegistry getBankGuiRegistry() {
@@ -216,7 +212,7 @@ public final class BankPlus extends JavaPlugin {
         return bpPlaceholders;
     }
 
-    public BPSQL getSql() {
+    public BPSQL getMySql() {
         return sql;
     }
 

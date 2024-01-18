@@ -108,7 +108,7 @@ public class BankListGui {
             Bank bank = BankManager.getBank(bankName);
             ConfigurationSection section = bank.getBanksGuiItemSection();
             if (section != null) {
-                String permission = bank.getPermission();
+                String permission = bank.getAccessPermission();
                 String path = (permission == null || p.hasPermission(permission)) ? "Available" : "Unavailable";
 
                 String dName = section.getString(path + ".Displayname");

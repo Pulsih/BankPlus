@@ -1,8 +1,9 @@
 package me.pulsi_.bankplus.bankSystem;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.BPPlayerManager;
-import me.pulsi_.bankplus.account.OnlineInfoHolder;
+import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -287,10 +288,10 @@ public class BankManager {
      * @return The player bank level of the selected bank.
      */
     public static int getCurrentLevel(String bankName, OfflinePlayer p) {
-        OnlineInfoHolder.BankInfo info = OnlineInfoHolder.getInfo(p, bankName);
-        if (info != null) return info.getLevel();
+        BPPlayer player = PlayerRegistry.get(p);
+        if (player != null) return player.getLevel();
 
-        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE().getSql().isConnected())
+        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE().getMySql().isConnected())
             return new SQLPlayerManager(p).getLevel(bankName);
 
         return Math.max(new BPPlayerManager(p).getPlayerConfig().getInt("banks." + bankName + ".level"), 1);
@@ -344,7 +345,7 @@ public class BankManager {
      */
     public static boolean isAvailable(String bankName, OfflinePlayer p) {
         Bank bank = getBank(bankName);
-        String permission = bank.getPermission();
+        String permission = bank.getAccessPermission();
         if (permission == null) return true;
 
         Player oP = p.getPlayer();
@@ -374,7 +375,7 @@ public class BankManager {
             return;
         }
 
-        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE().getSql().isConnected()) {
+        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE().getMySql().isConnected()) {
             new SQLPlayerManager(p).setLevel(level, bankName);
             return;
         }

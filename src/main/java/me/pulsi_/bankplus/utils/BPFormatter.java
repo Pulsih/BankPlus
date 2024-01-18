@@ -60,7 +60,7 @@ public class BPFormatter {
         return formatter.format(amount);
     }
 
-    public static String formatBigDouble(BigDecimal balance) {
+    public static String formatBigDecimal(BigDecimal balance) {
         String bal = balance.toString();
 
         int maxDecimals = Values.CONFIG.getMaxDecimalsAmount();
@@ -79,6 +79,10 @@ public class BPFormatter {
             else bal += "." + decimals;
         }
         return bal;
+    }
+
+    public static BigDecimal getBigDoubleFormatted(BigDecimal balance) {
+        return new BigDecimal(formatBigDecimal(balance));
     }
 
     private static String setMaxDigits(double balance, int digits) {

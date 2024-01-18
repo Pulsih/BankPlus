@@ -56,7 +56,7 @@ public class BPData {
     }
 
     public void shutdownPlugin() {
-        plugin.getPlayerRegistry().saveEveryone(false);
+        plugin.getEconomyRegistry().saveEveryone(false);
 
         BPConfigs configs = plugin.getConfigs();
         File file = configs.getFile(BPConfigs.Type.SAVES.name);
@@ -78,38 +78,44 @@ public class BPData {
 
     public boolean reloadPlugin() {
         boolean success = true;
-        Values.CONFIG.setupValues();
-        Values.MESSAGES.setupValues();
-        Values.MULTIPLE_BANKS.setupValues();
-        BPMessages.loadMessages();
+        try {
+            Values.CONFIG.setupValues();
+            Values.MESSAGES.setupValues();
+            Values.MULTIPLE_BANKS.setupValues();
+            BPMessages.loadMessages();
 
-        CmdRegisterer registerer = new CmdRegisterer();
-        registerer.resetCmds();
-        registerer.registerCmds();
+            CmdRegisterer registerer = new CmdRegisterer();
+            registerer.resetCmds();
+            registerer.registerCmds();
 
-        if (Values.CONFIG.isLogTransactions()) plugin.getBpLogUtils().setupLoggerFile();
-        if (Values.CONFIG.isIgnoringAfkPlayers()) plugin.getAfkManager().startCountdown();
-        if (Values.CONFIG.isBanktopEnabled()) plugin.getBankTopManager().startUpdateTask();
-        if (Values.CONFIG.isGuiModuleEnabled() && !plugin.getBankGuiRegistry().loadBanks()) success = false;
+            if (Values.CONFIG.isLogTransactions()) plugin.getBpLogUtils().setupLoggerFile();
+            if (Values.CONFIG.isIgnoringAfkPlayers()) plugin.getAfkManager().startCountdown();
+            if (Values.CONFIG.isBanktopEnabled()) plugin.getBankTopManager().startUpdateTask();
 
-        BPAFK BPAFK = plugin.getAfkManager();
-        if (!BPAFK.isPlayerCountdownActive()) BPAFK.startCountdown();
+            BPAFK BPAFK = plugin.getAfkManager();
+            if (!BPAFK.isPlayerCountdownActive()) BPAFK.startCountdown();
 
-        BPInterest interest = plugin.getInterest();
-        if (Values.CONFIG.isInterestEnabled() && interest.wasDisabled()) interest.startInterest();
+            BPInterest interest = plugin.getInterest();
+            if (Values.CONFIG.isInterestEnabled() && interest.wasDisabled()) interest.startInterest();
 
-        if (Values.CONFIG.isSqlEnabled()) {
-            BPSQL sql = plugin.getSql();
-            sql.disconnect();
-            sql.setupMySQL();
-            sql.connect();
-            sql.setupTables();
+            if (Values.CONFIG.isSqlEnabled()) {
+                BPSQL sql = plugin.getMySql();
+                sql.disconnect();
+                sql.setupMySQL();
+                sql.connect();
+                sql.setupTables();
+            }
+
+            Bukkit.getOnlinePlayers().forEach(p -> {
+                BPPlayer player = BankPlus.INSTANCE().getPlayerRegistry().get(p);
+                if (player != null && player.getOpenedBank() != null) p.closeInventory();
+            });
+
+            plugin.getBankGuiRegistry().loadBanks();
+        } catch (Exception e) {
+            BPLogger.warn("Something went wrong while trying to reload the plugin, check the console logs and if the error persist, ask for support in the support discord.");
+            success = false;
         }
-
-        Bukkit.getOnlinePlayers().forEach(p -> {
-            BPPlayer player = BankPlus.INSTANCE().getPlayerRegistry().get(p);
-            if (player != null && player.getOpenedBank() != null) p.closeInventory();
-        });
         return success;
     }
 

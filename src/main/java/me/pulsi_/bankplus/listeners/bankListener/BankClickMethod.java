@@ -115,7 +115,7 @@ public class BankClickMethod {
                             BPLogger.warn("Invalid deposit number! (Button: " + key + ", Number: " + value + ")");
                             continue;
                         }
-                        BPEconomy.deposit(p, amount, bankName);
+                        BPEconomy.deposit(p, amount);
                     }
                     break;
 
@@ -167,11 +167,11 @@ public class BankClickMethod {
                         break;
 
                     case "all":
-                        BPEconomy.deposit(p, BigDecimal.valueOf(vaultEconomy.getBalance(p)), bankName);
+                        BPEconomy.deposit(p, BigDecimal.valueOf(vaultEconomy.getBalance(p)));
                         break;
 
                     case "half":
-                        BPEconomy.deposit(p, BigDecimal.valueOf(vaultEconomy.getBalance(p) / 2), bankName);
+                        BPEconomy.deposit(p, BigDecimal.valueOf(vaultEconomy.getBalance(p) / 2));
                         break;
 
                     default:
@@ -182,7 +182,7 @@ public class BankClickMethod {
                             BPLogger.error("Invalid deposit number! (Path: " + itemValues + ", Number: " + actionAmount + ")");
                             return true;
                         }
-                        BPEconomy.deposit(p, amount, bankName);
+                        BPEconomy.deposit(p, amount);
                         break;
                 }
                 break;

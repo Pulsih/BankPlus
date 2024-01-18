@@ -50,7 +50,7 @@ public class PlayerChatMethod {
 
         if (BPUtils.isDepositing(p)) {
             BPSets.removePlayerFromDepositing(p);
-            BPEconomy.deposit(p, amount, identifier);
+            BPEconomy.deposit(p, amount);
         }
         if (BPUtils.isWithdrawing(p)) {
             BPSets.removePlayerFromWithdrawing(p);

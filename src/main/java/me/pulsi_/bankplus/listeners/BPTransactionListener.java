@@ -47,7 +47,7 @@ public class BPTransactionListener implements Listener {
     public void processDebt(BPPreTransactionEvent e) {
         OfflinePlayer p = e.getPlayer();
 
-        BigDecimal debt = BPEconomy.getDebt(p, e.getBankName());
+        BigDecimal debt = BPEconomy.getDebt(p);
         TransactionType type = e.getTransactionType();
         if (debt.doubleValue() <= 0d || (type != TransactionType.ADD && type != TransactionType.DEPOSIT && type != TransactionType.INTEREST && type != TransactionType.SET)) return;
 
@@ -85,7 +85,7 @@ public class BPTransactionListener implements Listener {
         OfflinePlayer p = e.getPlayer();
         Pair<BigDecimal, Double> pair = logHolder.remove(p.getUniqueId());
 
-        if (logFile == null) return;
+        if (logFile == null || pair == null) return;
 
         if (logUtils.checkDayChanged()) {
             logUtils.setupLoggerFile();
@@ -116,19 +116,15 @@ public class BPTransactionListener implements Listener {
                         .append("%)");
         }
 
-        builder.append(" - ")
-                .append(BPFormatter.formatBigDouble(e.getTransactionAmount()))
-                .append(" [")
-                .append(e.getBankName())
-                .append("] -> Bank bal before/after: [")
-                .append(BPFormatter.formatBigDouble(pair.getKey()))
-                .append("/")
-                .append(BPFormatter.formatBigDouble(e.getNewBalance()))
-                .append("] -> Vault bal before/after: [")
-                .append(BPFormatter.format(pair.getValue()))
-                .append("/")
-                .append(BPFormatter.format(e.getNewVaultBalance()))
-                .append("]\n");
+        builder.append(
+                " - Amount: %1, Bank: %2, Bank bal before-after %3 -> %4, Vault bal before-after: %5 -> %6\n"
+                        .replace("%1", BPFormatter.formatBigDecimal(e.getTransactionAmount()))
+                        .replace("%2", e.getBankName())
+                        .replace("%3", BPFormatter.formatBigDecimal(pair.getKey()))
+                        .replace("%4", BPFormatter.formatBigDecimal(e.getNewBalance()))
+                        .replace("%5", BPFormatter.format(pair.getValue()))
+                        .replace("%6", BPFormatter.format(e.getNewVaultBalance()))
+                );
 
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(logFile, true));

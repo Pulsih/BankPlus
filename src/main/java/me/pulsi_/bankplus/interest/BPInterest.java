@@ -23,7 +23,8 @@ import java.util.List;
 public class BPInterest {
 
     private long cooldown = 0;
-    private boolean wasDisabled = true;
+    private boolean wasDisabled = true, isOfflineInterestEnabled;
+    private Permission permission;
 
     private final BankPlus plugin;
 
@@ -32,6 +33,8 @@ public class BPInterest {
     }
 
     public void startInterest() {
+        permission = BankPlus.INSTANCE().getPermissions();
+        isOfflineInterestEnabled = Values.CONFIG.isGivingInterestToOfflinePlayers();
         long interestSave = 0;
 
         FileConfiguration config = plugin.getConfigs().getConfig(BPConfigs.Type.SAVES.name);
@@ -54,12 +57,7 @@ public class BPInterest {
 
     public void giveInterestToEveryone() {
         cooldown = System.currentTimeMillis() + Values.CONFIG.getInterestDelay();
-        boolean isOfflineInterestEnabled = Values.CONFIG.isGivingInterestToOfflinePlayers();
-
-        Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
-            Bukkit.getOnlinePlayers().forEach(this::giveInterest);
-            if (isOfflineInterestEnabled) giveInterest(Bukkit.getOfflinePlayers());
-        });
+        Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), this::giveInterest);
     }
 
     public void saveInterest(FileConfiguration savesConfig) {
@@ -72,65 +70,61 @@ public class BPInterest {
         BankPlus.INSTANCE().getTaskManager().setInterestTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), this::loopInterest, 10L));
     }
 
-    public void giveInterest(Player p) {
-        if (!p.hasPermission("bankplus.receive.interest") || (Values.CONFIG.isIgnoringAfkPlayers() && BankPlus.INSTANCE().getAfkManager().isAFK(p))) return;
-
-        BigDecimal interestAmount = new BigDecimal(0);
-        List<String> availableBanks = BankManager.getAvailableBanks(p);
-
-        for (String bankName : availableBanks) {
-            BigDecimal bankBalance = BPEconomy.getBankBalance(p, bankName);
-            BigDecimal interestMoney = getInterestMoney(bankName, p, BankManager.getInterestRate(bankName, p)), maxAmount = Values.CONFIG.getInterestMaxAmount();
-
-            if (bankBalance.doubleValue() <= 0) continue;
-            if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
-
-            BigDecimal amount = BPEconomy.addBankBalance(p, interestMoney, bankName, TransactionType.INTEREST);
-            interestAmount = interestAmount.add(amount);
-        }
-        if (!Values.MESSAGES.isInterestBroadcastEnabled()) return;
-
-        if (availableBanks.size() > 1) BPMessages.send(p, Values.MESSAGES.getMultiInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
-        else BPMessages.send(p, Values.MESSAGES.getInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
-    }
-
-    public void giveInterest(OfflinePlayer[] players) {
-        Permission permission = BankPlus.INSTANCE().getPermissions();
-        if (permission == null) {
-            BPLogger.warn("Cannot give offline interest, no permission plugin found!");
-            return;
-        }
-
+    public void giveInterest() {
         String perm = Values.CONFIG.getInterestOfflinePermission();
-        for (OfflinePlayer p : players) {
-            if (p.isOnline() || ((Values.CONFIG.getOfflineInterestLimit() > 0L) && System.currentTimeMillis() - p.getLastSeen() > Values.CONFIG.getOfflineInterestLimit())) continue;
-
-            boolean hasPermission = false;
-            for (World world : Bukkit.getWorlds()) {
-                if (perm == null || perm.isEmpty() || permission.playerHas(world.getName(), p, perm)) {
-                    hasPermission = true;
-                    break;
+        for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
+            Player oP = p.getPlayer();
+            if (oP != null && (!oP.hasPermission("bankplus.receive.interest") || (Values.CONFIG.isIgnoringAfkPlayers() && BankPlus.INSTANCE().getAfkManager().isAFK(oP)))) continue;
+            else {
+                if (!isOfflineInterestEnabled || (Values.CONFIG.getOfflineInterestLimit() > 0L && System.currentTimeMillis() - p.getLastSeen() > Values.CONFIG.getOfflineInterestLimit())) continue;
+                boolean hasPermission = false;
+                for (World world : Bukkit.getWorlds()) {
+                    if (perm == null || perm.isEmpty() || permission.playerHas(world.getName(), p, perm)) {
+                        hasPermission = true;
+                        break;
+                    }
                 }
+                if (!hasPermission) continue;
             }
-            if (!hasPermission) continue;
 
-            for (String bankName : BankManager.getAvailableBanks(p)) {
-                BigDecimal bankBalance = BPEconomy.getBankBalance(p, bankName);
-                BigDecimal maxAmount = Values.CONFIG.getInterestMaxAmount(),
-                        interestMoney = Values.CONFIG.isOfflineInterestDifferentRate() ?
-                        getInterestMoney(bankName, p, BankManager.getOfflineInterestRate(bankName, p)) :
-                        getInterestMoney(bankName, p, BankManager.getInterestRate(bankName, p));
+            BigDecimal interestAmount = new BigDecimal(0);
+            List<String> availableBanks = BankManager.getAvailableBanks(p);
 
-                if (bankBalance.doubleValue() <= 0) continue;
-                if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
+            if (p.isOnline()) {
+                for (String bankName : availableBanks) {
+                    BPEconomy economy = BPEconomy.get(bankName);
+                    BigDecimal bankBalance = economy.getBankBalance(p, bankName);
+                    BigDecimal interestMoney = getInterestMoney(bankName, p, BankManager.getInterestRate(bankName, p)), maxAmount = Values.CONFIG.getInterestMaxAmount();
 
-                BPEconomy.addBankBalance(p, interestMoney, bankName, TransactionType.INTEREST, true);
+                    if (bankBalance.doubleValue() <= 0) continue;
+                    if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
+
+                    BigDecimal amount = economy.addBankBalance(p, interestMoney, bankName, TransactionType.INTEREST);
+                    interestAmount = interestAmount.add(amount);
+                }
+                if (!Values.MESSAGES.isInterestBroadcastEnabled()) return;
+                if (availableBanks.size() > 1) BPMessages.send(p, Values.MESSAGES.getMultiInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
+                else BPMessages.send(p, Values.MESSAGES.getInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
+            } else {
+                for (String bankName : BankManager.getAvailableBanks(p)) {
+                    BPEconomy economy = BPEconomy.get(bankName);
+                    BigDecimal bankBalance = economy.getBankBalance(p, bankName);
+                    BigDecimal maxAmount = Values.CONFIG.getInterestMaxAmount(),
+                            interestMoney = Values.CONFIG.isOfflineInterestDifferentRate() ?
+                            getInterestMoney(bankName, p, BankManager.getOfflineInterestRate(bankName, p)) :
+                            getInterestMoney(bankName, p, BankManager.getInterestRate(bankName, p));
+
+                    if (bankBalance.doubleValue() <= 0) continue;
+                    if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
+
+                    economy.addBankBalance(p, interestMoney, bankName, TransactionType.INTEREST, true);
+                }
             }
         }
     }
 
     public BigDecimal getInterestMoney(String bankName, OfflinePlayer p, BigDecimal defaultInterest) {
-        BigDecimal playerBalance = BPEconomy.getBankBalance(p, bankName);
+        BigDecimal playerBalance = BPEconomy.get(bankName).getBankBalance(p, bankName);
 
         if (!Values.CONFIG.enableInterestLimiter() || !Values.CONFIG.accumulateInterestLimiter())
             return playerBalance.multiply(defaultInterest.divide(BigDecimal.valueOf(100)));

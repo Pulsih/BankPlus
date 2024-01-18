@@ -73,7 +73,7 @@ public class BPSQL {
     }
 
     public boolean isConnected() {
-        return connection != null;
+        return Values.CONFIG.isSqlEnabled() && connection != null;
     }
 
     public void connect() {

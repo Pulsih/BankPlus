@@ -47,7 +47,7 @@ public class TransferCmd extends BPCommand {
             return false;
         }
 
-        if (!BankPlus.INSTANCE().getSql().isConnected()) {
+        if (!BankPlus.INSTANCE().getMySql().isConnected()) {
             BPMessages.send(s, "%prefix% &cCould not initialize the task, MySQL hasn't been connected to it's database yet! &8(Try typing /bp reload)", true);
             return false;
         }

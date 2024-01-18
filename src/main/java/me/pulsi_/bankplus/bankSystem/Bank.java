@@ -1,107 +1,80 @@
 package me.pulsi_.bankplus.bankSystem;
 
-import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.utils.BPLogger;
+import me.pulsi_.bankplus.economy.BPEconomy;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
-
-import java.io.File;
-import java.io.IOException;
 
 public class Bank {
 
     private final String identifier;
-    private final String title;
-    private final int size, updateDelay;
-    private final String fillerMaterial;
-    private final boolean hasFiller, fillerGlowing;
+    private final BPEconomy bankEconomy;
+    private String title;
+    private int size, updateDelay;
+    private String fillerMaterial;
+    private boolean hasFiller, fillerGlowing;
     private ItemStack[] content;
-    private String permission;
-    private ConfigurationSection items, upgrades, banksListGuiItems, settings;
-
-    public Bank(String identifier, String title, int size, int updateDelay, ItemStack[] content) {
-        this.identifier = identifier;
-        this.title = title;
-        this.size = size;
-        this.updateDelay = updateDelay;
-        this.hasFiller = false;
-        this.fillerMaterial = null;
-        this.fillerGlowing = false;
-        this.content = content;
-        this.permission = null;
-        this.items = null;
-        this.upgrades = null;
-        this.banksListGuiItems = null;
-        this.settings = null;
-    }
+    private String accessPermission;
+    private ConfigurationSection items, upgrades, banksListGuiItems;
 
     public Bank(String identifier) {
         this.identifier = identifier;
-        File file = new File(BankPlus.INSTANCE().getDataFolder(), "banks" + File.separator + identifier + ".yml");
-        if (!file.exists()) {
-            BPLogger.error("The bank named \"" + identifier + "\" does not exist!");
-            this.title = "&c&l* TITLE NOT FOUND *";
-            this.size = 0;
-            this.updateDelay = 0;
-            this.hasFiller = false;
-            this.fillerMaterial = null;
-            this.fillerGlowing = false;
-            this.content = null;
-            return;
-        }
-
-        FileConfiguration config = new YamlConfiguration();
-        try {
-            config.load(file);
-        } catch (IOException | InvalidConfigurationException e) {
-            BPLogger.error("An error has occurred while loading a bank file: " + e.getMessage());
-        }
-
-        String title = config.getString("Title");
-        this.title = title == null ? "&c&l* TITLE NOT FOUND *" : title;
-        this.size = config.getInt("Lines");
-        this.updateDelay = config.getInt("Update-Delay");
-        this.hasFiller = config.getBoolean("Filler.Enabled");
-        this.fillerMaterial = config.getString("Filler.Material");
-        this.fillerGlowing = config.getBoolean("Filler.Glowing");
-
-        this.content = null;
-        this.permission = config.getString("Settings.Permission");
-        this.items = config.getConfigurationSection("Items");
-        this.upgrades = config.getConfigurationSection("Upgrades");
-        this.banksListGuiItems = config.getConfigurationSection("Settings.BanksGuiItem");
-        this.settings = config.getConfigurationSection("Settings");
+        bankEconomy = new BPEconomy();
     }
 
     public String getIdentifier() {
         return identifier;
     }
 
+    public BPEconomy getBankEconomy() {
+        return bankEconomy;
+    }
+
     public String getTitle() {
         return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title == null ? "&c&l* TITLE NOT FOUND *" : title;
     }
 
     public int getSize() {
         return Math.max(9, Math.min(54, size * 9));
     }
 
+    public void setSize(int size) {
+        this.size = size;
+    }
+
     public int getUpdateDelay() {
         return updateDelay;
+    }
+
+    public void setUpdateDelay(int updateDelay) {
+        this.updateDelay = updateDelay;
     }
 
     public String getFillerMaterial() {
         return fillerMaterial;
     }
 
+    public void setFillerMaterial(String fillerMaterial) {
+        this.fillerMaterial = fillerMaterial;
+    }
+
     public boolean hasFiller() {
         return hasFiller;
     }
 
+    public void setHasFiller(boolean hasFiller) {
+        this.hasFiller = hasFiller;
+    }
+
     public boolean isFillerGlowing() {
         return fillerGlowing;
+    }
+
+    public void setFillerGlowing(boolean fillerGlowing) {
+        this.fillerGlowing = fillerGlowing;
     }
 
     public ItemStack[] getContent() {
@@ -112,12 +85,12 @@ public class Bank {
         this.content = content;
     }
 
-    public String getPermission() {
-        return permission;
+    public String getAccessPermission() {
+        return accessPermission;
     }
 
-    public void setPermission(String permission) {
-        this.permission = permission;
+    public void setAccessPermission(String accessPermission) {
+        this.accessPermission = accessPermission;
     }
 
     public ConfigurationSection getItems() {
@@ -142,13 +115,5 @@ public class Bank {
 
     public void setBanksListGuiItems(ConfigurationSection items) {
         this.banksListGuiItems = items;
-    }
-
-    public ConfigurationSection getSettings() {
-        return settings;
-    }
-
-    public void setSettings(ConfigurationSection settings) {
-        this.settings = settings;
     }
 }

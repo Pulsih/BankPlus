@@ -30,116 +30,31 @@ public class BankGuiRegistry {
 
     public Bank bankListGui;
 
-    public boolean loadBanks() {
-        File file = new File(BankPlus.INSTANCE().getDataFolder(), "banks");
-        File[] files = file.listFiles();
+    public void loadBanks() {
+        BankPlus.INSTANCE().getEconomyRegistry().saveEveryone(true);
 
         banks.clear();
-        List<File> bankFiles;
 
-        if (files == null || files.length == 0) {
-            File defaultBankFile = new File(BankPlus.INSTANCE().getDataFolder(), "banks" + File.separator + Values.CONFIG.getMainGuiName() + ".yml");
+        List<File> bankFiles = new ArrayList<>();
+        File defaultBankFile = new File(BankPlus.INSTANCE().getDataFolder(), "banks" + File.separator + Values.CONFIG.getMainGuiName() + ".yml");
 
-            if (!defaultBankFile.exists()) {
-                BankPlus.INSTANCE().saveResource("banks" + File.separator + "bankplus_main_gui_base_file.yml", false);
-                File newMainFile = new File(BankPlus.INSTANCE().getDataFolder(), "banks" + File.separator + "bankplus_main_gui_base_file.yml");
-                newMainFile.renameTo(defaultBankFile);
-            }
-            bankFiles = new ArrayList<>(Collections.singletonList(defaultBankFile));
-        } else {
-            bankFiles = new ArrayList<>(Arrays.asList(files));
+        File[] files = new File(BankPlus.INSTANCE().getDataFolder(), "banks").listFiles();
+        if (files != null && files.length > 0) bankFiles.addAll(Arrays.asList(files));
 
-            boolean theresMainGui = false;
-            for (File bankFile : bankFiles) {
-                if (!bankFile.getName().replace(".yml", "").equals(Values.CONFIG.getMainGuiName())) continue;
-                theresMainGui = true;
-                break;
-            }
-            if (!theresMainGui) {
-                BPLogger.info("The main gui was missing, creating the file...");
-                File defaultBankFile = new File(BankPlus.INSTANCE().getDataFolder(), "banks" + File.separator + Values.CONFIG.getMainGuiName() + ".yml");
-                defaultBankFile.getParentFile().mkdir();
-
-                BankPlus.INSTANCE().saveResource("banks" + File.separator + "bankplus_main_gui_base_file.yml", false);
-                File newMainFile = new File(BankPlus.INSTANCE().getDataFolder(), "banks" + File.separator + "bankplus_main_gui_base_file.yml");
-                newMainFile.renameTo(defaultBankFile);
-
-                bankFiles.add(defaultBankFile);
-            }
+        if (defaultBankFile.exists()) {
+            generateMainBankFile(defaultBankFile);
+            bankFiles.add(defaultBankFile);
         }
 
         for (File bankFile : bankFiles) {
-            FileConfiguration bankConfig = new YamlConfiguration();
-            try {
-                bankConfig.load(bankFile);
-            } catch (IOException | InvalidConfigurationException e) {
-                BPLogger.error("An error has occurred while loading " + bankFile.getName() + " bank file: " + e.getMessage());
-                return false;
-            }
-
-            String identifier = bankFile.getName().replace(".yml", "");
+            String identifier = bankFile.getName().split("\\.")[0];
             Bank bank = new Bank(identifier);
-
-            ItemStack[] content = null;
-            ConfigurationSection items = bankConfig.getConfigurationSection("Items");
-            if (items != null) {
-                Inventory inv = Bukkit.createInventory(null, bank.getSize());
-
-                for (String item : items.getKeys(false)) {
-                    ConfigurationSection itemValues = items.getConfigurationSection(item);
-                    if (itemValues == null) continue;
-
-                    ItemStack guiItem;
-                    String material = itemValues.getString("Material");
-
-                    if (material.startsWith("HEAD")) guiItem = BPItems.getHead(material);
-                    else guiItem = BPItems.createItemStack(itemValues);
-
-                    ItemMeta meta = guiItem.getItemMeta();
-                    String displayname = itemValues.getString("Displayname");
-                    List<String> lore = new ArrayList<>();
-
-                    for (String lines : itemValues.getStringList("Lore"))
-                        lore.add(BPChat.color(lines));
-
-                    meta.setDisplayName(BPChat.color(displayname == null ? "&c&l*CANNOT FIND DISPLAYNAME*" : displayname));
-                    meta.setLore(lore);
-
-                    if (itemValues.getBoolean("Glowing")) {
-                        meta.addEnchant(Enchantment.DURABILITY, 1, true);
-                        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-                    }
-
-                    int modelData = itemValues.getInt("CustomModelData");
-                    if (modelData > 0) {
-                        try {
-                            meta.setCustomModelData(modelData);
-                        } catch (NoSuchMethodError e) {
-                            BPLogger.warn("Cannot set custom model data to the item: \"" + displayname + "\"&e. Custom model data is only available on 1.14.4+ servers!");
-                        }
-                    }
-                    guiItem.setItemMeta(meta);
-
-                    try {
-                        int slot = itemValues.getInt("Slot") - 1;
-                        inv.setItem(slot, guiItem);
-                    } catch (ArrayIndexOutOfBoundsException ex) {
-                        inv.addItem(guiItem);
-                    }
-                }
-
-                if (bank.hasFiller())
-                    for (int i = 0; i < inv.getSize(); i++)
-                        if (inv.getItem(i) == null) inv.setItem(i, BPItems.getFiller(bank));
-
-                content = inv.getContents();
-            }
-
-            bank.setContent(content);
+            if (Values.CONFIG.isGuiModuleEnabled()) loadBankGui(bank, bankFile);
             banks.put(identifier, bank);
         }
-        loadMultipleBanksGui();
-        return true;
+        if (Values.CONFIG.isGuiModuleEnabled()) loadMultipleBanksGui();
+
+        BankPlus.INSTANCE().getEconomyRegistry().saveEveryone(true);
     }
 
     public void loadMultipleBanksGui() {
@@ -152,9 +67,30 @@ public class BankGuiRegistry {
                 gui.setItem(i, filler);
         }
 
-        Bank multipleBanksGui = new Bank(
-                BankListGui.multipleBanksGuiID, title, Values.MULTIPLE_BANKS.getBanksGuiLines(), Values.MULTIPLE_BANKS.getUpdateDelay(), gui.getContents()
-        );
-        BankPlus.INSTANCE().getBankGuiRegistry().bankListGui = multipleBanksGui;
+        Bank multipleBanksGui = new Bank(BankListGui.multipleBanksGuiID);
+        multipleBanksGui.setSize(Values.MULTIPLE_BANKS.getBanksGuiLines());
+        multipleBanksGui.setUpdateDelay(Values.MULTIPLE_BANKS.getUpdateDelay());
+        multipleBanksGui.setContent(gui.getContents());
+
+        bankListGui = multipleBanksGui;
+    }
+
+    private void generateMainBankFile(File file) {
+        if (!file.exists()) {
+            BankPlus.INSTANCE().saveResource("banks" + File.separator + "bankplus_main_gui_base_file.yml", false);
+            File newMainFile = new File(BankPlus.INSTANCE().getDataFolder(), "banks" + File.separator + "bankplus_main_gui_base_file.yml");
+            newMainFile.renameTo(file);
+        }
+    }
+
+    private void loadBankGui(Bank bank, File bankFile) {
+        FileConfiguration bankConfig = new YamlConfiguration();
+        try {
+            bankConfig.load(bankFile);
+        } catch (IOException | InvalidConfigurationException e) {
+            BPLogger.warn(e, "Could not load \"" + bankFile.getName() + "\" bank properties because it contains an invalid configuration!");
+            return;
+        }
+        BankUtils.loadBankValues(bank, bankConfig);
     }
 }

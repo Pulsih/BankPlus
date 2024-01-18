@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.mySQL;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.utils.BPFormatter;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
@@ -16,13 +17,13 @@ public class SQLPlayerManager {
     public SQLPlayerManager(OfflinePlayer p) {
         this.p = p;
         this.uuid = p.getUniqueId().toString();
-        this.methods = BankPlus.INSTANCE().getSql().getSqlMethods();
+        this.methods = BankPlus.INSTANCE().getMySql().getSqlMethods();
     }
 
     public SQLPlayerManager(UUID uuid) {
         this.p = Bukkit.getOfflinePlayer(uuid);
         this.uuid = uuid.toString();
-        this.methods = BankPlus.INSTANCE().getSql().getSqlMethods();
+        this.methods = BankPlus.INSTANCE().getMySql().getSqlMethods();
     }
 
     public int getLevel(String bankName) {
@@ -50,15 +51,15 @@ public class SQLPlayerManager {
     }
 
     public void setMoney(BigDecimal amount, String bankName) {
-        set("money", amount.toString(), bankName);
+        set("money", BPFormatter.formatBigDecimal(amount), bankName);
     }
 
     public void setDebt(BigDecimal amount, String bankName) {
-        set("debt", amount.toString(), bankName);
+        set("debt", BPFormatter.formatBigDecimal(amount), bankName);
     }
 
     public void setOfflineInterest(BigDecimal amount, String bankName) {
-        set("interest", amount.toString(), bankName);
+        set("interest", BPFormatter.formatBigDecimal(amount), bankName);
     }
 
     public void set(String valueName, String newValue, String bankName) {

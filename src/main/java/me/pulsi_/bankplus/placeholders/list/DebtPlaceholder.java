@@ -3,10 +3,7 @@ package me.pulsi_.bankplus.placeholders.list;
 import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.placeholders.BPPlaceholder;
-import me.pulsi_.bankplus.values.Values;
 import org.bukkit.entity.Player;
-
-import java.math.BigDecimal;
 
 public class DebtPlaceholder extends BPPlaceholder {
 
@@ -18,6 +15,6 @@ public class DebtPlaceholder extends BPPlaceholder {
     @Override
     public String getPlaceholder(Player p, String target, String identifier) {
         if (!BankManager.exist(target)) return "&cThe selected bank does not exist.";
-        return getFormat(identifier, BPEconomy.getDebt(p, target));
+        return getFormat(identifier, BPEconomy.getDebt(p));
     }
 }

@@ -23,7 +23,7 @@ public class ConfigValues {
     private String bankTopMoneyFormat, banktopUpdateBroadcastMessage, upgradesMaxedPlaceholder, upgradesNoRequiredItems, banktopPlayerNotFoundPlaceholder, mainGuiName;
     private String notifyOfflineInterestMessage, interestDelay, interestOfflinePermission, interestMaxAmount, interestMoneyGiven, offlineInterestMoneyGiven, offlineInterestLimit;
     private String sqlHost, sqlPort, sqpDatabase, sqlUsername, sqlPassword;
-    private long notifyOfflineInterestDelay, saveBalancedDelay, updateBankTopDelay;
+    private long notifyOfflineInterestDelay, saveDelay, updateBankTopDelay;
     private int afkPlayersTime, maxDecimalsAmount, bankTopSize, chatExitTime;
     private boolean isReopeningBankAfterChat, isNotifyOfflineInterest, isStoringUUIDs, logTransactions, enableInterestLimiter;
     private boolean isInterestEnabled, isGivingInterestToOfflinePlayers, isOfflineInterestDifferentRate, notifyRegisteredPlayer, silentInfoMessages;
@@ -109,7 +109,7 @@ public class ConfigValues {
         guiActionsNeedPermissions = config.getBoolean("General-Settings.Gui-Actions-Need-Permissions");
         afkPlayersTime = config.getInt("Interest.AFK-Settings.AFK-Time");
         maxDecimalsAmount = config.getInt("General-Settings.Max-Decimals-Amount");
-        saveBalancedDelay = config.getLong("General-Settings.Save-Delay");
+        saveDelay = config.getLong("General-Settings.Save-Delay");
         banktopEnabled = config.getBoolean("BankTop.Enabled");
         updateBankTopDelay = config.getLong("BankTop.Update-Delay");
         bankTopSize = config.getInt("BankTop.Size");
@@ -506,8 +506,8 @@ public class ConfigValues {
         return interestLimiter;
     }
 
-    public long getSaveBalancedDelay() {
-        return saveBalancedDelay;
+    public long getSaveDelay() {
+        return saveDelay;
     }
 
     public long getUpdateBankTopDelay() {

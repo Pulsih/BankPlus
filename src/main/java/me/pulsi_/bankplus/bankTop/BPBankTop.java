@@ -32,7 +32,7 @@ public class BPBankTop {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             bankTop.clear();
 
-            HashMap<String, BigDecimal> balances = BPEconomy.getAllBankBalances();
+            HashMap<String, BigDecimal> balances = BPEconomy.getAllServerBankBalances();
             List<BigDecimal> amounts = new ArrayList<>(balances.values());
             List<String> names = new ArrayList<>(balances.keySet());
 
