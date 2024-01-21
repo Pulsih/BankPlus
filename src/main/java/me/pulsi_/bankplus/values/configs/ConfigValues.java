@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.values.configs;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.interest.BPInterest;
 import me.pulsi_.bankplus.managers.BPConfigs;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
@@ -260,7 +261,7 @@ public class ConfigValues {
     }
 
     public String getInterestOfflinePermission() {
-        return interestOfflinePermission;
+        return isOfflineInterestDifferentRate ? interestOfflinePermission : BPInterest.defaultInterestPermission;
     }
 
     public BigDecimal getMaxDepositAmount() {

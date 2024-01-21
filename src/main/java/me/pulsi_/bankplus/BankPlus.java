@@ -47,7 +47,7 @@ public final class BankPlus extends JavaPlugin {
     private BPBankTop bankTopManager;
     private BPConfigs bpConfigs;
     private BPData bpData;
-    private BPAFK BPAFK;
+    private BPAFK BPAfk;
     private BPInterest interest;
 
     private boolean isPlaceholderApiHooked = false, isEssentialsXHooked = false, isUpdated;
@@ -100,7 +100,7 @@ public final class BankPlus extends JavaPlugin {
         this.bankTopManager = new BPBankTop(this);
         this.bpConfigs = new BPConfigs(this);
         this.bpData = new BPData(this);
-        this.BPAFK = new BPAFK(this);
+        this.BPAfk = new BPAFK(this);
         this.interest = new BPInterest(this);
 
         RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
@@ -191,7 +191,7 @@ public final class BankPlus extends JavaPlugin {
     }
 
     public BPAFK getAfkManager() {
-        return BPAFK;
+        return BPAfk;
     }
 
     public TaskManager getTaskManager() {

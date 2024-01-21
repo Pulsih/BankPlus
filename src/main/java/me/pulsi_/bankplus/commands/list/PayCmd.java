@@ -52,7 +52,7 @@ public class PayCmd extends BPCommand {
         String fromBankName = Values.CONFIG.getMainGuiName();
         if (args.length > 3) fromBankName = args[3];
 
-        if (BankManager.exist(fromBankName)) {
+        if (!BankManager.exist(fromBankName)) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }
@@ -64,7 +64,7 @@ public class PayCmd extends BPCommand {
         String toBankName = Values.CONFIG.getMainGuiName();
         if (args.length > 4) toBankName = args[4];
 
-        if (BankManager.exist(toBankName)) {
+        if (!BankManager.exist(toBankName)) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }

@@ -106,7 +106,7 @@ public class BankUtils {
     private static void setMeta(ConfigurationSection itemValues, ItemStack item, Player p, String bankName) {
         ItemMeta meta = item.getItemMeta();
 
-        String displayName = itemValues.getString("Displayname") == null ? "&c&l*CANNOT FIND DISPLAYNAME*" : itemValues.getString("Displayname");
+        String displayName = itemValues.getString("Displayname");
         List<String> lore = new ArrayList<>();
 
         List<String> configLore = itemValues.getStringList("Lore");

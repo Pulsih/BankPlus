@@ -43,6 +43,7 @@ public class BPEconomy {
         List<BPEconomy> economies = new ArrayList<>();
         BankPlus pl = BankPlus.INSTANCE();
         if (pl == null) return economies;
+
         for (Bank bank : pl.getBankGuiRegistry().getBanks().values()) economies.add(bank.getBankEconomy());
         return economies;
     }
@@ -174,11 +175,10 @@ public class BPEconomy {
     }
 
     private BigDecimal setBankBalance(OfflinePlayer p, BigDecimal amount, boolean ignoreEvents, TransactionType type) {
-        Economy economy = BankPlus.INSTANCE().getVaultEconomy();
         BigDecimal result = new BigDecimal(0);
 
         if (!ignoreEvents) {
-            BPPreTransactionEvent event = startEvent(p, type, economy.getBalance(p), amount, bankName);
+            BPPreTransactionEvent event = startEvent(p, type, amount, bankName);
             if (event.isCancelled()) return result;
 
             amount = event.getTransactionAmount();
@@ -187,7 +187,7 @@ public class BPEconomy {
         result = result.max(amount.min(BankManager.getCapacity(bankName, p)));
         set(p, result);
 
-        if (!ignoreEvents) endEvent(p, type, economy.getBalance(p), amount, bankName);
+        if (!ignoreEvents) endEvent(p, type, amount, bankName);
         return result;
     }
 
@@ -236,7 +236,7 @@ public class BPEconomy {
         BigDecimal result = new BigDecimal(0);
 
         if (!ignoreEvents) {
-            BPPreTransactionEvent event = startEvent(p, type, economy.getBalance(p), amount, bankName);
+            BPPreTransactionEvent event = startEvent(p, type, amount, bankName);
             if (event.isCancelled()) return result;
 
             amount = event.getTransactionAmount();
@@ -255,7 +255,7 @@ public class BPEconomy {
             else set(p, capacity);
         }
 
-        if (!ignoreEvents) endEvent(p, type, economy.getBalance(p), amount, bankName);
+        if (!ignoreEvents) endEvent(p, type, amount, bankName);
         return result;
     }
 
@@ -292,7 +292,7 @@ public class BPEconomy {
         Economy economy = BankPlus.INSTANCE().getVaultEconomy();
         BigDecimal result = new BigDecimal(0);
         if (!ignoreEvents) {
-            BPPreTransactionEvent event = startEvent(p, type, economy.getBalance(p), amount, bankName);
+            BPPreTransactionEvent event = startEvent(p, type, amount, bankName);
             if (event.isCancelled()) return result;
 
             amount = event.getTransactionAmount();
@@ -307,7 +307,7 @@ public class BPEconomy {
             set(p, balance.subtract(result));
         }
 
-        if (!ignoreEvents) endEvent(p, type, economy.getBalance(p), result, bankName);
+        if (!ignoreEvents) endEvent(p, type, result, bankName);
         return result;
     }
 
@@ -450,14 +450,14 @@ public class BPEconomy {
         BPPlayerManager files = new BPPlayerManager(p);
         File file = files.getPlayerFile();
         FileConfiguration config = files.getPlayerConfig();
-        config.set("banks." + bankName + ".money", amount);
+        config.set("banks." + bankName + ".money", BPFormatter.formatBigDecimal(amount));
         if (changeOfflineInterest) config.set("banks." + bankName + ".interest", offlineInterest);
         files.savePlayerFile(config, file, true);
     }
 
     public void deposit(Player p, BigDecimal amount) {
         Economy economy = BankPlus.INSTANCE().getVaultEconomy();
-        BPPreTransactionEvent event = startEvent(p, TransactionType.DEPOSIT, economy.getBalance(p), amount, bankName);
+        BPPreTransactionEvent event = startEvent(p, TransactionType.DEPOSIT, amount, bankName);
         if (event.isCancelled()) return;
 
         amount = event.getTransactionAmount();
@@ -499,12 +499,12 @@ public class BPEconomy {
         BPMessages.send(p, "Success-Deposit", BPUtils.placeValues(p, amount.subtract(taxes)), BPUtils.placeValues(taxes, "taxes"));
         BPUtils.playSound("DEPOSIT", p);
 
-        endEvent(p, TransactionType.DEPOSIT, economy.getBalance(p), amount, bankName);
+        endEvent(p, TransactionType.DEPOSIT, amount, bankName);
     }
 
     public void withdraw(Player p, BigDecimal amount) {
         Economy economy = BankPlus.INSTANCE().getVaultEconomy();
-        BPPreTransactionEvent event = startEvent(p, TransactionType.WITHDRAW, economy.getBalance(p), amount, bankName);
+        BPPreTransactionEvent event = startEvent(p, TransactionType.WITHDRAW, amount, bankName);
         if (event.isCancelled()) return;
 
         amount = event.getTransactionAmount();
@@ -534,7 +534,7 @@ public class BPEconomy {
         BPMessages.send(p, "Success-Withdraw", BPUtils.placeValues(p, amount.subtract(taxes)), BPUtils.placeValues(taxes, "taxes"));
         BPUtils.playSound("WITHDRAW", p);
 
-        endEvent(p, TransactionType.WITHDRAW, economy.getBalance(p), amount, bankName);
+        endEvent(p, TransactionType.WITHDRAW, amount, bankName);
     }
 
     /**
@@ -576,17 +576,17 @@ public class BPEconomy {
         return bankName;
     }
 
-    private BPPreTransactionEvent startEvent(OfflinePlayer p, TransactionType type, double vaultBalance, BigDecimal amount, String bankName) {
+    public BPPreTransactionEvent startEvent(OfflinePlayer p, TransactionType type, BigDecimal amount, String bankName) {
         BPPreTransactionEvent event = new BPPreTransactionEvent(
-                p, type, getBankBalance(p), vaultBalance, amount, bankName
+                p, type, getBankBalance(p), BankPlus.INSTANCE().getVaultEconomy().getBalance(p), amount, bankName
         );
         BPUtils.callEvent(event);
         return event;
     }
 
-    private void endEvent(OfflinePlayer p, TransactionType type, double vaultBalance, BigDecimal amount, String bankName) {
+    public void endEvent(OfflinePlayer p, TransactionType type, BigDecimal amount, String bankName) {
         BPAfterTransactionEvent event = new BPAfterTransactionEvent(
-                p, type, getBankBalance(p), vaultBalance, amount, bankName
+                p, type, getBankBalance(p), BankPlus.INSTANCE().getVaultEconomy().getBalance(p), amount, bankName
         );
         BPUtils.callEvent(event);
     }

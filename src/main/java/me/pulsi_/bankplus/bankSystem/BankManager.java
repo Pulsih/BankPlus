@@ -330,7 +330,7 @@ public class BankManager {
         List<String> availableBanks = new ArrayList<>();
         if (p == null) return availableBanks;
 
-        for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet())
+        for (String bankName : BPEconomy.nameList())
             if (isAvailable(bankName, p)) availableBanks.add(bankName);
 
         return availableBanks;
@@ -346,19 +346,10 @@ public class BankManager {
     public static boolean isAvailable(String bankName, OfflinePlayer p) {
         Bank bank = getBank(bankName);
         String permission = bank.getAccessPermission();
-        if (permission == null) return true;
+        if (permission == null || permission.isEmpty()) return true;
 
         Player oP = p.getPlayer();
-        if (oP != null) return permission.isEmpty() || oP.hasPermission(permission);
-
-        boolean available = false;
-        Permission perm = BankPlus.INSTANCE().getPermissions();
-        for (World world : Bukkit.getWorlds()) {
-            if (!perm.playerHas(world.getName(), p, permission)) continue;
-            available = true;
-            break;
-        }
-        return available;
+        return oP != null ? oP.hasPermission(permission) : BPUtils.hasOfflinePermission(p, permission);
     }
 
     /**

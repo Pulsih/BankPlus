@@ -1,10 +1,14 @@
 package me.pulsi_.bankplus.interest;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.account.BPPlayerManager;
 import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.economy.TransactionType;
+import me.pulsi_.bankplus.events.BPPreTransactionEvent;
 import me.pulsi_.bankplus.managers.BPConfigs;
+import me.pulsi_.bankplus.utils.BPFormatter;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
@@ -16,10 +20,13 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.List;
 
 public class BPInterest {
+
+    public static final String defaultInterestPermission = "bankplus.receive.interest";
 
     private long cooldown = 0;
     private boolean wasDisabled = true, isOfflineInterestEnabled;
@@ -69,16 +76,14 @@ public class BPInterest {
 
     public void giveInterest() {
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
-            Player oP = p.getPlayer();
-            if (oP != null && (!oP.hasPermission("bankplus.receive.interest") || BankPlus.INSTANCE().getAfkManager().isAFK(oP))) continue;
-            else {
-                if (!isOfflineInterestEnabled || offlineTimeExpired(p) || !BPUtils.hasOfflinePermission(p, Values.CONFIG.getInterestOfflinePermission())) continue;
-            }
-
-            BigDecimal interestAmount = new BigDecimal(0);
             List<String> availableBanks = BankManager.getAvailableBanks(p);
+            if (availableBanks.isEmpty()) continue;
 
-            if (p.isOnline()) {
+            Player oP = p.getPlayer();
+            if (p.isOnline() && oP != null) {
+                if (!oP.hasPermission(defaultInterestPermission) || BankPlus.INSTANCE().getAfkManager().isAFK(oP)) continue;
+
+                BigDecimal interestAmount = new BigDecimal(0);
                 for (String bankName : availableBanks) {
                     BPEconomy economy = BPEconomy.get(bankName);
                     BigDecimal bankBalance = economy.getBankBalance(p);
@@ -90,23 +95,42 @@ public class BPInterest {
                     BigDecimal amount = economy.addBankBalance(p, interestMoney, TransactionType.INTEREST);
                     interestAmount = interestAmount.add(amount);
                 }
-                if (!Values.MESSAGES.isInterestBroadcastEnabled()) return;
+                if (!Values.MESSAGES.isInterestBroadcastEnabled()) continue;
+
                 if (availableBanks.size() > 1) BPMessages.send(p, Values.MESSAGES.getMultiInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
                 else BPMessages.send(p, Values.MESSAGES.getInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
             } else {
-                for (String bankName : BankManager.getAvailableBanks(p)) {
+                if (!isOfflineInterestEnabled || offlineTimeExpired(p) || !BPUtils.hasOfflinePermission(p, Values.CONFIG.getInterestOfflinePermission())) continue;
+
+                boolean save = false;
+                BPPlayerManager pManager = new BPPlayerManager(p);
+                File file = pManager.getPlayerFile();
+                FileConfiguration config = pManager.getPlayerConfig(file);
+
+                for (String bankName : availableBanks) {
                     BPEconomy economy = BPEconomy.get(bankName);
                     BigDecimal bankBalance = economy.getBankBalance(p);
                     BigDecimal maxAmount = Values.CONFIG.getInterestMaxAmount(),
                             interestMoney = Values.CONFIG.isOfflineInterestDifferentRate() ?
-                            getInterestMoney(bankName, p, BankManager.getOfflineInterestRate(bankName, p)) :
-                            getInterestMoney(bankName, p, BankManager.getInterestRate(bankName, p));
+                                    getInterestMoney(bankName, p, BankManager.getOfflineInterestRate(bankName, p)) :
+                                    getInterestMoney(bankName, p, BankManager.getInterestRate(bankName, p));
 
                     if (bankBalance.doubleValue() <= 0) continue;
                     if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
 
-                    economy.addBankBalance(p, interestMoney, TransactionType.INTEREST, true);
+                    BPPreTransactionEvent event = economy.startEvent(p, TransactionType.INTEREST, interestMoney, bankName);
+                    BigDecimal newAmount = event.getTransactionAmount();
+
+                    String path = "banks." + bankName + ".";
+                    BigDecimal amount = new BigDecimal(config.getString(path + "money"));
+
+                    config.set(path + "money", BPFormatter.formatBigDecimal(amount.add(newAmount)));
+                    config.set(path + "interest", BPFormatter.formatBigDecimal(newAmount));
+
+                    economy.endEvent(p, TransactionType.INTEREST, newAmount, bankName);
+                    save = true;
                 }
+                if (save) pManager.savePlayerFile(config, file, true);
             }
         }
     }
