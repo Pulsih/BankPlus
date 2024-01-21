@@ -57,9 +57,9 @@ public class SetCmd extends BPCommand {
 
         boolean silent = args.length > 4 && args[4].toLowerCase().contains("true");
 
-        if (confirm(s)) return false;
+        if (skipToConfirm(s)) return false;
 
-        BigDecimal set = BPEconomy.setBankBalance(p, amount, bankName);
+        BigDecimal set = BPEconomy.get(bankName).setBankBalance(p, amount);
         if (!silent) BPMessages.send(s, "Set-Message", BPUtils.placeValues(p, set));
         return true;
     }

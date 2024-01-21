@@ -33,12 +33,26 @@ public class BPEconomy {
     }
 
     public static BPEconomy get(String bankName) {
-        return BankPlus.INSTANCE().getBankGuiRegistry().getBanks().get(bankName).getBankEconomy();
+        BankPlus pl = BankPlus.INSTANCE();
+        if (pl == null) return null;
+
+        return pl.getBankGuiRegistry().getBanks().get(bankName).getBankEconomy();
     }
 
     public static List<BPEconomy> list() {
         List<BPEconomy> economies = new ArrayList<>();
-        for (Bank bank : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().values()) economies.add(bank.getBankEconomy());
+        BankPlus pl = BankPlus.INSTANCE();
+        if (pl == null) return economies;
+        for (Bank bank : pl.getBankGuiRegistry().getBanks().values()) economies.add(bank.getBankEconomy());
+        return economies;
+    }
+
+    public static List<String> nameList() {
+        List<String> economies = new ArrayList<>();
+        BankPlus pl = BankPlus.INSTANCE();
+        if (pl == null) return economies;
+
+        economies.addAll(pl.getBankGuiRegistry().getBanks().keySet());
         return economies;
     }
 
@@ -47,16 +61,12 @@ public class BPEconomy {
      *
      * @return A hashmap with the player name as KEY and the sum of all the player bank balances as VALUE.
      */
-    public static LinkedHashMap<String, BigDecimal> getAllServerBankBalances() {
+    public static LinkedHashMap<String, BigDecimal> getAllEconomiesBankBalances() {
         LinkedHashMap<String, BigDecimal> balances = new LinkedHashMap<>();
-
-        for (BPEconomy economy : list()) {
-            for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
-                BigDecimal balance = new BigDecimal(0);
-                for (String bankName : BankManager.getAvailableBanks(p))
-                    balance = balance.add(economy.getBankBalance(p, bankName));
-                balances.put(p.getName(), balance);
-            }
+        for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
+            BigDecimal balance = new BigDecimal(0);
+            for (String bankName : BankManager.getAvailableBanks(p)) balance = balance.add(get(bankName).getBankBalance(p));
+            balances.put(p.getName(), balance);
         }
         return balances;
     }
@@ -70,10 +80,14 @@ public class BPEconomy {
     }
 
     public void loadPlayer(OfflinePlayer p) {
+        if (isPlayerLoaded(p)) return;
+
         MoneyHolder holder = new MoneyHolder();
         holder.debt = getDebt(p);
         holder.money = getBankBalance(p);
         holder.offlineInterest = getOfflineInterest(p);
+
+        balances.put(p.getUniqueId(), holder);
     }
 
     public void unloadPlayer(UUID uuid) {
@@ -91,27 +105,39 @@ public class BPEconomy {
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
             BigDecimal balance = new BigDecimal(0);
             for (String bankName : BankManager.getAvailableBanks(p))
-                balance = balance.add(getBankBalance(p, bankName));
+                balance = balance.add(getBankBalance(p));
             balances.put(p.getName(), balance);
         }
         return balances;
     }
 
     /**
-     * Get the player bank balance of the selected bank.
-     * @param uuid The UUID of the player.
-     * @param bankName The bank where to get the balance.
+     * Get the sum of player bank balances of all banks.
+     *
+     * @param p The player.
      */
-    public BigDecimal getBankBalance(UUID uuid, String bankName) {
-        return getBankBalance(Bukkit.getOfflinePlayer(uuid), bankName);
+    public static BigDecimal getBankBalancesSum(OfflinePlayer p) {
+        BigDecimal amount = BigDecimal.valueOf(0);
+        for (BPEconomy economy : list())
+            amount = amount.add(economy.getBankBalance(p));
+        return amount;
     }
 
     /**
      * Get the player bank balance of the selected bank.
-     * @param p The player.
-     * @param bankName The bank where to get the balance.
+     *
+     * @param uuid The UUID of the player.
      */
-    public BigDecimal getBankBalance(OfflinePlayer p, String bankName) {
+    public BigDecimal getBankBalance(UUID uuid) {
+        return getBankBalance(Bukkit.getOfflinePlayer(uuid));
+    }
+
+    /**
+     * Get the player bank balance of the selected bank.
+     *
+     * @param p The player.
+     */
+    public BigDecimal getBankBalance(OfflinePlayer p) {
         if (balances.containsKey(p.getUniqueId())) return balances.get(p.getUniqueId()).money;
         if (BankPlus.INSTANCE().getMySql().isConnected()) return new SQLPlayerManager(p).getMoney(bankName);
         String bal = new BPPlayerManager(p).getPlayerConfig().getString("banks." + bankName + ".money");
@@ -119,22 +145,12 @@ public class BPEconomy {
     }
 
     /**
-     * Get the sum of the player bank balance of all banks.
-     * @param p The player.
-     */
-    public BigDecimal getBankBalance(OfflinePlayer p) {
-        BigDecimal amount = new BigDecimal(0);
-        for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) amount = amount.add(getBankBalance(p, bankName));
-        return amount;
-    }
-
-    /**
      * Set the selected amount in the selected bank.
      *
      * @return Number representing the actual amount set.
      */
-    public BigDecimal setBankBalance(OfflinePlayer p, BigDecimal amount, String bankName) {
-        return setBankBalance(p, amount, bankName, TransactionType.SET);
+    public BigDecimal setBankBalance(OfflinePlayer p, BigDecimal amount) {
+        return setBankBalance(p, amount, TransactionType.SET);
     }
 
     /**
@@ -143,8 +159,8 @@ public class BPEconomy {
      * @param ignoreEvents Choose if ignoring or not the bankplus transaction event.
      * @return Number representing the actual amount set.
      */
-    public BigDecimal setBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, boolean ignoreEvents) {
-        return setBankBalance(p, amount, bankName, ignoreEvents, TransactionType.SET);
+    public BigDecimal setBankBalance(OfflinePlayer p, BigDecimal amount, boolean ignoreEvents) {
+        return setBankBalance(p, amount, ignoreEvents, TransactionType.SET);
     }
 
     /**
@@ -153,11 +169,11 @@ public class BPEconomy {
      * @param type Override the transaction type with the one you choose.
      * @return Number representing the actual amount set.
      */
-    public BigDecimal setBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, TransactionType type) {
-        return setBankBalance(p, amount, bankName, false, type);
+    public BigDecimal setBankBalance(OfflinePlayer p, BigDecimal amount, TransactionType type) {
+        return setBankBalance(p, amount, false, type);
     }
 
-    private BigDecimal setBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, boolean ignoreEvents, TransactionType type) {
+    private BigDecimal setBankBalance(OfflinePlayer p, BigDecimal amount, boolean ignoreEvents, TransactionType type) {
         Economy economy = BankPlus.INSTANCE().getVaultEconomy();
         BigDecimal result = new BigDecimal(0);
 
@@ -180,8 +196,8 @@ public class BPEconomy {
      *
      * @return Number representing the actual amount added.
      */
-    public BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount, String bankName) {
-        return addBankBalance(p, amount, bankName, false, TransactionType.ADD, false);
+    public BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount) {
+        return addBankBalance(p, amount, false, TransactionType.ADD, false);
     }
 
     /**
@@ -190,8 +206,8 @@ public class BPEconomy {
      * @param ignoreEvents Choose if ignoring or not the bankplus transaction event.
      * @return Number representing the actual amount added.
      */
-    public BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, boolean ignoreEvents) {
-        return addBankBalance(p, amount, bankName, ignoreEvents, TransactionType.ADD, false);
+    public BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount, boolean ignoreEvents) {
+        return addBankBalance(p, amount, ignoreEvents, TransactionType.ADD, false);
     }
 
     /**
@@ -200,22 +216,22 @@ public class BPEconomy {
      * @param type Override the transaction type with the one you choose.
      * @return Number representing the actual amount added.
      */
-    public BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, TransactionType type) {
-        return addBankBalance(p, amount, bankName, false, type, false);
+    public BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount, TransactionType type) {
+        return addBankBalance(p, amount, false, type, false);
     }
 
     /**
      * Add the selected amount to the selected bank.
      *
-     * @param type Override the transaction type with the one you choose.
+     * @param type               Override the transaction type with the one you choose.
      * @param addOfflineInterest Choose if updating the offline interest with this transaction.
      * @return Number representing the actual amount added.
      */
-    public BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, TransactionType type, boolean addOfflineInterest) {
-        return addBankBalance(p, amount, bankName, false, type, addOfflineInterest);
+    public BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount, TransactionType type, boolean addOfflineInterest) {
+        return addBankBalance(p, amount, false, type, addOfflineInterest);
     }
 
-    private BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, boolean ignoreEvents, TransactionType type, boolean addOfflineInterest) {
+    private BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount, boolean ignoreEvents, TransactionType type, boolean addOfflineInterest) {
         Economy economy = BankPlus.INSTANCE().getVaultEconomy();
         BigDecimal result = new BigDecimal(0);
 
@@ -226,7 +242,7 @@ public class BPEconomy {
             amount = event.getTransactionAmount();
         }
 
-        BigDecimal capacity = BankManager.getCapacity(bankName, p), balance = getBankBalance(p, bankName);
+        BigDecimal capacity = BankManager.getCapacity(bankName, p), balance = getBankBalance(p);
         if (capacity.doubleValue() <= 0D || balance.add(amount).doubleValue() < capacity.doubleValue()) {
             result = amount;
             BigDecimal moneyToAdd = balance.add(result);
@@ -248,8 +264,8 @@ public class BPEconomy {
      *
      * @return Number representing the actual amount removed.
      */
-    public BigDecimal removeBankBalance(OfflinePlayer p, BigDecimal amount, String bankName) {
-        return removeBankBalance(p, amount, bankName, false, TransactionType.REMOVE);
+    public BigDecimal removeBankBalance(OfflinePlayer p, BigDecimal amount) {
+        return removeBankBalance(p, amount, false, TransactionType.REMOVE);
     }
 
     /**
@@ -258,8 +274,8 @@ public class BPEconomy {
      * @param ignoreEvents Choose if ignoring or not the bankplus transaction event.
      * @return Number representing the actual amount removed.
      */
-    public BigDecimal removeBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, boolean ignoreEvents) {
-        return removeBankBalance(p, amount, bankName, ignoreEvents, TransactionType.REMOVE);
+    public BigDecimal removeBankBalance(OfflinePlayer p, BigDecimal amount, boolean ignoreEvents) {
+        return removeBankBalance(p, amount, ignoreEvents, TransactionType.REMOVE);
     }
 
     /**
@@ -268,11 +284,11 @@ public class BPEconomy {
      * @param type Override the transaction type with the one you choose.
      * @return Number representing the actual amount removed.
      */
-    public BigDecimal removeBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, TransactionType type) {
-        return removeBankBalance(p, amount, bankName, false, type);
+    public BigDecimal removeBankBalance(OfflinePlayer p, BigDecimal amount, TransactionType type) {
+        return removeBankBalance(p, amount, false, type);
     }
 
-    private BigDecimal removeBankBalance(OfflinePlayer p, BigDecimal amount, String bankName, boolean ignoreEvents, TransactionType type) {
+    private BigDecimal removeBankBalance(OfflinePlayer p, BigDecimal amount, boolean ignoreEvents, TransactionType type) {
         Economy economy = BankPlus.INSTANCE().getVaultEconomy();
         BigDecimal result = new BigDecimal(0);
         if (!ignoreEvents) {
@@ -282,7 +298,7 @@ public class BPEconomy {
             amount = event.getTransactionAmount();
         }
 
-        BigDecimal balance = getBankBalance(p, bankName);
+        BigDecimal balance = getBankBalance(p);
         if (balance.subtract(amount).doubleValue() < 0D) {
             result = balance;
             set(p, new BigDecimal(0));
@@ -296,33 +312,22 @@ public class BPEconomy {
     }
 
     /**
-     * Get the total offline interest earned from the selected player from all banks.
+     * Get the offline interest earned from the selected player in the selected bank.
+     *
+     * @param uuid The player UUID.
+     * @return Offline interest.
+     */
+    public BigDecimal getOfflineInterest(UUID uuid) {
+        return getOfflineInterest(Bukkit.getOfflinePlayer(uuid));
+    }
+
+    /**
+     * Get the offline interest earned from the selected player in the selected bank.
+     *
      * @param p The player.
-     * @return Total offline interest.
+     * @return Offline interest.
      */
     public BigDecimal getOfflineInterest(OfflinePlayer p) {
-        BigDecimal amount = new BigDecimal(0);
-        for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) amount = amount.add(getOfflineInterest(p, bankName));
-        return amount;
-    }
-
-    /**
-     * Get the offline interest earned from the selected player in the selected bank.
-     * @param uuid The player UUID.
-     * @param bankName The bank name.
-     * @return Offline interest.
-     */
-    public BigDecimal getOfflineInterest(UUID uuid, String bankName) {
-        return getOfflineInterest(Bukkit.getOfflinePlayer(uuid), bankName);
-    }
-
-    /**
-     * Get the offline interest earned from the selected player in the selected bank.
-     * @param p The player.
-     * @param bankName The bank name.
-     * @return Offline interest.
-     */
-    public BigDecimal getOfflineInterest(OfflinePlayer p, String bankName) {
         if (balances.containsKey(p.getUniqueId())) return balances.get(p.getUniqueId()).offlineInterest;
 
         if (BankPlus.INSTANCE().getMySql().isConnected())
@@ -334,11 +339,11 @@ public class BPEconomy {
 
     /**
      * Set the offline interest to the selected amount in the selected bank.
-     * @param p The player.
+     *
+     * @param p      The player.
      * @param amount The new amount.
-     * @param bankName The bank name.
      */
-    public void setOfflineInterest(OfflinePlayer p, BigDecimal amount, String bankName) {
+    public void setOfflineInterest(OfflinePlayer p, BigDecimal amount) {
         amount = new BigDecimal(BPFormatter.formatBigDecimal(amount)).max(BigDecimal.valueOf(0));
 
         if (balances.containsKey(p.getUniqueId())) {
@@ -360,11 +365,11 @@ public class BPEconomy {
 
     /**
      * Set the player bank debt to the selected amount.
-     * @param p The player.
+     *
+     * @param p      The player.
      * @param amount The new debt amount.
-     * @param bankName The bank where to set the debt.
      */
-    public void setDebt(OfflinePlayer p, BigDecimal amount, String bankName) {
+    public void setDebt(OfflinePlayer p, BigDecimal amount) {
         amount = BPFormatter.getBigDoubleFormatted(amount).max(BigDecimal.valueOf(0));
 
         if (balances.containsKey(p.getUniqueId())) {
@@ -476,28 +481,28 @@ public class BPEconomy {
             taxes = amount.multiply(Values.CONFIG.getDepositTaxes().divide(BigDecimal.valueOf(100)));
 
         BigDecimal capacity = BankManager.getCapacity(bankName, p);
-        BigDecimal newBankBalance = getBankBalance(p, bankName).add(amount);
+        BigDecimal newBankBalance = getBankBalance(p).add(amount);
 
         /*
         Make it possible so when depositing all your money with taxes, the money will have the ability
         to FILL the bank instead of always depositing a bit less and never filling up the bank.
         */
         if (capacity.doubleValue() > 0d && newBankBalance.doubleValue() >= capacity.doubleValue()) {
-            BigDecimal moneyToFull = capacity.subtract(getBankBalance(p, bankName));
+            BigDecimal moneyToFull = capacity.subtract(getBankBalance(p));
             amount = moneyToFull.add(taxes);
         }
 
         EconomyResponse depositResponse = BankPlus.INSTANCE().getVaultEconomy().withdrawPlayer(p, amount.doubleValue());
         if (BPUtils.hasFailed(p, depositResponse)) return;
 
-        addBankBalance(p, amount.subtract(taxes), bankName, true);
+        addBankBalance(p, amount.subtract(taxes), true);
         BPMessages.send(p, "Success-Deposit", BPUtils.placeValues(p, amount.subtract(taxes)), BPUtils.placeValues(taxes, "taxes"));
         BPUtils.playSound("DEPOSIT", p);
 
         endEvent(p, TransactionType.DEPOSIT, economy.getBalance(p), amount, bankName);
     }
 
-    public void withdraw(Player p, BigDecimal amount, String bankName) {
+    public void withdraw(Player p, BigDecimal amount) {
         Economy economy = BankPlus.INSTANCE().getVaultEconomy();
         BPPreTransactionEvent event = startEvent(p, TransactionType.WITHDRAW, economy.getBalance(p), amount, bankName);
         if (event.isCancelled()) return;
@@ -509,7 +514,7 @@ public class BPEconomy {
             return;
         }
 
-        BigDecimal bankBal = getBankBalance(p, bankName);
+        BigDecimal bankBal = getBankBalance(p);
         if (!BPUtils.checkPreRequisites(bankBal, amount, p)) return;
 
         if (bankBal.doubleValue() < amount.doubleValue()) amount = bankBal;
@@ -525,7 +530,7 @@ public class BPEconomy {
         EconomyResponse withdrawResponse = economy.depositPlayer(p, amount.subtract(taxes).doubleValue());
         if (BPUtils.hasFailed(p, withdrawResponse)) return;
 
-        removeBankBalance(p, amount, bankName, true);
+        removeBankBalance(p, amount, true);
         BPMessages.send(p, "Success-Withdraw", BPUtils.placeValues(p, amount.subtract(taxes)), BPUtils.placeValues(taxes, "taxes"));
         BPUtils.playSound("WITHDRAW", p);
 
@@ -538,28 +543,28 @@ public class BPEconomy {
      * @param from     The player that will give the money.
      * @param to       The player that will receive your money.
      * @param amount   How much money you want to pay.
-     * @param fromBank The bank where the money will be taken.
      * @param toBank   The bank where the money will be added.
      */
-    public void pay(Player from, Player to, BigDecimal amount, String fromBank, String toBank) {
-        BigDecimal senderBalance = getBankBalance(from, fromBank);
+    public void pay(Player from, Player to, BigDecimal amount, String toBank) {
+        BigDecimal senderBalance = getBankBalance(from);
+        BPEconomy toEconomy = get(toBank);
 
         // Check if the sender has at least more than 0 money
-        if (senderBalance.doubleValue() < amount.doubleValue()) {
+        if (senderBalance.compareTo(amount) < 0) {
             BPMessages.send(from, "Insufficient-Money");
             return;
         }
 
         // Check if the receiver of the payment has the bank full
-        if (getBankBalance(to, toBank).doubleValue() >= BankManager.getCapacity(toBank, to).doubleValue()) {
+        if (toEconomy.getBankBalance(to).compareTo(BankManager.getCapacity(toBank, to)) >= 0) {
             BPMessages.send(from, "Bank-Full", "%player%$" + to.getName());
             return;
         }
 
-        BigDecimal added = addBankBalance(to, amount, toBank, TransactionType.PAY), extra = amount.subtract(added);
+        BigDecimal added = toEconomy.addBankBalance(to, amount, TransactionType.PAY), extra = amount.subtract(added);
         BPMessages.send(to, "Payment-Received", BPUtils.placeValues(from, added));
 
-        BigDecimal removed = removeBankBalance(from, amount.subtract(extra), fromBank, TransactionType.PAY);
+        BigDecimal removed = removeBankBalance(from, amount.subtract(extra), TransactionType.PAY);
         BPMessages.send(from, "Payment-Sent", BPUtils.placeValues(to, removed));
     }
 
@@ -573,7 +578,7 @@ public class BPEconomy {
 
     private BPPreTransactionEvent startEvent(OfflinePlayer p, TransactionType type, double vaultBalance, BigDecimal amount, String bankName) {
         BPPreTransactionEvent event = new BPPreTransactionEvent(
-                p, type, getBankBalance(p, bankName), vaultBalance, amount, bankName
+                p, type, getBankBalance(p), vaultBalance, amount, bankName
         );
         BPUtils.callEvent(event);
         return event;
@@ -581,7 +586,7 @@ public class BPEconomy {
 
     private void endEvent(OfflinePlayer p, TransactionType type, double vaultBalance, BigDecimal amount, String bankName) {
         BPAfterTransactionEvent event = new BPAfterTransactionEvent(
-                p, type, getBankBalance(p, bankName), vaultBalance, amount, bankName
+                p, type, getBankBalance(p), vaultBalance, amount, bankName
         );
         BPUtils.callEvent(event);
     }

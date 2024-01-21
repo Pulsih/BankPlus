@@ -2,12 +2,14 @@ package me.pulsi_.bankplus.economy;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayerManager;
+import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
 import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
@@ -28,8 +30,8 @@ public class EconomyRegistry {
                 String name = economy.getBankName();
                 pManager.setDebt(economy.getDebt(uuid), name);
                 pManager.setLevel(BankManager.getCurrentLevel(name, uuid), name);
-                pManager.setMoney(economy.getBankBalance(uuid, name), name);
-                pManager.setOfflineInterest(economy.getOfflineInterest(uuid, name), name);
+                pManager.setMoney(economy.getBankBalance(uuid), name);
+                pManager.setOfflineInterest(economy.getOfflineInterest(uuid), name);
             }
         } else {
             BPPlayerManager manager = new BPPlayerManager(uuid);
@@ -41,28 +43,23 @@ public class EconomyRegistry {
                 String name = economy.getBankName();
                 config.set("banks." + name + ".debt", BPFormatter.formatBigDecimal(economy.getDebt(uuid)));
                 config.set("banks." + name + ".level", BankManager.getCurrentLevel(name, uuid));
-                config.set("banks." + name + ".money", BPFormatter.formatBigDecimal(economy.getBankBalance(uuid, name)));
-                config.set("banks." + name + ".interest", BPFormatter.formatBigDecimal(economy.getOfflineInterest(uuid, name)));
+                config.set("banks." + name + ".money", BPFormatter.formatBigDecimal(economy.getBankBalance(uuid)));
+                config.set("banks." + name + ".interest", BPFormatter.formatBigDecimal(economy.getOfflineInterest(uuid)));
             }
             manager.savePlayerFile(config, file, async);
         }
     }
 
-    public void loadEveryone(boolean async) {
-        for ()
-        for (BPEconomy economy : BPEconomy.list()) {
-            for (UUID uuid : economy.getLoadedPlayers()) {
-                savePlayer(uuid, async);
-                if (Bukkit.getPlayer(uuid) == null) economy.unloadPlayer(uuid);
-            }
-        }
+    public void loadEveryone() {
+        for (Player p : Bukkit.getOnlinePlayers())
+            PlayerRegistry.loadPlayer(p);
     }
 
     public void saveEveryone(boolean async) {
         for (BPEconomy economy : BPEconomy.list()) {
             for (UUID uuid : economy.getLoadedPlayers()) {
                 savePlayer(uuid, async);
-                if (Bukkit.getPlayer(uuid) == null) economy.unloadPlayer(uuid);
+                if (Bukkit.getPlayer(uuid) == null) PlayerRegistry.unloadPlayer(uuid);
             }
         }
     }

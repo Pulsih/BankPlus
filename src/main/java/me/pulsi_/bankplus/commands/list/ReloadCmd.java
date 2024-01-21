@@ -25,7 +25,7 @@ public class ReloadCmd extends BPCommand {
 
     @Override
     public boolean onCommand(CommandSender s, String args[]) {
-        if (confirm(s)) return false;
+        if (skipToConfirm(s)) return false;
 
         long time = System.currentTimeMillis();
         BPMessages.send(s, "Reload-Started");

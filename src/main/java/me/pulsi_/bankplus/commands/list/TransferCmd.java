@@ -40,7 +40,7 @@ public class TransferCmd extends BPCommand {
             BPMessages.send(s, "Invalid-Action");
             return false;
         }
-        if (confirm(s)) return false;
+        if (skipToConfirm(s)) return false;
 
         if (!Values.CONFIG.isSqlEnabled()) {
             BPMessages.send(s, "%prefix% &cCould not initialize the task, MySQL hasn't been enabled in the config file!", true);

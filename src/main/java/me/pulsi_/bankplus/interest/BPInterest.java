@@ -5,7 +5,6 @@ import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.economy.TransactionType;
 import me.pulsi_.bankplus.managers.BPConfigs;
-import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
@@ -24,7 +23,6 @@ public class BPInterest {
 
     private long cooldown = 0;
     private boolean wasDisabled = true, isOfflineInterestEnabled;
-    private Permission permission;
 
     private final BankPlus plugin;
 
@@ -33,7 +31,6 @@ public class BPInterest {
     }
 
     public void startInterest() {
-        permission = BankPlus.INSTANCE().getPermissions();
         isOfflineInterestEnabled = Values.CONFIG.isGivingInterestToOfflinePlayers();
         long interestSave = 0;
 
@@ -71,20 +68,11 @@ public class BPInterest {
     }
 
     public void giveInterest() {
-        String perm = Values.CONFIG.getInterestOfflinePermission();
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
             Player oP = p.getPlayer();
-            if (oP != null && (!oP.hasPermission("bankplus.receive.interest") || (Values.CONFIG.isIgnoringAfkPlayers() && BankPlus.INSTANCE().getAfkManager().isAFK(oP)))) continue;
+            if (oP != null && (!oP.hasPermission("bankplus.receive.interest") || BankPlus.INSTANCE().getAfkManager().isAFK(oP))) continue;
             else {
-                if (!isOfflineInterestEnabled || (Values.CONFIG.getOfflineInterestLimit() > 0L && System.currentTimeMillis() - p.getLastSeen() > Values.CONFIG.getOfflineInterestLimit())) continue;
-                boolean hasPermission = false;
-                for (World world : Bukkit.getWorlds()) {
-                    if (perm == null || perm.isEmpty() || permission.playerHas(world.getName(), p, perm)) {
-                        hasPermission = true;
-                        break;
-                    }
-                }
-                if (!hasPermission) continue;
+                if (!isOfflineInterestEnabled || offlineTimeExpired(p) || !BPUtils.hasOfflinePermission(p, Values.CONFIG.getInterestOfflinePermission())) continue;
             }
 
             BigDecimal interestAmount = new BigDecimal(0);
@@ -93,13 +81,13 @@ public class BPInterest {
             if (p.isOnline()) {
                 for (String bankName : availableBanks) {
                     BPEconomy economy = BPEconomy.get(bankName);
-                    BigDecimal bankBalance = economy.getBankBalance(p, bankName);
+                    BigDecimal bankBalance = economy.getBankBalance(p);
                     BigDecimal interestMoney = getInterestMoney(bankName, p, BankManager.getInterestRate(bankName, p)), maxAmount = Values.CONFIG.getInterestMaxAmount();
 
                     if (bankBalance.doubleValue() <= 0) continue;
                     if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
 
-                    BigDecimal amount = economy.addBankBalance(p, interestMoney, bankName, TransactionType.INTEREST);
+                    BigDecimal amount = economy.addBankBalance(p, interestMoney, TransactionType.INTEREST);
                     interestAmount = interestAmount.add(amount);
                 }
                 if (!Values.MESSAGES.isInterestBroadcastEnabled()) return;
@@ -108,7 +96,7 @@ public class BPInterest {
             } else {
                 for (String bankName : BankManager.getAvailableBanks(p)) {
                     BPEconomy economy = BPEconomy.get(bankName);
-                    BigDecimal bankBalance = economy.getBankBalance(p, bankName);
+                    BigDecimal bankBalance = economy.getBankBalance(p);
                     BigDecimal maxAmount = Values.CONFIG.getInterestMaxAmount(),
                             interestMoney = Values.CONFIG.isOfflineInterestDifferentRate() ?
                             getInterestMoney(bankName, p, BankManager.getOfflineInterestRate(bankName, p)) :
@@ -117,14 +105,14 @@ public class BPInterest {
                     if (bankBalance.doubleValue() <= 0) continue;
                     if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
 
-                    economy.addBankBalance(p, interestMoney, bankName, TransactionType.INTEREST, true);
+                    economy.addBankBalance(p, interestMoney, TransactionType.INTEREST, true);
                 }
             }
         }
     }
 
     public BigDecimal getInterestMoney(String bankName, OfflinePlayer p, BigDecimal defaultInterest) {
-        BigDecimal playerBalance = BPEconomy.get(bankName).getBankBalance(p, bankName);
+        BigDecimal playerBalance = BPEconomy.get(bankName).getBankBalance(p);
 
         if (!Values.CONFIG.enableInterestLimiter() || !Values.CONFIG.accumulateInterestLimiter())
             return playerBalance.multiply(defaultInterest.divide(BigDecimal.valueOf(100)));
@@ -156,7 +144,7 @@ public class BPInterest {
         return result;
     }
 
-    private boolean isInterestActive() {
+    public boolean isInterestActive() {
         if (!Values.CONFIG.isInterestEnabled()) {
             BukkitTask task = BankPlus.INSTANCE().getTaskManager().getInterestTask();
             if (task != null) task.cancel();
@@ -165,6 +153,17 @@ public class BPInterest {
         }
         wasDisabled = false;
         return true;
+    }
+
+    public boolean offlineTimeExpired(OfflinePlayer p) {
+        if (Values.CONFIG.getOfflineInterestLimit() <= 0L) return false;
+        long lastSeen;
+        try {
+            lastSeen = p.getLastSeen();
+        } catch (NoSuchMethodError e) {
+            lastSeen = p.getLastPlayed();
+        }
+        return (System.currentTimeMillis() - lastSeen) > Values.CONFIG.getOfflineInterestLimit();
     }
 
     public boolean wasDisabled() {

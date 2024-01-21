@@ -1,6 +1,5 @@
 package me.pulsi_.bankplus.placeholders.list;
 
-import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.placeholders.BPPlaceholder;
@@ -44,13 +43,13 @@ public class CalculateWithdrawTaxesPlaceholder extends BPPlaceholder {
 
             BigDecimal amount, balance;
 
-            if (target == null) balance = BPEconomy.getBankBalance(p);
+            if (target == null) balance = BPEconomy.getBankBalancesSum(p);
             else {
                 if (!BankManager.exist(target))
                     return "The selected bank does not exist.";
 
                 number = number.replace("{" + target + "}", "");
-                balance = BPEconomy.getBankBalance(p, target);
+                balance = BPEconomy.get(target).getBankBalance(p);
             }
 
             try {

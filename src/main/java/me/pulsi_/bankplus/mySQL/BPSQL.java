@@ -1,7 +1,8 @@
 package me.pulsi_.bankplus.mySQL;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.bankSystem.BankGuiRegistry;
+import me.pulsi_.bankplus.bankSystem.BankRegistry;
+import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.OfflinePlayer;
@@ -12,14 +13,12 @@ import java.sql.SQLException;
 
 public class BPSQL {
 
-    private final BankGuiRegistry bankRegistry;
     private final BPSQLMethods sqlMethods;
     private String username, password, url;
     private Connection connection;
 
     public BPSQL() {
         sqlMethods = new BPSQLMethods(this);
-        bankRegistry = BankPlus.INSTANCE().getBankGuiRegistry();
     }
 
     public void setupMySQL() {
@@ -36,7 +35,7 @@ public class BPSQL {
 
     public boolean isPlayerRegistered(OfflinePlayer p) {
         String uuid = p.getUniqueId().toString();
-        for (String bankName : bankRegistry.getBanks().keySet())
+        for (String bankName : BPEconomy.nameList())
             if (getSqlMethods().exist(bankName, "uuid", uuid)) return true;
         return false;
     }
@@ -44,7 +43,7 @@ public class BPSQL {
     public void registerPlayer(OfflinePlayer p) {
         String uuid = p.getUniqueId().toString();
 
-        for (String bankName : bankRegistry.getBanks().keySet()) {
+        for (String bankName : BPEconomy.nameList()) {
             if (!getSqlMethods().exist(bankName, "uuid", uuid))
                 getSqlMethods().insertInto(
                         bankName,
@@ -59,7 +58,7 @@ public class BPSQL {
     }
 
     public void setupTables() {
-        for (String bankName : bankRegistry.getBanks().keySet())
+        for (String bankName : BPEconomy.nameList())
            getSqlMethods().createTable(
                    bankName,
                    "uuid varchar(100)",

@@ -1,20 +1,46 @@
 package me.pulsi_.bankplus.account;
 
-import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.bankSystem.BankManager;
+import me.pulsi_.bankplus.economy.BPEconomy;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.UUID;
 
 public class PlayerRegistry {
 
-    private final HashMap<UUID, BPPlayer> players = new HashMap<>();
+    private static final HashMap<UUID, BPPlayer> players = new HashMap<>();
 
-    public HashMap<UUID, BPPlayer> getPlayers() {
+    public static HashMap<UUID, BPPlayer> getPlayers() {
         return players;
     }
 
+    public static boolean isPlayerLoaded(OfflinePlayer p) {
+        return players.containsKey(p.getUniqueId());
+    }
+
+    public static void loadPlayer(Player p) {
+        if (isPlayerLoaded(p)) return;
+
+        BPPlayer bpPlayer = new BPPlayer(p);
+        for (BPEconomy economy : BPEconomy.list()) {
+            economy.loadPlayer(p);
+
+            String name = economy.getBankName();
+            bpPlayer.setBankLevel(name, BankManager.getCurrentLevel(name, p));
+        }
+
+        players.put(p.getUniqueId(), bpPlayer);
+    }
+
+    public static void unloadPlayer(UUID uuid) {
+        players.remove(uuid);
+        for (BPEconomy economy : BPEconomy.list())
+            economy.unloadPlayer(uuid);
+    }
+
     public static BPPlayer get(OfflinePlayer p) {
-        return BankPlus.INSTANCE().getPlayerRegistry().getPlayers().get(p.getUniqueId());
+        return players.get(p.getUniqueId());
     }
 }

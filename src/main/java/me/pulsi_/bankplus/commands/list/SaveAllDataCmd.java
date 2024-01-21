@@ -27,9 +27,9 @@ public class SaveAllDataCmd extends BPCommand {
 
     @Override
     public boolean onCommand(CommandSender s, String[] args) {
-        if (confirm(s)) return false;
+        if (skipToConfirm(s)) return false;
 
-        BankPlus.INSTANCE().getPlayerRegistry().forceSave(true);
+        BankPlus.INSTANCE().getEconomyRegistry().forceSave(true);
         if (Values.CONFIG.isSaveBalancesBroadcast()) BPLogger.info("All player data have been saved!");
         BPMessages.send(s, "%prefix% &aSuccessfully saved all player data!", true);
         return true;

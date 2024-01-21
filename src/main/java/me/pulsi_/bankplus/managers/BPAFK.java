@@ -21,7 +21,7 @@ public class BPAFK {
     }
 
     public boolean isAFK(Player p) {
-        return Values.CONFIG.useEssentialsXAFK() ? Essentials.getPlugin(Essentials.class).getUser(p).isAfk() : afkPlayers.contains(p);
+        return Values.CONFIG.isIgnoringAfkPlayers() && (Values.CONFIG.useEssentialsXAFK() ? Essentials.getPlugin(Essentials.class).getUser(p).isAfk() : afkPlayers.contains(p));
     }
 
     public void startCountdown() {

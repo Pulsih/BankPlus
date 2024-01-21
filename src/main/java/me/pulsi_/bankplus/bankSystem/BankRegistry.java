@@ -6,21 +6,17 @@ import me.pulsi_.bankplus.utils.BPItems;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-public class BankGuiRegistry {
+public class BankRegistry {
 
     private final HashMap<String, Bank> banks = new HashMap<>();
 
@@ -41,7 +37,7 @@ public class BankGuiRegistry {
         File[] files = new File(BankPlus.INSTANCE().getDataFolder(), "banks").listFiles();
         if (files != null && files.length > 0) bankFiles.addAll(Arrays.asList(files));
 
-        if (defaultBankFile.exists()) {
+        if (!defaultBankFile.exists()) {
             generateMainBankFile(defaultBankFile);
             bankFiles.add(defaultBankFile);
         }
@@ -52,14 +48,13 @@ public class BankGuiRegistry {
             if (Values.CONFIG.isGuiModuleEnabled()) loadBankGui(bank, bankFile);
             banks.put(identifier, bank);
         }
-        if (Values.CONFIG.isGuiModuleEnabled()) loadMultipleBanksGui();
+        if (Values.CONFIG.isGuiModuleEnabled() && Values.MULTIPLE_BANKS.enableMultipleBanksModule()) loadMultipleBanksGui();
 
-        BankPlus.INSTANCE().getEconomyRegistry().saveEveryone(true);
+        BankPlus.INSTANCE().getEconomyRegistry().loadEveryone();
     }
 
     public void loadMultipleBanksGui() {
-        String title = BPChat.color(Values.MULTIPLE_BANKS.getBanksGuiTitle() == null ? "&c&l * TITLE NOT FOUND *" : Values.MULTIPLE_BANKS.getBanksGuiTitle());
-        Inventory gui = Bukkit.createInventory(new BankHolder(), Math.max(9, Math.min(54, Values.MULTIPLE_BANKS.getBanksGuiLines() * 9)), title);
+        Inventory gui = Bukkit.createInventory(new BankHolder(), Math.max(9, Math.min(54, Values.MULTIPLE_BANKS.getBanksGuiLines() * 9)), "");
 
         if (Values.MULTIPLE_BANKS.isFillerEnabled()) {
             ItemStack filler = BPItems.getFiller(Values.MULTIPLE_BANKS.getFillerMaterial(), Values.MULTIPLE_BANKS.isFillerGlowing());
@@ -68,6 +63,7 @@ public class BankGuiRegistry {
         }
 
         Bank multipleBanksGui = new Bank(BankListGui.multipleBanksGuiID);
+        multipleBanksGui.setTitle(Values.MULTIPLE_BANKS.getBanksGuiTitle());
         multipleBanksGui.setSize(Values.MULTIPLE_BANKS.getBanksGuiLines());
         multipleBanksGui.setUpdateDelay(Values.MULTIPLE_BANKS.getUpdateDelay());
         multipleBanksGui.setContent(gui.getContents());
@@ -78,8 +74,8 @@ public class BankGuiRegistry {
     private void generateMainBankFile(File file) {
         if (!file.exists()) {
             BankPlus.INSTANCE().saveResource("banks" + File.separator + "bankplus_main_gui_base_file.yml", false);
-            File newMainFile = new File(BankPlus.INSTANCE().getDataFolder(), "banks" + File.separator + "bankplus_main_gui_base_file.yml");
-            newMainFile.renameTo(file);
+            File baseBankFile = new File(BankPlus.INSTANCE().getDataFolder(), "banks" + File.separator + "bankplus_main_gui_base_file.yml");
+            baseBankFile.renameTo(file);
         }
     }
 

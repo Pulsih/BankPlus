@@ -58,8 +58,8 @@ public class WithdrawCmd extends BPCommand {
             return false;
         }
 
-        if (confirm(s)) return false;
-        BPEconomy.withdraw(p, amount, bankName);
+        if (skipToConfirm(s)) return false;
+        BPEconomy.get(bankName).withdraw(p, amount);
         return true;
     }
 

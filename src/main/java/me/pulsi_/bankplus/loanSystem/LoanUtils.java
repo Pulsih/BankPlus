@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 public class LoanUtils {
 
     public static void sendRequest(Player from, Player to, BigDecimal amount, String fromBankName, String toBankName, String action) {
-        BigDecimal fBal = BPEconomy.getBankBalance(from, fromBankName);
+        BigDecimal fBal = BPEconomy.get(fromBankName).getBankBalance(from);
         if (fBal.doubleValue() <= 0d) {
             BPMessages.send(from, "Insufficient-Money");
             return;
@@ -79,18 +79,19 @@ public class LoanUtils {
             loan.setReceiver(sender);
         }
 
-        BPEconomy.removeBankBalance(sender, amount, loan.getFromBankName()); // Already checked that the amount isn't > than the balance.
+        BPEconomy.get(loan.getFromBankName()).removeBankBalance(sender, amount); // Already checked that the amount isn't > than the balance.
 
-        BigDecimal capacity = BankManager.getCapacity(loan.getToBankName(), p), balance = BPEconomy.getBankBalance(p, loan.getToBankName());
+        BPEconomy toEconomy = BPEconomy.get(loan.getToBankName());
+        BigDecimal capacity = BankManager.getCapacity(loan.getToBankName(), p), balance = toEconomy.getBankBalance(p);
         // If the bank is full, instead of loosing money they will be added to the vault balance
         if (balance.add(amount).doubleValue() >= capacity.doubleValue() && capacity.doubleValue() > 0d) {
-            BPEconomy.setBankBalance(p, capacity, loan.getToBankName(), TransactionType.LOAN);
+            toEconomy.setBankBalance(p, capacity, TransactionType.LOAN);
             BigDecimal extra = amount.subtract(capacity.subtract(balance));
 
             BankPlus.INSTANCE().getVaultEconomy().depositPlayer(p, extra.doubleValue());
             BPMessages.send(p, "Received-Loan-Full", BPUtils.placeValues(sender, amount), BPUtils.placeValues(extra, "extra"));
         } else {
-            BPEconomy.addBankBalance(p, amount, loan.getToBankName(), TransactionType.LOAN);
+            toEconomy.addBankBalance(p, amount, TransactionType.LOAN);
             BPMessages.send(p, "Received-Loan", BPUtils.placeValues(sender, amount));
         }
         BPMessages.send(sender, "Given-Loan", BPUtils.placeValues(p, amount));
@@ -127,7 +128,7 @@ public class LoanUtils {
     }
 
     public static void sendLoan(Player receiver, String fromBank, BigDecimal amount) {
-        BigDecimal balance = BPEconomy.getBankBalance(receiver, fromBank);
+        BigDecimal balance = BPEconomy.get(fromBank).getBankBalance(receiver);
         if (balance.doubleValue() <= 0d) {
             BPMessages.send(receiver, "Insufficient-Money");
             return;
@@ -145,12 +146,12 @@ public class LoanUtils {
 
         // If the bank is full, instead of loosing money they will be added to the vault balance
         if (balance.add(amount).doubleValue() >= capacity.doubleValue() && capacity.doubleValue() > 0d) {
-            BPEconomy.setBankBalance(receiver, capacity, fromBank, TransactionType.LOAN);
+            BPEconomy.get(loan.getToBankName()).setBankBalance(receiver, capacity, TransactionType.LOAN);
             BigDecimal extra = amount.subtract(capacity.subtract(balance));
             BankPlus.INSTANCE().getVaultEconomy().depositPlayer(receiver, extra.doubleValue());
             BPMessages.send(receiver, "Received-Loan-Full-Bank", BPUtils.placeValues(fromBank, amount), BPUtils.placeValues(extra, "extra"));
         } else {
-            BPEconomy.addBankBalance(receiver, amount, fromBank, TransactionType.LOAN);
+            BPEconomy.get(loan.getToBankName()).addBankBalance(receiver, amount, TransactionType.LOAN);
             BPMessages.send(receiver, "Received-Loan-Bank", BPUtils.placeValues(fromBank, amount));
         }
 
@@ -179,7 +180,7 @@ public class LoanUtils {
         // If the sender == null, means that the loan has been requested from a player to a bank, so we just remove the money to the player receiver.
         if (!isPlayerToBank) {
             // Add back "amount" to the sender of the loan.
-            BigDecimal addedToSender = BPEconomy.addBankBalance(sender, amount, fromBank, TransactionType.LOAN), extra = amount.subtract(addedToSender);
+            BigDecimal addedToSender = BPEconomy.get(fromBank).addBankBalance(sender, amount, TransactionType.LOAN), extra = amount.subtract(addedToSender);
             if (extra.doubleValue() <= 0) BPMessages.send(sender, "Loan-Payback", BPUtils.placeValues(receiver, addedToSender));
             else {
                 BPMessages.send(sender, "Loan-Payback-Full", BPUtils.placeValues(amount), BPUtils.placeValues(receiver, extra, "extra"));
@@ -188,15 +189,15 @@ public class LoanUtils {
         }
 
         // Remove "amount" from the receiver of the loan.
-        BigDecimal removedToReceiver = BPEconomy.removeBankBalance(receiver, amount, toBank, TransactionType.LOAN), debt = amount.subtract(removedToReceiver);
+        BigDecimal removedToReceiver = BPEconomy.get(toBank).removeBankBalance(receiver, amount, TransactionType.LOAN), debt = amount.subtract(removedToReceiver);
         if (debt.doubleValue() <= 0D) {
             if (isPlayerToBank) BPMessages.send(receiver, "Loan-Returned-Bank", BPUtils.placeValues(loan.getRequestedBank(), amount));
             else BPMessages.send(receiver, "Loan-Returned", BPUtils.placeValues(sender, amount));
         } else {
-            BigDecimal newDebt = BPEconomy.getDebt(receiver).add(debt);
+            BigDecimal newDebt = BPEconomy.get(toBank).getDebt(receiver).add(debt);
             if (isPlayerToBank) BPMessages.send(receiver, "Loan-Returned-Debt-Bank", BPUtils.placeValues(loan.getRequestedBank(), newDebt));
             else BPMessages.send(receiver, "Loan-Returned-Debt", BPUtils.placeValues(sender, newDebt));
-            BPEconomy.setDebt(receiver, newDebt, loan.getRequestedBank());
+            BPEconomy.get(toBank).setDebt(receiver, newDebt);
         }
 
         // Was the loan at his final instalment?

@@ -39,7 +39,7 @@ public class CustomWithdrawCmd extends BPCommand {
             return false;
         }
 
-        if (confirm(s)) return false;
+        if (skipToConfirm(s)) return false;
         BPUtils.customWithdraw(p, bankName);
         return true;
     }

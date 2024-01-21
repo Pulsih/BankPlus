@@ -30,7 +30,7 @@ public class RestartInterestCmd extends BPCommand {
             BPMessages.send(s, "Interest-Disabled");
             return false;
         }
-        if (confirm(s)) return false;
+        if (skipToConfirm(s)) return false;
         BankPlus.INSTANCE().getInterest().restartInterest();
         BPMessages.send(s, "Interest-Restarted");
         return true;

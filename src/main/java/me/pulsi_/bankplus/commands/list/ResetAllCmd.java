@@ -43,7 +43,7 @@ public class ResetAllCmd extends BPCommand {
             return false;
         }
 
-        if (confirm(s)) return false;
+        if (skipToConfirm(s)) return false;
 
         BPMessages.send(s, "%prefix% &aSuccessfully reset all players money! &8(&aWith &f" + mode + " &amode&8)", true);
         resetAll(Arrays.asList(Bukkit.getOfflinePlayers()), mode);
@@ -65,8 +65,8 @@ public class ResetAllCmd extends BPCommand {
             if (copy.isEmpty()) return;
             OfflinePlayer p = copy.remove(0);
 
-            if (mode.equalsIgnoreCase("maintain")) vaultEconomy.depositPlayer(p, BPEconomy.getBankBalance(p).doubleValue());
-            for (String bankName : banks) BPEconomy.setBankBalance(p, BigDecimal.valueOf(0), bankName);
+            if (mode.equalsIgnoreCase("maintain")) vaultEconomy.depositPlayer(p, BPEconomy.getBankBalancesSum(p).doubleValue());
+            for (String bankName : banks) BPEconomy.get(bankName).setBankBalance(p, BigDecimal.valueOf(0));
         }
 
         if (!copy.isEmpty())

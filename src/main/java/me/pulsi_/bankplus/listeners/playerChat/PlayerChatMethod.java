@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.listeners.playerChat;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
+import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
@@ -24,7 +25,7 @@ public class PlayerChatMethod {
         Player p = e.getPlayer();
         if (!isTyping(p)) return;
 
-        BPPlayer player = BankPlus.INSTANCE().getPlayerRegistry().get(p);
+        BPPlayer player = PlayerRegistry.get(p);
 
         Bank openedBank = player.getOpenedBank();
         if (openedBank == null) {
@@ -50,11 +51,11 @@ public class PlayerChatMethod {
 
         if (BPUtils.isDepositing(p)) {
             BPSets.removePlayerFromDepositing(p);
-            BPEconomy.deposit(p, amount);
+            BPEconomy.get(identifier).deposit(p, amount);
         }
         if (BPUtils.isWithdrawing(p)) {
             BPSets.removePlayerFromWithdrawing(p);
-            BPEconomy.withdraw(p, amount, identifier);
+            BPEconomy.get(identifier).withdraw(p, amount);
         }
         reopenBank(p, identifier);
     }
@@ -73,7 +74,7 @@ public class PlayerChatMethod {
 
     public static void reopenBank(Player p, String identifier) {
         Bukkit.getScheduler().runTask(BankPlus.INSTANCE(), () -> {
-            BukkitTask task = BankPlus.INSTANCE().getPlayerRegistry().get(p).getClosingTask();
+            BukkitTask task = PlayerRegistry.get(p).getClosingTask();
             if (task != null) task.cancel();
 
             BPSets.playerDepositing.remove(p.getUniqueId());

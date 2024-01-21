@@ -42,7 +42,7 @@ public class OpenCmd extends BPCommand {
             return false;
         }
 
-        if (!confirm(s)) BankUtils.openBank(p, bankName, false);
+        if (!skipToConfirm(s)) BankUtils.openBank(p, bankName, false);
         return true;
     }
 

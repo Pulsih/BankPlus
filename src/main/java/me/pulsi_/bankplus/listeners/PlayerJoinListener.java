@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayerManager;
+import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
@@ -26,15 +27,15 @@ public class PlayerJoinListener implements Listener {
             if (Values.CONFIG.notifyRegisteredPlayer()) BPLogger.info("Successfully registered " + p.getName() + "!");
         }
         pManager.checkForFileFixes(p, pManager);
-        pManager.loadPlayer();
+        PlayerRegistry.loadPlayer(p);
 
         if (!Values.CONFIG.notifyOfflineInterest()) return;
 
         BigDecimal amount = new BigDecimal(0);
-        for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) {
-            BigDecimal offlineInterest = BPEconomy.getOfflineInterest(p, bankName);
+        for (BPEconomy economy : BPEconomy.list()) {
+            BigDecimal offlineInterest = economy.getOfflineInterest(p);
             amount = amount.add(offlineInterest);
-            if (offlineInterest.doubleValue() > 0d) BPEconomy.setOfflineInterest(p, BigDecimal.valueOf(0), bankName);
+            if (offlineInterest.doubleValue() > 0d) economy.setOfflineInterest(p, BigDecimal.valueOf(0));
         }
 
         BigDecimal finalAmount = amount;

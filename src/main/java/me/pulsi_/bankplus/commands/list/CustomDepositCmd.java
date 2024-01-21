@@ -40,7 +40,7 @@ public class CustomDepositCmd extends BPCommand {
         }
 
 
-        if (confirm(s)) return false;
+        if (skipToConfirm(s)) return false;
         BPUtils.customDeposit(p, bankName);
         return true;
     }

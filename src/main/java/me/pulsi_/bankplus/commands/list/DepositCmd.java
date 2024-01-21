@@ -58,8 +58,8 @@ public class DepositCmd extends BPCommand {
             return false;
         }
 
-        if (confirm(s)) return false;
-        BPEconomy.deposit(p, amount);
+        if (skipToConfirm(s)) return false;
+        BPEconomy.get(bankName).deposit(p, amount);
         return true;
     }
 

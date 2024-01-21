@@ -57,9 +57,9 @@ public class AddCmd extends BPCommand {
 
         boolean silent = args.length > 4 && args[4].toLowerCase().contains("true");
 
-        if (confirm(s)) return false;
+        if (skipToConfirm(s)) return false;
 
-        BigDecimal added = BPEconomy.addBankBalance(p, amount, bankName);
+        BigDecimal added = BPEconomy.get(bankName).addBankBalance(p, amount);
         if (silent) return true;
 
         if (added.doubleValue() <= 0D) BPMessages.send(s, "Bank-Full", "%player%$" + p.getName());

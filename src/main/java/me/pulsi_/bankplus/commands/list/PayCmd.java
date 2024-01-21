@@ -73,7 +73,7 @@ public class PayCmd extends BPCommand {
             return false;
         }
 
-        if (!confirm(s)) BPEconomy.pay((Player) s, target, amount, fromBankName, toBankName);
+        if (!skipToConfirm(s)) BPEconomy.get(fromBankName).pay((Player) s, target, amount, toBankName);
         return true;
     }
 

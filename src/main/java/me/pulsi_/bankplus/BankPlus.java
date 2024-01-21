@@ -1,7 +1,6 @@
 package me.pulsi_.bankplus;
 
-import me.pulsi_.bankplus.account.PlayerRegistry;
-import me.pulsi_.bankplus.bankSystem.BankGuiRegistry;
+import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.bankTop.BPBankTop;
 import me.pulsi_.bankplus.economy.EconomyRegistry;
 import me.pulsi_.bankplus.interest.BPInterest;
@@ -31,12 +30,13 @@ import java.net.URL;
 public final class BankPlus extends JavaPlugin {
 
     public static final String actualVersion = "6.1";
+    private static int serverVersionInt;
+    private static String serverVersion;
     private static BankPlus INSTANCE;
 
     private final BPLogUtils bpLogUtils = new BPLogUtils();
-    private final PlayerRegistry playerRegistry = new PlayerRegistry();
     private final EconomyRegistry economyRegistry = new EconomyRegistry();
-    private final BankGuiRegistry bankGuiRegistry = new BankGuiRegistry();
+    private final BankRegistry bankRegistry = new BankRegistry();
     private final LoanRegistry loanRegistry = new LoanRegistry();
     private Economy vaultEconomy = null;
     private Permission perms = null;
@@ -51,8 +51,6 @@ public final class BankPlus extends JavaPlugin {
     private BPInterest interest;
 
     private boolean isPlaceholderApiHooked = false, isEssentialsXHooked = false, isUpdated;
-    private String serverVersion;
-    private int serverVersionInt;
 
     private int tries = 1;
 
@@ -84,7 +82,7 @@ public final class BankPlus extends JavaPlugin {
             return;
         }
 
-        this.serverVersion = getServer().getVersion();
+        serverVersion = getServer().getVersion();
 
         int index = serverVersion.lastIndexOf("MC:");
         String version = serverVersion.substring(index, serverVersion.length() - 1);
@@ -97,7 +95,7 @@ public final class BankPlus extends JavaPlugin {
             number = -1;
         }
 
-        this.serverVersionInt = number;
+        serverVersionInt = number;
 
         this.bankTopManager = new BPBankTop(this);
         this.bpConfigs = new BPConfigs(this);
@@ -136,16 +134,20 @@ public final class BankPlus extends JavaPlugin {
         return INSTANCE;
     }
 
-    public PlayerRegistry getPlayerRegistry() {
-        return playerRegistry;
+    public static String getServerVersion() {
+        return serverVersion;
+    }
+
+    public static int getServerVersionInt() {
+        return serverVersionInt;
     }
 
     public EconomyRegistry getEconomyRegistry() {
         return economyRegistry;
     }
 
-    public BankGuiRegistry getBankGuiRegistry() {
-        return bankGuiRegistry;
+    public BankRegistry getBankGuiRegistry() {
+        return bankRegistry;
     }
 
     public LoanRegistry getLoanRegistry() {
@@ -170,14 +172,6 @@ public final class BankPlus extends JavaPlugin {
 
     public boolean isUpdated() {
         return isUpdated;
-    }
-
-    public String getServerVersion() {
-        return serverVersion;
-    }
-
-    public int getServerVersionInt() {
-        return serverVersionInt;
     }
 
     public BPLogUtils getBpLogUtils() {

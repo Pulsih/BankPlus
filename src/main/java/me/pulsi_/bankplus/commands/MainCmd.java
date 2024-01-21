@@ -50,7 +50,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                     }
                 }
             } else {
-                BPMessages.send(p, "Multiple-Personal-Bank", BPUtils.placeValues(p, BPEconomy.getBankBalance(p)));
+                BPMessages.send(p, "Multiple-Personal-Bank", BPUtils.placeValues(p, BPEconomy.getBankBalancesSum(p)));
                 BPUtils.playSound("PERSONAL", p);
             }
             return true;

@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.managers;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
+import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.commands.BankTopCmd;
 import me.pulsi_.bankplus.commands.CmdRegisterer;
 import me.pulsi_.bankplus.commands.MainCmd;
@@ -107,7 +108,7 @@ public class BPData {
             }
 
             Bukkit.getOnlinePlayers().forEach(p -> {
-                BPPlayer player = BankPlus.INSTANCE().getPlayerRegistry().get(p);
+                BPPlayer player = PlayerRegistry.get(p);
                 if (player != null && player.getOpenedBank() != null) p.closeInventory();
             });
 

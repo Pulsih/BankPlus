@@ -32,13 +32,13 @@ public class BalanceCmd extends BPCommand {
         Player p = (Player) s;
 
         if (args.length == 1) {
-            if (confirm(s)) return false;
+            if (skipToConfirm(s)) return false;
 
             List<String> availableBanks = BankManager.getAvailableBanks(p);
-            if (availableBanks.size() > 1) BPMessages.send(p, "Multiple-Personal-Bank", BPUtils.placeValues(p, BPEconomy.getBankBalance(p)));
+            if (availableBanks.size() > 1) BPMessages.send(p, "Multiple-Personal-Bank", BPUtils.placeValues(p, BPEconomy.getBankBalancesSum(p)));
             else {
                 String name = availableBanks.get(0);
-                BPMessages.send(p, "Personal-Bank", BPUtils.placeValues(p, BPEconomy.getBankBalance(p, name), BankManager.getCurrentLevel(name, p)));
+                BPMessages.send(p, "Personal-Bank", BPUtils.placeValues(p, BPEconomy.getBankBalancesSum(p), BankManager.getCurrentLevel(name, p)));
             }
         } else {
             String bankName = args[1];
@@ -46,8 +46,8 @@ public class BalanceCmd extends BPCommand {
                 BPMessages.send(s, "Invalid-Bank");
                 return false;
             }
-            if (confirm(s)) return false;
-            BPMessages.send(p, "Personal-Bank", BPUtils.placeValues(p, BPEconomy.getBankBalance(p, bankName), BankManager.getCurrentLevel(bankName, p)));
+            if (skipToConfirm(s)) return false;
+            BPMessages.send(p, "Personal-Bank", BPUtils.placeValues(p, BPEconomy.get(bankName).getBankBalance(p), BankManager.getCurrentLevel(bankName, p)));
         }
         return true;
     }

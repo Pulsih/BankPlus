@@ -98,7 +98,7 @@ public abstract class BPCommand {
      * @param s The command sender.
      * @return true if it has to confirm, false otherwise.
      */
-    public boolean confirm(CommandSender s) {
+    public boolean skipToConfirm(CommandSender s) {
         if (needConfirm()) {
             if (!confirm.contains(s.getName())) {
                 Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> confirm.remove(s.getName()), getConfirmCooldown() * 20L);

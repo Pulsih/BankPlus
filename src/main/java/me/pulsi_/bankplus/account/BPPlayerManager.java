@@ -30,25 +30,6 @@ public class BPPlayerManager {
         this.p = Bukkit.getOfflinePlayer(uuid);
     }
 
-    public void loadPlayer() {
-        Player oP = p.getPlayer();
-        if (oP == null) return;
-
-        if (BankPlus.INSTANCE().getMySql().isConnected()) {
-            SQLPlayerManager pManager = new SQLPlayerManager(p);
-            for (BPEconomy economy : BPEconomy.list()) {
-                if (!economy.isPlayerLoaded(p)) economy.loadPlayer(p, pManager.getMoney(economyName));
-            }
-        } else {
-            FileConfiguration config = getPlayerConfig();
-            for (String economyName : PEEconomy.nameList()) {
-                PEEconomy economy = PEEconomy.get(economyName);
-                if (!economy.isPlayerLoaded(p)) economy.loadPlayer(p, BigDecimal.valueOf(config.getLong(economyName)));
-            }
-        }
-        BankPlus.INSTANCE().getPlayerRegistry().put(oP, new BPPlayer(oP));
-    }
-
     /**
      * Check if the player file has any errors and fix them.
      *

@@ -289,7 +289,7 @@ public class BankManager {
      */
     public static int getCurrentLevel(String bankName, OfflinePlayer p) {
         BPPlayer player = PlayerRegistry.get(p);
-        if (player != null) return player.getLevel();
+        if (player != null) return player.getBankLevel(bankName);
 
         if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE().getMySql().isConnected())
             return new SQLPlayerManager(p).getLevel(bankName);
@@ -369,9 +369,9 @@ public class BankManager {
      * @param level    The new level.
      */
     public static void setLevel(String bankName, OfflinePlayer p, int level) {
-        OnlineInfoHolder.BankInfo info = OnlineInfoHolder.getInfo(p, bankName);
-        if (info != null) {
-            info.setLevel(level);
+        BPPlayer player = PlayerRegistry.get(p);
+        if (player != null) {
+            player.setBankLevel(bankName, level);
             return;
         }
 
@@ -436,26 +436,28 @@ public class BankManager {
         }
 
         BigDecimal cost = getLevelCost(bankName, nextLevel);
+        BPEconomy economy = BPEconomy.get(bankName);
+
         if (Values.CONFIG.useBankBalanceToUpgrade()) {
 
-            BigDecimal balance = BPEconomy.getBankBalance(p, bankName);
+            BigDecimal balance = economy.getBankBalance(p);
             if (balance.doubleValue() < cost.doubleValue()) {
                 BPMessages.send(p, "Insufficient-Money");
                 return;
             }
 
-            BPEconomy.removeBankBalance(p, cost, bankName);
+            economy.removeBankBalance(p, cost);
         } else {
 
-            Economy economy = BankPlus.INSTANCE().getVaultEconomy();
-            double balance = economy.getBalance(p);
+            Economy vaultEconomy = BankPlus.INSTANCE().getVaultEconomy();
+            double balance = vaultEconomy.getBalance(p);
 
             if (balance < cost.doubleValue()) {
                 BPMessages.send(p, "Insufficient-Money");
                 return;
             }
 
-            economy.withdrawPlayer(p, cost.doubleValue());
+            vaultEconomy.withdrawPlayer(p, cost.doubleValue());
         }
 
         if (remove) for (ItemStack item : requiredItems) p.getInventory().removeItem(item);
@@ -498,7 +500,7 @@ public class BankManager {
                 toNumber = temp;
             }
 
-            BigDecimal balance = BPEconomy.getBankBalance(p, bankName);
+            BigDecimal balance = BPEconomy.get(bankName).getBankBalance(p);
             if (fromNumber.doubleValue() <= balance.doubleValue() && toNumber.doubleValue() >= balance.doubleValue())
                 return interestRate;
         }

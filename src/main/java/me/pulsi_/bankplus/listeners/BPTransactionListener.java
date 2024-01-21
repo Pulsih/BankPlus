@@ -47,7 +47,8 @@ public class BPTransactionListener implements Listener {
     public void processDebt(BPPreTransactionEvent e) {
         OfflinePlayer p = e.getPlayer();
 
-        BigDecimal debt = BPEconomy.getDebt(p);
+        BPEconomy economy = BPEconomy.get(e.getBankName());
+        BigDecimal debt = economy.getDebt(p);
         TransactionType type = e.getTransactionType();
         if (debt.doubleValue() <= 0d || (type != TransactionType.ADD && type != TransactionType.DEPOSIT && type != TransactionType.INTEREST && type != TransactionType.SET)) return;
 
@@ -63,7 +64,7 @@ public class BPTransactionListener implements Listener {
                 BPUtils.placeValues(debtLeft, "debt")
         );
 
-        BPEconomy.setDebt(p, debtLeft, e.getBankName());
+        economy.setDebt(p, debtLeft);
         e.setTransactionAmount(newTransactionAmount);
     }
 

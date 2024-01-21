@@ -57,9 +57,9 @@ public class RemoveCmd extends BPCommand {
 
         boolean silent = args.length > 4 && args[4].toLowerCase().contains("true");
 
-        if (confirm(s)) return false;
+        if (skipToConfirm(s)) return false;
 
-        BigDecimal removed = BPEconomy.removeBankBalance(p, amount, bankName);
+        BigDecimal removed = BPEconomy.get(bankName).removeBankBalance(p, amount);
         if (silent) return true;
 
         if (removed.doubleValue() <= 0D) BPMessages.send(s, "Bank-Empty", "%player%$" + p.getName());

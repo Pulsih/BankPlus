@@ -11,17 +11,11 @@ import org.bukkit.scheduler.BukkitTask;
 
 public class PlayerQuitListener implements Listener {
 
-    private final PlayerRegistry registry;
-
-    public PlayerQuitListener() {
-        this.registry = BankPlus.INSTANCE().getPlayerRegistry();
-    }
-
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
         Player p = e.getPlayer();
 
-        BukkitTask updating = registry.get(p).getBankUpdatingTask();
+        BukkitTask updating = PlayerRegistry.get(p).getBankUpdatingTask();
         if (updating != null) updating.cancel();
 
         BPSets.removePlayerFromDepositing(p);

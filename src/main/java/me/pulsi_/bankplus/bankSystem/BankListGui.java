@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.bankSystem;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
+import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPItems;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -28,7 +29,7 @@ public class BankListGui {
     public static final String multipleBanksGuiID = "MultipleBanksGui";
 
     public static void openMultipleBanksGui(Player p) {
-        BPPlayer player = BankPlus.INSTANCE().getPlayerRegistry().get(p);
+        BPPlayer player = PlayerRegistry.get(p);
 
         BukkitTask updating = player.getBankUpdatingTask();
         if (updating != null) updating.cancel();
@@ -61,7 +62,7 @@ public class BankListGui {
     }
 
     private static void placeBanks(Inventory banksListGui, Player p) {
-        BPPlayer player = BankPlus.INSTANCE().getPlayerRegistry().get(p);
+        BPPlayer player = PlayerRegistry.get(p);
         HashMap<String, String> banksClickHolder = new HashMap<>();
         int slot = 0;
 

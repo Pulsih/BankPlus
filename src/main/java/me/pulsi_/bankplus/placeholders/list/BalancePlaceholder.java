@@ -15,6 +15,6 @@ public class BalancePlaceholder extends BPPlaceholder {
     @Override
     public String getPlaceholder(Player p, String target, String identifier) {
         if (!BankManager.exist(target)) return "&cThe selected bank does not exist.";
-        return getFormat(identifier, BPEconomy.getBankBalance(p, target));
+        return getFormat(identifier, BPEconomy.get(target).getBankBalance(p));
     }
 }

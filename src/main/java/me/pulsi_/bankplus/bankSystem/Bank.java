@@ -8,7 +8,7 @@ public class Bank {
 
     private final String identifier;
     private final BPEconomy bankEconomy;
-    private String title;
+    private String title = "&c&l * TITLE NOT FOUND *";
     private int size, updateDelay;
     private String fillerMaterial;
     private boolean hasFiller, fillerGlowing;
@@ -18,7 +18,7 @@ public class Bank {
 
     public Bank(String identifier) {
         this.identifier = identifier;
-        bankEconomy = new BPEconomy();
+        bankEconomy = new BPEconomy(identifier);
     }
 
     public String getIdentifier() {
@@ -34,7 +34,7 @@ public class Bank {
     }
 
     public void setTitle(String title) {
-        this.title = title == null ? "&c&l* TITLE NOT FOUND *" : title;
+        if (title != null) this.title = title;
     }
 
     public int getSize() {

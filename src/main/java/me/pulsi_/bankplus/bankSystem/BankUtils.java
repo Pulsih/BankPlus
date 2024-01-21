@@ -3,13 +3,12 @@ package me.pulsi_.bankplus.bankSystem;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
+import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.utils.*;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -18,7 +17,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,8 +31,8 @@ public class BankUtils {
     }
 
     public static void openBank(Player p, String bankName, boolean bypass) {
-        BPPlayer player = BankPlus.INSTANCE().getPlayerRegistry().get(p);
-        BankGuiRegistry registry = BankPlus.INSTANCE().getBankGuiRegistry();
+        BPPlayer player = PlayerRegistry.get(p);
+        BankRegistry registry = BankPlus.INSTANCE().getBankGuiRegistry();
 
         if (bankName.equals(BankListGui.multipleBanksGuiID)) {
             BankListGui.openMultipleBanksGui(p);

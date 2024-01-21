@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.bankSystem.BankGuiRegistry;
+import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.loanSystem.LoanUtils;
@@ -19,7 +19,7 @@ import java.util.List;
 
 public class LoanCmd extends BPCommand {
 
-    private final BankGuiRegistry registry;
+    private final BankRegistry registry;
 
     public LoanCmd(String... aliases) {
         super(aliases);
@@ -125,7 +125,7 @@ public class LoanCmd extends BPCommand {
             return false;
         }
 
-        if (!confirm(s)) LoanUtils.sendRequest(sender, target, amount, fromBankName, toBankName, action);
+        if (!skipToConfirm(s)) LoanUtils.sendRequest(sender, target, amount, fromBankName, toBankName, action);
         return true;
     }
 

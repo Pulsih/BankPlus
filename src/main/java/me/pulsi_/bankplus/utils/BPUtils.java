@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
+import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.listeners.playerChat.PlayerChatMethod;
@@ -11,6 +12,7 @@ import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -171,7 +173,7 @@ public class BPUtils {
         BPSets.addPlayerToWithdraw(p);
         p.closeInventory();
 
-        BPPlayer pl = BankPlus.INSTANCE().getPlayerRegistry().get(p);
+        BPPlayer pl = PlayerRegistry.get(p);
         pl.setOpenedBank(BankPlus.INSTANCE().getBankGuiRegistry().getBanks().get(identifier));
         pl.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> {
             PlayerChatMethod.reopenBank(p, identifier);
@@ -190,7 +192,7 @@ public class BPUtils {
         BPSets.addPlayerToDeposit(p);
         p.closeInventory();
 
-        BPPlayer pl = BankPlus.INSTANCE().getPlayerRegistry().get(p);
+        BPPlayer pl = PlayerRegistry.get(p);
         pl.setOpenedBank(BankPlus.INSTANCE().getBankGuiRegistry().getBanks().get(identifier));
         pl.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> {
             PlayerChatMethod.reopenBank(p, identifier);
@@ -341,6 +343,17 @@ public class BPUtils {
         return true;
     }
 
+    public static boolean hasOfflinePermission(OfflinePlayer p, String permission) {
+        boolean hasPermission = false;
+        for (World world : Bukkit.getWorlds()) {
+            if (permission == null || permission.isEmpty() || BankPlus.INSTANCE().getPermissions().playerHas(world.getName(), p, permission)) {
+                hasPermission = true;
+                break;
+            }
+        }
+        return hasPermission;
+    }
+
     public static List<String> placeValues(BigDecimal amount) {
         return placeValues(null, null, amount, "amount", 0);
     }
@@ -391,7 +404,7 @@ public class BPUtils {
         BigDecimal capacity = BankManager.getCapacity(bankName, p);
         if (capacity.doubleValue() <= 0d) return false;
 
-        if (BPEconomy.getBankBalance(p, bankName).doubleValue() >= capacity.doubleValue()) {
+        if (BPEconomy.get(bankName).getBankBalance(p).doubleValue() >= capacity.doubleValue()) {
             BPMessages.send(p, "Cannot-Deposit-Anymore");
             return true;
         }

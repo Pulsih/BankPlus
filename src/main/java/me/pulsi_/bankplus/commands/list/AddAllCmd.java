@@ -45,7 +45,7 @@ public class AddAllCmd extends BPCommand {
             return false;
         }
 
-        if (confirm(s)) return false;
+        if (skipToConfirm(s)) return false;
 
         BPMessages.send(s, "%prefix% &aSuccessfully added &f" + num + " &amoney to all online players!", true);
         addAll(new ArrayList<>(Bukkit.getOnlinePlayers()), new BigDecimal(num), bankName);
@@ -64,10 +64,11 @@ public class AddAllCmd extends BPCommand {
 
     private void addAll(List<Player> onlinePlayers, BigDecimal amount, String bankName) {
         List<Player> copy = new ArrayList<>(onlinePlayers);
-      
+
+        BPEconomy economy = BPEconomy.get(bankName);
         for (int i = 0; i < 80; i++) {
             if (copy.isEmpty()) return;
-            BPEconomy.addBankBalance(copy.remove(0), amount, bankName);
+            economy.addBankBalance(copy.remove(0), amount);
         }
 
         if (!onlinePlayers.isEmpty())

@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.bankTop;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
+import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.managers.TaskManager;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -32,7 +33,7 @@ public class BPBankTop {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             bankTop.clear();
 
-            HashMap<String, BigDecimal> balances = BPEconomy.getAllServerBankBalances();
+            HashMap<String, BigDecimal> balances = BPEconomy.getAllEconomiesBankBalances();
             List<BigDecimal> amounts = new ArrayList<>(balances.values());
             List<String> names = new ArrayList<>(balances.keySet());
 
@@ -83,7 +84,7 @@ public class BPBankTop {
     }
 
     public int getPlayerBankTopPosition(OfflinePlayer p) {
-        BPPlayer player = plugin.getPlayerRegistry().get(p);
+        BPPlayer player = PlayerRegistry.get(p);
         if (player != null) {
             if (player.getBanktopPosition() == -1)
                 player.setBanktopPosition(getPlayerBankTopPosition(p.getName()));

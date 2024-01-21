@@ -38,15 +38,15 @@ public class ViewCmd extends BPCommand {
         }
 
         if (args.length == 2) {
-            if (confirm(s)) return false;
+            if (skipToConfirm(s)) return false;
 
             if (s instanceof Player) BPUtils.playSound("VIEW", (Player) s);
 
             List<String> availableBanks = BankManager.getAvailableBanks(target);
-            if (availableBanks.size() > 1) BPMessages.send(target, "Multiple-Bank-Others", BPUtils.placeValues(target, BPEconomy.getBankBalance(target)));
+            if (availableBanks.size() > 1) BPMessages.send(target, "Multiple-Bank-Others", BPUtils.placeValues(target, BPEconomy.getBankBalancesSum(target)));
             else {
                 String name = availableBanks.get(0);
-                BPMessages.send(s, "Bank-Others", BPUtils.placeValues(target, BPEconomy.getBankBalance(target, name), BankManager.getCurrentLevel(name, target)));
+                BPMessages.send(s, "Bank-Others", BPUtils.placeValues(target, BPEconomy.get(name).getBankBalance(target), BankManager.getCurrentLevel(name, target)));
             }
             return true;
         }
@@ -62,9 +62,9 @@ public class ViewCmd extends BPCommand {
             return false;
         }
 
-        if (confirm(s)) return false;
+        if (skipToConfirm(s)) return false;
         if (s instanceof Player) BPUtils.playSound("VIEW", (Player) s);
-        BPMessages.send(s, "Bank-Others", BPUtils.placeValues(target, BPEconomy.getBankBalance(target, bankName), BankManager.getCurrentLevel(bankName, target)));
+        BPMessages.send(s, "Bank-Others", BPUtils.placeValues(target, BPEconomy.get(bankName).getBankBalance(target), BankManager.getCurrentLevel(bankName, target)));
         return true;
     }
 
