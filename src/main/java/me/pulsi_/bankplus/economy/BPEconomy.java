@@ -102,13 +102,7 @@ public class BPEconomy {
      */
     public LinkedHashMap<String, BigDecimal> getAllBankBalances() {
         LinkedHashMap<String, BigDecimal> balances = new LinkedHashMap<>();
-
-        for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
-            BigDecimal balance = new BigDecimal(0);
-            for (String bankName : BankManager.getAvailableBanks(p))
-                balance = balance.add(getBankBalance(p));
-            balances.put(p.getName(), balance);
-        }
+        for (OfflinePlayer p : Bukkit.getOfflinePlayers()) balances.put(p.getName(), getBankBalance(p));
         return balances;
     }
 
@@ -232,7 +226,6 @@ public class BPEconomy {
     }
 
     private BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount, boolean ignoreEvents, TransactionType type, boolean addOfflineInterest) {
-        Economy economy = BankPlus.INSTANCE().getVaultEconomy();
         BigDecimal result = new BigDecimal(0);
 
         if (!ignoreEvents) {
@@ -289,7 +282,6 @@ public class BPEconomy {
     }
 
     private BigDecimal removeBankBalance(OfflinePlayer p, BigDecimal amount, boolean ignoreEvents, TransactionType type) {
-        Economy economy = BankPlus.INSTANCE().getVaultEconomy();
         BigDecimal result = new BigDecimal(0);
         if (!ignoreEvents) {
             BPPreTransactionEvent event = startEvent(p, type, amount, bankName);
@@ -467,7 +459,7 @@ public class BPEconomy {
             return;
         }
 
-        BigDecimal money = BigDecimal.valueOf(BankPlus.INSTANCE().getVaultEconomy().getBalance(p));
+        BigDecimal money = BigDecimal.valueOf(economy.getBalance(p));
         if (!BPUtils.checkPreRequisites(money, amount, p) || BPUtils.isBankFull(p, bankName)) return;
 
         if (money.doubleValue() < amount.doubleValue()) amount = money;
@@ -492,7 +484,7 @@ public class BPEconomy {
             amount = moneyToFull.add(taxes);
         }
 
-        EconomyResponse depositResponse = BankPlus.INSTANCE().getVaultEconomy().withdrawPlayer(p, amount.doubleValue());
+        EconomyResponse depositResponse = economy.withdrawPlayer(p, amount.doubleValue());
         if (BPUtils.hasFailed(p, depositResponse)) return;
 
         addBankBalance(p, amount.subtract(taxes), true);

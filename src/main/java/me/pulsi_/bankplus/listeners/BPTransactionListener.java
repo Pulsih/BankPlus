@@ -118,7 +118,7 @@ public class BPTransactionListener implements Listener {
         }
 
         builder.append(
-                " - Amount: %1, Bank: %2, Bank bal before-after %3 -> %4, Vault bal before-after: %5 -> %6\n"
+                " - %1 [%2] Bank before-after: [%3 -> %4] Vault before-after: [%5 -> %6]\n"
                         .replace("%1", BPFormatter.formatBigDecimal(e.getTransactionAmount()))
                         .replace("%2", e.getBankName())
                         .replace("%3", BPFormatter.formatBigDecimal(pair.getKey()))
