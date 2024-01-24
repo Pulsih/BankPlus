@@ -77,7 +77,7 @@ public class BPEconomy {
     }
 
     public Set<UUID> getLoadedPlayers() {
-        return balances.keySet();
+        return new HashSet<>(balances.keySet());
     }
 
     public void loadPlayer(OfflinePlayer p) {
