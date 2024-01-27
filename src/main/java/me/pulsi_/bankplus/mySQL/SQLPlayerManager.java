@@ -51,15 +51,15 @@ public class SQLPlayerManager {
     }
 
     public void setMoney(BigDecimal amount, String bankName) {
-        set("money", BPFormatter.formatBigDecimal(amount), bankName);
+        set("money", BPFormatter.formatBigDecimal(BPFormatter.getBigDoubleFormatted(amount).max(BigDecimal.valueOf(0))), bankName);
     }
 
     public void setDebt(BigDecimal amount, String bankName) {
-        set("debt", BPFormatter.formatBigDecimal(amount), bankName);
+        set("debt", BPFormatter.formatBigDecimal(BPFormatter.getBigDoubleFormatted(amount).max(BigDecimal.valueOf(0))), bankName);
     }
 
     public void setOfflineInterest(BigDecimal amount, String bankName) {
-        set("interest", BPFormatter.formatBigDecimal(amount), bankName);
+        set("interest", BPFormatter.formatBigDecimal(BPFormatter.getBigDoubleFormatted(amount).max(BigDecimal.valueOf(0))), bankName);
     }
 
     public void set(String valueName, String newValue, String bankName) {

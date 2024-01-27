@@ -8,14 +8,11 @@ import me.pulsi_.bankplus.economy.TransactionType;
 import me.pulsi_.bankplus.events.BPPreTransactionEvent;
 import me.pulsi_.bankplus.managers.BPConfigs;
 import me.pulsi_.bankplus.utils.BPFormatter;
-import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
-import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
@@ -118,7 +115,7 @@ public class BPInterest {
                     if (bankBalance.doubleValue() <= 0) continue;
                     if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
 
-                    BPPreTransactionEvent event = economy.startEvent(p, TransactionType.INTEREST, interestMoney, bankName);
+                    BPPreTransactionEvent event = economy.preTransactionEvent(p, TransactionType.INTEREST, interestMoney, bankName);
                     BigDecimal newAmount = event.getTransactionAmount();
 
                     String path = "banks." + bankName + ".";
@@ -127,7 +124,7 @@ public class BPInterest {
                     config.set(path + "money", BPFormatter.formatBigDecimal(amount.add(newAmount)));
                     config.set(path + "interest", BPFormatter.formatBigDecimal(newAmount));
 
-                    economy.endEvent(p, TransactionType.INTEREST, newAmount, bankName);
+                    economy.afterTransactionEvent(p, TransactionType.INTEREST, newAmount, bankName);
                     save = true;
                 }
                 if (save) pManager.savePlayerFile(config, file, true);
