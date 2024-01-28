@@ -15,6 +15,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 public class TransferCmd extends BPCommand {
 
@@ -68,19 +69,15 @@ public class TransferCmd extends BPCommand {
     }
 
     private void filesToDatabase() {
-        File folder = new File(BankPlus.INSTANCE().getDataFolder(), "playerdata");
-        File[] files = folder.listFiles();
-        if (files == null) return;
-
-
+        Set<String> banks = BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet();
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
             BPPlayerManager pManager = new BPPlayerManager(p);
-            if (!pManager.isPlayerRegistered()) continue;
+            if (pManager.isPlayerRegistered()) continue;
 
             FileConfiguration config = pManager.getPlayerConfig();
             SQLPlayerManager sqlManager = new SQLPlayerManager(p);
 
-            for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) {
+            for (String bankName : banks) {
                 String level = config.getString("banks." + bankName + ".level");
                 String money = config.getString("banks." + bankName + ".money");
                 String debt = config.getString("banks." + bankName + ".debt");

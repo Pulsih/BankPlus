@@ -17,7 +17,6 @@ public class BPLogUtils {
         day = format.format(System.currentTimeMillis());
 
         logFile = new File(BankPlus.INSTANCE().getDataFolder() + File.separator + "logs", day + ".txt");
-
         if (logFile.exists()) return;
 
         logFile.getParentFile().mkdirs();
