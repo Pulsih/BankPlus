@@ -28,7 +28,7 @@ public class ConfigValues {
     private int afkPlayersTime, maxDecimalsAmount, bankTopSize, chatExitTime;
     private boolean isReopeningBankAfterChat, isNotifyOfflineInterest, isStoringUUIDs, logTransactions, enableInterestLimiter;
     private boolean isInterestEnabled, isGivingInterestToOfflinePlayers, isOfflineInterestDifferentRate, notifyRegisteredPlayer, silentInfoMessages;
-    private boolean isUpdateCheckerEnabled, isWithdrawSoundEnabled, isDepositSoundEnabled, accumulateInterestLimiter;
+    private boolean isUpdateCheckerEnabled, isWithdrawSoundEnabled, isDepositSoundEnabled, accumulateInterestLimiter, saveOnQuit;
     private boolean isViewSoundEnabled, isPersonalSoundEnabled, isIgnoringAfkPlayers, useEssentialsXAFK, useBankBalanceToUpgrade, guiActionsNeedPermissions;
     private boolean banktopEnabled, banktopUpdateBroadcastEnabled, banktopUpdateBroadcastSilentConsole, saveBalancesBroadcast, guiModuleEnabled, sqlEnabled, sqlUseSSL;
     private String loanMaxAmount, loanInterest;
@@ -131,6 +131,7 @@ public class ConfigValues {
         notifyRegisteredPlayer = config.getBoolean("General-Settings.Notify-Registered-Player");
         silentInfoMessages = config.getBoolean("General-Settings.Silent-Info-Messages");
         accumulateInterestLimiter = config.getBoolean("Interest.Accumulate-Interest-Limiter");
+        saveOnQuit = config.getBoolean("General-Settings.Save-On-Quit");
     }
 
     public String getPlayerChatPriority() {
@@ -613,5 +614,9 @@ public class ConfigValues {
 
     public String getSqlPassword() {
         return sqlPassword;
+    }
+
+    public boolean isSaveOnQuit() {
+        return saveOnQuit;
     }
 }

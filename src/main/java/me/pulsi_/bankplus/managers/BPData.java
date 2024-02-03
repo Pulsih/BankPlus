@@ -123,8 +123,7 @@ public class BPData {
     private void registerEvents() {
         PluginManager plManager = plugin.getServer().getPluginManager();
 
-        plManager.registerEvents(new PlayerJoinListener(), plugin);
-        plManager.registerEvents(new PlayerQuitListener(), plugin);
+        plManager.registerEvents(new PlayerServerListener(), plugin);
         plManager.registerEvents(new UpdateChecker(), plugin);
         plManager.registerEvents(new AFKListener(plugin), plugin);
         plManager.registerEvents(new InventoryCloseListener(), plugin);

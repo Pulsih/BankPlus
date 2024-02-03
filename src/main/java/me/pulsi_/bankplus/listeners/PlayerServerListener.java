@@ -6,6 +6,7 @@ import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
+import me.pulsi_.bankplus.utils.BPSets;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -13,10 +14,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
-public class PlayerJoinListener implements Listener {
+public class PlayerServerListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
@@ -43,5 +47,22 @@ public class PlayerJoinListener implements Listener {
             Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () ->
                             BPMessages.send(p, Values.CONFIG.getNotifyOfflineInterestMessage(), BPUtils.placeValues(finalAmount), true),
                     Values.CONFIG.getNotifyOfflineInterestDelay() * 20L);
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        Player p = e.getPlayer();
+
+        BukkitTask updating = PlayerRegistry.get(p).getBankUpdatingTask();
+        if (updating != null) updating.cancel();
+
+        BPSets.removePlayerFromDepositing(p);
+        BPSets.removePlayerFromWithdrawing(p);
+
+        if (!Values.CONFIG.isSaveOnQuit()) return;
+
+        UUID uuid = p.getUniqueId();
+        BankPlus.INSTANCE().getEconomyRegistry().savePlayer(uuid, true);
+        PlayerRegistry.unloadPlayer(uuid);
     }
 }

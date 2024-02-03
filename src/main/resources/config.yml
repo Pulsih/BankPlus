@@ -87,6 +87,12 @@ General-Settings:
   # Put 0 to disable this option.
   Save-Delay: 10
 
+  # This option is not recommended, however; in cases where you are not
+  # using a save-delay or are using bungeecord and need to
+  # synchronize the changes between servers that are using MySQL
+  # storage, you will need to enable this option.
+  Save-On-Quit: false
+
   # Choose if sending a message to the console
   # when the plugin saves all balances. (Only console)
   Save-Broadcast: true
