@@ -95,6 +95,7 @@ public class BPEconomy {
         holder.debt = getDebt(p);
         holder.money = getBankBalance(p);
         holder.offlineInterest = getOfflineInterest(p);
+        holder.bankLevel = getBankLevel(p);
 
         balances.put(p.getUniqueId(), holder);
     }
@@ -324,24 +325,24 @@ public class BPEconomy {
     /**
      * Get the offline interest earned from the selected player in the selected bank.
      *
-     * @param uuid The player UUID.
+     * @param p The player.
      * @return Offline interest.
      */
-    public BigDecimal getOfflineInterest(UUID uuid) {
-        return getOfflineInterest(Bukkit.getOfflinePlayer(uuid));
+    public BigDecimal getOfflineInterest(OfflinePlayer p) {
+        return getOfflineInterest(p.getUniqueId());
     }
 
     /**
      * Get the offline interest earned from the selected player in the selected bank.
      *
-     * @param p The player.
+     * @param uuid The player UUID.
      * @return Offline interest.
      */
-    public BigDecimal getOfflineInterest(OfflinePlayer p) {
-        if (balances.containsKey(p.getUniqueId())) return balances.get(p.getUniqueId()).offlineInterest;
-        if (BankPlus.INSTANCE().getMySql().isConnected()) return new SQLPlayerManager(p).getOfflineInterest(bankName);
+    public BigDecimal getOfflineInterest(UUID uuid) {
+        if (balances.containsKey(uuid)) return balances.get(uuid).offlineInterest;
+        if (BankPlus.INSTANCE().getMySql().isConnected()) return new SQLPlayerManager(uuid).getOfflineInterest(bankName);
 
-        String interest = new BPPlayerManager(p).getPlayerConfig().getString(interestPath);
+        String interest = new BPPlayerManager(uuid).getPlayerConfig().getString(interestPath);
         return new BigDecimal(interest == null ? "0" : interest);
     }
 
@@ -361,8 +362,10 @@ public class BPEconomy {
         }
 
         if (BankPlus.INSTANCE().getMySql().isConnected()) {
-            new SQLPlayerManager(p).setOfflineInterest(amount, bankName);
-            endTransaction(p);
+            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
+                new SQLPlayerManager(p).setOfflineInterest(amount, bankName);
+                endTransaction(p);
+            });
             return;
         }
 
@@ -408,8 +411,10 @@ public class BPEconomy {
         }
 
         if (BankPlus.INSTANCE().getMySql().isConnected()) {
-            new SQLPlayerManager(p).setDebt(amount, bankName);
-            endTransaction(p);
+            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
+                new SQLPlayerManager(p).setDebt(amount, bankName);
+                endTransaction(p);
+            });
             return;
         }
 
@@ -447,8 +452,10 @@ public class BPEconomy {
         }
 
         if (BankPlus.INSTANCE().getMySql().isConnected()) {
-            new SQLPlayerManager(p).setLevel(level, bankName);
-            endTransaction(p);
+            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
+                new SQLPlayerManager(p).setLevel(level, bankName);
+                endTransaction(p);
+            });
             return;
         }
 
@@ -478,10 +485,12 @@ public class BPEconomy {
         }
 
         if (BankPlus.INSTANCE().getMySql().isConnected()) {
-            SQLPlayerManager pManager = new SQLPlayerManager(p);
-            pManager.setMoney(amount, bankName);
-            if (changeOfflineInterest) pManager.setOfflineInterest(offlineInterest, bankName);
-            endTransaction(p);
+            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
+                SQLPlayerManager pManager = new SQLPlayerManager(p);
+                pManager.setMoney(amount, bankName);
+                if (changeOfflineInterest) pManager.setOfflineInterest(offlineInterest, bankName);
+                endTransaction(p);
+            });
             return;
         }
 

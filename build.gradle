@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'me.pulsi_'
-version = '6.2-Alpha6'
+version = '6.2-Alpha7'
 
 repositories {
     mavenCentral()

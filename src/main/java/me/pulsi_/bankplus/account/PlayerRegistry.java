@@ -23,21 +23,13 @@ public class PlayerRegistry {
     public static void loadPlayer(Player p) {
         if (isPlayerLoaded(p)) return;
 
-        BPPlayer bpPlayer = new BPPlayer(p);
-        for (BPEconomy economy : BPEconomy.list()) {
-            economy.loadPlayer(p);
-
-            String name = economy.getBankName();
-            bpPlayer.setBankLevel(name, BankManager.getCurrentLevel(name, p));
-        }
-
-        players.put(p.getUniqueId(), bpPlayer);
+        for (BPEconomy economy : BPEconomy.list()) economy.loadPlayer(p);
+        players.put(p.getUniqueId(), new BPPlayer(p));
     }
 
     public static void unloadPlayer(UUID uuid) {
         players.remove(uuid);
-        for (BPEconomy economy : BPEconomy.list())
-            economy.unloadPlayer(uuid);
+        for (BPEconomy economy : BPEconomy.list()) economy.unloadPlayer(uuid);
     }
 
     public static BPPlayer get(OfflinePlayer p) {
