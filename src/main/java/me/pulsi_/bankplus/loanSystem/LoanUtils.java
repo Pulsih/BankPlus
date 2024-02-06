@@ -79,7 +79,7 @@ public class LoanUtils {
             loan.setReceiver(sender);
         }
 
-        BPEconomy.get(loan.getFromBankName()).removeBankBalance(sender, amount); // Already checked that the amount isn't > than the balance.
+        BPEconomy.get(loan.getFromBankName()).removeBankBalance(sender, amount, TransactionType.LOAN); // Already checked that the amount isn't > than the balance.
 
         BPEconomy toEconomy = BPEconomy.get(loan.getToBankName());
         BigDecimal capacity = BankManager.getCapacity(loan.getToBankName(), p), balance = toEconomy.getBankBalance(p);

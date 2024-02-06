@@ -11,7 +11,6 @@ import java.util.Map;
 public class BPPlayer {
 
     private final Player player;
-    private final HashMap<String, Integer> bankLevels = new HashMap<>();
 
     private Bank openedBank;
     private HashMap<String, String> playerBankClickHolder;
@@ -64,13 +63,5 @@ public class BPPlayer {
 
     public void setClosingTask(BukkitTask closingTask) {
         this.closingTask = closingTask;
-    }
-
-    public int getBankLevel(String bankName) {
-        return bankLevels.getOrDefault(bankName, 0);
-    }
-
-    public void setBankLevel(String bankName, int level) {
-        bankLevels.put(bankName, level);
     }
 }

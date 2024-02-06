@@ -273,28 +273,12 @@ public class BankManager {
      * Get the current bank level of the selected player.
      *
      * @param bankName The bank name.
-     * @param uuid     The player UUID.
-     * @return The player bank level of the selected bank.
-     */
-    public static int getCurrentLevel(String bankName, UUID uuid) {
-        return getCurrentLevel(bankName, Bukkit.getOfflinePlayer(uuid));
-    }
-
-    /**
-     * Get the current bank level of the selected player.
-     *
-     * @param bankName The bank name.
      * @param p        The player.
      * @return The player bank level of the selected bank.
      */
     public static int getCurrentLevel(String bankName, OfflinePlayer p) {
-        BPPlayer player = PlayerRegistry.get(p);
-        if (player != null) return player.getBankLevel(bankName);
-
-        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE().getMySql().isConnected())
-            return new SQLPlayerManager(p).getLevel(bankName);
-
-        return Math.max(new BPPlayerManager(p).getPlayerConfig().getInt("banks." + bankName + ".level"), 1);
+        BPEconomy economy = BPEconomy.get(bankName);
+        return economy == null ? 1 :economy.getBankLevel(p);
     }
 
     /**
@@ -360,22 +344,9 @@ public class BankManager {
      * @param level    The new level.
      */
     public static void setLevel(String bankName, OfflinePlayer p, int level) {
-        BPPlayer player = PlayerRegistry.get(p);
-        if (player != null) {
-            player.setBankLevel(bankName, level);
-            return;
-        }
-
-        if (Values.CONFIG.isSqlEnabled() && BankPlus.INSTANCE().getMySql().isConnected()) {
-            new SQLPlayerManager(p).setLevel(level, bankName);
-            return;
-        }
-
-        BPPlayerManager files = new BPPlayerManager(p);
-        File file = files.getPlayerFile();
-        FileConfiguration config = files.getPlayerConfig(file);
-        config.set("banks." + bankName + ".level", level);
-        files.savePlayerFile(config, file, true);
+        BPEconomy economy = BPEconomy.get(bankName);
+        if (economy != null) economy.setBankLevel(p, level);
+        else BPLogger.warn("Could not set bank level to " + p.getName() + " because the specified bank \"" + bankName + "\" does not exist.");
     }
 
     /**

@@ -13,11 +13,8 @@ import java.util.List;
 
 public class OpenCmd extends BPCommand {
 
-    private final String identifier;
-
     public OpenCmd(String... aliases) {
         super(aliases);
-        this.identifier = aliases[0];
     }
 
     @Override

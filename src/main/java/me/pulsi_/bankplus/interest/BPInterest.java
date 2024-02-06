@@ -83,10 +83,10 @@ public class BPInterest {
                 BigDecimal interestAmount = new BigDecimal(0);
                 for (String bankName : availableBanks) {
                     BPEconomy economy = BPEconomy.get(bankName);
-                    BigDecimal bankBalance = economy.getBankBalance(p);
+                    if (economy.getBankBalance(p).doubleValue() <= 0) continue;
+
                     BigDecimal interestMoney = getInterestMoney(bankName, p, BankManager.getInterestRate(bankName, p)), maxAmount = Values.CONFIG.getInterestMaxAmount();
 
-                    if (bankBalance.doubleValue() <= 0) continue;
                     if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
 
                     BigDecimal amount = economy.addBankBalance(p, interestMoney, TransactionType.INTEREST);
