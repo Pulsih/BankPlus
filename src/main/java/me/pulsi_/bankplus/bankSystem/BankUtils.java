@@ -32,6 +32,11 @@ public class BankUtils {
 
     public static void openBank(Player p, String bankName, boolean bypass) {
         BPPlayer player = PlayerRegistry.get(p);
+        if (player == null) {
+            PlayerRegistry.loadPlayer(p);
+            player = PlayerRegistry.get(p);
+        }
+
         BankRegistry registry = BankPlus.INSTANCE().getBankGuiRegistry();
 
         if (bankName.equals(BankListGui.multipleBanksGuiID)) {

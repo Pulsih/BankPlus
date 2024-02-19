@@ -8,7 +8,6 @@ import me.pulsi_.bankplus.events.BPAfterTransactionEvent;
 import me.pulsi_.bankplus.events.BPPreTransactionEvent;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
 import me.pulsi_.bankplus.utils.BPFormatter;
-import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
@@ -146,7 +145,7 @@ public class BPEconomy {
         if (BankPlus.INSTANCE().getMySql().isConnected()) return new SQLPlayerManager(p).getMoney(bankName);
 
         String bal = new BPPlayerManager(p).getPlayerConfig().getString(moneyPath);
-        return new BigDecimal(bal == null ? "0" : bal);
+        return BPFormatter.getBigDecimalFormatted(bal);
     }
 
     /**
@@ -343,7 +342,7 @@ public class BPEconomy {
         if (BankPlus.INSTANCE().getMySql().isConnected()) return new SQLPlayerManager(uuid).getOfflineInterest(bankName);
 
         String interest = new BPPlayerManager(uuid).getPlayerConfig().getString(interestPath);
-        return new BigDecimal(interest == null ? "0" : interest);
+        return BPFormatter.getBigDecimalFormatted(interest);
     }
 
     /**
@@ -391,8 +390,8 @@ public class BPEconomy {
         if (balances.containsKey(uuid)) return balances.get(uuid).debt;
         if (BankPlus.INSTANCE().getMySql().isConnected()) return new SQLPlayerManager(uuid).getDebt(bankName);
 
-        String bal = new BPPlayerManager(uuid).getPlayerConfig().getString(debtPath);
-        return new BigDecimal(bal == null ? "0" : bal);
+        String debt = new BPPlayerManager(uuid).getPlayerConfig().getString(debtPath);
+        return BPFormatter.getBigDecimalFormatted(debt);
     }
 
     /**
@@ -467,14 +466,14 @@ public class BPEconomy {
      * Method internally used to simplify the transactions.
      */
     private void set(OfflinePlayer p, BigDecimal amount) {
-        set(p, amount, new BigDecimal(0));
+        set(p, amount, BigDecimal.ZERO);
     }
 
     /**
      * Method internally used to simplify the transactions.
      */
     private void set(OfflinePlayer p, BigDecimal amount, BigDecimal offlineInterest) {
-        boolean changeOfflineInterest = offlineInterest.doubleValue() > 0d;
+        boolean changeOfflineInterest = offlineInterest.compareTo(BigDecimal.ZERO) > 0;
 
         if (balances.containsKey(p.getUniqueId())) {
             Holder holder = balances.get(p.getUniqueId());
@@ -499,48 +498,41 @@ public class BPEconomy {
     }
 
     public void deposit(Player p, BigDecimal amount) {
-        if (isInTransaction(p)) return;
+        if (BPUtils.isBankFull(p, bankName) || isInTransaction(p)) return;
 
         BPPreTransactionEvent event = preTransactionEvent(p, TransactionType.DEPOSIT, amount, bankName);
         if (event.isCancelled()) return;
 
         amount = event.getTransactionAmount();
-        if (amount.doubleValue() < Values.CONFIG.getDepositMinimumAmount().doubleValue()) {
-            BPMessages.send(p, "Minimum-Number", "%min%$" + Values.CONFIG.getDepositMinimumAmount());
-            return;
-        }
+        if (minimumAmount(p, amount, Values.CONFIG.getDepositMinimumAmount())) return;
 
         Economy economy = BankPlus.INSTANCE().getVaultEconomy();
         BigDecimal wallet = BigDecimal.valueOf(economy.getBalance(p));
-        if (!BPUtils.checkPreRequisites(wallet, amount, p) || BPUtils.isBankFull(p, bankName)) return;
+        if (!BPUtils.checkPreRequisites(wallet, amount, p)) return;
 
+        BigDecimal maxDeposit = Values.CONFIG.getMaxDepositAmount();
+        if (maxDeposit.compareTo(BigDecimal.ZERO) > 0 && amount.compareTo(maxDeposit) >= 0) amount = maxDeposit;
         if (wallet.doubleValue() < amount.doubleValue()) amount = wallet;
 
-        BigDecimal maxDepositAmount = Values.CONFIG.getMaxDepositAmount();
-        if (maxDepositAmount.doubleValue() != 0 && amount.doubleValue() >= maxDepositAmount.doubleValue())
-            amount = maxDepositAmount;
+        BigDecimal capacity = BankManager.getCapacity(bankName, p).subtract(getBankBalance(p)), finalAmount = amount.min(capacity);
 
-        BigDecimal taxes = new BigDecimal(0);
-        if (Values.CONFIG.getDepositTaxes().doubleValue() > 0 && !p.hasPermission("bankplus.deposit.bypass-taxes"))
-            taxes = amount.multiply(Values.CONFIG.getDepositTaxes().divide(BigDecimal.valueOf(100)));
-
-        BigDecimal capacity = BankManager.getCapacity(bankName, p);
-        BigDecimal newBankBalance = getBankBalance(p).add(amount);
-
-        /*
-        Make it possible so when depositing all your money with taxes, the money will have the ability
-        to FILL the bank instead of always depositing a bit less and never filling up the bank.
-        */
-        if (capacity.doubleValue() > 0d && newBankBalance.doubleValue() >= capacity.doubleValue()) {
-            BigDecimal moneyToFull = capacity.subtract(getBankBalance(p));
-            amount = moneyToFull.add(taxes);
+        BigDecimal depositTaxes = Values.CONFIG.getDepositTaxes(), taxes = BigDecimal.ZERO;
+        if (depositTaxes.compareTo(BigDecimal.ZERO) > 0 && !p.hasPermission("bankplus.deposit.bypass-taxes")) {
+            if (amount.compareTo(capacity) <= 0) taxes = finalAmount.multiply(depositTaxes.divide(BigDecimal.valueOf(100)));
+            else {
+                // Makes it able to fill the bank if a higher number is used.
+                taxes = capacity.multiply(depositTaxes.divide(BigDecimal.valueOf(100)));
+                finalAmount = finalAmount.add(taxes);
+            }
         }
 
-        EconomyResponse depositResponse = economy.withdrawPlayer(p, amount.doubleValue());
+        BigDecimal actualDepositingMoney = finalAmount.subtract(taxes);
+
+        EconomyResponse depositResponse = economy.withdrawPlayer(p, finalAmount.doubleValue());
         if (BPUtils.hasFailed(p, depositResponse)) return;
 
-        addBankBalance(p, amount.subtract(taxes), true);
-        BPMessages.send(p, "Success-Deposit", BPUtils.placeValues(p, amount.subtract(taxes)), BPUtils.placeValues(taxes, "taxes"));
+        addBankBalance(p, actualDepositingMoney, true);
+        BPMessages.send(p, "Success-Deposit", BPUtils.placeValues(p, actualDepositingMoney), BPUtils.placeValues(taxes, "taxes"));
         BPUtils.playSound("DEPOSIT", p);
 
         afterTransactionEvent(p, TransactionType.DEPOSIT, amount, bankName);
@@ -553,23 +545,18 @@ public class BPEconomy {
         if (event.isCancelled()) return;
 
         amount = event.getTransactionAmount();
-        if (amount.doubleValue() < Values.CONFIG.getWithdrawMinimumAmount().doubleValue()) {
-            BPMessages.send(p, "Minimum-Number", "%min%$" + Values.CONFIG.getWithdrawMinimumAmount());
-            return;
-        }
+        if (minimumAmount(p, amount, Values.CONFIG.getWithdrawTaxes())) return;
 
         BigDecimal bankBal = getBankBalance(p);
         if (!BPUtils.checkPreRequisites(bankBal, amount, p)) return;
 
-        if (bankBal.doubleValue() < amount.doubleValue()) amount = bankBal;
+        BigDecimal maxWithdraw = Values.CONFIG.getMaxWithdrawAmount();
+        if (maxWithdraw.compareTo(BigDecimal.ZERO) > 0 && amount.compareTo(maxWithdraw) >= 0) amount = maxWithdraw;
+        if (bankBal.compareTo(amount) < 0) amount = bankBal;
 
-        BigDecimal maxWithdrawAmount = Values.CONFIG.getMaxWithdrawAmount();
-        if (maxWithdrawAmount.doubleValue() > 0 && amount.doubleValue() >= maxWithdrawAmount.doubleValue())
-            amount = maxWithdrawAmount;
-
-        BigDecimal taxes = new BigDecimal(0);
-        if (Values.CONFIG.getWithdrawTaxes().doubleValue() > 0 && !p.hasPermission("bankplus.withdraw.bypass-taxes"))
-            taxes = amount.multiply(Values.CONFIG.getWithdrawTaxes().divide(BigDecimal.valueOf(100)));
+        BigDecimal withdrawTaxes = Values.CONFIG.getWithdrawTaxes(), taxes = BigDecimal.ZERO;
+        if (withdrawTaxes.compareTo(BigDecimal.ZERO) > 0 && !p.hasPermission("bankplus.withdraw.bypass-taxes"))
+            taxes = amount.multiply(withdrawTaxes.divide(BigDecimal.valueOf(100)));
 
         EconomyResponse withdrawResponse = BankPlus.INSTANCE().getVaultEconomy().depositPlayer(p, amount.subtract(taxes).doubleValue());
         if (BPUtils.hasFailed(p, withdrawResponse)) return;
@@ -621,6 +608,14 @@ public class BPEconomy {
         return bankName;
     }
 
+    private boolean minimumAmount(Player p, BigDecimal amount, BigDecimal minimum) {
+        if (amount.compareTo(minimum) < 0) {
+            BPMessages.send(p, "Minimum-Number", "%min%$" + Values.CONFIG.getDepositMinimumAmount());
+            return true;
+        }
+        return false;
+    }
+
     public BPPreTransactionEvent preTransactionEvent(OfflinePlayer p, TransactionType type, BigDecimal amount, String bankName) {
         BPPreTransactionEvent event = new BPPreTransactionEvent(
                 p, type, getBankBalance(p), BankPlus.INSTANCE().getVaultEconomy().getBalance(p), amount, bankName
@@ -662,8 +657,8 @@ public class BPEconomy {
         BPPlayerManager files = new BPPlayerManager(p);
         File file = files.getPlayerFile();
         FileConfiguration config = files.getPlayerConfig(file);
-        config.set(path, BPFormatter.formatBigDecimal(BPFormatter.getBigDoubleFormatted(value).max(BigDecimal.valueOf(0))));
-        if (offlineInterest.doubleValue() > 0d) config.set(interestPath, BPFormatter.formatBigDecimal(BPFormatter.getBigDoubleFormatted(offlineInterest).max(BigDecimal.valueOf(0))));
+        config.set(path, BPFormatter.formatBigDecimal(BPFormatter.getBigDecimalFormatted(value).max(BigDecimal.valueOf(0))));
+        if (offlineInterest.doubleValue() > 0d) config.set(interestPath, BPFormatter.formatBigDecimal(BPFormatter.getBigDecimalFormatted(offlineInterest).max(BigDecimal.valueOf(0))));
         files.savePlayerFile(config, file, true);
     }
 
@@ -672,24 +667,25 @@ public class BPEconomy {
         File file = files.getPlayerFile();
         FileConfiguration config = files.getPlayerConfig(file);
         config.set(path, Math.max(1, value));
-        if (offlineInterest.doubleValue() > 0d) config.set(interestPath, BPFormatter.formatBigDecimal(BPFormatter.getBigDoubleFormatted(offlineInterest).max(BigDecimal.valueOf(0))));
+        if (offlineInterest.doubleValue() > 0d) config.set(interestPath, BPFormatter.formatBigDecimal(BPFormatter.getBigDecimalFormatted(offlineInterest).max(BigDecimal.valueOf(0))));
         files.savePlayerFile(config, file, true);
     }
 
     private static class Holder {
-        private BigDecimal money = new BigDecimal(0), offlineInterest = new BigDecimal(0), debt = new BigDecimal(0);
+        private final BigDecimal zero = BigDecimal.valueOf(0);
+        private BigDecimal money = zero, offlineInterest = zero, debt = zero;
         private int bankLevel = 1;
 
         public void setMoney(BigDecimal money) {
-            this.money = BPFormatter.getBigDoubleFormatted(money).max(BigDecimal.valueOf(0));
+            this.money = BPFormatter.getBigDecimalFormatted(money).max(zero);
         }
 
         public void setOfflineInterest(BigDecimal offlineInterest) {
-            this.debt = BPFormatter.getBigDoubleFormatted(offlineInterest).max(BigDecimal.valueOf(0));
+            this.debt = BPFormatter.getBigDecimalFormatted(offlineInterest).max(zero);
         }
 
         public void setDebt(BigDecimal debt) {
-            this.debt = BPFormatter.getBigDoubleFormatted(debt).max(BigDecimal.valueOf(0));
+            this.debt = BPFormatter.getBigDecimalFormatted(debt).max(zero);
         }
 
         public void setBankLevel(int bankLevel) {

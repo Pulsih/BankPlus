@@ -114,7 +114,7 @@ public class BPData {
 
             plugin.getBankGuiRegistry().loadBanks();
         } catch (Exception e) {
-            BPLogger.warn("Something went wrong while trying to reload the plugin, check the console logs and if the error persist, ask for support in the support discord.");
+            BPLogger.warn(e, "Something went wrong while trying to reload the plugin, check the console logs and if the error persist, ask for support in the support discord.");
             success = false;
         }
         return success;

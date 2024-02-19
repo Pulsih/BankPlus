@@ -60,29 +60,43 @@ public class BPFormatter {
         return formatter.format(amount);
     }
 
-    public static String formatBigDecimal(BigDecimal balance) {
-        String bal = balance.toString();
+    public static String formatBigDecimal(BigDecimal amount) {
+        String balance = amount.toPlainString();
 
         int maxDecimals = Values.CONFIG.getMaxDecimalsAmount();
-        if (maxDecimals <= 0) return bal.contains(".") ? bal.split("\\.")[0] : bal;
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            if (maxDecimals <= 0) return "0";
 
-        if (balance.doubleValue() > 0 && bal.contains(".")) {
-            String decimals = bal.split("\\.")[1];
+            StringBuilder decimals = new StringBuilder(maxDecimals);
+            for (int i = 0; i < maxDecimals; i++) decimals.append("0");
+            return "0." + decimals;
+        }
+
+        boolean hasDecimals = balance.contains(".");
+        if (maxDecimals <= 0) return hasDecimals ? balance.split("\\.")[0] : balance;
+
+        if (hasDecimals) {
+            String decimals = balance.split("\\.")[1];
             if (decimals.length() > maxDecimals) {
                 String correctedDecimals = decimals.substring(0, maxDecimals);
-                bal = bal.split("\\.")[0] + "." + correctedDecimals;
+                balance = balance.split("\\.")[0] + "." + correctedDecimals;
             }
-        } else {
-            StringBuilder decimals = new StringBuilder();
-            for (int i = 0; i < maxDecimals; i++) decimals.append("0");
-            if (balance.doubleValue() <= 0) bal = "0." + decimals;
-            else bal += "." + decimals;
         }
-        return bal;
+        return balance;
     }
 
-    public static BigDecimal getBigDoubleFormatted(BigDecimal balance) {
-        return new BigDecimal(formatBigDecimal(balance));
+    public static BigDecimal getBigDecimalFormatted(BigDecimal amount) {
+        return new BigDecimal(formatBigDecimal(amount));
+    }
+
+    public static BigDecimal getBigDecimalFormatted(String amount) {
+        BigDecimal bD;
+        try {
+            bD = new BigDecimal(amount);
+        } catch (Exception e) {
+            bD = BigDecimal.ZERO;
+        }
+        return new BigDecimal(formatBigDecimal(bD));
     }
 
     private static String setMaxDigits(double balance, int digits) {

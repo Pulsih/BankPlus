@@ -24,20 +24,20 @@ public class ReloadCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String args[]) {
+    public boolean onCommand(CommandSender s, String[] args) {
         if (skipToConfirm(s)) return false;
 
         long time = System.currentTimeMillis();
-        BPMessages.send(s, "Reload-Started");
+        BPMessages.send(s, "%prefix% &aThe plugin will now try to reload...", true);
 
         boolean reloaded = BankPlus.INSTANCE().getDataManager().reloadPlugin();
-        if (reloaded) BPMessages.send(s, "Reload-Ended", "%time%$" + (System.currentTimeMillis() - time));
-        else BPMessages.send(s, "Reload-Failed");
+        if (reloaded) BPMessages.send(s, "%prefix% &2Plugin successfully reloaded! &8(&b" + (System.currentTimeMillis() - time) + "ms&8)", true);
+        else BPMessages.send(s, "%prefix% &cFailed reloading task, please check the console for more info.", true);
         return true;
     }
 
     @Override
-    public List<String> tabCompletion(CommandSender s, String args[]) {
+    public List<String> tabCompletion(CommandSender s, String[] args) {
         return null;
     }
 }

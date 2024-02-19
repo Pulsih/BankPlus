@@ -32,7 +32,7 @@ public class RestartInterestCmd extends BPCommand {
         }
         if (skipToConfirm(s)) return false;
         BankPlus.INSTANCE().getInterest().restartInterest();
-        BPMessages.send(s, "Interest-Restarted");
+        BPMessages.send(s, "%prefix% &aInterest Restarted!", true);
         return true;
     }
 

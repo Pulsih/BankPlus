@@ -17,14 +17,6 @@ Prefix: "&a&lBank&9&lPlus"
 # If you don't want a message to show put:
 # Message: ""
 
-# System
-Reload-Started: "%prefix% &aThe plugin will now try to reload..."
-Reload-Ended: "%prefix% &2Plugin successfully reloaded! &8(&b%time%ms&8)"
-Reload-Failed: "%prefix% &cFailed reloading task, please check the console for more info. (Usually this is not a bankplus problem!)"
-Interest-Restarted: "%prefix% &aInterest Restarted!"
-Interest-Disabled: "%prefix% &cThe interest is disabled!"
-BankTop-Disabled: "%prefix% &cThe banktop is disabled!"
-
 # Plugin
 Personal-Bank:
   - "%prefix% &7Bank statistics:"
@@ -110,6 +102,8 @@ Help-Message:
   - "&aRate 5 Star!"
 
 # Errors
+Interest-Disabled: "%prefix% &cThe interest is disabled!"
+BankTop-Disabled: "%prefix% &cThe banktop is disabled!"
 Specify-Number: "%prefix% &cPlease specify a number."
 Specify-Player: "%prefix% &cPlease specify a player."
 Specify-Bank: "%prefix% &cPlease specify a bank."
