@@ -9,6 +9,7 @@ import me.pulsi_.bankplus.listeners.playerChat.PlayerChatMethod;
 import me.pulsi_.bankplus.managers.BPConfigs;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.EconomyResponse;
+import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
@@ -344,10 +345,13 @@ public class BPUtils {
     }
 
     public static boolean hasOfflinePermission(OfflinePlayer p, String permission) {
-        boolean hasPermission = false;
-        for (World world : Bukkit.getWorlds()) {
-            if (permission == null || permission.isEmpty() || BankPlus.INSTANCE().getPermissions().playerHas(world.getName(), p, permission)) {
-                hasPermission = true;
+        Permission perm = BankPlus.INSTANCE().getPermissions();
+        boolean hasPermission = true;
+
+        if (perm != null && permission != null && !permission.isEmpty()) {
+            for (World world : Bukkit.getWorlds()) {
+                if (perm.playerHas(world.getName(), p, permission)) continue;
+                hasPermission = false;
                 break;
             }
         }

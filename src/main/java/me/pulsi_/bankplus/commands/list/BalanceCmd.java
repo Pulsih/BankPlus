@@ -35,6 +35,11 @@ public class BalanceCmd extends BPCommand {
             if (skipToConfirm(s)) return false;
 
             List<String> availableBanks = BankManager.getAvailableBanks(p);
+            if (availableBanks.isEmpty()) {
+                BPMessages.send(p, "No-Available-Banks");
+                return false;
+            }
+
             if (availableBanks.size() > 1) BPMessages.send(p, "Multiple-Personal-Bank", BPUtils.placeValues(p, BPEconomy.getBankBalancesSum(p)));
             else {
                 String name = availableBanks.get(0);

@@ -10,10 +10,9 @@ public class Bank {
     private final BPEconomy bankEconomy;
     private String title = "&c&l * TITLE NOT FOUND *";
     private int size, updateDelay;
-    private String fillerMaterial;
-    private boolean hasFiller, fillerGlowing;
+    private String fillerMaterial, accessPermission;
+    private boolean giveInterestIfNotAvailable, fillerEnabled, fillerGlowing;
     private ItemStack[] content;
-    private String accessPermission;
     private ConfigurationSection items, upgrades, banksListGuiItems;
 
     public Bank(String identifier) {
@@ -33,87 +32,95 @@ public class Bank {
         return title;
     }
 
-    public void setTitle(String title) {
-        if (title != null) this.title = title;
-    }
-
     public int getSize() {
         return Math.max(9, Math.min(54, size * 9));
-    }
-
-    public void setSize(int size) {
-        this.size = size;
     }
 
     public int getUpdateDelay() {
         return updateDelay;
     }
 
-    public void setUpdateDelay(int updateDelay) {
-        this.updateDelay = updateDelay;
-    }
-
     public String getFillerMaterial() {
         return fillerMaterial;
     }
 
-    public void setFillerMaterial(String fillerMaterial) {
-        this.fillerMaterial = fillerMaterial;
+    public boolean isGiveInterestIfNotAvailable() {
+        return giveInterestIfNotAvailable;
     }
 
-    public boolean hasFiller() {
-        return hasFiller;
-    }
-
-    public void setHasFiller(boolean hasFiller) {
-        this.hasFiller = hasFiller;
+    public boolean isFillerEnabled() {
+        return fillerEnabled;
     }
 
     public boolean isFillerGlowing() {
         return fillerGlowing;
     }
 
-    public void setFillerGlowing(boolean fillerGlowing) {
-        this.fillerGlowing = fillerGlowing;
-    }
-
     public ItemStack[] getContent() {
         return content;
-    }
-
-    public void setContent(ItemStack[] content) {
-        this.content = content;
     }
 
     public String getAccessPermission() {
         return accessPermission;
     }
 
-    public void setAccessPermission(String accessPermission) {
-        this.accessPermission = accessPermission;
-    }
-
     public ConfigurationSection getItems() {
         return items;
-    }
-
-    public void setItems(ConfigurationSection items) {
-        this.items = items;
     }
 
     public ConfigurationSection getUpgrades() {
         return upgrades;
     }
 
+    public ConfigurationSection getBanksListGuiItems() {
+        return banksListGuiItems;
+    }
+
+    public void setTitle(String title) {
+        if (title != null) this.title = title;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
+    public void setUpdateDelay(int updateDelay) {
+        this.updateDelay = updateDelay;
+    }
+
+    public void setFillerMaterial(String fillerMaterial) {
+        this.fillerMaterial = fillerMaterial;
+    }
+
+    public void setGiveInterestIfNotAvailable(boolean giveInterestIfNotAvailable) {
+        this.giveInterestIfNotAvailable = giveInterestIfNotAvailable;
+    }
+
+    public void setFillerEnabled(boolean fillerEnabled) {
+        this.fillerEnabled = fillerEnabled;
+    }
+
+    public void setFillerGlowing(boolean fillerGlowing) {
+        this.fillerGlowing = fillerGlowing;
+    }
+
+    public void setContent(ItemStack[] content) {
+        this.content = content;
+    }
+
+    public void setAccessPermission(String accessPermission) {
+        this.accessPermission = accessPermission;
+    }
+
+    public void setItems(ConfigurationSection items) {
+        this.items = items;
+    }
+
     public void setUpgrades(ConfigurationSection upgrades) {
         this.upgrades = upgrades;
     }
 
-    public ConfigurationSection getBanksGuiItemSection() {
-        return banksListGuiItems;
-    }
-
-    public void setBanksListGuiItems(ConfigurationSection items) {
-        this.banksListGuiItems = items;
+    public void setBanksListGuiItems(ConfigurationSection banksListGuiItems) {
+        this.banksListGuiItems = banksListGuiItems;
     }
 }

@@ -20,7 +20,6 @@ public class BPSQLMethods {
      * Method used to easily create a new table.
      * @param tableName The name of the table you want to create.
      * @param args An argument is identifier as: "[ArgumentName] [<a href="https://www.w3schools.com/sql/sql_datatypes.asp">ArgumentType</a>(OptionalArgs)]".
-     *             For more arguments, separate them using ",".
      */
     public void createTable(String tableName, String... args) {
         if (!isConnected()) return;

@@ -26,7 +26,7 @@ public class ConfigValues {
     private String sqlHost, sqlPort, sqpDatabase, sqlUsername, sqlPassword;
     private long notifyOfflineInterestDelay, saveDelay, updateBankTopDelay;
     private int afkPlayersTime, maxDecimalsAmount, bankTopSize, chatExitTime;
-    private boolean isReopeningBankAfterChat, isNotifyOfflineInterest, isStoringUUIDs, logTransactions, enableInterestLimiter;
+    private boolean showHelpMessageWhenNoAvailableBanks, isReopeningBankAfterChat, isNotifyOfflineInterest, isStoringUUIDs, logTransactions, enableInterestLimiter;
     private boolean isInterestEnabled, isGivingInterestToOfflinePlayers, isOfflineInterestDifferentRate, notifyRegisteredPlayer, silentInfoMessages;
     private boolean isUpdateCheckerEnabled, isWithdrawSoundEnabled, isDepositSoundEnabled, accumulateInterestLimiter, saveOnQuit;
     private boolean isViewSoundEnabled, isPersonalSoundEnabled, isIgnoringAfkPlayers, useEssentialsXAFK, useBankBalanceToUpgrade, guiActionsNeedPermissions;
@@ -92,6 +92,7 @@ public class ConfigValues {
         banktopPlayerNotFoundPlaceholder = config.getString("Placeholders.BankTop.Player-Not-Found");
         worldsBlacklist = config.getStringList("General-Settings.Worlds-Blacklist");
         exitCommands = config.getStringList("General-Settings.Chat-Exit-Commands");
+        showHelpMessageWhenNoAvailableBanks = config.getBoolean("General-Settings.Show-Help-Message-When-No-Available-Banks");
         isReopeningBankAfterChat = config.getBoolean("General-Settings.Reopen-Bank-After-Chat");
         isInterestEnabled = config.getBoolean("Interest.Enabled");
         isNotifyOfflineInterest = config.getBoolean("General-Settings.Offline-Interest-Earned-Message.Enabled");
@@ -418,6 +419,10 @@ public class ConfigValues {
 
     public List<String> getExitCommands() {
         return exitCommands;
+    }
+
+    public boolean isShowHelpMessageWhenNoAvailableBanks() {
+        return showHelpMessageWhenNoAvailableBanks;
     }
 
     public boolean isReopeningBankAfterChat() {

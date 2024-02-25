@@ -39,8 +39,12 @@ public class BankManager {
         return BankPlus.INSTANCE().getBankGuiRegistry().getBanks().get(bankName);
     }
 
+    public static Collection<Bank> getBanks() {
+        return BankPlus.INSTANCE().getBankGuiRegistry().getBanks().values();
+    }
+
     public static boolean exist(String bankName) {
-        return BankPlus.INSTANCE().getBankGuiRegistry().getBanks().containsKey(bankName);
+        return getBank(bankName) != null;
     }
 
     /**
@@ -329,6 +333,8 @@ public class BankManager {
      */
     public static boolean isAvailable(String bankName, OfflinePlayer p) {
         Bank bank = getBank(bankName);
+        if (bank == null) return false;
+
         String permission = bank.getAccessPermission();
         if (permission == null || permission.isEmpty()) return true;
 
@@ -422,7 +428,7 @@ public class BankManager {
             vaultEconomy.withdrawPlayer(p, cost.doubleValue());
         }
 
-        if (remove) for (ItemStack item : requiredItems) p.getInventory().removeItem(item);
+        if (isRemovingRequiredItems(bankName, nextLevel) && remove) for (ItemStack item : requiredItems) p.getInventory().removeItem(item);
 
         setLevel(bankName, p, nextLevel);
         BPMessages.send(p, "Bank-Upgraded");

@@ -31,34 +31,31 @@ public class BankUtils {
     }
 
     public static void openBank(Player p, String bankName, boolean bypass) {
+        if ((p.hasPermission("bankplus.open") || !BankManager.isAvailable(bankName, p)) && !bypass) {
+            BPMessages.send(p, "Cannot-Access-Bank");
+            return;
+        }
+
         BPPlayer player = PlayerRegistry.get(p);
         if (player == null) {
             PlayerRegistry.loadPlayer(p);
             player = PlayerRegistry.get(p);
         }
 
-        BankRegistry registry = BankPlus.INSTANCE().getBankGuiRegistry();
-
         if (bankName.equals(BankListGui.multipleBanksGuiID)) {
             BankListGui.openMultipleBanksGui(p);
             return;
         }
 
-        if (!registry.getBanks().containsKey(bankName)) {
+        if (!BankManager.exist(bankName)) {
             BPMessages.send(p, "Invalid-Bank");
-            return;
-        }
-
-        if (!BankManager.isAvailable(bankName, p) && !bypass) {
-            BPMessages.send(p, "Cannot-Access-Bank");
             return;
         }
 
         BukkitTask updating = player.getBankUpdatingTask();
         if (updating != null) updating.cancel();
 
-        Bank baseBank = registry.getBanks().get(bankName);
-
+        Bank baseBank = BankManager.getBank(bankName);
         String title = baseBank.getTitle();
         if (!BankPlus.INSTANCE().isPlaceholderApiHooked()) title = BPChat.color(title);
         else title = PlaceholderAPI.setPlaceholders(p, BPChat.color(title));
@@ -146,7 +143,8 @@ public class BankUtils {
         bank.setTitle(config.getString("Title"));
         bank.setSize(config.getInt("Lines"));
         bank.setUpdateDelay(config.getInt("Update-Delay"));
-        bank.setHasFiller(config.getBoolean("Filler.Enabled"));
+        bank.setGiveInterestIfNotAvailable(config.getBoolean("Settings.Give-Interest-If-Not-Available"));
+        bank.setFillerEnabled(config.getBoolean("Filler.Enabled"));
         bank.setFillerMaterial(config.getString("Filler.Material"));
         bank.setFillerGlowing(config.getBoolean("Filler.Glowing"));
 
@@ -201,7 +199,7 @@ public class BankUtils {
                 }
             }
 
-            if (bank.hasFiller())
+            if (bank.isFillerEnabled())
                 for (int i = 0; i < inv.getSize(); i++)
                     if (inv.getItem(i) == null) inv.setItem(i, BPItems.getFiller(bank));
 

@@ -71,7 +71,7 @@ public class BankListGui {
 
             ItemStack bankItem;
             boolean glow = false;
-            ConfigurationSection section = BankManager.getBank(bankName).getBanksGuiItemSection();
+            ConfigurationSection section = BankManager.getBank(bankName).getBanksListGuiItems();
 
             if (section == null) bankItem = BPItems.UNKNOWN_ITEM.clone();
             else {
@@ -107,7 +107,7 @@ public class BankListGui {
             List<String> lore = new ArrayList<>();
 
             Bank bank = BankManager.getBank(bankName);
-            ConfigurationSection section = bank.getBanksGuiItemSection();
+            ConfigurationSection section = bank.getBanksListGuiItems();
             if (section != null) {
                 String permission = bank.getAccessPermission();
                 String path = (permission == null || p.hasPermission(permission)) ? "Available" : "Unavailable";

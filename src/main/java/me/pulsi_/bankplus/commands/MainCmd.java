@@ -7,6 +7,7 @@ import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.configs.ConfigValues;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -33,7 +34,16 @@ public class MainCmd implements CommandExecutor, TabCompleter {
         if (args.length == 0) {
             if (!BPUtils.hasPermission(s, "bankplus.use")) return true;
 
-            if (!(s instanceof Player)) {
+            if (s instanceof Player) {
+                if (BankManager.getAvailableBanks((Player) s).isEmpty()) {
+                    if (Values.CONFIG.isShowHelpMessageWhenNoAvailableBanks()) {
+                        BPMessages.send(s, "Help-Message");
+                    } else {
+                        BPMessages.send(s, "No-Available-Banks");
+                    }
+                    return true;
+                }
+            } else {
                 BPMessages.send(s, "Help-Message");
                 return true;
             }

@@ -23,6 +23,9 @@ General-Settings:
   # (Example: Update message)
   Silent-Info-Messages: false
 
+  # Enable this option to show the help message when the player has no banks to open.
+  Show-Help-Message-When-No-Available-Banks: true
+
   # Settings to enable and manage MySQL
   MySQL:
     # Enabling this option will stop BankPlus from storing data in

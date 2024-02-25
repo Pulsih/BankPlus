@@ -15,6 +15,12 @@ Settings:
   # or put "" to make it accessible to everyone.
   Permission: "bankplus.use"
 
+  # Enable this setting to allow players to receive
+  # interest even if they cannot access the
+  # bank (useful with servers that access the bank
+  # only from the force command cmd)
+  Give-Interest-If-Not-Available: false
+
   # This is the item that will be showed up in the
   # banks-gui if the multiple-banks module is enabled.
   #

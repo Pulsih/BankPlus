@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.interest;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayerManager;
 import me.pulsi_.bankplus.account.PlayerRegistry;
+import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.economy.TransactionType;
@@ -20,6 +21,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 public class BPInterest {
@@ -74,7 +76,12 @@ public class BPInterest {
 
     public void giveInterest() {
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
-            List<String> availableBanks = BankManager.getAvailableBanks(p);
+
+            List<String> availableBanks = new ArrayList<>();
+            for (Bank bank : BankManager.getBanks())
+                if (bank.isGiveInterestIfNotAvailable() || BankManager.isAvailable(bank.getIdentifier(), p))
+                    availableBanks.add(bank.getIdentifier());
+
             if (availableBanks.isEmpty()) continue;
 
             Player oP = p.getPlayer();
