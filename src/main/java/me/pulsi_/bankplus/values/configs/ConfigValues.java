@@ -26,7 +26,7 @@ public class ConfigValues {
     private String sqlHost, sqlPort, sqpDatabase, sqlUsername, sqlPassword;
     private long notifyOfflineInterestDelay, saveDelay, updateBankTopDelay;
     private int afkPlayersTime, maxDecimalsAmount, bankTopSize, chatExitTime;
-    private boolean showHelpMessageWhenNoAvailableBanks, isReopeningBankAfterChat, isNotifyOfflineInterest, isStoringUUIDs, logTransactions, enableInterestLimiter;
+    private boolean showHelpMessageWhenNoAvailableBanks, needOpenPermissionToOpen, isReopeningBankAfterChat, isNotifyOfflineInterest, isStoringUUIDs, logTransactions, enableInterestLimiter;
     private boolean isInterestEnabled, isGivingInterestToOfflinePlayers, isOfflineInterestDifferentRate, notifyRegisteredPlayer, silentInfoMessages;
     private boolean isUpdateCheckerEnabled, isWithdrawSoundEnabled, isDepositSoundEnabled, accumulateInterestLimiter, saveOnQuit;
     private boolean isViewSoundEnabled, isPersonalSoundEnabled, isIgnoringAfkPlayers, useEssentialsXAFK, useBankBalanceToUpgrade, guiActionsNeedPermissions;
@@ -93,6 +93,7 @@ public class ConfigValues {
         worldsBlacklist = config.getStringList("General-Settings.Worlds-Blacklist");
         exitCommands = config.getStringList("General-Settings.Chat-Exit-Commands");
         showHelpMessageWhenNoAvailableBanks = config.getBoolean("General-Settings.Show-Help-Message-When-No-Available-Banks");
+        needOpenPermissionToOpen = config.getBoolean("General-Settings.Need-Open-Permission-To-Open");
         isReopeningBankAfterChat = config.getBoolean("General-Settings.Reopen-Bank-After-Chat");
         isInterestEnabled = config.getBoolean("Interest.Enabled");
         isNotifyOfflineInterest = config.getBoolean("General-Settings.Offline-Interest-Earned-Message.Enabled");
@@ -379,7 +380,7 @@ public class ConfigValues {
     }
 
     public long getOfflineInterestLimit() {
-        if (!offlineInterestLimit.contains(" ")) return BPUtils.minutesInMilliseconds(Integer.parseInt(interestDelay));
+        if (!offlineInterestLimit.contains(" ")) return BPUtils.minutesInMilliseconds(Integer.parseInt(offlineInterestLimit));
 
         int delay;
         try {
@@ -423,6 +424,10 @@ public class ConfigValues {
 
     public boolean isShowHelpMessageWhenNoAvailableBanks() {
         return showHelpMessageWhenNoAvailableBanks;
+    }
+
+    public boolean isNeedOpenPermissionToOpen() {
+        return needOpenPermissionToOpen;
     }
 
     public boolean isReopeningBankAfterChat() {

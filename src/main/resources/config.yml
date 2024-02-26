@@ -26,6 +26,9 @@ General-Settings:
   # Enable this option to show the help message when the player has no banks to open.
   Show-Help-Message-When-No-Available-Banks: true
 
+  # If enabled, to open a bank the player will also need the permission bankplus.open to open it.
+  Need-Open-Permission-To-Open: true
+
   # Settings to enable and manage MySQL
   MySQL:
     # Enabling this option will stop BankPlus from storing data in

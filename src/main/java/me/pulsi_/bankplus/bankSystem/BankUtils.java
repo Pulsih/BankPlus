@@ -31,9 +31,13 @@ public class BankUtils {
     }
 
     public static void openBank(Player p, String bankName, boolean bypass) {
-        if ((p.hasPermission("bankplus.open") || !BankManager.isAvailable(bankName, p)) && !bypass) {
-            BPMessages.send(p, "Cannot-Access-Bank");
-            return;
+        if (!bypass) {
+            if (Values.CONFIG.isNeedOpenPermissionToOpen() && !BPUtils.hasPermission(p, "bankplus.open")) return;
+
+            if (!BankManager.isAvailable(bankName, p)) {
+                BPMessages.send(p, "Cannot-Access-Bank");
+                return;
+            }
         }
 
         BPPlayer player = PlayerRegistry.get(p);

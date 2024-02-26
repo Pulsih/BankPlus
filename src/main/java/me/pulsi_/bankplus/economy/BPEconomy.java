@@ -545,7 +545,7 @@ public class BPEconomy {
         if (event.isCancelled()) return;
 
         amount = event.getTransactionAmount();
-        if (minimumAmount(p, amount, Values.CONFIG.getWithdrawTaxes())) return;
+        if (minimumAmount(p, amount, Values.CONFIG.getWithdrawMinimumAmount())) return;
 
         BigDecimal bankBal = getBankBalance(p);
         if (!BPUtils.checkPreRequisites(bankBal, amount, p)) return;
@@ -610,7 +610,7 @@ public class BPEconomy {
 
     private boolean minimumAmount(Player p, BigDecimal amount, BigDecimal minimum) {
         if (amount.compareTo(minimum) < 0) {
-            BPMessages.send(p, "Minimum-Number", "%min%$" + Values.CONFIG.getDepositMinimumAmount());
+            BPMessages.send(p, "Minimum-Number", "%min%$" + minimum);
             return true;
         }
         return false;
