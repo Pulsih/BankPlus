@@ -12,10 +12,6 @@ public class PlayerRegistry {
 
     private static final HashMap<UUID, BPPlayer> players = new HashMap<>();
 
-    public static HashMap<UUID, BPPlayer> getPlayers() {
-        return players;
-    }
-
     public static boolean isPlayerLoaded(OfflinePlayer p) {
         return players.containsKey(p.getUniqueId());
     }

@@ -57,14 +57,14 @@ Settings:
         - "&aNeeded permission: &bbankplus.use"
       Glowing: true
 
-# These are the bank upgrades, you can upgrade a bank
+# These are the bank levels, you can upgrade a bank
 # by running the command /bank upgrade <bank> or by
 # using the action in the gui "Upgrade".
 #
-# If the Upgrades section isn't specified, the bank will
+# If the levels section isn't specified, the bank will
 # have no upgrades and will use the default values set
 # in the config.yml
-Upgrades:
+Levels:
   # This must be a number an indicates the bank level.
   1: # 1 Is the default level, it can't be lower than 1.
     Capacity: "50000"

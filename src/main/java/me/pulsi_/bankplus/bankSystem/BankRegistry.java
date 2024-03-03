@@ -45,7 +45,7 @@ public class BankRegistry {
         for (File bankFile : bankFiles) {
             String identifier = bankFile.getName().split("\\.")[0];
             Bank bank = new Bank(identifier);
-            if (Values.CONFIG.isGuiModuleEnabled()) loadBankGui(bank, bankFile);
+            loadBankGui(bank, bankFile);
             banks.put(identifier, bank);
         }
         if (Values.CONFIG.isGuiModuleEnabled() && Values.MULTIPLE_BANKS.enableMultipleBanksModule()) loadMultipleBanksGui();

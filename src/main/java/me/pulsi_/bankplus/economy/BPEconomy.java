@@ -72,31 +72,72 @@ public class BPEconomy {
     public static LinkedHashMap<String, BigDecimal> getAllEconomiesBankBalances() {
         LinkedHashMap<String, BigDecimal> balances = new LinkedHashMap<>();
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
-            BigDecimal balance = new BigDecimal(0);
+            BigDecimal balance = BigDecimal.ZERO;
             for (String bankName : BankManager.getAvailableBanks(p)) balance = balance.add(get(bankName).getBankBalance(p));
             balances.put(p.getName(), balance);
         }
         return balances;
     }
 
+    /**
+     * Get the sum of player bank balances of all banks.
+     *
+     * @param p The player.
+     */
+    public static BigDecimal getBankBalancesSum(OfflinePlayer p) {
+        BigDecimal amount = BigDecimal.valueOf(0);
+        for (BPEconomy economy : list())
+            amount = amount.add(economy.getBankBalance(p));
+        return amount;
+    }
+
     public boolean isPlayerLoaded(OfflinePlayer p) {
-        return balances.containsKey(p.getUniqueId());
+        return isPlayerLoaded(p.getUniqueId());
+    }
+
+    public boolean isPlayerLoaded(UUID uuid) {
+        return balances.containsKey(uuid);
     }
 
     public Set<UUID> getLoadedPlayers() {
         return new HashSet<>(balances.keySet());
     }
 
-    public void loadPlayer(OfflinePlayer p) {
-        if (isPlayerLoaded(p)) return;
+    public Holder loadPlayer(OfflinePlayer p) {
+        return loadPlayer(p.getUniqueId());
+    }
+
+    public Holder loadPlayer(UUID uuid) {
+        if (isPlayerLoaded(uuid)) return balances.get(uuid);
 
         Holder holder = new Holder();
-        holder.debt = getDebt(p);
-        holder.money = getBankBalance(p);
-        holder.offlineInterest = getOfflineInterest(p);
-        holder.bankLevel = getBankLevel(p);
 
-        balances.put(p.getUniqueId(), holder);
+        BigDecimal debt, money, offlineInterest;
+        int level;
+
+        if (BankPlus.INSTANCE().getMySql().isConnected()) {
+            SQLPlayerManager pManager = new SQLPlayerManager(uuid);
+
+            debt = pManager.getDebt(bankName);
+            money = pManager.getMoney(bankName);
+            offlineInterest = pManager.getOfflineInterest(bankName);
+            level = pManager.getLevel(bankName);
+        } else {
+            FileConfiguration config = new BPPlayerManager(uuid).getPlayerConfig();
+
+            debt = BPFormatter.getBigDecimalFormatted(config.getString(debtPath));
+            money = BPFormatter.getBigDecimalFormatted(config.getString(moneyPath));
+            offlineInterest = BPFormatter.getBigDecimalFormatted(config.getString(interestPath));
+            level = Math.max(config.getInt(levelPath), 1);
+        }
+
+        holder.debt = debt;
+        holder.money = money;
+        holder.offlineInterest = offlineInterest;
+        holder.bankLevel = level;
+
+        balances.put(uuid, holder);
+        return holder;
     }
 
     public void unloadPlayer(UUID uuid) {
@@ -115,15 +156,12 @@ public class BPEconomy {
     }
 
     /**
-     * Get the sum of player bank balances of all banks.
+     * Get the player bank balance of the selected bank.
      *
      * @param p The player.
      */
-    public static BigDecimal getBankBalancesSum(OfflinePlayer p) {
-        BigDecimal amount = BigDecimal.valueOf(0);
-        for (BPEconomy economy : list())
-            amount = amount.add(economy.getBankBalance(p));
-        return amount;
+    public BigDecimal getBankBalance(OfflinePlayer p) {
+        return getBankBalance(p.getUniqueId());
     }
 
     /**
@@ -132,20 +170,8 @@ public class BPEconomy {
      * @param uuid The UUID of the player.
      */
     public BigDecimal getBankBalance(UUID uuid) {
-        return getBankBalance(Bukkit.getOfflinePlayer(uuid));
-    }
-
-    /**
-     * Get the player bank balance of the selected bank.
-     *
-     * @param p The player.
-     */
-    public BigDecimal getBankBalance(OfflinePlayer p) {
-        if (balances.containsKey(p.getUniqueId())) return balances.get(p.getUniqueId()).money;
-        if (BankPlus.INSTANCE().getMySql().isConnected()) return new SQLPlayerManager(p).getMoney(bankName);
-
-        String bal = new BPPlayerManager(p).getPlayerConfig().getString(moneyPath);
-        return BPFormatter.getBigDecimalFormatted(bal);
+        Holder holder = isPlayerLoaded(uuid) ? balances.get(uuid) : loadPlayer(uuid);
+        return holder.money;
     }
 
     /**
@@ -179,7 +205,7 @@ public class BPEconomy {
 
     private BigDecimal setBankBalance(OfflinePlayer p, BigDecimal amount, boolean ignoreEvents, TransactionType type) {
         BigDecimal result = new BigDecimal(0);
-        if (startTransaction(p)) return result;
+        if (startAndCheckTransaction(p)) return result;
 
         if (!ignoreEvents) {
             BPPreTransactionEvent event = preTransactionEvent(p, type, amount, bankName);
@@ -204,7 +230,7 @@ public class BPEconomy {
      * @return Number representing the actual amount added.
      */
     public BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount) {
-        return addBankBalance(p, amount, false, TransactionType.ADD, false);
+        return addBankBalance(p, amount, false, TransactionType.ADD);
     }
 
     /**
@@ -214,7 +240,7 @@ public class BPEconomy {
      * @return Number representing the actual amount added.
      */
     public BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount, boolean ignoreEvents) {
-        return addBankBalance(p, amount, ignoreEvents, TransactionType.ADD, false);
+        return addBankBalance(p, amount, ignoreEvents, TransactionType.ADD);
     }
 
     /**
@@ -224,23 +250,12 @@ public class BPEconomy {
      * @return Number representing the actual amount added.
      */
     public BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount, TransactionType type) {
-        return addBankBalance(p, amount, false, type, false);
+        return addBankBalance(p, amount, false, type);
     }
 
-    /**
-     * Add the selected amount to the selected bank.
-     *
-     * @param type               Override the transaction type with the one you choose.
-     * @param addOfflineInterest Choose if updating the offline interest with this transaction.
-     * @return Number representing the actual amount added.
-     */
-    public BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount, TransactionType type, boolean addOfflineInterest) {
-        return addBankBalance(p, amount, false, type, addOfflineInterest);
-    }
-
-    private BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount, boolean ignoreEvents, TransactionType type, boolean addOfflineInterest) {
+    private BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount, boolean ignoreEvents, TransactionType type) {
         BigDecimal result = new BigDecimal(0);
-        if (startTransaction(p)) return result;
+        if (startAndCheckTransaction(p)) return result;
 
         if (!ignoreEvents) {
             BPPreTransactionEvent event = preTransactionEvent(p, type, amount, bankName);
@@ -255,13 +270,10 @@ public class BPEconomy {
         BigDecimal capacity = BankManager.getCapacity(bankName, p), balance = getBankBalance(p);
         if (capacity.doubleValue() <= 0D || balance.add(amount).doubleValue() < capacity.doubleValue()) {
             result = amount;
-            BigDecimal newBalance = balance.add(result);
-            if (addOfflineInterest) set(p, newBalance, result);
-            else set(p, newBalance);
+            set(p, balance.add(result));
         } else {
             result = capacity.subtract(balance);
-            if (addOfflineInterest) set(p, capacity, result);
-            else set(p, capacity);
+            set(p, capacity);
         }
 
         if (!ignoreEvents) afterTransactionEvent(p, type, amount, bankName);
@@ -299,7 +311,7 @@ public class BPEconomy {
 
     private BigDecimal removeBankBalance(OfflinePlayer p, BigDecimal amount, boolean ignoreEvents, TransactionType type) {
         BigDecimal result = new BigDecimal(0);
-        if (startTransaction(p)) return result;
+        if (startAndCheckTransaction(p)) return result;
 
         if (!ignoreEvents) {
             BPPreTransactionEvent event = preTransactionEvent(p, type, amount, bankName);
@@ -338,11 +350,8 @@ public class BPEconomy {
      * @return Offline interest.
      */
     public BigDecimal getOfflineInterest(UUID uuid) {
-        if (balances.containsKey(uuid)) return balances.get(uuid).offlineInterest;
-        if (BankPlus.INSTANCE().getMySql().isConnected()) return new SQLPlayerManager(uuid).getOfflineInterest(bankName);
-
-        String interest = new BPPlayerManager(uuid).getPlayerConfig().getString(interestPath);
-        return BPFormatter.getBigDecimalFormatted(interest);
+        Holder holder = isPlayerLoaded(uuid) ? balances.get(uuid) : loadPlayer(uuid);
+        return holder.offlineInterest;
     }
 
     /**
@@ -352,23 +361,11 @@ public class BPEconomy {
      * @param amount The new amount.
      */
     public void setOfflineInterest(OfflinePlayer p, BigDecimal amount) {
-        if (startTransaction(p)) return;
+        if (startAndCheckTransaction(p)) return;
 
-        if (balances.containsKey(p.getUniqueId())) {
-            balances.get(p.getUniqueId()).setOfflineInterest(amount);
-            endTransaction(p);
-            return;
-        }
+        Holder holder = isPlayerLoaded(p) ? balances.get(p.getUniqueId()) : loadPlayer(p);
+        holder.setOfflineInterest(amount);
 
-        if (BankPlus.INSTANCE().getMySql().isConnected()) {
-            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
-                new SQLPlayerManager(p).setOfflineInterest(amount, bankName);
-                endTransaction(p);
-            });
-            return;
-        }
-
-        configSet(p, interestPath, amount);
         endTransaction(p);
     }
 
@@ -387,11 +384,8 @@ public class BPEconomy {
      * @param uuid The player UUID.
      */
     public BigDecimal getDebt(UUID uuid) {
-        if (balances.containsKey(uuid)) return balances.get(uuid).debt;
-        if (BankPlus.INSTANCE().getMySql().isConnected()) return new SQLPlayerManager(uuid).getDebt(bankName);
-
-        String debt = new BPPlayerManager(uuid).getPlayerConfig().getString(debtPath);
-        return BPFormatter.getBigDecimalFormatted(debt);
+        Holder holder = isPlayerLoaded(uuid) ? balances.get(uuid) : loadPlayer(uuid);
+        return holder.debt;
     }
 
     /**
@@ -401,23 +395,11 @@ public class BPEconomy {
      * @param amount The new debt amount.
      */
     public void setDebt(OfflinePlayer p, BigDecimal amount) {
-        if (startTransaction(p)) return;
+        if (startAndCheckTransaction(p)) return;
 
-        if (balances.containsKey(p.getUniqueId())) {
-            balances.get(p.getUniqueId()).setDebt(amount);
-            endTransaction(p);
-            return;
-        }
+        Holder holder = isPlayerLoaded(p) ? balances.get(p.getUniqueId()) : loadPlayer(p);
+        holder.setDebt(amount);
 
-        if (BankPlus.INSTANCE().getMySql().isConnected()) {
-            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
-                new SQLPlayerManager(p).setDebt(amount, bankName);
-                endTransaction(p);
-            });
-            return;
-        }
-
-        configSet(p, debtPath, amount);
         endTransaction(p);
     }
 
@@ -436,29 +418,16 @@ public class BPEconomy {
      * @return The current bank level.
      */
     public int getBankLevel(UUID uuid) {
-        if (balances.containsKey(uuid)) return balances.get(uuid).bankLevel;
-        if (BankPlus.INSTANCE().getMySql().isConnected()) return new SQLPlayerManager(uuid).getLevel(bankName);
-        return Math.max(new BPPlayerManager(uuid).getPlayerConfig().getInt(levelPath), 1);
+        Holder holder = isPlayerLoaded(uuid) ? balances.get(uuid) : loadPlayer(uuid);
+        return holder.bankLevel;
     }
 
     public void setBankLevel(OfflinePlayer p, int level) {
-        if (startTransaction(p)) return;
+        if (startAndCheckTransaction(p)) return;
 
-        if (balances.containsKey(p.getUniqueId())) {
-            balances.get(p.getUniqueId()).setBankLevel(level);
-            endTransaction(p);
-            return;
-        }
+        Holder holder = isPlayerLoaded(p) ? balances.get(p.getUniqueId()) : loadPlayer(p);
+        holder.setBankLevel(level);
 
-        if (BankPlus.INSTANCE().getMySql().isConnected()) {
-            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
-                new SQLPlayerManager(p).setLevel(level, bankName);
-                endTransaction(p);
-            });
-            return;
-        }
-
-        configSet(p, levelPath, level);
         endTransaction(p);
     }
 
@@ -466,34 +435,8 @@ public class BPEconomy {
      * Method internally used to simplify the transactions.
      */
     private void set(OfflinePlayer p, BigDecimal amount) {
-        set(p, amount, BigDecimal.ZERO);
-    }
-
-    /**
-     * Method internally used to simplify the transactions.
-     */
-    private void set(OfflinePlayer p, BigDecimal amount, BigDecimal offlineInterest) {
-        boolean changeOfflineInterest = offlineInterest.compareTo(BigDecimal.ZERO) > 0;
-
-        if (balances.containsKey(p.getUniqueId())) {
-            Holder holder = balances.get(p.getUniqueId());
-            holder.setMoney(amount);
-            if (changeOfflineInterest) holder.setOfflineInterest(offlineInterest);
-            endTransaction(p);
-            return;
-        }
-
-        if (BankPlus.INSTANCE().getMySql().isConnected()) {
-            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
-                SQLPlayerManager pManager = new SQLPlayerManager(p);
-                pManager.setMoney(amount, bankName);
-                if (changeOfflineInterest) pManager.setOfflineInterest(offlineInterest, bankName);
-                endTransaction(p);
-            });
-            return;
-        }
-
-        configSet(p, moneyPath, amount, offlineInterest);
+        Holder pHolder = isPlayerLoaded(p) ? balances.get(p.getUniqueId()) : loadPlayer(p);
+        pHolder.setMoney(amount);
         endTransaction(p);
     }
 
@@ -631,7 +574,7 @@ public class BPEconomy {
         BPUtils.callEvent(event);
     }
 
-    private boolean startTransaction(OfflinePlayer p) {
+    private boolean startAndCheckTransaction(OfflinePlayer p) {
         if (transactions.contains(p.getUniqueId())) return true;
         transactions.add(p.getUniqueId());
         return false;
@@ -645,34 +588,8 @@ public class BPEconomy {
         transactions.remove(p.getUniqueId());
     }
 
-    private void configSet(OfflinePlayer p, String path, BigDecimal value) {
-        configSet(p, path, value, BigDecimal.valueOf(0));
-    }
-
-    private void configSet(OfflinePlayer p, String path, int value) {
-        configSet(p, path, value, BigDecimal.valueOf(0));
-    }
-
-    private void configSet(OfflinePlayer p, String path, BigDecimal value, BigDecimal offlineInterest) {
-        BPPlayerManager files = new BPPlayerManager(p);
-        File file = files.getPlayerFile();
-        FileConfiguration config = files.getPlayerConfig(file);
-        config.set(path, BPFormatter.formatBigDecimal(BPFormatter.getBigDecimalFormatted(value).max(BigDecimal.valueOf(0))));
-        if (offlineInterest.doubleValue() > 0d) config.set(interestPath, BPFormatter.formatBigDecimal(BPFormatter.getBigDecimalFormatted(offlineInterest).max(BigDecimal.valueOf(0))));
-        files.savePlayerFile(config, file, true);
-    }
-
-    private void configSet(OfflinePlayer p, String path, int value, BigDecimal offlineInterest) {
-        BPPlayerManager files = new BPPlayerManager(p);
-        File file = files.getPlayerFile();
-        FileConfiguration config = files.getPlayerConfig(file);
-        config.set(path, Math.max(1, value));
-        if (offlineInterest.doubleValue() > 0d) config.set(interestPath, BPFormatter.formatBigDecimal(BPFormatter.getBigDecimalFormatted(offlineInterest).max(BigDecimal.valueOf(0))));
-        files.savePlayerFile(config, file, true);
-    }
-
     private static class Holder {
-        private final BigDecimal zero = BigDecimal.valueOf(0);
+        private final BigDecimal zero = BigDecimal.ZERO;
         private BigDecimal money = zero, offlineInterest = zero, debt = zero;
         private int bankLevel = 1;
 

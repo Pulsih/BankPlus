@@ -28,6 +28,7 @@ public class EconomyRegistry {
             SQLPlayerManager pManager = new SQLPlayerManager(uuid);
             for (BPEconomy economy : BPEconomy.list()) {
                 String name = economy.getBankName();
+
                 pManager.setDebt(economy.getDebt(uuid), name);
                 pManager.setLevel(economy.getBankLevel(uuid), name);
                 pManager.setMoney(economy.getBankBalance(uuid), name);

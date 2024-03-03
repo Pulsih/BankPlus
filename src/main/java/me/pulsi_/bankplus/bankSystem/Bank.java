@@ -1,19 +1,25 @@
 package me.pulsi_.bankplus.bankSystem;
 
 import me.pulsi_.bankplus.economy.BPEconomy;
+import net.md_5.bungee.api.chat.hover.content.Item;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
 
 public class Bank {
 
     private final String identifier;
     private final BPEconomy bankEconomy;
+    private final HashMap<Integer, BankLevel> bankLevels = new HashMap<>();
     private String title = "&c&l * TITLE NOT FOUND *";
     private int size, updateDelay;
     private String fillerMaterial, accessPermission;
     private boolean giveInterestIfNotAvailable, fillerEnabled, fillerGlowing;
     private ItemStack[] content;
-    private ConfigurationSection items, upgrades, banksListGuiItems;
+    private ConfigurationSection items, banksListGuiItems;
 
     public Bank(String identifier) {
         this.identifier = identifier;
@@ -68,10 +74,6 @@ public class Bank {
         return items;
     }
 
-    public ConfigurationSection getUpgrades() {
-        return upgrades;
-    }
-
     public ConfigurationSection getBanksListGuiItems() {
         return banksListGuiItems;
     }
@@ -116,11 +118,22 @@ public class Bank {
         this.items = items;
     }
 
-    public void setUpgrades(ConfigurationSection upgrades) {
-        this.upgrades = upgrades;
-    }
-
     public void setBanksListGuiItems(ConfigurationSection banksListGuiItems) {
         this.banksListGuiItems = banksListGuiItems;
+    }
+
+    public BankLevel getBankLevel(int level) {
+        return bankLevels.get(level);
+    }
+
+    public HashMap<Integer, BankLevel> getBankLevels() {
+        return bankLevels;
+    }
+
+    public static class BankLevel {
+        BigDecimal cost, capacity, interest, offlineInterest;
+        List<ItemStack> requiredItems;
+        List<String> interestLimiter;
+        boolean removeRequiredItems;
     }
 }

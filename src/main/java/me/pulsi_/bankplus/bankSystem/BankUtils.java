@@ -7,6 +7,7 @@ import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.utils.*;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -17,7 +18,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class BankUtils {
@@ -139,8 +142,81 @@ public class BankUtils {
     }
 
     public static void loadBankValues(Bank bank, FileConfiguration config) {
+        String bankName = bank.getIdentifier();
         bank.setAccessPermission(config.getString("Settings.Permission"));
-        bank.setUpgrades(config.getConfigurationSection("Upgrades"));
+
+        ConfigurationSection levels = config.getConfigurationSection("Levels");
+        if (levels != null) {
+            for (String key : levels.getKeys(false)) {
+                int level;
+                try {
+                    level = Integer.parseInt(key);
+                } catch (NumberFormatException e) {
+                    BPLogger.warn("The bank \"" + bankName + "\" contains an invalid level number! (" + key + ")");
+                    continue;
+                }
+
+                ConfigurationSection values = levels.getConfigurationSection(key);
+                if (values == null) continue;
+
+                Bank.BankLevel bankLevel = new Bank.BankLevel();
+
+                bankLevel.cost = BPFormatter.getBigDecimalFormatted(values.getString("Cost"));
+
+                String capacity = values.getString("Capacity");
+                bankLevel.capacity = capacity == null ? Values.CONFIG.getMaxBankCapacity() : BPFormatter.getBigDecimalFormatted(capacity);
+
+                String interest = values.getString("Interest");
+                bankLevel.interest = interest == null ? Values.CONFIG.getInterestMoneyGiven() : BPFormatter.getBigDecimalFormatted(interest.replace("%", ""));
+
+                String offlineInterest = values.getString("Offline-Interest");
+                bankLevel.offlineInterest = offlineInterest == null ? Values.CONFIG.getOfflineInterestMoneyGiven() : BPFormatter.getBigDecimalFormatted(offlineInterest.replace("%", ""));
+
+                List<ItemStack> requiredItems = new ArrayList<>();
+                String requiredItemsString = values.getString("Required-Items");
+                if (requiredItemsString != null && !requiredItemsString.isEmpty()) {
+
+                    List<String> configItems = new ArrayList<>();
+                    if (!requiredItemsString.contains(",")) configItems.add(requiredItemsString);
+                    else configItems.addAll(Arrays.asList(requiredItemsString.split(",")));
+
+                    for (String splitItem : configItems) {
+                        if (!splitItem.contains("-")) {
+                            try {
+                                requiredItems.add(new ItemStack(Material.valueOf(splitItem)));
+                            } catch (IllegalArgumentException e) {
+                                BPLogger.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + level + ".");
+                            }
+                        } else {
+                            String[] split = splitItem.split("-");
+                            ItemStack item;
+                            try {
+                                item = new ItemStack(Material.valueOf(split[0]));
+                            } catch (IllegalArgumentException e) {
+                                BPLogger.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + level + ".");
+                                continue;
+                            }
+                            int amount = 1;
+                            try {
+                                amount = Integer.parseInt(split[1]);
+                            } catch (NumberFormatException e) {
+                                BPLogger.warn("The bank \"" + bankName + "\" contains an invalid number in the \"Required-Items\" path at level *" + level + ".");
+                            }
+
+                            item.setAmount(amount);
+                            requiredItems.add(item);
+                        }
+                    }
+                }
+                bankLevel.requiredItems = requiredItems;
+                bankLevel.removeRequiredItems = values.getBoolean("Remove-Required-Items");
+
+                List<String> limiter = values.getStringList("Interest-Limiter");
+                bankLevel.interestLimiter = limiter.isEmpty() ? Values.CONFIG.getInterestLimiter() : limiter;
+
+                bank.getBankLevels().put(level, bankLevel);
+            }
+        }
 
         if (!Values.CONFIG.isGuiModuleEnabled()) return;
 

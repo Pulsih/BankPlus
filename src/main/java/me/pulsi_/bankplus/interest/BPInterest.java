@@ -85,17 +85,16 @@ public class BPInterest {
             if (availableBanks.isEmpty()) continue;
 
             Player oP = p.getPlayer();
-            if (p.isOnline() && oP != null) {
+            if (oP != null) {
                 if (!oP.hasPermission(defaultInterestPermission) || BankPlus.INSTANCE().getAfkManager().isAFK(oP)) continue;
 
                 BigDecimal interestAmount = new BigDecimal(0);
                 for (String bankName : availableBanks) {
                     BPEconomy economy = BPEconomy.get(bankName);
-                    if (economy.getBankBalance(p).doubleValue() <= 0) continue;
+                    if (economy.getBankBalance(p).compareTo(BigDecimal.ZERO) <= 0) continue;
 
                     BigDecimal interestMoney = getInterestMoney(bankName, p, BankManager.getInterestRate(bankName, p)), maxAmount = Values.CONFIG.getInterestMaxAmount();
-
-                    if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
+                    if (interestMoney.compareTo(maxAmount) > 0) interestMoney = maxAmount;
 
                     BigDecimal amount = economy.addBankBalance(p, interestMoney, TransactionType.INTEREST);
                     interestAmount = interestAmount.add(amount);
@@ -107,35 +106,21 @@ public class BPInterest {
             } else {
                 if (!isOfflineInterestEnabled || offlineTimeExpired(p) || !BPUtils.hasOfflinePermission(p, Values.CONFIG.getInterestOfflinePermission())) continue;
 
-                boolean save = false;
-                BPPlayerManager pManager = new BPPlayerManager(p);
-                File file = pManager.getPlayerFile();
-                FileConfiguration config = pManager.getPlayerConfig(file);
-
                 for (String bankName : availableBanks) {
                     BPEconomy economy = BPEconomy.get(bankName);
                     BigDecimal bankBalance = economy.getBankBalance(p);
+                    if (bankBalance.compareTo(BigDecimal.ZERO) <= 0) continue;
+
                     BigDecimal maxAmount = Values.CONFIG.getInterestMaxAmount(),
                             interestMoney = Values.CONFIG.isOfflineInterestDifferentRate() ?
                                     getInterestMoney(bankName, p, BankManager.getOfflineInterestRate(bankName, p)) :
                                     getInterestMoney(bankName, p, BankManager.getInterestRate(bankName, p));
 
-                    if (bankBalance.doubleValue() <= 0) continue;
-                    if (interestMoney.doubleValue() >= maxAmount.doubleValue()) interestMoney = maxAmount;
+                    if (interestMoney.compareTo(maxAmount) > 0) interestMoney = maxAmount;
 
-                    BPPreTransactionEvent event = economy.preTransactionEvent(p, TransactionType.INTEREST, interestMoney, bankName);
-                    BigDecimal newAmount = event.getTransactionAmount();
-
-                    String path = "banks." + bankName + ".";
-                    BigDecimal amount = new BigDecimal(config.getString(path + "money"));
-
-                    config.set(path + "money", BPFormatter.formatBigDecimal(amount.add(newAmount)));
-                    config.set(path + "interest", BPFormatter.formatBigDecimal(newAmount));
-
-                    economy.afterTransactionEvent(p, TransactionType.INTEREST, newAmount, bankName);
-                    save = true;
+                    economy.addBankBalance(p, interestMoney);
+                    economy.setOfflineInterest(p, economy.getOfflineInterest(p).add(interestMoney));
                 }
-                if (save) pManager.savePlayerFile(config, file, true);
             }
         }
     }

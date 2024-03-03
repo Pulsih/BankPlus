@@ -65,11 +65,11 @@ public class BankManager {
      * @return The capacity amount.
      */
     public static BigDecimal getCapacity(String bankName, int level) {
-        ConfigurationSection upgrades = getBank(bankName).getUpgrades();
-        if (upgrades == null) return Values.CONFIG.getMaxBankCapacity();
+        Bank bank = getBank(bankName);
+        if (bank == null) return Values.CONFIG.getMaxBankCapacity();
 
-        String capacity = upgrades.getString((Math.max(level, 1)) + ".Capacity");
-        return (capacity == null ? Values.CONFIG.getMaxBankCapacity() : new BigDecimal(capacity));
+        Bank.BankLevel bankLevel = bank.getBankLevel(level);
+        return bankLevel == null ? Values.CONFIG.getMaxBankCapacity() : bankLevel.capacity;
     }
 
     /**
@@ -100,19 +100,10 @@ public class BankManager {
             return getLimitedInterest(bankName, p, level, Values.CONFIG.getInterestMoneyGiven());
 
         Bank bank = getBank(bankName);
-        ConfigurationSection upgrades = bank.getUpgrades();
-        if (upgrades == null) return Values.CONFIG.getInterestMoneyGiven();
+        if (bank == null) return Values.CONFIG.getInterestMoneyGiven();
 
-        level = Math.max(level, 1);
-        String interest = upgrades.getString(level + ".Interest");
-        if (BPUtils.isInvalidNumber(interest)) {
-            // Check this before to avoid spamming warns if the user does not specify an interest in an upgrade.
-            if (interest != null)
-                BPLogger.warn("Invalid interest amount in the " + level + "* upgrades section, file: " + bankName + ".yml");
-            return Values.CONFIG.getInterestMoneyGiven();
-        }
-
-        return new BigDecimal(interest.replace("%", ""));
+        Bank.BankLevel bankLevel = bank.getBankLevel(level);
+        return bankLevel == null ? Values.CONFIG.getInterestMoneyGiven() : bankLevel.offlineInterest;
     }
 
     /**
@@ -143,19 +134,10 @@ public class BankManager {
             return getLimitedInterest(bankName, p, level, Values.CONFIG.getOfflineInterestMoneyGiven());
 
         Bank bank = getBank(bankName);
-        ConfigurationSection upgrades = bank.getUpgrades();
-        if (upgrades == null) return Values.CONFIG.getOfflineInterestMoneyGiven();
+        if (bank == null) return Values.CONFIG.getOfflineInterestMoneyGiven();
 
-        level = Math.max(level, 1);
-        String interest = upgrades.getString(level + ".Offline-Interest");
-        if (BPUtils.isInvalidNumber(interest)) {
-            // Check this before to avoid spamming warns if the user does not specify an interest in an upgrade.
-            if (interest != null)
-                BPLogger.warn("Invalid offline interest amount in the " + level + "* upgrades section, file: " + bankName + ".yml");
-            return Values.CONFIG.getOfflineInterestMoneyGiven();
-        }
-
-        return new BigDecimal(interest.replace("%", ""));
+        Bank.BankLevel bankLevel = bank.getBankLevel(level);
+        return bankLevel == null ? Values.CONFIG.getOfflineInterestMoneyGiven() : bankLevel.offlineInterest;
     }
 
     /**
@@ -167,11 +149,10 @@ public class BankManager {
      */
     public static List<String> getInterestLimiter(String bankName, int level) {
         Bank bank = getBank(bankName);
-        ConfigurationSection upgrades = bank.getUpgrades();
-        if (upgrades == null) return Values.CONFIG.getInterestLimiter();
+        if (bank == null) return new ArrayList<>();
 
-        List<String> limiter = upgrades.getStringList(Math.max(level, 1) + ".Interest-Limiter");
-        return limiter.isEmpty() ? Values.CONFIG.getInterestLimiter() : limiter;
+        Bank.BankLevel bankLevel = bank.getBankLevel(level);
+        return bankLevel == null ? new ArrayList<>() : bankLevel.interestLimiter;
     }
 
     /**
@@ -183,11 +164,10 @@ public class BankManager {
      */
     public static BigDecimal getLevelCost(String bankName, int level) {
         Bank bank = getBank(bankName);
-        ConfigurationSection upgrades = bank.getUpgrades();
-        if (upgrades == null) return new BigDecimal(0);
+        if (bank == null) return BigDecimal.ZERO;
 
-        String cost = upgrades.getString(Math.max(level, 1) + ".Cost");
-        return new BigDecimal(cost == null ? "0" : cost);
+        Bank.BankLevel bankLevel = bank.getBankLevel(level);
+        return bankLevel == null ? BigDecimal.ZERO : bankLevel.cost;
     }
 
     /**
@@ -198,48 +178,11 @@ public class BankManager {
      * @return A list of itemstack representing the required items with its amount set, null if not specified.
      */
     public static List<ItemStack> getRequiredItems(String bankName, int level) {
-        List<ItemStack> items = new ArrayList<>();
-
         Bank bank = getBank(bankName);
-        ConfigurationSection upgrades = bank.getUpgrades();
-        if (upgrades == null) return items;
+        if (bank == null) return new ArrayList<>();
 
-        level = Math.max(level, 1);
-        String requiredItemsString = upgrades.getString(level + ".Required-Items");
-        if (requiredItemsString == null || requiredItemsString.isEmpty()) return items;
-
-        List<String> configItems = new ArrayList<>();
-        if (!requiredItemsString.contains(",")) configItems.add(requiredItemsString);
-        else configItems.addAll(Arrays.asList(requiredItemsString.split(",")));
-
-        for (String splitItem : configItems) {
-            if (!splitItem.contains("-")) {
-                try {
-                    items.add(new ItemStack(Material.valueOf(splitItem)));
-                } catch (IllegalArgumentException e) {
-                    BPLogger.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + level + ".");
-                }
-            } else {
-                String[] split = splitItem.split("-");
-                ItemStack item;
-                try {
-                    item = new ItemStack(Material.valueOf(split[0]));
-                } catch (IllegalArgumentException e) {
-                    BPLogger.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + level + ".");
-                    continue;
-                }
-                int amount = 1;
-                try {
-                    amount = Integer.parseInt(split[1]);
-                } catch (NumberFormatException e) {
-                    BPLogger.warn("The bank \"" + bankName + "\" contains an invalid number in the \"Required-Items\" path at level *" + level + ".");
-                }
-
-                item.setAmount(amount);
-                items.add(item);
-            }
-        }
-        return items;
+        Bank.BankLevel bankLevel = bank.getBankLevel(level);
+        return bankLevel == null ? new ArrayList<>() : bankLevel.requiredItems;
     }
 
     /**
@@ -250,8 +193,11 @@ public class BankManager {
      * @return true if in the selected bank level is specified to remove the items, false otherwise.
      */
     public static boolean isRemovingRequiredItems(String bankName, int level) {
-        ConfigurationSection upgrades = getBank(bankName).getUpgrades();
-        return upgrades != null && upgrades.getBoolean(Math.max(level, 1) + ".Remove-Required-Items");
+        Bank bank = getBank(bankName);
+        if (bank == null) return false;
+
+        Bank.BankLevel bankLevel = bank.getBankLevel(level);
+        return bankLevel != null && bankLevel.removeRequiredItems;
     }
 
     /**
@@ -263,13 +209,15 @@ public class BankManager {
     public static List<String> getLevels(String bankName) {
         List<String> levels = new ArrayList<>();
 
-        ConfigurationSection upgrades = getBank(bankName).getUpgrades();
-        if (upgrades == null) {
+        Bank bank = getBank(bankName);
+        if (bank == null) {
             levels.add("1");
             return levels;
         }
 
-        levels.addAll(upgrades.getKeys(false));
+        for (int level : bank.getBankLevels().keySet())
+            levels.add(level + "");
+
         return levels;
     }
 
@@ -282,7 +230,7 @@ public class BankManager {
      */
     public static int getCurrentLevel(String bankName, OfflinePlayer p) {
         BPEconomy economy = BPEconomy.get(bankName);
-        return economy == null ? 1 :economy.getBankLevel(p);
+        return economy == null ? 1 : economy.getBankLevel(p);
     }
 
     /**
@@ -304,8 +252,7 @@ public class BankManager {
      * @return true if the bank has another level, false otherwise.
      */
     public static boolean hasNextLevel(String bankName, int currentLevel) {
-        ConfigurationSection upgrades = getBank(bankName).getUpgrades();
-        return upgrades != null && upgrades.getConfigurationSection(String.valueOf(currentLevel + 1)) != null;
+        return getLevels(bankName).contains(String.valueOf(currentLevel + 1));
     }
 
     /**
