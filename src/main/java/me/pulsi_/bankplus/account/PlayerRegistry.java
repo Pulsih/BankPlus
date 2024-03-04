@@ -1,6 +1,5 @@
 package me.pulsi_.bankplus.account;
 
-import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -19,13 +18,13 @@ public class PlayerRegistry {
     public static void loadPlayer(Player p) {
         if (isPlayerLoaded(p)) return;
 
-        for (BPEconomy economy : BPEconomy.list()) economy.loadPlayer(p);
+        for (BPEconomy economy : BPEconomy.list()) economy.loadPlayerBalance(p);
         players.put(p.getUniqueId(), new BPPlayer(p));
     }
 
     public static void unloadPlayer(UUID uuid) {
         players.remove(uuid);
-        for (BPEconomy economy : BPEconomy.list()) economy.unloadPlayer(uuid);
+        for (BPEconomy economy : BPEconomy.list()) economy.unloadPlayerBalance(uuid);
     }
 
     public static BPPlayer get(OfflinePlayer p) {

@@ -57,11 +57,9 @@ public class EconomyRegistry {
     }
 
     public void saveEveryone(boolean async) {
-        for (BPEconomy economy : BPEconomy.list()) {
-            for (UUID uuid : economy.getLoadedPlayers()) {
-                savePlayer(uuid, async);
-                if (Bukkit.getPlayer(uuid) == null) PlayerRegistry.unloadPlayer(uuid);
-            }
+        for (UUID uuid : BPEconomy.getLoadedPlayers()) {
+            savePlayer(uuid, async);
+            if (Bukkit.getPlayer(uuid) == null) PlayerRegistry.unloadPlayer(uuid);
         }
     }
 
