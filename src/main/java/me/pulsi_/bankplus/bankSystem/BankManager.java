@@ -103,7 +103,7 @@ public class BankManager {
         if (bank == null) return Values.CONFIG.getInterestMoneyGiven();
 
         Bank.BankLevel bankLevel = bank.getBankLevel(level);
-        return bankLevel == null ? Values.CONFIG.getInterestMoneyGiven() : bankLevel.offlineInterest;
+        return bankLevel == null ? Values.CONFIG.getInterestMoneyGiven() : bankLevel.interest;
     }
 
     /**

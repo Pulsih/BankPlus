@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.BPPlayerManager;
 import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.economy.BPEconomy;
@@ -35,15 +36,15 @@ public class PlayerServerListener implements Listener {
 
         if (!Values.CONFIG.notifyOfflineInterest()) return;
 
-        BigDecimal amount = new BigDecimal(0);
+        BigDecimal amount = BigDecimal.ZERO;
         for (BPEconomy economy : BPEconomy.list()) {
             BigDecimal offlineInterest = economy.getOfflineInterest(p);
             amount = amount.add(offlineInterest);
-            if (offlineInterest.doubleValue() > 0d) economy.setOfflineInterest(p, BigDecimal.valueOf(0));
+            if (offlineInterest.compareTo(BigDecimal.ZERO) > 0) economy.setOfflineInterest(p, BigDecimal.ZERO);
         }
 
         BigDecimal finalAmount = amount;
-        if (finalAmount.doubleValue() > 0d)
+        if (finalAmount.compareTo(BigDecimal.ZERO) > 0)
             Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () ->
                             BPMessages.send(p, Values.CONFIG.getNotifyOfflineInterestMessage(), BPUtils.placeValues(finalAmount), true),
                     Values.CONFIG.getNotifyOfflineInterestDelay() * 20L);
@@ -53,8 +54,11 @@ public class PlayerServerListener implements Listener {
     public void onQuit(PlayerQuitEvent e) {
         Player p = e.getPlayer();
 
-        BukkitTask updating = PlayerRegistry.get(p).getBankUpdatingTask();
-        if (updating != null) updating.cancel();
+        BPPlayer player = PlayerRegistry.get(p);
+        if (player != null) {
+            BukkitTask updating = player.getBankUpdatingTask();
+            if (updating != null) updating.cancel();
+        }
 
         BPSets.removePlayerFromDepositing(p);
         BPSets.removePlayerFromWithdrawing(p);

@@ -19,11 +19,12 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 public class BPEconomy {
 
-    private static Set<UUID> loadedPlayers = new HashSet<>();
+    private static final Set<UUID> loadedPlayers = new HashSet<>();
 
     private final String bankName;
     private final HashMap<UUID, Holder> balances = new HashMap<>();
@@ -71,7 +72,7 @@ public class BPEconomy {
      * @return A set of UUIDs.
      */
     public static Set<UUID> getLoadedPlayers() {
-        return loadedPlayers;
+        return new HashSet<>(loadedPlayers);
     }
 
     /**
@@ -95,7 +96,7 @@ public class BPEconomy {
      * @param p The player.
      */
     public static BigDecimal getBankBalancesSum(OfflinePlayer p) {
-        BigDecimal amount = BigDecimal.valueOf(0);
+        BigDecimal amount = BigDecimal.ZERO;
         for (BPEconomy economy : list())
             amount = amount.add(economy.getBankBalance(p));
         return amount;
@@ -284,12 +285,17 @@ public class BPEconomy {
         }
 
         BigDecimal capacity = BankManager.getCapacity(bankName, p), balance = getBankBalance(p);
-        if (capacity.doubleValue() <= 0D || balance.add(amount).doubleValue() < capacity.doubleValue()) {
+        if (capacity.compareTo(BigDecimal.ZERO) <= 0) {
             result = amount;
             set(p, balance.add(result));
         } else {
-            result = capacity.subtract(balance);
-            set(p, capacity);
+            if (balance.add(amount).compareTo(capacity) < 0) {
+                result = amount;
+                set(p, balance.add(result));
+            } else {
+                result = capacity.subtract(balance);
+                set(p, capacity);
+            }
         }
 
         if (!ignoreEvents) afterTransactionEvent(p, type, amount, bankName);
@@ -340,7 +346,7 @@ public class BPEconomy {
         }
 
         BigDecimal balance = getBankBalance(p);
-        if (balance.subtract(amount).doubleValue() < 0D) result = balance;
+        if (balance.subtract(amount).compareTo(BigDecimal.ZERO) < 0) result = balance;
         else result = amount;
 
         set(p, balance.subtract(result));
@@ -480,7 +486,8 @@ public class BPEconomy {
             if (amount.compareTo(capacity) <= 0) taxes = finalAmount.multiply(depositTaxes.divide(BigDecimal.valueOf(100)));
             else {
                 // Makes it able to fill the bank if a higher number is used.
-                taxes = capacity.multiply(depositTaxes.divide(BigDecimal.valueOf(100)));
+                taxes = capacity.multiply(depositTaxes).divide(BigDecimal.valueOf(100), RoundingMode.DOWN);
+                taxes = taxes.min(finalAmount).max(BigDecimal.ZERO);
                 finalAmount = finalAmount.add(taxes);
             }
         }
@@ -514,8 +521,10 @@ public class BPEconomy {
         if (bankBal.compareTo(amount) < 0) amount = bankBal;
 
         BigDecimal withdrawTaxes = Values.CONFIG.getWithdrawTaxes(), taxes = BigDecimal.ZERO;
-        if (withdrawTaxes.compareTo(BigDecimal.ZERO) > 0 && !p.hasPermission("bankplus.withdraw.bypass-taxes"))
-            taxes = amount.multiply(withdrawTaxes.divide(BigDecimal.valueOf(100)));
+        if (withdrawTaxes.compareTo(BigDecimal.ZERO) > 0 && !p.hasPermission("bankplus.withdraw.bypass-taxes")) {
+            taxes = amount.multiply(withdrawTaxes).divide(BigDecimal.valueOf(100), RoundingMode.DOWN);
+            taxes = taxes.min(amount).max(BigDecimal.ZERO);
+        }
 
         EconomyResponse withdrawResponse = BankPlus.INSTANCE().getVaultEconomy().depositPlayer(p, amount.subtract(taxes).doubleValue());
         if (BPUtils.hasFailed(p, withdrawResponse)) return;
@@ -605,20 +614,19 @@ public class BPEconomy {
     }
 
     private static class Holder {
-        private final BigDecimal zero = BigDecimal.ZERO;
-        private BigDecimal money = zero, offlineInterest = zero, debt = zero;
+        private BigDecimal money = BigDecimal.ZERO, offlineInterest = BigDecimal.ZERO, debt = BigDecimal.ZERO;
         private int bankLevel = 1;
 
         public void setMoney(BigDecimal money) {
-            this.money = BPFormatter.getBigDecimalFormatted(money).max(zero);
+            this.money = BPFormatter.getBigDecimalFormatted(money).max(BigDecimal.ZERO);
         }
 
         public void setOfflineInterest(BigDecimal offlineInterest) {
-            this.debt = BPFormatter.getBigDecimalFormatted(offlineInterest).max(zero);
+            this.offlineInterest = BPFormatter.getBigDecimalFormatted(offlineInterest).max(BigDecimal.ZERO);
         }
 
         public void setDebt(BigDecimal debt) {
-            this.debt = BPFormatter.getBigDecimalFormatted(debt).max(zero);
+            this.debt = BPFormatter.getBigDecimalFormatted(debt).max(BigDecimal.ZERO);
         }
 
         public void setBankLevel(int bankLevel) {

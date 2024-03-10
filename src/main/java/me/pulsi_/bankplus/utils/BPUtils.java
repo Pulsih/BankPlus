@@ -418,8 +418,7 @@ public class BPUtils {
     public static boolean hasFailed(Player p, EconomyResponse response) {
         if (!response.transactionSuccess()) {
             BPMessages.send(p, "Internal-Error");
-            BPLogger.warn("Warning! (THIS IS NOT A BANKPLUS ERROR!) Vault has failed his transaction task. To" +
-                    " avoid dupe bugs also bankplus has cancelled the transaction.");
+            BPLogger.warn("Vault has failed his transaction task. To avoid dupe bugs, bankplus has also cancelled the transaction. Reason: " + response.errorMessage);
             return true;
         }
         return false;

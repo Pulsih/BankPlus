@@ -302,7 +302,7 @@ public class ConfigValues {
     public BigDecimal getWithdrawTaxes() {
         if (BPUtils.isInvalidNumber(withdrawTaxes)) {
             BPLogger.error(DEF_ERROR.replace("%", "Withdraw-Settings.Withdraw-Taxes"));
-            return new BigDecimal(0);
+            return BigDecimal.ZERO;
         }
         return new BigDecimal(withdrawTaxes.replace("%", ""));
     }

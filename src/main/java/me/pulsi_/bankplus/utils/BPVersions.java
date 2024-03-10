@@ -54,4 +54,8 @@ public class BPVersions {
         }
         BPLogger.info("Conversion finished!");
     }
+
+    public static void changeBankUpgradesSection() {
+
+    }
 }
