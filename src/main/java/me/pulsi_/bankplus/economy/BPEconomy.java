@@ -293,7 +293,7 @@ public class BPEconomy {
                 result = amount;
                 set(p, balance.add(result));
             } else {
-                result = capacity.subtract(balance);
+                result = capacity.subtract(balance).max(BigDecimal.ZERO);
                 set(p, capacity);
             }
         }

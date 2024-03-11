@@ -10,6 +10,7 @@ import me.pulsi_.bankplus.economy.TransactionType;
 import me.pulsi_.bankplus.events.BPPreTransactionEvent;
 import me.pulsi_.bankplus.managers.BPConfigs;
 import me.pulsi_.bankplus.utils.BPFormatter;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
@@ -75,6 +76,7 @@ public class BPInterest {
     }
 
     public void giveInterest() {
+        BigDecimal maxAmount = Values.CONFIG.getInterestMaxAmount();
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
 
             List<String> availableBanks = new ArrayList<>();
@@ -88,16 +90,19 @@ public class BPInterest {
             if (oP != null) {
                 if (!oP.hasPermission(defaultInterestPermission) || BankPlus.INSTANCE().getAfkManager().isAFK(oP)) continue;
 
-                BigDecimal interestAmount = new BigDecimal(0);
+                BigDecimal interestAmount = BigDecimal.ZERO;
                 for (String bankName : availableBanks) {
                     BPEconomy economy = BPEconomy.get(bankName);
+                    if (economy == null) {
+                        BPLogger.warn("Could not add interest to the player " + p.getName() + " because the bank " + bankName + " does not exist.");
+                        continue;
+                    }
                     if (economy.getBankBalance(p).compareTo(BigDecimal.ZERO) <= 0) continue;
 
-                    BigDecimal interestMoney = getInterestMoney(bankName, p, BankManager.getInterestRate(bankName, p)), maxAmount = Values.CONFIG.getInterestMaxAmount();
-                    if (interestMoney.compareTo(maxAmount) > 0) interestMoney = maxAmount;
+                    BigDecimal interestMoney = getInterestMoney(bankName, p, BankManager.getInterestRate(bankName, p)).min(maxAmount);
 
-                    BigDecimal amount = economy.addBankBalance(p, interestMoney, TransactionType.INTEREST);
-                    interestAmount = interestAmount.add(amount);
+                    BigDecimal added = economy.addBankBalance(p, interestMoney, TransactionType.INTEREST);
+                    interestAmount = interestAmount.add(added);
                 }
                 if (!Values.MESSAGES.isInterestBroadcastEnabled()) continue;
 
@@ -108,18 +113,18 @@ public class BPInterest {
 
                 for (String bankName : availableBanks) {
                     BPEconomy economy = BPEconomy.get(bankName);
-                    BigDecimal bankBalance = economy.getBankBalance(p);
-                    if (bankBalance.compareTo(BigDecimal.ZERO) <= 0) continue;
+                    if (economy == null) {
+                        BPLogger.warn("Could not add interest to the player " + p.getName() + " because the bank " + bankName + " does not exist.");
+                        continue;
+                    }
+                    if (economy.getBankBalance(p).compareTo(BigDecimal.ZERO) <= 0) continue;
 
-                    BigDecimal maxAmount = Values.CONFIG.getInterestMaxAmount(),
-                            interestMoney = Values.CONFIG.isOfflineInterestDifferentRate() ?
+                    BigDecimal interestMoney = (Values.CONFIG.isOfflineInterestDifferentRate() ?
                                     getInterestMoney(bankName, p, BankManager.getOfflineInterestRate(bankName, p)) :
-                                    getInterestMoney(bankName, p, BankManager.getInterestRate(bankName, p));
+                                    getInterestMoney(bankName, p, BankManager.getInterestRate(bankName, p))).min(maxAmount);
 
-                    if (interestMoney.compareTo(maxAmount) > 0) interestMoney = maxAmount;
-
-                    economy.addBankBalance(p, interestMoney);
-                    economy.setOfflineInterest(p, economy.getOfflineInterest(p).add(interestMoney));
+                    BigDecimal added = economy.addBankBalance(p, interestMoney, TransactionType.INTEREST);
+                    economy.setOfflineInterest(p, economy.getOfflineInterest(p).add(added));
                 }
             }
         }

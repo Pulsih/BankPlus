@@ -18,7 +18,7 @@ public class ConfigValues {
     private String chatExitMessage, playerChatPriority, bankClickPriority;
     private String second, seconds, minute, minutes, hour, hours, day, days;
     private String interestTimeSeparator, interestTimeFinalSeparator, interestTimeFormat;
-    private String k, m, b, t, q, qq;
+    private String k, m, b, t, q, qq, moneyFormatSeparator;
     private String infiniteCapacityText, withdrawSound, depositSound, viewSound, personalSound;
     private String maxDepositAmount, maxWithdrawAmount, depositTaxes, withdrawTaxes, depositMinimumAmount, withdrawMinimumAmount, maxBankCapacity, startAmount;
     private String bankTopMoneyFormat, banktopUpdateBroadcastMessage, upgradesMaxedPlaceholder, upgradesNoRequiredItems, banktopPlayerNotFoundPlaceholder, mainGuiName;
@@ -58,6 +58,7 @@ public class ConfigValues {
         t = config.getString("Placeholders.Money.Trillions");
         q = config.getString("Placeholders.Money.Quadrillions");
         qq = config.getString("Placeholders.Money.Quintillions");
+        moneyFormatSeparator = config.getString("Placeholders.Money.Separator");
         withdrawSound = config.getString("General-Settings.Withdraw-Sound.Sound");
         depositSound = config.getString("General-Settings.Deposit-Sound.Sound");
         viewSound = config.getString("General-Settings.View-Sound.Sound");
@@ -218,6 +219,10 @@ public class ConfigValues {
 
     public String getQq() {
         return qq == null ? "QQ" : qq;
+    }
+
+    public String getMoneyFormatSeparator() {
+        return moneyFormatSeparator == null ? "." : moneyFormatSeparator;
     }
 
     public String getWithdrawSound() {

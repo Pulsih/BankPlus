@@ -56,7 +56,7 @@ public class BPFormatter {
     }
 
     public static String formatCommas(Object amount) {
-        DecimalFormat formatter = new DecimalFormat("#,###");
+        DecimalFormat formatter = new DecimalFormat("#" + Values.CONFIG.getMoneyFormatSeparator() + "###");
         return formatter.format(amount);
     }
 
