@@ -13,17 +13,17 @@ public class SQLPlayerManager {
     private final String uuid;
     private final OfflinePlayer p;
     private final BPSQLMethods methods;
+    private final BPSQL bpsql;
 
     public SQLPlayerManager(OfflinePlayer p) {
-        this.p = p;
-        this.uuid = p.getUniqueId().toString();
-        this.methods = BankPlus.INSTANCE().getMySql().getSqlMethods();
+        this(p.getUniqueId());
     }
 
     public SQLPlayerManager(UUID uuid) {
         this.p = Bukkit.getOfflinePlayer(uuid);
         this.uuid = uuid.toString();
-        this.methods = BankPlus.INSTANCE().getMySql().getSqlMethods();
+        this.bpsql = BankPlus.INSTANCE().getMySql();
+        this.methods = bpsql.getSqlMethods();
     }
 
     public int getLevel(String bankName) {
@@ -63,7 +63,7 @@ public class SQLPlayerManager {
     }
 
     public void set(String valueName, String newValue, String bankName) {
-        if (!methods.exist(bankName, "uuid", uuid)) methods.insertInto(bankName, uuid, p.getName());
+        if (!methods.exist(bankName, "uuid", uuid)) bpsql.addRow(bankName, p);
         methods.update(bankName, "uuid", uuid, valueName, newValue);
     }
 

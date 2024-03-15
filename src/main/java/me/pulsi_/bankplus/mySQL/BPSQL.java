@@ -41,20 +41,22 @@ public class BPSQL {
     }
 
     public void registerPlayer(OfflinePlayer p) {
-        String uuid = p.getUniqueId().toString();
-
         for (String bankName : BPEconomy.nameList()) {
-            if (!getSqlMethods().exist(bankName, "uuid", uuid))
-                getSqlMethods().insertInto(
-                        bankName,
-                        uuid,
-                        p.getName(),
-                        "1",
-                        Values.CONFIG.getStartAmount().toString(),
-                        "0",
-                        "0"
-                );
+            if (!getSqlMethods().exist(bankName, "uuid", p.getUniqueId().toString()))
+                addRow(bankName, p);
         }
+    }
+
+    public void addRow(String bankName, OfflinePlayer p) {
+        getSqlMethods().insertInto(
+                bankName,
+                p.getUniqueId().toString(),
+                p.getName(),
+                "1",
+                Values.CONFIG.getStartAmount().toString(),
+                "0",
+                "0"
+        );
     }
 
     public void setupTables() {
