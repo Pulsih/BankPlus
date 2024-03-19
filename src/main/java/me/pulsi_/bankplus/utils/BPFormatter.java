@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.configs.ConfigValues;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -56,8 +57,15 @@ public class BPFormatter {
     }
 
     public static String formatCommas(Object amount) {
-        DecimalFormat formatter = new DecimalFormat("#" + Values.CONFIG.getMoneyFormatSeparator() + "###");
-        return formatter.format(amount);
+        DecimalFormat formatter = new DecimalFormat("#,###");
+        String formatted;
+        try {
+            formatted = formatter.format(amount);
+        } catch (IllegalArgumentException e) {
+            BPLogger.warn(e, "Could not format the amount " + amount + "!");
+            formatted = "";
+        }
+        return formatted.replace(",", Values.CONFIG.getMoneyFormatSeparator());
     }
 
     public static String formatBigDecimal(BigDecimal amount) {
