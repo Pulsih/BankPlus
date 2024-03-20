@@ -5,6 +5,7 @@ import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPArgs;
+import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
@@ -34,6 +35,15 @@ public class DepositCmd extends BPCommand {
     public boolean onCommand(CommandSender s, String[] args) {
         Player p = (Player) s;
 
+        String bankName = Values.CONFIG.getMainGuiName();
+        if (args.length > 2) bankName = args[2];
+
+        if (!BankManager.exist(bankName)) {
+            BPMessages.send(s, "Invalid-Bank");
+            return false;
+        }
+        BPEconomy economy = BPEconomy.get(bankName);
+
         BigDecimal amount;
         switch (args[1]) {
             case "all":
@@ -47,19 +57,10 @@ public class DepositCmd extends BPCommand {
             default:
                 String num = args[1];
                 if (BPUtils.isInvalidNumber(num, s)) return false;
-                amount = new BigDecimal(num);
+                amount = BPFormatter.getBigDecimalFormatted(num);
         }
 
-        String bankName = Values.CONFIG.getMainGuiName();
-        if (args.length > 2) bankName = args[2];
-
-        if (!BankManager.exist(bankName)) {
-            BPMessages.send(s, "Invalid-Bank");
-            return false;
-        }
-
-        if (skipToConfirm(s)) return false;
-        BPEconomy.get(bankName).deposit(p, amount);
+        if (!skipToConfirm(s)) economy.deposit(p, amount);
         return true;
     }
 

@@ -6,6 +6,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BPSQLMethods {
 
@@ -17,9 +19,9 @@ public class BPSQLMethods {
     }
 
     /**
-     * Method used to easily create a new table.
+     * Create a new table.
      * @param tableName The name of the table you want to create.
-     * @param args An argument is identifier as: "[ArgumentName] [<a href="https://www.w3schools.com/sql/sql_datatypes.asp">ArgumentType</a>(OptionalArgs)]".
+     * @param args The columns of the table. Format: argumentName argumentType(optionalArgs) | uuid varchar(255)
      */
     public void createTable(String tableName, String... args) {
         if (!isConnected()) return;
@@ -43,6 +45,7 @@ public class BPSQLMethods {
      */
     public void deleteTable(String tableName) {
         if (!isConnected()) return;
+
         try {
             connection.prepareStatement("DROP TABLE " + tableName).executeUpdate();
         } catch (SQLException e) {
@@ -51,7 +54,7 @@ public class BPSQLMethods {
     }
 
     /**
-     * Insert a new specified element in the selected table.
+     * Insert a new non-existing element in the selected table.
      * <p>
      * Make sure to put the values in the same order of the database.
      * @param tableName The selected table.
@@ -76,95 +79,89 @@ public class BPSQLMethods {
     }
 
     /**
-     * Update a value that is already present in the table.
+     * Update an existing value in a column of a table.
      * <p>
-     * Example: Updating the "money" value in the table "test" of the player "TestPlayer" to "500" (The column for player names is called "accountname").
-     * <p>
-     * #update("test", "accountname", "TestPlayer", "money", "500");
      * @param tableName The table name.
-     * @param columnName The name of the table values column to compare with "elementToCheck". (Example: uuid)
-     * @param elementToCheck The element to parse with the columnName.
-     * @param newValue The new value to set.
+     * @param columnName The name of the columns where to update the value.
+     * @param value The new value to set.
      */
-    public void update(String tableName, String columnName, String elementToCheck, String valueArgumentName, String newValue) {
+    public void update(String tableName, String columnName, String value) {
+        update(tableName, columnName, value, null);
+    }
+
+    /**
+     * Update an existing value in a column of a table.
+     * <p>
+     * @param tableName The table name.
+     * @param columnName The name of the columns where to update the value.
+     * @param value The new value to set.
+     * @param condition A condition that must be met to update the column. Example: "WHERE uuid=playerUUID"
+     */
+    public void update(String tableName, String columnName, String value, String condition) {
         if (!isConnected()) return;
+
         try {
-            PreparedStatement statement = connection.prepareStatement("UPDATE " + tableName + " SET " + valueArgumentName + "=? WHERE " + columnName + "=?");
-            statement.setString(1, newValue);
-            statement.setString(2, elementToCheck);
+            String check = condition != null ? " " + condition : "";
+
+            PreparedStatement statement = connection.prepareStatement("UPDATE " + tableName + " SET " + columnName + "=?" + check);
+            statement.setString(1, value);
 
             statement.executeUpdate();
         } catch (SQLException e) {
-            BPLogger.error(e, "Could not update the value \"" + valueArgumentName + "\" of the table \"" + tableName + "\"!");
+            BPLogger.error(e, "Could not update the column \"" + columnName + "\" of the table \"" + tableName + "\"!");
         }
     }
 
     /**
-     * Get a string from the selected table.
-     * <p>
-     * Example: Getting from the table "test" the value "money" from a player that is called "TestName" (The column for player names is called "accountname").
-     * <p>
-     * #get("test", "accountname", "TestName", "money");
+     * Get a result of values from the selected columns of that table.
+     *
      * @param tableName The table name.
-     * @param columnName The name of the table values column to compare with "elementToCheck". (Example: UUID)
-     * @param elementToCheck The element to parse with the columnName.
-     * @param valueNameToGet The name of the column where to take the values.
-     * @return A string or null if not found.
+     * @param columnName The name of the column from which to take the values.
+     * @return A list of values.
      */
-    public String get(String tableName, String columnName, String elementToCheck, String valueNameToGet) {
-        if (!isConnected()) return null;
-        try {
-            PreparedStatement statement = connection.prepareStatement("SELECT " + valueNameToGet + " FROM " + tableName + " WHERE " + columnName + "=?");
-            statement.setString(1, elementToCheck);
-            ResultSet set = statement.executeQuery();
+    public List<String> get(String tableName, String columnName) {
+        return get(tableName, columnName, null);
+    }
 
-            return (set.next() ? set.getString(valueNameToGet) : null);
+    /**
+     * Get a result of values from the selected column of that table.
+     *
+     * @param tableName The table name.
+     * @param columnName The name of the column from which to take the values.
+     * @param condition The condition that must be met to return as a valid result.
+     * @return A list of values.
+     */
+    public List<String> get(String tableName, String columnName, String condition) {
+        List<String> result = new ArrayList<>();
+        if (!isConnected()) return result;
+
+        try {
+            String check = condition != null ? " " + condition : "";
+            PreparedStatement statement = connection.prepareStatement("SELECT " + columnName + " FROM " + tableName + check);
+
+            ResultSet set = statement.executeQuery();
+            while (set.next()) result.add(set.getString(columnName));
         } catch (SQLException e) {
-            BPLogger.error(e, "Could not get the value \"" + valueNameToGet + "\" from the table \"" + tableName + "\"!");
-            return null;
+            BPLogger.error(e, "Could not get the value \"" + columnName + "\" from the table \"" + tableName + "\"!");
         }
+        return result;
     }
 
     /**
      * Remove an element from the table.
-     * <p>
-     * Example: Removing from the table "test" the element that has as name "TestName" (The column for player names is called "accountname").
-     * <p>
-     * #removeFrom("test", "accountname", "TestName");
+     *
      * @param tableName The table name.
      * @param columnName The name of the column to check in.
      * @param valueName The name that has to be removed from the table.
      */
     public void removeFrom(String tableName, String columnName, String valueName) {
         if (!isConnected()) return;
+
         try {
             connection.prepareStatement("REMOVE FROM " + tableName + " WHERE " + columnName + "=" + valueName).executeUpdate();
         } catch (SQLException e) {
             BPLogger.error(e, "Could not remove the value \"" + valueName + "\" from the table \"" + tableName + "\"!");
         }
-    }
-
-    /**
-     * Check if the selected value exists in the selected table.
-     * <p>
-     * Example: Check if the player named "TestName" exists in the "test" table. (The column for player names is called "accountname").
-     * <p>
-     * #exist("test", "accountname", "TestName");
-     * @param tableName The table name.
-     * @param columnName The name of the column to check in.
-     * @param valueNameToCheck The value to check if it exists in the selected columnName.
-     * @return true if it exists, otherwise false.
-     */
-    public boolean exist(String tableName, String columnName, String valueNameToCheck) {
-        if (!isConnected()) return false;
-        try {
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM " + tableName + " WHERE " + columnName + "=?");
-            statement.setString(1, valueNameToCheck);
-            return statement.executeQuery().next();
-        } catch (SQLException e) {
-            BPLogger.error(e, "Could not check for existence of the value \"" + valueNameToCheck + "\" in the table \"" + tableName + "\"!");
-        }
-        return false;
     }
 
     /**

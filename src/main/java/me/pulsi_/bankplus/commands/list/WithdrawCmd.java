@@ -5,6 +5,7 @@ import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPArgs;
+import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
@@ -34,22 +35,6 @@ public class WithdrawCmd extends BPCommand {
     public boolean onCommand(CommandSender s, String[] args) {
         Player p = (Player) s;
 
-        BigDecimal amount;
-        switch (args[1]) {
-            case "all":
-                amount = BigDecimal.valueOf(BankPlus.INSTANCE().getVaultEconomy().getBalance(p));
-                break;
-
-            case "half":
-                amount = BigDecimal.valueOf(BankPlus.INSTANCE().getVaultEconomy().getBalance(p) / 2);
-                break;
-
-            default:
-                String num = args[1];
-                if (BPUtils.isInvalidNumber(num, s)) return false;
-                amount = new BigDecimal(num);
-        }
-
         String bankName = Values.CONFIG.getMainGuiName();
         if (args.length > 2) bankName = args[2];
 
@@ -57,9 +42,25 @@ public class WithdrawCmd extends BPCommand {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }
+        BPEconomy economy = BPEconomy.get(bankName);
 
-        if (skipToConfirm(s)) return false;
-        BPEconomy.get(bankName).withdraw(p, amount);
+        BigDecimal amount;
+        switch (args[1]) {
+            case "all":
+                amount = economy.getBankBalance(p);
+                break;
+
+            case "half":
+                amount = economy.getBankBalance(p).divide(BigDecimal.valueOf(2));
+                break;
+
+            default:
+                String num = args[1];
+                if (BPUtils.isInvalidNumber(num, s)) return false;
+                amount = BPFormatter.getBigDecimalFormatted(num);
+        }
+
+        if (!skipToConfirm(s)) economy.withdraw(p, amount);
         return true;
     }
 

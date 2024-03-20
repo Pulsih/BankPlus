@@ -87,11 +87,7 @@ public class BPPlayerManager {
     }
 
     public void registerPlayer() {
-        if (Values.CONFIG.isSqlEnabled()) {
-            BPSQL sql = BankPlus.INSTANCE().getMySql();
-            if (sql.isConnected()) sql.registerPlayer(p);
-            return;
-        }
+        if (Values.CONFIG.isSqlEnabled()) return; // The database already get updated when we check for player registration.
 
         File file = getPlayerFile();
         if (file.exists()) return;

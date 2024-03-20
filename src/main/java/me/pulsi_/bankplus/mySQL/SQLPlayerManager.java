@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 public class SQLPlayerManager {
@@ -63,11 +64,14 @@ public class SQLPlayerManager {
     }
 
     public void set(String valueName, String newValue, String bankName) {
-        if (!methods.exist(bankName, "uuid", uuid)) bpsql.addRow(bankName, p);
-        methods.update(bankName, "uuid", uuid, valueName, newValue);
+        if (methods.get(bankName, valueName, "WHERE uuid=" + uuid).isEmpty()) bpsql.createNewDefault(bankName, p);
+        methods.update(bankName, valueName, newValue, "WHERE uuid=" + uuid);
     }
 
     public String get(String valueName, String bankName) {
-        return methods.get(bankName, "uuid", uuid, valueName);
+        List<String> result = methods.get(bankName, valueName, "WHERE uuid=" + uuid);
+        if (result.isEmpty()) return null;
+
+        return result.get(0);
     }
 }

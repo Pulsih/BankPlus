@@ -1,7 +1,5 @@
 package me.pulsi_.bankplus.mySQL;
 
-import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.Values;
@@ -34,20 +32,15 @@ public class BPSQL {
     }
 
     public boolean isPlayerRegistered(OfflinePlayer p) {
-        String uuid = p.getUniqueId().toString();
-        for (String bankName : BPEconomy.nameList())
-            if (getSqlMethods().exist(bankName, "uuid", uuid)) return true;
-        return false;
-    }
-
-    public void registerPlayer(OfflinePlayer p) {
+        boolean registered = false;
         for (String bankName : BPEconomy.nameList()) {
-            if (!getSqlMethods().exist(bankName, "uuid", p.getUniqueId().toString()))
-                addRow(bankName, p);
+            if (!getSqlMethods().get(bankName, "uuid", "WHERE uuid=" + p.getUniqueId()).isEmpty()) registered = true;
+            else createNewDefault(bankName, p);
         }
+        return registered;
     }
 
-    public void addRow(String bankName, OfflinePlayer p) {
+    public void createNewDefault(String bankName, OfflinePlayer p) {
         getSqlMethods().insertInto(
                 bankName,
                 p.getUniqueId().toString(),
@@ -63,12 +56,12 @@ public class BPSQL {
         for (String bankName : BPEconomy.nameList())
            getSqlMethods().createTable(
                    bankName,
-                   "uuid varchar(100)",
-                   "account_name varchar(100)",
-                   "bank_level varchar(100)",
-                   "money varchar(100)",
-                   "interest varchar(100)",
-                   "debt varchar(100)",
+                   "uuid varchar(255)",
+                   "account_name varchar(255)",
+                   "bank_level varchar(255)",
+                   "money varchar(255)",
+                   "interest varchar(255)",
+                   "debt varchar(255)",
                    "PRIMARY KEY (uuid)"
            );
     }

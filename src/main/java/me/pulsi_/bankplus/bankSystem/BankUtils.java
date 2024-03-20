@@ -132,7 +132,7 @@ public class BankUtils {
         }
 
         if (BankPlus.INSTANCE().isPlaceholderApiHooked()) {
-            meta.setDisplayName(PlaceholderAPI.setPlaceholders(p, BPChat.color(displayName)));
+            meta.setDisplayName(BPChat.color(PlaceholderAPI.setPlaceholders(p, displayName)));
             meta.setLore(PlaceholderAPI.setPlaceholders(p, lore));
         } else {
             meta.setDisplayName(BPChat.color(displayName));
