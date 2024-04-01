@@ -52,24 +52,24 @@ public class SQLPlayerManager {
     }
 
     public void setMoney(BigDecimal amount, String bankName) {
-        set("money", BPFormatter.formatBigDecimal(amount.max(BigDecimal.ZERO)), bankName);
+        set("money", BPFormatter.styleBigDecimal(amount.max(BigDecimal.ZERO)), bankName);
     }
 
     public void setDebt(BigDecimal amount, String bankName) {
-        set("debt", BPFormatter.formatBigDecimal(amount.max(BigDecimal.ZERO)), bankName);
+        set("debt", BPFormatter.styleBigDecimal(amount.max(BigDecimal.ZERO)), bankName);
     }
 
     public void setOfflineInterest(BigDecimal amount, String bankName) {
-        set("interest", BPFormatter.formatBigDecimal(amount.max(BigDecimal.ZERO)), bankName);
+        set("interest", BPFormatter.styleBigDecimal(amount.max(BigDecimal.ZERO)), bankName);
     }
 
     public void set(String valueName, String newValue, String bankName) {
-        if (methods.get(bankName, valueName, "WHERE uuid=" + uuid).isEmpty()) bpsql.createNewDefault(bankName, p);
-        methods.update(bankName, valueName, newValue, "WHERE uuid=" + uuid);
+        if (methods.get(bankName, valueName, "WHERE uuid='" + uuid + "'").isEmpty()) bpsql.createNewDefault(bankName, p);
+        methods.update(bankName, valueName, newValue, "WHERE uuid='" + uuid + "'");
     }
 
     public String get(String valueName, String bankName) {
-        List<String> result = methods.get(bankName, valueName, "WHERE uuid=" + uuid);
+        List<String> result = methods.get(bankName, valueName, "WHERE uuid='" + uuid + "'");
         if (result.isEmpty()) return null;
 
         return result.get(0);

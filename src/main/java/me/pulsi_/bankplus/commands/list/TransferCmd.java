@@ -12,7 +12,6 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
@@ -69,7 +68,7 @@ public class TransferCmd extends BPCommand {
     }
 
     private void filesToDatabase() {
-        Set<String> banks = BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet();
+        Set<String> banks = BankPlus.INSTANCE().getBankRegistry().getBanks().keySet();
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
             BPPlayerManager pManager = new BPPlayerManager(p);
             if (pManager.isPlayerRegistered()) continue;
@@ -99,7 +98,7 @@ public class TransferCmd extends BPCommand {
             FileConfiguration config = pManager.getPlayerConfig();
             SQLPlayerManager sqlManager = new SQLPlayerManager(p);
 
-            for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) {
+            for (String bankName : BankPlus.INSTANCE().getBankRegistry().getBanks().keySet()) {
                 int level = sqlManager.getLevel(bankName);
                 String money = sqlManager.getMoney(bankName).toString();
                 String debt = sqlManager.getDebt(bankName).toString();

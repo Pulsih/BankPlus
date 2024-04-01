@@ -112,7 +112,7 @@ public class BPData {
                 if (player != null && player.getOpenedBank() != null) p.closeInventory();
             });
 
-            plugin.getBankGuiRegistry().loadBanks();
+            plugin.getBankRegistry().loadBanks();
         } catch (Exception e) {
             BPLogger.warn(e, "Something went wrong while trying to reload the plugin, check the console logs and if the error persist, ask for support in the support discord.");
             success = false;

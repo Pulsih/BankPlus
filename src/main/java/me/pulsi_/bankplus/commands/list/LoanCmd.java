@@ -24,7 +24,7 @@ public class LoanCmd extends BPCommand {
     public LoanCmd(String... aliases) {
         super(aliases);
 
-        registry = BankPlus.INSTANCE().getBankGuiRegistry();
+        registry = BankPlus.INSTANCE().getBankRegistry();
     }
 
     @Override

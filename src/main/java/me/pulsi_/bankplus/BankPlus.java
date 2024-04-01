@@ -146,7 +146,7 @@ public final class BankPlus extends JavaPlugin {
         return economyRegistry;
     }
 
-    public BankRegistry getBankGuiRegistry() {
+    public BankRegistry getBankRegistry() {
         return bankRegistry;
     }
 

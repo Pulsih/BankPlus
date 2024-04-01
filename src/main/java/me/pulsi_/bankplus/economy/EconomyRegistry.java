@@ -3,7 +3,6 @@ package me.pulsi_.bankplus.economy;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayerManager;
 import me.pulsi_.bankplus.account.PlayerRegistry;
-import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
 import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.values.Values;
@@ -42,10 +41,10 @@ public class EconomyRegistry {
 
             for (BPEconomy economy : BPEconomy.list()) {
                 String name = economy.getBankName();
-                config.set("banks." + name + ".debt", BPFormatter.formatBigDecimal(economy.getDebt(uuid)));
+                config.set("banks." + name + ".debt", BPFormatter.styleBigDecimal(economy.getDebt(uuid)));
                 config.set("banks." + name + ".level", economy.getBankLevel(uuid));
-                config.set("banks." + name + ".money", BPFormatter.formatBigDecimal(economy.getBankBalance(uuid)));
-                config.set("banks." + name + ".interest", BPFormatter.formatBigDecimal(economy.getOfflineInterest(uuid)));
+                config.set("banks." + name + ".money", BPFormatter.styleBigDecimal(economy.getBankBalance(uuid)));
+                config.set("banks." + name + ".interest", BPFormatter.styleBigDecimal(economy.getOfflineInterest(uuid)));
             }
             manager.savePlayerFile(config, file, async);
         }

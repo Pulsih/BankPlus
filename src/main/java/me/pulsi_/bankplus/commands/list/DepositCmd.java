@@ -57,7 +57,7 @@ public class DepositCmd extends BPCommand {
             default:
                 String num = args[1];
                 if (BPUtils.isInvalidNumber(num, s)) return false;
-                amount = BPFormatter.getBigDecimalFormatted(num);
+                amount = BPFormatter.getStyledBigDecimal(num);
         }
 
         if (!skipToConfirm(s)) economy.deposit(p, amount);

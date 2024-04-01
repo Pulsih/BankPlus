@@ -175,7 +175,7 @@ public class BPUtils {
         p.closeInventory();
 
         BPPlayer pl = PlayerRegistry.get(p);
-        pl.setOpenedBank(BankPlus.INSTANCE().getBankGuiRegistry().getBanks().get(identifier));
+        pl.setOpenedBank(BankPlus.INSTANCE().getBankRegistry().getBanks().get(identifier));
         pl.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> {
             PlayerChatMethod.reopenBank(p, identifier);
             BPMessages.send(p, "Chat-Time-Expired");
@@ -194,7 +194,7 @@ public class BPUtils {
         p.closeInventory();
 
         BPPlayer pl = PlayerRegistry.get(p);
-        pl.setOpenedBank(BankPlus.INSTANCE().getBankGuiRegistry().getBanks().get(identifier));
+        pl.setOpenedBank(BankPlus.INSTANCE().getBankRegistry().getBanks().get(identifier));
         pl.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> {
             PlayerChatMethod.reopenBank(p, identifier);
             BPMessages.send(p, "Chat-Time-Expired");
@@ -393,7 +393,7 @@ public class BPUtils {
 
         values.add("%" + identifier + "%$" + BPFormatter.formatCommas(amount));
         values.add("%" + identifier + "_long%$" + amount);
-        values.add("%" + identifier + "_formatted%$" + BPFormatter.format(amount));
+        values.add("%" + identifier + "_formatted%$" + BPFormatter.formatPrecise(amount));
         values.add("%" + identifier + "_formatted_long%$" + BPFormatter.formatLong(amount));
 
         if (level > 0) values.add("%level%$" + level);

@@ -357,7 +357,6 @@ Placeholders:
     Trillions: "T"
     Quadrillions: "Q"
     Quintillions: "QQ"
-    Separator: "."
 
   Time:
     Second: "s"

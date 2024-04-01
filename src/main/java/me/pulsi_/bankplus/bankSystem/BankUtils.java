@@ -18,7 +18,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -161,16 +160,16 @@ public class BankUtils {
 
                 Bank.BankLevel bankLevel = new Bank.BankLevel();
 
-                bankLevel.cost = BPFormatter.getBigDecimalFormatted(values.getString("Cost"));
+                bankLevel.cost = BPFormatter.getStyledBigDecimal(values.getString("Cost"));
 
                 String capacity = values.getString("Capacity");
-                bankLevel.capacity = capacity == null ? Values.CONFIG.getMaxBankCapacity() : BPFormatter.getBigDecimalFormatted(capacity);
+                bankLevel.capacity = capacity == null ? Values.CONFIG.getMaxBankCapacity() : BPFormatter.getStyledBigDecimal(capacity);
 
                 String interest = values.getString("Interest");
-                bankLevel.interest = interest == null ? Values.CONFIG.getInterestMoneyGiven() : BPFormatter.getBigDecimalFormatted(interest.replace("%", ""));
+                bankLevel.interest = interest == null ? Values.CONFIG.getInterestMoneyGiven() : BPFormatter.getStyledBigDecimal(interest.replace("%", ""));
 
                 String offlineInterest = values.getString("Offline-Interest");
-                bankLevel.offlineInterest = offlineInterest == null ? Values.CONFIG.getOfflineInterestMoneyGiven() : BPFormatter.getBigDecimalFormatted(offlineInterest.replace("%", ""));
+                bankLevel.offlineInterest = offlineInterest == null ? Values.CONFIG.getOfflineInterestMoneyGiven() : BPFormatter.getStyledBigDecimal(offlineInterest.replace("%", ""));
 
                 List<ItemStack> requiredItems = new ArrayList<>();
                 String requiredItemsString = values.getString("Required-Items");

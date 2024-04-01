@@ -41,7 +41,7 @@ public class BankListGui {
             }
         }
 
-        Bank baseBanksListGui = BankPlus.INSTANCE().getBankGuiRegistry().bankListGui;
+        Bank baseBanksListGui = BankPlus.INSTANCE().getBankRegistry().bankListGui;
 
         String title = baseBanksListGui.getTitle();
         if (!BankPlus.INSTANCE().isPlaceholderApiHooked()) title = BPChat.color(title);
@@ -66,7 +66,7 @@ public class BankListGui {
         HashMap<String, String> banksClickHolder = new HashMap<>();
         int slot = 0;
 
-        for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) {
+        for (String bankName : BankPlus.INSTANCE().getBankRegistry().getBanks().keySet()) {
             if (Values.MULTIPLE_BANKS.isShowNotAvailableBanks() && !BankManager.isAvailable(bankName, p)) continue;
 
             ItemStack bankItem;
@@ -94,7 +94,7 @@ public class BankListGui {
 
     private static void updateMeta(Inventory banksList, Player p) {
         int slot = 0;
-        for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) {
+        for (String bankName : BankPlus.INSTANCE().getBankRegistry().getBanks().keySet()) {
             if (Values.MULTIPLE_BANKS.isShowNotAvailableBanks() && !BankManager.isAvailable(bankName, p)) continue;
 
             ItemStack item = banksList.getItem(slot);

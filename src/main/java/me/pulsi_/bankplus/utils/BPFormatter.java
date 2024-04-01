@@ -1,7 +1,6 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.values.Values;
-import me.pulsi_.bankplus.values.configs.ConfigValues;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -16,59 +15,86 @@ public class BPFormatter {
                     Values.CONFIG.getT(), Values.CONFIG.getQ(), Values.CONFIG.getQq()
             };
 
-    public static String format(BigDecimal balance) {
-        double bal = balance.doubleValue();
+    private static final int limit = order.length - 1;
+
+    /**
+     * Return numbers like as 23.54k, 765.536M, 91.3T.
+     * @param amount The amount.
+     * @return A string.
+     */
+    public static String formatPrecise(BigDecimal amount) {
+        return formatPrecise(amount.doubleValue());
+    }
+
+    /**
+     * Return numbers like as 23.54k, 765.536M, 91.3T.
+     * @param amount The amount.
+     * @return A string.
+     */
+    public static String formatPrecise(double amount) {
+        int i = 0;
+        double scale = 1000D;
+
+        while (amount >= scale && i < limit) {
+            i++;
+            scale *= 1000D;
+        }
+
+        return setMaxDigits(amount / (scale / 1000D)) + order[i];
+    }
+
+    /**
+     * Return numbers like as 657k, 123k, 97M.
+     * @param amount The amount.
+     * @return A string.
+     */
+    public static String formatLong(BigDecimal amount) {
+        double bal = amount.doubleValue();
 
         int i = 0;
-        double amount = 1000d;
+        long scale = 1000L;
 
-        while (bal >= amount && i < order.length - 1) {
+        while (bal >= scale && i < limit) {
             i++;
-            amount *= 1000d;
+            scale *= 1000L;
         }
 
-        return setMaxDigits(bal / (amount / 1000d), Values.CONFIG.getMaxDecimalsAmount()) + order[i];
+        return Math.round(bal / (scale / 1000D)) + order[i];
     }
 
-    public static String format(double balance) {
-        int i = 0;
-        double amount = 1000d;
+    /**
+     * Return numbers like as 14.243,12, 75.249, 231.785.
+     * @param amount The amount.
+     * @return A string.
+     */
+    public static String formatCommas(BigDecimal amount) {
+        String number = styleBigDecimal(amount), numbers = number, decimals = "", result;
 
-        while (balance >= amount && i < order.length - 1) {
-            i++;
-            amount *= 1000d;
+        if (Values.CONFIG.getMaxDecimalsAmount() > 0) {
+            String[] split = number.split("\\.");
+            numbers = split[0];
+            decimals = split[1];
         }
 
-        return setMaxDigits(balance / (amount / 1000d), Values.CONFIG.getMaxDecimalsAmount()) + order[i];
-    }
-
-    public static String formatLong(BigDecimal balance) {
-        double bal = balance.doubleValue();
-
-        int i = 0;
-        long amount = 1000l;
-
-        while (bal >= amount && i < order.length - 1) {
-            i++;
-            amount *= 1000l;
+        StringBuilder builder = new StringBuilder();
+        for (int i = numbers.length() - 1, count = 0; i > 0; i--, count++) {
+            if (count > 3) {
+                builder.append(".");
+                count = 0;
+            }
+            builder.append(numbers.charAt(i));
         }
+        result = builder + (decimals.isEmpty() ? "" : ("," + decimals));
 
-        return Math.round(bal / (amount / 1000l)) + order[i];
+        return result;
     }
 
-    public static String formatCommas(Object amount) {
-        DecimalFormat formatter = new DecimalFormat("#,###");
-        String formatted;
-        try {
-            formatted = formatter.format(amount);
-        } catch (IllegalArgumentException e) {
-            BPLogger.warn(e, "Could not format the amount " + amount + "!");
-            formatted = "";
-        }
-        return formatted.replace(",", Values.CONFIG.getMoneyFormatSeparator());
-    }
-
-    public static String formatBigDecimal(BigDecimal amount) {
+    /**
+     * Get a BigDecimal amount and format it with the BankPlus style.
+     * @param amount The amount.
+     * @return A string.
+     */
+    public static String styleBigDecimal(BigDecimal amount) {
         String balance = amount.toPlainString();
 
         int maxDecimals = Values.CONFIG.getMaxDecimalsAmount();
@@ -84,32 +110,34 @@ public class BPFormatter {
         if (maxDecimals <= 0) return hasDecimals ? balance.split("\\.")[0] : balance;
 
         if (hasDecimals) {
-            String decimals = balance.split("\\.")[1];
+            String[] split = balance.split("\\.");
+            String decimals = split[1];
+
             if (decimals.length() > maxDecimals) {
                 String correctedDecimals = decimals.substring(0, maxDecimals);
-                balance = balance.split("\\.")[0] + "." + correctedDecimals;
+                balance = split[0] + "." + correctedDecimals;
             }
         }
         return balance;
     }
 
-    public static BigDecimal getBigDecimalFormatted(BigDecimal amount) {
-        return new BigDecimal(formatBigDecimal(amount));
+    public static BigDecimal getStyledBigDecimal(BigDecimal amount) {
+        return new BigDecimal(styleBigDecimal(amount));
     }
 
-    public static BigDecimal getBigDecimalFormatted(String amount) {
+    public static BigDecimal getStyledBigDecimal(String amount) {
         BigDecimal bD;
         try {
             bD = new BigDecimal(amount);
         } catch (Exception e) {
             bD = BigDecimal.ZERO;
         }
-        return new BigDecimal(formatBigDecimal(bD));
+        return new BigDecimal(styleBigDecimal(bD));
     }
 
-    private static String setMaxDigits(double balance, int digits) {
+    private static String setMaxDigits(double balance) {
         NumberFormat format = NumberFormat.getInstance(Locale.ENGLISH);
-        format.setMaximumFractionDigits(digits);
+        format.setMaximumFractionDigits(Values.CONFIG.getMaxDecimalsAmount());
         format.setMinimumFractionDigits(0);
         return format.format(balance);
     }

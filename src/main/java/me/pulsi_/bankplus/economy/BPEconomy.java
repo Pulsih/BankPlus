@@ -4,6 +4,7 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayerManager;
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankManager;
+import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.events.BPAfterTransactionEvent;
 import me.pulsi_.bankplus.events.BPPreTransactionEvent;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
@@ -45,7 +46,7 @@ public class BPEconomy {
         BankPlus pl = BankPlus.INSTANCE();
         if (pl == null) return null;
 
-        return pl.getBankGuiRegistry().getBanks().get(bankName).getBankEconomy();
+        return pl.getBankRegistry().getBanks().get(bankName).getBankEconomy();
     }
 
     public static List<BPEconomy> list() {
@@ -53,16 +54,19 @@ public class BPEconomy {
         BankPlus pl = BankPlus.INSTANCE();
         if (pl == null) return economies;
 
-        for (Bank bank : pl.getBankGuiRegistry().getBanks().values()) economies.add(bank.getBankEconomy());
+        for (Bank bank : pl.getBankRegistry().getBanks().values()) economies.add(bank.getBankEconomy());
         return economies;
     }
 
-    public static List<String> nameList() {
-        List<String> economies = new ArrayList<>();
+    public static Set<String> nameList() {
+        Set<String> economies = new HashSet<>();
+
         BankPlus pl = BankPlus.INSTANCE();
         if (pl == null) return economies;
 
-        economies.addAll(pl.getBankGuiRegistry().getBanks().keySet());
+        BankRegistry bankRegistry = pl.getBankRegistry();
+        if (bankRegistry != null) economies = bankRegistry.getBanks().keySet();
+
         return economies;
     }
 
@@ -133,9 +137,9 @@ public class BPEconomy {
         } else {
             FileConfiguration config = new BPPlayerManager(uuid).getPlayerConfig();
 
-            debt = BPFormatter.getBigDecimalFormatted(config.getString(debtPath));
-            money = BPFormatter.getBigDecimalFormatted(config.getString(moneyPath));
-            offlineInterest = BPFormatter.getBigDecimalFormatted(config.getString(interestPath));
+            debt = BPFormatter.getStyledBigDecimal(config.getString(debtPath));
+            money = BPFormatter.getStyledBigDecimal(config.getString(moneyPath));
+            offlineInterest = BPFormatter.getStyledBigDecimal(config.getString(interestPath));
             level = Math.max(config.getInt(levelPath), 1);
         }
 
@@ -225,7 +229,7 @@ public class BPEconomy {
         if (startAndCheckTransaction(p)) return result;
 
         if (!ignoreEvents) {
-            BPPreTransactionEvent event = preTransactionEvent(p, type, amount, bankName);
+            BPPreTransactionEvent event = preTransactionEvent(p, type, amount);
             if (event.isCancelled()) {
                 endTransaction(p);
                 return result;
@@ -237,7 +241,7 @@ public class BPEconomy {
         result = result.max(amount.min(BankManager.getCapacity(bankName, p)));
         set(p, result);
 
-        if (!ignoreEvents) afterTransactionEvent(p, type, amount, bankName);
+        if (!ignoreEvents) afterTransactionEvent(p, type, amount);
         return result;
     }
 
@@ -275,7 +279,7 @@ public class BPEconomy {
         if (startAndCheckTransaction(p)) return result;
 
         if (!ignoreEvents) {
-            BPPreTransactionEvent event = preTransactionEvent(p, type, amount, bankName);
+            BPPreTransactionEvent event = preTransactionEvent(p, type, amount);
             if (event.isCancelled()) {
                 endTransaction(p);
                 return result;
@@ -298,7 +302,7 @@ public class BPEconomy {
             }
         }
 
-        if (!ignoreEvents) afterTransactionEvent(p, type, amount, bankName);
+        if (!ignoreEvents) afterTransactionEvent(p, type, amount);
         return result;
     }
 
@@ -336,7 +340,7 @@ public class BPEconomy {
         if (startAndCheckTransaction(p)) return result;
 
         if (!ignoreEvents) {
-            BPPreTransactionEvent event = preTransactionEvent(p, type, amount, bankName);
+            BPPreTransactionEvent event = preTransactionEvent(p, type, amount);
             if (event.isCancelled()) {
                 endTransaction(p);
                 return result;
@@ -351,7 +355,7 @@ public class BPEconomy {
 
         set(p, balance.subtract(result));
 
-        if (!ignoreEvents) afterTransactionEvent(p, type, result, bankName);
+        if (!ignoreEvents) afterTransactionEvent(p, type, result);
         return result;
     }
 
@@ -465,7 +469,7 @@ public class BPEconomy {
     public void deposit(Player p, BigDecimal amount) {
         if (BPUtils.isBankFull(p, bankName) || isInTransaction(p)) return;
 
-        BPPreTransactionEvent event = preTransactionEvent(p, TransactionType.DEPOSIT, amount, bankName);
+        BPPreTransactionEvent event = preTransactionEvent(p, TransactionType.DEPOSIT, amount);
         if (event.isCancelled()) return;
 
         amount = event.getTransactionAmount();
@@ -501,13 +505,13 @@ public class BPEconomy {
         BPMessages.send(p, "Success-Deposit", BPUtils.placeValues(p, actualDepositingMoney), BPUtils.placeValues(taxes, "taxes"));
         BPUtils.playSound("DEPOSIT", p);
 
-        afterTransactionEvent(p, TransactionType.DEPOSIT, amount, bankName);
+        afterTransactionEvent(p, TransactionType.DEPOSIT, amount);
     }
 
     public void withdraw(Player p, BigDecimal amount) {
         if (isInTransaction(p)) return;
 
-        BPPreTransactionEvent event = preTransactionEvent(p, TransactionType.WITHDRAW, amount, bankName);
+        BPPreTransactionEvent event = preTransactionEvent(p, TransactionType.WITHDRAW, amount);
         if (event.isCancelled()) return;
 
         amount = event.getTransactionAmount();
@@ -533,7 +537,7 @@ public class BPEconomy {
         BPMessages.send(p, "Success-Withdraw", BPUtils.placeValues(p, amount.subtract(taxes)), BPUtils.placeValues(taxes, "taxes"));
         BPUtils.playSound("WITHDRAW", p);
 
-        afterTransactionEvent(p, TransactionType.WITHDRAW, amount, bankName);
+        afterTransactionEvent(p, TransactionType.WITHDRAW, amount);
     }
 
     /**
@@ -584,7 +588,7 @@ public class BPEconomy {
         return false;
     }
 
-    public BPPreTransactionEvent preTransactionEvent(OfflinePlayer p, TransactionType type, BigDecimal amount, String bankName) {
+    private BPPreTransactionEvent preTransactionEvent(OfflinePlayer p, TransactionType type, BigDecimal amount) {
         BPPreTransactionEvent event = new BPPreTransactionEvent(
                 p, type, getBankBalance(p), BankPlus.INSTANCE().getVaultEconomy().getBalance(p), amount, bankName
         );
@@ -592,7 +596,7 @@ public class BPEconomy {
         return event;
     }
 
-    public void afterTransactionEvent(OfflinePlayer p, TransactionType type, BigDecimal amount, String bankName) {
+    private void afterTransactionEvent(OfflinePlayer p, TransactionType type, BigDecimal amount) {
         BPAfterTransactionEvent event = new BPAfterTransactionEvent(
                 p, type, getBankBalance(p), BankPlus.INSTANCE().getVaultEconomy().getBalance(p), amount, bankName
         );
@@ -618,15 +622,15 @@ public class BPEconomy {
         private int bankLevel = 1;
 
         public void setMoney(BigDecimal money) {
-            this.money = BPFormatter.getBigDecimalFormatted(money).max(BigDecimal.ZERO);
+            this.money = BPFormatter.getStyledBigDecimal(money).max(BigDecimal.ZERO);
         }
 
         public void setOfflineInterest(BigDecimal offlineInterest) {
-            this.offlineInterest = BPFormatter.getBigDecimalFormatted(offlineInterest).max(BigDecimal.ZERO);
+            this.offlineInterest = BPFormatter.getStyledBigDecimal(offlineInterest).max(BigDecimal.ZERO);
         }
 
         public void setDebt(BigDecimal debt) {
-            this.debt = BPFormatter.getBigDecimalFormatted(debt).max(BigDecimal.ZERO);
+            this.debt = BPFormatter.getStyledBigDecimal(debt).max(BigDecimal.ZERO);
         }
 
         public void setBankLevel(int bankLevel) {

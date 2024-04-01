@@ -24,7 +24,7 @@ public class BPArgs {
         List<String> returningArgs = new ArrayList<>();
 
         List<String> banks = new ArrayList<>();
-        for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) banks.add(bankName);
+        for (String bankName : BankPlus.INSTANCE().getBankRegistry().getBanks().keySet()) banks.add(bankName);
 
         for (String arg : banks)
             if (arg.toLowerCase().startsWith(args[args.length - 1].toLowerCase())) returningArgs.add(arg);

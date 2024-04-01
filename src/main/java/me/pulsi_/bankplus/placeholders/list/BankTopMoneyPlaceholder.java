@@ -1,8 +1,6 @@
 package me.pulsi_.bankplus.placeholders.list;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.bankSystem.BankManager;
-import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.placeholders.BPPlaceholder;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPFormatter;
@@ -41,7 +39,7 @@ public class BankTopMoneyPlaceholder extends BPPlaceholder {
             case "amount_long":
                 return String.valueOf(money);
             default:
-                return BPFormatter.format(money);
+                return BPFormatter.formatPrecise(money);
             case "amount_formatted_long":
                 return BPFormatter.formatLong(money);
         }

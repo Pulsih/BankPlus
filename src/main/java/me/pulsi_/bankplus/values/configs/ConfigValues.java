@@ -619,7 +619,7 @@ public class ConfigValues {
         return sqlPort;
     }
 
-    public String getSqpDatabase() {
+    public String getSqlDatabase() {
         return sqpDatabase;
     }
 

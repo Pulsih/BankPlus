@@ -1,27 +1,17 @@
 package me.pulsi_.bankplus.bankSystem;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BPPlayer;
-import me.pulsi_.bankplus.account.BPPlayerManager;
-import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.economy.BPEconomy;
-import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.Economy;
-import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -36,11 +26,11 @@ public class BankManager {
     }
 
     public static Bank getBank(String bankName) {
-        return BankPlus.INSTANCE().getBankGuiRegistry().getBanks().get(bankName);
+        return BankPlus.INSTANCE().getBankRegistry().getBanks().get(bankName);
     }
 
     public static Collection<Bank> getBanks() {
-        return BankPlus.INSTANCE().getBankGuiRegistry().getBanks().values();
+        return BankPlus.INSTANCE().getBankRegistry().getBanks().values();
     }
 
     public static boolean exist(String bankName) {

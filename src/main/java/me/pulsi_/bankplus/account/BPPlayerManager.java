@@ -1,9 +1,7 @@
 package me.pulsi_.bankplus.account;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.mySQL.BPSQL;
-import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
 import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.Values;
@@ -11,7 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +43,7 @@ public class BPPlayerManager {
             hasChanges = true;
         }
 
-        for (String bankName : BankPlus.INSTANCE().getBankGuiRegistry().getBanks().keySet()) {
+        for (String bankName : BankPlus.INSTANCE().getBankRegistry().getBanks().keySet()) {
             String sBalance = config.getString("banks." + bankName + ".money");
             String sLevel = config.getString("banks." + bankName + ".level");
             String sDebt = config.getString("banks." + bankName + ".debt");
@@ -57,7 +54,7 @@ public class BPPlayerManager {
             }
             if (sBalance == null) {
                 BigDecimal amount = Values.CONFIG.getMainGuiName().equals(bankName) ? Values.CONFIG.getStartAmount() : BigDecimal.valueOf(0);
-                config.set("banks." + bankName + ".money", BPFormatter.formatBigDecimal(amount));
+                config.set("banks." + bankName + ".money", BPFormatter.styleBigDecimal(amount));
                 hasChanges = true;
             }
             if (sDebt == null) {
@@ -77,17 +74,13 @@ public class BPPlayerManager {
     }
 
     public boolean isPlayerRegistered() {
-        if (Values.CONFIG.isSqlEnabled()) {
-            BPSQL sql = BankPlus.INSTANCE().getMySql();
-            if (sql.isConnected()) return sql.isPlayerRegistered(p);
-        }
-
-        File file = getPlayerFile();
-        return file.exists();
+        BPSQL sql = BankPlus.INSTANCE().getMySql();
+        if (sql.isConnected()) return sql.isPlayerRegistered(p);
+        return getPlayerFile().exists();
     }
 
     public void registerPlayer() {
-        if (Values.CONFIG.isSqlEnabled()) return; // The database already get updated when we check for player registration.
+        if (BankPlus.INSTANCE().getMySql().isConnected()) return; // The database already get updated when we check for player registration.
 
         File file = getPlayerFile();
         if (file.exists()) return;

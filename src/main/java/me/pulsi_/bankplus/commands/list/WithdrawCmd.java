@@ -1,6 +1,5 @@
 package me.pulsi_.bankplus.commands.list;
 
-import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
@@ -57,7 +56,7 @@ public class WithdrawCmd extends BPCommand {
             default:
                 String num = args[1];
                 if (BPUtils.isInvalidNumber(num, s)) return false;
-                amount = BPFormatter.getBigDecimalFormatted(num);
+                amount = BPFormatter.getStyledBigDecimal(num);
         }
 
         if (!skipToConfirm(s)) economy.withdraw(p, amount);

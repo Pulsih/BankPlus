@@ -55,7 +55,7 @@ public class BankTopCmd implements CommandExecutor {
                 stringToReplace = String.valueOf(money);
                 break;
             default:
-                stringToReplace = BPFormatter.format(money);
+                stringToReplace = BPFormatter.formatPrecise(money);
                 break;
             case "amount_formatted_long":
                 stringToReplace = BPFormatter.formatLong(money);

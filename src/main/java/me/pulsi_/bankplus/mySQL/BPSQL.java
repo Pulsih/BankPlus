@@ -22,7 +22,7 @@ public class BPSQL {
     public void setupMySQL() {
         String host = Values.CONFIG.getSqlHost();
         String port = Values.CONFIG.getSqlPort();
-        String database = Values.CONFIG.getSqpDatabase();
+        String database = Values.CONFIG.getSqlDatabase();
         username = Values.CONFIG.getSqlUsername();
         password = Values.CONFIG.getSqlPassword();
 
@@ -34,7 +34,7 @@ public class BPSQL {
     public boolean isPlayerRegistered(OfflinePlayer p) {
         boolean registered = false;
         for (String bankName : BPEconomy.nameList()) {
-            if (!getSqlMethods().get(bankName, "uuid", "WHERE uuid=" + p.getUniqueId()).isEmpty()) registered = true;
+            if (!getSqlMethods().get(bankName, "uuid", "WHERE uuid='" + p.getUniqueId() + "'").isEmpty()) registered = true;
             else createNewDefault(bankName, p);
         }
         return registered;

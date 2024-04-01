@@ -105,8 +105,8 @@ public class BPTransactionListener implements Listener {
             BigDecimal taxes = Values.CONFIG.getDepositTaxes();
             if (taxes.doubleValue() > 0)
                 builder.append(" (Taxes: ")
-                    .append(taxes)
-                    .append("%)");
+                        .append(taxes)
+                        .append("%)");
         }
 
         if (type.equals(TransactionType.WITHDRAW)) {
@@ -119,13 +119,13 @@ public class BPTransactionListener implements Listener {
 
         builder.append(
                 " - %1 [%2] Bank before-after: [%3 -> %4] Vault before-after: [%5 -> %6]\n"
-                        .replace("%1", BPFormatter.formatBigDecimal(e.getTransactionAmount()))
+                        .replace("%1", BPFormatter.styleBigDecimal(e.getTransactionAmount()))
                         .replace("%2", e.getBankName())
-                        .replace("%3", BPFormatter.formatBigDecimal(pair.getKey()))
-                        .replace("%4", BPFormatter.formatBigDecimal(e.getNewBalance()))
-                        .replace("%5", BPFormatter.format(pair.getValue()))
-                        .replace("%6", BPFormatter.format(e.getNewVaultBalance()))
-                );
+                        .replace("%3", BPFormatter.styleBigDecimal(pair.getKey()))
+                        .replace("%4", BPFormatter.styleBigDecimal(e.getNewBalance()))
+                        .replace("%5", BPFormatter.formatPrecise(pair.getValue()))
+                        .replace("%6", BPFormatter.formatPrecise(e.getNewVaultBalance()))
+        );
 
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(logFile, true));

@@ -26,7 +26,7 @@ public abstract class BPPlaceholder {
         if (value == null) return "Invalid number!";
 
         if (formatter.contains("_long")) return String.valueOf(value);
-        if (formatter.contains("_formatted")) return BPFormatter.format(value);
+        if (formatter.contains("_formatted")) return BPFormatter.formatPrecise(value);
         if (formatter.contains("_formatted_long")) return BPFormatter.formatLong(value);
         return BPFormatter.formatCommas(value);
     }
