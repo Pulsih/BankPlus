@@ -37,7 +37,7 @@ public class BankTopMoneyPlaceholder extends BPPlaceholder {
             case "default_amount":
                 return BPFormatter.formatCommas(money);
             case "amount_long":
-                return String.valueOf(money);
+                return money.toPlainString();
             default:
                 return BPFormatter.formatPrecise(money);
             case "amount_formatted_long":

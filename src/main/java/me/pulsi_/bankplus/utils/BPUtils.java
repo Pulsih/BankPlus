@@ -392,7 +392,7 @@ public class BPUtils {
         if (bank != null) values.add("%bank%$" + bank);
 
         values.add("%" + identifier + "%$" + BPFormatter.formatCommas(amount));
-        values.add("%" + identifier + "_long%$" + amount);
+        values.add("%" + identifier + "_long%$" + amount.toPlainString());
         values.add("%" + identifier + "_formatted%$" + BPFormatter.formatPrecise(amount));
         values.add("%" + identifier + "_formatted_long%$" + BPFormatter.formatLong(amount));
 

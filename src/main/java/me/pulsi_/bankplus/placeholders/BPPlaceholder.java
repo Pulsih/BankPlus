@@ -25,7 +25,7 @@ public abstract class BPPlaceholder {
     public String getFormat(String formatter, BigDecimal value) {
         if (value == null) return "Invalid number!";
 
-        if (formatter.contains("_long")) return String.valueOf(value);
+        if (formatter.contains("_long")) return value.toPlainString();
         if (formatter.contains("_formatted")) return BPFormatter.formatPrecise(value);
         if (formatter.contains("_formatted_long")) return BPFormatter.formatLong(value);
         return BPFormatter.formatCommas(value);

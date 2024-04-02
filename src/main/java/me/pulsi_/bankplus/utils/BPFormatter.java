@@ -70,20 +70,21 @@ public class BPFormatter {
     public static String formatCommas(BigDecimal amount) {
         String number = styleBigDecimal(amount), numbers = number, decimals = "", result;
 
-        if (Values.CONFIG.getMaxDecimalsAmount() > 0) {
+        if (number.contains(".")) {
             String[] split = number.split("\\.");
             numbers = split[0];
             decimals = split[1];
         }
 
         StringBuilder builder = new StringBuilder();
-        for (int i = numbers.length() - 1, count = 0; i > 0; i--, count++) {
-            if (count > 3) {
+        for (int i = numbers.length() - 1, count = 0; i >= 0; i--, count++) {
+            if (count >= 3) {
                 builder.append(".");
                 count = 0;
             }
             builder.append(numbers.charAt(i));
         }
+        builder.reverse();
         result = builder + (decimals.isEmpty() ? "" : ("," + decimals));
 
         return result;
@@ -98,6 +99,8 @@ public class BPFormatter {
         String balance = amount.toPlainString();
 
         int maxDecimals = Values.CONFIG.getMaxDecimalsAmount();
+
+        // 0 or below.
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             if (maxDecimals <= 0) return "0";
 
@@ -107,17 +110,29 @@ public class BPFormatter {
         }
 
         boolean hasDecimals = balance.contains(".");
+        // if not using decimals, return the number without them.
         if (maxDecimals <= 0) return hasDecimals ? balance.split("\\.")[0] : balance;
 
         if (hasDecimals) {
             String[] split = balance.split("\\.");
             String decimals = split[1];
+            int decimalAmount = decimals.length();
 
-            if (decimals.length() > maxDecimals) {
-                String correctedDecimals = decimals.substring(0, maxDecimals);
-                balance = split[0] + "." + correctedDecimals;
+            // if the number has decimals more than the limit, cut them.
+            if (decimalAmount > maxDecimals) balance = split[0] + "." + decimals.substring(0, maxDecimals);
+
+            // if the number has fewer decimals than the limit, add the missing ones with a 0.
+            if (decimalAmount < maxDecimals) {
+                StringBuilder builder = new StringBuilder(maxDecimals);
+                for (int i = 0; i < (maxDecimals - decimalAmount); i++) builder.append("0");
+                balance = balance + builder;
             }
+        } else {
+            StringBuilder decimals = new StringBuilder(maxDecimals);
+            for (int i = 0; i < maxDecimals; i++) decimals.append("0");
+            balance = balance + "." + decimals;
         }
+
         return balance;
     }
 
