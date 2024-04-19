@@ -122,7 +122,10 @@ public final class BankPlus extends JavaPlugin {
         if (Values.CONFIG.isUpdateCheckerEnabled())
             Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> isUpdated = isPluginUpdated(), 0, (8 * 1200) * 60 /*8 hours*/);
 
-        if (!BPConfigs.isUpdated()) BPVersions.convertPlayerFilesToNewStyle();
+        if (BPConfigs.isUpdated()) return;
+
+        BPVersions.convertPlayerFilesToNewStyle();
+        BPVersions.changeBankUpgradesSection();
     }
 
     @Override

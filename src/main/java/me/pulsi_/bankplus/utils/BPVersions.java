@@ -8,8 +8,8 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.util.Scanner;
 
 /**
  * This class will be changed between versions, it will be used to add the compatibility for older versions to the newest versions.
@@ -58,22 +58,27 @@ public class BPVersions {
 
     public static void changeBankUpgradesSection() {
         File[] files = new File(BankPlus.INSTANCE().getDataFolder(), "banks").listFiles();
-        if (files == null || files.length > 0) return;
+        if (files == null) return;
 
         for (File bankFile : files) {
-            FileConfiguration config = new YamlConfiguration(), newConfig = new YamlConfiguration();
-
+            Scanner scanner;
             try {
-                config.load(bankFile);
-            } catch (InvalidConfigurationException | IOException e) {
+                scanner = new Scanner(bankFile, "UTF-8");
+            } catch (FileNotFoundException e) {
+                BPLogger.warn(e, "Could not find \"" + bankFile + "\" file!");
                 continue;
             }
 
-            ConfigurationSection upgrades = config.getConfigurationSection("Upgrades");
+            StringBuilder builder = new StringBuilder();
+            while (scanner.hasNext()) builder.append(scanner.nextLine().replace("Upgrades:", "Levels:")).append("\n");
 
-            for (String key : config.getConfigurationSection("").getKeys(true)) {
-                newConfig.set(key, config.get(key));
-
+            try {
+                BufferedWriter writer = new BufferedWriter(new FileWriter(bankFile));
+                writer.write(builder.toString());
+                writer.flush();
+                writer.close();
+            } catch (IOException e) {
+                BPLogger.error(e, e.getMessage());
             }
         }
     }
