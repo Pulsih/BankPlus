@@ -99,6 +99,8 @@ public class BPData {
             BPInterest interest = plugin.getInterest();
             if (Values.CONFIG.isInterestEnabled() && interest.wasDisabled()) interest.startInterest();
 
+            plugin.getBankRegistry().loadBanks();
+
             if (Values.CONFIG.isSqlEnabled()) {
                 BPSQL sql = plugin.getMySql();
                 sql.disconnect();
@@ -111,8 +113,6 @@ public class BPData {
                 BPPlayer player = PlayerRegistry.get(p);
                 if (player != null && player.getOpenedBank() != null) p.closeInventory();
             });
-
-            plugin.getBankRegistry().loadBanks();
         } catch (Exception e) {
             BPLogger.warn(e, "Something went wrong while trying to reload the plugin, check the console logs and if the error persist, ask for support in the support discord.");
             success = false;

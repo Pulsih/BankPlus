@@ -271,8 +271,9 @@ public class BankUtils {
                 guiItem.setItemMeta(meta);
 
                 try {
-                    int slot = itemValues.getInt("Slot") - 1;
-                    inv.setItem(slot, guiItem);
+                    List<Integer> slots = itemValues.getIntegerList("Slot");
+                    if (slots.isEmpty()) inv.setItem(itemValues.getInt("Slot") - 1, guiItem);
+                    else for (int slot : slots) inv.setItem(slot - 1, guiItem);
                 } catch (ArrayIndexOutOfBoundsException ex) {
                     inv.addItem(guiItem);
                 }
