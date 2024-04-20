@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.mySQL;
 
 import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.OfflinePlayer;
@@ -32,10 +33,15 @@ public class BPSQL {
     }
 
     public boolean isPlayerRegistered(OfflinePlayer p) {
-        boolean registered = false;
+        boolean registered = false, uuid = Values.CONFIG.isStoringUUIDs();
         for (String bankName : BPEconomy.nameList()) {
-            if (!getSqlMethods().get(bankName, "uuid", "WHERE uuid='" + p.getUniqueId() + "'").isEmpty()) registered = true;
-            else createNewDefault(bankName, p);
+            if (uuid) {
+                if (!getSqlMethods().get(bankName, "uuid", "WHERE uuid='" + p.getUniqueId() + "'").isEmpty()) registered = true;
+                else createNewDefault(bankName, p);
+            } else {
+                if (!getSqlMethods().get(bankName, "account_name", "WHERE account_name='" + p.getName() + "'").isEmpty()) registered = true;
+                else createNewDefault(bankName, p);
+            }
         }
         return registered;
     }
@@ -46,7 +52,7 @@ public class BPSQL {
                 p.getUniqueId().toString(),
                 p.getName(),
                 "1",
-                Values.CONFIG.getStartAmount().toString(),
+                BPFormatter.styleBigDecimal(Values.CONFIG.getStartAmount()),
                 "0",
                 "0"
         );

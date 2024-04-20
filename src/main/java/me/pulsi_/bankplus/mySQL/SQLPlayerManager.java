@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.mySQL;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.utils.BPFormatter;
+import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
@@ -28,22 +29,22 @@ public class SQLPlayerManager {
     }
 
     public int getLevel(String bankName) {
-        String level = get("bank_level", bankName);
+        String level = get(bankName, "bank_level");
         return Integer.parseInt(level == null ? "1" : level);
     }
 
     public BigDecimal getMoney(String bankName) {
-        String money = get("money", bankName);
+        String money = get(bankName, "money");
         return new BigDecimal(money == null ? "0" : money);
     }
 
     public BigDecimal getDebt(String bankName) {
-        String debt = get("debt", bankName);
+        String debt = get(bankName, "debt");
         return new BigDecimal(debt == null ? "0" : debt);
     }
 
     public BigDecimal getOfflineInterest(String bankName) {
-        String interest = get("interest", bankName);
+        String interest = get(bankName, "interest");
         return new BigDecimal(interest == null ? "0" : interest);
     }
 
@@ -64,14 +65,22 @@ public class SQLPlayerManager {
     }
 
     public void set(String valueName, String newValue, String bankName) {
-        if (methods.get(bankName, valueName, "WHERE uuid='" + uuid + "'").isEmpty()) bpsql.createNewDefault(bankName, p);
-        methods.update(bankName, valueName, newValue, "WHERE uuid='" + uuid + "'");
+        if (resultSet(bankName, valueName).isEmpty()) bpsql.createNewDefault(bankName, p);
+        if (Values.CONFIG.isStoringUUIDs()) methods.update(bankName, valueName, newValue, "WHERE uuid='" + uuid + "'");
+        else  methods.update(bankName, valueName, newValue, "WHERE account_name='" + p.getName() + "'");
     }
 
-    public String get(String valueName, String bankName) {
-        List<String> result = methods.get(bankName, valueName, "WHERE uuid='" + uuid + "'");
+    public String get(String bankName, String valueName) {
+        List<String> result = resultSet(bankName, valueName);
         if (result.isEmpty()) return null;
 
         return result.get(0);
+    }
+
+    private List<String> resultSet(String bankName, String valueName) {
+        List<String> result;
+        if (Values.CONFIG.isStoringUUIDs()) result = methods.get(bankName, valueName, "WHERE uuid='" + uuid + "'");
+        else result = methods.get(bankName, valueName, "WHERE account_name='" + p.getName() + "'");
+        return result;
     }
 }
