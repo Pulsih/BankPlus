@@ -1,7 +1,7 @@
 # If you want to know more about bank guis: https://github.com/Pulsih/BankPlus/wiki/Bank-Config
 Title: "&a&lBANK"
 Lines: 5
-Update-Delay: 10 #In ticks, put 0 to disable
+Update-Delay: 10
 Filler:
   Enabled: true
   Material: "WHITE_STAINED_GLASS_PANE"

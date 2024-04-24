@@ -5,6 +5,7 @@ import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.BPPlayerManager;
 import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.economy.EconomyUtils;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPSets;
@@ -66,7 +67,7 @@ public class PlayerServerListener implements Listener {
         if (!Values.CONFIG.isSaveOnQuit()) return;
 
         UUID uuid = p.getUniqueId();
-        BankPlus.INSTANCE().getEconomyRegistry().savePlayer(uuid, true);
+        EconomyUtils.savePlayer(uuid, true);
         PlayerRegistry.unloadPlayer(uuid);
     }
 }

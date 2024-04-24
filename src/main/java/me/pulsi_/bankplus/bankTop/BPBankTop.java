@@ -4,24 +4,20 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.economy.BPEconomy;
-import me.pulsi_.bankplus.managers.TaskManager;
+import me.pulsi_.bankplus.managers.BPTaskManager;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class BPBankTop {
 
-    private final HashMap<Integer, BankTopPlayer> bankTop = new HashMap<>();
+    private final List<BankTopPlayer> bankTop = new ArrayList<>();
 
     private final BankPlus plugin;
 
@@ -39,8 +35,9 @@ public class BPBankTop {
 
             Collections.sort(amounts);
 
-            for (int i = balances.size() - 1, a = 0; i >= 0 && a < Values.CONFIG.getBankTopSize(); i--, a++) {
-                BigDecimal amount = amounts.get(i);
+            // i from the end because the balances have been sorted in ascending way, count to not overcome the banktop limit.
+            for (int i = balances.size() - 1, count = 0; i >= 0 && count < Values.CONFIG.getBankTopSize(); i--) {
+                BigDecimal amount = amounts.remove(i);
 
                 for (String name : names) {
                     if (!balances.get(name).equals(amount)) continue;
@@ -48,10 +45,10 @@ public class BPBankTop {
                     BankTopPlayer player = new BankTopPlayer();
                     player.setBalance(amount);
                     player.setName(name);
-                    bankTop.put(a + 1, player);
+                    bankTop.add(player);
 
-                    amounts.remove(amount);
                     names.remove(name);
+                    count++;
                     break;
                 }
             }
@@ -64,13 +61,9 @@ public class BPBankTop {
         });
     }
 
-    public void startUpdateTask() {
-        TaskManager taskManager = plugin.getTaskManager();
-        BukkitTask task = taskManager.getBroadcastTask();
-        if (task != null) task.cancel();
-
+    public void restartUpdateTask() {
         long delay = Values.CONFIG.getUpdateBankTopDelay();
-        taskManager.setBroadcastTask(Bukkit.getScheduler().runTaskTimer(plugin, this::updateBankTop, delay, delay));
+        BPTaskManager.setTask(BPTaskManager.BANKTOP_BROADCAST_TASK, Bukkit.getScheduler().runTaskTimer(plugin, this::updateBankTop, delay, delay));
     }
 
     public BigDecimal getBankTopBalancePlayer(int position) {

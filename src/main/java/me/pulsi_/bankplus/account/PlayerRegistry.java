@@ -16,10 +16,8 @@ public class PlayerRegistry {
     }
 
     public static void loadPlayer(Player p) {
-        if (isPlayerLoaded(p)) return;
-
         for (BPEconomy economy : BPEconomy.list()) economy.loadPlayerBalance(p);
-        players.put(p.getUniqueId(), new BPPlayer(p));
+        players.putIfAbsent(p.getUniqueId(), new BPPlayer(p));
     }
 
     public static void unloadPlayer(UUID uuid) {

@@ -1,19 +1,14 @@
 package me.pulsi_.bankplus.bankSystem;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.utils.BPChat;
+import me.pulsi_.bankplus.economy.EconomyUtils;
 import me.pulsi_.bankplus.utils.BPItems;
-import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 public class BankRegistry {
@@ -27,9 +22,7 @@ public class BankRegistry {
     public Bank bankListGui;
 
     public void loadBanks() {
-        BankPlus.INSTANCE().getEconomyRegistry().saveEveryone(true);
-
-        banks.clear();
+        Set<String> currentRegisteredBanks = banks.keySet();
 
         List<File> bankFiles = new ArrayList<>();
         File defaultBankFile = new File(BankPlus.INSTANCE().getDataFolder(), "banks" + File.separator + Values.CONFIG.getMainGuiName() + ".yml");
@@ -42,15 +35,28 @@ public class BankRegistry {
             bankFiles.add(defaultBankFile);
         }
 
+        Set<String> newRegisteredBanks = new HashSet<>();
         for (File bankFile : bankFiles) {
             String identifier = bankFile.getName().split("\\.")[0];
+            newRegisteredBanks.add(identifier);
+
+            if (banks.containsKey(identifier)) {
+                BankUtils.updateBankValues(banks.get(identifier), bankFile);
+                continue;
+            }
+
             Bank bank = new Bank(identifier);
-            loadBankGui(bank, bankFile);
+            BankUtils.updateBankValues(bank, bankFile);
             banks.put(identifier, bank);
         }
-        if (Values.CONFIG.isGuiModuleEnabled() && Values.MULTIPLE_BANKS.enableMultipleBanksModule()) loadMultipleBanksGui();
 
-        BankPlus.INSTANCE().getEconomyRegistry().loadEveryone();
+        for (String oldRegisteredBank : currentRegisteredBanks)
+            if (!newRegisteredBanks.contains(oldRegisteredBank)) banks.remove(oldRegisteredBank);
+
+        if (Values.CONFIG.isGuiModuleEnabled() && Values.MULTIPLE_BANKS.enableMultipleBanksModule()) loadMultipleBanksGui();
+        else bankListGui = null;
+
+        EconomyUtils.loadEveryone();
     }
 
     public void loadMultipleBanksGui() {
@@ -72,21 +78,8 @@ public class BankRegistry {
     }
 
     private void generateMainBankFile(File file) {
-        if (!file.exists()) {
-            BankPlus.INSTANCE().saveResource("banks" + File.separator + "bankplus_main_gui_base_file.yml", false);
-            File baseBankFile = new File(BankPlus.INSTANCE().getDataFolder(), "banks" + File.separator + "bankplus_main_gui_base_file.yml");
-            baseBankFile.renameTo(file);
-        }
-    }
-
-    private void loadBankGui(Bank bank, File bankFile) {
-        FileConfiguration bankConfig = new YamlConfiguration();
-        try {
-            bankConfig.load(bankFile);
-        } catch (IOException | InvalidConfigurationException e) {
-            BPLogger.warn(e, "Could not load \"" + bankFile.getName() + "\" bank properties because it contains an invalid configuration!");
-            return;
-        }
-        BankUtils.loadBankValues(bank, bankConfig);
+        BankPlus.INSTANCE().saveResource("banks" + File.separator + "bankplus_main_gui_base_file.yml", false);
+        File baseBankFile = new File(BankPlus.INSTANCE().getDataFolder(), "banks" + File.separator + "bankplus_main_gui_base_file.yml");
+        baseBankFile.renameTo(file);
     }
 }

@@ -6,10 +6,14 @@ import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.commands.BankTopCmd;
 import me.pulsi_.bankplus.commands.CmdRegisterer;
 import me.pulsi_.bankplus.commands.MainCmd;
+import me.pulsi_.bankplus.economy.EconomyUtils;
 import me.pulsi_.bankplus.external.UpdateChecker;
 import me.pulsi_.bankplus.external.bStats;
 import me.pulsi_.bankplus.interest.BPInterest;
-import me.pulsi_.bankplus.listeners.*;
+import me.pulsi_.bankplus.listeners.AFKListener;
+import me.pulsi_.bankplus.listeners.BPTransactionListener;
+import me.pulsi_.bankplus.listeners.InventoryCloseListener;
+import me.pulsi_.bankplus.listeners.PlayerServerListener;
 import me.pulsi_.bankplus.listeners.bankListener.*;
 import me.pulsi_.bankplus.listeners.playerChat.*;
 import me.pulsi_.bankplus.mySQL.BPSQL;
@@ -57,7 +61,7 @@ public class BPData {
     }
 
     public void shutdownPlugin() {
-        plugin.getEconomyRegistry().saveEveryone(false);
+        EconomyUtils.saveEveryone(false);
 
         BPConfigs configs = plugin.getConfigs();
         File file = configs.getFile(BPConfigs.Type.SAVES.name);
@@ -86,18 +90,17 @@ public class BPData {
             BPMessages.loadMessages();
 
             CmdRegisterer registerer = new CmdRegisterer();
-            registerer.resetCmds();
             registerer.registerCmds();
 
             if (Values.CONFIG.isLogTransactions()) plugin.getBpLogUtils().setupLoggerFile();
             if (Values.CONFIG.isIgnoringAfkPlayers()) plugin.getAfkManager().startCountdown();
-            if (Values.CONFIG.isBanktopEnabled()) plugin.getBankTopManager().startUpdateTask();
+            if (Values.CONFIG.isBanktopEnabled() && !BPTaskManager.contains(BPTaskManager.BANKTOP_BROADCAST_TASK)) plugin.getBankTopManager().restartUpdateTask();
 
             BPAFK BPAFK = plugin.getAfkManager();
             if (!BPAFK.isPlayerCountdownActive()) BPAFK.startCountdown();
 
             BPInterest interest = plugin.getInterest();
-            if (Values.CONFIG.isInterestEnabled() && interest.wasDisabled()) interest.startInterest();
+            if (Values.CONFIG.isInterestEnabled() && interest.wasDisabled()) interest.restartInterest();
 
             plugin.getBankRegistry().loadBanks();
 
@@ -108,6 +111,8 @@ public class BPData {
                 sql.connect();
                 sql.setupTables();
             }
+
+            if (!BPTaskManager.contains(BPTaskManager.MONEY_SAVING_TASK)) EconomyUtils.restartSavingInterval();
 
             Bukkit.getOnlinePlayers().forEach(p -> {
                 BPPlayer player = PlayerRegistry.get(p);

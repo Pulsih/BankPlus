@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.economy;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayerManager;
 import me.pulsi_.bankplus.account.PlayerRegistry;
+import me.pulsi_.bankplus.managers.BPTaskManager;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
 import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.values.Values;
@@ -14,15 +15,9 @@ import org.bukkit.scheduler.BukkitTask;
 import java.io.File;
 import java.util.UUID;
 
-public class EconomyRegistry {
+public class EconomyUtils {
 
-    private BukkitTask saveTask;
-
-    public EconomyRegistry() {
-        forceSave(true);
-    }
-
-    public void savePlayer(UUID uuid, boolean async) {
+    public static void savePlayer(UUID uuid, boolean async) {
         if (BankPlus.INSTANCE().getMySql().isConnected()) {
             SQLPlayerManager pManager = new SQLPlayerManager(uuid);
             for (BPEconomy economy : BPEconomy.list()) {
@@ -50,27 +45,23 @@ public class EconomyRegistry {
         }
     }
 
-    public void loadEveryone() {
+    public static void loadEveryone() {
         for (Player p : Bukkit.getOnlinePlayers())
             PlayerRegistry.loadPlayer(p);
     }
 
-    public void saveEveryone(boolean async) {
+    public static void saveEveryone(boolean async) {
         for (UUID uuid : BPEconomy.getLoadedPlayers()) {
             savePlayer(uuid, async);
             if (Bukkit.getPlayer(uuid) == null) PlayerRegistry.unloadPlayer(uuid);
         }
     }
 
-    public void forceSave(boolean async) {
-        saveEveryone(async);
-
-        if (saveTask != null) saveTask.cancel();
-
+    public static void restartSavingInterval() {
         long delay = Values.CONFIG.getSaveDelay();
         if (delay <= 0) return;
 
         long minutes = delay * 1200L;
-        saveTask = Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE(), () -> saveEveryone(async), minutes, minutes);
+        BPTaskManager.setTask(BPTaskManager.MONEY_SAVING_TASK, Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE(), () -> saveEveryone(true), minutes, minutes));
     }
 }

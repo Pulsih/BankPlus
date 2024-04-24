@@ -1,8 +1,8 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.bankSystem.BankManager;
+import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.loanSystem.LoanUtils;
 import me.pulsi_.bankplus.utils.BPArgs;

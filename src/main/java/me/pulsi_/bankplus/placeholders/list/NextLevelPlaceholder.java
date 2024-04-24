@@ -5,8 +5,6 @@ import me.pulsi_.bankplus.placeholders.BPPlaceholder;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.entity.Player;
 
-import java.math.BigDecimal;
-
 public class NextLevelPlaceholder extends BPPlaceholder {
 
     @Override

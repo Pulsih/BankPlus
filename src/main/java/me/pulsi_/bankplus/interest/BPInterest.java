@@ -1,15 +1,12 @@
 package me.pulsi_.bankplus.interest;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BPPlayerManager;
-import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.economy.TransactionType;
-import me.pulsi_.bankplus.events.BPPreTransactionEvent;
 import me.pulsi_.bankplus.managers.BPConfigs;
-import me.pulsi_.bankplus.utils.BPFormatter;
+import me.pulsi_.bankplus.managers.BPTaskManager;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
@@ -20,7 +17,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +34,7 @@ public class BPInterest {
         this.plugin = plugin;
     }
 
-    public void startInterest() {
+    public void restartInterest() {
         isOfflineInterestEnabled = Values.CONFIG.isGivingInterestToOfflinePlayers();
         long interestSave = 0;
 
@@ -54,12 +50,6 @@ public class BPInterest {
         return cooldown - System.currentTimeMillis();
     }
 
-    public void restartInterest() {
-        BukkitTask task = BankPlus.INSTANCE().getTaskManager().getInterestTask();
-        if (task != null) task.cancel();
-        startInterest();
-    }
-
     public void giveInterestToEveryone() {
         cooldown = System.currentTimeMillis() + Values.CONFIG.getInterestDelay();
         Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), this::giveInterest);
@@ -72,7 +62,7 @@ public class BPInterest {
     private void loopInterest() {
         if (!isInterestActive()) return;
         if (getInterestCooldownMillis() <= 0) giveInterestToEveryone();
-        BankPlus.INSTANCE().getTaskManager().setInterestTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), this::loopInterest, 10L));
+        BPTaskManager.setTask(BPTaskManager.INTEREST_TASK, Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), this::loopInterest, 10L));
     }
 
     public void giveInterest() {
@@ -165,8 +155,7 @@ public class BPInterest {
 
     public boolean isInterestActive() {
         if (!Values.CONFIG.isInterestEnabled()) {
-            BukkitTask task = BankPlus.INSTANCE().getTaskManager().getInterestTask();
-            if (task != null) task.cancel();
+            BPTaskManager.removeTask(BPTaskManager.INTEREST_TASK);
             wasDisabled = true;
             return false;
         }

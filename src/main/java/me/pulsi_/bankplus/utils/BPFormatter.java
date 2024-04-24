@@ -3,7 +3,6 @@ package me.pulsi_.bankplus.utils;
 import me.pulsi_.bankplus.values.Values;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
 

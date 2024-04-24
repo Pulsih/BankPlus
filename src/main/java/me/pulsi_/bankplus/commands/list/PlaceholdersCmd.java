@@ -3,10 +3,8 @@ package me.pulsi_.bankplus.commands.list;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.commands.BPCommand;
-import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPArgs;
 import me.pulsi_.bankplus.utils.BPMessages;
-import me.pulsi_.bankplus.utils.BPUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 

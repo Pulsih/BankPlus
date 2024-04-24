@@ -5,6 +5,8 @@ import me.pulsi_.bankplus.commands.list.*;
 public class CmdRegisterer {
 
     public void registerCmds() {
+        MainCmd.commands.clear();
+
         new AddAllCmd("addAll").register();
         new AddCmd("add").register();
         new BalanceCmd("balance", "bal").register();
@@ -33,9 +35,5 @@ public class CmdRegisterer {
         new UpgradeCmd("upgrade").register();
         new ViewCmd("view").register();
         new WithdrawCmd("withdraw").register();
-    }
-
-    public void resetCmds() {
-        MainCmd.commands.clear();
     }
 }

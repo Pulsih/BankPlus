@@ -1,7 +1,6 @@
 package me.pulsi_.bankplus.bankSystem;
 
 import me.pulsi_.bankplus.economy.BPEconomy;
-import net.md_5.bungee.api.chat.hover.content.Item;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
 
@@ -14,6 +13,7 @@ public class Bank {
     private final String identifier;
     private final BPEconomy bankEconomy;
     private final HashMap<Integer, BankLevel> bankLevels = new HashMap<>();
+
     private String title = "&c&l * TITLE NOT FOUND *";
     private int size, updateDelay;
     private String fillerMaterial, accessPermission;

@@ -7,7 +7,6 @@ import me.pulsi_.bankplus.values.Values;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public class NextLevelRequiredItemsPlaceholder extends BPPlaceholder {

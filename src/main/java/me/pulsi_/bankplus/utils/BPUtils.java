@@ -346,12 +346,13 @@ public class BPUtils {
 
     public static boolean hasOfflinePermission(OfflinePlayer p, String permission) {
         Permission perm = BankPlus.INSTANCE().getPermissions();
-        boolean hasPermission = true;
+        boolean hasPermission = false;
 
         if (perm != null && permission != null && !permission.isEmpty()) {
             for (World world : Bukkit.getWorlds()) {
-                if (perm.playerHas(world.getName(), p, permission)) continue;
-                hasPermission = false;
+                if (!perm.playerHas(world.getName(), p, permission)) continue;
+
+                hasPermission = true;
                 break;
             }
         }

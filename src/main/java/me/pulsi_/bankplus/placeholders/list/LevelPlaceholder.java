@@ -2,7 +2,6 @@ package me.pulsi_.bankplus.placeholders.list;
 
 import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.placeholders.BPPlaceholder;
-import me.pulsi_.bankplus.values.Values;
 import org.bukkit.entity.Player;
 
 public class LevelPlaceholder extends BPPlaceholder {
