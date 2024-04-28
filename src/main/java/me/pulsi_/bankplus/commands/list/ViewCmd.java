@@ -1,6 +1,6 @@
 package me.pulsi_.bankplus.commands.list;
 
-import me.pulsi_.bankplus.bankSystem.BankManager;
+import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPArgs;
@@ -42,29 +42,29 @@ public class ViewCmd extends BPCommand {
 
             if (s instanceof Player) BPUtils.playSound("VIEW", (Player) s);
 
-            List<String> availableBanks = BankManager.getAvailableBanks(target);
+            List<String> availableBanks = BankUtils.getAvailableBankNames(target);
             if (availableBanks.size() > 1) BPMessages.send(target, "Multiple-Bank-Others", BPUtils.placeValues(target, BPEconomy.getBankBalancesSum(target)));
             else {
                 String name = availableBanks.get(0);
-                BPMessages.send(s, "Bank-Others", BPUtils.placeValues(target, BPEconomy.get(name).getBankBalance(target), BankManager.getCurrentLevel(name, target)));
+                BPMessages.send(s, "Bank-Others", BPUtils.placeValues(target, BPEconomy.get(name).getBankBalance(target), BankUtils.getCurrentLevel(name, target)));
             }
             return true;
         }
 
         String bankName = args[2];
-        if (!BankManager.exist(bankName)) {
+        if (!BankUtils.exist(bankName)) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }
 
-        if (!BankManager.isAvailable(bankName, target)) {
+        if (!BankUtils.isAvailable(bankName, target)) {
             BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
             return false;
         }
 
         if (skipToConfirm(s)) return false;
         if (s instanceof Player) BPUtils.playSound("VIEW", (Player) s);
-        BPMessages.send(s, "Bank-Others", BPUtils.placeValues(target, BPEconomy.get(bankName).getBankBalance(target), BankManager.getCurrentLevel(bankName, target)));
+        BPMessages.send(s, "Bank-Others", BPUtils.placeValues(target, BPEconomy.get(bankName).getBankBalance(target), BankUtils.getCurrentLevel(bankName, target)));
         return true;
     }
 

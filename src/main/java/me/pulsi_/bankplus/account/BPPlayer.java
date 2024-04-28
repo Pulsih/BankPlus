@@ -11,7 +11,6 @@ public class BPPlayer {
     private final Player player;
 
     private Bank openedBank;
-    private HashMap<String, String> playerBankClickHolder;
     private int banktopPosition = -1;
     private BukkitTask bankUpdatingTask, closingTask;
 
@@ -25,10 +24,6 @@ public class BPPlayer {
 
     public Bank getOpenedBank() {
         return openedBank;
-    }
-
-    public HashMap<String, String> getPlayerBankClickHolder() {
-        return playerBankClickHolder;
     }
 
     public int getBanktopPosition() {
@@ -45,10 +40,6 @@ public class BPPlayer {
 
     public void setOpenedBank(Bank openedBank) {
         this.openedBank = openedBank;
-    }
-
-    public void setPlayerBankClickHolder(HashMap<String, String> playerBankClickHolder) {
-        this.playerBankClickHolder = playerBankClickHolder;
     }
 
     public void setBanktopPosition(int banktopPosition) {

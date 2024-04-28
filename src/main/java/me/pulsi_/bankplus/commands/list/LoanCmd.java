@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.bankSystem.BankManager;
+import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.loanSystem.LoanUtils;
@@ -87,7 +87,7 @@ public class LoanCmd extends BPCommand {
         BigDecimal amount = new BigDecimal(num);
 
         if (action.equals("request") && registry.getBanks().containsKey(targetName)) {
-            if (!BankManager.isAvailable(targetName, sender)) {
+            if (!BankUtils.isAvailable(targetName, sender)) {
                 BPMessages.send(sender, "Cannot-Access-Bank");
                 return false;
             }
@@ -104,11 +104,11 @@ public class LoanCmd extends BPCommand {
         String fromBankName = Values.CONFIG.getMainGuiName();
         if (args.length > 4) fromBankName = args[4];
 
-        if (!BankManager.exist(fromBankName)) {
+        if (!BankUtils.exist(fromBankName)) {
             BPMessages.send(sender, "Invalid-Bank");
             return false;
         }
-        if (!BankManager.isAvailable(fromBankName, sender)) {
+        if (!BankUtils.isAvailable(fromBankName, sender)) {
             BPMessages.send(sender, "Cannot-Access-Bank");
             return false;
         }
@@ -116,11 +116,11 @@ public class LoanCmd extends BPCommand {
         String toBankName = Values.CONFIG.getMainGuiName();
         if (args.length > 5) toBankName = args[5];
 
-        if (!BankManager.exist(toBankName)) {
+        if (!BankUtils.exist(toBankName)) {
             BPMessages.send(sender, "Invalid-Bank");
             return false;
         }
-        if (!BankManager.isAvailable(toBankName, target)) {
+        if (!BankUtils.isAvailable(toBankName, target)) {
             BPMessages.send(sender, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
             return false;
         }
@@ -145,7 +145,7 @@ public class LoanCmd extends BPCommand {
 
         if (args.length == 3) {
             List<String> availableBanks = new ArrayList<>();
-            if (args[1].equalsIgnoreCase("request")) availableBanks.addAll(BankManager.getAvailableBanks(p));
+            if (args[1].equalsIgnoreCase("request")) availableBanks.addAll(BankUtils.getAvailableBankNames(p));
 
             availableBanks.addAll(BPArgs.getOnlinePlayers(args));
             return BPArgs.getArgs(args, availableBanks);
@@ -155,10 +155,10 @@ public class LoanCmd extends BPCommand {
             return BPArgs.getArgs(args, "1", "2", "3");
 
         if (args.length == 5)
-            return BPArgs.getArgs(args, BankManager.getAvailableBanks(p));
+            return BPArgs.getArgs(args, BankUtils.getAvailableBankNames(p));
 
         if (args.length == 6)
-            return BPArgs.getArgs(args, BankManager.getAvailableBanks(Bukkit.getPlayerExact(args[3])));
+            return BPArgs.getArgs(args, BankUtils.getAvailableBankNames(Bukkit.getPlayerExact(args[3])));
 
         return null;
     }

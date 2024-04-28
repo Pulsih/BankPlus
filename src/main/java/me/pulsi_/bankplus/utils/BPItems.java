@@ -14,11 +14,9 @@ public class BPItems {
 
     public static final ItemStack UNKNOWN_ITEM = new ItemStack(Material.STONE);
 
-    public static ItemStack createItemStack(ConfigurationSection values) {
-        String material = values.getString("Material");
-
+    public static ItemStack createItemStack(String material) {
         ItemStack result = UNKNOWN_ITEM.clone();
-        if (material != null) {
+        if (material != null && !material.isEmpty()) {
             if (material.startsWith("HEAD")) result = getHead(material);
             else {
                 if (!material.contains(":")) result = new ItemStack(Material.valueOf(material));
@@ -32,9 +30,6 @@ public class BPItems {
                 }
             }
         }
-
-        int amount = values.getInt("amount");
-        if (amount > 1) result.setAmount(amount);
         return result;
     }
 

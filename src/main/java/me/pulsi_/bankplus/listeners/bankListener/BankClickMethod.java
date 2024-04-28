@@ -5,7 +5,6 @@ import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.bankSystem.BankHolder;
 import me.pulsi_.bankplus.bankSystem.BankListGui;
-import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -35,19 +34,20 @@ public class BankClickMethod {
 
         int slot = e.getSlot();
         String bankName = player.getOpenedBank().getIdentifier();
+
         if (bankName.equals(BankListGui.multipleBanksGuiID)) {
             HashMap<String, String> slots = player.getPlayerBankClickHolder();
             if (!slots.containsKey(p.getName() + "." + slot)) return;
 
             p.closeInventory();
-            BankUtils.openBank(p, slots.get(p.getName() + "." + slot), false);
+            BankGuiUtils.openBank(p, slots.get(p.getName() + "." + slot), false);
             for (int i = 0; i < slots.size(); i++)
                 slots.remove(p.getName() + "." + i);
 
             return;
         }
 
-        ConfigurationSection items = BankManager.getBank(bankName).getItems();
+        ConfigurationSection items = BankUtils.getBank(bankName).getItems();
         if (items == null) return;
 
         for (String key : items.getKeys(false)) {
@@ -74,7 +74,7 @@ public class BankClickMethod {
                 if (identifier.equals("[UPGRADE]")) {
                     if (Values.CONFIG.isGuiActionsNeedPermissions() && !BPUtils.hasPermission(p, "bankplus.upgrade")) return;
 
-                    BankManager.upgradeBank(bankName, p);
+                    BankUtils.upgradeBank(bankName, p);
                     continue;
                 }
 
@@ -218,7 +218,7 @@ public class BankClickMethod {
                 break;
 
             case "upgrade":
-                BankManager.upgradeBank(bankName, p);
+                BankUtils.upgradeBank(bankName, p);
                 break;
         }
         return true;

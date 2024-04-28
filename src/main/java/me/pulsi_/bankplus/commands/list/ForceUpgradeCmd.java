@@ -1,6 +1,6 @@
 package me.pulsi_.bankplus.commands.list;
 
-import me.pulsi_.bankplus.bankSystem.BankManager;
+import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.BPArgs;
 import me.pulsi_.bankplus.utils.BPMessages;
@@ -39,19 +39,19 @@ public class ForceUpgradeCmd extends BPCommand {
         if (args.length > 2) bankName = args[2];
         boolean silent = args.length > 3 && args[3].toLowerCase().contains("true");
 
-        if (!BankManager.exist(bankName)) {
+        if (!BankUtils.exist(bankName)) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }
 
-        if (!BankManager.isAvailable(bankName, p)) {
+        if (!BankUtils.isAvailable(bankName, p)) {
             BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + p.getName());
             return false;
         }
 
         if (skipToConfirm(s)) return false;
 
-        BankManager.upgradeBank(bankName, p);
+        BankUtils.upgradeBank(bankName, p);
         if (!silent) BPMessages.send(s, "Force-Upgrade", "%player%$" + p.getName(), "%bank%$" + bankName);
         return true;
     }
@@ -61,7 +61,7 @@ public class ForceUpgradeCmd extends BPCommand {
         Player p = args.length > 1 ? Bukkit.getPlayer(args[1]) : null;
 
         if (args.length == 3)
-            return BPArgs.getArgs(args, BankManager.getAvailableBanks(p));
+            return BPArgs.getArgs(args, BankUtils.getAvailableBankNames(p));
 
         if (args.length == 4)
             return BPArgs.getArgs(args, "silent=true", "silent=false");

@@ -87,8 +87,8 @@ Title-Custom-Transaction:
 # Interest Messages
 Interest-Broadcast:
   Enabled: true
-  Message: "%prefix% &aYou have earned &f%amount_formatted% Money &ain interest!"
-  Multi-Message: "%prefix% &aYou have earned a total amount of &f%amount_formatted% Money &ain interest!"
+  Message: "%prefix% &aYou have earned &f%amount_formatted% money &ain interest!"
+  Multi-Message: "%prefix% &aYou have earned a total amount of &f%amount_formatted% money &ain interest!"
   No-Money: "%prefix% &aSadly, you received 0 money from interest."
   Bank-Full: "%prefix% &cYou can't earn anymore money from interest because your bank is full!"
 

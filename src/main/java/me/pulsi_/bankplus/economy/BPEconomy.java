@@ -3,7 +3,7 @@ package me.pulsi_.bankplus.economy;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayerManager;
 import me.pulsi_.bankplus.bankSystem.Bank;
-import me.pulsi_.bankplus.bankSystem.BankManager;
+import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.events.BPAfterTransactionEvent;
 import me.pulsi_.bankplus.events.BPPreTransactionEvent;
@@ -88,7 +88,7 @@ public class BPEconomy {
         LinkedHashMap<String, BigDecimal> balances = new LinkedHashMap<>();
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
             BigDecimal balance = BigDecimal.ZERO;
-            for (String bankName : BankManager.getAvailableBanks(p)) balance = balance.add(get(bankName).getBankBalance(p));
+            for (String bankName : BankUtils.getAvailableBankNames(p)) balance = balance.add(get(bankName).getBankBalance(p));
             balances.put(p.getName(), balance);
         }
         return balances;
@@ -238,7 +238,7 @@ public class BPEconomy {
             amount = event.getTransactionAmount();
         }
 
-        result = result.max(amount.min(BankManager.getCapacity(bankName, p)));
+        result = result.max(amount.min(BankUtils.getCapacity(bankName, p)));
         set(p, result);
 
         if (!ignoreEvents) afterTransactionEvent(p, type, amount);
@@ -288,7 +288,7 @@ public class BPEconomy {
             amount = event.getTransactionAmount();
         }
 
-        BigDecimal capacity = BankManager.getCapacity(bankName, p), balance = getBankBalance(p);
+        BigDecimal capacity = BankUtils.getCapacity(bankName, p), balance = getBankBalance(p);
         if (capacity.compareTo(BigDecimal.ZERO) <= 0) {
             result = amount;
             set(p, balance.add(result));
@@ -483,7 +483,7 @@ public class BPEconomy {
         if (maxDeposit.compareTo(BigDecimal.ZERO) > 0 && amount.compareTo(maxDeposit) >= 0) amount = maxDeposit;
         if (wallet.doubleValue() < amount.doubleValue()) amount = wallet;
 
-        BigDecimal capacity = BankManager.getCapacity(bankName, p).subtract(getBankBalance(p)), finalAmount = amount.min(capacity);
+        BigDecimal capacity = BankUtils.getCapacity(bankName, p).subtract(getBankBalance(p)), finalAmount = amount.min(capacity);
 
         BigDecimal depositTaxes = Values.CONFIG.getDepositTaxes(), taxes = BigDecimal.ZERO;
         if (depositTaxes.compareTo(BigDecimal.ZERO) > 0 && !p.hasPermission("bankplus.deposit.bypass-taxes")) {
@@ -560,7 +560,7 @@ public class BPEconomy {
 
         BPEconomy toEconomy = get(toBank);
         // Check if the receiver of the payment has the bank full
-        if (toEconomy.getBankBalance(to).compareTo(BankManager.getCapacity(toBank, to)) >= 0) {
+        if (toEconomy.getBankBalance(to).compareTo(BankUtils.getCapacity(toBank, to)) >= 0) {
             BPMessages.send(from, "Bank-Full", "%player%$" + to.getName());
             return;
         }

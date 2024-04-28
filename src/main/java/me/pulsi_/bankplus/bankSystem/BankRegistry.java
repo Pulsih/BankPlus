@@ -41,12 +41,12 @@ public class BankRegistry {
             newRegisteredBanks.add(identifier);
 
             if (banks.containsKey(identifier)) {
-                BankUtils.updateBankValues(banks.get(identifier), bankFile);
+                banks.get(identifier).updateBankSettings(bankFile);
                 continue;
             }
 
             Bank bank = new Bank(identifier);
-            BankUtils.updateBankValues(bank, bankFile);
+            bank.updateBankSettings(bankFile);
             banks.put(identifier, bank);
         }
 
@@ -72,7 +72,6 @@ public class BankRegistry {
         multipleBanksGui.setTitle(Values.MULTIPLE_BANKS.getBanksGuiTitle());
         multipleBanksGui.setSize(Values.MULTIPLE_BANKS.getBanksGuiLines());
         multipleBanksGui.setUpdateDelay(Values.MULTIPLE_BANKS.getUpdateDelay());
-        multipleBanksGui.setContent(gui.getContents());
 
         bankListGui = multipleBanksGui;
     }

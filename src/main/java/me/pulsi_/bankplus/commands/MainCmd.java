@@ -1,7 +1,6 @@
 package me.pulsi_.bankplus.commands;
 
 import me.pulsi_.bankplus.bankSystem.BankListGui;
-import me.pulsi_.bankplus.bankSystem.BankManager;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPMessages;
@@ -34,7 +33,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
             if (!BPUtils.hasPermission(s, "bankplus.use")) return true;
 
             if (s instanceof Player) {
-                if (BankManager.getAvailableBanks((Player) s).isEmpty()) {
+                if (BankUtils.getAvailableBankNames((Player) s).isEmpty()) {
                     if (Values.CONFIG.isShowHelpMessageWhenNoAvailableBanks()) {
                         BPMessages.send(s, "Help-Message");
                     } else {
@@ -49,13 +48,13 @@ public class MainCmd implements CommandExecutor, TabCompleter {
             Player p = (Player) s;
 
             if (Values.CONFIG.isGuiModuleEnabled()) {
-                if (!Values.MULTIPLE_BANKS.enableMultipleBanksModule()) BankUtils.openBank(p);
+                if (!Values.MULTIPLE_BANKS.enableMultipleBanksModule()) BankGuiUtils.openBank(p);
                 else {
-                    if (!Values.MULTIPLE_BANKS.isDirectlyOpenIf1IsAvailable()) BankUtils.openBank(p, BankListGui.multipleBanksGuiID);
+                    if (!Values.MULTIPLE_BANKS.isDirectlyOpenIf1IsAvailable()) BankGuiUtils.openBank(p, BankListGui.multipleBanksGuiID);
                     else {
-                        List<String> availableBanks = BankManager.getAvailableBanks(p);
-                        if (availableBanks.size() == 1) BankUtils.openBank(p, availableBanks.get(0));
-                        else BankUtils.openBank(p, BankListGui.multipleBanksGuiID);
+                        List<String> availableBanks = BankUtils.getAvailableBankNames(p);
+                        if (availableBanks.size() == 1) BankGuiUtils.openBank(p, availableBanks.get(0));
+                        else BankGuiUtils.openBank(p, BankListGui.multipleBanksGuiID);
                     }
                 }
             } else {

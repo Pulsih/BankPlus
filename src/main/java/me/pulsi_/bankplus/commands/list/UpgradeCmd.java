@@ -1,6 +1,6 @@
 package me.pulsi_.bankplus.commands.list;
 
-import me.pulsi_.bankplus.bankSystem.BankManager;
+import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.BPArgs;
 import me.pulsi_.bankplus.utils.BPMessages;
@@ -33,17 +33,17 @@ public class UpgradeCmd extends BPCommand {
         String bankName = Values.CONFIG.getMainGuiName();
         if (args.length > 1) bankName = args[1];
 
-        if (!BankManager.exist(bankName)) {
+        if (!BankUtils.exist(bankName)) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }
 
-        if (!BankManager.isAvailable(bankName, p)) {
+        if (!BankUtils.isAvailable(bankName, p)) {
             BPMessages.send(p, "Cannot-Access-Bank");
             return false;
         }
 
-        if (!skipToConfirm(s)) BankManager.upgradeBank(bankName, p);
+        if (!skipToConfirm(s)) BankUtils.upgradeBank(bankName, p);
         return true;
     }
 
@@ -52,7 +52,7 @@ public class UpgradeCmd extends BPCommand {
         Player p = (Player) s;
 
         if (args.length == 2)
-            return BPArgs.getArgs(args, BankManager.getAvailableBanks(p));
+            return BPArgs.getArgs(args, BankUtils.getAvailableBankNames(p));
         return null;
     }
 }

@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.placeholders.list;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.bankSystem.BankManager;
+import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.placeholders.BPPlaceholder;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.entity.Player;
@@ -25,7 +25,7 @@ public class CalculateDepositTaxesPlaceholder extends BPPlaceholder {
 
             BigDecimal amount;
             if (target != null) {
-                if (!BankManager.exist(target))
+                if (!BankUtils.exist(target))
                     return "The selected bank does not exist.";
 
                 number = number.replace("{" + target + "}", "");

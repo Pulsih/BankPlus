@@ -1,6 +1,6 @@
 package me.pulsi_.bankplus.commands.list;
 
-import me.pulsi_.bankplus.bankSystem.BankManager;
+import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPArgs;
@@ -52,11 +52,11 @@ public class PayCmd extends BPCommand {
         String fromBankName = Values.CONFIG.getMainGuiName();
         if (args.length > 3) fromBankName = args[3];
 
-        if (!BankManager.exist(fromBankName)) {
+        if (!BankUtils.exist(fromBankName)) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }
-        if (!BankManager.isAvailable(fromBankName, player)) {
+        if (!BankUtils.isAvailable(fromBankName, player)) {
             BPMessages.send(s, "Cannot-Access-Bank");
             return false;
         }
@@ -64,11 +64,11 @@ public class PayCmd extends BPCommand {
         String toBankName = Values.CONFIG.getMainGuiName();
         if (args.length > 4) toBankName = args[4];
 
-        if (!BankManager.exist(toBankName)) {
+        if (!BankUtils.exist(toBankName)) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }
-        if (!BankManager.isAvailable(toBankName, target)) {
+        if (!BankUtils.isAvailable(toBankName, target)) {
             BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
             return false;
         }
@@ -87,10 +87,10 @@ public class PayCmd extends BPCommand {
             return BPArgs.getArgs(args, "1", "2", "3");
 
         if (args.length == 4)
-            return BPArgs.getArgs(args, BankManager.getAvailableBanks(p));
+            return BPArgs.getArgs(args, BankUtils.getAvailableBankNames(p));
 
         if (args.length == 5)
-            return BPArgs.getArgs(args, BankManager.getAvailableBanks(target));
+            return BPArgs.getArgs(args, BankUtils.getAvailableBankNames(target));
         return null;
     }
 }

@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.bankSystem.BankManager;
+import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.BPArgs;
 import me.pulsi_.bankplus.utils.BPMessages;
@@ -49,7 +49,7 @@ public class PlaceholdersCmd extends BPCommand {
         Player p = (Player) s;
 
         if (args.length == 2)
-            return BPArgs.getArgs(args, BankManager.getAvailableBanks(p));
+            return BPArgs.getArgs(args, BankUtils.getAvailableBankNames(p));
         return null;
     }
 }

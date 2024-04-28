@@ -2,7 +2,7 @@ package me.pulsi_.bankplus.interest;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.Bank;
-import me.pulsi_.bankplus.bankSystem.BankManager;
+import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.economy.TransactionType;
 import me.pulsi_.bankplus.managers.BPConfigs;
@@ -15,7 +15,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -70,8 +69,8 @@ public class BPInterest {
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
 
             List<String> availableBanks = new ArrayList<>();
-            for (Bank bank : BankManager.getBanks())
-                if (bank.isGiveInterestIfNotAvailable() || BankManager.isAvailable(bank.getIdentifier(), p))
+            for (Bank bank : BankUtils.getBanks())
+                if (bank.isGiveInterestIfNotAvailable() || BankUtils.isAvailable(bank.getIdentifier(), p))
                     availableBanks.add(bank.getIdentifier());
 
             if (availableBanks.isEmpty()) continue;
@@ -89,7 +88,7 @@ public class BPInterest {
                     }
                     if (economy.getBankBalance(p).compareTo(BigDecimal.ZERO) <= 0) continue;
 
-                    BigDecimal interestMoney = getInterestMoney(bankName, p, BankManager.getInterestRate(bankName, p)).min(maxAmount);
+                    BigDecimal interestMoney = getInterestMoney(bankName, p, BankUtils.getInterestRate(bankName, p)).min(maxAmount);
 
                     BigDecimal added = economy.addBankBalance(p, interestMoney, TransactionType.INTEREST);
                     interestAmount = interestAmount.add(added);
@@ -97,7 +96,19 @@ public class BPInterest {
                 if (!Values.MESSAGES.isInterestBroadcastEnabled()) continue;
 
                 if (availableBanks.size() > 1) BPMessages.send(p, Values.MESSAGES.getMultiInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
-                else BPMessages.send(p, Values.MESSAGES.getInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
+                else {
+                    if (BankUtils.isFull(availableBanks.get(0), p)) {
+                        BPMessages.send(p, Values.MESSAGES.getInterestBankFull(), BPUtils.placeValues(p, interestAmount), true);
+                        continue;
+                    }
+
+                    if (interestAmount.compareTo(BigDecimal.ZERO) <= 0) {
+                        BPMessages.send(p, Values.MESSAGES.getInterestNoMoney(), BPUtils.placeValues(p, interestAmount), true);
+                        continue;
+                    }
+
+                    BPMessages.send(p, Values.MESSAGES.getInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
+                }
             } else {
                 if (!isOfflineInterestEnabled || offlineTimeExpired(p) || !BPUtils.hasOfflinePermission(p, Values.CONFIG.getInterestOfflinePermission())) continue;
 
@@ -110,8 +121,8 @@ public class BPInterest {
                     if (economy.getBankBalance(p).compareTo(BigDecimal.ZERO) <= 0) continue;
 
                     BigDecimal interestMoney = (Values.CONFIG.isOfflineInterestDifferentRate() ?
-                                    getInterestMoney(bankName, p, BankManager.getOfflineInterestRate(bankName, p)) :
-                                    getInterestMoney(bankName, p, BankManager.getInterestRate(bankName, p))).min(maxAmount);
+                                    getInterestMoney(bankName, p, BankUtils.getOfflineInterestRate(bankName, p)) :
+                                    getInterestMoney(bankName, p, BankUtils.getInterestRate(bankName, p))).min(maxAmount);
 
                     BigDecimal added = economy.addBankBalance(p, interestMoney, TransactionType.INTEREST);
                     economy.setOfflineInterest(p, economy.getOfflineInterest(p).add(added));
@@ -126,7 +137,7 @@ public class BPInterest {
         if (!Values.CONFIG.enableInterestLimiter() || !Values.CONFIG.accumulateInterestLimiter())
             return playerBalance.multiply(defaultInterest.divide(BigDecimal.valueOf(100)));
 
-        List<String> limiter = BankManager.getInterestLimiter(bankName, BankManager.getCurrentLevel(bankName, p));
+        List<String> limiter = BankUtils.getInterestLimiter(bankName, BankUtils.getCurrentLevel(bankName, p));
         BigDecimal result = new BigDecimal(0), count = playerBalance;
         for (String line : limiter) {
             if (!line.contains(":")) continue;
