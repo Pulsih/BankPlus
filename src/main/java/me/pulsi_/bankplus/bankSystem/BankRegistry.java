@@ -19,8 +19,6 @@ public class BankRegistry {
         return banks;
     }
 
-    public Bank bankListGui;
-
     public void loadBanks() {
         Set<String> currentRegisteredBanks = banks.keySet();
 
@@ -53,27 +51,7 @@ public class BankRegistry {
         for (String oldRegisteredBank : currentRegisteredBanks)
             if (!newRegisteredBanks.contains(oldRegisteredBank)) banks.remove(oldRegisteredBank);
 
-        if (Values.CONFIG.isGuiModuleEnabled() && Values.MULTIPLE_BANKS.enableMultipleBanksModule()) loadMultipleBanksGui();
-        else bankListGui = null;
-
         EconomyUtils.loadEveryone();
-    }
-
-    public void loadMultipleBanksGui() {
-        Inventory gui = Bukkit.createInventory(new BankHolder(), Math.max(9, Math.min(54, Values.MULTIPLE_BANKS.getBanksGuiLines() * 9)), "");
-
-        if (Values.MULTIPLE_BANKS.isFillerEnabled()) {
-            ItemStack filler = BPItems.getFiller(Values.MULTIPLE_BANKS.getFillerMaterial(), Values.MULTIPLE_BANKS.isFillerGlowing());
-            for (int i = 0; i < gui.getSize(); i++)
-                gui.setItem(i, filler);
-        }
-
-        Bank multipleBanksGui = new Bank(BankListGui.multipleBanksGuiID);
-        multipleBanksGui.setTitle(Values.MULTIPLE_BANKS.getBanksGuiTitle());
-        multipleBanksGui.setSize(Values.MULTIPLE_BANKS.getBanksGuiLines());
-        multipleBanksGui.setUpdateDelay(Values.MULTIPLE_BANKS.getUpdateDelay());
-
-        bankListGui = multipleBanksGui;
     }
 
     private void generateMainBankFile(File file) {

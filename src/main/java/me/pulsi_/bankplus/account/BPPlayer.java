@@ -1,16 +1,15 @@
 package me.pulsi_.bankplus.account;
 
 import me.pulsi_.bankplus.bankSystem.Bank;
+import me.pulsi_.bankplus.bankSystem.BankGui;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
-
-import java.util.HashMap;
 
 public class BPPlayer {
 
     private final Player player;
 
-    private Bank openedBank;
+    private BankGui openedBankGui;
     private int banktopPosition = -1;
     private BukkitTask bankUpdatingTask, closingTask;
 
@@ -22,8 +21,8 @@ public class BPPlayer {
         return player;
     }
 
-    public Bank getOpenedBank() {
-        return openedBank;
+    public BankGui getOpenedBankGui() {
+        return openedBankGui;
     }
 
     public int getBanktopPosition() {
@@ -38,8 +37,8 @@ public class BPPlayer {
         return closingTask;
     }
 
-    public void setOpenedBank(Bank openedBank) {
-        this.openedBank = openedBank;
+    public void setOpenedBankGui(BankGui openedBankGui) {
+        this.openedBankGui = openedBankGui;
     }
 
     public void setBanktopPosition(int banktopPosition) {

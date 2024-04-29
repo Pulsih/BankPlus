@@ -175,7 +175,7 @@ public class BPUtils {
         p.closeInventory();
 
         BPPlayer pl = PlayerRegistry.get(p);
-        pl.setOpenedBank(BankPlus.INSTANCE().getBankRegistry().getBanks().get(identifier));
+        pl.setOpenedBankGui(BankPlus.INSTANCE().getBankRegistry().getBanks().get(identifier));
         pl.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> {
             PlayerChatMethod.reopenBank(p, identifier);
             BPMessages.send(p, "Chat-Time-Expired");
@@ -194,7 +194,7 @@ public class BPUtils {
         p.closeInventory();
 
         BPPlayer pl = PlayerRegistry.get(p);
-        pl.setOpenedBank(BankPlus.INSTANCE().getBankRegistry().getBanks().get(identifier));
+        pl.setOpenedBankGui(BankPlus.INSTANCE().getBankRegistry().getBanks().get(identifier));
         pl.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> {
             PlayerChatMethod.reopenBank(p, identifier);
             BPMessages.send(p, "Chat-Time-Expired");

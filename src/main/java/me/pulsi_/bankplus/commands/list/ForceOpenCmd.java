@@ -46,7 +46,7 @@ public class ForceOpenCmd extends BPCommand {
 
         if (skipToConfirm(s)) return false;
 
-        BankUtils.getBank(bankName).openGuiBank(p, true);
+        BankUtils.getBank(bankName).openBankGui(p, true);
         if (!silent) BPMessages.send(s, "Force-Open", "%player%$" + p.getName(), "%bank%$" + bankName);
         return true;
     }

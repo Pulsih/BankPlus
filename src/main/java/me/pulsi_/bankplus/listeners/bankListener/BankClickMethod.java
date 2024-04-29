@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.listeners.bankListener;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
+import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankHolder;
 import me.pulsi_.bankplus.bankSystem.BankListGui;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
@@ -19,7 +20,6 @@ import org.bukkit.inventory.Inventory;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
-import java.util.List;
 
 public class BankClickMethod {
 
@@ -30,12 +30,12 @@ public class BankClickMethod {
         e.setCancelled(true);
 
         BPPlayer player = PlayerRegistry.get(p);
-        if (player.getOpenedBank() == null) return;
+        if (player.getOpenedBankGui() == null) return;
 
         int slot = e.getSlot();
-        String bankName = player.getOpenedBank().getIdentifier();
+        Bank openedBank = player.getOpenedBankGui();
 
-        if (bankName.equals(BankListGui.multipleBanksGuiID)) {
+        if (openedBank instanceof BankListGui) {
             HashMap<String, String> slots = player.getPlayerBankClickHolder();
             if (!slots.containsKey(p.getName() + "." + slot)) return;
 
@@ -47,105 +47,91 @@ public class BankClickMethod {
             return;
         }
 
-        ConfigurationSection items = BankUtils.getBank(bankName).getItems();
-        if (items == null) return;
+        Bank openedBank = player.getOpenedBankGui();
+        Bank.BankItem clickedItem = openedBank.getBankItems().get(slot);
+        if (clickedItem == null) return;
 
-        for (String key : items.getKeys(false)) {
-            ConfigurationSection itemValues = items.getConfigurationSection(key);
-            if (itemValues == null || slot + 1 != itemValues.getInt("Slot")) continue;
+        for (String actionType : clickedItem.actions) {
+            String[] parts = actionType.split(" ");
+            int length = parts.length;
 
-            List<String> actions = itemValues.getStringList("Actions");
-            if (actions.isEmpty()) {
-                // Check if they are still using the old methods, still process it and invite them to update it.
-                if (processOldClickMethod(itemValues, bankName, p))
-                    BPLogger.warn("Warning! You are using an old format for the item action! Check out the BankPlus wiki and update it!");
+            String identifier = length > 0 ? parts[0] : null, value = "";
+            if (identifier == null) continue;
+
+            if (identifier.equals("[UPGRADE]")) {
+                if (Values.CONFIG.isGuiActionsNeedPermissions() && !BPUtils.hasPermission(p, "bankplus.upgrade")) return;
+
+                BankUtils.upgradeBank(bankName, p);
                 continue;
             }
 
-            Economy vaultEconomy = BankPlus.INSTANCE().getVaultEconomy();
-
-            for (String actionType : actions) {
-                String[] parts = actionType.split(" ");
-                int length = parts.length;
-
-                String identifier = length > 0 ? parts[0] : null, value = "";
-                if (identifier == null) continue;
-
-                if (identifier.equals("[UPGRADE]")) {
-                    if (Values.CONFIG.isGuiActionsNeedPermissions() && !BPUtils.hasPermission(p, "bankplus.upgrade")) return;
-
-                    BankUtils.upgradeBank(bankName, p);
-                    continue;
+            if (length != 1) {
+                StringBuilder builder = new StringBuilder();
+                for (int i = 1; i < length; i++) {
+                    builder.append(parts[i]);
+                    if (i + 1 < length) builder.append(" ");
                 }
+                value = builder.toString();
+            }
 
-                if (length != 1) {
-                    StringBuilder builder = new StringBuilder();
-                    for (int i = 1; i < length; i++) {
-                        builder.append(parts[i]);
-                        if (i + 1 < length) builder.append(" ");
-                    }
-                    value = builder.toString();
+            if (value.equals("")) {
+                BPLogger.warn("No value specified! Item: " + key + ". File: " + bankName + ".yml. Action: " + identifier + ".");
+                continue;
+            }
+
+            BPEconomy economy = BPEconomy.get(bankName);
+            switch (identifier) {
+                case "[CONSOLE]": {
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), value);
                 }
+                break;
 
-                if (value.equals("")) {
-                    BPLogger.warn("No value specified! Item: " + key + ". File: " + bankName + ".yml. Action: " + identifier + ".");
-                    continue;
+                case "[DEPOSIT]": {
+                    if (Values.CONFIG.isGuiActionsNeedPermissions() && !BPUtils.hasPermission(p, "bankplus.deposit")) return;
+
+                    if (value.equals("CUSTOM")) {
+                        BPUtils.customDeposit(p, bankName);
+                        continue;
+                    }
+                    BigDecimal amount;
+                    try {
+                        if (!value.endsWith("%")) amount = new BigDecimal(value);
+                        else {
+                            BigDecimal percentage = new BigDecimal(value.replace("%", "")).divide(BigDecimal.valueOf(100));
+                            amount = BigDecimal.valueOf(vaultEconomy.getBalance(p)).multiply(percentage);
+                        }
+                    } catch (NumberFormatException ex) {
+                        BPLogger.warn("Invalid deposit number! (Button: " + key + ", Number: " + value + ")");
+                        continue;
+                    }
+                    economy.deposit(p, amount);
                 }
+                break;
 
-                BPEconomy economy = BPEconomy.get(bankName);
-                switch (identifier) {
-                    case "[CONSOLE]": {
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), value);
+                case "[PLAYER]": {
+                    p.chat(value);
+                }
+                break;
+
+                case "[WITHDRAW]": {
+                    if (Values.CONFIG.isGuiActionsNeedPermissions() && !BPUtils.hasPermission(p, "bankplus.withdraw")) return;
+
+                    if (value.equals("CUSTOM")) {
+                        BPUtils.customWithdraw(p, bankName);
+                        continue;
                     }
-                    break;
-
-                    case "[DEPOSIT]": {
-                        if (Values.CONFIG.isGuiActionsNeedPermissions() && !BPUtils.hasPermission(p, "bankplus.deposit")) return;
-
-                        if (value.equals("CUSTOM")) {
-                            BPUtils.customDeposit(p, bankName);
-                            continue;
+                    BigDecimal amount;
+                    try {
+                        if (!value.endsWith("%")) amount = new BigDecimal(value);
+                        else {
+                            BigDecimal percentage = new BigDecimal(value.replace("%", "")).divide(BigDecimal.valueOf(100));
+                            amount = economy.getBankBalance(p).multiply(percentage);
                         }
-                        BigDecimal amount;
-                        try {
-                            if (!value.endsWith("%")) amount = new BigDecimal(value);
-                            else {
-                                BigDecimal percentage = new BigDecimal(value.replace("%", "")).divide(BigDecimal.valueOf(100));
-                                amount = BigDecimal.valueOf(vaultEconomy.getBalance(p)).multiply(percentage);
-                            }
-                        } catch (NumberFormatException ex) {
-                            BPLogger.warn("Invalid deposit number! (Button: " + key + ", Number: " + value + ")");
-                            continue;
-                        }
-                        economy.deposit(p, amount);
+                    } catch (NumberFormatException ex) {
+                        BPLogger.warn("Invalid withdraw number! (Button: " + key + ", Number: " + value + ")");
+                        continue;
                     }
-                    break;
-
-                    case "[PLAYER]": {
-                        p.chat(value);
-                    }
-                    break;
-
-                    case "[WITHDRAW]": {
-                        if (Values.CONFIG.isGuiActionsNeedPermissions() && !BPUtils.hasPermission(p, "bankplus.withdraw")) return;
-
-                        if (value.equals("CUSTOM")) {
-                            BPUtils.customWithdraw(p, bankName);
-                            continue;
-                        }
-                        BigDecimal amount;
-                        try {
-                            if (!value.endsWith("%")) amount = new BigDecimal(value);
-                            else {
-                                BigDecimal percentage = new BigDecimal(value.replace("%", "")).divide(BigDecimal.valueOf(100));
-                                amount = economy.getBankBalance(p).multiply(percentage);
-                            }
-                        } catch (NumberFormatException ex) {
-                            BPLogger.warn("Invalid withdraw number! (Button: " + key + ", Number: " + value + ")");
-                            continue;
-                        }
-                        economy.withdraw(p, amount);
-                    }
+                    economy.withdraw(p, amount);
                 }
             }
         }

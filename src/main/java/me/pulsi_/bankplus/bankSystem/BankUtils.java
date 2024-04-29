@@ -286,29 +286,22 @@ public class BankUtils {
     /**
      * Check if the selected bank is available for the selected player.
      *
-     * @param bank The bank.
-     * @param p        The player.
-     * @return true if available, false otherwise.
-     */
-    public static boolean isAvailable(Bank bank, OfflinePlayer p) {
-        if (bank == null) return false;
-
-        String permission = bank.getAccessPermission();
-        if (permission == null || permission.isEmpty()) return true;
-
-        Player oP = p.getPlayer();
-        return oP != null ? oP.hasPermission(permission) : BPUtils.hasOfflinePermission(p, permission);
-    }
-
-    /**
-     * Check if the selected bank is available for the selected player.
-     *
      * @param bankName The bank name.
      * @param p        The player.
      * @return true if available, false otherwise.
      */
     public static boolean isAvailable(String bankName, OfflinePlayer p) {
-        Bank bank = getBank(bankName);
+        return isAvailable(getBank(bankName), p);
+    }
+
+    /**
+     * Check if the selected bank is available for the selected player.
+     *
+     * @param bank The bank.
+     * @param p        The player.
+     * @return true if available, false otherwise.
+     */
+    public static boolean isAvailable(Bank bank, OfflinePlayer p) {
         if (bank == null) return false;
 
         String permission = bank.getAccessPermission();
@@ -508,6 +501,8 @@ public class BankUtils {
      * @return An ItemStack.
      */
     public static ItemStack getItemFromSection(ConfigurationSection itemSection) {
+        if (itemSection == null) return BPItems.UNKNOWN_ITEM.clone();
+
         ItemStack guiItem = BPItems.createItemStack(itemSection.getString("Material"));
 
         int amount = itemSection.getInt("amount");

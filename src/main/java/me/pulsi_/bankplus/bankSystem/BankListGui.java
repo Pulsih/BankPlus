@@ -5,12 +5,10 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.utils.BPChat;
-import me.pulsi_.bankplus.utils.BPItems;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -24,11 +22,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class BankListGui {
+/**
+ * This class is used to create different instances of the bank list gui based on the player-accessible banks.
+ * It must be initialized, every gui can be different depending on the player.
+ */
+public class BankListGui extends BankGui {
 
-    public static final String multipleBanksGuiID = "MultipleBanksGui";
+    public BankListGui() {
+        super("BankListGui");
+    }
 
-    public static void openMultipleBanksGui(Player p) {
+    public void openBankListGui(Player p) {
         BPPlayer player = PlayerRegistry.get(p);
 
         BukkitTask updating = player.getBankUpdatingTask();
@@ -37,61 +41,44 @@ public class BankListGui {
         if (Values.MULTIPLE_BANKS.isDirectlyOpenIf1IsAvailable()) {
             List<Bank> availableBanks = BankUtils.getAvailableBanks(p);
             if (availableBanks.size() == 1) {
-                availableBanks.get(0).openGuiBank(p);
+                availableBanks.get(0).openBankGui(p);
                 return;
             }
         }
 
-        Bank baseBanksListGui = BankPlus.INSTANCE().getBankRegistry().bankListGui;
-
-        String title = baseBanksListGui.getTitle();
+        String title = Values.MULTIPLE_BANKS.getBanksGuiTitle();
         if (!BankPlus.INSTANCE().isPlaceholderApiHooked()) title = BPChat.color(title);
         else title = PlaceholderAPI.setPlaceholders(p, BPChat.color(title));
 
-        Inventory banksListGui = Bukkit.createInventory(new BankHolder(), baseBanksListGui.getSize(), title);
-        placeBanks(banksListGui, p);
-        updateMeta(banksListGui, p);
+        Inventory bankListInventory = Bukkit.createInventory(new BankHolder(), Values.MULTIPLE_BANKS.getBankListGuiLines(), title);
+        placeContent(bankListInventory, p);
+        updateMeta(bankListInventory, p);
 
         long delay = Values.MULTIPLE_BANKS.getUpdateDelay();
-        if (delay >= 0)
-            player.setBankUpdatingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE(), () -> updateMeta(banksListGui, p), delay, delay));
+        if (delay >= 0) player.setBankUpdatingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE(), () -> updateMeta(bankListInventory, p), delay, delay));
 
-        player.setOpenedBank(baseBanksListGui);
+        player.setOpenedBankGui(this);
         BPUtils.playSound("PERSONAL", p);
-        p.openInventory(banksListGui);
+        p.openInventory(bankListInventory);
     }
 
-    private static void placeBanks(Inventory banksListGui, Player p) {
-        BPPlayer player = PlayerRegistry.get(p);
-        HashMap<String, String> banksClickHolder = new HashMap<>();
+    private final HashMap<Integer, Bank> bankListGuiClickHolder = new HashMap<>();
+
+    private void placeContent(Inventory bankInventory, Player p) {
         int slot = 0;
 
-        for (String bankName : BankPlus.INSTANCE().getBankRegistry().getBanks().keySet()) {
-            if (Values.MULTIPLE_BANKS.isShowNotAvailableBanks() && !BankUtils.isAvailable(bankName, p)) continue;
+        for (Bank bank : BankPlus.INSTANCE().getBankRegistry().getBanks().values()) {
+            if (Values.MULTIPLE_BANKS.isShowNotAvailableBanks() && !BankUtils.isAvailable(bank, p)) continue;
 
-            ItemStack bankItem;
-            boolean glow = false;
-            ConfigurationSection section = BankUtils.getBank(bankName).getBanksListGuiItems();
+            BankItem bankItem = BankUtils.isAvailable(bank, p) ? bank.getAvailableBankListItem() : bank.getUnavailableBankListItem();
 
-            if (section == null) bankItem = BPItems.UNKNOWN_ITEM.clone();
-            else {
-                String path = BankUtils.isAvailable(bankName, p) ? "Available" : "Unavailable";
-                glow = section.getBoolean(path + ".Glowing");
-                try {
-                    bankItem = new ItemStack(Material.valueOf(section.getString(path + ".Material")));
-                } catch (IllegalArgumentException e) {
-                    bankItem = BPItems.UNKNOWN_ITEM.clone();
-                }
-            }
-
-            if (glow) glow(bankItem);
-            banksListGui.setItem(slot, bankItem);
-            banksClickHolder.put(p.getName() + "." + slot, bankName);
+            bankInventory.setItem(slot, bankItem.getItem());
+            bankListGuiClickHolder.put(slot, bank);
             slot++;
         }
     }
 
-    private static void updateMeta(Inventory banksList, Player p) {
+    private void updateMeta(Inventory banksList, Player p) {
         int slot = 0;
         for (String bankName : BankPlus.INSTANCE().getBankRegistry().getBanks().keySet()) {
             if (Values.MULTIPLE_BANKS.isShowNotAvailableBanks() && !BankUtils.isAvailable(bankName, p)) continue;
@@ -130,23 +117,7 @@ public class BankListGui {
         }
     }
 
-    private static void setMeta(String displayname, List<String> lore, ItemMeta meta, Player p) {
-        List<String> newLore = new ArrayList<>();
-        for (String lines : lore) newLore.add(BPChat.color(lines));
-
-        if (BankPlus.INSTANCE().isPlaceholderApiHooked()) {
-            meta.setDisplayName(PlaceholderAPI.setPlaceholders(p, BPChat.color(displayname)));
-            meta.setLore(PlaceholderAPI.setPlaceholders(p, newLore));
-        } else {
-            meta.setDisplayName(BPChat.color(displayname));
-            meta.setLore(newLore);
-        }
-    }
-
-    private static void glow(ItemStack item) {
-        ItemMeta meta = item.getItemMeta();
-        meta.addEnchant(Enchantment.DURABILITY, 1, true);
-        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        item.setItemMeta(meta);
+    public HashMap<Integer, Bank> getBankListGuiClickHolder() {
+        return bankListGuiClickHolder;
     }
 }

@@ -116,7 +116,7 @@ public class BPData {
 
             Bukkit.getOnlinePlayers().forEach(p -> {
                 BPPlayer player = PlayerRegistry.get(p);
-                if (player != null && player.getOpenedBank() != null) p.closeInventory();
+                if (player != null && player.getOpenedBankGui() != null) p.closeInventory();
             });
         } catch (Exception e) {
             BPLogger.warn(e, "Something went wrong while trying to reload the plugin, check the console logs and if the error persist, ask for support in the support discord.");

@@ -11,7 +11,7 @@ public class MultipleBanksValues {
     private boolean enableMultipleBanksModule, showNotAvailableBanks, directlyOpenIf1IsAvailable, previousItemGlowing, nextItemGlowing;
     private String banksGuiTitle, previousItemMaterial, nextItemMaterial, previousItemDisplayname, nextItemDisplayname, fillerMaterial;
     private List<String> previousItemLore, nextItemLore, autoBanksUnlocker;
-    private int banksGuiLines, previousItemSlot, nextItemSlot, updateDelay;
+    private int bankListGuiLines, previousItemSlot, nextItemSlot, updateDelay;
     private boolean fillerEnabled, fillerGlowing;
 
     public static MultipleBanksValues getInstance() {
@@ -35,7 +35,7 @@ public class MultipleBanksValues {
         fillerMaterial = multipleBanks.getString("Banks-Gui.Filler.Material");
         previousItemLore = multipleBanks.getStringList("Banks-Gui.Previous-Page.Lore");
         nextItemLore = multipleBanks.getStringList("Banks-Gui.Next-Page.Lore");
-        banksGuiLines = multipleBanks.getInt("Banks-Gui.Lines");
+        bankListGuiLines = multipleBanks.getInt("Banks-Gui.Lines");
         previousItemSlot = multipleBanks.getInt("Banks-Gui.Previous-Page.Slot");
         nextItemSlot = multipleBanks.getInt("Banks-Gui.Next-Page.Slot");
         updateDelay = multipleBanks.getInt("Banks-Gui.Update-Delay");
@@ -99,8 +99,8 @@ public class MultipleBanksValues {
         return nextItemLore;
     }
 
-    public int getBanksGuiLines() {
-        return banksGuiLines;
+    public int getBankListGuiLines() {
+        return Math.max(9, Math.min(54, bankListGuiLines * 9));
     }
 
     public int getPreviousItemSlot() {

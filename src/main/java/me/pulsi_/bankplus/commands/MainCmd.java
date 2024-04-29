@@ -1,5 +1,6 @@
 package me.pulsi_.bankplus.commands;
 
+import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankListGui;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
@@ -48,13 +49,13 @@ public class MainCmd implements CommandExecutor, TabCompleter {
             Player p = (Player) s;
 
             if (Values.CONFIG.isGuiModuleEnabled()) {
-                if (!Values.MULTIPLE_BANKS.enableMultipleBanksModule()) BankGuiUtils.openBank(p);
+                if (!Values.MULTIPLE_BANKS.enableMultipleBanksModule()) BankUtils.getBank(Values.CONFIG.getMainGuiName()).openBankGui(p);
                 else {
-                    if (!Values.MULTIPLE_BANKS.isDirectlyOpenIf1IsAvailable()) BankGuiUtils.openBank(p, BankListGui.multipleBanksGuiID);
+                    if (!Values.MULTIPLE_BANKS.isDirectlyOpenIf1IsAvailable()) BankUtils.getBank(BankListGui.MULTIPLE_BANKS_GUI_ID).openBankGui(p);
                     else {
-                        List<String> availableBanks = BankUtils.getAvailableBankNames(p);
-                        if (availableBanks.size() == 1) BankGuiUtils.openBank(p, availableBanks.get(0));
-                        else BankGuiUtils.openBank(p, BankListGui.multipleBanksGuiID);
+                        List<Bank> availableBanks = BankUtils.getAvailableBanks(p);
+                        if (availableBanks.size() == 1) availableBanks.get(0).openBankGui(p);
+                        else BankUtils.getBank(BankListGui.MULTIPLE_BANKS_GUI_ID).openBankGui(p);
                     }
                 }
             } else {

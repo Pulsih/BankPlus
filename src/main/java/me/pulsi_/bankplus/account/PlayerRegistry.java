@@ -15,14 +15,16 @@ public class PlayerRegistry {
         return players.containsKey(p.getUniqueId());
     }
 
-    public static void loadPlayer(Player p) {
+    public static BPPlayer loadPlayer(Player p) {
         for (BPEconomy economy : BPEconomy.list()) economy.loadPlayerBalance(p);
-        players.putIfAbsent(p.getUniqueId(), new BPPlayer(p));
+        BPPlayer bpPlayer = new BPPlayer(p);
+        players.putIfAbsent(p.getUniqueId(), bpPlayer);
+        return bpPlayer;
     }
 
-    public static void unloadPlayer(UUID uuid) {
-        players.remove(uuid);
+    public static BPPlayer unloadPlayer(UUID uuid) {
         for (BPEconomy economy : BPEconomy.list()) economy.unloadPlayerBalance(uuid);
+        return players.remove(uuid);
     }
 
     public static BPPlayer get(OfflinePlayer p) {

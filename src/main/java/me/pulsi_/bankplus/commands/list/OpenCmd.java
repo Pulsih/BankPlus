@@ -38,7 +38,7 @@ public class OpenCmd extends BPCommand {
             return false;
         }
 
-        if (!skipToConfirm(s)) BankUtils.getBank(bankName).openGuiBank(p);
+        if (!skipToConfirm(s)) BankUtils.getBank(bankName).openBankGui(p);
         return true;
     }
 

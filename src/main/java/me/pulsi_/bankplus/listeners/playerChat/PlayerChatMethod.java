@@ -26,7 +26,7 @@ public class PlayerChatMethod {
 
         BPPlayer player = PlayerRegistry.get(p);
 
-        Bank openedBank = player.getOpenedBank();
+        Bank openedBank = player.getOpenedBankGui();
         if (openedBank == null) {
             BPLogger.warn("BankPlus chat-transaction failed for player " + p.getName() + ", he did not have an opened bank. (Try again and if the problem persist contact the developer)");
             BPSets.removePlayerFromDepositing(p);

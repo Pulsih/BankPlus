@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.bankSystem.Bank;
+import me.pulsi_.bankplus.bankSystem.BankGui;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.configuration.ConfigurationSection;
@@ -87,10 +88,10 @@ public class BPItems {
         return item;
     }
 
-    public static ItemStack getFiller(Bank bank) {
+    public static ItemStack getFiller(BankGui bankGui) {
         ItemStack item;
         try {
-            String material = bank.getFillerMaterial();
+            String material = bankGui.getFillerMaterial();
             if (material.contains(":")) {
                 String[] itemData = material.split(":");
                 item = new ItemStack(Material.valueOf(itemData[0]), 1, Byte.parseByte(itemData[1]));
@@ -102,7 +103,7 @@ public class BPItems {
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(BPChat.color("&f"));
 
-        if (bank.isFillerGlowing()) {
+        if (bankGui.isFillerGlowing()) {
             meta.addEnchant(Enchantment.DURABILITY, 1, true);
             item.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
