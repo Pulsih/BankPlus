@@ -96,6 +96,9 @@ Levels:
     # This offline interest will only work if the 'Different-Offline-Rate'
     # section is enabled in the config.yml, otherwise it will use the normal interest.
     Offline-Interest: "5%"
+
+    # The max amount that a player can receive in interest.
+    # Max-Interest-Amount: 10000
   3:
     Cost: "10000"
     Required-Items: "DIAMOND-4,EMERALD-2"

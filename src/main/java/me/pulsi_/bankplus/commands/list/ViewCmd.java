@@ -1,5 +1,6 @@
 package me.pulsi_.bankplus.commands.list;
 
+import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
@@ -42,11 +43,11 @@ public class ViewCmd extends BPCommand {
 
             if (s instanceof Player) BPUtils.playSound("VIEW", (Player) s);
 
-            List<String> availableBanks = BankUtils.getAvailableBankNames(target);
+            List<Bank> availableBanks = BankUtils.getAvailableBanks(target);
             if (availableBanks.size() > 1) BPMessages.send(target, "Multiple-Bank-Others", BPUtils.placeValues(target, BPEconomy.getBankBalancesSum(target)));
             else {
-                String name = availableBanks.get(0);
-                BPMessages.send(s, "Bank-Others", BPUtils.placeValues(target, BPEconomy.get(name).getBankBalance(target), BankUtils.getCurrentLevel(name, target)));
+                Bank bank = availableBanks.get(0);
+                BPMessages.send(s, "Bank-Others", BPUtils.placeValues(target, bank.getBankEconomy().getBankBalance(target), BankUtils.getCurrentLevel(bank, target)));
             }
             return true;
         }
@@ -64,7 +65,8 @@ public class ViewCmd extends BPCommand {
 
         if (skipToConfirm(s)) return false;
         if (s instanceof Player) BPUtils.playSound("VIEW", (Player) s);
-        BPMessages.send(s, "Bank-Others", BPUtils.placeValues(target, BPEconomy.get(bankName).getBankBalance(target), BankUtils.getCurrentLevel(bankName, target)));
+        Bank bank = BankUtils.getBank(bankName);
+        BPMessages.send(s, "Bank-Others", BPUtils.placeValues(target, bank.getBankEconomy().getBankBalance(target), BankUtils.getCurrentLevel(bank, target)));
         return true;
     }
 

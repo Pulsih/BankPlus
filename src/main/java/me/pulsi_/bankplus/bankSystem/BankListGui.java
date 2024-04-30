@@ -28,6 +28,8 @@ import java.util.List;
  */
 public class BankListGui extends BankGui {
 
+    private final HashMap<Integer, Bank> bankListGuiClickHolder = new HashMap<>();
+
     public BankListGui() {
         super("BankListGui");
     }
@@ -51,20 +53,19 @@ public class BankListGui extends BankGui {
         else title = PlaceholderAPI.setPlaceholders(p, BPChat.color(title));
 
         Inventory bankListInventory = Bukkit.createInventory(new BankHolder(), Values.MULTIPLE_BANKS.getBankListGuiLines(), title);
-        placeContent(bankListInventory, p);
-        updateMeta(bankListInventory, p);
+        placeContent(getBankItems(), bankListInventory, p);
+        updateBankGuiMeta(bankListInventory, p);
 
         long delay = Values.MULTIPLE_BANKS.getUpdateDelay();
-        if (delay >= 0) player.setBankUpdatingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE(), () -> updateMeta(bankListInventory, p), delay, delay));
+        if (delay >= 0) player.setBankUpdatingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE(), () -> updateBankGuiMeta(bankListInventory, p), delay, delay));
 
         player.setOpenedBankGui(this);
         BPUtils.playSound("PERSONAL", p);
         p.openInventory(bankListInventory);
     }
 
-    private final HashMap<Integer, Bank> bankListGuiClickHolder = new HashMap<>();
-
-    private void placeContent(Inventory bankInventory, Player p) {
+    @Override
+    public void placeContent(HashMap<Integer, BankItem> items, Inventory bankInventory, Player p) {
         int slot = 0;
 
         for (Bank bank : BankPlus.INSTANCE().getBankRegistry().getBanks().values()) {
@@ -74,46 +75,8 @@ public class BankListGui extends BankGui {
 
             bankInventory.setItem(slot, bankItem.getItem());
             bankListGuiClickHolder.put(slot, bank);
+            getBankItems().put(slot, bankItem);
             slot++;
-        }
-    }
-
-    private void updateMeta(Inventory banksList, Player p) {
-        int slot = 0;
-        for (String bankName : BankPlus.INSTANCE().getBankRegistry().getBanks().keySet()) {
-            if (Values.MULTIPLE_BANKS.isShowNotAvailableBanks() && !BankUtils.isAvailable(bankName, p)) continue;
-
-            ItemStack item = banksList.getItem(slot);
-            slot++;
-
-            if (item == null) continue;
-
-            ItemMeta meta = item.getItemMeta();
-            String displayname = "&c&l* DISPLAYNAME NOT FOUND *";
-            List<String> lore = new ArrayList<>();
-
-            Bank bank = BankUtils.getBank(bankName);
-            ConfigurationSection section = bank.getBanksListGuiItems();
-            if (section != null) {
-                String permission = bank.getAccessPermission();
-                String path = (permission == null || p.hasPermission(permission)) ? "Available" : "Unavailable";
-
-                String dName = section.getString(path + ".Displayname");
-                if (dName != null) displayname = dName;
-
-                lore = section.getStringList(path + ".Lore");
-                int modelData = section.getInt(path + ".CustomModelData");
-
-                if (modelData > 0) {
-                    try {
-                        meta.setCustomModelData(modelData);
-                    } catch (NoSuchMethodError e) {
-                        BPLogger.warn("Cannot set custom model data to the item: \"" + displayname + "\"&e. Custom model data is only available on 1.14.4+ servers!");
-                    }
-                }
-            }
-            setMeta(displayname, lore, meta, p);
-            item.setItemMeta(meta);
         }
     }
 

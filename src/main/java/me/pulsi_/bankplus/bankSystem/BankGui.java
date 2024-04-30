@@ -37,6 +37,10 @@ public class BankGui {
     private boolean giveInterestIfNotAvailable, fillerEnabled, fillerGlowing;
     private Bank.BankItem availableBankListItem, unavailableBankListItem;
 
+    public String getIdentifier() {
+        return identifier;
+    }
+
     public HashMap<Integer, Bank.BankItem> getBankItems() {
         return bankItems;
     }
@@ -206,7 +210,7 @@ public class BankGui {
         ItemStack inventoryItem = playerOpenedInventory.getItem(slot);
         ItemMeta meta = inventoryItem.getItemMeta();
 
-        List<String> actualLore = new ArrayList<>(), levelLore = bankItem.lore.get(BankUtils.getCurrentLevel(identifier, p));
+        List<String> actualLore = new ArrayList<>(), levelLore = bankItem.lore.get(BankUtils.getCurrentLevel(BankUtils.getBank(identifier), p));
         if (levelLore == null) levelLore = bankItem.lore.get(0);
         for (String line : levelLore) actualLore.add(BPChat.color(line));
 

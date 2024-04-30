@@ -51,11 +51,11 @@ public class MainCmd implements CommandExecutor, TabCompleter {
             if (Values.CONFIG.isGuiModuleEnabled()) {
                 if (!Values.MULTIPLE_BANKS.enableMultipleBanksModule()) BankUtils.getBank(Values.CONFIG.getMainGuiName()).openBankGui(p);
                 else {
-                    if (!Values.MULTIPLE_BANKS.isDirectlyOpenIf1IsAvailable()) BankUtils.getBank(BankListGui.MULTIPLE_BANKS_GUI_ID).openBankGui(p);
+                    if (!Values.MULTIPLE_BANKS.isDirectlyOpenIf1IsAvailable()) new BankListGui().openBankListGui(p);
                     else {
                         List<Bank> availableBanks = BankUtils.getAvailableBanks(p);
                         if (availableBanks.size() == 1) availableBanks.get(0).openBankGui(p);
-                        else BankUtils.getBank(BankListGui.MULTIPLE_BANKS_GUI_ID).openBankGui(p);
+                        else new BankListGui().openBankListGui(p);
                     }
                 }
             } else {

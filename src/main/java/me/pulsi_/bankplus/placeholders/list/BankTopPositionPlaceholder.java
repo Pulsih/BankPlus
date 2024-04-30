@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.placeholders.list;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.bankTop.BPBankTop;
 import me.pulsi_.bankplus.placeholders.BPPlaceholder;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.values.Values;
@@ -18,6 +19,6 @@ public class BankTopPositionPlaceholder extends BPPlaceholder {
         if (!Values.CONFIG.isBanktopEnabled())
             return BPChat.color("&cThe banktop is not enabled!");
 
-        return BankPlus.INSTANCE().getBankTopManager().getPlayerBankTopPosition(p) + "";
+        return BPBankTop.getPlayerBankTopPosition(p) + "";
     }
 }

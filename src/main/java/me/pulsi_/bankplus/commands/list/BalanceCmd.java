@@ -1,5 +1,6 @@
 package me.pulsi_.bankplus.commands.list;
 
+import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
@@ -34,17 +35,14 @@ public class BalanceCmd extends BPCommand {
         if (args.length == 1) {
             if (skipToConfirm(s)) return false;
 
-            List<String> availableBanks = BankUtils.getAvailableBankNames(p);
+            List<Bank> availableBanks = BankUtils.getAvailableBanks(p);
             if (availableBanks.isEmpty()) {
                 BPMessages.send(p, "No-Available-Banks");
                 return false;
             }
 
             if (availableBanks.size() > 1) BPMessages.send(p, "Multiple-Personal-Bank", BPUtils.placeValues(p, BPEconomy.getBankBalancesSum(p)));
-            else {
-                String name = availableBanks.get(0);
-                BPMessages.send(p, "Personal-Bank", BPUtils.placeValues(p, BPEconomy.getBankBalancesSum(p), BankUtils.getCurrentLevel(name, p)));
-            }
+            else BPMessages.send(p, "Personal-Bank", BPUtils.placeValues(p, BPEconomy.getBankBalancesSum(p), BankUtils.getCurrentLevel(availableBanks.get(0), p)));
         } else {
             String bankName = args[1];
             if (!BankUtils.exist(bankName)) {
@@ -52,7 +50,7 @@ public class BalanceCmd extends BPCommand {
                 return false;
             }
             if (skipToConfirm(s)) return false;
-            BPMessages.send(p, "Personal-Bank", BPUtils.placeValues(p, BPEconomy.get(bankName).getBankBalance(p), BankUtils.getCurrentLevel(bankName, p)));
+            BPMessages.send(p, "Personal-Bank", BPUtils.placeValues(p, BPEconomy.get(bankName).getBankBalance(p), BankUtils.getCurrentLevel(BankUtils.getBank(bankName), p)));
         }
         return true;
     }

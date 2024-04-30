@@ -3,11 +3,9 @@ package me.pulsi_.bankplus.listeners.bankListener;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
-import me.pulsi_.bankplus.bankSystem.Bank;
-import me.pulsi_.bankplus.bankSystem.BankHolder;
-import me.pulsi_.bankplus.bankSystem.BankListGui;
-import me.pulsi_.bankplus.bankSystem.BankUtils;
+import me.pulsi_.bankplus.bankSystem.*;
 import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.utils.BPFormatter;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
@@ -25,188 +23,90 @@ public class BankClickMethod {
 
     public static void process(InventoryClickEvent e) {
         Player p = (Player) e.getWhoClicked();
-        Inventory bank = e.getClickedInventory();
-        if (bank == null || bank.getHolder() == null || !(bank.getHolder() instanceof BankHolder)) return;
+        Inventory bankInventory = e.getClickedInventory();
+        if (bankInventory == null || bankInventory.getHolder() == null || !(bankInventory.getHolder() instanceof BankHolder)) return;
         e.setCancelled(true);
 
         BPPlayer player = PlayerRegistry.get(p);
         if (player.getOpenedBankGui() == null) return;
 
         int slot = e.getSlot();
-        Bank openedBank = player.getOpenedBankGui();
+        BankGui openedBank = player.getOpenedBankGui();
 
         if (openedBank instanceof BankListGui) {
-            HashMap<String, String> slots = player.getPlayerBankClickHolder();
-            if (!slots.containsKey(p.getName() + "." + slot)) return;
-
-            p.closeInventory();
-            BankGuiUtils.openBank(p, slots.get(p.getName() + "." + slot), false);
-            for (int i = 0; i < slots.size(); i++)
-                slots.remove(p.getName() + "." + i);
-
+            BankListGui bankListGui = (BankListGui) openedBank;
+            Bank clickedBank = bankListGui.getBankListGuiClickHolder().get(slot);
+            if (clickedBank != null) clickedBank.openBankGui(p);
             return;
         }
 
-        Bank openedBank = player.getOpenedBankGui();
         Bank.BankItem clickedItem = openedBank.getBankItems().get(slot);
         if (clickedItem == null) return;
 
-        for (String actionType : clickedItem.actions) {
-            String[] parts = actionType.split(" ");
-            int length = parts.length;
+        String bankName = openedBank.getIdentifier();
+        for (String action : clickedItem.getActions()) {
+            String identifier = action.substring(action.indexOf("["), action.indexOf("]") + 1), value = action.replace(identifier + " ", "");
 
-            String identifier = length > 0 ? parts[0] : null, value = "";
-            if (identifier == null) continue;
-
-            if (identifier.equals("[UPGRADE]")) {
-                if (Values.CONFIG.isGuiActionsNeedPermissions() && !BPUtils.hasPermission(p, "bankplus.upgrade")) return;
-
-                BankUtils.upgradeBank(bankName, p);
-                continue;
-            }
-
-            if (length != 1) {
-                StringBuilder builder = new StringBuilder();
-                for (int i = 1; i < length; i++) {
-                    builder.append(parts[i]);
-                    if (i + 1 < length) builder.append(" ");
-                }
-                value = builder.toString();
-            }
-
-            if (value.equals("")) {
-                BPLogger.warn("No value specified! Item: " + key + ". File: " + bankName + ".yml. Action: " + identifier + ".");
-                continue;
-            }
-
-            BPEconomy economy = BPEconomy.get(bankName);
-            switch (identifier) {
-                case "[CONSOLE]": {
+            switch (identifier.toLowerCase()) {
+                case "[console]":
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), value);
-                }
-                break;
+                    break;
 
-                case "[DEPOSIT]": {
+                case "[deposit]": {
                     if (Values.CONFIG.isGuiActionsNeedPermissions() && !BPUtils.hasPermission(p, "bankplus.deposit")) return;
 
-                    if (value.equals("CUSTOM")) {
+                    if (value.equalsIgnoreCase("CUSTOM")) {
                         BPUtils.customDeposit(p, bankName);
                         continue;
                     }
+
                     BigDecimal amount;
                     try {
-                        if (!value.endsWith("%")) amount = new BigDecimal(value);
+                        if (!value.endsWith("%")) amount = BPFormatter.getStyledBigDecimal(value);
                         else {
-                            BigDecimal percentage = new BigDecimal(value.replace("%", "")).divide(BigDecimal.valueOf(100));
-                            amount = BigDecimal.valueOf(vaultEconomy.getBalance(p)).multiply(percentage);
+                            BigDecimal percentage = BPFormatter.getStyledBigDecimal(value.replace("%", "")).divide(BigDecimal.valueOf(100));
+                            amount = BigDecimal.valueOf(BankPlus.INSTANCE().getVaultEconomy().getBalance(p)).multiply(percentage);
                         }
                     } catch (NumberFormatException ex) {
-                        BPLogger.warn("Invalid deposit number! (Button: " + key + ", Number: " + value + ")");
+                        BPLogger.warn("Could not deposit because an invalid number has been specified! (Bank gui: " + bankName + ", Item slot: " + slot + ", Value: " + value + ")");
                         continue;
                     }
-                    economy.deposit(p, amount);
+                    BPEconomy.get(bankName).deposit(p, amount);
                 }
                 break;
 
-                case "[PLAYER]": {
+                case "[player]":
                     p.chat(value);
-                }
-                break;
+                    break;
 
-                case "[WITHDRAW]": {
+                case "[withdraw]": {
                     if (Values.CONFIG.isGuiActionsNeedPermissions() && !BPUtils.hasPermission(p, "bankplus.withdraw")) return;
 
                     if (value.equals("CUSTOM")) {
                         BPUtils.customWithdraw(p, bankName);
                         continue;
                     }
+
+                    BPEconomy economy = BPEconomy.get(bankName);
                     BigDecimal amount;
+
                     try {
                         if (!value.endsWith("%")) amount = new BigDecimal(value);
                         else {
-                            BigDecimal percentage = new BigDecimal(value.replace("%", "")).divide(BigDecimal.valueOf(100));
+                            BigDecimal percentage = BPFormatter.getStyledBigDecimal(value.replace("%", "")).divide(BigDecimal.valueOf(100));
                             amount = economy.getBankBalance(p).multiply(percentage);
                         }
                     } catch (NumberFormatException ex) {
-                        BPLogger.warn("Invalid withdraw number! (Button: " + key + ", Number: " + value + ")");
+                        BPLogger.warn("Could not withdraw because an invalid number has been specified! (Bank gui: " + bankName + ", Item slot: " + slot + ", Value: " + value + ")");
                         continue;
                     }
                     economy.withdraw(p, amount);
                 }
+                break;
+
+                case "[upgrade]":
+                    BankUtils.upgradeBank(BankUtils.getBank(bankName), p);
             }
         }
-    }
-
-    private static boolean processOldClickMethod(ConfigurationSection itemValues, String bankName, Player p) {
-        String actionType = itemValues.getString("Action.Action-Type");
-        if (actionType == null) return false;
-
-        String actionAmount = itemValues.getString("Action.Amount");
-
-        actionType = actionType.toLowerCase();
-        actionAmount = actionAmount == null ? "null" : actionAmount.toLowerCase();
-
-        BPEconomy economy = BPEconomy.get(bankName);
-        Economy vaultEconomy = BankPlus.INSTANCE().getVaultEconomy();
-        switch (actionType) {
-            case "deposit":
-                switch (actionAmount) {
-                    case "custom":
-                        BPUtils.customDeposit(p);
-                        break;
-
-                    case "all":
-                        economy.deposit(p, BigDecimal.valueOf(vaultEconomy.getBalance(p)));
-                        break;
-
-                    case "half":
-                        economy.deposit(p, BigDecimal.valueOf(vaultEconomy.getBalance(p) / 2));
-                        break;
-
-                    default:
-                        BigDecimal amount;
-                        try {
-                            amount = new BigDecimal(actionAmount);
-                        } catch (NumberFormatException ex) {
-                            BPLogger.error("Invalid deposit number! (Path: " + itemValues + ", Number: " + actionAmount + ")");
-                            return true;
-                        }
-                        economy.deposit(p, amount);
-                        break;
-                }
-                break;
-
-            case "withdraw":
-                switch (actionAmount) {
-                    case "custom":
-                        BPUtils.customWithdraw(p);
-                        break;
-
-                    case "all":
-                        economy.withdraw(p, economy.getBankBalance(p));
-                        break;
-
-                    case "half":
-                        economy.withdraw(p, economy.getBankBalance(p).divide(BigDecimal.valueOf(2)));
-                        break;
-
-                    default:
-                        BigDecimal amount;
-                        try {
-                            amount = new BigDecimal(actionAmount);
-                        } catch (NumberFormatException ex) {
-                            BPLogger.error("Invalid withdraw number! (Path: " + itemValues + ", Number: " + actionAmount + ")");
-                            return true;
-                        }
-                        economy.withdraw(p, amount);
-                        break;
-                }
-                break;
-
-            case "upgrade":
-                BankUtils.upgradeBank(bankName, p);
-                break;
-        }
-        return true;
     }
 }

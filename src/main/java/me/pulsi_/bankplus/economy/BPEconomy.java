@@ -27,15 +27,17 @@ public class BPEconomy {
 
     private static final Set<UUID> loadedPlayers = new HashSet<>();
 
-    private final String bankName;
+    private final Bank originBank;
+    //private final String bankName;
     private final HashMap<UUID, Holder> balances = new HashMap<>();
     private final Set<UUID> transactions = new HashSet<>();
 
     private final String moneyPath, interestPath, debtPath, levelPath;
 
-    public BPEconomy(String bankName) {
-        this.bankName = bankName;
+    public BPEconomy(Bank originBank) {
+        this.originBank = originBank;
 
+        String bankName = originBank.getIdentifier();
         this.moneyPath = "banks." + bankName + ".money";
         this.interestPath = "banks." + bankName + ".interest";
         this.debtPath = "banks." + bankName + ".debt";
@@ -106,6 +108,10 @@ public class BPEconomy {
         return amount;
     }
 
+    public Bank getOriginBank() {
+        return originBank;
+    }
+
     public boolean isPlayerBalanceLoaded(OfflinePlayer p) {
         return isPlayerBalanceLoaded(p.getUniqueId());
     }
@@ -115,10 +121,18 @@ public class BPEconomy {
     }
 
     public Holder loadPlayerBalance(OfflinePlayer p) {
-        return loadPlayerBalance(p.getUniqueId());
+        return loadPlayerBalance(p.getUniqueId(), true);
     }
 
     public Holder loadPlayerBalance(UUID uuid) {
+        return loadPlayerBalance(uuid, true);
+    }
+
+    public Holder loadPlayerBalance(OfflinePlayer p, boolean wasRegistered) {
+        return loadPlayerBalance(p.getUniqueId(), wasRegistered);
+    }
+
+    public Holder loadPlayerBalance(UUID uuid, boolean wasRegistered) {
         loadedPlayers.add(uuid);
         if (isPlayerBalanceLoaded(uuid)) return balances.get(uuid);
 
@@ -127,18 +141,20 @@ public class BPEconomy {
         BigDecimal debt, money, offlineInterest;
         int level;
 
+        boolean useStartAmount = !wasRegistered && BankUtils.isMainBank(originBank);
         if (BankPlus.INSTANCE().getMySql().isConnected()) {
             SQLPlayerManager pManager = new SQLPlayerManager(uuid);
 
+            String bankName = originBank.getIdentifier();
             debt = pManager.getDebt(bankName);
-            money = pManager.getMoney(bankName);
+            money = useStartAmount ? Values.CONFIG.getStartAmount() : pManager.getMoney(bankName);
             offlineInterest = pManager.getOfflineInterest(bankName);
             level = pManager.getLevel(bankName);
         } else {
             FileConfiguration config = new BPPlayerManager(uuid).getPlayerConfig();
 
             debt = BPFormatter.getStyledBigDecimal(config.getString(debtPath));
-            money = BPFormatter.getStyledBigDecimal(config.getString(moneyPath));
+            money = useStartAmount ? Values.CONFIG.getStartAmount() : BPFormatter.getStyledBigDecimal(config.getString(moneyPath));
             offlineInterest = BPFormatter.getStyledBigDecimal(config.getString(interestPath));
             level = Math.max(config.getInt(levelPath), 1);
         }
@@ -238,7 +254,7 @@ public class BPEconomy {
             amount = event.getTransactionAmount();
         }
 
-        result = result.max(amount.min(BankUtils.getCapacity(bankName, p)));
+        result = result.max(amount.min(BankUtils.getCapacity(originBank, p)));
         set(p, result);
 
         if (!ignoreEvents) afterTransactionEvent(p, type, amount);
@@ -288,7 +304,7 @@ public class BPEconomy {
             amount = event.getTransactionAmount();
         }
 
-        BigDecimal capacity = BankUtils.getCapacity(bankName, p), balance = getBankBalance(p);
+        BigDecimal capacity = BankUtils.getCapacity(originBank, p), balance = getBankBalance(p);
         if (capacity.compareTo(BigDecimal.ZERO) <= 0) {
             result = amount;
             set(p, balance.add(result));
@@ -467,7 +483,7 @@ public class BPEconomy {
     }
 
     public void deposit(Player p, BigDecimal amount) {
-        if (BPUtils.isBankFull(p, bankName) || isInTransaction(p)) return;
+        if (BPUtils.isBankFull(p, originBank) || isInTransaction(p)) return;
 
         BPPreTransactionEvent event = preTransactionEvent(p, TransactionType.DEPOSIT, amount);
         if (event.isCancelled()) return;
@@ -483,7 +499,7 @@ public class BPEconomy {
         if (maxDeposit.compareTo(BigDecimal.ZERO) > 0 && amount.compareTo(maxDeposit) >= 0) amount = maxDeposit;
         if (wallet.doubleValue() < amount.doubleValue()) amount = wallet;
 
-        BigDecimal capacity = BankUtils.getCapacity(bankName, p).subtract(getBankBalance(p)), finalAmount = amount.min(capacity);
+        BigDecimal capacity = BankUtils.getCapacity(originBank, p).subtract(getBankBalance(p)), finalAmount = amount.min(capacity);
 
         BigDecimal depositTaxes = Values.CONFIG.getDepositTaxes(), taxes = BigDecimal.ZERO;
         if (depositTaxes.compareTo(BigDecimal.ZERO) > 0 && !p.hasPermission("bankplus.deposit.bypass-taxes")) {
@@ -546,9 +562,9 @@ public class BPEconomy {
      * @param from     The player that will give the money.
      * @param to       The player that will receive your money.
      * @param amount   How much money you want to pay.
-     * @param toBank   The bank where the money will be added.
+     * @param toBankName   The bank name where the money will be added.
      */
-    public void pay(Player from, Player to, BigDecimal amount, String toBank) {
+    public void pay(Player from, Player to, BigDecimal amount, String toBankName) {
         if (isInTransaction(from)) return;
 
         BigDecimal senderBalance = getBankBalance(from);
@@ -558,7 +574,8 @@ public class BPEconomy {
             return;
         }
 
-        BPEconomy toEconomy = get(toBank);
+        Bank toBank = BankUtils.getBank(toBankName);
+        BPEconomy toEconomy = toBank.getBankEconomy();
         // Check if the receiver of the payment has the bank full
         if (toEconomy.getBankBalance(to).compareTo(BankUtils.getCapacity(toBank, to)) >= 0) {
             BPMessages.send(from, "Bank-Full", "%player%$" + to.getName());
@@ -572,14 +589,6 @@ public class BPEconomy {
         BPMessages.send(from, "Payment-Sent", BPUtils.placeValues(to, removed));
     }
 
-    /**
-     * Returns the name of the bank that own this economy.
-     * @return A string representing the bank name.
-     */
-    public String getBankName() {
-        return bankName;
-    }
-
     private boolean minimumAmount(Player p, BigDecimal amount, BigDecimal minimum) {
         if (amount.compareTo(minimum) < 0) {
             BPMessages.send(p, "Minimum-Number", "%min%$" + minimum);
@@ -590,7 +599,7 @@ public class BPEconomy {
 
     private BPPreTransactionEvent preTransactionEvent(OfflinePlayer p, TransactionType type, BigDecimal amount) {
         BPPreTransactionEvent event = new BPPreTransactionEvent(
-                p, type, getBankBalance(p), BankPlus.INSTANCE().getVaultEconomy().getBalance(p), amount, bankName
+                p, type, getBankBalance(p), BankPlus.INSTANCE().getVaultEconomy().getBalance(p), amount, originBank.getIdentifier()
         );
         BPUtils.callEvent(event);
         return event;
@@ -598,7 +607,7 @@ public class BPEconomy {
 
     private void afterTransactionEvent(OfflinePlayer p, TransactionType type, BigDecimal amount) {
         BPAfterTransactionEvent event = new BPAfterTransactionEvent(
-                p, type, getBankBalance(p), BankPlus.INSTANCE().getVaultEconomy().getBalance(p), amount, bankName
+                p, type, getBankBalance(p), BankPlus.INSTANCE().getVaultEconomy().getBalance(p), amount, originBank.getIdentifier()
         );
         BPUtils.callEvent(event);
     }

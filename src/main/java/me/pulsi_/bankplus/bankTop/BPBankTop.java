@@ -1,8 +1,6 @@
 package me.pulsi_.bankplus.bankTop;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BPPlayer;
-import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.managers.BPTaskManager;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -17,16 +15,10 @@ import java.util.*;
 
 public class BPBankTop {
 
-    private final List<BankTopPlayer> bankTop = new ArrayList<>();
+    private static final List<BankTopPlayer> bankTop = new ArrayList<>();
 
-    private final BankPlus plugin;
-
-    public BPBankTop(BankPlus plugin) {
-        this.plugin = plugin;
-    }
-
-    public void updateBankTop() {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+    public static void updateBankTop() {
+        Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
             bankTop.clear();
 
             HashMap<String, BigDecimal> balances = BPEconomy.getAllEconomiesBankBalances();
@@ -61,36 +53,30 @@ public class BPBankTop {
         });
     }
 
-    public void restartUpdateTask() {
+    public static void restartUpdateTask() {
         long delay = Values.CONFIG.getUpdateBankTopDelay();
-        BPTaskManager.setTask(BPTaskManager.BANKTOP_BROADCAST_TASK, Bukkit.getScheduler().runTaskTimer(plugin, this::updateBankTop, delay, delay));
+        BPTaskManager.setTask(BPTaskManager.BANKTOP_BROADCAST_TASK, Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE(), BPBankTop::updateBankTop, delay, delay));
     }
 
-    public BigDecimal getBankTopBalancePlayer(int position) {
-        BankTopPlayer p = bankTop.get(Math.min(bankTop.size(), Math.max(1, position)));
-        return (p == null || p.getBalance() == null ? new BigDecimal(0) : p.getBalance());
+    public static BigDecimal getBankTopBalancePlayer(int position) {
+        BankTopPlayer p = bankTop.get(position - 1);
+        return ((p == null || p.getBalance() == null) ? BigDecimal.ZERO : p.getBalance());
     }
 
-    public String getBankTopNamePlayer(int position) {
-        BankTopPlayer p = bankTop.get(Math.min(bankTop.size(), Math.max(1, position)));
-        return (p == null || p.getName() == null ? Values.CONFIG.getBanktopPlayerNotFoundPlaceholder() : p.getName());
+    public static String getBankTopNamePlayer(int position) {
+        BankTopPlayer p = bankTop.get(position - 1);
+        return ((p == null || p.getName() == null) ? Values.CONFIG.getBanktopPlayerNotFoundPlaceholder() : p.getName());
     }
 
-    public int getPlayerBankTopPosition(OfflinePlayer p) {
-        BPPlayer player = PlayerRegistry.get(p);
-        if (player != null) {
-            if (player.getBanktopPosition() == -1)
-                player.setBanktopPosition(getPlayerBankTopPosition(p.getName()));
-            return player.getBanktopPosition();
-        }
+    public static int getPlayerBankTopPosition(OfflinePlayer p) {
         return getPlayerBankTopPosition(p.getName());
     }
 
-    public int getPlayerBankTopPosition(String name) {
+    public static int getPlayerBankTopPosition(String name) {
         int position = -1;
-        for (int i = 1; i <= bankTop.size(); i++) {
+        for (int i = 0; i <= bankTop.size(); i++) {
             BankTopPlayer p = bankTop.get(i);
-            if (p != null && p.getName() != null && p.getName().equals(name)) return i;
+            if (p != null && p.getName() != null && p.getName().equals(name)) return i + 1;
         }
         return position;
     }

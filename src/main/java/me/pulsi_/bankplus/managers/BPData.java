@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.managers;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
+import me.pulsi_.bankplus.bankTop.BPBankTop;
 import me.pulsi_.bankplus.commands.BankTopCmd;
 import me.pulsi_.bankplus.commands.CmdRegisterer;
 import me.pulsi_.bankplus.commands.MainCmd;
@@ -16,6 +17,7 @@ import me.pulsi_.bankplus.listeners.InventoryCloseListener;
 import me.pulsi_.bankplus.listeners.PlayerServerListener;
 import me.pulsi_.bankplus.listeners.bankListener.*;
 import me.pulsi_.bankplus.listeners.playerChat.*;
+import me.pulsi_.bankplus.loanSystem.BPLoanRegistry;
 import me.pulsi_.bankplus.mySQL.BPSQL;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -49,7 +51,7 @@ public class BPData {
         plugin.getConfigs().setupConfigs();
         reloadPlugin();
 
-        plugin.getLoanRegistry().loadAllLoans();
+        BPLoanRegistry.loadAllLoans();
 
         registerEvents();
         setupCommands();
@@ -57,7 +59,7 @@ public class BPData {
         BPLogger.log("    &aDone! &8(&3" + (System.currentTimeMillis() - startTime) + "ms&8)");
         BPLogger.log("");
 
-        if (Values.CONFIG.isBanktopEnabled()) plugin.getBankTopManager().updateBankTop();
+        if (Values.CONFIG.isBanktopEnabled()) BPBankTop.updateBankTop();
     }
 
     public void shutdownPlugin() {
@@ -68,7 +70,7 @@ public class BPData {
         FileConfiguration savesConfig = configs.getConfig(file);
 
         if (Values.CONFIG.isInterestEnabled()) plugin.getInterest().saveInterest(savesConfig);
-        plugin.getLoanRegistry().saveAllLoans(savesConfig);
+        BPLoanRegistry.saveAllLoans(savesConfig);
 
         try {
             savesConfig.save(file);
@@ -94,7 +96,7 @@ public class BPData {
 
             if (Values.CONFIG.isLogTransactions()) plugin.getBpLogUtils().setupLoggerFile();
             if (Values.CONFIG.isIgnoringAfkPlayers()) plugin.getAfkManager().startCountdown();
-            if (Values.CONFIG.isBanktopEnabled() && !BPTaskManager.contains(BPTaskManager.BANKTOP_BROADCAST_TASK)) plugin.getBankTopManager().restartUpdateTask();
+            if (Values.CONFIG.isBanktopEnabled() && !BPTaskManager.contains(BPTaskManager.BANKTOP_BROADCAST_TASK)) BPBankTop.restartUpdateTask();
 
             BPAFK BPAFK = plugin.getAfkManager();
             if (!BPAFK.isPlayerCountdownActive()) BPAFK.startCountdown();

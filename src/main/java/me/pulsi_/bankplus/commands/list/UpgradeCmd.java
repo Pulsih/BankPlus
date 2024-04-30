@@ -43,7 +43,7 @@ public class UpgradeCmd extends BPCommand {
             return false;
         }
 
-        if (!skipToConfirm(s)) BankUtils.upgradeBank(bankName, p);
+        if (!skipToConfirm(s)) BankUtils.upgradeBank(BankUtils.getBank(bankName), p);
         return true;
     }
 

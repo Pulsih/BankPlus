@@ -1,5 +1,6 @@
 package me.pulsi_.bankplus.loanSystem;
 
+import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.scheduler.BukkitTask;
@@ -9,50 +10,51 @@ import java.math.BigDecimal;
 public class BPLoan {
 
     private OfflinePlayer sender, receiver;
-    private final String fromBankName, toBankName, requestedBank;
-    private BigDecimal moneyGiven, moneyToReturn;
+    private final Bank senderBank, receiverBank, requestedBank;
+    private final BigDecimal moneyGiven;
+    private BigDecimal moneyToReturn;
     private BukkitTask task;
     private long timeLeft;
     private int instalments, instalmentsPoint;
+    private final LoanType loanType;
 
-    // Used for loans from player to player
-    public BPLoan(OfflinePlayer sender, OfflinePlayer receiver, BigDecimal amount, String fromBankName, String toBankName) {
+    /**
+     * Constructor for loans player-to-player.
+     * @param sender The loan sender.
+     * @param receiver The loan receiver.
+     * @param amount The loan amount.
+     * @param senderBank The sender bank.
+     * @param receiverBank The receiver bank.
+     */
+    public BPLoan(OfflinePlayer sender, OfflinePlayer receiver, BigDecimal amount, Bank senderBank, Bank receiverBank) {
         this.sender = sender;
         this.receiver = receiver;
         this.moneyGiven = amount;
         this.moneyToReturn = amount.add(amount.divide(BigDecimal.valueOf(100)).multiply(Values.CONFIG.getLoanInterest()));
-        this.fromBankName = fromBankName;
-        this.toBankName = toBankName;
+        this.senderBank = senderBank;
+        this.receiverBank = receiverBank;
         this.instalments = Values.CONFIG.getLoanInstalments();
         this.requestedBank = null;
+        this.loanType = LoanType.PLAYER_TO_PLAYER;
     }
 
-    // Used for loans from player to bank
-    public BPLoan(OfflinePlayer receiver, String bank, BigDecimal amount) {
+    /**
+     * Constructor used for loans bank-to-player.
+     * The sender and receiver banks will be null, and the requestedBank will be the bank that gave the loan.
+     * @param receiver The loan receiver
+     * @param bank The bank loan sender.
+     * @param amount The loan amount.
+     */
+    public BPLoan(OfflinePlayer receiver, Bank bank, BigDecimal amount) {
         this.sender = null; // The sender would be the bank.
         this.receiver = receiver;
         this.moneyGiven = amount;
         this.moneyToReturn = amount.add(amount.divide(BigDecimal.valueOf(100)).multiply(Values.CONFIG.getLoanInterest()));
-        this.fromBankName = null;
-        this.toBankName = null;
+        this.senderBank = null;
+        this.receiverBank = null;
         this.instalments = Values.CONFIG.getLoanInstalments();
         this.requestedBank = bank;
-    }
-
-    public BPLoan(OfflinePlayer sender, OfflinePlayer receiver, String fromBankName, String toBankName) {
-        this.sender = sender;
-        this.receiver = receiver;
-        this.fromBankName = fromBankName;
-        this.toBankName = toBankName;
-        this.requestedBank = null;
-    }
-
-    public BPLoan(OfflinePlayer receiver, String requestedBank) {
-        this.sender = null;
-        this.receiver = receiver;
-        this.fromBankName = null;
-        this.toBankName = null;
-        this.requestedBank = requestedBank;
+        this.loanType = LoanType.BANK_TO_PLAYER;
     }
 
     public OfflinePlayer getSender() {
@@ -63,15 +65,15 @@ public class BPLoan {
         return receiver;
     }
 
-    public String getFromBankName() {
-        return fromBankName;
+    public Bank getSenderBank() {
+        return senderBank;
     }
 
-    public String getToBankName() {
-        return toBankName;
+    public Bank getReceiverBank() {
+        return receiverBank;
     }
 
-    public String getRequestedBank() {
+    public Bank getRequestedBank() {
         return requestedBank;
     }
 
@@ -125,5 +127,10 @@ public class BPLoan {
 
     public void setInstalmentsPoint(int instalmentsPoint) {
         this.instalmentsPoint = instalmentsPoint;
+    }
+
+    public enum LoanType {
+        PLAYER_TO_PLAYER,
+        BANK_TO_PLAYER
     }
 }

@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.placeholders.list;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.bankTop.BPBankTop;
 import me.pulsi_.bankplus.placeholders.BPPlaceholder;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.values.Values;
@@ -29,6 +30,6 @@ public class BankTopNamePlaceholder extends BPPlaceholder {
         if (position > Values.CONFIG.getBankTopSize())
             return "&cThe banktop limit is " + Values.CONFIG.getBankTopSize() + "!";
 
-        return BankPlus.INSTANCE().getBankTopManager().getBankTopNamePlayer(position);
+        return BPBankTop.getBankTopNamePlayer(position);
     }
 }

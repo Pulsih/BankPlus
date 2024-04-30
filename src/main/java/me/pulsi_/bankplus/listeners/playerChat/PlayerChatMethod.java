@@ -4,6 +4,8 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.bankSystem.Bank;
+import me.pulsi_.bankplus.bankSystem.BankGui;
+import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPMessages;
@@ -26,7 +28,7 @@ public class PlayerChatMethod {
 
         BPPlayer player = PlayerRegistry.get(p);
 
-        Bank openedBank = player.getOpenedBankGui();
+        BankGui openedBank = player.getOpenedBankGui();
         if (openedBank == null) {
             BPLogger.warn("BankPlus chat-transaction failed for player " + p.getName() + ", he did not have an opened bank. (Try again and if the problem persist contact the developer)");
             BPSets.removePlayerFromDepositing(p);
@@ -78,7 +80,7 @@ public class PlayerChatMethod {
 
             BPSets.playerDepositing.remove(p.getUniqueId());
             BPSets.playerWithdrawing.remove(p.getUniqueId());
-            if (Values.CONFIG.isReopeningBankAfterChat()) BankGuiUtils.openBank(p, identifier, true);
+            if (Values.CONFIG.isReopeningBankAfterChat()) BankUtils.getBank(identifier).openBankGui(p, true);
         });
     }
 

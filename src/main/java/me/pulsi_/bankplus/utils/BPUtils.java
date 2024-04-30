@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.utils;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
+import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.listeners.playerChat.PlayerChatMethod;
@@ -402,14 +403,14 @@ public class BPUtils {
     }
 
     public static boolean isBankFull(Player p) {
-        return isBankFull(p, Values.CONFIG.getMainGuiName());
+        return isBankFull(p, BankUtils.getBank(Values.CONFIG.getMainGuiName()));
     }
 
-    public static boolean isBankFull(Player p, String bankName) {
-        BigDecimal capacity = BankUtils.getCapacity(bankName, p);
-        if (capacity.doubleValue() <= 0d) return false;
+    public static boolean isBankFull(Player p, Bank bank) {
+        BigDecimal capacity = BankUtils.getCapacity(bank, p);
+        if (capacity.compareTo(BigDecimal.ZERO) <= 0) return false;
 
-        if (BPEconomy.get(bankName).getBankBalance(p).doubleValue() >= capacity.doubleValue()) {
+        if (bank.getBankEconomy().getBankBalance(p).compareTo(capacity) >= 0) {
             BPMessages.send(p, "Cannot-Deposit-Anymore");
             return true;
         }

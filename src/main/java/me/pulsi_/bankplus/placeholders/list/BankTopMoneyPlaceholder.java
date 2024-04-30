@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.placeholders.list;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.bankTop.BPBankTop;
 import me.pulsi_.bankplus.placeholders.BPPlaceholder;
 import me.pulsi_.bankplus.utils.BPChat;
 import me.pulsi_.bankplus.utils.BPFormatter;
@@ -32,7 +33,7 @@ public class BankTopMoneyPlaceholder extends BPPlaceholder {
         if (position > Values.CONFIG.getBankTopSize())
             return "&cThe banktop limit is " + Values.CONFIG.getBankTopSize() + "!";
 
-        BigDecimal money = BankPlus.INSTANCE().getBankTopManager().getBankTopBalancePlayer(position);
+        BigDecimal money = BPBankTop.getBankTopBalancePlayer(position);
         switch (Values.CONFIG.getBankTopMoneyFormat()) {
             case "default_amount":
                 return BPFormatter.formatCommas(money);

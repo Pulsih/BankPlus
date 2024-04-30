@@ -16,7 +16,11 @@ public class PlayerRegistry {
     }
 
     public static BPPlayer loadPlayer(Player p) {
-        for (BPEconomy economy : BPEconomy.list()) economy.loadPlayerBalance(p);
+        return loadPlayer(p, true);
+    }
+
+    public static BPPlayer loadPlayer(Player p, boolean wasRegistered) {
+        for (BPEconomy economy : BPEconomy.list()) economy.loadPlayerBalance(p, wasRegistered);
         BPPlayer bpPlayer = new BPPlayer(p);
         players.putIfAbsent(p.getUniqueId(), bpPlayer);
         return bpPlayer;

@@ -10,7 +10,6 @@ import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.util.UUID;
@@ -21,7 +20,7 @@ public class EconomyUtils {
         if (BankPlus.INSTANCE().getMySql().isConnected()) {
             SQLPlayerManager pManager = new SQLPlayerManager(uuid);
             for (BPEconomy economy : BPEconomy.list()) {
-                String name = economy.getBankName();
+                String name = economy.getOriginBank().getIdentifier();
 
                 pManager.setDebt(economy.getDebt(uuid), name);
                 pManager.setLevel(economy.getBankLevel(uuid), name);
@@ -35,7 +34,7 @@ public class EconomyUtils {
             FileConfiguration config = manager.getPlayerConfig(file);
 
             for (BPEconomy economy : BPEconomy.list()) {
-                String name = economy.getBankName();
+                String name = economy.getOriginBank().getIdentifier();
                 config.set("banks." + name + ".debt", BPFormatter.styleBigDecimal(economy.getDebt(uuid)));
                 config.set("banks." + name + ".level", economy.getBankLevel(uuid));
                 config.set("banks." + name + ".money", BPFormatter.styleBigDecimal(economy.getBankBalance(uuid)));

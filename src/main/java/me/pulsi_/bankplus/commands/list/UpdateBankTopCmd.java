@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.bankTop.BPBankTop;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.BPMessages;
 import org.bukkit.command.CommandSender;
@@ -27,7 +28,7 @@ public class UpdateBankTopCmd extends BPCommand {
     public boolean onCommand(CommandSender s, String[] args) {
         if (skipToConfirm(s)) return false;
 
-        BankPlus.INSTANCE().getBankTopManager().updateBankTop();
+        BPBankTop.updateBankTop();
         BPMessages.send(s, "BankTop-Updated");
         return true;
     }

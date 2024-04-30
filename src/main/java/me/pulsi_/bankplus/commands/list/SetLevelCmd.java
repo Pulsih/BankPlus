@@ -51,13 +51,13 @@ public class SetLevelCmd extends BPCommand {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }
-        if (!BankUtils.getLevels(bankName).contains(level)) {
+        if (!BankUtils.getLevels(BankUtils.getBank(bankName)).contains(level)) {
             BPMessages.send(s, "Invalid-Bank-Level");
             return false;
         }
         if (skipToConfirm(s)) return false;
 
-        BankUtils.setLevel(bankName, p, Integer.parseInt(level));
+        BankUtils.setLevel(BankUtils.getBank(bankName), p, Integer.parseInt(level));
         BPMessages.send(s, "Set-Level-Message", "%player%$" + p.getName(), "%level%$" + level);
         return true;
     }

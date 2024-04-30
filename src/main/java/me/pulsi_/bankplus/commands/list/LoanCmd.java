@@ -101,31 +101,31 @@ public class LoanCmd extends BPCommand {
             return false;
         }
 
-        String fromBankName = Values.CONFIG.getMainGuiName();
-        if (args.length > 4) fromBankName = args[4];
+        String senderBank = Values.CONFIG.getMainGuiName();
+        if (args.length > 4) senderBank = args[4];
 
-        if (!BankUtils.exist(fromBankName)) {
+        if (!BankUtils.exist(senderBank)) {
             BPMessages.send(sender, "Invalid-Bank");
             return false;
         }
-        if (!BankUtils.isAvailable(fromBankName, sender)) {
+        if (!BankUtils.isAvailable(senderBank, sender)) {
             BPMessages.send(sender, "Cannot-Access-Bank");
             return false;
         }
 
-        String toBankName = Values.CONFIG.getMainGuiName();
-        if (args.length > 5) toBankName = args[5];
+        String receiverBank = Values.CONFIG.getMainGuiName();
+        if (args.length > 5) receiverBank = args[5];
 
-        if (!BankUtils.exist(toBankName)) {
+        if (!BankUtils.exist(receiverBank)) {
             BPMessages.send(sender, "Invalid-Bank");
             return false;
         }
-        if (!BankUtils.isAvailable(toBankName, target)) {
+        if (!BankUtils.isAvailable(receiverBank, target)) {
             BPMessages.send(sender, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
             return false;
         }
 
-        if (!skipToConfirm(s)) LoanUtils.sendRequest(sender, target, amount, fromBankName, toBankName, action);
+        if (!skipToConfirm(s)) LoanUtils.sendRequest(sender, target, amount, BankUtils.getBank(senderBank), BankUtils.getBank(receiverBank), action);
         return true;
     }
 

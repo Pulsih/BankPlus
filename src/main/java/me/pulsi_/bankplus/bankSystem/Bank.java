@@ -27,7 +27,7 @@ public class Bank extends BankGui {
         super(identifier);
 
         this.identifier = identifier;
-        bankEconomy = new BPEconomy(identifier);
+        bankEconomy = new BPEconomy(this);
     }
 
     public String getIdentifier() {
@@ -159,7 +159,7 @@ public class Bank extends BankGui {
     }
 
     public static class BankLevel {
-        BigDecimal cost, capacity, interest, offlineInterest;
+        BigDecimal cost, capacity, interest, offlineInterest, maxInterestAmount;
         List<ItemStack> requiredItems;
         List<String> interestLimiter;
         boolean removeRequiredItems;

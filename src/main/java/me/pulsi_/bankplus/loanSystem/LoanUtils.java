@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.loanSystem;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.economy.TransactionType;
@@ -15,86 +16,101 @@ import java.math.BigDecimal;
 
 public class LoanUtils {
 
-    public static void sendRequest(Player from, Player to, BigDecimal amount, String fromBankName, String toBankName, String action) {
-        BigDecimal fBal = BPEconomy.get(fromBankName).getBankBalance(from);
-        if (fBal.doubleValue() <= 0d) {
-            BPMessages.send(from, "Insufficient-Money");
+    /**
+     * Initialize a load request.
+     * @param sender The player sender.
+     * @param receiver The player receiver.
+     * @param amount The loan amount.
+     * @param senderBank The sender bank from where to take the money.
+     * @param receiverBank The receiver bank where the money will be deposited.
+     * @param action The request action between give and request
+     */
+    public static void sendRequest(Player sender, Player receiver, BigDecimal amount, Bank senderBank, Bank receiverBank, String action) {
+        BigDecimal senderBalance = senderBank.getBankEconomy().getBankBalance(sender);
+        if (senderBalance.compareTo(BigDecimal.ZERO) <= 0) {
+            BPMessages.send(sender, "Insufficient-Money");
             return;
         }
 
-        if (fBal.doubleValue() < amount.doubleValue()) amount = fBal;
+        if (senderBalance.compareTo(amount) < 0) amount = senderBalance;
 
-        LoanRegistry.BPRequest request = new LoanRegistry.BPRequest();
-        request.setSender(from);
-        request.setTarget(to);
+        // Initialize the loan request.
+        BPLoanRegistry.LoanRequest request = new BPLoanRegistry.LoanRequest();
+        request.setSender(sender);
+        request.setReceiver(receiver);
 
-        BPLoan loan = new BPLoan(from, to, amount, fromBankName, toBankName);
+        // Initialize the loan object that could be processed later.
+        BPLoan loan = new BPLoan(sender, receiver, amount, senderBank, receiverBank);
         request.setLoan(loan);
 
+        BigDecimal moneyToReturn = loan.getMoneyToReturn();
         if (action.equals("give")) {
-            BigDecimal capacity = BankUtils.getCapacity(loan.getToBankName(), to);
-            if (loan.getMoneyToReturn().doubleValue() > capacity.doubleValue()) {
-                BPMessages.send(from, "Cannot-Afford-Loan-Others", "%player%$" + to.getName());
+            BigDecimal capacity = BankUtils.getCapacity(BankUtils.getBank(loan.getReceiverBank()), receiver);
+            if (moneyToReturn.compareTo(capacity) > 0) {
+                BPMessages.send(sender, "Cannot-Afford-Loan-Others", "%player%$" + receiver.getName());
                 return;
             }
-            BPMessages.send(to, "Loan-Give-Request-Received", BPUtils.placeValues(from, amount));
-            request.setLoanSender(true);
-        } else {
-            BigDecimal capacity = BankUtils.getCapacity(loan.getFromBankName(), from);
-            if (loan.getMoneyToReturn().doubleValue() > capacity.doubleValue()) {
-                BPMessages.send(from, "Cannot-Afford-Loan");
+
+            BPMessages.send(receiver, "Loan-Give-Request-Received", BPUtils.placeValues(sender, amount));
+            request.setSenderIsReceiver(true);
+        } else { // "request"
+            BigDecimal capacity = BankUtils.getCapacity(senderBank, sender);
+            if (moneyToReturn.compareTo(capacity) > 0) {
+                BPMessages.send(sender, "Cannot-Afford-Loan");
                 return;
             }
-            BPMessages.send(to, "Loan-Request-Received", BPUtils.placeValues(from, amount));
-            request.setLoanSender(false);
+
+            BPMessages.send(receiver, "Loan-Request-Received", BPUtils.placeValues(sender, amount));
+            request.setSenderIsReceiver(false);
         }
-        BPMessages.send(from, "Loan-Request-Sent", "%player%$" + to.getName());
 
-        LoanRegistry registry = BankPlus.INSTANCE().getLoanRegistry();
-        registry.getRequests().put(from.getUniqueId(), request);
-
-        Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> registry.getRequests().remove(to.getUniqueId()), Values.CONFIG.getLoanAcceptTime() * 20L);
+        BPMessages.send(sender, "Loan-Request-Sent", "%player%$" + receiver.getName());
+        BPLoanRegistry.queueLoanRequest(sender, request);
     }
 
-    public static void acceptRequest(Player p) {
-        if (!hasRequest(p)) {
-            BPMessages.send(p, "No-Loan-Requests");
+    /**
+     * Accept the request.
+     * @param receiver The player that has typed /bp loan accept.
+     */
+    public static void acceptRequest(Player receiver) {
+        if (!hasRequest(receiver)) {
+            BPMessages.send(receiver, "No-Loan-Requests");
             return;
         }
 
-        LoanRegistry registry = BankPlus.INSTANCE().getLoanRegistry();
-
-        Player sender = getLoanSenderTargetPlayer(p);
+        Player sender = getLoanSenderFromRequest(receiver);
         if (sender == null) return;
 
-        LoanRegistry.BPRequest request = registry.getRequests().remove(sender.getUniqueId());
+        BPLoanRegistry.LoanRequest request = BPLoanRegistry.getRequests().remove(sender.getUniqueId());
         BPLoan loan = request.getLoan();
         BigDecimal amount = loan.getMoneyGiven();
 
-        if (!request.isLoanSender()) {
+        if (!request.senderIsReceiver()) {
             Player tempPlayer = sender;
-            sender = p;
-            p = tempPlayer;
-            loan.setSender(p);
+            sender = receiver;
+            receiver = tempPlayer;
+            loan.setSender(receiver);
             loan.setReceiver(sender);
         }
 
-        BPEconomy.get(loan.getFromBankName()).removeBankBalance(sender, amount, TransactionType.LOAN); // Already checked that the amount isn't > than the balance.
+        loan.getSenderBank().getBankEconomy().removeBankBalance(sender, amount, TransactionType.LOAN); // Already checked that the amount isn't > than the balance.
 
-        BPEconomy toEconomy = BPEconomy.get(loan.getToBankName());
-        BigDecimal capacity = BankUtils.getCapacity(loan.getToBankName(), p), balance = toEconomy.getBankBalance(p);
+        Bank receiverBank = loan.getReceiverBank();
+        BPEconomy receiverBankEconomy = receiverBank.getBankEconomy();
+        BigDecimal receiverCapacity = BankUtils.getCapacity(receiverBank, receiver), receiverBalance = receiverBankEconomy.getBankBalance(receiver);
         // If the bank is full, instead of loosing money they will be added to the vault balance
-        if (balance.add(amount).doubleValue() >= capacity.doubleValue() && capacity.doubleValue() > 0d) {
-            toEconomy.setBankBalance(p, capacity, TransactionType.LOAN);
-            BigDecimal extra = amount.subtract(capacity.subtract(balance));
+        if (receiverBalance.add(amount).compareTo(receiverCapacity) >= 0 && receiverCapacity.compareTo(BigDecimal.ZERO) > 0) {
+            receiverBankEconomy.setBankBalance(receiver, receiverCapacity, TransactionType.LOAN);
+            BigDecimal extra = amount.subtract(receiverCapacity.subtract(receiverBalance));
 
-            BankPlus.INSTANCE().getVaultEconomy().depositPlayer(p, extra.doubleValue());
-            BPMessages.send(p, "Received-Loan-Full", BPUtils.placeValues(sender, amount), BPUtils.placeValues(extra, "extra"));
+            BankPlus.INSTANCE().getVaultEconomy().depositPlayer(receiver, extra.doubleValue());
+            BPMessages.send(receiver, "Received-Loan-Full", BPUtils.placeValues(sender, amount), BPUtils.placeValues(extra, "extra"));
         } else {
-            toEconomy.addBankBalance(p, amount, TransactionType.LOAN);
-            BPMessages.send(p, "Received-Loan", BPUtils.placeValues(sender, amount));
+            receiverBankEconomy.addBankBalance(receiver, amount, TransactionType.LOAN);
+            BPMessages.send(receiver, "Received-Loan", BPUtils.placeValues(sender, amount));
         }
-        BPMessages.send(sender, "Given-Loan", BPUtils.placeValues(p, amount));
+        BPMessages.send(sender, "Given-Loan", BPUtils.placeValues(receiver, amount));
+
         registry.getLoans().add(loan);
         startLoanTask(loan);
     }
@@ -105,7 +121,7 @@ public class LoanUtils {
             return;
         }
 
-        Player sender = getLoanSenderTargetPlayer(p);
+        Player sender = getLoanSenderFromRequest(p);
         if (sender == null) return;
 
         BankPlus.INSTANCE().getLoanRegistry().getRequests().remove(sender.getUniqueId());
@@ -119,7 +135,7 @@ public class LoanUtils {
             return;
         }
 
-        Player sender = getLoanSenderTargetPlayer(p);
+        Player sender = getLoanSenderFromRequest(p);
         if (sender == null) return;
 
         BankPlus.INSTANCE().getLoanRegistry().getRequests().remove(sender.getUniqueId());
@@ -134,7 +150,7 @@ public class LoanUtils {
             return;
         }
 
-        if (balance.doubleValue() < amount.doubleValue()) amount = balance;
+        if (balance.compareTo(amount) < 0) amount = balance;
 
         BPLoan loan = new BPLoan(receiver, fromBank, amount);
 
@@ -146,12 +162,12 @@ public class LoanUtils {
 
         // If the bank is full, instead of loosing money they will be added to the vault balance
         if (balance.add(amount).doubleValue() >= capacity.doubleValue() && capacity.doubleValue() > 0d) {
-            BPEconomy.get(loan.getToBankName()).setBankBalance(receiver, capacity, TransactionType.LOAN);
+            BPEconomy.get(loan.getReceiverBank()).setBankBalance(receiver, capacity, TransactionType.LOAN);
             BigDecimal extra = amount.subtract(capacity.subtract(balance));
             BankPlus.INSTANCE().getVaultEconomy().depositPlayer(receiver, extra.doubleValue());
             BPMessages.send(receiver, "Received-Loan-Full-Bank", BPUtils.placeValues(fromBank, amount), BPUtils.placeValues(extra, "extra"));
         } else {
-            BPEconomy.get(loan.getToBankName()).addBankBalance(receiver, amount, TransactionType.LOAN);
+            BPEconomy.get(loan.getReceiverBank()).addBankBalance(receiver, amount, TransactionType.LOAN);
             BPMessages.send(receiver, "Received-Loan-Bank", BPUtils.placeValues(fromBank, amount));
         }
 
@@ -159,69 +175,33 @@ public class LoanUtils {
         startLoanTask(loan);
     }
 
-    public static void startLoanTask(BPLoan loan) {
-        int delay = loan.getTimeLeft() <= 0 ? Values.CONFIG.getLoanDelay() : BPUtils.millisecondsInTicks(loan.getTimeLeft());
-        loan.setTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> loanTask(loan), delay));
-    }
-
-    private static void loanTask(BPLoan loan) {
-        loan.setTimeLeft(System.currentTimeMillis() + BPUtils.ticksInMilliseconds(Values.CONFIG.getLoanDelay()));
-        loan.setInstalmentsPoint(loan.getInstalmentsPoint() + 1);
-        int instalments = loan.getInstalments();
-
-        BigDecimal amount = loan.getMoneyToReturn().divide(BigDecimal.valueOf(instalments));
-        OfflinePlayer sender = loan.getSender(), receiver = loan.getReceiver();
-        boolean isPlayerToBank = sender == null;
-
-        String fromBank = loan.getFromBankName() == null ? loan.getRequestedBank() : loan.getFromBankName(),
-                toBank = loan.getToBankName() == null ? loan.getRequestedBank() : loan.getToBankName();
-
-        // Means that the loan has been requested from a player to another player, so we need to give back the money.
-        // If the sender == null, means that the loan has been requested from a player to a bank, so we just remove the money to the player receiver.
-        if (!isPlayerToBank) {
-            // Add back "amount" to the sender of the loan.
-            BigDecimal addedToSender = BPEconomy.get(fromBank).addBankBalance(sender, amount, TransactionType.LOAN), extra = amount.subtract(addedToSender);
-            if (extra.doubleValue() <= 0) BPMessages.send(sender, "Loan-Payback", BPUtils.placeValues(receiver, addedToSender));
-            else {
-                BPMessages.send(sender, "Loan-Payback-Full", BPUtils.placeValues(amount), BPUtils.placeValues(receiver, extra, "extra"));
-                BankPlus.INSTANCE().getVaultEconomy().depositPlayer(sender, extra.doubleValue());
-            }
-        }
-
-        // Remove "amount" from the receiver of the loan.
-        BigDecimal removedToReceiver = BPEconomy.get(toBank).removeBankBalance(receiver, amount, TransactionType.LOAN), debt = amount.subtract(removedToReceiver);
-        if (debt.doubleValue() <= 0D) {
-            if (isPlayerToBank) BPMessages.send(receiver, "Loan-Returned-Bank", BPUtils.placeValues(loan.getRequestedBank(), amount));
-            else BPMessages.send(receiver, "Loan-Returned", BPUtils.placeValues(sender, amount));
-        } else {
-            BigDecimal newDebt = BPEconomy.get(toBank).getDebt(receiver).add(debt);
-            if (isPlayerToBank) BPMessages.send(receiver, "Loan-Returned-Debt-Bank", BPUtils.placeValues(loan.getRequestedBank(), newDebt));
-            else BPMessages.send(receiver, "Loan-Returned-Debt", BPUtils.placeValues(sender, newDebt));
-            BPEconomy.get(toBank).setDebt(receiver, newDebt);
-        }
-
-        // Was the loan at his final instalment?
-        if (loan.getInstalmentsPoint() >= instalments) BankPlus.INSTANCE().getLoanRegistry().getLoans().remove(loan);
-        else loan.setTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> loanTask(loan), Values.CONFIG.getLoanDelay()));
-    }
-
     public static boolean hasRequest(Player p) {
         boolean hasRequest = false;
-        for (LoanRegistry.BPRequest request : BankPlus.INSTANCE().getLoanRegistry().getRequests().values()) {
-            if (!request.getTarget().equals(p)) continue;
+        for (BPLoanRegistry.LoanRequest request : BankPlus.INSTANCE().getLoanRegistry().getRequests().values()) {
+            if (!request.getReceiver().equals(p)) continue;
             hasRequest = true;
             break;
         }
         return hasRequest;
     }
 
+    /**
+     * Checks if the selected player has sent a request.
+     * @param p The player.
+     * @return true if he sent a request, false otherwise.
+     */
     public static boolean hasSentRequest(Player p) {
-        return BankPlus.INSTANCE().getLoanRegistry().getRequests().containsKey(p.getUniqueId());
+        return BPLoanRegistry.getRequests().containsKey(p.getUniqueId());
     }
 
-    public static Player getLoanSenderTargetPlayer(Player p) {
-        for (LoanRegistry.BPRequest request : BankPlus.INSTANCE().getLoanRegistry().getRequests().values())
-            if (request.getTarget().equals(p)) return request.getSender();
+    /**
+     * Loop through all the request, check if the player p is the loan target, if yes, get the sender from that loan request.
+     * @param p The player that received a request.
+     * @return The player that sent the loan request.
+     */
+    public static Player getLoanSenderFromRequest(Player p) {
+        for (BPLoanRegistry.LoanRequest request : BPLoanRegistry.getRequests().values())
+            if (request.getReceiver().equals(p)) return request.getSender();
         return null;
     }
 }

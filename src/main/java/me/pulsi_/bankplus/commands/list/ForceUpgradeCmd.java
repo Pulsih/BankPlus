@@ -51,7 +51,7 @@ public class ForceUpgradeCmd extends BPCommand {
 
         if (skipToConfirm(s)) return false;
 
-        BankUtils.upgradeBank(bankName, p);
+        BankUtils.upgradeBank(BankUtils.getBank(bankName), p);
         if (!silent) BPMessages.send(s, "Force-Upgrade", "%player%$" + p.getName(), "%bank%$" + bankName);
         return true;
     }

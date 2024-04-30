@@ -28,12 +28,14 @@ public class PlayerServerListener implements Listener {
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
         BPPlayerManager pManager = new BPPlayerManager(p);
+        boolean wasRegistered = true;
         if (!pManager.isPlayerRegistered()) {
             pManager.registerPlayer();
             if (Values.CONFIG.notifyRegisteredPlayer()) BPLogger.info("Successfully registered " + p.getName() + "!");
+            wasRegistered = false;
         }
         pManager.checkForFileFixes(p, pManager);
-        PlayerRegistry.loadPlayer(p);
+        PlayerRegistry.loadPlayer(p, wasRegistered);
 
         if (!Values.CONFIG.notifyOfflineInterest()) return;
 

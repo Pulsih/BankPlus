@@ -1,9 +1,7 @@
 package me.pulsi_.bankplus;
 
 import me.pulsi_.bankplus.bankSystem.BankRegistry;
-import me.pulsi_.bankplus.bankTop.BPBankTop;
 import me.pulsi_.bankplus.interest.BPInterest;
-import me.pulsi_.bankplus.loanSystem.LoanRegistry;
 import me.pulsi_.bankplus.logSystem.BPLogUtils;
 import me.pulsi_.bankplus.managers.BPAFK;
 import me.pulsi_.bankplus.managers.BPConfigs;
@@ -34,13 +32,11 @@ public final class BankPlus extends JavaPlugin {
 
     private final BPLogUtils bpLogUtils = new BPLogUtils();
     private final BankRegistry bankRegistry = new BankRegistry();
-    private final LoanRegistry loanRegistry = new LoanRegistry();
     private Economy vaultEconomy = null;
     private Permission perms = null;
 
     private final BPPlaceholders bpPlaceholders = new BPPlaceholders();
     private final BPSQL sql = new BPSQL();
-    private BPBankTop bankTopManager;
     private BPConfigs bpConfigs;
     private BPData bpData;
     private BPAFK BPAfk;
@@ -93,7 +89,6 @@ public final class BankPlus extends JavaPlugin {
 
         serverVersionInt = number;
 
-        this.bankTopManager = new BPBankTop(this);
         this.bpConfigs = new BPConfigs(this);
         this.bpData = new BPData(this);
         this.BPAfk = new BPAFK(this);
@@ -145,10 +140,6 @@ public final class BankPlus extends JavaPlugin {
         return bankRegistry;
     }
 
-    public LoanRegistry getLoanRegistry() {
-        return loanRegistry;
-    }
-
     public Economy getVaultEconomy() {
         return vaultEconomy;
     }
@@ -171,10 +162,6 @@ public final class BankPlus extends JavaPlugin {
 
     public BPLogUtils getBpLogUtils() {
         return bpLogUtils;
-    }
-
-    public BPBankTop getBankTopManager() {
-        return bankTopManager;
     }
 
     public BPConfigs getConfigs() {
