@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.loanSystem;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.economy.TransactionType;
@@ -28,6 +29,7 @@ public class BPLoanRegistry {
 
     /**
      * List to track each loan made by players.
+     *
      * @return A list of loans.
      */
     public static List<BPLoan> getLoans() {
@@ -42,6 +44,13 @@ public class BPLoanRegistry {
         return requests;
     }
 
+    /**
+     * Loan storage style:
+     * loans:
+     * loan-receiver-UUID:
+     * sender: loan-sender-UUID
+     * loan-values ....
+     */
     public static void loadAllLoans() {
         FileConfiguration saves = BankPlus.INSTANCE().getConfigs().getConfig(BPConfigs.Type.SAVES.name);
 
@@ -74,38 +83,44 @@ public class BPLoanRegistry {
 
             String requestedBank = values.getString("requested-bank");
             if (requestedBank != null) {
-                if (BankUtils.exist(requestedBank)) requestedBank = Values.CONFIG.getMainGuiName();
-                else BPLogger.warn("The loan \"" + receiverUUID + "\" specified an invalid bank to take the money, using the main bank.");
+                if (!BankUtils.exist(requestedBank)) {
+                    BPLogger.warn("The loan \"" + receiverUUID + "\" specified an invalid bank to take the money, using the main bank.");
+                    requestedBank = Values.CONFIG.getMainGuiName();
+                }
 
-                loan = new BPLoan(receiver, requestedBank);
+                loan = new BPLoan(receiver, BankUtils.getBank(requestedBank));
             } else {
 
                 String fromBank = Values.CONFIG.getMainGuiName(), toBank = Values.CONFIG.getMainGuiName();
                 String fromBankString = values.getString("from"), toBankString = values.getString("to");
 
                 if (fromBankString == null) BPLogger.warn("The loan \"" + receiverUUID + "\" did not specify a bank to take the money, using the main bank.");
-                else {
-                    if (BankUtils.exist(fromBankString)) fromBank = fromBankString;
-                    else BPLogger.warn("The loan \"" + receiverUUID + "\" specified an invalid bank to take the money, using the main bank.");
+                else if (!BankUtils.exist(fromBankString)) {
+                    BPLogger.warn("The loan \"" + receiverUUID + "\" specified an invalid bank to take the money, using the main bank.");
+                    fromBank = fromBankString;
                 }
 
                 if (toBankString == null) BPLogger.warn("The loan \"" + receiverUUID + "\" did not specify a bank to give the money, using the main bank.");
-                else {
-                    if (BankUtils.exist(toBankString)) toBank = toBankString;
-                    else BPLogger.warn("The loan \"" + receiverUUID + "\" specified an invalid bank to give the money, using the main bank.");
+                else if (!BankUtils.exist(toBankString)) {
+                    BPLogger.warn("The loan \"" + receiverUUID + "\" specified an invalid bank to give the money, using the main bank.");
+                    toBank = toBankString;
                 }
 
-                loan = new BPLoan(sender, receiver, fromBank, toBank);
+                loan = new BPLoan(sender, receiver, BankUtils.getBank(fromBank), BankUtils.getBank(toBank));
             }
 
             loan.setMoneyToReturn(new BigDecimal(moneyToReturn));
             loan.setInstalments(values.getInt("instalments"));
             loan.setInstalmentsPoint(values.getInt("instalments-point"));
 
-            LoanUtils.startLoanTask(loan);
+            registerLoan(loan);
         }
     }
 
+    /**
+     * Save all currently registered loans.
+     * @param savesConfig The saves file where to save the loans.
+     */
     public static void saveAllLoans(FileConfiguration savesConfig) {
         for (BPLoan loan : loans) {
             String path = "loans." + loan.getReceiver().getUniqueId() + ".";
@@ -123,7 +138,9 @@ public class BPLoanRegistry {
 
     /**
      * Register the loan to the loan registry and start the returning task.
-     * @param loan The loan.
+     * * Note: This method does not give the initial money to the player, you'll have to add them manually.
+     *
+     * @param loan The loan to register.
      */
     public static void registerLoan(BPLoan loan) {
         loans.add(loan);
@@ -135,7 +152,8 @@ public class BPLoanRegistry {
 
     /**
      * Queue the loan request for the specified time.
-     * @param sender The sender of the request.
+     *
+     * @param sender      The sender of the request.
      * @param loanRequest The loan request.
      */
     public static void queueLoanRequest(Player sender, LoanRequest loanRequest) {
@@ -149,39 +167,40 @@ public class BPLoanRegistry {
         loan.setInstalmentsPoint(loan.getInstalmentsPoint() + 1);
         int instalments = loan.getInstalments();
 
-        BigDecimal amount = loan.getMoneyToReturn().divide(BigDecimal.valueOf(instalments));
+        BigDecimal currentTaskAmount = loan.getMoneyToReturn().divide(BigDecimal.valueOf(instalments));
         OfflinePlayer sender = loan.getSender(), receiver = loan.getReceiver();
-        boolean isPlayerToBank = sender == null;
+        boolean isBankToPlayer = sender == null;
 
-        String fromBank = loan.getSenderBank() == null ? loan.getRequestedBank() : loan.getSenderBank(),
-                toBank = loan.getReceiverBank() == null ? loan.getRequestedBank() : loan.getReceiverBank();
+        Bank senderBank = loan.getSenderBank() == null ? loan.getRequestedBank() : loan.getSenderBank(),
+                receiverBank = loan.getReceiverBank() == null ? loan.getRequestedBank() : loan.getReceiverBank();
 
         // Means that the loan has been requested from a player to another player, so we need to give back the money.
         // If the sender == null, means that the loan has been requested from a player to a bank, so we just remove the money to the player receiver.
-        if (!isPlayerToBank) {
-            // Add back "amount" to the sender of the loan.
-            BigDecimal addedToSender = BPEconomy.get(fromBank).addBankBalance(sender, amount, TransactionType.LOAN), extra = amount.subtract(addedToSender);
-            if (extra.doubleValue() <= 0) BPMessages.send(sender, "Loan-Payback", BPUtils.placeValues(receiver, addedToSender));
+        if (!isBankToPlayer) {
+            // Add back a part of the amount to the sender of the loan.
+            BigDecimal addedToSender = senderBank.getBankEconomy().addBankBalance(sender, currentTaskAmount, TransactionType.LOAN), extra = currentTaskAmount.subtract(addedToSender);
+            if (extra.compareTo(BigDecimal.ZERO) <= 0) BPMessages.send(sender, "Loan-Payback", BPUtils.placeValues(receiver, addedToSender));
             else {
-                BPMessages.send(sender, "Loan-Payback-Full", BPUtils.placeValues(amount), BPUtils.placeValues(receiver, extra, "extra"));
+                BPMessages.send(sender, "Loan-Payback-Full", BPUtils.placeValues(currentTaskAmount), BPUtils.placeValues(receiver, extra, "extra"));
                 BankPlus.INSTANCE().getVaultEconomy().depositPlayer(sender, extra.doubleValue());
             }
         }
 
-        // Remove "amount" from the receiver of the loan.
-        BigDecimal removedToReceiver = BPEconomy.get(toBank).removeBankBalance(receiver, amount, TransactionType.LOAN), debt = amount.subtract(removedToReceiver);
+        // Remove a part of the amount from the receiver of the loan.
+        BPEconomy receiverBankEconomy = receiverBank.getBankEconomy();
+        BigDecimal removedToReceiver = receiverBankEconomy.removeBankBalance(receiver, currentTaskAmount, TransactionType.LOAN), debt = currentTaskAmount.subtract(removedToReceiver);
         if (debt.doubleValue() <= 0D) {
-            if (isPlayerToBank) BPMessages.send(receiver, "Loan-Returned-Bank", BPUtils.placeValues(loan.getRequestedBank(), amount));
-            else BPMessages.send(receiver, "Loan-Returned", BPUtils.placeValues(sender, amount));
+            if (isBankToPlayer) BPMessages.send(receiver, "Loan-Returned-Bank", BPUtils.placeValues(loan.getRequestedBank().getIdentifier(), currentTaskAmount));
+            else BPMessages.send(receiver, "Loan-Returned", BPUtils.placeValues(sender, currentTaskAmount));
         } else {
-            BigDecimal newDebt = BPEconomy.get(toBank).getDebt(receiver).add(debt);
-            if (isPlayerToBank) BPMessages.send(receiver, "Loan-Returned-Debt-Bank", BPUtils.placeValues(loan.getRequestedBank(), newDebt));
+            BigDecimal newDebt = receiverBankEconomy.getDebt(receiver).add(debt);
+            if (isBankToPlayer) BPMessages.send(receiver, "Loan-Returned-Debt-Bank", BPUtils.placeValues(loan.getRequestedBank().getIdentifier(), newDebt));
             else BPMessages.send(receiver, "Loan-Returned-Debt", BPUtils.placeValues(sender, newDebt));
-            BPEconomy.get(toBank).setDebt(receiver, newDebt);
+            receiverBankEconomy.setDebt(receiver, newDebt);
         }
 
         // Was the loan at his final instalment?
-        if (loan.getInstalmentsPoint() >= instalments) BankPlus.INSTANCE().getLoanRegistry().getLoans().remove(loan);
+        if (loan.getInstalmentsPoint() >= instalments) loans.remove(loan);
         else loan.setTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> advanceReturningTask(loan), Values.CONFIG.getLoanDelay()));
     }
 

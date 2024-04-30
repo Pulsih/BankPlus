@@ -19,7 +19,7 @@ public class BPLoan {
     private final LoanType loanType;
 
     /**
-     * Constructor for loans player-to-player.
+     * Constructor used for loans player-to-player.
      * @param sender The loan sender.
      * @param receiver The loan receiver.
      * @param amount The loan amount.
@@ -39,6 +39,25 @@ public class BPLoan {
     }
 
     /**
+     * Constructor used for loans player-to-player where the money to return will be defined later with code.
+     * @param sender The loan sender.
+     * @param receiver The loan receiver.
+     * @param amount The loan amount.
+     * @param senderBank The sender bank.
+     * @param receiverBank The receiver bank.
+     */
+    public BPLoan(OfflinePlayer sender, OfflinePlayer receiver, Bank senderBank, Bank receiverBank) {
+        this.sender = sender;
+        this.receiver = receiver;
+        this.moneyGiven = BigDecimal.ZERO;
+        this.senderBank = senderBank;
+        this.receiverBank = receiverBank;
+        this.instalments = Values.CONFIG.getLoanInstalments();
+        this.requestedBank = null;
+        this.loanType = LoanType.PLAYER_TO_PLAYER;
+    }
+
+    /**
      * Constructor used for loans bank-to-player.
      * The sender and receiver banks will be null, and the requestedBank will be the bank that gave the loan.
      * @param receiver The loan receiver
@@ -50,6 +69,22 @@ public class BPLoan {
         this.receiver = receiver;
         this.moneyGiven = amount;
         this.moneyToReturn = amount.add(amount.divide(BigDecimal.valueOf(100)).multiply(Values.CONFIG.getLoanInterest()));
+        this.senderBank = null;
+        this.receiverBank = null;
+        this.instalments = Values.CONFIG.getLoanInstalments();
+        this.requestedBank = bank;
+        this.loanType = LoanType.BANK_TO_PLAYER;
+    }
+
+    /**
+     * Constructor used for loans bank-to-player where the money to return will be defined later with code.
+     * @param receiver The loan receiver
+     * @param bank The bank loan sender.
+     */
+    public BPLoan(OfflinePlayer receiver, Bank bank) {
+        this.sender = null; // The sender would be the bank.
+        this.receiver = receiver;
+        this.moneyGiven = BigDecimal.ZERO;
         this.senderBank = null;
         this.receiverBank = null;
         this.instalments = Values.CONFIG.getLoanInstalments();

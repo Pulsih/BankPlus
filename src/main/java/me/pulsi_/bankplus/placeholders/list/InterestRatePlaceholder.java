@@ -14,6 +14,6 @@ public class InterestRatePlaceholder extends BPPlaceholder {
     @Override
     public String getPlaceholder(Player p, String target, String identifier) {
         if (!BankUtils.exist(target)) return "&cThe selected bank does not exist.";
-        return BankUtils.getInterestRate(target, p) + "";
+        return BankUtils.getInterestRate(BankUtils.getBank(target), p) + "";
     }
 }

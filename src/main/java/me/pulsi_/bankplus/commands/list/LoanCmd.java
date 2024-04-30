@@ -75,7 +75,7 @@ public class LoanCmd extends BPCommand {
             BPMessages.send(sender, "Specify-Player");
             return false;
         }
-        String targetName = args[2];
+        String receiverName = args[2];
 
         if (args.length == 3) {
             BPMessages.send(sender, "Specify-Number");
@@ -86,16 +86,16 @@ public class LoanCmd extends BPCommand {
         if (BPUtils.isInvalidNumber(num, sender)) return false;
         BigDecimal amount = new BigDecimal(num);
 
-        if (action.equals("request") && registry.getBanks().containsKey(targetName)) {
-            if (!BankUtils.isAvailable(targetName, sender)) {
+        if (action.equals("request") && registry.getBanks().containsKey(receiverName)) {
+            if (!BankUtils.isAvailable(receiverName, sender)) {
                 BPMessages.send(sender, "Cannot-Access-Bank");
                 return false;
             }
-            LoanUtils.sendLoan(sender, targetName, amount);
+            LoanUtils.sendLoan(sender, BankUtils.getBank(receiverName), amount);
             return true;
         }
 
-        Player target = Bukkit.getPlayerExact(targetName);
+        Player target = Bukkit.getPlayerExact(receiverName);
         if (target == null || target.equals(s)) {
             BPMessages.send(s, "Invalid-Player");
             return false;

@@ -18,7 +18,7 @@ public class CapacityPlaceholder extends BPPlaceholder {
     public String getPlaceholder(Player p, String target, String identifier) {
         if (!BankUtils.exist(target)) return "&cThe selected bank does not exist.";
 
-        BigDecimal capacity = BankUtils.getCapacity(target, p);
+        BigDecimal capacity = BankUtils.getCapacity(BankUtils.getBank(target), p);
         if (capacity.longValue() <= 0) return Values.CONFIG.getInfiniteCapacityText();
         return getFormat(identifier, capacity);
     }
