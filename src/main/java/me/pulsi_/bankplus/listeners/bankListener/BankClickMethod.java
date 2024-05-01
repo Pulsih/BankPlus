@@ -36,7 +36,10 @@ public class BankClickMethod {
         if (openedBank instanceof BankListGui) {
             BankListGui bankListGui = (BankListGui) openedBank;
             Bank clickedBank = bankListGui.getBankListGuiClickHolder().get(slot);
-            if (clickedBank != null) clickedBank.openBankGui(p);
+            if (clickedBank != null) {
+                p.closeInventory();
+                clickedBank.openBankGui(p);
+            }
             return;
         }
 

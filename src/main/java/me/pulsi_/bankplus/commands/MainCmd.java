@@ -35,11 +35,8 @@ public class MainCmd implements CommandExecutor, TabCompleter {
 
             if (s instanceof Player) {
                 if (BankUtils.getAvailableBankNames((Player) s).isEmpty()) {
-                    if (Values.CONFIG.isShowHelpMessageWhenNoAvailableBanks()) {
-                        BPMessages.send(s, "Help-Message");
-                    } else {
-                        BPMessages.send(s, "No-Available-Banks");
-                    }
+                    if (Values.CONFIG.isShowHelpMessageWhenNoAvailableBanks()) BPMessages.send(s, "Help-Message");
+                    else BPMessages.send(s, "No-Available-Banks");
                     return true;
                 }
             } else {
@@ -51,11 +48,11 @@ public class MainCmd implements CommandExecutor, TabCompleter {
             if (Values.CONFIG.isGuiModuleEnabled()) {
                 if (!Values.MULTIPLE_BANKS.enableMultipleBanksModule()) BankUtils.getBank(Values.CONFIG.getMainGuiName()).openBankGui(p);
                 else {
-                    if (!Values.MULTIPLE_BANKS.isDirectlyOpenIf1IsAvailable()) new BankListGui().openBankListGui(p);
+                    if (!Values.MULTIPLE_BANKS.isDirectlyOpenIf1IsAvailable()) new BankListGui().openBankGui(p);
                     else {
                         List<Bank> availableBanks = BankUtils.getAvailableBanks(p);
                         if (availableBanks.size() == 1) availableBanks.get(0).openBankGui(p);
-                        else new BankListGui().openBankListGui(p);
+                        else new BankListGui().openBankGui(p);
                     }
                 }
             } else {

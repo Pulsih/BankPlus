@@ -34,7 +34,13 @@ public class BankListGui extends BankGui {
         super("BankListGui");
     }
 
-    public void openBankListGui(Player p) {
+    @Override
+    public void openBankGui(Player p) {
+        this.openBankGui(p, true);
+    }
+
+    @Override
+    public void openBankGui(Player p, boolean bypass) {
         BPPlayer player = PlayerRegistry.get(p);
 
         BukkitTask updating = player.getBankUpdatingTask();

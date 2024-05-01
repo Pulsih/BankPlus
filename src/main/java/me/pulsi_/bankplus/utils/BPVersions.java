@@ -22,7 +22,7 @@ public class BPVersions {
         File[] files = dataFolder.listFiles();
         if (files == null || files.length == 0) return;
 
-        BPLogger.info("Found playerdata folder, starting to convert the files to the new format.");
+        int converted = 0;
         for (File file : files) {
             FileConfiguration oldConfig = new YamlConfiguration(), newConfig = new YamlConfiguration();
 
@@ -48,11 +48,12 @@ public class BPVersions {
 
             try {
                 newConfig.save(file);
+                converted++;
             } catch (IOException e) {
                 BPLogger.error(e, "Could not apply changes while converting the player file \"" + file.getName() + "\".");
             }
         }
-        BPLogger.info("Conversion finished!");
+        if (converted > 0) BPLogger.info("Successfully converted " + converted + " player files to the new format!");
     }
 
     public static void changeBankUpgradesSection() {
@@ -68,8 +69,15 @@ public class BPVersions {
                 continue;
             }
 
+            boolean convertFile = false;
             StringBuilder builder = new StringBuilder();
-            while (scanner.hasNext()) builder.append(scanner.nextLine().replace("Upgrades:", "Levels:")).append("\n");
+            while (scanner.hasNext()) {
+                String nextLine = scanner.nextLine();
+                if (nextLine.contains("Upgrades:")) convertFile = true;
+
+                builder.append(nextLine.replace("Upgrades:", "Levels:")).append("\n");
+            }
+            if (!convertFile) continue;
 
             try {
                 BufferedWriter writer = new BufferedWriter(new FileWriter(bankFile));

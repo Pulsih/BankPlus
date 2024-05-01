@@ -1,13 +1,10 @@
 package me.pulsi_.bankplus.utils;
 
-import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 
 public class BPLogger {
 
-    public static void error(Exception e, String error) {
-        if (error == null) error = "null";
-
+    public static void error(Exception e, Object error) {
         error(error);
         error("");
         error("Additional information:");
@@ -23,19 +20,17 @@ public class BPLogger {
         }
     }
 
-    public static void error(String error) {
+    public static void error(Object error) {
         if (error == null) error = "null";
         log(BPChat.prefix + " &8[&cERROR&8] &c" + error);
     }
 
-    public static void warn(String warn) {
+    public static void warn(Object warn) {
         if (warn == null) warn = "null";
         log(BPChat.prefix + " &8[&eWARN&8] &e" + warn);
     }
 
-    public static void warn(Exception e, String warn) {
-        if (warn == null) warn = "null";
-
+    public static void warn(Exception e, Object warn) {
         warn(warn);
         warn("");
         warn("Additional information:");
@@ -51,10 +46,7 @@ public class BPLogger {
         }
     }
 
-    public static void info(String info) {
-        if (Values.CONFIG.silentInfoMessages()) return;
-
-        if (info == null) info = "null";
+    public static void info(Object info) {
         log(BPChat.prefix + " &8[&9INFO&8] &9" + info);
     }
 

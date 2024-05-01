@@ -235,6 +235,8 @@ public class BankUtils {
      * @return The player bank level of the selected bank.
      */
     public static int getCurrentLevel(Bank bank, OfflinePlayer p) {
+        if (bank == null) return 1;
+
         BPEconomy economy = bank.getBankEconomy();
         return economy == null ? 1 : economy.getBankLevel(p);
     }
@@ -247,7 +249,7 @@ public class BankUtils {
      * @return true if the bank has another level, false otherwise.
      */
     public static boolean hasNextLevel(Bank bank, OfflinePlayer p) {
-        return hasNextLevel(bank, getCurrentLevel(bank, p));
+        return bank != null && hasNextLevel(bank, getCurrentLevel(bank, p));
     }
 
     /**
@@ -258,7 +260,7 @@ public class BankUtils {
      * @return true if the bank has another level, false otherwise.
      */
     public static boolean hasNextLevel(Bank bank, int currentLevel) {
-        return getLevels(bank).contains(String.valueOf(currentLevel + 1));
+        return bank != null && getLevels(bank).contains(String.valueOf(currentLevel + 1));
     }
 
     /**
@@ -271,7 +273,7 @@ public class BankUtils {
         List<Bank> availableBanks = new ArrayList<>();
         if (p == null) return availableBanks;
 
-        for (Bank bank : BankPlus.INSTANCE().getBankRegistry().getBanks().values())
+        for (Bank bank : getBanks())
             if (isAvailable(bank, p)) availableBanks.add(bank);
 
         return availableBanks;

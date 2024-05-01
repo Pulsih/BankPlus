@@ -20,7 +20,7 @@ public class BankRegistry {
     }
 
     public void loadBanks() {
-        Set<String> currentRegisteredBanks = banks.keySet();
+        Set<String> currentRegisteredBanks = new HashSet<>(banks.keySet());
 
         List<File> bankFiles = new ArrayList<>();
         File defaultBankFile = new File(BankPlus.INSTANCE().getDataFolder(), "banks" + File.separator + Values.CONFIG.getMainGuiName() + ".yml");
@@ -48,8 +48,8 @@ public class BankRegistry {
             banks.put(identifier, bank);
         }
 
-        for (String oldRegisteredBank : currentRegisteredBanks)
-            if (!newRegisteredBanks.contains(oldRegisteredBank)) banks.remove(oldRegisteredBank);
+        for (String currentRegisteredBank : currentRegisteredBanks)
+            if (!newRegisteredBanks.contains(currentRegisteredBank)) banks.remove(currentRegisteredBank);
 
         EconomyUtils.loadEveryone();
     }
