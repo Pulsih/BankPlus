@@ -32,11 +32,12 @@ public final class BankPlus extends JavaPlugin {
 
     private final BPLogUtils bpLogUtils = new BPLogUtils();
     private final BankRegistry bankRegistry = new BankRegistry();
+    private final BPSQL sql = new BPSQL();
+
     private Economy vaultEconomy = null;
     private Permission perms = null;
 
-    private final BPPlaceholders bpPlaceholders = new BPPlaceholders();
-    private final BPSQL sql = new BPSQL();
+    private BPPlaceholders bpPlaceholders;
     private BPConfigs bpConfigs;
     private BPData bpData;
     private BPAFK BPAfk;
@@ -101,6 +102,7 @@ public final class BankPlus extends JavaPlugin {
 
         if (plManager.getPlugin("PlaceholderAPI") != null) {
             BPLogger.info("Hooked into PlaceholderAPI!");
+            bpPlaceholders = new BPPlaceholders();
             bpPlaceholders.registerPlaceholders();
             bpPlaceholders.register();
             isPlaceholderApiHooked = true;
