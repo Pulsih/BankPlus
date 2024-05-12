@@ -7,8 +7,7 @@ import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.economy.TransactionType;
 import me.pulsi_.bankplus.managers.BPConfigs;
 import me.pulsi_.bankplus.managers.BPTaskManager;
-import me.pulsi_.bankplus.utils.BPLogger;
-import me.pulsi_.bankplus.utils.BPMessages;
+import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -90,19 +89,19 @@ public class BPInterest {
                 }
                 if (!Values.MESSAGES.isInterestBroadcastEnabled()) continue;
 
-                if (availableBanks.size() > 1) BPMessages.send(p, Values.MESSAGES.getMultiInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
+                if (availableBanks.size() > 1) BPMessages.send(oP, Values.MESSAGES.getMultiInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
                 else {
                     if (BankUtils.isFull(availableBanks.get(0), p)) {
-                        BPMessages.send(p, Values.MESSAGES.getInterestBankFull(), BPUtils.placeValues(p, interestAmount), true);
+                        BPMessages.send(oP, Values.MESSAGES.getInterestBankFull(), BPUtils.placeValues(p, interestAmount), true);
                         continue;
                     }
 
                     if (interestAmount.compareTo(BigDecimal.ZERO) <= 0) {
-                        BPMessages.send(p, Values.MESSAGES.getInterestNoMoney(), BPUtils.placeValues(p, interestAmount), true);
+                        BPMessages.send(oP, Values.MESSAGES.getInterestNoMoney(), BPUtils.placeValues(p, interestAmount), true);
                         continue;
                     }
 
-                    BPMessages.send(p, Values.MESSAGES.getInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
+                    BPMessages.send(oP, Values.MESSAGES.getInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
                 }
             } else {
                 if (!isOfflineInterestEnabled || offlineTimeExpired(p) || !BPUtils.hasOfflinePermission(p, Values.CONFIG.getInterestOfflinePermission())) continue;

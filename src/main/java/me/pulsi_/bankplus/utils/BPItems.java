@@ -1,10 +1,9 @@
 package me.pulsi_.bankplus.utils;
 
-import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankGui;
+import me.pulsi_.bankplus.utils.texts.BPChat;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;

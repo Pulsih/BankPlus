@@ -1,10 +1,9 @@
 package me.pulsi_.bankplus.placeholders.list;
 
-import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankTop.BPBankTop;
 import me.pulsi_.bankplus.placeholders.BPPlaceholder;
-import me.pulsi_.bankplus.utils.BPChat;
-import me.pulsi_.bankplus.utils.BPFormatter;
+import me.pulsi_.bankplus.utils.texts.BPChat;
+import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.entity.Player;
 

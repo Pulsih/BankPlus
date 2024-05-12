@@ -2,7 +2,7 @@ package me.pulsi_.bankplus.commands;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.managers.BPConfigs;
-import me.pulsi_.bankplus.utils.BPMessages;
+import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -12,6 +12,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import static me.pulsi_.bankplus.commands.BPCmdRegistry.commands;
 
 public abstract class BPCommand {
 
@@ -26,7 +28,7 @@ public abstract class BPCommand {
     private final String confirmMessage, cooldownMessage;
     private final List<String> usage;
 
-    public BPCommand(String... aliases) {
+    public BPCommand(FileConfiguration commandsConfig, String... aliases) {
         this.identifier = aliases[0];
 
         String id = identifier.toLowerCase();
@@ -35,7 +37,7 @@ public abstract class BPCommand {
         this.aliases = new String[aliases.length - 1];
         System.arraycopy(aliases, 1, this.aliases, 0, aliases.length - 1);
 
-        FileConfiguration config = BankPlus.INSTANCE().getConfigs().getConfig(BPConfigs.Type.COMMANDS.name);
+        FileConfiguration config = BankPlus.INSTANCE().getConfigs().getConfig("commands.yml");
 
         needConfirm = config.getBoolean(id + ".need-confirm");
         hasCooldown = config.getBoolean(id + ".has-cooldown");
@@ -87,9 +89,9 @@ public abstract class BPCommand {
     }
 
     public void register() {
-        MainCmd.commands.put(identifier.toLowerCase(), this);
+        commands.put(identifier.toLowerCase(), this);
         for (String alias : aliases)
-            MainCmd.commands.put(alias.toLowerCase(), this);
+            commands.put(alias.toLowerCase(), this);
     }
 
     /**

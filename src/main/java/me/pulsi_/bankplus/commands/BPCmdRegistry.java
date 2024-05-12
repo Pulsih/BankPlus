@@ -2,10 +2,14 @@ package me.pulsi_.bankplus.commands;
 
 import me.pulsi_.bankplus.commands.list.*;
 
-public class CmdRegisterer {
+import java.util.LinkedHashMap;
 
-    public void registerCmds() {
-        MainCmd.commands.clear();
+public class BPCmdRegistry {
+
+    protected static final LinkedHashMap<String, BPCommand> commands = new LinkedHashMap<>();
+
+    public static void registerCmds() {
+        commands.clear();
 
         new AddAllCmd("addAll").register();
         new AddCmd("add").register();

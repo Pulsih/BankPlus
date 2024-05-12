@@ -1,8 +1,10 @@
 package me.pulsi_.bankplus.commands;
 
-import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankTop.BPBankTop;
 import me.pulsi_.bankplus.utils.*;
+import me.pulsi_.bankplus.utils.texts.BPChat;
+import me.pulsi_.bankplus.utils.texts.BPFormatter;
+import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

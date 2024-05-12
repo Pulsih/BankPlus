@@ -1,6 +1,6 @@
 package me.pulsi_.bankplus.placeholders;
 
-import me.pulsi_.bankplus.utils.BPFormatter;
+import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;

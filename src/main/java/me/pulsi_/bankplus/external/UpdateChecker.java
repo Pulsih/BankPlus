@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.external;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.utils.BPChat;
+import me.pulsi_.bankplus.utils.texts.BPChat;
 import me.pulsi_.bankplus.values.Values;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;

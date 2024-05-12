@@ -5,7 +5,7 @@ import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.bankTop.BPBankTop;
 import me.pulsi_.bankplus.commands.BankTopCmd;
-import me.pulsi_.bankplus.commands.CmdRegisterer;
+import me.pulsi_.bankplus.commands.BPCmdRegistry;
 import me.pulsi_.bankplus.commands.MainCmd;
 import me.pulsi_.bankplus.economy.EconomyUtils;
 import me.pulsi_.bankplus.external.UpdateChecker;
@@ -19,9 +19,9 @@ import me.pulsi_.bankplus.listeners.bankListener.*;
 import me.pulsi_.bankplus.listeners.playerChat.*;
 import me.pulsi_.bankplus.loanSystem.BPLoanRegistry;
 import me.pulsi_.bankplus.mySQL.BPSQL;
-import me.pulsi_.bankplus.utils.BPChat;
+import me.pulsi_.bankplus.utils.texts.BPChat;
 import me.pulsi_.bankplus.utils.BPLogger;
-import me.pulsi_.bankplus.utils.BPMessages;
+import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -44,7 +44,7 @@ public class BPData {
         BPLogger.log("");
         BPLogger.log("    " + BPChat.prefix + " &2Enabling plugin...");
         BPLogger.log("    &aRunning on version &f" + plugin.getDescription().getVersion() + "&a!");
-        BPLogger.log("    &aDetected server version: &f" + plugin.getServerVersion());
+        BPLogger.log("    &aDetected server version: &f" + BankPlus.getServerVersion());
 
         BPLogger.log("    &aSetting up the plugin...");
         new bStats(plugin);
@@ -66,7 +66,7 @@ public class BPData {
         EconomyUtils.saveEveryone(false);
 
         BPConfigs configs = plugin.getConfigs();
-        File file = configs.getFile(BPConfigs.Type.SAVES.name);
+        File file = configs.getFile("saves.yml");
         FileConfiguration savesConfig = configs.getConfig(file);
 
         if (Values.CONFIG.isInterestEnabled()) plugin.getInterest().saveInterest(savesConfig);
@@ -89,10 +89,9 @@ public class BPData {
             Values.CONFIG.setupValues();
             Values.MESSAGES.setupValues();
             Values.MULTIPLE_BANKS.setupValues();
-            BPMessages.loadMessages();
 
-            CmdRegisterer registerer = new CmdRegisterer();
-            registerer.registerCmds();
+            BPMessages.loadMessages();
+            BPCmdRegistry.registerCmds();
 
             if (Values.CONFIG.isLogTransactions()) plugin.getBpLogUtils().setupLoggerFile();
             if (Values.CONFIG.isIgnoringAfkPlayers()) plugin.getAfkManager().startCountdown();

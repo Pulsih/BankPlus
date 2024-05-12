@@ -5,9 +5,10 @@ import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
-import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.listeners.playerChat.PlayerChatMethod;
 import me.pulsi_.bankplus.managers.BPConfigs;
+import me.pulsi_.bankplus.utils.texts.BPFormatter;
+import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.milkbowl.vault.permission.Permission;
@@ -25,87 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BPUtils {
-
-    public static String formatTime(long milliseconds) {
-        long seconds = milliseconds / 1000;
-        long minutes = seconds / 60;
-        long hours = minutes / 60;
-        long days = hours / 24;
-
-        String format = Values.CONFIG.getInterestTimeFormat();
-        String[] parts = format.split("%");
-        int amount = parts.length;
-
-        for (int i = 1; i < amount; i++) {
-            String identifier = parts[i];
-            long time = 0;
-
-            switch (identifier) {
-                case "s":
-                    time = seconds - (minutes * 60);
-                    break;
-                case "m":
-                    time = minutes - (hours * 60);
-                    break;
-                case "h":
-                    time = hours - (days * 24);
-                    break;
-                case "d":
-                    time = days;
-                    break;
-            }
-            if (time <= 0) format = format.replace("%" + identifier, "");
-        }
-
-        parts = format.split("%");
-        amount = parts.length;
-
-        for (int i = 1; i < amount; i++) {
-            String identifier = parts[i], timeIdentifier = "";
-            long time = 0;
-
-            switch (identifier) {
-                case "s":
-                    time = seconds - (minutes * 60);
-                    timeIdentifier = "seconds";
-                    break;
-                case "m":
-                    time = minutes - (hours * 60);
-                    timeIdentifier = "minutes";
-                    break;
-                case "h":
-                    time = hours - (days * 24);
-                    timeIdentifier = "hours";
-                    break;
-                case "d":
-                    time = days;
-                    timeIdentifier = "days";
-                    break;
-            }
-
-            int last = i + 2;
-            String separator = last > amount ? "" : last == amount ? Values.CONFIG.getInterestTimeFinalSeparator() : Values.CONFIG.getInterestTimeSeparator();
-            String replacer = time <= 0 ? "" : time + getTimeIdentifier(timeIdentifier, time) + separator;
-
-            format = format.replace("%" + identifier, replacer);
-        }
-
-        return format;
-    }
-
-    private static String getTimeIdentifier(String id, long time) {
-        switch (id) {
-            case "seconds":
-                return time == 1 ? Values.CONFIG.getSecond() : Values.CONFIG.getSeconds();
-            case "minutes":
-                return time == 1 ? Values.CONFIG.getMinute() : Values.CONFIG.getMinutes();
-            case "hours":
-                return time == 1 ? Values.CONFIG.getHour() : Values.CONFIG.getHours();
-            case "days":
-                return time == 1 ? Values.CONFIG.getDay() : Values.CONFIG.getDays();
-        }
-        return "";
-    }
 
     /**
      * BankPlus does not accept negative numbers, if a number is lower than 0, it will return true.

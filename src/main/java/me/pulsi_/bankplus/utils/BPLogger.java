@@ -1,5 +1,7 @@
 package me.pulsi_.bankplus.utils;
 
+import me.pulsi_.bankplus.utils.texts.BPChat;
+import me.pulsi_.bankplus.utils.texts.BPMessages;
 import org.bukkit.Bukkit;
 
 public class BPLogger {

@@ -1,4 +1,4 @@
-package me.pulsi_.bankplus.utils;
+package me.pulsi_.bankplus.utils.texts;
 
 import me.pulsi_.bankplus.BankPlus;
 import org.bukkit.Bukkit;

@@ -4,7 +4,7 @@ import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankListGui;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
-import me.pulsi_.bankplus.utils.BPMessages;
+import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.command.Command;
@@ -17,9 +17,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-public class MainCmd implements CommandExecutor, TabCompleter {
+import static me.pulsi_.bankplus.commands.BPCmdRegistry.commands;
 
-    public static final LinkedHashMap<String, BPCommand> commands = new LinkedHashMap<>();
+public class MainCmd implements CommandExecutor, TabCompleter {
 
     public boolean onCommand(CommandSender s, Command command, String label, String[] args) {
         if (!Values.CONFIG.getWorldsBlacklist().isEmpty() && s instanceof Player) {

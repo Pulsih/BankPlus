@@ -18,19 +18,6 @@ public class BPConfigs {
     private static boolean updated = false;
     private boolean autoUpdateFiles;
 
-    public enum Type {
-        CONFIG("config.yml"),
-        MESSAGES("messages.yml"),
-        MULTIPLE_BANKS("multiple_banks.yml"),
-        SAVES("saves.yml"),
-        COMMANDS("commands.yml");
-
-        public final String name;
-        Type(String name) {
-            this.name = name;
-        }
-    }
-
     private final BankPlus plugin;
 
     public BPConfigs(BankPlus plugin) {
@@ -38,106 +25,77 @@ public class BPConfigs {
     }
 
     public void setupConfigs() {
-        setupSavesFile();
-        setupCommands();
-        setupConfig();
-        setupMessages();
-        setupMultipleBanks();
-    }
+        FileConfiguration config = getConfig("config.yml");
+        String path = "General-Settings.Auto-Update-Files";
+        autoUpdateFiles = config.get(path) == null || config.getBoolean(path);
 
-    public void setupSavesFile() {
-        File file = new File(BankPlus.INSTANCE().getDataFolder(), Type.SAVES.name);
+        checkAndCreateFile("config.yml");
+        checkAndCreateFile("messages.yml");
+        checkAndCreateFile("multiple_banks.yml");
+
+        File file = new File(BankPlus.INSTANCE().getDataFolder(), "saves.yml");
         if (!file.exists()) {
             try {
                 file.getParentFile().mkdir();
                 file.createNewFile();
             } catch (IOException e) {
-                BPLogger.error("Failed to to create the " + Type.SAVES.name + " file! " + e.getMessage());
+                BPLogger.error(e, "Failed to to create the saves.yml file! ");
             }
             updated = false;
         }
 
-        FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+        FileConfiguration savesConfig = YamlConfiguration.loadConfiguration(file);
         if (updated) {
-            String v = config.getString("version");
+            String v = savesConfig.getString("version");
             updated = v != null && v.equals(plugin.getDescription().getVersion());
         }
 
-        config.options().header("DO NOT EDIT / REMOVE THIS FILE OR BANKPLUS MAY GET RESET!");
-        config.set("version", plugin.getDescription().getVersion());
+        savesConfig.options().header("DO NOT EDIT / REMOVE THIS FILE OR BANKPLUS MAY GET RESET!");
+        savesConfig.set("version", plugin.getDescription().getVersion());
 
         try {
-            config.save(file);
+            savesConfig.save(file);
         } catch (IOException e) {
-            BPLogger.error("Could not save \"saves\" file! (Error: " + e.getMessage().replace("\n", "") + ")");
+            BPLogger.error(e, "Could not save \"saves.yml\" file!");
         }
     }
 
-    public void setupConfig() {
-        boolean updateFile = true, alreadyExist = getFile(Type.CONFIG.name).exists();
-        if (alreadyExist) {
-            FileConfiguration config = getConfig(Type.CONFIG.name);
-
-            autoUpdateFiles = config.get("General-Settings.Auto-Update-Files") == null || config.getBoolean("General-Settings.Auto-Update-Files");
-            updateFile = !updated && autoUpdateFiles;
-        }
-
-        if (updateFile) setupFile(Type.CONFIG, alreadyExist);
-    }
-
-    public void setupMessages() {
-        boolean updateFile = true, alreadyExist = getFile(Type.MESSAGES.name).exists();
-        if (alreadyExist) updateFile = !updated && autoUpdateFiles;
-
-        if (updateFile) setupFile(Type.MESSAGES, alreadyExist);
-    }
-
-    public void setupMultipleBanks() {
-        boolean updateFile = true, alreadyExist = getFile(Type.MULTIPLE_BANKS.name).exists();
-        if (alreadyExist) updateFile = !updated && autoUpdateFiles;
-
-        if (updateFile) setupFile(Type.MULTIPLE_BANKS, alreadyExist);
-    }
-
-    public void setupCommands() {
-        File file = getFile(Type.COMMANDS.name);
-        if (!file.exists()) plugin.saveResource("commands.yml", true);
-
-        InputStreamReader internalFile = new InputStreamReader(BankPlus.INSTANCE().getResource("commands.yml"), StandardCharsets.UTF_8);
-        YamlConfiguration internalConfig = YamlConfiguration.loadConfiguration(internalFile), externalConfig = YamlConfiguration.loadConfiguration(file);
-
-        boolean hasChanges = false;
-        for (String key : internalConfig.getKeys(true)) {
-            if (externalConfig.contains(key)) continue;
-
-            hasChanges = true;
-            externalConfig.set(key, internalConfig.get(key));
-        }
-
-        if (!hasChanges) return;
-
-        try {
-            externalConfig.save(file);
-        } catch (Exception e) {
-            BPLogger.error("Could not save file changes to commands.yml! (Error: " + e.getMessage() + ")");
-        }
+    /**
+     * Initialize the selected file, create a new from origin if not exist, or check if the
+     * plugin is updated before going through the setup phase and adding possible missing paths.
+     * @param fileName The file nane.
+     */
+    public void checkAndCreateFile(String fileName) {
+        boolean alreadyExist = getFile(fileName).exists();
+        if (!alreadyExist || (!updated && autoUpdateFiles)) setupFile(fileName, alreadyExist);
     }
 
     public File getFile(String path) {
         return new File(plugin.getDataFolder(), path);
     }
 
+    public FileConfiguration getConfig(String fileName) {
+        return getConfig(getFile(fileName));
+    }
+
     public FileConfiguration getConfig(File file) {
-        return YamlConfiguration.loadConfiguration(file);
+        YamlConfiguration config = new YamlConfiguration();
+
+        try {
+            config.load(file);
+        } catch (Exception e) {
+            BPLogger.error(e, "Could not load configuration file \"" + file + "\".");
+        }
+        return config;
     }
 
-    public FileConfiguration getConfig(String path) {
-        return YamlConfiguration.loadConfiguration(getFile(path));
-    }
-
-    public void setupFile(Type type, boolean backup) {
-        String fileName = type.name;
-        File folderFile = getFile(type.name);
+    /**
+     * Initialize an existing file from the resource folder and add possible missing paths.
+     * @param fileName The file name.
+     * @param backup Choose if creating a backup of the previous file or not.
+     */
+    public void setupFile(String fileName, boolean backup) {
+        File folderFile = getFile(fileName);
         if (!folderFile.exists()) {
             plugin.saveResource(fileName, true);
             return;
