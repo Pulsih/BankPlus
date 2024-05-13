@@ -4,12 +4,13 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.List;
 
 public class ReloadCmd extends BPCommand {
 
-    public ReloadCmd(String... aliases) {
+    public ReloadCmd(FileConfiguration commandsConfig, String... aliases) {
         super(aliases);
     }
 
@@ -24,8 +25,8 @@ public class ReloadCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String[] args) {
-        if (skipToConfirm(s)) return false;
+    public boolean onSuccessExecution(CommandSender s, String[] args) {
+        if (hasConfirmed(s)) return false;
 
         long time = System.currentTimeMillis();
         BPMessages.send(s, "%prefix% &aThe plugin will now try to reload...", true);

@@ -4,17 +4,18 @@ import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.utils.BPUtils;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.util.List;
 
 public class BalanceCmd extends BPCommand {
 
-    public BalanceCmd(String... aliases) {
+    public BalanceCmd(FileConfiguration commandsConfig, String... aliases) {
         super(aliases);
     }
 
@@ -29,11 +30,11 @@ public class BalanceCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String[] args) {
+    public boolean onSuccessExecution(CommandSender s, String[] args) {
         Player p = (Player) s;
 
         if (args.length == 1) {
-            if (skipToConfirm(s)) return false;
+            if (hasConfirmed(s)) return false;
 
             List<Bank> availableBanks = BankUtils.getAvailableBanks(p);
             if (availableBanks.isEmpty()) {
@@ -49,7 +50,7 @@ public class BalanceCmd extends BPCommand {
                 BPMessages.send(s, "Invalid-Bank");
                 return false;
             }
-            if (skipToConfirm(s)) return false;
+            if (hasConfirmed(s)) return false;
             BPMessages.send(p, "Personal-Bank", BPUtils.placeValues(p, BPEconomy.get(bankName).getBankBalance(p), BankUtils.getCurrentLevel(BankUtils.getBank(bankName), p)));
         }
         return true;

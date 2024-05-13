@@ -17,6 +17,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.inventory.ItemStack;
@@ -82,44 +83,6 @@ public class BPUtils {
         if (s.hasPermission(permission)) return true;
         BPMessages.send(s, "No-Permission", "%permission%$" + permission);
         return false;
-    }
-
-    public static void customWithdraw(Player p) {
-        customWithdraw(p, Values.CONFIG.getMainGuiName());
-    }
-
-    public static void customWithdraw(Player p, String identifier) {
-        if (Values.MESSAGES.isTitleCustomAmountEnabled())
-            BPUtils.sendTitle(BankPlus.INSTANCE().getConfigs().getConfig(BPConfigs.Type.MESSAGES.name).getString("Title-Custom-Transaction.Title-Withdraw"), p);
-        BPMessages.send(p, "Chat-Withdraw");
-        BPSets.addPlayerToWithdraw(p);
-        p.closeInventory();
-
-        BPPlayer pl = PlayerRegistry.get(p);
-        pl.setOpenedBankGui(BankPlus.INSTANCE().getBankRegistry().getBanks().get(identifier));
-        pl.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> {
-            PlayerChatMethod.reopenBank(p, identifier);
-            BPMessages.send(p, "Chat-Time-Expired");
-        }, Values.CONFIG.getChatExitTime() * 20L));
-    }
-
-    public static void customDeposit(Player p) {
-        customDeposit(p, Values.CONFIG.getMainGuiName());
-    }
-
-    public static void customDeposit(Player p, String identifier) {
-        if (Values.MESSAGES.isTitleCustomAmountEnabled())
-            BPUtils.sendTitle(BankPlus.INSTANCE().getConfigs().getConfig(BPConfigs.Type.MESSAGES.name).getString("Title-Custom-Transaction.Title-Deposit"), p);
-        BPMessages.send(p, "Chat-Deposit");
-        BPSets.addPlayerToDeposit(p);
-        p.closeInventory();
-
-        BPPlayer pl = PlayerRegistry.get(p);
-        pl.setOpenedBankGui(BankPlus.INSTANCE().getBankRegistry().getBanks().get(identifier));
-        pl.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> {
-            PlayerChatMethod.reopenBank(p, identifier);
-            BPMessages.send(p, "Chat-Time-Expired");
-        }, Values.CONFIG.getChatExitTime() * 20L));
     }
 
     public static void sendTitle(String title, Player p) {
@@ -363,5 +326,9 @@ public class BPUtils {
             else builder.append(", ");
         }
         return builder.toString();
+    }
+
+    public static boolean pathExist(FileConfiguration config, String path) {
+        return config != null && config.get(path) != null;
     }
 }

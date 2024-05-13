@@ -4,8 +4,8 @@ import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankListGui;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
-import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
+import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -14,7 +14,6 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import static me.pulsi_.bankplus.commands.BPCmdRegistry.commands;

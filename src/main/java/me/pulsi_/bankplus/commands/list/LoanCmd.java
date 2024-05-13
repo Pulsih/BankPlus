@@ -1,16 +1,17 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.bankSystem.BankRegistry;
+import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.loanSystem.LoanUtils;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
@@ -21,7 +22,7 @@ public class LoanCmd extends BPCommand {
 
     private final BankRegistry registry;
 
-    public LoanCmd(String... aliases) {
+    public LoanCmd(FileConfiguration commandsConfig, String... aliases) {
         super(aliases);
 
         registry = BankPlus.INSTANCE().getBankRegistry();
@@ -38,7 +39,7 @@ public class LoanCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String[] args) {
+    public boolean onSuccessExecution(CommandSender s, String[] args) {
         Player sender = (Player) s;
 
         if (args.length == 1) {
@@ -125,7 +126,7 @@ public class LoanCmd extends BPCommand {
             return false;
         }
 
-        if (!skipToConfirm(s)) LoanUtils.sendRequest(sender, target, amount, BankUtils.getBank(senderBank), BankUtils.getBank(receiverBank), action);
+        if (!hasConfirmed(s)) LoanUtils.sendRequest(sender, target, amount, BankUtils.getBank(senderBank), BankUtils.getBank(receiverBank), action);
         return true;
     }
 

@@ -4,12 +4,13 @@ import me.pulsi_.bankplus.bankTop.BPBankTop;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.List;
 
 public class UpdateBankTopCmd extends BPCommand {
 
-    public UpdateBankTopCmd(String... aliases) {
+    public UpdateBankTopCmd(FileConfiguration commandsConfig, String... aliases) {
         super(aliases);
     }
 
@@ -24,8 +25,8 @@ public class UpdateBankTopCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String[] args) {
-        if (skipToConfirm(s)) return false;
+    public boolean onSuccessExecution(CommandSender s, String[] args) {
+        if (hasConfirmed(s)) return false;
 
         BPBankTop.updateBankTop();
         BPMessages.send(s, "BankTop-Updated");

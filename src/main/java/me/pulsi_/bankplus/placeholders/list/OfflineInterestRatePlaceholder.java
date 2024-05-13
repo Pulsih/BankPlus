@@ -1,6 +1,5 @@
 package me.pulsi_.bankplus.placeholders.list;
 
-import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.placeholders.BPPlaceholder;
 import org.bukkit.entity.Player;

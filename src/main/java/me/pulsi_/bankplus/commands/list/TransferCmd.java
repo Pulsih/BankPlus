@@ -18,7 +18,7 @@ import java.util.Set;
 
 public class TransferCmd extends BPCommand {
 
-    public TransferCmd(String... aliases) {
+    public TransferCmd(FileConfiguration commandsConfig, String... aliases) {
         super(aliases);
     }
 
@@ -33,14 +33,14 @@ public class TransferCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String[] args) {
+    public boolean onSuccessExecution(CommandSender s, String[] args) {
         String mode = args[1].toLowerCase();
 
         if (!mode.equals("filestodatabase") && !mode.equals("databasetofiles")) {
             BPMessages.send(s, "Invalid-Action");
             return false;
         }
-        if (skipToConfirm(s)) return false;
+        if (hasConfirmed(s)) return false;
 
         if (!Values.CONFIG.isSqlEnabled()) {
             BPMessages.send(s, "%prefix% &cCould not initialize the task, MySQL hasn't been enabled in the config file!", true);

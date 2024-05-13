@@ -3,21 +3,48 @@ package me.pulsi_.bankplus.commands.list;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 
 public class AddCmd extends BPCommand {
 
-    public AddCmd(String... aliases) {
-        super(aliases);
+    public AddCmd(FileConfiguration commandsConfig, String... aliases) {
+        super(commandsConfig, aliases);
+    }
+
+    @Override
+    public List<String> defaultUsage() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public int defaultConfirmCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultConfirmMessage() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public int defaultCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultCooldownMessage() {
+        return Collections.emptyList();
     }
 
     @Override
@@ -31,7 +58,12 @@ public class AddCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String[] args) {
+    public boolean preCmdChecks(CommandSender s, String[] args) {
+        return false;
+    }
+
+    @Override
+    public boolean onSuccessExecution(CommandSender s, String[] args) {
         OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
         if (!p.hasPlayedBefore()) {
             BPMessages.send(s, "Invalid-Player");
@@ -57,7 +89,7 @@ public class AddCmd extends BPCommand {
 
         boolean silent = args.length > 4 && args[4].toLowerCase().contains("true");
 
-        if (skipToConfirm(s)) return false;
+        if (hasConfirmed(s)) return false;
 
         BigDecimal added = BPEconomy.get(bankName).addBankBalance(p, amount);
         if (silent) return true;

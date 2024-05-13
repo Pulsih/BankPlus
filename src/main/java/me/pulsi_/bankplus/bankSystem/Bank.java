@@ -2,7 +2,8 @@ package me.pulsi_.bankplus.bankSystem;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.economy.BPEconomy;
-import me.pulsi_.bankplus.utils.*;
+import me.pulsi_.bankplus.utils.BPLogger;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -16,18 +17,21 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 
-public class Bank extends BankGui {
+public class Bank {
 
     private final String identifier;
     private final BPEconomy bankEconomy;
+    private final BankGui bankGui;
     // HashMap to keep track of the bank levels.
     private final HashMap<Integer, BankLevel> bankLevels = new HashMap<>();
 
-    public Bank(String identifier) {
-        super(identifier);
+    private String accessPermission;
+    private boolean giveInterestIfNotAvailable;
 
+    public Bank(String identifier) {
         this.identifier = identifier;
         bankEconomy = new BPEconomy(this);
+        bankGui = new BankGui(this);
     }
 
     public String getIdentifier() {
@@ -38,12 +42,32 @@ public class Bank extends BankGui {
         return bankEconomy;
     }
 
+    public BankGui getBankGui() {
+        return bankGui;
+    }
+
     public HashMap<Integer, BankLevel> getBankLevels() {
         return bankLevels;
     }
 
+    public String getAccessPermission() {
+        return accessPermission;
+    }
+
+    public boolean isGiveInterestIfNotAvailable() {
+        return giveInterestIfNotAvailable;
+    }
+
     public BankLevel getBankLevel(int level) {
         return bankLevels.get(level);
+    }
+
+    public void setAccessPermission(String accessPermission) {
+        this.accessPermission = accessPermission;
+    }
+
+    public void setGiveInterestIfNotAvailable(boolean giveInterestIfNotAvailable) {
+        this.giveInterestIfNotAvailable = giveInterestIfNotAvailable;
     }
 
     public void updateBankSettings() {
@@ -62,9 +86,9 @@ public class Bank extends BankGui {
             BPLogger.warn(e, "Could not load \"" + identifier + "\" bank properties because it contains an invalid configuration!");
             return;
         }
-        getBankItems().clear();
 
         setAccessPermission(config.getString("Settings.Permission"));
+        setGiveInterestIfNotAvailable(config.getBoolean("Settings.Give-Interest-If-Not-Available"));
 
         ConfigurationSection levels = config.getConfigurationSection("Levels");
         bankLevels.clear();
@@ -85,14 +109,14 @@ public class Bank extends BankGui {
         }
 
         if (!Values.CONFIG.isGuiModuleEnabled()) return;
+        bankGui.getBankItems().clear();
 
-        setTitle(config.getString("Title"));
-        setSize(config.getInt("Lines"));
-        setUpdateDelay(config.getInt("Update-Delay"));
-        setGiveInterestIfNotAvailable(config.getBoolean("Settings.Give-Interest-If-Not-Available"));
-        setFillerEnabled(config.getBoolean("Filler.Enabled"));
-        setFillerMaterial(config.getString("Filler.Material"));
-        setFillerGlowing(config.getBoolean("Filler.Glowing"));
+        bankGui.setTitle(config.getString("Title"));
+        bankGui.setSize(config.getInt("Lines"));
+        bankGui.setUpdateDelay(config.getInt("Update-Delay"));
+        bankGui.setFillerEnabled(config.getBoolean("Filler.Enabled"));
+        bankGui.setFillerMaterial(config.getString("Filler.Material"));
+        bankGui.setFillerGlowing(config.getBoolean("Filler.Glowing"));
 
         ConfigurationSection items = config.getConfigurationSection("Items");
         if (items != null) {
@@ -101,7 +125,7 @@ public class Bank extends BankGui {
                 if (itemSection == null) continue;
 
                 ItemStack itemStack = BankUtils.getItemFromSection(itemSection);
-                Bank.BankItem bankItem = new Bank.BankItem();
+                BankGui.BankItem bankItem = new BankGui.BankItem();
                 bankItem.setItem(itemStack);
                 bankItem.setMaterial(itemSection.getString("Material"));
                 bankItem.setDisplayname(itemSection.getString("Displayname"));
@@ -125,37 +149,37 @@ public class Bank extends BankGui {
                 }
 
                 List<Integer> slots = itemSection.getIntegerList("Slot");
-                if (slots.isEmpty()) setBankItem(itemSection.getInt("Slot") - 1, bankItem);
-                else for (int slot : slots) setBankItem(slot - 1, bankItem);
+                if (slots.isEmpty()) bankGui.setBankItem(itemSection.getInt("Slot") - 1, bankItem);
+                else for (int slot : slots) bankGui.setBankItem(slot - 1, bankItem);
             }
         }
 
         if (!Values.MULTIPLE_BANKS.enableMultipleBanksModule()) {
-            setAvailableBankListItem(null);
-            setUnavailableBankListItem(null);
+            bankGui.setAvailableBankListItem(null);
+            bankGui.setUnavailableBankListItem(null);
             return;
         }
 
         ConfigurationSection availableSection = config.getConfigurationSection("Settings.BanksGuiItem.Available"),
                 unavailableSection = config.getConfigurationSection("Settings.BanksGuiItem.Unavailable");
 
-        Bank.BankItem availableItem = new Bank.BankItem();
+        BankGui.BankItem availableItem = new BankGui.BankItem();
         availableItem.setItem(BankUtils.getItemFromSection(availableSection));
         if (availableSection != null) {
             availableItem.setMaterial(availableSection.getString("Material"));
             availableItem.setDisplayname(availableSection.getString("Displayname"));
             availableItem.getLore().put(0, availableSection.getStringList("Lore"));
         }
-        setAvailableBankListItem(availableItem);
+        bankGui.setAvailableBankListItem(availableItem);
 
-        Bank.BankItem unavailableItem = new Bank.BankItem();
+        BankGui.BankItem unavailableItem = new BankGui.BankItem();
         availableItem.setItem(BankUtils.getItemFromSection(unavailableSection));
         if (unavailableSection != null) {
             unavailableItem.setMaterial(unavailableSection.getString("Material"));
             unavailableItem.setDisplayname(unavailableSection.getString("Displayname"));
             unavailableItem.getLore().put(0, unavailableSection.getStringList("Lore"));
         }
-        setUnavailableBankListItem(unavailableItem);
+        bankGui.setUnavailableBankListItem(unavailableItem);
     }
 
     public static class BankLevel {

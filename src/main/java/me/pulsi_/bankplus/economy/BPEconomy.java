@@ -1,17 +1,21 @@
 package me.pulsi_.bankplus.economy;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.BPPlayerManager;
+import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.bankSystem.Bank;
-import me.pulsi_.bankplus.bankSystem.BankUtils;
+import me.pulsi_.bankplus.bankSystem.BankGui;
 import me.pulsi_.bankplus.bankSystem.BankRegistry;
-import me.pulsi_.bankplus.commands.BPCmdRegistry;
+import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.events.BPAfterTransactionEvent;
 import me.pulsi_.bankplus.events.BPPreTransactionEvent;
+import me.pulsi_.bankplus.listeners.playerChat.PlayerChatMethod;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
+import me.pulsi_.bankplus.utils.BPSets;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
@@ -29,7 +33,6 @@ public class BPEconomy {
     private static final Set<UUID> loadedPlayers = new HashSet<>();
 
     private final Bank originBank;
-    //private final String bankName;
     private final HashMap<UUID, Holder> balances = new HashMap<>();
     private final Set<UUID> transactions = new HashSet<>();
 
@@ -555,6 +558,48 @@ public class BPEconomy {
         BPUtils.playSound("WITHDRAW", p);
 
         afterTransactionEvent(p, TransactionType.WITHDRAW, amount);
+    }
+
+    /**
+     * Initialize the custom withdraw task for the selected player (Withdraw through chat).
+     * @param p The player.
+     */
+    public void customDeposit(Player p) {
+        if (Values.MESSAGES.isTitleCustomAmountEnabled()) BPUtils.sendTitle(Values.MESSAGES.getCustomDepositTitle(), p);
+
+        BPMessages.send(p, "Chat-Deposit");
+        BPSets.addPlayerToDeposit(p);
+        p.closeInventory();
+
+        BPPlayer pl = PlayerRegistry.get(p);
+        BankGui bankGui = getOriginBank().getBankGui();
+        pl.setOpenedBankGui(bankGui);
+
+        pl.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> {
+            PlayerChatMethod.reopenBank(p, bankGui);
+            BPMessages.send(p, "Chat-Time-Expired");
+        }, Values.CONFIG.getChatExitTime() * 20L));
+    }
+
+    /**
+     * Initialize the custom deposit task for the selected player (Deposit through chat).
+     * @param p The player.
+     */
+    public void customWithdraw(Player p) {
+        if (Values.MESSAGES.isTitleCustomAmountEnabled()) BPUtils.sendTitle(Values.MESSAGES.getCustomWithdrawTitle(), p);
+
+        BPMessages.send(p, "Chat-Withdraw");
+        BPSets.addPlayerToWithdraw(p);
+        p.closeInventory();
+
+        BPPlayer pl = PlayerRegistry.get(p);
+        BankGui bankGui = getOriginBank().getBankGui();
+        pl.setOpenedBankGui(bankGui);
+
+        pl.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> {
+            PlayerChatMethod.reopenBank(p, bankGui);
+            BPMessages.send(p, "Chat-Time-Expired");
+        }, Values.CONFIG.getChatExitTime() * 20L));
     }
 
     /**

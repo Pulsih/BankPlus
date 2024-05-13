@@ -5,12 +5,13 @@ import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.List;
 
 public class GiveInterestCmd extends BPCommand {
 
-    public GiveInterestCmd(String... aliases) {
+    public GiveInterestCmd(FileConfiguration commandsConfig, String... aliases) {
         super(aliases);
     }
 
@@ -25,12 +26,12 @@ public class GiveInterestCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String[] args) {
+    public boolean onSuccessExecution(CommandSender s, String[] args) {
         if (!Values.CONFIG.isInterestEnabled()) {
             BPMessages.send(s, "Interest-Disabled");
             return false;
         }
-        if (skipToConfirm(s)) return false;
+        if (hasConfirmed(s)) return false;
 
         BPMessages.send(s, "%prefix% &2Successfully given the interest! The countdown has been restarted.", true);
         BankPlus.INSTANCE().getInterest().giveInterestToEveryone();

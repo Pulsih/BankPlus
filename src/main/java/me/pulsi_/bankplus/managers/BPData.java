@@ -4,8 +4,8 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.bankTop.BPBankTop;
-import me.pulsi_.bankplus.commands.BankTopCmd;
 import me.pulsi_.bankplus.commands.BPCmdRegistry;
+import me.pulsi_.bankplus.commands.BankTopCmd;
 import me.pulsi_.bankplus.commands.MainCmd;
 import me.pulsi_.bankplus.economy.EconomyUtils;
 import me.pulsi_.bankplus.external.UpdateChecker;
@@ -19,8 +19,8 @@ import me.pulsi_.bankplus.listeners.bankListener.*;
 import me.pulsi_.bankplus.listeners.playerChat.*;
 import me.pulsi_.bankplus.loanSystem.BPLoanRegistry;
 import me.pulsi_.bankplus.mySQL.BPSQL;
-import me.pulsi_.bankplus.utils.texts.BPChat;
 import me.pulsi_.bankplus.utils.BPLogger;
+import me.pulsi_.bankplus.utils.texts.BPChat;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -31,6 +31,8 @@ import java.io.File;
 import java.io.IOException;
 
 public class BPData {
+
+    private boolean start = true;
 
     private final BankPlus plugin;
 
@@ -60,6 +62,7 @@ public class BPData {
         BPLogger.log("");
 
         if (Values.CONFIG.isBanktopEnabled()) BPBankTop.updateBankTop();
+        start = false;
     }
 
     public void shutdownPlugin() {
@@ -91,7 +94,7 @@ public class BPData {
             Values.MULTIPLE_BANKS.setupValues();
 
             BPMessages.loadMessages();
-            BPCmdRegistry.registerCmds();
+            BPCmdRegistry.registerPluginCommands();
 
             if (Values.CONFIG.isLogTransactions()) plugin.getBpLogUtils().setupLoggerFile();
             if (Values.CONFIG.isIgnoringAfkPlayers()) plugin.getAfkManager().startCountdown();
@@ -101,7 +104,7 @@ public class BPData {
             if (!BPAFK.isPlayerCountdownActive()) BPAFK.startCountdown();
 
             BPInterest interest = plugin.getInterest();
-            if (Values.CONFIG.isInterestEnabled() && interest.wasDisabled()) interest.restartInterest();
+            if (Values.CONFIG.isInterestEnabled() && interest.wasDisabled()) interest.restartInterest(start);
 
             plugin.getBankRegistry().loadBanks();
 

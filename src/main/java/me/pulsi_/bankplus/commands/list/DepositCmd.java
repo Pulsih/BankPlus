@@ -4,12 +4,13 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
@@ -17,7 +18,7 @@ import java.util.List;
 
 public class DepositCmd extends BPCommand {
 
-    public DepositCmd(String... aliases) {
+    public DepositCmd(FileConfiguration commandsConfig, String... aliases) {
         super(aliases);
     }
 
@@ -32,7 +33,7 @@ public class DepositCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String[] args) {
+    public boolean onSuccessExecution(CommandSender s, String[] args) {
         Player p = (Player) s;
 
         String bankName = Values.CONFIG.getMainGuiName();
@@ -60,7 +61,7 @@ public class DepositCmd extends BPCommand {
                 amount = BPFormatter.getStyledBigDecimal(num);
         }
 
-        if (!skipToConfirm(s)) economy.deposit(p, amount);
+        if (!hasConfirmed(s)) economy.deposit(p, amount);
         return true;
     }
 

@@ -2,12 +2,14 @@ package me.pulsi_.bankplus.utils.texts;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 
 public class BPMessages {
 
@@ -35,7 +37,7 @@ public class BPMessages {
      * @param replacers A list of possible replacements.
      */
     public static void send(Player p, String identifier, Object... replacers) {
-        if (p == null) return;
+        if (p == null || identifier == null || identifier.isEmpty()) return;
 
         boolean fromString = fromString(replacers);
         if (!fromString && !messages.containsKey(identifier)) {
@@ -64,7 +66,7 @@ public class BPMessages {
      * @param replacers A list of possible replacements.
      */
     public static void send(CommandSender s, String identifier, Object... replacers) {
-        if (s == null) return;
+        if (s == null || identifier == null || identifier.isEmpty()) return;
 
         boolean fromString = fromString(replacers);
         if (!fromString && !messages.containsKey(identifier)) {
@@ -116,15 +118,8 @@ public class BPMessages {
 
         FileConfiguration config = BankPlus.INSTANCE().getConfigs().getConfig("messages.yml");
 
-        for (String identifier : config.getConfigurationSection("").getKeys(false)) {
-            List<String> configMessages = config.getStringList(identifier);
-            if (configMessages.isEmpty()) {
-                String singleMessage = config.getString(identifier);
-                if (singleMessage != null && !singleMessage.isEmpty()) configMessages.add(singleMessage);
-            }
-
-            messages.put(identifier, configMessages);
-        }
+        for (String identifier : config.getConfigurationSection("").getKeys(false))
+            messages.put(identifier, getPossibleMessages(config, identifier));
 
         if (!messages.containsKey("prefix")) prefix = BPChat.prefix;
         else {
@@ -141,6 +136,15 @@ public class BPMessages {
 
     public static String getPrefix() {
         return prefix;
+    }
+
+    public static List<String> getPossibleMessages(FileConfiguration config, String path) {
+        List<String> configMessages = config.getStringList(path);
+        if (configMessages.isEmpty()) {
+            String singleMessage = config.getString(path);
+            if (singleMessage != null && !singleMessage.isEmpty()) configMessages.add(singleMessage);
+        }
+        return configMessages;
     }
 
     private static String format(Player p, String text) {

@@ -7,8 +7,8 @@ import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.economy.TransactionType;
 import me.pulsi_.bankplus.managers.BPConfigs;
 import me.pulsi_.bankplus.managers.BPTaskManager;
-import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.utils.BPUtils;
+import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -32,12 +32,14 @@ public class BPInterest {
         this.plugin = plugin;
     }
 
-    public void restartInterest() {
+    public void restartInterest(boolean start) {
         isOfflineInterestEnabled = Values.CONFIG.isGivingInterestToOfflinePlayers();
         long interestSave = 0;
 
-        FileConfiguration config = plugin.getConfigs().getConfig(BPConfigs.Type.SAVES.name);
-        if (config != null) interestSave = config.getLong("interest-save");
+        if (start) {
+            FileConfiguration config = plugin.getConfigs().getConfig("saves.yml");
+            if (config != null) interestSave = config.getLong("interest-save");
+        }
 
         if (interestSave > 0) cooldown = System.currentTimeMillis() + interestSave;
         else cooldown = System.currentTimeMillis() + Values.CONFIG.getInterestDelay();

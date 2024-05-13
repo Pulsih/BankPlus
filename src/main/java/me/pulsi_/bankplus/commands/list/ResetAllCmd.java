@@ -9,6 +9,7 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class ResetAllCmd extends BPCommand {
 
     private final Economy vaultEconomy;
 
-    public ResetAllCmd(String... aliases) {
+    public ResetAllCmd(FileConfiguration commandsConfig, String... aliases) {
         super(aliases);
         vaultEconomy = BankPlus.INSTANCE().getVaultEconomy();
     }
@@ -36,14 +37,14 @@ public class ResetAllCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String[] args) {
+    public boolean onSuccessExecution(CommandSender s, String[] args) {
         String mode = args[1];
         if (!mode.equalsIgnoreCase("delete") && !mode.equalsIgnoreCase("maintain")) {
             BPMessages.send(s, "%prefix% &cInvalid reset mode! Choose one between &a\"delete\" &cand &a\"maintain\"&c.", true);
             return false;
         }
 
-        if (skipToConfirm(s)) return false;
+        if (hasConfirmed(s)) return false;
 
         BPMessages.send(s, "%prefix% &aSuccessfully reset all players money! &8(&aWith &f" + mode + " &amode&8)", true);
         resetAll(Arrays.asList(Bukkit.getOfflinePlayers()), mode);

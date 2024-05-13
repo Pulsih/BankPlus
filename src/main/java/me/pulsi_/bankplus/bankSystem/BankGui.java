@@ -4,7 +4,8 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
-import me.pulsi_.bankplus.utils.*;
+import me.pulsi_.bankplus.utils.BPItems;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPChat;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.Values;
@@ -21,26 +22,26 @@ import java.util.List;
 
 public class BankGui {
 
-    private final String identifier;
+    private final Bank originBank;
 
-    public BankGui(String identifier) {
-        this.identifier = identifier;
+    public BankGui(Bank originBank) {
+        this.originBank = originBank;
     }
 
     // Pseudo inventory content to keep track of items, lore and actions. K = Inventory slot V = BankItem
-    private final HashMap<Integer, Bank.BankItem> bankItems = new HashMap<>();
+    private final HashMap<Integer, BankItem> bankItems = new HashMap<>();
 
     private String title = "&c&l * TITLE NOT FOUND *";
     private int size, updateDelay;
-    private String fillerMaterial, accessPermission;
-    private boolean giveInterestIfNotAvailable, fillerEnabled, fillerGlowing;
-    private Bank.BankItem availableBankListItem, unavailableBankListItem;
+    private String fillerMaterial;
+    private boolean fillerEnabled, fillerGlowing;
+    private BankItem availableBankListItem, unavailableBankListItem;
 
-    public String getIdentifier() {
-        return identifier;
+    public Bank getOriginBank() {
+        return originBank;
     }
 
-    public HashMap<Integer, Bank.BankItem> getBankItems() {
+    public HashMap<Integer, BankItem> getBankItems() {
         return bankItems;
     }
 
@@ -60,14 +61,6 @@ public class BankGui {
         return fillerMaterial;
     }
 
-    public String getAccessPermission() {
-        return accessPermission;
-    }
-
-    public boolean isGiveInterestIfNotAvailable() {
-        return giveInterestIfNotAvailable;
-    }
-
     public boolean isFillerEnabled() {
         return fillerEnabled;
     }
@@ -76,11 +69,11 @@ public class BankGui {
         return fillerGlowing;
     }
 
-    public Bank.BankItem getAvailableBankListItem() {
+    public BankItem getAvailableBankListItem() {
         return availableBankListItem;
     }
 
-    public Bank.BankItem getUnavailableBankListItem() {
+    public BankItem getUnavailableBankListItem() {
         return unavailableBankListItem;
     }
 
@@ -104,14 +97,6 @@ public class BankGui {
         this.fillerMaterial = fillerMaterial;
     }
 
-    public void setAccessPermission(String accessPermission) {
-        this.accessPermission = accessPermission;
-    }
-
-    public void setGiveInterestIfNotAvailable(boolean giveInterestIfNotAvailable) {
-        this.giveInterestIfNotAvailable = giveInterestIfNotAvailable;
-    }
-
     public void setFillerEnabled(boolean fillerEnabled) {
         this.fillerEnabled = fillerEnabled;
     }
@@ -120,11 +105,11 @@ public class BankGui {
         this.fillerGlowing = fillerGlowing;
     }
 
-    public void setAvailableBankListItem(Bank.BankItem availableBankListItem) {
+    public void setAvailableBankListItem(BankItem availableBankListItem) {
         this.availableBankListItem = availableBankListItem;
     }
 
-    public void setUnavailableBankListItem(Bank.BankItem unavailableBankListItem) {
+    public void setUnavailableBankListItem(BankItem unavailableBankListItem) {
         this.unavailableBankListItem = unavailableBankListItem;
     }
 
@@ -136,7 +121,7 @@ public class BankGui {
         if (!bypass) {
             if (Values.CONFIG.isNeedOpenPermissionToOpen() && !BPUtils.hasPermission(p, "bankplus.open")) return;
 
-            if (!BankUtils.isAvailable(identifier, p)) {
+            if (!BankUtils.isAvailable(originBank, p)) {
                 BPMessages.send(p, "Cannot-Access-Bank");
                 return;
             }
@@ -145,27 +130,21 @@ public class BankGui {
         BPPlayer player = PlayerRegistry.get(p);
         if (player == null) player = PlayerRegistry.loadPlayer(p);
 
-        if (!BankUtils.exist(identifier)) {
-            BPMessages.send(p, "Invalid-Bank");
-            return;
-        }
-
         BukkitTask updating = player.getBankUpdatingTask();
         if (updating != null) updating.cancel();
 
-        Bank baseBank = BankUtils.getBank(identifier);
-        String title = baseBank.getTitle();
+        String title = this.title;
         if (!BankPlus.INSTANCE().isPlaceholderApiHooked()) title = BPChat.color(title);
         else title = PlaceholderAPI.setPlaceholders(p, BPChat.color(title));
 
-        Inventory bankInventory = Bukkit.createInventory(new BankHolder(), baseBank.getSize(), title);
+        Inventory bankInventory = Bukkit.createInventory(new BankHolder(), getSize(), title);
         placeContent(bankItems, bankInventory, p);
         updateBankGuiMeta(bankInventory, p);
 
-        long delay = baseBank.getUpdateDelay();
+        long delay = updateDelay;
         if (delay >= 0) player.setBankUpdatingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE(), () -> updateBankGuiMeta(bankInventory, p), delay, delay));
 
-        player.setOpenedBankGui(baseBank);
+        player.setOpenedBankGui(this);
         BPUtils.playSound("PERSONAL", p);
         p.openInventory(bankInventory);
     }
@@ -176,7 +155,7 @@ public class BankGui {
      * @param bankInventory The bank inventory.
      * @param p The player needed for possible skulls.
      */
-    public void placeContent(HashMap<Integer, Bank.BankItem> items, Inventory bankInventory, Player p) {
+    public void placeContent(HashMap<Integer, BankItem> items, Inventory bankInventory, Player p) {
         if (fillerEnabled) {
             ItemStack filler = BPItems.getFiller(this);
             int size = bankInventory.getSize();
@@ -184,7 +163,7 @@ public class BankGui {
         }
 
         for (int slot : items.keySet()) {
-            Bank.BankItem item = items.get(slot);
+            BankItem item = items.get(slot);
             if (item.material.equalsIgnoreCase("head-%player%")) bankInventory.setItem(slot,  BPItems.getHead(p));
             else bankInventory.setItem(slot, items.get(slot).item);
         }
@@ -204,12 +183,12 @@ public class BankGui {
      * @param slot The slot of the item.
      */
     public void updateBankGuiItemMeta(int slot, Inventory playerOpenedInventory, Player p) {
-        Bank.BankItem bankItem = bankItems.get(slot);
+        BankItem bankItem = bankItems.get(slot);
 
         ItemStack inventoryItem = playerOpenedInventory.getItem(slot);
         ItemMeta meta = inventoryItem.getItemMeta();
 
-        List<String> actualLore = new ArrayList<>(), levelLore = bankItem.lore.get(BankUtils.getCurrentLevel(BankUtils.getBank(identifier), p));
+        List<String> actualLore = new ArrayList<>(), levelLore = bankItem.lore.get(BankUtils.getCurrentLevel(originBank, p));
         if (levelLore == null) levelLore = bankItem.lore.get(0);
         for (String line : levelLore) actualLore.add(BPChat.color(line));
 

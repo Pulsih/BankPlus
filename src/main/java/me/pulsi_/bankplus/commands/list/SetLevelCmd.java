@@ -2,19 +2,20 @@ package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.List;
 
 public class SetLevelCmd extends BPCommand {
 
-    public SetLevelCmd(String... aliases) {
+    public SetLevelCmd(FileConfiguration commandsConfig, String... aliases) {
         super(aliases);
     }
 
@@ -29,7 +30,7 @@ public class SetLevelCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String args[]) {
+    public boolean onSuccessExecution(CommandSender s, String args[]) {
         OfflinePlayer p = Bukkit.getPlayerExact(args[1]);
         if (!p.hasPlayedBefore()) {
             BPMessages.send(s, "Invalid-Player");
@@ -55,7 +56,7 @@ public class SetLevelCmd extends BPCommand {
             BPMessages.send(s, "Invalid-Bank-Level");
             return false;
         }
-        if (skipToConfirm(s)) return false;
+        if (hasConfirmed(s)) return false;
 
         BankUtils.setLevel(BankUtils.getBank(bankName), p, Integer.parseInt(level));
         BPMessages.send(s, "Set-Level-Message", "%player%$" + p.getName(), "%level%$" + level);

@@ -3,12 +3,13 @@ package me.pulsi_.bankplus.commands.list;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
@@ -16,7 +17,7 @@ import java.util.List;
 
 public class PayCmd extends BPCommand {
 
-    public PayCmd(String... aliases) {
+    public PayCmd(FileConfiguration commandsConfig, String... aliases) {
         super(aliases);
     }
 
@@ -31,7 +32,7 @@ public class PayCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String[] args) {
+    public boolean onSuccessExecution(CommandSender s, String[] args) {
         Player target = Bukkit.getPlayerExact(args[1]);
         if (target == null || target.equals(s)) {
             BPMessages.send(s, "Invalid-Player");
@@ -73,7 +74,7 @@ public class PayCmd extends BPCommand {
             return false;
         }
 
-        if (!skipToConfirm(s)) BPEconomy.get(fromBankName).pay((Player) s, target, amount, toBankName);
+        if (!hasConfirmed(s)) BPEconomy.get(fromBankName).pay((Player) s, target, amount, toBankName);
         return true;
     }
 

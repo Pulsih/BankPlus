@@ -6,12 +6,13 @@ import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.List;
 
 public class SaveAllDataCmd extends BPCommand {
 
-    public SaveAllDataCmd(String... aliases) {
+    public SaveAllDataCmd(FileConfiguration commandsConfig, String... aliases) {
         super(aliases);
     }
 
@@ -26,8 +27,8 @@ public class SaveAllDataCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String[] args) {
-        if (skipToConfirm(s)) return false;
+    public boolean onSuccessExecution(CommandSender s, String[] args) {
+        if (hasConfirmed(s)) return false;
 
         EconomyUtils.saveEveryone(true);
         EconomyUtils.restartSavingInterval();

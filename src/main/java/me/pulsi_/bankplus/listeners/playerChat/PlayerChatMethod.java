@@ -3,13 +3,12 @@ package me.pulsi_.bankplus.listeners.playerChat;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
+import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankGui;
-import me.pulsi_.bankplus.bankSystem.BankUtils;
-import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
-import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.utils.BPSets;
 import me.pulsi_.bankplus.utils.BPUtils;
+import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -35,10 +34,12 @@ public class PlayerChatMethod {
             return;
         }
 
-        String identifier = openedBank.getIdentifier();
         String message = ChatColor.stripColor(e.getMessage());
 
-        if (hasTypedExit(message, p, e, identifier)) return;
+        if (hasTypedExit(message, p, e)) {
+            reopenBank(p, openedBank);
+            return;
+        }
         e.setCancelled(true);
 
         BigDecimal amount;
@@ -51,20 +52,19 @@ public class PlayerChatMethod {
 
         if (BPUtils.isDepositing(p)) {
             BPSets.removePlayerFromDepositing(p);
-            BPEconomy.get(identifier).deposit(p, amount);
+            openedBank.getOriginBank().getBankEconomy().deposit(p, amount);
         }
         if (BPUtils.isWithdrawing(p)) {
             BPSets.removePlayerFromWithdrawing(p);
-            BPEconomy.get(identifier).withdraw(p, amount);
+            openedBank.getOriginBank().getBankEconomy().withdraw(p, amount);
         }
-        reopenBank(p, identifier);
+        reopenBank(p, openedBank);
     }
 
-    private static boolean hasTypedExit(String message, Player p, AsyncPlayerChatEvent e, String identifier) {
+    private static boolean hasTypedExit(String message, Player p, AsyncPlayerChatEvent e) {
         if (isTyping(p) && !message.toLowerCase().contains(Values.CONFIG.getChatExitMessage().toLowerCase())) return false;
         e.setCancelled(true);
         executeExitCommands(p);
-        reopenBank(p, identifier);
         return true;
     }
 
@@ -72,14 +72,14 @@ public class PlayerChatMethod {
         return BPUtils.isDepositing(p) || BPUtils.isWithdrawing(p);
     }
 
-    public static void reopenBank(Player p, String identifier) {
+    public static void reopenBank(Player p, BankGui openedBankGui) {
         Bukkit.getScheduler().runTask(BankPlus.INSTANCE(), () -> {
             BukkitTask task = PlayerRegistry.get(p).getClosingTask();
             if (task != null) task.cancel();
 
             BPSets.playerDepositing.remove(p.getUniqueId());
             BPSets.playerWithdrawing.remove(p.getUniqueId());
-            if (Values.CONFIG.isReopeningBankAfterChat()) BankUtils.getBank(identifier).openBankGui(p, true);
+            if (Values.CONFIG.isReopeningBankAfterChat()) openedBankGui.openBankGui(p, true);
         });
     }
 

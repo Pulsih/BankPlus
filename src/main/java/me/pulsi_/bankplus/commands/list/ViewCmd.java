@@ -4,19 +4,20 @@ import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.utils.BPUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.util.List;
 
 public class ViewCmd extends BPCommand {
 
-    public ViewCmd(String... aliases) {
+    public ViewCmd(FileConfiguration commandsConfig, String... aliases) {
         super(aliases);
     }
 
@@ -31,7 +32,7 @@ public class ViewCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String[] args) {
+    public boolean onSuccessExecution(CommandSender s, String[] args) {
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
         if (!target.hasPlayedBefore()) {
             BPMessages.send(s, "Invalid-Player");
@@ -39,7 +40,7 @@ public class ViewCmd extends BPCommand {
         }
 
         if (args.length == 2) {
-            if (skipToConfirm(s)) return false;
+            if (hasConfirmed(s)) return false;
 
             if (s instanceof Player) BPUtils.playSound("VIEW", (Player) s);
 
@@ -63,7 +64,7 @@ public class ViewCmd extends BPCommand {
             return false;
         }
 
-        if (skipToConfirm(s)) return false;
+        if (hasConfirmed(s)) return false;
         if (s instanceof Player) BPUtils.playSound("VIEW", (Player) s);
         Bank bank = BankUtils.getBank(bankName);
         BPMessages.send(s, "Bank-Others", BPUtils.placeValues(target, bank.getBankEconomy().getBankBalance(target), BankUtils.getCurrentLevel(bank, target)));

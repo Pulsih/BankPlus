@@ -7,17 +7,20 @@ import org.bukkit.configuration.file.FileConfiguration;
 public class MessageValues {
 
     private boolean isTitleCustomAmountEnabled, isInterestBroadcastEnabled;
-    private String interestMoney, interestNoMoney, multiInterestMoney, interestBankFull;
+    private String customDepositTitle, customWithdrawTitle, interestMoney;
+    private String interestNoMoney, multiInterestMoney, interestBankFull;
 
     public static MessageValues getInstance() {
         return new MessageValues();
     }
 
     public void setupValues() {
-        FileConfiguration messages = BankPlus.INSTANCE().getConfigs().getConfig(BPConfigs.Type.MESSAGES.name);
+        FileConfiguration messages = BankPlus.INSTANCE().getConfigs().getConfig("messages.yml");
 
         isTitleCustomAmountEnabled = messages.getBoolean("Title-Custom-Transaction.Enabled");
         isInterestBroadcastEnabled = messages.getBoolean("Interest-Broadcast.Enabled");
+        customDepositTitle = messages.getString("Title-Custom-Transaction.Title-Deposit");
+        customWithdrawTitle = messages.getString("Title-Custom-Transaction.Title-Withdraw");
         interestMoney = messages.getString("Interest-Broadcast.Message");
         multiInterestMoney = messages.getString("Interest-Broadcast.Multi-Message");
         interestNoMoney = messages.getString("Interest-Broadcast.No-Money");
@@ -30,6 +33,14 @@ public class MessageValues {
 
     public boolean isInterestBroadcastEnabled() {
         return isInterestBroadcastEnabled;
+    }
+
+    public String getCustomDepositTitle() {
+        return customDepositTitle;
+    }
+
+    public String getCustomWithdrawTitle() {
+        return customWithdrawTitle;
     }
 
     public String getInterestMoney() {

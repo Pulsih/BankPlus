@@ -6,13 +6,14 @@ import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.util.List;
 
 public class UpgradeCmd extends BPCommand {
 
-    public UpgradeCmd(String... aliases) {
+    public UpgradeCmd(FileConfiguration commandsConfig, String... aliases) {
         super(aliases);
     }
 
@@ -27,7 +28,7 @@ public class UpgradeCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String[] args) {
+    public boolean onSuccessExecution(CommandSender s, String[] args) {
         Player p = (Player) s;
 
         String bankName = Values.CONFIG.getMainGuiName();
@@ -43,7 +44,7 @@ public class UpgradeCmd extends BPCommand {
             return false;
         }
 
-        if (!skipToConfirm(s)) BankUtils.upgradeBank(BankUtils.getBank(bankName), p);
+        if (!hasConfirmed(s)) BankUtils.upgradeBank(BankUtils.getBank(bankName), p);
         return true;
     }
 

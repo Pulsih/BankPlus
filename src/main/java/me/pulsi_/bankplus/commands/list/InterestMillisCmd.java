@@ -5,12 +5,13 @@ import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.List;
 
 public class InterestMillisCmd extends BPCommand {
 
-    public InterestMillisCmd(String... aliases) {
+    public InterestMillisCmd(FileConfiguration commandsConfig, String... aliases) {
         super(aliases);
     }
 
@@ -25,12 +26,12 @@ public class InterestMillisCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String[] args) {
+    public boolean onSuccessExecution(CommandSender s, String[] args) {
         if (!Values.CONFIG.isInterestEnabled()) {
             BPMessages.send(s, "Interest-Disabled");
             return false;
         }
-        if (!skipToConfirm(s)) BPMessages.send(s, "Interest-Time", "%time%$" + BankPlus.INSTANCE().getInterest().getInterestCooldownMillis());
+        if (!hasConfirmed(s)) BPMessages.send(s, "Interest-Time", "%time%$" + BankPlus.INSTANCE().getInterest().getInterestCooldownMillis());
         return true;
     }
 

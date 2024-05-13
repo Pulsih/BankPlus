@@ -3,20 +3,21 @@ package me.pulsi_.bankplus.commands.list;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 public class RemoveCmd extends BPCommand {
 
-    public RemoveCmd(String... aliases) {
+    public RemoveCmd(FileConfiguration commandsConfig, String... aliases) {
         super(aliases);
     }
 
@@ -31,7 +32,7 @@ public class RemoveCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String[] args) {
+    public boolean onSuccessExecution(CommandSender s, String[] args) {
         OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
         if (!p.hasPlayedBefore()) {
             BPMessages.send(s, "Invalid-Player");
@@ -57,7 +58,7 @@ public class RemoveCmd extends BPCommand {
 
         boolean silent = args.length > 4 && args[4].toLowerCase().contains("true");
 
-        if (skipToConfirm(s)) return false;
+        if (hasConfirmed(s)) return false;
 
         BigDecimal removed = BPEconomy.get(bankName).removeBankBalance(p, amount);
         if (silent) return true;

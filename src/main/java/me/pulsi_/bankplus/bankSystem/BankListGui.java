@@ -4,8 +4,8 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
-import me.pulsi_.bankplus.utils.texts.BPChat;
 import me.pulsi_.bankplus.utils.BPUtils;
+import me.pulsi_.bankplus.utils.texts.BPChat;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -24,7 +24,7 @@ public class BankListGui extends BankGui {
     private final HashMap<Integer, Bank> bankListGuiClickHolder = new HashMap<>();
 
     public BankListGui() {
-        super("BankListGui");
+        super(null);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class BankListGui extends BankGui {
         if (Values.MULTIPLE_BANKS.isDirectlyOpenIf1IsAvailable()) {
             List<Bank> availableBanks = BankUtils.getAvailableBanks(p);
             if (availableBanks.size() == 1) {
-                availableBanks.get(0).openBankGui(p);
+                availableBanks.get(0).getBankGui().openBankGui(p);
                 return;
             }
         }
@@ -70,7 +70,8 @@ public class BankListGui extends BankGui {
         for (Bank bank : BankPlus.INSTANCE().getBankRegistry().getBanks().values()) {
             if (Values.MULTIPLE_BANKS.isShowNotAvailableBanks() && !BankUtils.isAvailable(bank, p)) continue;
 
-            BankItem bankItem = BankUtils.isAvailable(bank, p) ? bank.getAvailableBankListItem() : bank.getUnavailableBankListItem();
+            BankGui gui = bank.getBankGui();
+            BankItem bankItem = BankUtils.isAvailable(bank, p) ? gui.getAvailableBankListItem() : gui.getUnavailableBankListItem();
 
             bankInventory.setItem(slot, bankItem.getItem());
             bankListGuiClickHolder.put(slot, bank);

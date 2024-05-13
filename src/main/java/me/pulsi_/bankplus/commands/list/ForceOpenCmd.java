@@ -7,13 +7,14 @@ import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.util.List;
 
 public class ForceOpenCmd extends BPCommand {
 
-    public ForceOpenCmd(String... aliases) {
+    public ForceOpenCmd(FileConfiguration commandsConfig, String... aliases) {
         super(aliases);
     }
 
@@ -28,7 +29,7 @@ public class ForceOpenCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String[] args) {
+    public boolean onSuccessExecution(CommandSender s, String[] args) {
         Player p = Bukkit.getPlayerExact(args[1]);
         if (p == null) {
             BPMessages.send(s, "Invalid-Player");
@@ -44,7 +45,7 @@ public class ForceOpenCmd extends BPCommand {
             return false;
         }
 
-        if (skipToConfirm(s)) return false;
+        if (hasConfirmed(s)) return false;
 
         BankUtils.getBank(bankName).openBankGui(p, true);
         if (!silent) BPMessages.send(s, "Force-Open", "%player%$" + p.getName(), "%bank%$" + bankName);

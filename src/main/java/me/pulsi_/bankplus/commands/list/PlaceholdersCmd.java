@@ -6,13 +6,14 @@ import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.util.List;
 
 public class PlaceholdersCmd extends BPCommand {
 
-    public PlaceholdersCmd(String... aliases) {
+    public PlaceholdersCmd(FileConfiguration commandsConfig, String... aliases) {
         super(aliases);
     }
 
@@ -27,7 +28,7 @@ public class PlaceholdersCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String[] args) {
+    public boolean onSuccessExecution(CommandSender s, String[] args) {
         List<String> placeholders =  BankPlus.INSTANCE().getBpPlaceholders().getRegisteredPlaceholders();
         int size = placeholders.size();
 

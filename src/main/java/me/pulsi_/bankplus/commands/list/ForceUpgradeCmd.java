@@ -7,13 +7,14 @@ import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.util.List;
 
 public class ForceUpgradeCmd extends BPCommand {
 
-    public ForceUpgradeCmd(String... aliases) {
+    public ForceUpgradeCmd(FileConfiguration commandsConfig, String... aliases) {
         super(aliases);
     }
 
@@ -28,7 +29,7 @@ public class ForceUpgradeCmd extends BPCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender s, String[] args) {
+    public boolean onSuccessExecution(CommandSender s, String[] args) {
         Player p = Bukkit.getPlayerExact(args[1]);
         if (p == null) {
             BPMessages.send(s, "Invalid-Player");
@@ -49,7 +50,7 @@ public class ForceUpgradeCmd extends BPCommand {
             return false;
         }
 
-        if (skipToConfirm(s)) return false;
+        if (hasConfirmed(s)) return false;
 
         BankUtils.upgradeBank(BankUtils.getBank(bankName), p);
         if (!silent) BPMessages.send(s, "Force-Upgrade", "%player%$" + p.getName(), "%bank%$" + bankName);
