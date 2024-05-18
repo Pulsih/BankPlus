@@ -15,7 +15,7 @@ public class BPMessages {
 
     private static final HashMap<String, List<String>> messages = new HashMap<>();
 
-    private static String prefix = null;
+    private static String prefix = BPChat.prefix;
 
     private static boolean alertMissingMessages;
 

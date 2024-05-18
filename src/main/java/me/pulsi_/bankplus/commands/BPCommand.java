@@ -52,7 +52,8 @@ public abstract class BPCommand {
         List<String> result = defaultValue;
         if (BPUtils.pathExist(config, path)) result = BPMessages.getPossibleMessages(config, path);
         else {
-            config.set(path, result);
+            if (result.isEmpty()) config.set(path, new ArrayList<>());
+            else config.set(path, result);
             hasChangedConfig = true;
         }
         return result;
@@ -75,7 +76,7 @@ public abstract class BPCommand {
      * @return A bank name.
      */
     public String getPossibleBank(String[] args, int argumentPosition) {
-        return args.length >= argumentPosition ? args[argumentPosition] : Values.CONFIG.getMainGuiName();
+        return args.length > argumentPosition ? args[argumentPosition] : Values.CONFIG.getMainGuiName();
     }
 
     /**
@@ -103,11 +104,11 @@ public abstract class BPCommand {
                 Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> confirm.remove(name), confirmCooldown * 20L);
                 for (String message : confirmMessage) BPMessages.send(s, message, true);
                 confirm.add(name);
-                return true;
+                return false;
             }
             confirm.remove(name);
         }
-        return false;
+        return true;
     }
 
     /**
@@ -141,8 +142,10 @@ public abstract class BPCommand {
      */
     public boolean isInCooldown(CommandSender s) {
         String name = s.getName();
+        if (!cooldowns.containsKey(name)) return false;
+
         long get = cooldowns.get(name), cur = System.currentTimeMillis();
-        if (!cooldowns.containsKey(name) || get <= cur) return false;
+        if (get <= cur) return false;
 
         for (String message : cooldownMessage)
             BPMessages.send(s, message, true, "%time%$" + BPFormatter.formatTime(get - cur));

@@ -51,8 +51,7 @@ public class BankUtils {
      * @return true if it is registered, false otherwise.
      */
     public static boolean exist(Bank bank) {
-        if (bank == null) return false;
-        return exist(bank.getIdentifier(), null);
+        return exist(bank, null);
     }
 
     /**
@@ -61,8 +60,9 @@ public class BankUtils {
      * @return true if it is registered, false otherwise.
      */
     public static boolean exist(Bank bank, CommandSender s) {
-        if (bank == null) return false;
-        return exist(bank.getIdentifier(), s);
+        boolean exist = bank != null;
+        if (!exist) BPMessages.send(s, "Invalid-Bank");
+        return exist;
     }
 
     /**

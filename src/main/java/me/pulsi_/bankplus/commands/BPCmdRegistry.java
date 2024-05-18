@@ -19,6 +19,13 @@ public class BPCmdRegistry {
 
         BPConfigs configs = BankPlus.INSTANCE().getConfigs();
         File commandsFile = configs.getFile("commands.yml");
+        if (!commandsFile.exists()) {
+            try {
+                commandsFile.createNewFile();
+            } catch (IOException e) {
+                BPLogger.warn(e, "Could not create \"commands.yml\" file.");
+            }
+        }
         FileConfiguration commandsConfig = configs.getConfig(commandsFile);
 
         boolean save = new AddAllCmd(commandsConfig, "addAll").register();

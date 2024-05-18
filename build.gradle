@@ -5,6 +5,9 @@ plugins {
 group = 'me.pulsi_'
 version = '6.2-Alpha23'
 
+setLibsDirName("plugins");
+setBuildDir(new File("C:\\Users\\faste\\Desktop\\Test Server"));
+
 repositories {
     mavenCentral()
     maven {
