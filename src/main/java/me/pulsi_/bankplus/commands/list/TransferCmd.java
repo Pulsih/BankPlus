@@ -13,13 +13,43 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 public class TransferCmd extends BPCommand {
 
     public TransferCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(aliases);
+        super(commandsConfig, aliases);
+    }
+
+    @Override
+    public List<String> defaultUsage() {
+        return Arrays.asList(
+                "%prefix% &cUsage: &7/bank transfer [mode] | Specify a mode between &a\"filesToDatabase\" &7and &a\"databaseToFiles\"&7.",
+                "&7Use this command to &a&ntransfer&7 the playerdata from a place to another in case you &a&nswitch&7 saving mode."
+        );
+    }
+
+    @Override
+    public int defaultConfirmCooldown() {
+        return 5;
+    }
+
+    @Override
+    public List<String> defaultConfirmMessage() {
+        return Collections.singletonList("%prefix% &cType the command again within 5 seconds to confirm this action.");
+    }
+
+    @Override
+    public int defaultCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultCooldownMessage() {
+        return Collections.emptyList();
     }
 
     @Override
@@ -33,14 +63,13 @@ public class TransferCmd extends BPCommand {
     }
 
     @Override
-    public boolean onSuccessExecution(CommandSender s, String[] args) {
+    public boolean preCmdChecks(CommandSender s, String[] args) {
         String mode = args[1].toLowerCase();
 
         if (!mode.equals("filestodatabase") && !mode.equals("databasetofiles")) {
             BPMessages.send(s, "Invalid-Action");
             return false;
         }
-        if (hasConfirmed(s)) return false;
 
         if (!Values.CONFIG.isSqlEnabled()) {
             BPMessages.send(s, "%prefix% &cCould not initialize the task, MySQL hasn't been enabled in the config file!", true);
@@ -51,13 +80,17 @@ public class TransferCmd extends BPCommand {
             BPMessages.send(s, "%prefix% &cCould not initialize the task, MySQL hasn't been connected to it's database yet! &8(Try typing /bp reload)", true);
             return false;
         }
+        return true;
+    }
 
+    @Override
+    public void onExecution(CommandSender s, String[] args) {
         BPMessages.send(s, "%prefix% &7Task initialized, wait a few moments...", true);
-        if (mode.equals("filestodatabase")) filesToDatabase();
+
+        if (args[1].toLowerCase().equals("filestodatabase")) filesToDatabase();
         else databaseToFile();
 
         BPMessages.send(s, "%prefix% &2Task finished!", true);
-        return true;
     }
 
     @Override

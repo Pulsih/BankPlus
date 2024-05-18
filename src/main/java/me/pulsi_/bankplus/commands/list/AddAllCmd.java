@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -61,23 +62,14 @@ public class AddAllCmd extends BPCommand {
 
     @Override
     public boolean preCmdChecks(CommandSender s, String[] args) {
-        if (BPUtils.isInvalidNumber(args[1], s)) return false;
-
-        String bankName = Values.CONFIG.getMainGuiName();
-        if (args.length > 2) bankName = args[2];
-
-        if (!BankUtils.exist(bankName)) {
-            BPMessages.send(s, "Invalid-Bank");
-            return false;
-        }
-        return true;
+        return !BPUtils.isInvalidNumber(args[1], s) && BankUtils.exist(getPossibleBank(args, 2), s);
     }
 
     @Override
-    public void onSuccessExecution(CommandSender s, String[] args) {
-        String num = args[1];
+    public void onExecution(CommandSender s, String[] args) {
+        BigDecimal num = new BigDecimal(args[1]);
         BPMessages.send(s, "%prefix% &aSuccessfully added &f" + num + " &amoney to all online players!", true);
-        addAll(new ArrayList<>(Bukkit.getOnlinePlayers()), new BigDecimal(num), args[2]);
+        addAll(Bukkit.getOnlinePlayers(), num, BPEconomy.get(getPossibleBank(args, 2)));
     }
 
     @Override
@@ -90,16 +82,21 @@ public class AddAllCmd extends BPCommand {
         return null;
     }
 
-    private void addAll(List<Player> onlinePlayers, BigDecimal amount, String bankName) {
+    /**
+     * Method to add to each online player the selected amount, split
+     * the task every 80 players to avoid freezing in bigger servers.
+     * @param onlinePlayers The initial online players list.
+     * @param amount The selected amount to add.
+     * @param economy The bank economy where to add the money.
+     */
+    private void addAll(Collection<? extends Player> onlinePlayers, BigDecimal amount, BPEconomy economy) {
         List<Player> copy = new ArrayList<>(onlinePlayers);
 
-        BPEconomy economy = BPEconomy.get(bankName);
         for (int i = 0; i < 80; i++) {
             if (copy.isEmpty()) return;
             economy.addBankBalance(copy.remove(0), amount);
         }
 
-        if (!onlinePlayers.isEmpty())
-            Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> addAll(copy, amount, bankName), 1);
+        Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> addAll(copy, amount, economy), 1);
     }
 }

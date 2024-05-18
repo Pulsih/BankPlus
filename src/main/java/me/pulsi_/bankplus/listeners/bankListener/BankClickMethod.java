@@ -35,15 +35,16 @@ public class BankClickMethod {
             Bank clickedBank = bankListGui.getBankListGuiClickHolder().get(slot);
             if (clickedBank != null) {
                 p.closeInventory();
-                clickedBank.openBankGui(p);
+                clickedBank.getBankGui().openBankGui(p);
             }
             return;
         }
 
-        Bank.BankItem clickedItem = openedBank.getBankItems().get(slot);
+        BankGui.BankItem clickedItem = openedBank.getBankItems().get(slot);
         if (clickedItem == null) return;
 
-        String bankName = openedBank.getIdentifier();
+        BPEconomy economy = openedBank.getOriginBank().getBankEconomy();
+        String bankName = openedBank.getOriginBank().getIdentifier();
         for (String action : clickedItem.getActions()) {
             String identifier = action.substring(action.indexOf("["), action.indexOf("]") + 1), value = action.replace(identifier + " ", "");
 
@@ -56,7 +57,7 @@ public class BankClickMethod {
                     if (Values.CONFIG.isGuiActionsNeedPermissions() && !BPUtils.hasPermission(p, "bankplus.deposit")) return;
 
                     if (value.equalsIgnoreCase("CUSTOM")) {
-                        BPUtils.customDeposit(p, bankName);
+                        economy.customDeposit(p);
                         continue;
                     }
 
@@ -71,7 +72,7 @@ public class BankClickMethod {
                         BPLogger.warn("Could not deposit because an invalid number has been specified! (Bank gui: " + bankName + ", Item slot: " + slot + ", Value: " + value + ")");
                         continue;
                     }
-                    BPEconomy.get(bankName).deposit(p, amount);
+                    economy.deposit(p, amount);
                 }
                 break;
 
@@ -83,13 +84,11 @@ public class BankClickMethod {
                     if (Values.CONFIG.isGuiActionsNeedPermissions() && !BPUtils.hasPermission(p, "bankplus.withdraw")) return;
 
                     if (value.equals("CUSTOM")) {
-                        BPUtils.customWithdraw(p, bankName);
+                        economy.customWithdraw(p);
                         continue;
                     }
 
-                    BPEconomy economy = BPEconomy.get(bankName);
                     BigDecimal amount;
-
                     try {
                         if (!value.endsWith("%")) amount = new BigDecimal(value);
                         else {

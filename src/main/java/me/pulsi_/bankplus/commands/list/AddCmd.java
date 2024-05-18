@@ -24,7 +24,7 @@ public class AddCmd extends BPCommand {
 
     @Override
     public List<String> defaultUsage() {
-        return Collections.emptyList();
+        return Collections.singletonList("%prefix% &cUsage: &7/bank add [player] [amount] <bankName>");
     }
 
     @Override
@@ -59,13 +59,7 @@ public class AddCmd extends BPCommand {
 
     @Override
     public boolean preCmdChecks(CommandSender s, String[] args) {
-        return false;
-    }
-
-    @Override
-    public boolean onSuccessExecution(CommandSender s, String[] args) {
-        OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
-        if (!p.hasPlayedBefore()) {
+        if (!Bukkit.getOfflinePlayer(args[1]).hasPlayedBefore()) {
             BPMessages.send(s, "Invalid-Player");
             return false;
         }
@@ -74,29 +68,19 @@ public class AddCmd extends BPCommand {
             BPMessages.send(s, "Specify-Number");
             return false;
         }
-        String num = args[2];
 
-        if (BPUtils.isInvalidNumber(num, s)) return false;
-        BigDecimal amount = new BigDecimal(num);
+        return !BPUtils.isInvalidNumber(args[2], s) && BankUtils.exist(getPossibleBank(args, 3));
+    }
 
-        String bankName = Values.CONFIG.getMainGuiName();
-        if (args.length > 3) bankName = args[3];
+    @Override
+    public void onExecution(CommandSender s, String[] args) {
+        OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
+        BigDecimal added = BPEconomy.get(getPossibleBank(args, 3)).addBankBalance(p, new BigDecimal(args[2]));
 
-        if (!BankUtils.exist(bankName)) {
-            BPMessages.send(s, "Invalid-Bank");
-            return false;
-        }
-
-        boolean silent = args.length > 4 && args[4].toLowerCase().contains("true");
-
-        if (hasConfirmed(s)) return false;
-
-        BigDecimal added = BPEconomy.get(bankName).addBankBalance(p, amount);
-        if (silent) return true;
+        if (isSilent(args)) return;
 
         if (added.doubleValue() <= 0D) BPMessages.send(s, "Bank-Full", "%player%$" + p.getName());
         else BPMessages.send(s, "Add-Message", BPUtils.placeValues(p, added));
-        return true;
     }
 
     @Override

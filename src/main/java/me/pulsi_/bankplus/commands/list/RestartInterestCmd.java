@@ -7,12 +7,38 @@ import me.pulsi_.bankplus.values.Values;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import java.util.Collections;
 import java.util.List;
 
 public class RestartInterestCmd extends BPCommand {
 
     public RestartInterestCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(aliases);
+        super(commandsConfig, aliases);
+    }
+
+    @Override
+    public List<String> defaultUsage() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public int defaultConfirmCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultConfirmMessage() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public int defaultCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultCooldownMessage() {
+        return Collections.emptyList();
     }
 
     @Override
@@ -26,15 +52,18 @@ public class RestartInterestCmd extends BPCommand {
     }
 
     @Override
-    public boolean onSuccessExecution(CommandSender s, String[] args) {
+    public boolean preCmdChecks(CommandSender s, String[] args) {
         if (!Values.CONFIG.isInterestEnabled()) {
             BPMessages.send(s, "Interest-Disabled");
             return false;
         }
-        if (hasConfirmed(s)) return false;
-        BankPlus.INSTANCE().getInterest().restartInterest();
-        BPMessages.send(s, "%prefix% &aInterest Restarted!", true);
         return true;
+    }
+
+    @Override
+    public void onExecution(CommandSender s, String[] args) {
+        BankPlus.INSTANCE().getInterest().restartInterest(false);
+        BPMessages.send(s, "%prefix% &aInterest cooldown restarted!", true);
     }
 
     @Override

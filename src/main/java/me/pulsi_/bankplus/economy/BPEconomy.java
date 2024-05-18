@@ -49,10 +49,9 @@ public class BPEconomy {
     }
 
     public static BPEconomy get(String bankName) {
-        BankPlus pl = BankPlus.INSTANCE();
-        if (pl == null) return null;
-
-        return pl.getBankRegistry().getBanks().get(bankName).getBankEconomy();
+        Bank bank = BankUtils.getBank(bankName);
+        if (bank == null) return null;
+        return bank.getBankEconomy();
     }
 
     public static List<BPEconomy> list() {
@@ -608,9 +607,9 @@ public class BPEconomy {
      * @param from     The player that will give the money.
      * @param to       The player that will receive your money.
      * @param amount   How much money you want to pay.
-     * @param toBankName   The bank name where the money will be added.
+     * @param toBank   The bank where the money will be added.
      */
-    public void pay(Player from, Player to, BigDecimal amount, String toBankName) {
+    public void pay(Player from, Player to, BigDecimal amount, Bank toBank) {
         if (isInTransaction(from)) return;
 
         BigDecimal senderBalance = getBankBalance(from);
@@ -620,7 +619,6 @@ public class BPEconomy {
             return;
         }
 
-        Bank toBank = BankUtils.getBank(toBankName);
         BPEconomy toEconomy = toBank.getBankEconomy();
         // Check if the receiver of the payment has the bank full
         if (toEconomy.getBankBalance(to).compareTo(BankUtils.getCapacity(toBank, to)) >= 0) {

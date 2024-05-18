@@ -6,12 +6,38 @@ import me.pulsi_.bankplus.utils.texts.BPMessages;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import java.util.Collections;
 import java.util.List;
 
 public class ReloadCmd extends BPCommand {
 
     public ReloadCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(aliases);
+        super(commandsConfig, aliases);
+    }
+
+    @Override
+    public List<String> defaultUsage() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public int defaultConfirmCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultConfirmMessage() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public int defaultCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultCooldownMessage() {
+        return Collections.emptyList();
     }
 
     @Override
@@ -25,16 +51,18 @@ public class ReloadCmd extends BPCommand {
     }
 
     @Override
-    public boolean onSuccessExecution(CommandSender s, String[] args) {
-        if (hasConfirmed(s)) return false;
+    public boolean preCmdChecks(CommandSender s, String[] args) {
+        return true;
+    }
 
-        long time = System.currentTimeMillis();
+    @Override
+    public void onExecution(CommandSender s, String[] args) {
+       long time = System.currentTimeMillis();
         BPMessages.send(s, "%prefix% &aThe plugin will now try to reload...", true);
 
         boolean reloaded = BankPlus.INSTANCE().getDataManager().reloadPlugin();
         if (reloaded) BPMessages.send(s, "%prefix% &2Plugin successfully reloaded! &8(&b" + (System.currentTimeMillis() - time) + "ms&8)", true);
         else BPMessages.send(s, "%prefix% &cFailed reloading task, please check the console for more info.", true);
-        return true;
     }
 
     @Override

@@ -9,12 +9,38 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
+import java.util.Collections;
 import java.util.List;
 
 public class PlaceholdersCmd extends BPCommand {
 
     public PlaceholdersCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(aliases);
+        super(commandsConfig, aliases);
+    }
+
+    @Override
+    public List<String> defaultUsage() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public int defaultConfirmCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultConfirmMessage() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public int defaultCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultCooldownMessage() {
+        return Collections.emptyList();
     }
 
     @Override
@@ -28,7 +54,12 @@ public class PlaceholdersCmd extends BPCommand {
     }
 
     @Override
-    public boolean onSuccessExecution(CommandSender s, String[] args) {
+    public boolean preCmdChecks(CommandSender s, String[] args) {
+        return true;
+    }
+
+    @Override
+    public void onExecution(CommandSender s, String[] args) {
         List<String> placeholders =  BankPlus.INSTANCE().getBpPlaceholders().getRegisteredPlaceholders();
         int size = placeholders.size();
 
@@ -42,7 +73,6 @@ public class PlaceholdersCmd extends BPCommand {
             else builder.append("&8]&7, ");
         }
         BPMessages.send(s, builder.toString(), true);
-        return true;
     }
 
     @Override

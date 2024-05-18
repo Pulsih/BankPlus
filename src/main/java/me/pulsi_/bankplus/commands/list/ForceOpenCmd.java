@@ -5,17 +5,43 @@ import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.configs.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
+import java.util.Collections;
 import java.util.List;
 
 public class ForceOpenCmd extends BPCommand {
 
     public ForceOpenCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(aliases);
+        super(commandsConfig, aliases);
+    }
+
+    @Override
+    public List<String> defaultUsage() {
+        return Collections.singletonList("%prefix% &cUsage: &7/bank forceopen [player] <bankName>");
+    }
+    @Override
+    public int defaultConfirmCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultConfirmMessage() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public int defaultCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultCooldownMessage() {
+        return Collections.emptyList();
     }
 
     @Override
@@ -29,27 +55,27 @@ public class ForceOpenCmd extends BPCommand {
     }
 
     @Override
-    public boolean onSuccessExecution(CommandSender s, String[] args) {
-        Player p = Bukkit.getPlayerExact(args[1]);
-        if (p == null) {
+    public boolean preCmdChecks(CommandSender s, String[] args) {
+        if (Values.CONFIG.isGuiModuleEnabled()) {
+            BPMessages.send(s, "Gui-Module-Disabled");
+            return false;
+        }
+
+        if (Bukkit.getPlayerExact(args[1]) == null) {
             BPMessages.send(s, "Invalid-Player");
             return false;
         }
 
-        String bankName = Values.CONFIG.getMainGuiName();
-        if (args.length > 2) bankName = args[2];
-        boolean silent = args.length > 3 && args[3].toLowerCase().contains("true");
+        return BankUtils.exist(getPossibleBank(args, 2), s);
+    }
 
-        if (!BankUtils.exist(bankName)) {
-            BPMessages.send(s, "Invalid-Bank");
-            return false;
-        }
+    @Override
+    public void onExecution(CommandSender s, String[] args) {
+        Player p = Bukkit.getPlayerExact(args[1]);
 
-        if (hasConfirmed(s)) return false;
-
-        BankUtils.getBank(bankName).openBankGui(p, true);
-        if (!silent) BPMessages.send(s, "Force-Open", "%player%$" + p.getName(), "%bank%$" + bankName);
-        return true;
+        String bankName = getPossibleBank(args, 2);
+        BankUtils.getBank(bankName).getBankGui().openBankGui(p, true);
+        if (!isSilent(args)) BPMessages.send(s, "Force-Open", "%player%$" + p.getName(), "%bank%$" + bankName);
     }
 
     @Override

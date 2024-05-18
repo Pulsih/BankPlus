@@ -1,5 +1,6 @@
 package me.pulsi_.bankplus.commands.list;
 
+import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
@@ -13,12 +14,38 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 
 public class SetCmd extends BPCommand {
 
     public SetCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(aliases);
+        super(commandsConfig, aliases);
+    }
+
+    @Override
+    public List<String> defaultUsage() {
+        return Collections.singletonList("%prefix% &cUsage: &7/bank set [player] [amount] <bankName>");
+    }
+
+    @Override
+    public int defaultConfirmCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultConfirmMessage() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public int defaultCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultCooldownMessage() {
+        return Collections.emptyList();
     }
 
     @Override
@@ -32,9 +59,8 @@ public class SetCmd extends BPCommand {
     }
 
     @Override
-    public boolean onSuccessExecution(CommandSender s, String[] args) {
-        OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
-        if (!p.hasPlayedBefore()) {
+    public boolean preCmdChecks(CommandSender s, String[] args) {
+        if (!Bukkit.getOfflinePlayer(args[1]).hasPlayedBefore()) {
             BPMessages.send(s, "Invalid-Player");
             return false;
         }
@@ -43,26 +69,15 @@ public class SetCmd extends BPCommand {
             BPMessages.send(s, "Specify-Number");
             return false;
         }
-        String num = args[2];
 
-        if (BPUtils.isInvalidNumber(num, s)) return false;
-        BigDecimal amount = new BigDecimal(num);
+        return !BPUtils.isInvalidNumber(args[2], s) && BankUtils.exist(getPossibleBank(args, 3), s);
+    }
 
-        String bankName = Values.CONFIG.getMainGuiName();
-        if (args.length > 3) bankName = args[3];
-
-        if (!BankUtils.exist(bankName)) {
-            BPMessages.send(s, "Invalid-Bank");
-            return false;
-        }
-
-        boolean silent = args.length > 4 && args[4].toLowerCase().contains("true");
-
-        if (hasConfirmed(s)) return false;
-
-        BigDecimal set = BPEconomy.get(bankName).setBankBalance(p, amount);
-        if (!silent) BPMessages.send(s, "Set-Message", BPUtils.placeValues(p, set));
-        return true;
+    @Override
+    public void onExecution(CommandSender s, String[] args) {
+        OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
+        BigDecimal set = BPEconomy.get(getPossibleBank(args, 3)).setBankBalance(p, new BigDecimal(args[2]));
+        if (!isSilent(args)) BPMessages.send(s, "Set-Message", BPUtils.placeValues(p, set));
     }
 
     @Override

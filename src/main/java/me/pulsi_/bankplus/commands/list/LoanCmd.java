@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
@@ -16,6 +17,8 @@ import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class LoanCmd extends BPCommand {
@@ -23,9 +26,43 @@ public class LoanCmd extends BPCommand {
     private final BankRegistry registry;
 
     public LoanCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(aliases);
+        super(commandsConfig, aliases);
 
         registry = BankPlus.INSTANCE().getBankRegistry();
+    }
+
+    @Override
+    public List<String> defaultUsage() {
+        return Arrays.asList(
+                "%prefix% &cUsage: &7/bank loan [action] [playerName] [amount] <fromBankName> <toBankName>",
+                "",
+                "&7Possible actions:"
+                , " &8* &aGive"
+                , " &8* &aRequest"
+                , " &8* &aAccept"
+                , " &8* &aDeny"
+                , " &8* &aCancel"
+        );
+    }
+
+    @Override
+    public int defaultConfirmCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultConfirmMessage() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public int defaultCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultCooldownMessage() {
+        return Collections.emptyList();
     }
 
     @Override
@@ -39,26 +76,14 @@ public class LoanCmd extends BPCommand {
     }
 
     @Override
-    public boolean onSuccessExecution(CommandSender s, String[] args) {
+    public boolean preCmdChecks(CommandSender s, String[] args) {
         Player sender = (Player) s;
-
-        if (args.length == 1) {
-            BPMessages.send(sender, "Specify-Action");
-            return false;
-        }
 
         String action = args[1].toLowerCase();
         switch (action) {
             case "accept":
-                LoanUtils.acceptRequest(sender);
-                return true;
-
-            case "deny":
-                LoanUtils.denyRequest(sender);
-                return true;
-
             case "cancel":
-                LoanUtils.cancelRequest(sender);
+            case "deny":
                 return true;
         }
 
@@ -85,14 +110,13 @@ public class LoanCmd extends BPCommand {
 
         String num = args[3];
         if (BPUtils.isInvalidNumber(num, sender)) return false;
-        BigDecimal amount = new BigDecimal(num);
 
+        // Request bank-to-player, if this passes, the request will be player-to-player.
         if (action.equals("request") && registry.getBanks().containsKey(receiverName)) {
             if (!BankUtils.isAvailable(receiverName, sender)) {
                 BPMessages.send(sender, "Cannot-Access-Bank");
                 return false;
             }
-            LoanUtils.sendLoan(sender, BankUtils.getBank(receiverName), amount);
             return true;
         }
 
@@ -102,32 +126,57 @@ public class LoanCmd extends BPCommand {
             return false;
         }
 
-        String senderBank = Values.CONFIG.getMainGuiName();
-        if (args.length > 4) senderBank = args[4];
+        // Check if the bank specified by the request sender is available for him.
+        Bank senderBank = BankUtils.getBank(getPossibleBank(args, 4));
 
-        if (!BankUtils.exist(senderBank)) {
-            BPMessages.send(sender, "Invalid-Bank");
-            return false;
-        }
+        if (!BankUtils.exist(senderBank, s)) return false;
         if (!BankUtils.isAvailable(senderBank, sender)) {
             BPMessages.send(sender, "Cannot-Access-Bank");
             return false;
         }
 
-        String receiverBank = Values.CONFIG.getMainGuiName();
-        if (args.length > 5) receiverBank = args[5];
+        // Check if the bank specified by the request sender is available for the request target.
+        Bank receiverBank = BankUtils.getBank(getPossibleBank(args, 5));
 
-        if (!BankUtils.exist(receiverBank)) {
-            BPMessages.send(sender, "Invalid-Bank");
-            return false;
-        }
+        if (!BankUtils.exist(receiverBank, s)) return false;
         if (!BankUtils.isAvailable(receiverBank, target)) {
             BPMessages.send(sender, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
             return false;
         }
-
-        if (!hasConfirmed(s)) LoanUtils.sendRequest(sender, target, amount, BankUtils.getBank(senderBank), BankUtils.getBank(receiverBank), action);
         return true;
+    }
+
+    @Override
+    public void onExecution(CommandSender s, String[] args) {
+        Player sender = (Player) s;
+
+        String action = args[1].toLowerCase();
+        switch (action) {
+            case "accept":
+                LoanUtils.acceptRequest(sender);
+                return;
+
+            case "deny":
+                LoanUtils.denyRequest(sender);
+                return;
+
+            case "cancel":
+                LoanUtils.cancelRequest(sender);
+                return;
+        }
+
+        String receiverName = args[2];
+        BigDecimal amount = new BigDecimal(args[3]);
+
+        if (action.equals("request") && registry.getBanks().containsKey(receiverName)) {
+            LoanUtils.sendLoan(sender, BankUtils.getBank(receiverName), amount);
+            return;
+        }
+
+        Player target = Bukkit.getPlayerExact(receiverName);
+        Bank senderBank = BankUtils.getBank(getPossibleBank(args, 4));
+        Bank receiverBank = BankUtils.getBank(getPossibleBank(args, 5));
+        LoanUtils.sendRequest(sender, target, amount, senderBank, receiverBank, action);
     }
 
     @Override

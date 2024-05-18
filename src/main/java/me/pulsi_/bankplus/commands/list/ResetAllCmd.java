@@ -12,18 +12,48 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ResetAllCmd extends BPCommand {
 
     private final Economy vaultEconomy;
 
     public ResetAllCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(aliases);
+        super(commandsConfig, aliases);
         vaultEconomy = BankPlus.INSTANCE().getVaultEconomy();
+    }
+
+    @Override
+    public List<String> defaultUsage() {
+        return Collections.singletonList(
+                "%prefix% &cUsage: &7/bank resetall [mode] | Specify a mode between &a\"delete\" &7and" +
+                        " &a\"maintain\"&7: &adelete &7will remove all players money and they will be lost," +
+                        " &amaintain &7will move all players money from their banks to their vault balance."
+        );
+    }
+
+    @Override
+    public int defaultConfirmCooldown() {
+        return 5;
+    }
+
+    @Override
+    public List<String> defaultConfirmMessage() {
+        return Collections.singletonList(
+                "%prefix% &cWarning, this command is going to reset everyone's bank balance," +
+                        " based on the mode you choose, this action is not reversible and may " +
+                        "take few seconds, type the command again within 5 seconds to confirm."
+        );
+    }
+
+    @Override
+    public int defaultCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultCooldownMessage() {
+        return Collections.emptyList();
     }
 
     @Override
@@ -37,18 +67,20 @@ public class ResetAllCmd extends BPCommand {
     }
 
     @Override
-    public boolean onSuccessExecution(CommandSender s, String[] args) {
+    public boolean preCmdChecks(CommandSender s, String[] args) {
         String mode = args[1];
         if (!mode.equalsIgnoreCase("delete") && !mode.equalsIgnoreCase("maintain")) {
             BPMessages.send(s, "%prefix% &cInvalid reset mode! Choose one between &a\"delete\" &cand &a\"maintain\"&c.", true);
             return false;
         }
+        return true;
+    }
 
-        if (hasConfirmed(s)) return false;
-
+    @Override
+    public void onExecution(CommandSender s, String[] args) {
+        String mode = args[1];
         BPMessages.send(s, "%prefix% &aSuccessfully reset all players money! &8(&aWith &f" + mode + " &amode&8)", true);
         resetAll(Arrays.asList(Bukkit.getOfflinePlayers()), mode);
-        return true;
     }
 
     @Override
@@ -67,10 +99,9 @@ public class ResetAllCmd extends BPCommand {
             OfflinePlayer p = copy.remove(0);
 
             if (mode.equalsIgnoreCase("maintain")) vaultEconomy.depositPlayer(p, BPEconomy.getBankBalancesSum(p).doubleValue());
-            for (String bankName : banks) BPEconomy.get(bankName).setBankBalance(p, BigDecimal.valueOf(0));
+            for (String bankName : banks) BPEconomy.get(bankName).setBankBalance(p, BigDecimal.ZERO);
         }
 
-        if (!copy.isEmpty())
-            Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> resetAll(copy, mode), 1);
+        Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> resetAll(copy, mode), 1);
     }
 }

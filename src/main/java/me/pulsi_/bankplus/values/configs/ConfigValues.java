@@ -35,7 +35,7 @@ public class ConfigValues {
     private int loanInstalments, loanDelay, loanAcceptTime;
 
     public void setupValues() {
-        FileConfiguration config = BankPlus.INSTANCE().getConfigs().getConfig(BPConfigs.Type.CONFIG.name);
+        FileConfiguration config = BankPlus.INSTANCE().getConfigs().getConfig("config.yml");
 
         chatExitMessage = config.getString("General-Settings.Chat-Exit-Message");
         chatExitTime = config.getInt("General-Settings.Chat-Exit-Time");

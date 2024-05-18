@@ -11,12 +11,38 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import java.util.Collections;
 import java.util.List;
 
 public class SetLevelCmd extends BPCommand {
 
     public SetLevelCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(aliases);
+        super(commandsConfig, aliases);
+    }
+
+    @Override
+    public List<String> defaultUsage() {
+        return Collections.singletonList("%prefix% &cUsage: &7/bank setLevel [level] <bankName>");
+    }
+
+    @Override
+    public int defaultConfirmCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultConfirmMessage() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public int defaultCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultCooldownMessage() {
+        return Collections.emptyList();
     }
 
     @Override
@@ -30,7 +56,7 @@ public class SetLevelCmd extends BPCommand {
     }
 
     @Override
-    public boolean onSuccessExecution(CommandSender s, String args[]) {
+    public boolean preCmdChecks(CommandSender s, String[] args) {
         OfflinePlayer p = Bukkit.getPlayerExact(args[1]);
         if (!p.hasPlayedBefore()) {
             BPMessages.send(s, "Invalid-Player");
@@ -45,22 +71,23 @@ public class SetLevelCmd extends BPCommand {
         String level = args[2];
         if (BPUtils.isInvalidNumber(level, s)) return false;
 
-        String bankName = Values.CONFIG.getMainGuiName();
-        if (args.length > 3) bankName = args[3];
+        String bankName = getPossibleBank(args, 3);
+        if (!BankUtils.exist(bankName)) return false;
 
-        if (!BankUtils.exist(bankName)) {
-            BPMessages.send(s, "Invalid-Bank");
-            return false;
-        }
         if (!BankUtils.getLevels(BankUtils.getBank(bankName)).contains(level)) {
             BPMessages.send(s, "Invalid-Bank-Level");
             return false;
         }
-        if (hasConfirmed(s)) return false;
-
-        BankUtils.setLevel(BankUtils.getBank(bankName), p, Integer.parseInt(level));
-        BPMessages.send(s, "Set-Level-Message", "%player%$" + p.getName(), "%level%$" + level);
         return true;
+    }
+
+    @Override
+    public void onExecution(CommandSender s, String[] args) {
+        OfflinePlayer p = Bukkit.getPlayerExact(args[1]);
+
+        String level = args[2];
+        BankUtils.setLevel(BankUtils.getBank(getPossibleBank(args, 3)), p, Integer.parseInt(level));
+        BPMessages.send(s, "Set-Level-Message", "%player%$" + p.getName(), "%level%$" + level);
     }
 
     @Override

@@ -11,12 +11,38 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
+import java.util.Collections;
 import java.util.List;
 
 public class BalanceCmd extends BPCommand {
 
     public BalanceCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(aliases);
+        super(commandsConfig, aliases);
+    }
+
+    @Override
+    public List<String> defaultUsage() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public int defaultConfirmCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultConfirmMessage() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public int defaultCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultCooldownMessage() {
+        return Collections.emptyList();
     }
 
     @Override
@@ -30,38 +56,45 @@ public class BalanceCmd extends BPCommand {
     }
 
     @Override
-    public boolean onSuccessExecution(CommandSender s, String[] args) {
+    public boolean preCmdChecks(CommandSender s, String[] args) {
         Player p = (Player) s;
 
         if (args.length == 1) {
-            if (hasConfirmed(s)) return false;
-
             List<Bank> availableBanks = BankUtils.getAvailableBanks(p);
             if (availableBanks.isEmpty()) {
                 BPMessages.send(p, "No-Available-Banks");
                 return false;
             }
-
-            if (availableBanks.size() > 1) BPMessages.send(p, "Multiple-Personal-Bank", BPUtils.placeValues(p, BPEconomy.getBankBalancesSum(p)));
-            else BPMessages.send(p, "Personal-Bank", BPUtils.placeValues(p, BPEconomy.getBankBalancesSum(p), BankUtils.getCurrentLevel(availableBanks.get(0), p)));
         } else {
-            String bankName = args[1];
-            if (!BankUtils.exist(bankName)) {
+            Bank bank = BankUtils.getBank(args[1]);
+            if (bank == null) {
                 BPMessages.send(s, "Invalid-Bank");
                 return false;
             }
-            if (hasConfirmed(s)) return false;
-            BPMessages.send(p, "Personal-Bank", BPUtils.placeValues(p, BPEconomy.get(bankName).getBankBalance(p), BankUtils.getCurrentLevel(BankUtils.getBank(bankName), p)));
+            if (!BankUtils.isAvailable(bank, p)) {
+                BPMessages.send(s, "Invalid-Bank");
+                return false;
+            }
         }
         return true;
     }
 
     @Override
-    public List<String> tabCompletion(CommandSender s, String[] args) {
+    public void onExecution(CommandSender s, String[] args) {
         Player p = (Player) s;
+        if (args.length == 1) {
+            List<Bank> availableBanks = BankUtils.getAvailableBanks(p);
+            if (availableBanks.size() > 1) BPMessages.send(p, "Multiple-Personal-Bank", BPUtils.placeValues(p, BPEconomy.getBankBalancesSum(p)));
+            else BPMessages.send(p, "Personal-Bank", BPUtils.placeValues(p, BPEconomy.getBankBalancesSum(p), BankUtils.getCurrentLevel(availableBanks.get(0), p)));
+        } else {
+            Bank bank = BankUtils.getBank(args[1]);
+            BPMessages.send(p, "Personal-Bank", BPUtils.placeValues(p, bank.getBankEconomy().getBankBalance(p), BankUtils.getCurrentLevel(bank, p)));
+        }
+    }
 
-        if (args.length == 2)
-            return BPArgs.getArgs(args, BankUtils.getAvailableBankNames(p));
+    @Override
+    public List<String> tabCompletion(CommandSender s, String[] args) {
+        if (args.length == 2) return BPArgs.getArgs(args, BankUtils.getAvailableBankNames((Player) s));
         return null;
     }
 }

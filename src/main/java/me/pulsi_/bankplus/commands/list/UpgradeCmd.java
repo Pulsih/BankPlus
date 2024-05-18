@@ -1,5 +1,6 @@
 package me.pulsi_.bankplus.commands.list;
 
+import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
@@ -9,12 +10,38 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
+import java.util.Collections;
 import java.util.List;
 
 public class UpgradeCmd extends BPCommand {
 
     public UpgradeCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(aliases);
+        super(commandsConfig, aliases);
+    }
+
+    @Override
+    public List<String> defaultUsage() {
+        return Collections.singletonList("%prefix% &cUsage: &7/bank upgrade <bankName>");
+    }
+
+    @Override
+    public int defaultConfirmCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultConfirmMessage() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public int defaultCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultCooldownMessage() {
+        return Collections.emptyList();
     }
 
     @Override
@@ -28,24 +55,20 @@ public class UpgradeCmd extends BPCommand {
     }
 
     @Override
-    public boolean onSuccessExecution(CommandSender s, String[] args) {
-        Player p = (Player) s;
+    public boolean preCmdChecks(CommandSender s, String[] args) {
+        Bank bank = BankUtils.getBank(getPossibleBank(args, 1));
+        if (!BankUtils.exist(bank, s)) return false;
 
-        String bankName = Values.CONFIG.getMainGuiName();
-        if (args.length > 1) bankName = args[1];
-
-        if (!BankUtils.exist(bankName)) {
-            BPMessages.send(s, "Invalid-Bank");
+        if (!BankUtils.isAvailable(bank, (Player) s)) {
+            BPMessages.send(s, "Cannot-Access-Bank");
             return false;
         }
-
-        if (!BankUtils.isAvailable(bankName, p)) {
-            BPMessages.send(p, "Cannot-Access-Bank");
-            return false;
-        }
-
-        if (!hasConfirmed(s)) BankUtils.upgradeBank(BankUtils.getBank(bankName), p);
         return true;
+    }
+
+    @Override
+    public void onExecution(CommandSender s, String[] args) {
+        BankUtils.upgradeBank(BankUtils.getBank(getPossibleBank(args, 1)), (Player) s);
     }
 
     @Override

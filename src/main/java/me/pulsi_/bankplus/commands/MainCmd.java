@@ -45,12 +45,12 @@ public class MainCmd implements CommandExecutor, TabCompleter {
             Player p = (Player) s;
 
             if (Values.CONFIG.isGuiModuleEnabled()) {
-                if (!Values.MULTIPLE_BANKS.enableMultipleBanksModule()) BankUtils.getBank(Values.CONFIG.getMainGuiName()).openBankGui(p);
+                if (!Values.MULTIPLE_BANKS.enableMultipleBanksModule()) BankUtils.getBank(Values.CONFIG.getMainGuiName()).getBankGui().openBankGui(p);
                 else {
                     if (!Values.MULTIPLE_BANKS.isDirectlyOpenIf1IsAvailable()) new BankListGui().openBankGui(p);
                     else {
                         List<Bank> availableBanks = BankUtils.getAvailableBanks(p);
-                        if (availableBanks.size() == 1) availableBanks.get(0).openBankGui(p);
+                        if (availableBanks.size() == 1) availableBanks.get(0).getBankGui().openBankGui(p);
                         else new BankListGui().openBankGui(p);
                     }
                 }
@@ -82,7 +82,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
         if (args.length == 1) {
             List<String> cmds = new ArrayList<>();
             for (BPCommand cmd : commands.values())
-                if (s.hasPermission("bankplus." + cmd.getIdentifier().toLowerCase())) cmds.add(cmd.getIdentifier());
+                if (s.hasPermission(cmd.permission)) cmds.add(cmd.identifier);
 
             List<String> result = new ArrayList<>();
             for (String arg : cmds)
@@ -90,10 +90,8 @@ public class MainCmd implements CommandExecutor, TabCompleter {
             return result;
         }
 
-        if (!commands.containsKey(args0) || !s.hasPermission("bankplus." + args0)) return null;
-
         BPCommand cmd = commands.get(args0);
-        if (cmd.playerOnly() && !(s instanceof Player)) return null;
+        if (cmd == null || !s.hasPermission(cmd.permission) || (cmd.playerOnly() && !(s instanceof Player))) return null;
 
         return cmd.tabCompletion(s, args);
     }

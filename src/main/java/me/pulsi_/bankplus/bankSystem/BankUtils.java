@@ -13,6 +13,7 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -45,12 +46,43 @@ public class BankUtils {
     }
 
     /**
-     * Cheks if the selected bank name is registered.
-     * @param bankName The bank name
+     * Checks if the selected bank is registered.
+     * @param bank The bank.
+     * @return true if it is registered, false otherwise.
+     */
+    public static boolean exist(Bank bank) {
+        if (bank == null) return false;
+        return exist(bank.getIdentifier(), null);
+    }
+
+    /**
+     * Checks if the selected bank is registered.
+     * @param bank The bank.
+     * @return true if it is registered, false otherwise.
+     */
+    public static boolean exist(Bank bank, CommandSender s) {
+        if (bank == null) return false;
+        return exist(bank.getIdentifier(), s);
+    }
+
+    /**
+     * Checks if the selected bank name is registered.
+     * @param bankName The bank name.
      * @return true if it is registered, false otherwise.
      */
     public static boolean exist(String bankName) {
-        return getBank(bankName) != null;
+        return exist(bankName, null);
+    }
+
+    /**
+     * Checks if the selected bank name is registered, and automatically alert the command sender, if specified, its non-existence.
+     * @param bankName The bank name.
+     * @return true if it is registered, false otherwise.
+     */
+    public static boolean exist(String bankName, CommandSender s) {
+        boolean exist = getBank(bankName) != null;
+        if (!exist) BPMessages.send(s, "Invalid-Bank");
+        return exist;
     }
 
     /**
@@ -354,7 +386,7 @@ public class BankUtils {
      * Method to upgrade the selected bank for the selected player,
      * the player must be online because of the possible required
      * items and values that are required to upgrade, to set the
-     * level of the bank to an offline player use {@link BankUtils#setLevel(String, OfflinePlayer, int)}
+     * level of the bank to an offline player use {@link BankUtils#setLevel(Bank, OfflinePlayer, int)}
      *
      * @param bank The bank.
      * @param p    The player.

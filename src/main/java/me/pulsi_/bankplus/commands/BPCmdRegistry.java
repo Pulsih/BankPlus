@@ -24,11 +24,11 @@ public class BPCmdRegistry {
         boolean save = new AddAllCmd(commandsConfig, "addAll").register();
         if (new AddCmd(commandsConfig, "add").register()) save = true;
         if (new BalanceCmd(commandsConfig, "balance", "bal").register()) save = true;
-        if (new CustomDepositCmd(commandsConfig, "customDeposit").register()) save = true;
-        if (new CustomWithdrawCmd(commandsConfig, "customWithdraw").register()) save = true;
         if (new DepositCmd(commandsConfig, "deposit").register()) save = true;
+        if (new ForceDepositCmd(commandsConfig, "forceDeposit").register()) save = true;
         if (new ForceOpenCmd(commandsConfig, "forceOpen").register()) save = true;
         if (new ForceUpgradeCmd(commandsConfig, "forceUpgrade").register()) save = true;
+        if (new ForceWithdrawCmd(commandsConfig, "forceWithdraw").register()) save = true;
         if (new GiveInterestCmd(commandsConfig, "giveInterest").register()) save = true;
         if (new HelpCmd(commandsConfig, "help").register()) save = true;
         if (new InterestCmd(commandsConfig, "interest").register()) save = true;

@@ -8,12 +8,38 @@ import me.pulsi_.bankplus.values.Values;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import java.util.Collections;
 import java.util.List;
 
 public class SaveAllDataCmd extends BPCommand {
 
     public SaveAllDataCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(aliases);
+        super(commandsConfig, aliases);
+    }
+
+    @Override
+    public List<String> defaultUsage() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public int defaultConfirmCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultConfirmMessage() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public int defaultCooldown() {
+        return 0;
+    }
+
+    @Override
+    public List<String> defaultCooldownMessage() {
+        return Collections.emptyList();
     }
 
     @Override
@@ -27,15 +53,17 @@ public class SaveAllDataCmd extends BPCommand {
     }
 
     @Override
-    public boolean onSuccessExecution(CommandSender s, String[] args) {
-        if (hasConfirmed(s)) return false;
+    public boolean preCmdChecks(CommandSender s, String[] args) {
+        return true;
+    }
 
+    @Override
+    public void onExecution(CommandSender s, String[] args) {
         EconomyUtils.saveEveryone(true);
         EconomyUtils.restartSavingInterval();
 
         if (Values.CONFIG.isSaveBalancesBroadcast()) BPLogger.info("All player data have been saved!");
         BPMessages.send(s, "%prefix% &aSuccessfully saved all player data!", true);
-        return true;
     }
 
     @Override
