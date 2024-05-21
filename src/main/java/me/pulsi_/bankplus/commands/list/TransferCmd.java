@@ -5,6 +5,7 @@ import me.pulsi_.bankplus.account.BPPlayerManager;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
+import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.Bukkit;
@@ -39,7 +40,7 @@ public class TransferCmd extends BPCommand {
 
     @Override
     public List<String> defaultConfirmMessage() {
-        return Collections.singletonList("%prefix% &cType the command again within 5 seconds to confirm this action.");
+        return Collections.singletonList("%prefix% &cThis command will overwrite the data from a place to another, type the command again within 5 seconds to confirm this action.");
     }
 
     @Override
@@ -103,10 +104,7 @@ public class TransferCmd extends BPCommand {
     private void filesToDatabase() {
         Set<String> banks = BankPlus.INSTANCE().getBankRegistry().getBanks().keySet();
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
-            BPPlayerManager pManager = new BPPlayerManager(p);
-            if (pManager.isPlayerRegistered()) continue;
-
-            FileConfiguration config = pManager.getPlayerConfig();
+            FileConfiguration config = new BPPlayerManager(p).getPlayerConfig();
             SQLPlayerManager sqlManager = new SQLPlayerManager(p);
 
             for (String bankName : banks) {
@@ -116,9 +114,9 @@ public class TransferCmd extends BPCommand {
                 String interest = config.getString("banks." + bankName + ".interest");
 
                 sqlManager.setLevel(Integer.parseInt(level == null ? "1" : level), bankName);
-                sqlManager.setMoney(new BigDecimal(money == null ? "0" : money), bankName);
-                sqlManager.setDebt(new BigDecimal(debt == null ? "0" : debt), bankName);
-                sqlManager.setOfflineInterest(new BigDecimal(interest == null ? "0" : interest), bankName);
+                sqlManager.setMoney(BPFormatter.getStyledBigDecimal(money), bankName);
+                sqlManager.setDebt(BPFormatter.getStyledBigDecimal(debt), bankName);
+                sqlManager.setOfflineInterest(BPFormatter.getStyledBigDecimal(interest), bankName);
             }
         }
     }

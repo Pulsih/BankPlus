@@ -36,7 +36,7 @@ public class BankUtils {
     public BankUtils() throws Exception {
         throw new Exception("This class may not be initialized.");
     }
-
+ 
     public static Bank getBank(String bankName) {
         return BankPlus.INSTANCE().getBankRegistry().getBanks().get(bankName);
     }
