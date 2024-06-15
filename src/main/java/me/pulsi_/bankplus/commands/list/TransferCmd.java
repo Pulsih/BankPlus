@@ -2,7 +2,9 @@ package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayerManager;
+import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
+import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
@@ -102,26 +104,23 @@ public class TransferCmd extends BPCommand {
     }
 
     private void filesToDatabase() {
-        Set<String> banks = BankPlus.INSTANCE().getBankRegistry().getBanks().keySet();
+        Set<String> banks = BPEconomy.nameList();
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
-            FileConfiguration config = new BPPlayerManager(p).getPlayerConfig();
             SQLPlayerManager sqlManager = new SQLPlayerManager(p);
 
             for (String bankName : banks) {
-                String level = config.getString("banks." + bankName + ".level");
-                String money = config.getString("banks." + bankName + ".money");
-                String debt = config.getString("banks." + bankName + ".debt");
-                String interest = config.getString("banks." + bankName + ".interest");
+                BPEconomy economy = BPEconomy.get(bankName);
 
-                sqlManager.setLevel(Integer.parseInt(level == null ? "1" : level), bankName);
-                sqlManager.setMoney(BPFormatter.getStyledBigDecimal(money), bankName);
-                sqlManager.setDebt(BPFormatter.getStyledBigDecimal(debt), bankName);
-                sqlManager.setOfflineInterest(BPFormatter.getStyledBigDecimal(interest), bankName);
+                sqlManager.setLevel(economy.getBankLevel(p), bankName);
+                sqlManager.setMoney(BPFormatter.getStyledBigDecimal(economy.getBankBalance(p)), bankName);
+                sqlManager.setDebt(BPFormatter.getStyledBigDecimal(economy.getDebt(p)), bankName);
+                sqlManager.setOfflineInterest(BPFormatter.getStyledBigDecimal(economy.getOfflineInterest(p)), bankName);
             }
         }
     }
 
     private void databaseToFile() {
+        Set<String> banks = BPEconomy.nameList();
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
             BPPlayerManager pManager = new BPPlayerManager(p);
             if (!pManager.isPlayerRegistered()) continue;
@@ -129,11 +128,11 @@ public class TransferCmd extends BPCommand {
             FileConfiguration config = pManager.getPlayerConfig();
             SQLPlayerManager sqlManager = new SQLPlayerManager(p);
 
-            for (String bankName : BankPlus.INSTANCE().getBankRegistry().getBanks().keySet()) {
+            for (String bankName : banks) {
                 int level = sqlManager.getLevel(bankName);
-                String money = sqlManager.getMoney(bankName).toString();
-                String debt = sqlManager.getDebt(bankName).toString();
-                String interest = sqlManager.getOfflineInterest(bankName).toString();
+                String money = BPFormatter.styleBigDecimal(sqlManager.getMoney(bankName));
+                String debt = BPFormatter.styleBigDecimal(sqlManager.getDebt(bankName));
+                String interest = BPFormatter.styleBigDecimal(sqlManager.getOfflineInterest(bankName));
 
                 config.set("banks." + bankName + ".level", level);
                 config.set("banks." + bankName + ".money", money);

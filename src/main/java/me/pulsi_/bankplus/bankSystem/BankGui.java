@@ -146,6 +146,7 @@ public class BankGui {
 
         player.setOpenedBankGui(this);
         BPUtils.playSound("PERSONAL", p);
+        p.closeInventory();
         p.openInventory(bankInventory);
     }
 

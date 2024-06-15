@@ -32,18 +32,17 @@ public class BPSQL {
         BPLogger.info("MySQL setup finished!");
     }
 
-    public boolean isPlayerRegistered(OfflinePlayer p) {
-        boolean registered = false, uuid = Values.CONFIG.isStoringUUIDs();
+    public void fillEmptyRecords(OfflinePlayer p) {
+        boolean uuid = Values.CONFIG.isStoringUUIDs();
         for (String bankName : BPEconomy.nameList()) {
             if (uuid) {
-                if (!getSqlMethods().get(bankName, "uuid", "WHERE uuid='" + p.getUniqueId() + "'").isEmpty()) registered = true;
-                else createNewDefault(bankName, p);
+                if (!getSqlMethods().get(bankName, "uuid", "WHERE uuid='" + p.getUniqueId() + "'").isEmpty())
+                    createNewDefault(bankName, p);
             } else {
-                if (!getSqlMethods().get(bankName, "account_name", "WHERE account_name='" + p.getName() + "'").isEmpty()) registered = true;
-                else createNewDefault(bankName, p);
+                if (getSqlMethods().get(bankName, "account_name", "WHERE account_name='" + p.getName() + "'").isEmpty())
+                    createNewDefault(bankName, p);
             }
         }
-        return registered;
     }
 
     public void createNewDefault(String bankName, OfflinePlayer p) {
