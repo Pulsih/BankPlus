@@ -16,7 +16,7 @@ import java.util.Scanner;
 public class BPConfigs {
 
     private static boolean updated = false;
-    private boolean autoUpdateFiles;
+    private boolean autoUpdateFiles = true;
 
     private final BankPlus plugin;
 
@@ -25,9 +25,12 @@ public class BPConfigs {
     }
 
     public void setupConfigs() {
-        FileConfiguration config = getConfig("config.yml");
-        String path = "General-Settings.Auto-Update-Files";
-        autoUpdateFiles = config.get(path) == null || config.getBoolean(path);
+        File configFile = getFile("config.yml");
+        if (configFile.exists()) {
+            FileConfiguration config = getConfig("config.yml");
+            String path = "General-Settings.Auto-Update-Files";
+            autoUpdateFiles = config.get(path) == null || config.getBoolean(path);
+        }
 
         checkAndCreateFile("config.yml");
         checkAndCreateFile("messages.yml");

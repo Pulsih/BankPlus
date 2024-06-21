@@ -49,7 +49,7 @@ public class SQLPlayerManager {
     }
 
     public void setLevel(int level, String bankName) {
-        set("bank_level", "" + level, bankName);
+        set("bank_level", "" + Math.max(1, level), bankName);
     }
 
     public void setMoney(BigDecimal amount, String bankName) {

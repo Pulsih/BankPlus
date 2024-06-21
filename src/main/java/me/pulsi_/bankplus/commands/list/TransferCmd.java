@@ -104,17 +104,19 @@ public class TransferCmd extends BPCommand {
     }
 
     private void filesToDatabase() {
-        Set<String> banks = BPEconomy.nameList();
+        List<BPEconomy> economies = BPEconomy.list();
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
+            BPPlayerManager pManager = new BPPlayerManager(p);
             SQLPlayerManager sqlManager = new SQLPlayerManager(p);
 
-            for (String bankName : banks) {
-                BPEconomy economy = BPEconomy.get(bankName);
+            FileConfiguration pConfig = pManager.getPlayerConfig();
+            for (BPEconomy economy : economies) {
+                String bankName = economy.getOriginBank().getIdentifier();
 
-                sqlManager.setLevel(economy.getBankLevel(p), bankName);
-                sqlManager.setMoney(BPFormatter.getStyledBigDecimal(economy.getBankBalance(p)), bankName);
-                sqlManager.setDebt(BPFormatter.getStyledBigDecimal(economy.getDebt(p)), bankName);
-                sqlManager.setOfflineInterest(BPFormatter.getStyledBigDecimal(economy.getOfflineInterest(p)), bankName);
+                sqlManager.setDebt(BPFormatter.getStyledBigDecimal(pConfig.getString("banks." + bankName + ".debt")), bankName);
+                sqlManager.setOfflineInterest(BPFormatter.getStyledBigDecimal(pConfig.getString("banks." + bankName + ".interest")), bankName);
+                sqlManager.setLevel(pConfig.getInt("banks." + bankName + ".level"), bankName);
+                sqlManager.setMoney(BPFormatter.getStyledBigDecimal(pConfig.getString("banks." + bankName + ".money")), bankName);
             }
         }
     }
@@ -134,10 +136,10 @@ public class TransferCmd extends BPCommand {
                 String debt = BPFormatter.styleBigDecimal(sqlManager.getDebt(bankName));
                 String interest = BPFormatter.styleBigDecimal(sqlManager.getOfflineInterest(bankName));
 
-                config.set("banks." + bankName + ".level", level);
-                config.set("banks." + bankName + ".money", money);
                 config.set("banks." + bankName + ".debt", debt);
                 config.set("banks." + bankName + ".interest", interest);
+                config.set("banks." + bankName + ".level", level);
+                config.set("banks." + bankName + ".money", money);
             }
 
             pManager.savePlayerFile(config, pManager.getPlayerFile(), true);

@@ -6,10 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class BPMessages {
 
@@ -118,24 +115,18 @@ public class BPMessages {
 
         FileConfiguration config = BankPlus.INSTANCE().getConfigs().getConfig("messages.yml");
 
-        for (String identifier : config.getConfigurationSection("").getKeys(false))
-            messages.put(identifier, getPossibleMessages(config, identifier));
-
-        if (!messages.containsKey("prefix")) prefix = BPChat.prefix;
-        else {
-            List<String> prefixes = messages.get("prefix");
-            prefix = prefixes.isEmpty() ? BPChat.prefix : prefixes.get(0);
+        for (String identifier : config.getConfigurationSection("").getKeys(false)) {
+            if (!identifier.equals("Enable-Missing-Message-Alert") && !identifier.equals("Prefix") && !identifier.equals("Title-Custom-Transaction") && !identifier.equals("Interest-Broadcast"))
+                messages.put(identifier, getPossibleMessages(config, identifier));
         }
 
-        alertMissingMessages = config.getBoolean("enable-missing-message-alert");
+        String prefixString = config.getString("Prefix");
+        prefix = prefixString == null ? BPChat.prefix : prefixString;
+        alertMissingMessages = config.getBoolean("Enable-Missing-Message-Alert");
     }
 
     public static String addPrefix(String message) {
-        return BPChat.color(message.replace("%prefix%", getPrefix()));
-    }
-
-    public static String getPrefix() {
-        return prefix;
+        return BPChat.color(message.replace("%prefix%", prefix));
     }
 
     public static List<String> getPossibleMessages(FileConfiguration config, String path) {

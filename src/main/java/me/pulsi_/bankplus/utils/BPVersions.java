@@ -1,13 +1,17 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.bankSystem.BankUtils;
+import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.managers.BPConfigs;
+import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.values.Values;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.util.Scanner;
 
 /**
@@ -33,17 +37,30 @@ public class BPVersions {
                 continue;
             }
 
-            String name = oldConfig.getString("Account-Name"), interest = oldConfig.getString("Offline-Interest"), debt = oldConfig.getString("Debt");
-            if (name == null && interest == null && debt == null) continue;
+            String money = oldConfig.getString("Money"), name = oldConfig.getString("Account-Name"), interest = oldConfig.getString("Offline-Interest"), debt = oldConfig.getString("Debt");
+            if (money == null && name == null && interest == null && debt == null) continue;
 
             newConfig.set("name", name);
-            if (Values.CONFIG.notifyOfflineInterest()) newConfig.set("interest", interest);
-            newConfig.set("debt", debt);
 
-            for (String bankName : BankPlus.INSTANCE().getBankRegistry().getBanks().keySet()) {
-                if (Values.CONFIG.getMainGuiName().equals(bankName)) newConfig.set("banks." + bankName + ".money", oldConfig.get("Money") == null ? Values.CONFIG.getStartAmount() : oldConfig.get("Money"));
-                else newConfig.set("banks." + bankName + ".money", oldConfig.get("Banks." + bankName + ".Money") == null ? "0" : oldConfig.get("Banks." + bankName + ".Money"));
-                newConfig.set("banks." + bankName + ".level", oldConfig.get("Banks." + bankName + ".Level") == null ? "1" : oldConfig.get("Banks." + bankName + ".Level"));
+            for (String bankName : BPEconomy.nameList()) {
+                if (Values.CONFIG.getMainGuiName().equals(bankName)) {
+                    BigDecimal oldMoney;
+                    if (money == null) oldMoney = Values.CONFIG.getStartAmount();
+                    else oldMoney = BPFormatter.getStyledBigDecimal(money);
+                    newConfig.set("banks." + bankName + ".money", BPFormatter.styleBigDecimal(oldMoney));
+
+                    newConfig.set("banks." + bankName + ".debt", BPFormatter.styleBigDecimal(BPFormatter.getStyledBigDecimal(debt)));
+                    newConfig.set("banks." + bankName + ".interest", BPFormatter.styleBigDecimal(BPFormatter.getStyledBigDecimal(interest)));
+                } else {
+                    BigDecimal oldMoney = BPFormatter.getStyledBigDecimal(oldConfig.getString("Banks." + bankName + ".Money"));
+                    newConfig.set("banks." + bankName + ".money", BPFormatter.styleBigDecimal(oldMoney));
+
+                    newConfig.set("banks." + bankName + ".debt", "0");
+                    newConfig.set("banks." + bankName + ".interest", "0");
+                }
+
+                String levelString = oldConfig.getString("Banks." + bankName + ".Level");
+                newConfig.set("banks." + bankName + ".level", levelString == null ? "1" : levelString);
             }
 
             try {

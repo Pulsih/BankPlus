@@ -5,6 +5,7 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.utils.BPItems;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPChat;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
@@ -127,6 +128,7 @@ public class BankGui {
             }
         }
 
+        p.closeInventory();
         BPPlayer player = PlayerRegistry.get(p);
         if (player == null) player = PlayerRegistry.loadPlayer(p);
 
@@ -141,12 +143,10 @@ public class BankGui {
         placeContent(bankItems, bankInventory, p);
         updateBankGuiMeta(bankInventory, p);
 
-        long delay = updateDelay;
-        if (delay >= 0) player.setBankUpdatingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE(), () -> updateBankGuiMeta(bankInventory, p), delay, delay));
+        if (updateDelay >= 0) player.setBankUpdatingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE(), () -> updateBankGuiMeta(bankInventory, p), updateDelay, updateDelay));
 
         player.setOpenedBankGui(this);
         BPUtils.playSound("PERSONAL", p);
-        p.closeInventory();
         p.openInventory(bankInventory);
     }
 

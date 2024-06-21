@@ -62,11 +62,13 @@ public class BPBankTop {
     }
 
     public static BigDecimal getBankTopBalancePlayer(int position) {
+        if (position < 0 || position >= bankTop.size()) return BigDecimal.ZERO;
         BankTopPlayer p = bankTop.get(position - 1);
         return ((p == null || p.getBalance() == null) ? BigDecimal.ZERO : p.getBalance());
     }
 
     public static String getBankTopNamePlayer(int position) {
+        if (position < 0 || position >= bankTop.size()) return Values.CONFIG.getBanktopPlayerNotFoundPlaceholder();
         BankTopPlayer p = bankTop.get(position - 1);
         return ((p == null || p.getName() == null) ? Values.CONFIG.getBanktopPlayerNotFoundPlaceholder() : p.getName());
     }

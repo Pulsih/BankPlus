@@ -3,12 +3,11 @@ plugins {
 }
 
 group = 'me.pulsi_'
-version = '6.2-Alpha24-PreRelease'
+version = '6.2-Alpha24-PreRelease2'
 
-/* Remove comments when testing the plugin.
-setLibsDirName("plugins");
-setBuildDir(new File("C:\\Users\\faste\\Desktop\\Test Server"));
-*/
+// Remove comments when testing the plugin.
+//setLibsDirName("plugins");
+//setBuildDir(new File("C:\\Users\\faste\\Desktop\\Test Server"));
 
 repositories {
     mavenCentral()
