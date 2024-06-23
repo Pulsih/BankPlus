@@ -193,12 +193,16 @@ Interest:
     # before marking a player as AFK
     AFK-Time: 5
 
-  # The percentage of money given. (Default: 5%)
+  # The interest rate. (Default: 5%)
   #
   # IMPORTANT! This amount is defined in the BANK FILE!
   # This option is only a fallback value in case the
   # level of the bank does not specify its amount!
-  Money-Given: "5%"
+  Rate: "5%"
+
+  # Enabled this option to deliver the interest on
+  # the vault bank balance instead of the bank balance.
+  Give-Interest-On-Vault-Balance: false
 
   # This is the interest cooldown.
   # You can choose the delay between:
@@ -208,6 +212,13 @@ Interest:
   # will automatically choose minutes.
   # (You must put the space to specify the time!)
   Delay: "5 m"
+
+  # Select a number where the interest message won't
+  # be shown if the total interest isn't greater than the
+  # specified amount.
+  #
+  # Put "0" to disable this feature.
+  Skip-Message-If-Lower-Than: "0"
 
   # The max amount that you can receive with interest.
   # This setting can also be specified in the bank levels.
@@ -231,7 +242,7 @@ Interest:
   # If 'Different-Offline-Rate' is enabled, the offline players
   # will receive this interest rate. It works the same as the
   # "Money-Given" above; you can edit this in the bank file.
-  Offline-Money-Given: "5%"
+  Offline-Rate: "5%"
 
   # The permission for offline players to receive interest.
   # You can put "" if you don't want to use a permission.

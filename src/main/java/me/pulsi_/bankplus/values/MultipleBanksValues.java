@@ -1,24 +1,23 @@
-package me.pulsi_.bankplus.values.configs;
+package me.pulsi_.bankplus.values;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.managers.BPConfigs;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.List;
 
 public class MultipleBanksValues {
 
-    private boolean enableMultipleBanksModule, showNotAvailableBanks, directlyOpenIf1IsAvailable, previousItemGlowing, nextItemGlowing;
-    private String banksGuiTitle, previousItemMaterial, nextItemMaterial, previousItemDisplayname, nextItemDisplayname, fillerMaterial;
-    private List<String> previousItemLore, nextItemLore, autoBanksUnlocker;
-    private int bankListGuiLines, previousItemSlot, nextItemSlot, updateDelay;
-    private boolean fillerEnabled, fillerGlowing;
+    private static boolean enableMultipleBanksModule;
+    private static boolean showNotAvailableBanks;
+    private static boolean directlyOpenIf1IsAvailable;
+    private static boolean previousItemGlowing, nextItemGlowing;
+    private static String banksGuiTitle;
+    private static String previousItemMaterial, nextItemMaterial, previousItemDisplayname, nextItemDisplayname, fillerMaterial;
+    private static List<String> previousItemLore, nextItemLore, autoBanksUnlocker;
+    private static int bankListGuiLines, previousItemSlot, nextItemSlot, updateDelay;
+    private static boolean fillerEnabled, fillerGlowing;
 
-    public static MultipleBanksValues getInstance() {
-        return new MultipleBanksValues();
-    }
-
-    public void setupValues() {
+    public static void setupValues() {
         FileConfiguration multipleBanks = BankPlus.INSTANCE().getConfigs().getConfig("multiple_banks.yml");
 
         enableMultipleBanksModule = multipleBanks.getBoolean("Enabled");
@@ -43,83 +42,83 @@ public class MultipleBanksValues {
         fillerGlowing = multipleBanks.getBoolean("Banks-Gui.Filler.Glowing");
     }
 
-    public boolean enableMultipleBanksModule() {
+    public static boolean enableMultipleBanksModule() {
         return enableMultipleBanksModule;
     }
 
-    public boolean isShowNotAvailableBanks() {
+    public static boolean isShowNotAvailableBanks() {
         return showNotAvailableBanks;
     }
 
-    public boolean isDirectlyOpenIf1IsAvailable() {
+    public static boolean isDirectlyOpenIf1IsAvailable() {
         return directlyOpenIf1IsAvailable;
     }
 
-    public List<String> getAutoBanksUnlocker() {
+    public static List<String> getAutoBanksUnlocker() {
         return autoBanksUnlocker;
     }
 
-    public boolean isPreviousItemGlowing() {
+    public static boolean isPreviousItemGlowing() {
         return previousItemGlowing;
     }
 
-    public boolean isNextItemGlowing() {
+    public static boolean isNextItemGlowing() {
         return nextItemGlowing;
     }
 
-    public String getBanksGuiTitle() {
+    public static String getBanksGuiTitle() {
         return banksGuiTitle;
     }
 
-    public String getPreviousItemMaterial() {
+    public static String getPreviousItemMaterial() {
         return previousItemMaterial;
     }
 
-    public String getNextItemMaterial() {
+    public static String getNextItemMaterial() {
         return nextItemMaterial;
     }
 
-    public String getPreviousItemDisplayname() {
+    public static String getPreviousItemDisplayname() {
         return previousItemDisplayname;
     }
 
-    public String getNextItemDisplayname() {
+    public static String getNextItemDisplayname() {
         return nextItemDisplayname;
     }
 
-    public String getFillerMaterial() {
+    public static String getFillerMaterial() {
         return fillerMaterial;
     }
 
-    public List<String> getPreviousItemLore() {
+    public static List<String> getPreviousItemLore() {
         return previousItemLore;
     }
 
-    public List<String> getNextItemLore() {
+    public static List<String> getNextItemLore() {
         return nextItemLore;
     }
 
-    public int getBankListGuiLines() {
+    public static int getBankListGuiLines() {
         return Math.max(9, Math.min(54, bankListGuiLines * 9));
     }
 
-    public int getPreviousItemSlot() {
+    public static int getPreviousItemSlot() {
         return previousItemSlot;
     }
 
-    public int getNextItemSlot() {
+    public static int getNextItemSlot() {
         return nextItemSlot;
     }
 
-    public boolean isFillerEnabled() {
+    public static boolean isFillerEnabled() {
         return fillerEnabled;
     }
 
-    public boolean isFillerGlowing() {
+    public static boolean isFillerGlowing() {
         return fillerGlowing;
     }
 
-    public int getUpdateDelay() {
+    public static int getUpdateDelay() {
         return updateDelay;
     }
 }

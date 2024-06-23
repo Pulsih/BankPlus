@@ -4,7 +4,7 @@ import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.EconomyUtils;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -62,7 +62,7 @@ public class SaveAllDataCmd extends BPCommand {
         EconomyUtils.saveEveryone(true);
         EconomyUtils.restartSavingInterval();
 
-        if (Values.CONFIG.isSaveBalancesBroadcast()) BPLogger.info("All player data have been saved!");
+        if (ConfigValues.isBroadcastingSaves()) BPLogger.info("All player data have been saved!");
         BPMessages.send(s, "%prefix% &aSuccessfully saved all player data!", true);
     }
 

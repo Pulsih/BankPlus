@@ -4,8 +4,7 @@ import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.values.Values;
-import me.pulsi_.bankplus.values.configs.ConfigValues;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -56,7 +55,7 @@ public class ForceOpenCmd extends BPCommand {
 
     @Override
     public boolean preCmdChecks(CommandSender s, String[] args) {
-        if (Values.CONFIG.isGuiModuleEnabled()) {
+        if (ConfigValues.isGuiModuleEnabled()) {
             BPMessages.send(s, "Gui-Module-Disabled");
             return false;
         }

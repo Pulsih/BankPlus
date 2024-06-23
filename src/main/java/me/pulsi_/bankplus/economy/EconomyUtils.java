@@ -6,7 +6,7 @@ import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.managers.BPTaskManager;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -16,6 +16,11 @@ import java.util.UUID;
 
 public class EconomyUtils {
 
+    /**
+     * Save the selected player balance.
+     * @param uuid The player UUID.
+     * @param async Choose if executing this action asynchronously to increase the server performance. (DO NOT USE ON SERVER SHOTDOWN)
+     */
     public static void savePlayer(UUID uuid, boolean async) {
         if (BankPlus.INSTANCE().getMySql().isConnected()) {
             SQLPlayerManager pManager = new SQLPlayerManager(uuid);
@@ -44,11 +49,18 @@ public class EconomyUtils {
         }
     }
 
+    /**
+     * Load all the online players balance.
+     */
     public static void loadEveryone() {
         for (Player p : Bukkit.getOnlinePlayers())
             PlayerRegistry.loadPlayer(p);
     }
 
+    /**
+     * Save everyone's balance.
+     * @param async Choose if executing this action asynchronously to increase the server performance. (DO NOT USE ON SERVER SHOTDOWN)
+     */
     public static void saveEveryone(boolean async) {
         for (UUID uuid : BPEconomy.getLoadedPlayers()) {
             savePlayer(uuid, async);
@@ -56,8 +68,11 @@ public class EconomyUtils {
         }
     }
 
+    /**
+     * Restart the saving cooldown.
+     */
     public static void restartSavingInterval() {
-        long delay = Values.CONFIG.getSaveDelay();
+        long delay = ConfigValues.getSaveDelay();
         if (delay <= 0) return;
 
         long minutes = delay * 1200L;

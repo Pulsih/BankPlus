@@ -6,7 +6,7 @@ import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.mySQL.BPSQL;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -56,7 +56,7 @@ public class BPPlayerManager {
                 hasChanges = true;
             }
             if (sBalance == null) {
-                BigDecimal amount = Values.CONFIG.getMainGuiName().equals(bankName) ? Values.CONFIG.getStartAmount() : BigDecimal.valueOf(0);
+                BigDecimal amount = ConfigValues.getMainGuiName().equals(bankName) ? ConfigValues.getStartAmount() : BigDecimal.valueOf(0);
                 config.set("banks." + bankName + ".money", BPFormatter.styleBigDecimal(amount));
                 hasChanges = true;
             }
@@ -64,7 +64,7 @@ public class BPPlayerManager {
                 config.set("banks." + bankName + ".debt", "0");
                 hasChanges = true;
             }
-            if (Values.CONFIG.notifyOfflineInterest()) {
+            if (ConfigValues.isNotifyingOfflineInterest()) {
                 String sInterest = config.getString("banks." + bankName + ".interest");
                 if (sInterest == null) {
                     config.set("banks." + bankName + ".interest", "0");
@@ -100,7 +100,7 @@ public class BPPlayerManager {
     }
 
     public File getPlayerFile() {
-        String identifier = (Values.CONFIG.isStoringUUIDs() ? p.getUniqueId().toString() : p.getName());
+        String identifier = (ConfigValues.isStoringUUIDs() ? p.getUniqueId().toString() : p.getName());
         return new File(BankPlus.INSTANCE().getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
     }
 

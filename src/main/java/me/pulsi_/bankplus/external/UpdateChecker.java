@@ -2,7 +2,7 @@ package me.pulsi_.bankplus.external;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.utils.texts.BPChat;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -19,7 +19,7 @@ public class UpdateChecker implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
-        if (!Values.CONFIG.isUpdateCheckerEnabled() || (!p.isOp() && !p.hasPermission("bankplus.notify")) || BankPlus.INSTANCE().isUpdated()) return;
+        if (!ConfigValues.isUpdateCheckerEnabled() || (!p.isOp() && !p.hasPermission("bankplus.notify")) || BankPlus.INSTANCE().isUpdated()) return;
 
         TextComponent text = new TextComponent(BPChat.color("&a&lBank&9&lPlus &aNew update available! "));
         TextComponent button = new TextComponent(BPChat.color("&9&l[CLICK HERE]"));

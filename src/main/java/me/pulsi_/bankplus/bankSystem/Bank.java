@@ -4,7 +4,8 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
+import me.pulsi_.bankplus.values.MultipleBanksValues;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -108,7 +109,7 @@ public class Bank {
             }
         }
 
-        if (!Values.CONFIG.isGuiModuleEnabled()) return;
+        if (!ConfigValues.isGuiModuleEnabled()) return;
         bankGui.getBankItems().clear();
 
         bankGui.setTitle(config.getString("Title"));
@@ -154,7 +155,7 @@ public class Bank {
             }
         }
 
-        if (!Values.MULTIPLE_BANKS.enableMultipleBanksModule()) {
+        if (!MultipleBanksValues.enableMultipleBanksModule()) {
             bankGui.setAvailableBankListItem(null);
             bankGui.setUnavailableBankListItem(null);
             return;

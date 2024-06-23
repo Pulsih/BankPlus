@@ -2,7 +2,7 @@ package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.utils.BPUtils;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,28 +20,28 @@ public class AFKListener implements Listener {
 
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
-        if (!Values.CONFIG.isIgnoringAfkPlayers() || Values.CONFIG.useEssentialsXAFK()) return;
+        if (!ConfigValues.isIgnoringAfkPlayers() || ConfigValues.isUsingEssentialsXAFK()) return;
 
         Player p = e.getPlayer();
-        long time = System.currentTimeMillis() + BPUtils.minutesInMilliseconds(Values.CONFIG.getAfkPlayersTime());
+        long time = System.currentTimeMillis() + BPUtils.minutesInMilliseconds(ConfigValues.getAfkPlayersTime());
         plugin.getAfkManager().getAfkCooldown().put(p.getUniqueId(), time);
     }
 
     @EventHandler
     public void onInteract(PlayerInteractEvent e) {
-        if (!Values.CONFIG.isIgnoringAfkPlayers() || Values.CONFIG.useEssentialsXAFK()) return;
+        if (!ConfigValues.isIgnoringAfkPlayers() || ConfigValues.isUsingEssentialsXAFK()) return;
 
         Player p = e.getPlayer();
-        long time = System.currentTimeMillis() + BPUtils.minutesInMilliseconds(Values.CONFIG.getAfkPlayersTime());
+        long time = System.currentTimeMillis() + BPUtils.minutesInMilliseconds(ConfigValues.getAfkPlayersTime());
         plugin.getAfkManager().getAfkCooldown().put(p.getUniqueId(), time);
     }
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
-        if (!Values.CONFIG.isIgnoringAfkPlayers() || Values.CONFIG.useEssentialsXAFK()) return;
+        if (!ConfigValues.isIgnoringAfkPlayers() || ConfigValues.isUsingEssentialsXAFK()) return;
 
         Player p = e.getPlayer();
-        long time = System.currentTimeMillis() + BPUtils.minutesInMilliseconds(Values.CONFIG.getAfkPlayersTime());
+        long time = System.currentTimeMillis() + BPUtils.minutesInMilliseconds(ConfigValues.getAfkPlayersTime());
         plugin.getAfkManager().getAfkCooldown().put(p.getUniqueId(), time);
     }
 }

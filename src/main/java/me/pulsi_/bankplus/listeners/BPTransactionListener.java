@@ -10,7 +10,7 @@ import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.EventHandler;
@@ -70,13 +70,13 @@ public class BPTransactionListener implements Listener {
 
     @EventHandler
     public void onTransactionStart(BPPreTransactionEvent e) {
-        if (Values.CONFIG.isLogTransactions())
+        if (ConfigValues.isLoggingTransactions())
             logHolder.put(e.getPlayer().getUniqueId(), new Pair<>(e.getCurrentBalance(), e.getCurrentVaultBalance()));
     }
 
     @EventHandler
     public void onTransactionEnd(BPAfterTransactionEvent e) {
-        if (Values.CONFIG.isLogTransactions()) log(e);
+        if (ConfigValues.isLoggingTransactions()) log(e);
     }
 
     private void log(BPAfterTransactionEvent e) {
@@ -102,7 +102,7 @@ public class BPTransactionListener implements Listener {
         builder.append(type.name());
 
         if (type.equals(TransactionType.DEPOSIT)) {
-            BigDecimal taxes = Values.CONFIG.getDepositTaxes();
+            BigDecimal taxes = ConfigValues.getDepositTaxes();
             if (taxes.doubleValue() > 0)
                 builder.append(" (Taxes: ")
                         .append(taxes)
@@ -110,7 +110,7 @@ public class BPTransactionListener implements Listener {
         }
 
         if (type.equals(TransactionType.WITHDRAW)) {
-            BigDecimal taxes = Values.CONFIG.getWithdrawTaxes();
+            BigDecimal taxes = ConfigValues.getWithdrawTaxes();
             if (taxes.doubleValue() > 0)
                 builder.append(" (Taxes: ")
                         .append(taxes)

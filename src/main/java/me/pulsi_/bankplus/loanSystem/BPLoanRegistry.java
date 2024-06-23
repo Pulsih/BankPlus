@@ -5,11 +5,10 @@ import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.economy.TransactionType;
-import me.pulsi_.bankplus.managers.BPConfigs;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
@@ -85,13 +84,13 @@ public class BPLoanRegistry {
             if (requestedBank != null) {
                 if (!BankUtils.exist(requestedBank)) {
                     BPLogger.warn("The loan \"" + receiverUUID + "\" specified an invalid bank to take the money, using the main bank.");
-                    requestedBank = Values.CONFIG.getMainGuiName();
+                    requestedBank = ConfigValues.getMainGuiName();
                 }
 
                 loan = new BPLoan(receiver, BankUtils.getBank(requestedBank));
             } else {
 
-                String fromBank = Values.CONFIG.getMainGuiName(), toBank = Values.CONFIG.getMainGuiName();
+                String fromBank = ConfigValues.getMainGuiName(), toBank = ConfigValues.getMainGuiName();
                 String fromBankString = values.getString("from"), toBankString = values.getString("to");
 
                 if (fromBankString == null) BPLogger.warn("The loan \"" + receiverUUID + "\" did not specify a bank to take the money, using the main bank.");
@@ -146,7 +145,7 @@ public class BPLoanRegistry {
         loans.add(loan);
 
         // Check that because not every loan is brand new, there could be loans that have a different time left.
-        int delay = loan.getTimeLeft() <= 0 ? Values.CONFIG.getLoanDelay() : BPUtils.millisecondsInTicks(loan.getTimeLeft());
+        int delay = loan.getTimeLeft() <= 0 ? ConfigValues.getLoanDelay() : BPUtils.millisecondsInTicks(loan.getTimeLeft());
         loan.setTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> advanceReturningTask(loan), delay));
     }
 
@@ -159,11 +158,11 @@ public class BPLoanRegistry {
     public static void queueLoanRequest(Player sender, LoanRequest loanRequest) {
         UUID uuid = sender.getUniqueId();
         requests.put(uuid, loanRequest);
-        Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> requests.remove(uuid), Values.CONFIG.getLoanAcceptTime() * 20L);
+        Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> requests.remove(uuid), ConfigValues.getLoanAcceptTime() * 20L);
     }
 
     private static void advanceReturningTask(BPLoan loan) {
-        loan.setTimeLeft(System.currentTimeMillis() + BPUtils.ticksInMilliseconds(Values.CONFIG.getLoanDelay()));
+        loan.setTimeLeft(System.currentTimeMillis() + BPUtils.ticksInMilliseconds(ConfigValues.getLoanDelay()));
         loan.setInstalmentsPoint(loan.getInstalmentsPoint() + 1);
         int instalments = loan.getInstalments();
 
@@ -201,7 +200,7 @@ public class BPLoanRegistry {
 
         // Was the loan at his final instalment?
         if (loan.getInstalmentsPoint() >= instalments) loans.remove(loan);
-        else loan.setTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> advanceReturningTask(loan), Values.CONFIG.getLoanDelay()));
+        else loan.setTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> advanceReturningTask(loan), ConfigValues.getLoanDelay()));
     }
 
     public static class LoanRequest {

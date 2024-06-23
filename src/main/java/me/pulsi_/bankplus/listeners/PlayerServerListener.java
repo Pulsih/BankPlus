@@ -10,7 +10,7 @@ import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPSets;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -31,13 +31,13 @@ public class PlayerServerListener implements Listener {
         boolean wasRegistered = true;
         if (!pManager.isPlayerRegistered()) {
             pManager.registerPlayer();
-            if (Values.CONFIG.notifyRegisteredPlayer()) BPLogger.info("Successfully registered " + p.getName() + "!");
+            if (ConfigValues.isNotifyingNewPlayer()) BPLogger.info("Successfully registered " + p.getName() + "!");
             wasRegistered = false;
         }
         pManager.checkForFileFixes(p, pManager);
         PlayerRegistry.loadPlayer(p, wasRegistered);
 
-        if (!Values.CONFIG.notifyOfflineInterest()) return;
+        if (!ConfigValues.isNotifyingOfflineInterest()) return;
 
         BigDecimal amount = BigDecimal.ZERO;
         for (BPEconomy economy : BPEconomy.list()) {
@@ -49,8 +49,8 @@ public class PlayerServerListener implements Listener {
         BigDecimal finalAmount = amount;
         if (finalAmount.compareTo(BigDecimal.ZERO) > 0)
             Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () ->
-                            BPMessages.send(p, Values.CONFIG.getNotifyOfflineInterestMessage(), BPUtils.placeValues(finalAmount), true),
-                    Values.CONFIG.getNotifyOfflineInterestDelay() * 20L);
+                            BPMessages.send(p, ConfigValues.getOfflineInterestMessage(), BPUtils.placeValues(finalAmount), true),
+                    ConfigValues.getNotifyOfflineInterestDelay() * 20L);
     }
 
     @EventHandler
@@ -66,7 +66,7 @@ public class PlayerServerListener implements Listener {
         BPSets.removePlayerFromDepositing(p);
         BPSets.removePlayerFromWithdrawing(p);
 
-        if (!Values.CONFIG.isSaveOnQuit()) return;
+        if (!ConfigValues.isSavingOnQuit()) return;
 
         UUID uuid = p.getUniqueId();
         EconomyUtils.savePlayer(uuid, true);

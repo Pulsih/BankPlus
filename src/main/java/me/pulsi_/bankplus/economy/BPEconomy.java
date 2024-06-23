@@ -16,7 +16,8 @@ import me.pulsi_.bankplus.utils.BPSets;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
+import me.pulsi_.bankplus.values.MessageValues;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
@@ -150,14 +151,14 @@ public class BPEconomy {
 
             String bankName = originBank.getIdentifier();
             debt = pManager.getDebt(bankName);
-            money = useStartAmount ? Values.CONFIG.getStartAmount() : pManager.getMoney(bankName);
+            money = useStartAmount ? ConfigValues.getStartAmount() : pManager.getMoney(bankName);
             offlineInterest = pManager.getOfflineInterest(bankName);
             level = pManager.getLevel(bankName);
         } else {
             FileConfiguration config = new BPPlayerManager(uuid).getPlayerConfig();
 
             debt = BPFormatter.getStyledBigDecimal(config.getString(debtPath));
-            money = useStartAmount ? Values.CONFIG.getStartAmount() : BPFormatter.getStyledBigDecimal(config.getString(moneyPath));
+            money = useStartAmount ? ConfigValues.getStartAmount() : BPFormatter.getStyledBigDecimal(config.getString(moneyPath));
             offlineInterest = BPFormatter.getStyledBigDecimal(config.getString(interestPath));
             level = Math.max(config.getInt(levelPath), 1);
         }
@@ -492,19 +493,19 @@ public class BPEconomy {
         if (event.isCancelled()) return;
 
         amount = event.getTransactionAmount();
-        if (minimumAmount(p, amount, Values.CONFIG.getDepositMinimumAmount())) return;
+        if (minimumAmount(p, amount, ConfigValues.getDepositMinimumAmount())) return;
 
         Economy economy = BankPlus.INSTANCE().getVaultEconomy();
         BigDecimal wallet = BigDecimal.valueOf(economy.getBalance(p));
         if (!BPUtils.checkPreRequisites(wallet, amount, p)) return;
 
-        BigDecimal maxDeposit = Values.CONFIG.getMaxDepositAmount();
+        BigDecimal maxDeposit = ConfigValues.getMaxDepositAmount();
         if (maxDeposit.compareTo(BigDecimal.ZERO) > 0 && amount.compareTo(maxDeposit) >= 0) amount = maxDeposit;
         if (wallet.doubleValue() < amount.doubleValue()) amount = wallet;
 
         BigDecimal capacity = BankUtils.getCapacity(originBank, p).subtract(getBankBalance(p)), finalAmount = amount.min(capacity);
 
-        BigDecimal depositTaxes = Values.CONFIG.getDepositTaxes(), taxes = BigDecimal.ZERO;
+        BigDecimal depositTaxes = ConfigValues.getDepositTaxes(), taxes = BigDecimal.ZERO;
         if (depositTaxes.compareTo(BigDecimal.ZERO) > 0 && !p.hasPermission("bankplus.deposit.bypass-taxes")) {
             if (amount.compareTo(capacity) <= 0) taxes = finalAmount.multiply(depositTaxes.divide(BigDecimal.valueOf(100)));
             else {
@@ -534,16 +535,16 @@ public class BPEconomy {
         if (event.isCancelled()) return;
 
         amount = event.getTransactionAmount();
-        if (minimumAmount(p, amount, Values.CONFIG.getWithdrawMinimumAmount())) return;
+        if (minimumAmount(p, amount, ConfigValues.getWithdrawMinimumAmount())) return;
 
         BigDecimal bankBal = getBankBalance(p);
         if (!BPUtils.checkPreRequisites(bankBal, amount, p)) return;
 
-        BigDecimal maxWithdraw = Values.CONFIG.getMaxWithdrawAmount();
+        BigDecimal maxWithdraw = ConfigValues.getMaxWithdrawAmount();
         if (maxWithdraw.compareTo(BigDecimal.ZERO) > 0 && amount.compareTo(maxWithdraw) >= 0) amount = maxWithdraw;
         if (bankBal.compareTo(amount) < 0) amount = bankBal;
 
-        BigDecimal withdrawTaxes = Values.CONFIG.getWithdrawTaxes(), taxes = BigDecimal.ZERO;
+        BigDecimal withdrawTaxes = ConfigValues.getWithdrawTaxes(), taxes = BigDecimal.ZERO;
         if (withdrawTaxes.compareTo(BigDecimal.ZERO) > 0 && !p.hasPermission("bankplus.withdraw.bypass-taxes")) {
             taxes = amount.multiply(withdrawTaxes).divide(BigDecimal.valueOf(100), RoundingMode.DOWN);
             taxes = taxes.min(amount).max(BigDecimal.ZERO);
@@ -564,7 +565,7 @@ public class BPEconomy {
      * @param p The player.
      */
     public void customDeposit(Player p) {
-        if (Values.MESSAGES.isTitleCustomAmountEnabled()) BPUtils.sendTitle(Values.MESSAGES.getCustomDepositTitle(), p);
+        if (MessageValues.isTitleCustomAmountEnabled()) BPUtils.sendTitle(MessageValues.getCustomDepositTitle(), p);
 
         BPMessages.send(p, "Chat-Deposit");
         BPSets.addPlayerToDeposit(p);
@@ -577,7 +578,7 @@ public class BPEconomy {
         pl.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> {
             PlayerChatMethod.reopenBank(p, bankGui);
             BPMessages.send(p, "Chat-Time-Expired");
-        }, Values.CONFIG.getChatExitTime() * 20L));
+        }, ConfigValues.getChatExitTime() * 20L));
     }
 
     /**
@@ -585,7 +586,7 @@ public class BPEconomy {
      * @param p The player.
      */
     public void customWithdraw(Player p) {
-        if (Values.MESSAGES.isTitleCustomAmountEnabled()) BPUtils.sendTitle(Values.MESSAGES.getCustomWithdrawTitle(), p);
+        if (MessageValues.isTitleCustomAmountEnabled()) BPUtils.sendTitle(MessageValues.getCustomWithdrawTitle(), p);
 
         BPMessages.send(p, "Chat-Withdraw");
         BPSets.addPlayerToWithdraw(p);
@@ -598,7 +599,7 @@ public class BPEconomy {
         pl.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> {
             PlayerChatMethod.reopenBank(p, bankGui);
             BPMessages.send(p, "Chat-Time-Expired");
-        }, Values.CONFIG.getChatExitTime() * 20L));
+        }, ConfigValues.getChatExitTime() * 20L));
     }
 
     /**

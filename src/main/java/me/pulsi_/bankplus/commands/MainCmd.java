@@ -6,7 +6,8 @@ import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
+import me.pulsi_.bankplus.values.MultipleBanksValues;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -21,9 +22,9 @@ import static me.pulsi_.bankplus.commands.BPCmdRegistry.commands;
 public class MainCmd implements CommandExecutor, TabCompleter {
 
     public boolean onCommand(CommandSender s, Command command, String label, String[] args) {
-        if (!Values.CONFIG.getWorldsBlacklist().isEmpty() && s instanceof Player) {
+        if (!ConfigValues.getWorldsBlacklist().isEmpty() && s instanceof Player) {
             Player p = (Player) s;
-            if (Values.CONFIG.getWorldsBlacklist().contains(p.getWorld().getName()) && !p.hasPermission("bankplus.worlds.blacklist.bypass")) {
+            if (ConfigValues.getWorldsBlacklist().contains(p.getWorld().getName()) && !p.hasPermission("bankplus.worlds.blacklist.bypass")) {
                 BPMessages.send(p, "Cannot-Use-Bank-Here");
                 return true;
             }
@@ -34,7 +35,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
 
             if (s instanceof Player) {
                 if (BankUtils.getAvailableBankNames((Player) s).isEmpty()) {
-                    if (Values.CONFIG.isShowHelpMessageWhenNoAvailableBanks()) BPMessages.send(s, "Help-Message");
+                    if (ConfigValues.isShowingHelpWhenNoBanksAvailable()) BPMessages.send(s, "Help-Message");
                     else BPMessages.send(s, "No-Available-Banks");
                     return true;
                 }
@@ -44,10 +45,10 @@ public class MainCmd implements CommandExecutor, TabCompleter {
             }
             Player p = (Player) s;
 
-            if (Values.CONFIG.isGuiModuleEnabled()) {
-                if (!Values.MULTIPLE_BANKS.enableMultipleBanksModule()) BankUtils.getBank(Values.CONFIG.getMainGuiName()).getBankGui().openBankGui(p);
+            if (ConfigValues.isGuiModuleEnabled()) {
+                if (!MultipleBanksValues.enableMultipleBanksModule()) BankUtils.getBank(ConfigValues.getMainGuiName()).getBankGui().openBankGui(p);
                 else {
-                    if (!Values.MULTIPLE_BANKS.isDirectlyOpenIf1IsAvailable()) new BankListGui().openBankGui(p);
+                    if (!MultipleBanksValues.isDirectlyOpenIf1IsAvailable()) new BankListGui().openBankGui(p);
                     else {
                         List<Bank> availableBanks = BankUtils.getAvailableBanks(p);
                         if (availableBanks.size() == 1) availableBanks.get(0).getBankGui().openBankGui(p);

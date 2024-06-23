@@ -5,11 +5,10 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.utils.BPItems;
-import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPChat;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -120,7 +119,7 @@ public class BankGui {
 
     public void openBankGui(Player p, boolean bypass) {
         if (!bypass) {
-            if (Values.CONFIG.isNeedOpenPermissionToOpen() && !BPUtils.hasPermission(p, "bankplus.open")) return;
+            if (ConfigValues.isOpeningPermissionsNeeded() && !BPUtils.hasPermission(p, "bankplus.open")) return;
 
             if (!BankUtils.isAvailable(originBank, p)) {
                 BPMessages.send(p, "Cannot-Access-Bank");

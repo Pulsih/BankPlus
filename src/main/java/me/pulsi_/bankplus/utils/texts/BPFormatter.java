@@ -1,6 +1,6 @@
 package me.pulsi_.bankplus.utils.texts;
 
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
@@ -10,8 +10,8 @@ public class BPFormatter {
 
     private static final String[] order = new String[]
             {
-                    "", Values.CONFIG.getK(), Values.CONFIG.getM(), Values.CONFIG.getB(),
-                    Values.CONFIG.getT(), Values.CONFIG.getQ(), Values.CONFIG.getQq()
+                    "", ConfigValues.getK(), ConfigValues.getM(), ConfigValues.getB(),
+                    ConfigValues.getT(), ConfigValues.getQ(), ConfigValues.getQq()
             };
 
     private static final int limit = order.length - 1;
@@ -97,7 +97,7 @@ public class BPFormatter {
     public static String styleBigDecimal(BigDecimal amount) {
         String balance = amount.toPlainString();
 
-        int maxDecimals = Values.CONFIG.getMaxDecimalsAmount();
+        int maxDecimals = ConfigValues.getMaxDecimalsAmount();
 
         // 0 or below.
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
@@ -142,7 +142,7 @@ public class BPFormatter {
     public static BigDecimal getStyledBigDecimal(String amount) {
         BigDecimal bD;
         try {
-            bD = new BigDecimal(amount);
+            bD = new BigDecimal(amount.replace("%", ""));
         } catch (Exception e) {
             bD = BigDecimal.ZERO;
         }
@@ -151,7 +151,7 @@ public class BPFormatter {
 
     private static String setMaxDigits(double balance) {
         NumberFormat format = NumberFormat.getInstance(Locale.ENGLISH);
-        format.setMaximumFractionDigits(Values.CONFIG.getMaxDecimalsAmount());
+        format.setMaximumFractionDigits(ConfigValues.getMaxDecimalsAmount());
         format.setMinimumFractionDigits(0);
         return format.format(balance);
     }
@@ -162,7 +162,7 @@ public class BPFormatter {
         long hours = minutes / 60;
         long days = hours / 24;
 
-        String format = Values.CONFIG.getInterestTimeFormat();
+        String format = ConfigValues.getInterestTimeFormat();
         String[] parts = format.split("%");
         int amount = parts.length;
 
@@ -214,7 +214,7 @@ public class BPFormatter {
             }
 
             int last = i + 2;
-            String separator = last > amount ? "" : last == amount ? Values.CONFIG.getInterestTimeFinalSeparator() : Values.CONFIG.getInterestTimeSeparator();
+            String separator = last > amount ? "" : last == amount ? ConfigValues.getInterestTimeFinalSeparator() : ConfigValues.getInterestTimeSeparator();
             String replacer = time <= 0 ? "" : time + getTimeIdentifier(timeIdentifier, time) + separator;
 
             format = format.replace("%" + identifier, replacer);
@@ -226,13 +226,13 @@ public class BPFormatter {
     private static String getTimeIdentifier(String id, long time) {
         switch (id) {
             case "seconds":
-                return time == 1 ? Values.CONFIG.getSecond() : Values.CONFIG.getSeconds();
+                return time == 1 ? ConfigValues.getSecond() : ConfigValues.getSeconds();
             case "minutes":
-                return time == 1 ? Values.CONFIG.getMinute() : Values.CONFIG.getMinutes();
+                return time == 1 ? ConfigValues.getMinute() : ConfigValues.getMinutes();
             case "hours":
-                return time == 1 ? Values.CONFIG.getHour() : Values.CONFIG.getHours();
+                return time == 1 ? ConfigValues.getHour() : ConfigValues.getHours();
             case "days":
-                return time == 1 ? Values.CONFIG.getDay() : Values.CONFIG.getDays();
+                return time == 1 ? ConfigValues.getDay() : ConfigValues.getDays();
         }
         return "";
     }

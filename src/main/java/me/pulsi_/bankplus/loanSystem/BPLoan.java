@@ -1,7 +1,7 @@
 package me.pulsi_.bankplus.loanSystem;
 
 import me.pulsi_.bankplus.bankSystem.Bank;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -30,10 +30,10 @@ public class BPLoan {
         this.sender = sender;
         this.receiver = receiver;
         this.moneyGiven = amount;
-        this.moneyToReturn = amount.add(amount.divide(BigDecimal.valueOf(100)).multiply(Values.CONFIG.getLoanInterest()));
+        this.moneyToReturn = amount.add(amount.divide(BigDecimal.valueOf(100)).multiply(ConfigValues.getLoanInterest()));
         this.senderBank = senderBank;
         this.receiverBank = receiverBank;
-        this.instalments = Values.CONFIG.getLoanInstalments();
+        this.instalments = ConfigValues.getLoanInstalments();
         this.requestedBank = null;
         this.loanType = LoanType.PLAYER_TO_PLAYER;
     }
@@ -52,7 +52,7 @@ public class BPLoan {
         this.moneyGiven = BigDecimal.ZERO;
         this.senderBank = senderBank;
         this.receiverBank = receiverBank;
-        this.instalments = Values.CONFIG.getLoanInstalments();
+        this.instalments = ConfigValues.getLoanInstalments();
         this.requestedBank = null;
         this.loanType = LoanType.PLAYER_TO_PLAYER;
     }
@@ -68,10 +68,10 @@ public class BPLoan {
         this.sender = null; // The sender would be the bank.
         this.receiver = receiver;
         this.moneyGiven = amount;
-        this.moneyToReturn = amount.add(amount.divide(BigDecimal.valueOf(100)).multiply(Values.CONFIG.getLoanInterest()));
+        this.moneyToReturn = amount.add(amount.divide(BigDecimal.valueOf(100)).multiply(ConfigValues.getLoanInterest()));
         this.senderBank = null;
         this.receiverBank = null;
-        this.instalments = Values.CONFIG.getLoanInstalments();
+        this.instalments = ConfigValues.getLoanInstalments();
         this.requestedBank = bank;
         this.loanType = LoanType.BANK_TO_PLAYER;
     }
@@ -87,7 +87,7 @@ public class BPLoan {
         this.moneyGiven = BigDecimal.ZERO;
         this.senderBank = null;
         this.receiverBank = null;
-        this.instalments = Values.CONFIG.getLoanInstalments();
+        this.instalments = ConfigValues.getLoanInstalments();
         this.requestedBank = bank;
         this.loanType = LoanType.BANK_TO_PLAYER;
     }

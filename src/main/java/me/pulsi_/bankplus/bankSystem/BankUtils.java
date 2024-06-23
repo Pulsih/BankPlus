@@ -8,7 +8,8 @@ import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPChat;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
+import me.pulsi_.bankplus.values.MultipleBanksValues;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -91,7 +92,7 @@ public class BankUtils {
      * @return true if it is the main bank, false otherwise.
      */
     public static boolean isMainBank(Bank bank) {
-        return bank.getIdentifier().equals(Values.CONFIG.getMainGuiName());
+        return bank.getIdentifier().equals(ConfigValues.getMainGuiName());
     }
 
     /**
@@ -113,7 +114,7 @@ public class BankUtils {
      */
     public static BigDecimal getCapacity(Bank bank, int level) {
         Bank.BankLevel bankLevel = bank.getBankLevel(level);
-        return bankLevel == null ? Values.CONFIG.getMaxBankCapacity() : bankLevel.capacity;
+        return bankLevel == null ? ConfigValues.getMaxBankCapacity() : bankLevel.capacity;
     }
 
     /**
@@ -136,7 +137,7 @@ public class BankUtils {
      */
     public static BigDecimal getMaxInterestAmount(Bank bank, int level) {
         Bank.BankLevel bankLevel = bank.getBankLevel(level);
-        return bankLevel == null ? Values.CONFIG.getInterestMaxAmount() : bankLevel.maxInterestAmount;
+        return bankLevel == null ? ConfigValues.getInterestMaxAmount() : bankLevel.maxInterestAmount;
     }
 
     /**
@@ -163,13 +164,13 @@ public class BankUtils {
      * @return The interest amount.
      */
     public static BigDecimal getInterestRate(Bank bank, OfflinePlayer p, int level) {
-        if (Values.CONFIG.enableInterestLimiter())
-            return getLimitedInterest(bank, p, level, Values.CONFIG.getInterestMoneyGiven());
+        if (ConfigValues.isInterestLimiterEnabled())
+            return getLimitedInterest(bank, p, level, ConfigValues.getInterestRate());
 
-        if (bank == null) return Values.CONFIG.getInterestMoneyGiven();
+        if (bank == null) return ConfigValues.getInterestRate();
 
         Bank.BankLevel bankLevel = bank.getBankLevel(level);
-        return bankLevel == null ? Values.CONFIG.getInterestMoneyGiven() : bankLevel.interest;
+        return bankLevel == null ? ConfigValues.getInterestRate() : bankLevel.interest;
     }
 
     /**
@@ -196,11 +197,11 @@ public class BankUtils {
      * @return The interest amount.
      */
     public static BigDecimal getOfflineInterestRate(Bank bank, OfflinePlayer p, int level) {
-        if (Values.CONFIG.enableInterestLimiter())
-            return getLimitedInterest(bank, p, level, Values.CONFIG.getOfflineInterestMoneyGiven());
+        if (ConfigValues.isInterestLimiterEnabled())
+            return getLimitedInterest(bank, p, level, ConfigValues.getOfflineInterestRate());
 
         Bank.BankLevel bankLevel = bank.getBankLevel(level);
-        return bankLevel == null ? Values.CONFIG.getOfflineInterestMoneyGiven() : bankLevel.offlineInterest;
+        return bankLevel == null ? ConfigValues.getOfflineInterestRate() : bankLevel.offlineInterest;
     }
 
     /**
@@ -212,7 +213,7 @@ public class BankUtils {
      */
     public static List<String> getInterestLimiter(Bank bank, int level) {
         Bank.BankLevel bankLevel = bank.getBankLevel(level);
-        return bankLevel == null ? Values.CONFIG.getInterestLimiter() : bankLevel.interestLimiter;
+        return bankLevel == null ? ConfigValues.getInterestLimiter() : bankLevel.interestLimiter;
     }
 
     /**
@@ -433,7 +434,7 @@ public class BankUtils {
         BigDecimal cost = getLevelCost(bank, nextLevel);
         BPEconomy economy = bank.getBankEconomy();
 
-        if (Values.CONFIG.useBankBalanceToUpgrade()) {
+        if (ConfigValues.isUsingBankBalanceToUpgrade()) {
 
             BigDecimal balance = economy.getBankBalance(p);
             if (balance.doubleValue() < cost.doubleValue()) {
@@ -462,7 +463,7 @@ public class BankUtils {
         BPMessages.send(p, "Bank-Upgraded");
 
         if (!hasNextLevel(bank, nextLevel)) {
-            for (String line : Values.MULTIPLE_BANKS.getAutoBanksUnlocker()) {
+            for (String line : MultipleBanksValues.getAutoBanksUnlocker()) {
                 if (!line.contains(":")) continue;
 
                 String[] parts = line.split(":");
@@ -490,16 +491,16 @@ public class BankUtils {
         bankLevel.cost = BPFormatter.getStyledBigDecimal(levelSection.getString("Cost"));
 
         String capacity = levelSection.getString("Capacity");
-        bankLevel.capacity = capacity == null ? Values.CONFIG.getMaxBankCapacity() : BPFormatter.getStyledBigDecimal(capacity);
+        bankLevel.capacity = capacity == null ? ConfigValues.getMaxBankCapacity() : BPFormatter.getStyledBigDecimal(capacity);
 
         String interest = levelSection.getString("Interest");
-        bankLevel.interest = interest == null ? Values.CONFIG.getInterestMoneyGiven() : BPFormatter.getStyledBigDecimal(interest.replace("%", ""));
+        bankLevel.interest = interest == null ? ConfigValues.getInterestRate() : BPFormatter.getStyledBigDecimal(interest.replace("%", ""));
 
         String offlineInterest = levelSection.getString("Offline-Interest");
-        bankLevel.offlineInterest = offlineInterest == null ? Values.CONFIG.getOfflineInterestMoneyGiven() : BPFormatter.getStyledBigDecimal(offlineInterest.replace("%", ""));
+        bankLevel.offlineInterest = offlineInterest == null ? ConfigValues.getOfflineInterestRate() : BPFormatter.getStyledBigDecimal(offlineInterest.replace("%", ""));
 
         String maxInterestAmount = levelSection.getString("Max-Interest-Amount");
-        bankLevel.maxInterestAmount = maxInterestAmount == null ? Values.CONFIG.getInterestMaxAmount() : BPFormatter.getStyledBigDecimal(maxInterestAmount);
+        bankLevel.maxInterestAmount = maxInterestAmount == null ? ConfigValues.getInterestMaxAmount() : BPFormatter.getStyledBigDecimal(maxInterestAmount);
 
         List<ItemStack> requiredItems = new ArrayList<>();
         String requiredItemsString = levelSection.getString("Required-Items");
@@ -542,7 +543,7 @@ public class BankUtils {
         bankLevel.removeRequiredItems = levelSection.getBoolean("Remove-Required-Items");
 
         List<String> limiter = levelSection.getStringList("Interest-Limiter");
-        bankLevel.interestLimiter = limiter.isEmpty() ? Values.CONFIG.getInterestLimiter() : limiter;
+        bankLevel.interestLimiter = limiter.isEmpty() ? ConfigValues.getInterestLimiter() : limiter;
 
         return bankLevel;
     }

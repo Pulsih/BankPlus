@@ -5,7 +5,7 @@ import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.managers.BPTaskManager;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -31,7 +31,7 @@ public class BPBankTop {
             Collections.sort(amounts);
 
             // i from the end because the balances have been sorted in ascending way, count to not overcome the banktop limit.
-            for (int i = balances.size() - 1, count = 0; i >= 0 && count < Values.CONFIG.getBankTopSize(); i--) {
+            for (int i = balances.size() - 1, count = 0; i >= 0 && count < ConfigValues.getBankTopSize(); i--) {
                 BigDecimal amount = amounts.remove(i);
 
                 for (String name : names) {
@@ -48,16 +48,16 @@ public class BPBankTop {
                 }
             }
 
-            if (!Values.CONFIG.isBanktopUpdateBroadcastEnabled()) return;
+            if (!ConfigValues.isBankTopUpdateBroadcastEnabled()) return;
 
-            String message = Values.CONFIG.getBanktopUpdateBroadcastMessage();
-            if (!Values.CONFIG.isBanktopUpdateBroadcastSilentConsole()) BPLogger.log(message);
+            String message = ConfigValues.getBankTopUpdateBroadcastMessage();
+            if (!ConfigValues.isBankTopUpdateBroadcastSilentConsole()) BPLogger.log(message);
             for (Player p : Bukkit.getOnlinePlayers()) BPMessages.send(p, message, true);
         });
     }
 
     public static void restartUpdateTask() {
-        long delay = Values.CONFIG.getUpdateBankTopDelay();
+        long delay = ConfigValues.getUpdateBankTopDelay();
         BPTaskManager.setTask(BPTaskManager.BANKTOP_BROADCAST_TASK, Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE(), BPBankTop::updateBankTop, delay, delay));
     }
 
@@ -68,9 +68,9 @@ public class BPBankTop {
     }
 
     public static String getBankTopNamePlayer(int position) {
-        if (position < 0 || position >= bankTop.size()) return Values.CONFIG.getBanktopPlayerNotFoundPlaceholder();
+        if (position < 0 || position >= bankTop.size()) return ConfigValues.getBankTopPlayerNotFoundPlaceholder();
         BankTopPlayer p = bankTop.get(position - 1);
-        return ((p == null || p.getName() == null) ? Values.CONFIG.getBanktopPlayerNotFoundPlaceholder() : p.getName());
+        return ((p == null || p.getName() == null) ? ConfigValues.getBankTopPlayerNotFoundPlaceholder() : p.getName());
     }
 
     public static int getPlayerBankTopPosition(OfflinePlayer p) {

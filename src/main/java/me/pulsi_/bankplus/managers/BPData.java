@@ -22,7 +22,9 @@ import me.pulsi_.bankplus.mySQL.BPSQL;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.texts.BPChat;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
+import me.pulsi_.bankplus.values.MessageValues;
+import me.pulsi_.bankplus.values.MultipleBanksValues;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.PluginManager;
@@ -61,7 +63,7 @@ public class BPData {
         BPLogger.log("    &aDone! &8(&3" + (System.currentTimeMillis() - startTime) + "ms&8)");
         BPLogger.log("");
 
-        if (Values.CONFIG.isBanktopEnabled()) BPBankTop.updateBankTop();
+        if (ConfigValues.isBankTopEnabled()) BPBankTop.updateBankTop();
         start = false;
     }
 
@@ -72,7 +74,7 @@ public class BPData {
         File file = configs.getFile("saves.yml");
         FileConfiguration savesConfig = configs.getConfig(file);
 
-        if (Values.CONFIG.isInterestEnabled()) plugin.getInterest().saveInterest(savesConfig);
+        if (ConfigValues.isInterestEnabled()) plugin.getInterest().saveInterest(savesConfig);
         BPLoanRegistry.saveAllLoans(savesConfig);
 
         try {
@@ -89,26 +91,26 @@ public class BPData {
     public boolean reloadPlugin() {
         boolean success = true;
         try {
-            Values.CONFIG.setupValues();
-            Values.MESSAGES.setupValues();
-            Values.MULTIPLE_BANKS.setupValues();
+            ConfigValues.setupValues();
+            MessageValues.setupValues();
+            MultipleBanksValues.setupValues();
 
             BPMessages.loadMessages();
             BPCmdRegistry.registerPluginCommands();
 
-            if (Values.CONFIG.isLogTransactions()) plugin.getBpLogUtils().setupLoggerFile();
-            if (Values.CONFIG.isIgnoringAfkPlayers()) plugin.getAfkManager().startCountdown();
-            if (Values.CONFIG.isBanktopEnabled() && !BPTaskManager.contains(BPTaskManager.BANKTOP_BROADCAST_TASK)) BPBankTop.restartUpdateTask();
+            if (ConfigValues.isLoggingTransactions()) plugin.getBpLogUtils().setupLoggerFile();
+            if (ConfigValues.isIgnoringAfkPlayers()) plugin.getAfkManager().startCountdown();
+            if (ConfigValues.isBankTopEnabled() && !BPTaskManager.contains(BPTaskManager.BANKTOP_BROADCAST_TASK)) BPBankTop.restartUpdateTask();
 
             BPAFK BPAFK = plugin.getAfkManager();
             if (!BPAFK.isPlayerCountdownActive()) BPAFK.startCountdown();
 
             BPInterest interest = plugin.getInterest();
-            if (Values.CONFIG.isInterestEnabled() && interest.wasDisabled()) interest.restartInterest(start);
+            if (ConfigValues.isInterestEnabled() && interest.wasDisabled()) interest.restartInterest(start);
 
             plugin.getBankRegistry().loadBanks();
 
-            if (Values.CONFIG.isSqlEnabled()) {
+            if (ConfigValues.isSqlEnabled()) {
                 BPSQL sql = plugin.getMySql();
                 sql.disconnect();
                 sql.setupMySQL();
@@ -138,7 +140,7 @@ public class BPData {
         plManager.registerEvents(new InventoryCloseListener(), plugin);
         plManager.registerEvents(new BPTransactionListener(), plugin);
 
-        String chatPriority = Values.CONFIG.getPlayerChatPriority();
+        String chatPriority = ConfigValues.getPlayerChatPriority();
         if (chatPriority == null) plManager.registerEvents(new PlayerChatNormal(), plugin);
         else switch (chatPriority) {
             case "LOWEST":
@@ -158,7 +160,7 @@ public class BPData {
                 break;
         }
 
-        String bankClickPriority = Values.CONFIG.getBankClickPriority();
+        String bankClickPriority = ConfigValues.getBankClickPriority();
         if (bankClickPriority == null) plManager.registerEvents(new BankClickNormal(), plugin);
         else switch (bankClickPriority) {
             case "LOWEST":

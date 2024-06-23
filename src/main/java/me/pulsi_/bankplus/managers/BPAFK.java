@@ -2,7 +2,7 @@ package me.pulsi_.bankplus.managers;
 
 import com.earth2me.essentials.Essentials;
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -21,11 +21,11 @@ public class BPAFK {
     }
 
     public boolean isAFK(Player p) {
-        return Values.CONFIG.isIgnoringAfkPlayers() && (Values.CONFIG.useEssentialsXAFK() ? Essentials.getPlugin(Essentials.class).getUser(p).isAfk() : afkPlayers.contains(p));
+        return ConfigValues.isIgnoringAfkPlayers() && (ConfigValues.isUsingEssentialsXAFK() ? Essentials.getPlugin(Essentials.class).getUser(p).isAfk() : afkPlayers.contains(p));
     }
 
     public void startCountdown() {
-        if (!Values.CONFIG.isIgnoringAfkPlayers() || Values.CONFIG.useEssentialsXAFK()) {
+        if (!ConfigValues.isIgnoringAfkPlayers() || ConfigValues.isUsingEssentialsXAFK()) {
             isPlayerCountdownActive = false;
             return;
         }

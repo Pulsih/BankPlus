@@ -3,13 +3,12 @@ package me.pulsi_.bankplus.listeners.playerChat;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
-import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankGui;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPSets;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -62,7 +61,7 @@ public class PlayerChatMethod {
     }
 
     private static boolean hasTypedExit(String message, Player p, AsyncPlayerChatEvent e) {
-        if (isTyping(p) && !message.toLowerCase().contains(Values.CONFIG.getChatExitMessage().toLowerCase())) return false;
+        if (isTyping(p) && !message.toLowerCase().contains(ConfigValues.getChatExitMessage().toLowerCase())) return false;
         e.setCancelled(true);
         executeExitCommands(p);
         return true;
@@ -79,13 +78,13 @@ public class PlayerChatMethod {
 
             BPSets.playerDepositing.remove(p.getUniqueId());
             BPSets.playerWithdrawing.remove(p.getUniqueId());
-            if (Values.CONFIG.isReopeningBankAfterChat()) openedBankGui.openBankGui(p, true);
+            if (ConfigValues.isReopeningBankAfterChat()) openedBankGui.openBankGui(p, true);
         });
     }
 
     private static void executeExitCommands(Player p) {
         Bukkit.getScheduler().runTask(BankPlus.INSTANCE(), () -> {
-            for (String cmd : Values.CONFIG.getExitCommands()) {
+            for (String cmd : ConfigValues.getExitCommands()) {
                 if (cmd.startsWith("[CONSOLE]")) {
                     String s = cmd.replace("[CONSOLE] ", "").replace("%player%", p.getName());
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), s);

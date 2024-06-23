@@ -1,15 +1,11 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BPPlayer;
-import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
-import me.pulsi_.bankplus.listeners.playerChat.PlayerChatMethod;
-import me.pulsi_.bankplus.managers.BPConfigs;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
@@ -122,8 +118,8 @@ public class BPUtils {
         String sound;
         switch (input) {
             case "WITHDRAW": {
-                if (!Values.CONFIG.isWithdrawSoundEnabled()) return;
-                sound = Values.CONFIG.getWithdrawSound();
+                if (!ConfigValues.isWithdrawSoundEnabled()) return;
+                sound = ConfigValues.getWithdrawSound();
                 if (sound == null) {
                     BPLogger.warn("You are missing a string! &8(&ePath: General.Withdraw-Sound.Sound in config.yml&8)");
                     return;
@@ -132,8 +128,8 @@ public class BPUtils {
             break;
 
             case "DEPOSIT": {
-                if (!Values.CONFIG.isDepositSoundEnabled()) return;
-                sound = Values.CONFIG.getDepositSound();
+                if (!ConfigValues.isDepositSoundEnabled()) return;
+                sound = ConfigValues.getDepositSound();
                 if (sound == null) {
                     BPLogger.warn("You are missing a string! &8(&ePath: General.Deposit-Sound.Sound in config.yml&8)");
                     return;
@@ -142,8 +138,8 @@ public class BPUtils {
             break;
 
             case "VIEW": {
-                if (!Values.CONFIG.isViewSoundEnabled()) return;
-                sound = Values.CONFIG.getViewSound();
+                if (!ConfigValues.isViewSoundEnabled()) return;
+                sound = ConfigValues.getViewSound();
                 if (sound == null) {
                     BPLogger.warn("You are missing a string! &8(&ePath: General.View-Sound.Sound in config.yml&8)");
                     return;
@@ -152,8 +148,8 @@ public class BPUtils {
             break;
 
             case "PERSONAL": {
-                if (!Values.CONFIG.isPersonalSoundEnabled()) return;
-                sound = Values.CONFIG.getPersonalSound();
+                if (!ConfigValues.isPersonalSoundEnabled()) return;
+                sound = ConfigValues.getPersonalSound();
                 if (sound == null) {
                     BPLogger.warn("You are missing a string! &8(&ePath: General.Personal-Sound.Sound in config.yml&8)");
                     return;
@@ -286,7 +282,7 @@ public class BPUtils {
     }
 
     public static boolean isBankFull(Player p) {
-        return isBankFull(p, BankUtils.getBank(Values.CONFIG.getMainGuiName()));
+        return isBankFull(p, BankUtils.getBank(ConfigValues.getMainGuiName()));
     }
 
     public static boolean isBankFull(Player p, Bank bank) {

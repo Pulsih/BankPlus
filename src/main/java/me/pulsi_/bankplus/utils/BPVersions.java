@@ -1,11 +1,10 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.managers.BPConfigs;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -18,6 +17,37 @@ import java.util.Scanner;
  * This class will be changed between versions, it will be used to add the compatibility for older versions to the newest versions.
  */
 public class BPVersions {
+
+    public static void renameInterestMoneyGiveToRate() {
+        File configFile = BankPlus.INSTANCE().getConfigs().getFile("config.yml");
+        if (configFile == null) return;
+
+        Scanner scanner;
+        try {
+            scanner = new Scanner(configFile, "UTF-8");
+        } catch (FileNotFoundException e) {
+            BPLogger.warn(e, "Could not convert \"" + configFile + "\" interest money-given and offline-money-given paths!");
+            return;
+        }
+
+        boolean contains = false;
+        StringBuilder builder = new StringBuilder();
+        while (scanner.hasNext()) {
+            String nextLine = scanner.nextLine();
+            if (nextLine.contains("Money-Given:") || nextLine.contains("Offline-Money-Given:")) contains = true;
+            builder.append(scanner.nextLine().replace("Money-Given:", "Rate:").replace("Offline-Money-Given:", "Offline-Rate:")).append("\n");
+        }
+
+        if (!contains) return;
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(configFile));
+            writer.write(builder.toString());
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            BPLogger.error(e, e.getMessage());
+        }
+    }
 
     public static void convertPlayerFilesToNewStyle() {
         if (BPConfigs.isUpdated()) return;
@@ -43,9 +73,9 @@ public class BPVersions {
             newConfig.set("name", name);
 
             for (String bankName : BPEconomy.nameList()) {
-                if (Values.CONFIG.getMainGuiName().equals(bankName)) {
+                if (ConfigValues.getMainGuiName().equals(bankName)) {
                     BigDecimal oldMoney;
-                    if (money == null) oldMoney = Values.CONFIG.getStartAmount();
+                    if (money == null) oldMoney = ConfigValues.getStartAmount();
                     else oldMoney = BPFormatter.getStyledBigDecimal(money);
                     newConfig.set("banks." + bankName + ".money", BPFormatter.styleBigDecimal(oldMoney));
 

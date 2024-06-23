@@ -1,20 +1,15 @@
-package me.pulsi_.bankplus.values.configs;
+package me.pulsi_.bankplus.values;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.managers.BPConfigs;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class MessageValues {
 
-    private boolean isTitleCustomAmountEnabled, isInterestBroadcastEnabled;
-    private String customDepositTitle, customWithdrawTitle, interestMoney;
-    private String interestNoMoney, multiInterestMoney, interestBankFull;
+    private static boolean isTitleCustomAmountEnabled, isInterestBroadcastEnabled;
+    private static String customDepositTitle, customWithdrawTitle;
+    private static String interestMoney, interestNoMoney, multiInterestMoney, interestBankFull;
 
-    public static MessageValues getInstance() {
-        return new MessageValues();
-    }
-
-    public void setupValues() {
+    public static void setupValues() {
         FileConfiguration messages = BankPlus.INSTANCE().getConfigs().getConfig("messages.yml");
 
         isTitleCustomAmountEnabled = messages.getBoolean("Title-Custom-Transaction.Enabled");
@@ -27,35 +22,35 @@ public class MessageValues {
         interestBankFull = messages.getString("Interest-Broadcast.Bank-Full");
     }
 
-    public boolean isTitleCustomAmountEnabled() {
+    public static boolean isTitleCustomAmountEnabled() {
         return isTitleCustomAmountEnabled;
     }
 
-    public boolean isInterestBroadcastEnabled() {
+    public static boolean isInterestBroadcastEnabled() {
         return isInterestBroadcastEnabled;
     }
 
-    public String getCustomDepositTitle() {
+    public static String getCustomDepositTitle() {
         return customDepositTitle;
     }
 
-    public String getCustomWithdrawTitle() {
+    public static String getCustomWithdrawTitle() {
         return customWithdrawTitle;
     }
 
-    public String getInterestMoney() {
+    public static String getInterestMoney() {
         return interestMoney;
     }
 
-    public String getMultiInterestMoney() {
+    public static String getMultiInterestMoney() {
         return multiInterestMoney;
     }
 
-    public String getInterestNoMoney() {
+    public static String getInterestNoMoney() {
         return interestNoMoney;
     }
 
-    public String getInterestBankFull() {
+    public static String getInterestBankFull() {
         return interestBankFull;
     }
 }

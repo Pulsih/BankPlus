@@ -3,7 +3,7 @@ package me.pulsi_.bankplus.placeholders;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.placeholders.list.*;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
     public String onPlaceholderRequest(Player p, String identifier) {
         if (p == null) return "Player not online";
 
-        String target = Values.CONFIG.getMainGuiName();
+        String target = ConfigValues.getMainGuiName();
         if (identifier.contains("{") && identifier.endsWith("}"))
             target = identifier.substring(identifier.indexOf("{") + 1, identifier.indexOf("}"));
 

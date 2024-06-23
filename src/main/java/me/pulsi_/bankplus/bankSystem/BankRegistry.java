@@ -2,7 +2,7 @@ package me.pulsi_.bankplus.bankSystem;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.economy.EconomyUtils;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 
 import java.io.File;
 import java.util.*;
@@ -19,7 +19,7 @@ public class BankRegistry {
         Set<String> currentRegisteredBanks = new HashSet<>(banks.keySet());
 
         List<File> bankFiles = new ArrayList<>();
-        File defaultBankFile = new File(BankPlus.INSTANCE().getDataFolder(), "banks" + File.separator + Values.CONFIG.getMainGuiName() + ".yml");
+        File defaultBankFile = new File(BankPlus.INSTANCE().getDataFolder(), "banks" + File.separator + ConfigValues.getMainGuiName() + ".yml");
 
         File[] files = new File(BankPlus.INSTANCE().getDataFolder(), "banks").listFiles();
         if (files != null && files.length > 0) bankFiles.addAll(Arrays.asList(files));

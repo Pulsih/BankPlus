@@ -4,7 +4,7 @@ import me.pulsi_.bankplus.bankTop.BPBankTop;
 import me.pulsi_.bankplus.placeholders.BPPlaceholder;
 import me.pulsi_.bankplus.utils.texts.BPChat;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
@@ -18,7 +18,7 @@ public class BankTopMoneyPlaceholder extends BPPlaceholder {
 
     @Override
     public String getPlaceholder(Player p, String target, String identifier) {
-        if (!Values.CONFIG.isBanktopEnabled())
+        if (!ConfigValues.isBankTopEnabled())
             return BPChat.color("&cThe banktop is not enabled!");
 
         String number = identifier.replace("banktop_money_", "");
@@ -29,11 +29,11 @@ public class BankTopMoneyPlaceholder extends BPPlaceholder {
             return "&cInvalid banktop number!";
         }
 
-        if (position > Values.CONFIG.getBankTopSize())
-            return "&cThe banktop limit is " + Values.CONFIG.getBankTopSize() + "!";
+        if (position > ConfigValues.getBankTopSize())
+            return "&cThe banktop limit is " + ConfigValues.getBankTopSize() + "!";
 
         BigDecimal money = BPBankTop.getBankTopBalancePlayer(position);
-        switch (Values.CONFIG.getBankTopMoneyFormat()) {
+        switch (ConfigValues.getBankTopMoneyFormat()) {
             case "default_amount":
                 return BPFormatter.formatCommas(money);
             case "amount_long":

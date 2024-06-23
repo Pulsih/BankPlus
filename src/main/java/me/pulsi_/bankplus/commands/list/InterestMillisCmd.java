@@ -3,7 +3,7 @@ package me.pulsi_.bankplus.commands.list;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -53,7 +53,7 @@ public class InterestMillisCmd extends BPCommand {
 
     @Override
     public boolean preCmdChecks(CommandSender s, String[] args) {
-        if (!Values.CONFIG.isInterestEnabled()) {
+        if (!ConfigValues.isInterestEnabled()) {
             BPMessages.send(s, "Interest-Disabled");
             return false;
         }

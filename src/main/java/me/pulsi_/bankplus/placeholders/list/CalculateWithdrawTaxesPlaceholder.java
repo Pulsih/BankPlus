@@ -3,7 +3,7 @@ package me.pulsi_.bankplus.placeholders.list;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.placeholders.BPPlaceholder;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
@@ -37,7 +37,7 @@ public class CalculateWithdrawTaxesPlaceholder extends BPPlaceholder {
                 return "Invalid Number!";
             }
 
-            taxes = amount.multiply(Values.CONFIG.getWithdrawTaxes().divide(BigDecimal.valueOf(100)));
+            taxes = amount.multiply(ConfigValues.getWithdrawTaxes().divide(BigDecimal.valueOf(100)));
         } else {
             String number = secondIdentifier.replace("percentage_", "");
 
@@ -59,7 +59,7 @@ public class CalculateWithdrawTaxesPlaceholder extends BPPlaceholder {
             }
 
             BigDecimal percentageBalance = balance.multiply(amount.divide(BigDecimal.valueOf(100)));
-            taxes = percentageBalance.multiply(Values.CONFIG.getWithdrawTaxes().divide(BigDecimal.valueOf(100)));
+            taxes = percentageBalance.multiply(ConfigValues.getWithdrawTaxes().divide(BigDecimal.valueOf(100)));
         }
         return getFormat(identifier, taxes);
     }

@@ -6,7 +6,7 @@ import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPChat;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -18,13 +18,13 @@ public class BankTopCmd implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender s, Command command, String label, String[] args) {
-        if (!Values.CONFIG.isBanktopEnabled()) {
+        if (!ConfigValues.isBankTopEnabled()) {
             BPMessages.send(s, "BankTop-Disabled");
             return false;
         }
         if (!BPUtils.hasPermission(s, "bankplus.banktop")) return false;
 
-        List<String> format = Values.CONFIG.getBankTopFormat();
+        List<String> format = ConfigValues.getBankTopFormat();
         for (String line : format) s.sendMessage(BPChat.color(placeName(placeMoney(line))));
         return true;
     }
@@ -43,15 +43,15 @@ public class BankTopCmd implements CommandExecutor {
             BPLogger.error("Message: " + message);
             return message;
         }
-        if (position > Values.CONFIG.getBankTopSize()) {
-            BPLogger.error("Limit of the BankTop: " + Values.CONFIG.getBankTopSize());
+        if (position > ConfigValues.getBankTopSize()) {
+            BPLogger.error("Limit of the BankTop: " + ConfigValues.getBankTopSize());
             BPLogger.error("Message: " + message);
             return message;
         }
 
         String stringToReplace;
         BigDecimal money = BPBankTop.getBankTopBalancePlayer(position);
-        switch (Values.CONFIG.getBankTopMoneyFormat()) {
+        switch (ConfigValues.getBankTopMoneyFormat()) {
             case "default_amount":
                 stringToReplace = BPFormatter.formatCommas(money);
                 break;
@@ -82,8 +82,8 @@ public class BankTopCmd implements CommandExecutor {
             BPLogger.error("Message: " + message);
             return message;
         }
-        if (position > Values.CONFIG.getBankTopSize()) {
-            BPLogger.error("Limit of the BankTop: " + Values.CONFIG.getBankTopSize());
+        if (position > ConfigValues.getBankTopSize()) {
+            BPLogger.error("Limit of the BankTop: " + ConfigValues.getBankTopSize());
             BPLogger.error("Message: " + message);
             return message;
         }

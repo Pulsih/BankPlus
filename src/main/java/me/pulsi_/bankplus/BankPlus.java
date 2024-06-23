@@ -11,7 +11,7 @@ import me.pulsi_.bankplus.placeholders.BPPlaceholders;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPVersions;
 import me.pulsi_.bankplus.utils.texts.BPChat;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
@@ -95,6 +95,12 @@ public final class BankPlus extends JavaPlugin {
         this.BPAfk = new BPAFK(this);
         this.interest = new BPInterest(this);
 
+        if (!BPConfigs.isUpdated()) {
+            BPVersions.renameInterestMoneyGiveToRate();
+            BPVersions.convertPlayerFilesToNewStyle();
+            BPVersions.changeBankUpgradesSection();
+        }
+
         RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
         if (rsp != null) perms = rsp.getProvider();
 
@@ -112,13 +118,8 @@ public final class BankPlus extends JavaPlugin {
             isEssentialsXHooked = true;
         }
 
-        if (Values.CONFIG.isUpdateCheckerEnabled())
+        if (ConfigValues.isUpdateCheckerEnabled())
             Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> isUpdated = isPluginUpdated(), 0, (8 * 1200) * 60 /*8 hours*/);
-
-        if (BPConfigs.isUpdated()) return;
-
-        BPVersions.convertPlayerFilesToNewStyle();
-        BPVersions.changeBankUpgradesSection();
     }
 
     @Override
@@ -212,10 +213,10 @@ public final class BankPlus extends JavaPlugin {
             BPLogger.error(e, "Could not check for updates!");
         }
 
-        if (version.toLowerCase().contains("-alpha") && !Values.CONFIG.silentInfoMessages())
+        if (version.toLowerCase().contains("-alpha") && !ConfigValues.isSilentInfoMessages())
             BPLogger.info("You are using an alpha version of the plugin, please report any bug or problem found in my discord!");
 
-        if (!Values.CONFIG.silentInfoMessages()) {
+        if (!ConfigValues.isSilentInfoMessages()) {
             if (updated) BPLogger.info("The plugin is updated!");
             else {
                 BPLogger.info("New version of the plugin available! (v" + newVersion + ").");

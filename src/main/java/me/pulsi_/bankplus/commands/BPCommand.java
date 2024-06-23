@@ -4,7 +4,7 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -76,7 +76,7 @@ public abstract class BPCommand {
      * @return A bank name.
      */
     public String getPossibleBank(String[] args, int argumentPosition) {
-        return args.length > argumentPosition ? args[argumentPosition] : Values.CONFIG.getMainGuiName();
+        return args.length > argumentPosition ? args[argumentPosition] : ConfigValues.getMainGuiName();
     }
 
     /**

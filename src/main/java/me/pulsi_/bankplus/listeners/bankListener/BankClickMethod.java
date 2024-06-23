@@ -8,7 +8,7 @@ import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -54,7 +54,7 @@ public class BankClickMethod {
                     break;
 
                 case "[deposit]": {
-                    if (Values.CONFIG.isGuiActionsNeedPermissions() && !BPUtils.hasPermission(p, "bankplus.deposit")) return;
+                    if (ConfigValues.isGuiActionsNeedingPermissions() && !BPUtils.hasPermission(p, "bankplus.deposit")) return;
 
                     if (value.equalsIgnoreCase("CUSTOM")) {
                         economy.customDeposit(p);
@@ -81,7 +81,7 @@ public class BankClickMethod {
                     break;
 
                 case "[withdraw]": {
-                    if (Values.CONFIG.isGuiActionsNeedPermissions() && !BPUtils.hasPermission(p, "bankplus.withdraw")) return;
+                    if (ConfigValues.isGuiActionsNeedingPermissions() && !BPUtils.hasPermission(p, "bankplus.withdraw")) return;
 
                     if (value.equals("CUSTOM")) {
                         economy.customWithdraw(p);

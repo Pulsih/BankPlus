@@ -3,7 +3,7 @@ package me.pulsi_.bankplus.mySQL;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.OfflinePlayer;
 
 import java.sql.Connection;
@@ -21,22 +21,22 @@ public class BPSQL {
     }
 
     public void setupMySQL() {
-        String host = Values.CONFIG.getSqlHost();
-        String port = Values.CONFIG.getSqlPort();
-        String database = Values.CONFIG.getSqlDatabase();
-        username = Values.CONFIG.getSqlUsername();
-        password = Values.CONFIG.getSqlPassword();
+        String host = ConfigValues.getSqlHost();
+        String port = ConfigValues.getSqlPort();
+        String database = ConfigValues.getSqlDatabase();
+        username = ConfigValues.getSqlUsername();
+        password = ConfigValues.getSqlPassword();
 
-        url = "jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=" + Values.CONFIG.isSqlUseSSL();
+        url = "jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=" + ConfigValues.isSqlUsingSSL();
 
         BPLogger.info("MySQL setup finished!");
     }
 
     public void fillEmptyRecords(OfflinePlayer p) {
-        boolean uuid = Values.CONFIG.isStoringUUIDs();
+        boolean uuid = ConfigValues.isStoringUUIDs();
         for (String bankName : BPEconomy.nameList()) {
             if (uuid) {
-                if (!getSqlMethods().get(bankName, "uuid", "WHERE uuid='" + p.getUniqueId() + "'").isEmpty())
+                if (getSqlMethods().get(bankName, "uuid", "WHERE uuid='" + p.getUniqueId() + "'").isEmpty())
                     createNewDefault(bankName, p);
             } else {
                 if (getSqlMethods().get(bankName, "account_name", "WHERE account_name='" + p.getName() + "'").isEmpty())
@@ -51,7 +51,7 @@ public class BPSQL {
                 p.getUniqueId().toString(),
                 p.getName(),
                 "1",
-                BPFormatter.styleBigDecimal(Values.CONFIG.getStartAmount()),
+                BPFormatter.styleBigDecimal(ConfigValues.getStartAmount()),
                 "0",
                 "0"
         );
@@ -72,7 +72,7 @@ public class BPSQL {
     }
 
     public boolean isConnected() {
-        return Values.CONFIG.isSqlEnabled() && connection != null;
+        return ConfigValues.isSqlEnabled() && connection != null;
     }
 
     public void connect() {

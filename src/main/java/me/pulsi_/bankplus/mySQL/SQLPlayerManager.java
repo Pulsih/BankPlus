@@ -2,7 +2,7 @@ package me.pulsi_.bankplus.mySQL;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
-import me.pulsi_.bankplus.values.Values;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
@@ -66,7 +66,7 @@ public class SQLPlayerManager {
 
     public void set(String valueName, String newValue, String bankName) {
         if (resultSet(bankName, valueName).isEmpty()) bpsql.createNewDefault(bankName, p);
-        if (Values.CONFIG.isStoringUUIDs()) methods.update(bankName, valueName, newValue, "WHERE uuid='" + uuid + "'");
+        if (ConfigValues.isStoringUUIDs()) methods.update(bankName, valueName, newValue, "WHERE uuid='" + uuid + "'");
         else  methods.update(bankName, valueName, newValue, "WHERE account_name='" + p.getName() + "'");
     }
 
@@ -79,7 +79,7 @@ public class SQLPlayerManager {
 
     private List<String> resultSet(String bankName, String valueName) {
         List<String> result;
-        if (Values.CONFIG.isStoringUUIDs()) result = methods.get(bankName, valueName, "WHERE uuid='" + uuid + "'");
+        if (ConfigValues.isStoringUUIDs()) result = methods.get(bankName, valueName, "WHERE uuid='" + uuid + "'");
         else result = methods.get(bankName, valueName, "WHERE account_name='" + p.getName() + "'");
         return result;
     }
