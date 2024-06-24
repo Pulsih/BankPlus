@@ -85,7 +85,7 @@ public class ViewCmd extends BPCommand {
         if (args.length == 2) {
             if (s instanceof Player && ConfigValues.isViewSoundEnabled()) {
                 if (!BPUtils.playSound(ConfigValues.getViewSound(), (Player) s))
-                    BPLogger.warn("Could not play VIEW sound for player \"" + s.getName() + "\":");
+                    BPLogger.warn("Occurred while trying to play VIEW sound for player \"" + s.getName() + "\".");
             }
 
             List<Bank> availableBanks = BankUtils.getAvailableBanks(target);
@@ -100,7 +100,7 @@ public class ViewCmd extends BPCommand {
 
         if (s instanceof Player && ConfigValues.isViewSoundEnabled()) {
             if (!BPUtils.playSound(ConfigValues.getViewSound(), (Player) s))
-                BPLogger.warn("Could not play VIEW sound for player \"" + s.getName() + "\":");
+                BPLogger.warn("Occurred while trying to play VIEW sound for player \"" + s.getName() + "\".");
         }
         Bank bank = BankUtils.getBank(getPossibleBank(args, 2));
         BPMessages.send(s, "Bank-Others", BPUtils.placeValues(target, bank.getBankEconomy().getBankBalance(target), BankUtils.getCurrentLevel(bank, target)));

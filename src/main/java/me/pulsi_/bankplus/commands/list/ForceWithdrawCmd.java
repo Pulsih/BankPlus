@@ -75,6 +75,11 @@ public class ForceWithdrawCmd extends BPCommand {
             return false;
         }
 
+        if (args.length == 2) {
+            BPMessages.send(s, "Specify-Number");
+            return false;
+        }
+
         String arg2 = args[2].toLowerCase();
         return arg2.equals("custom") || arg2.equals("all") || arg2.equals("half") || !BPUtils.isInvalidNumber(arg2, s);
     }

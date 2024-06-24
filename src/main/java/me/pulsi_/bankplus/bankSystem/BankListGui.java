@@ -63,7 +63,7 @@ public class BankListGui extends BankGui {
         player.setOpenedBankGui(this);
         if (ConfigValues.isPersonalSoundEnabled()) {
             if (!BPUtils.playSound(ConfigValues.getPersonalSound(), p))
-                BPLogger.warn("Could not play PERSONAL sound for player \"" + p.getName() + "\":");
+                BPLogger.warn("Occurred while trying to play PERSONAL sound for player \"" + p.getName() + "\".");
         }
         p.openInventory(bankListInventory);
     }

@@ -102,7 +102,7 @@ public class BPData {
 
             if (ConfigValues.isLoggingTransactions()) plugin.getBpLogUtils().setupLoggerFile();
             if (ConfigValues.isIgnoringAfkPlayers()) plugin.getAfkManager().startCountdown();
-            if (ConfigValues.isBankTopEnabled() && !BPTaskManager.contains(BPTaskManager.BANKTOP_BROADCAST_TASK)) BPBankTop.restartUpdateTask();
+            if (ConfigValues.isBankTopEnabled() && !BPTaskManager.contains(BPTaskManager.BANKTOP_BROADCAST_TASK)) BPBankTop.restartBankTopUpdateTask();
 
             BPAFK BPAFK = plugin.getAfkManager();
             if (!BPAFK.isPlayerCountdownActive()) BPAFK.startCountdown();

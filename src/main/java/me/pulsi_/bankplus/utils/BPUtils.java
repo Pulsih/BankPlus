@@ -135,7 +135,7 @@ public class BPUtils {
         try {
             sound = Sound.valueOf(values[0]);
         } catch (IllegalArgumentException e) {
-            BPLogger.warn("\"" + values[0] + "\" is an invalid sound, change enum type in your config.yml that is correct for your server version. (this is not an error)");
+            BPLogger.warn("\"" + values[0] + "\" is an invalid sound enum, change it in config.yml searching the correct enum name based on your server version. (This is not an error)");
             return false;
         }
 

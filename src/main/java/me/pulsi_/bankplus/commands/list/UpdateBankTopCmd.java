@@ -58,6 +58,7 @@ public class UpdateBankTopCmd extends BPCommand {
     @Override
     public void onExecution(CommandSender s, String[] args) {
         BPBankTop.updateBankTop();
+        BPBankTop.restartBankTopUpdateTask();
         BPMessages.send(s, "BankTop-Updated");
     }
 

@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.commands.list;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.economy.EconomyUtils;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import net.milkbowl.vault.economy.Economy;
@@ -92,14 +93,22 @@ public class ResetAllCmd extends BPCommand {
 
     private void resetAll(List<OfflinePlayer> offlinePlayers, String mode) {
         List<OfflinePlayer> copy = new ArrayList<>(offlinePlayers);
-        Set<String> banks = BankPlus.INSTANCE().getBankRegistry().getBanks().keySet();
+        List<BPEconomy> economies = BPEconomy.list();
 
         for (int i = 0; i < 80; i++) {
-            if (copy.isEmpty()) return;
+            if (copy.isEmpty()) {
+                EconomyUtils.saveEveryone(true);
+                return;
+            }
             OfflinePlayer p = copy.remove(0);
 
             if (mode.equalsIgnoreCase("maintain")) vaultEconomy.depositPlayer(p, BPEconomy.getBankBalancesSum(p).doubleValue());
-            for (String bankName : banks) BPEconomy.get(bankName).setBankBalance(p, BigDecimal.ZERO);
+            for (BPEconomy economy : economies) {
+                economy.setBankBalance(p, BigDecimal.ZERO);
+                economy.setDebt(p, BigDecimal.ZERO);
+                economy.setBankLevel(p, 1);
+                economy.setOfflineInterest(p, BigDecimal.ZERO);
+            }
         }
 
         Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> resetAll(copy, mode), 1);

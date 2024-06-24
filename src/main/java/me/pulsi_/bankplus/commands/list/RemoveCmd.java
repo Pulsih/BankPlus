@@ -59,8 +59,7 @@ public class RemoveCmd extends BPCommand {
 
     @Override
     public boolean preCmdChecks(CommandSender s, String[] args) {
-        OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
-        if (!p.hasPlayedBefore()) {
+        if (!Bukkit.getOfflinePlayer(args[1]).hasPlayedBefore()) {
             BPMessages.send(s, "Invalid-Player");
             return false;
         }
