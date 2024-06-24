@@ -221,8 +221,8 @@ Interest:
   Skip-Message-If-Lower-Than: "0"
 
   # The max amount that you can receive with interest.
-  # This setting can also be specified in the bank levels.
-  # (Max-Interest-Amount)
+  # This is a fallback value, in case the bank level does not specify one. (Max-Interest-Amount)
+  # Put 0 to disable.
   Max-Amount: "500000"
 
   # Choose if also giving interest to offline players.

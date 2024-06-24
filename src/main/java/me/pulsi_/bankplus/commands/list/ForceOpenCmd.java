@@ -70,11 +70,11 @@ public class ForceOpenCmd extends BPCommand {
 
     @Override
     public void onExecution(CommandSender s, String[] args) {
-        Player p = Bukkit.getPlayerExact(args[1]);
-
+        Player target = Bukkit.getPlayerExact(args[1]);
         String bankName = getPossibleBank(args, 2);
-        BankUtils.getBank(bankName).getBankGui().openBankGui(p, true);
-        if (!isSilent(args)) BPMessages.send(s, "Force-Open", "%player%$" + p.getName(), "%bank%$" + bankName);
+
+        BankUtils.getBank(bankName).getBankGui().openBankGui(target, true);
+        if (!isSilent(args)) BPMessages.send(s, "Force-Open", "%player%$" + target.getName(), "%bank%$" + bankName);
     }
 
     @Override

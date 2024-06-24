@@ -61,8 +61,8 @@ public class ForceDepositCmd extends BPCommand {
 
     @Override
     public boolean preCmdChecks(CommandSender s, String[] args) {
-        Player p = Bukkit.getPlayerExact(args[1]);
-        if (p == null) {
+        Player target = Bukkit.getPlayerExact(args[1]);
+        if (target == null) {
             BPMessages.send(s, "Invalid-Player");
             return false;
         }
@@ -70,8 +70,8 @@ public class ForceDepositCmd extends BPCommand {
         Bank bank = BankUtils.getBank(getPossibleBank(args, 3));
         if (!BankUtils.exist(bank, s)) return false;
 
-        if (!BankUtils.isAvailable(bank, (Player) s)) {
-            BPMessages.send(s, "Cannot-Access-Bank");
+        if (!BankUtils.isAvailable(bank, target)) {
+            BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
             return false;
         }
 
@@ -86,28 +86,28 @@ public class ForceDepositCmd extends BPCommand {
 
     @Override
     public void onExecution(CommandSender s, String[] args) {
-        Player p = Bukkit.getPlayerExact(args[1]);
+        Player target = Bukkit.getPlayerExact(args[1]);
         BPEconomy economy = BPEconomy.get(getPossibleBank(args, 3));
 
         BigDecimal amount;
         String arg2 = args[2].toLowerCase();
         switch (arg2) {
             case "all":
-                amount = BigDecimal.valueOf(BankPlus.INSTANCE().getVaultEconomy().getBalance(p));
+                amount = BigDecimal.valueOf(BankPlus.INSTANCE().getVaultEconomy().getBalance(target));
                 break;
 
             case "half":
-                amount = BigDecimal.valueOf(BankPlus.INSTANCE().getVaultEconomy().getBalance(p) / 2);
+                amount = BigDecimal.valueOf(BankPlus.INSTANCE().getVaultEconomy().getBalance(target) / 2);
                 break;
 
             case "custom":
-                economy.customDeposit(p);
+                economy.customDeposit(target);
                 return;
 
             default:
                 amount = BPFormatter.getStyledBigDecimal(arg2);
         }
-        economy.deposit((Player) s, amount);
+        economy.deposit(target, amount);
     }
 
     @Override

@@ -6,6 +6,7 @@ import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.economy.TransactionType;
 import me.pulsi_.bankplus.managers.BPTaskManager;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.ConfigValues;
@@ -95,8 +96,10 @@ public class BPInterest {
                     BPEconomy economy = bank.getBankEconomy();
                     if (economy.getBankBalance(p).compareTo(BigDecimal.ZERO) <= 0) continue;
 
+                    BigDecimal interestMoney = getInterestMoney(bank, p, BankUtils.getInterestRate(bank, p));
+
                     BigDecimal maxAmount = BankUtils.getMaxInterestAmount(bank, p);
-                    BigDecimal interestMoney = getInterestMoney(bank, p, BankUtils.getInterestRate(bank, p)).min(maxAmount);
+                    if (maxAmount.compareTo(BigDecimal.ZERO) > 0) interestMoney = interestMoney.min(maxAmount);
 
                     BigDecimal added;
                     if (!interestToVault) added = economy.addBankBalance(p, interestMoney, TransactionType.INTEREST);
@@ -132,10 +135,12 @@ public class BPInterest {
                     BPEconomy economy = bank.getBankEconomy();
                     if (economy.getBankBalance(p).compareTo(BigDecimal.ZERO) <= 0) continue;
 
-                    BigDecimal maxAmount = BankUtils.getMaxInterestAmount(bank, p);
-                    BigDecimal interestMoney = (ConfigValues.isOfflineInterestDifferentRate() ?
+                    BigDecimal interestMoney = ConfigValues.isOfflineInterestDifferentRate() ?
                                     getInterestMoney(bank, p, BankUtils.getOfflineInterestRate(bank, p)) :
-                                    getInterestMoney(bank, p, BankUtils.getInterestRate(bank, p))).min(maxAmount);
+                                    getInterestMoney(bank, p, BankUtils.getInterestRate(bank, p));
+
+                    BigDecimal maxAmount = BankUtils.getMaxInterestAmount(bank, p);
+                    if (maxAmount.compareTo(BigDecimal.ZERO) > 0) interestMoney = interestMoney.min(maxAmount);
 
                     BigDecimal added;
                     if (!interestToVault) added = economy.addBankBalance(p, interestMoney, TransactionType.INTEREST);
@@ -170,9 +175,9 @@ public class BPInterest {
             String interest = split1[1].replace("%", ""), from = split2[0], to = split2[1];
             BigDecimal interestRate = new BigDecimal(interest), fromNumber = new BigDecimal(from), toNumber = new BigDecimal(to);
 
-            if (fromNumber.doubleValue() > toNumber.doubleValue()) toNumber = fromNumber;
+            if (fromNumber.compareTo(toNumber) > 0) toNumber = fromNumber;
 
-            if (toNumber.doubleValue() < count.doubleValue()) {
+            if (toNumber.compareTo(count) < 0) {
                 result = result.add(toNumber.multiply(interestRate).divide(BigDecimal.valueOf(100)));
                 count = count.subtract(toNumber);
             } else {

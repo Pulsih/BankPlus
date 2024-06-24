@@ -21,7 +21,7 @@ public class ValueLoader {
         String amount = config.getString(path);
         if (BPUtils.isInvalidNumber(amount))
             BPLogger.warn("\"" + path + "\" is an invalid number, please correct it in the config.yml.");
-        return BPFormatter.getStyledBigDecimal(path);
+        return BPFormatter.getStyledBigDecimal(amount);
     }
 
     /**

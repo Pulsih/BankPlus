@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.values;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.utils.BPLogger;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.math.BigDecimal;

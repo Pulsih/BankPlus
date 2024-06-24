@@ -61,8 +61,8 @@ public class ForceWithdrawCmd extends BPCommand {
 
     @Override
     public boolean preCmdChecks(CommandSender s, String[] args) {
-        Player p = Bukkit.getPlayerExact(args[1]);
-        if (p == null) {
+        Player target = Bukkit.getPlayerExact(args[1]);
+        if (target == null) {
             BPMessages.send(s, "Invalid-Player");
             return false;
         }
@@ -70,8 +70,8 @@ public class ForceWithdrawCmd extends BPCommand {
         Bank bank = BankUtils.getBank(getPossibleBank(args, 3));
         if (!BankUtils.exist(getPossibleBank(args, 3))) return false;
 
-        if (!BankUtils.isAvailable(bank, (Player) s)) {
-            BPMessages.send(s, "Cannot-Access-Bank");
+        if (!BankUtils.isAvailable(bank, target)) {
+            BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
             return false;
         }
 
@@ -86,28 +86,28 @@ public class ForceWithdrawCmd extends BPCommand {
 
     @Override
     public void onExecution(CommandSender s, String[] args) {
-        Player p = Bukkit.getPlayerExact(args[1]);
+        Player target = Bukkit.getPlayerExact(args[1]);
         BPEconomy economy = BPEconomy.get(getPossibleBank(args, 3));
 
         BigDecimal amount;
         String arg2 = args[2].toLowerCase();
         switch (arg2) {
             case "all":
-                amount = economy.getBankBalance(p);
+                amount = economy.getBankBalance(target);
                 break;
 
             case "half":
-                amount = economy.getBankBalance(p).divide(BigDecimal.valueOf(2));
+                amount = economy.getBankBalance(target).divide(BigDecimal.valueOf(2));
                 break;
 
             case "custom":
-                economy.customWithdraw(p);
+                economy.customWithdraw(target);
                 return;
 
             default:
                 amount = BPFormatter.getStyledBigDecimal(arg2);
         }
-        economy.withdraw((Player) s, amount);
+        economy.withdraw(target, amount);
     }
 
     @Override

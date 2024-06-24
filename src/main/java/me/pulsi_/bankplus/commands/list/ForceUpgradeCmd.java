@@ -56,8 +56,8 @@ public class ForceUpgradeCmd extends BPCommand {
 
     @Override
     public boolean preCmdChecks(CommandSender s, String[] args) {
-        Player p = Bukkit.getPlayerExact(args[1]);
-        if (p == null) {
+        Player target = Bukkit.getPlayerExact(args[1]);
+        if (target == null) {
             BPMessages.send(s, "Invalid-Player");
             return false;
         }
@@ -65,8 +65,8 @@ public class ForceUpgradeCmd extends BPCommand {
         Bank bank = BankUtils.getBank(getPossibleBank(args, 2));
         if (!BankUtils.exist(bank, s)) return false;
 
-        if (!BankUtils.isAvailable(bank, p)) {
-            BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + p.getName());
+        if (!BankUtils.isAvailable(bank, target)) {
+            BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
             return false;
         }
         return true;
@@ -74,10 +74,11 @@ public class ForceUpgradeCmd extends BPCommand {
 
     @Override
     public void onExecution(CommandSender s, String[] args) {
-        Player p = Bukkit.getPlayerExact(args[1]);
+        Player target = Bukkit.getPlayerExact(args[1]);
         String bankName = getPossibleBank(args, 2);
-        BankUtils.upgradeBank(BankUtils.getBank(bankName), p);
-        if (!isSilent(args)) BPMessages.send(s, "Force-Upgrade", "%player%$" + p.getName(), "%bank%$" + bankName);
+
+        BankUtils.upgradeBank(BankUtils.getBank(bankName), target);
+        if (!isSilent(args)) BPMessages.send(s, "Force-Upgrade", "%player%$" + target.getName(), "%bank%$" + bankName);
     }
 
     @Override
