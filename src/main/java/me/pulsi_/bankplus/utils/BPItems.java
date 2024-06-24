@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 
 public class BPItems {
 
@@ -39,51 +40,11 @@ public class BPItems {
         ItemStack item = UNKNOWN_ITEM.clone();
         if (material.startsWith("HEAD[")) {
             String player = material.replace("HEAD[", "").replace("]", "");
-            try {
-                item = BPHeads.getNameHead(player, new ItemStack(Material.PLAYER_HEAD));
-            } catch (NoSuchFieldError er) {
-                item = BPHeads.getNameHead(player, new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()));
-            }
+            item = BPHeads.getNameHead(player);
         } else if (material.startsWith("HEAD-<")) {
             String textureValue = material.replace("HEAD-<", "").replace(">", "");
-            try {
-                item = BPHeads.getValueHead(new ItemStack(Material.PLAYER_HEAD), textureValue);
-            } catch (NoSuchFieldError er) {
-                item = BPHeads.getValueHead(new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()), textureValue);
-            }
+            item = BPHeads.getValueHead(textureValue);
         }
-        return item;
-    }
-
-    public static ItemStack getHead(Player p) {
-        ItemStack item;
-        try {
-            item = BPHeads.getNameHead(p.getName(), new ItemStack(Material.PLAYER_HEAD));
-        } catch (NoSuchFieldError er) {
-            item = BPHeads.getNameHead(p.getName(), new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal()));
-        }
-        return item;
-    }
-
-    public static ItemStack getFiller(String material, boolean glowing) {
-        ItemStack item;
-        try {
-            if (material.contains(":")) {
-                String[] itemData = material.split(":");
-                item = new ItemStack(Material.valueOf(itemData[0]), 1, Byte.parseByte(itemData[1]));
-            } else item = new ItemStack(Material.valueOf(material));
-        } catch (IllegalArgumentException e) {
-            item = UNKNOWN_ITEM.clone();
-        }
-
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("");
-
-        if (glowing) {
-            meta.addEnchant(Enchantment.DURABILITY, 1, true);
-            item.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        }
-        item.setItemMeta(meta);
         return item;
     }
 

@@ -20,7 +20,7 @@ public class BPVersions {
 
     public static void renameInterestMoneyGiveToRate() {
         File configFile = BankPlus.INSTANCE().getConfigs().getFile("config.yml");
-        if (configFile == null) return;
+        if (configFile == null || !configFile.exists()) return;
 
         Scanner scanner;
         try {
@@ -35,7 +35,7 @@ public class BPVersions {
         while (scanner.hasNext()) {
             String nextLine = scanner.nextLine();
             if (nextLine.contains("Money-Given:") || nextLine.contains("Offline-Money-Given:")) contains = true;
-            builder.append(scanner.nextLine().replace("Money-Given:", "Rate:").replace("Offline-Money-Given:", "Offline-Rate:")).append("\n");
+            builder.append(nextLine.replace("Money-Given:", "Rate:").replace("Offline-Money-Given:", "Offline-Rate:")).append("\n");
         }
 
         if (!contains) return;

@@ -4,6 +4,7 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
+import me.pulsi_.bankplus.utils.BPHeads;
 import me.pulsi_.bankplus.utils.BPItems;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPChat;
@@ -164,7 +165,7 @@ public class BankGui {
 
         for (int slot : items.keySet()) {
             BankItem item = items.get(slot);
-            if (item.material.equalsIgnoreCase("head-%player%")) bankInventory.setItem(slot,  BPItems.getHead(p));
+            if (item.material.equalsIgnoreCase("head-%player%")) bankInventory.setItem(slot,  BPHeads.getNameHead(p.getName()));
             else bankInventory.setItem(slot, items.get(slot).item);
         }
     }
