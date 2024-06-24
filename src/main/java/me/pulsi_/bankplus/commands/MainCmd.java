@@ -4,6 +4,7 @@ import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankListGui;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.ConfigValues;
@@ -57,7 +58,10 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                 }
             } else {
                 BPMessages.send(p, "Multiple-Personal-Bank", BPUtils.placeValues(p, BPEconomy.getBankBalancesSum(p)));
-                BPUtils.playSound("PERSONAL", p);
+                if (ConfigValues.isPersonalSoundEnabled()) {
+                    if (!BPUtils.playSound(ConfigValues.getPersonalSound(), p))
+                        BPLogger.warn("Could not play PERSONAL sound for player \"" + p.getName() + "\":");
+                }
             }
             return true;
         }

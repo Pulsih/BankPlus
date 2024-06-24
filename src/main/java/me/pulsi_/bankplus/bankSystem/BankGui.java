@@ -6,6 +6,7 @@ import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.utils.BPHeads;
 import me.pulsi_.bankplus.utils.BPItems;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPChat;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
@@ -146,7 +147,10 @@ public class BankGui {
         if (updateDelay >= 0) player.setBankUpdatingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE(), () -> updateBankGuiMeta(bankInventory, p), updateDelay, updateDelay));
 
         player.setOpenedBankGui(this);
-        BPUtils.playSound("PERSONAL", p);
+        if (ConfigValues.isPersonalSoundEnabled()) {
+            if (!BPUtils.playSound(ConfigValues.getPersonalSound(), p))
+                BPLogger.warn("Could not play PERSONAL sound for player \"" + p.getName() + "\":");
+        }
         p.openInventory(bankInventory);
     }
 

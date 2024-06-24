@@ -4,9 +4,11 @@ import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -81,10 +83,14 @@ public class ViewCmd extends BPCommand {
     public void onExecution(CommandSender s, String[] args) {
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
         if (args.length == 2) {
-            if (s instanceof Player) BPUtils.playSound("VIEW", (Player) s);
+            if (s instanceof Player && ConfigValues.isViewSoundEnabled()) {
+                if (!BPUtils.playSound(ConfigValues.getViewSound(), (Player) s))
+                    BPLogger.warn("Could not play VIEW sound for player \"" + s.getName() + "\":");
+            }
 
             List<Bank> availableBanks = BankUtils.getAvailableBanks(target);
-            if (availableBanks.size() > 1) BPMessages.send(s, "Multiple-Bank-Others", BPUtils.placeValues(target, BPEconomy.getBankBalancesSum(target)));
+            if (availableBanks.size() > 1)
+                BPMessages.send(s, "Multiple-Bank-Others", BPUtils.placeValues(target, BPEconomy.getBankBalancesSum(target)));
             else {
                 Bank bank = availableBanks.get(0);
                 BPMessages.send(s, "Bank-Others", BPUtils.placeValues(target, bank.getBankEconomy().getBankBalance(target), BankUtils.getCurrentLevel(bank, target)));
@@ -92,7 +98,10 @@ public class ViewCmd extends BPCommand {
             return;
         }
 
-        if (s instanceof Player) BPUtils.playSound("VIEW", (Player) s);
+        if (s instanceof Player && ConfigValues.isViewSoundEnabled()) {
+            if (!BPUtils.playSound(ConfigValues.getViewSound(), (Player) s))
+                BPLogger.warn("Could not play VIEW sound for player \"" + s.getName() + "\":");
+        }
         Bank bank = BankUtils.getBank(getPossibleBank(args, 2));
         BPMessages.send(s, "Bank-Others", BPUtils.placeValues(target, bank.getBankEconomy().getBankBalance(target), BankUtils.getCurrentLevel(bank, target)));
     }

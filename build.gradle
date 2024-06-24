@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'me.pulsi_'
-version = '6.2-Alpha24-PreRelease2'
+version = '6.2'
 
 // Remove comments when testing the plugin.
 //setLibsDirName("plugins");

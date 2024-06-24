@@ -12,6 +12,7 @@ import me.pulsi_.bankplus.events.BPAfterTransactionEvent;
 import me.pulsi_.bankplus.events.BPPreTransactionEvent;
 import me.pulsi_.bankplus.listeners.playerChat.PlayerChatMethod;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPSets;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
@@ -523,7 +524,10 @@ public class BPEconomy {
 
         addBankBalance(p, actualDepositingMoney, true);
         BPMessages.send(p, "Success-Deposit", BPUtils.placeValues(p, actualDepositingMoney), BPUtils.placeValues(taxes, "taxes"));
-        BPUtils.playSound("DEPOSIT", p);
+        if (ConfigValues.isDepositSoundEnabled()) {
+            if (!BPUtils.playSound(ConfigValues.getDepositSound(), p))
+                BPLogger.warn("Could not play DEPOSIT sound for player \"" + p.getName() + "\":");
+        }
 
         afterTransactionEvent(p, TransactionType.DEPOSIT, amount);
     }
@@ -555,7 +559,10 @@ public class BPEconomy {
 
         removeBankBalance(p, amount, true);
         BPMessages.send(p, "Success-Withdraw", BPUtils.placeValues(p, amount.subtract(taxes)), BPUtils.placeValues(taxes, "taxes"));
-        BPUtils.playSound("WITHDRAW", p);
+        if (ConfigValues.isWithdrawSoundEnabled()) {
+            if (!BPUtils.playSound(ConfigValues.getWithdrawSound(), p))
+                BPLogger.warn("Could not play WITHDRAW sound for player \"" + p.getName() + "\":");
+        }
 
         afterTransactionEvent(p, TransactionType.WITHDRAW, amount);
     }

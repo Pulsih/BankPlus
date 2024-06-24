@@ -113,79 +113,49 @@ public class BPUtils {
         } else p.sendTitle(title, "");
     }
 
-    public static void playSound(String input, Player p) {
-
-        String sound;
-        switch (input) {
-            case "WITHDRAW": {
-                if (!ConfigValues.isWithdrawSoundEnabled()) return;
-                sound = ConfigValues.getWithdrawSound();
-                if (sound == null) {
-                    BPLogger.warn("You are missing a string! &8(&ePath: General.Withdraw-Sound.Sound in config.yml&8)");
-                    return;
-                }
-            }
-            break;
-
-            case "DEPOSIT": {
-                if (!ConfigValues.isDepositSoundEnabled()) return;
-                sound = ConfigValues.getDepositSound();
-                if (sound == null) {
-                    BPLogger.warn("You are missing a string! &8(&ePath: General.Deposit-Sound.Sound in config.yml&8)");
-                    return;
-                }
-            }
-            break;
-
-            case "VIEW": {
-                if (!ConfigValues.isViewSoundEnabled()) return;
-                sound = ConfigValues.getViewSound();
-                if (sound == null) {
-                    BPLogger.warn("You are missing a string! &8(&ePath: General.View-Sound.Sound in config.yml&8)");
-                    return;
-                }
-            }
-            break;
-
-            case "PERSONAL": {
-                if (!ConfigValues.isPersonalSoundEnabled()) return;
-                sound = ConfigValues.getPersonalSound();
-                if (sound == null) {
-                    BPLogger.warn("You are missing a string! &8(&ePath: General.Personal-Sound.Sound in config.yml&8)");
-                    return;
-                }
-            }
-            break;
-
-            default:
-                return;
+    /**
+     * Play a sound for that player.
+     * @param soundString The sound string.
+     * @param p The player target.
+     * @return Return true on successfully play.
+     */
+    public static boolean playSound(String soundString, Player p) {
+        if (soundString == null || soundString.isEmpty()) {
+            BPLogger.warn("No sound have been specified.");
+            return false;
         }
 
-        if (!sound.contains(",")) {
-            BPLogger.warn("The format of the sound \"" + sound + "\" is wrong! ");
-            BPLogger.warn("Please correct it in the config!");
-            return;
-        }
-        String[] pathSlitted = sound.split(",");
-        String soundType;
-        float volume, pitch;
+        String[] values;
+        if (soundString.contains(",")) values = soundString.split(",");
+        else values = new String[]{soundString};
+
+        Sound sound;
+        float volume = 5, pitch = 1;
 
         try {
-            soundType = pathSlitted[0];
-            volume = Float.parseFloat(pathSlitted[1]);
-            pitch = Float.parseFloat(pathSlitted[2]);
-        } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-            BPLogger.warn("The format of the sound \"" + sound + "\" is wrong! ");
-            BPLogger.warn("Please correct it in the config!");
-            return;
-        }
-
-        try {
-            p.playSound(p.getLocation(), Sound.valueOf(soundType), volume, pitch);
+            sound = Sound.valueOf(values[0]);
         } catch (IllegalArgumentException e) {
-            BPLogger.warn("\"" + sound + "\" is an invalid sound type for your server version!");
-            BPLogger.warn("Please change it in the config!");
+            BPLogger.warn("\"" + values[0] + "\" is an invalid sound, change enum type in your config.yml that is correct for your server version. (this is not an error)");
+            return false;
         }
+
+        if (values.length > 1) {
+            try {
+                volume = Float.parseFloat(values[1]);
+            } catch (NumberFormatException e) {
+                BPLogger.warn("\"" + values[1] + "\" is not a valid volume number.");
+            }
+        }
+        if (values.length > 2) {
+            try {
+                pitch = Float.parseFloat(values[2]);
+            } catch (NumberFormatException e) {
+                BPLogger.warn("\"" + values[2] + "\" is not a valid pitch number.");
+            }
+        }
+
+        p.playSound(p.getLocation(), sound, volume, pitch);
+        return true;
     }
 
     public static long secondsInMilliseconds(int seconds) {
