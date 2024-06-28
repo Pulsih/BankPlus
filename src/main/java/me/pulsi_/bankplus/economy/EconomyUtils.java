@@ -21,8 +21,13 @@ public class EconomyUtils {
      * @param uuid The player UUID.
      * @param async Choose if executing this action asynchronously to increase the server performance. (DO NOT USE ON SERVER SHOTDOWN)
      */
-    public static void savePlayer(UUID uuid, boolean async) {
+    public static void savePlayer(UUID uuid, boolean async, boolean unload) {
         if (BankPlus.INSTANCE().getMySql().isConnected()) {
+            if (async) {
+                Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> savePlayer(uuid, false, unload));
+                return;
+            }
+
             SQLPlayerManager pManager = new SQLPlayerManager(uuid);
             for (BPEconomy economy : BPEconomy.list()) {
                 String name = economy.getOriginBank().getIdentifier();
@@ -47,6 +52,7 @@ public class EconomyUtils {
             }
             manager.savePlayerFile(config, file, async);
         }
+        if (unload) PlayerRegistry.unloadPlayer(uuid);
     }
 
     /**
@@ -62,10 +68,8 @@ public class EconomyUtils {
      * @param async Choose if executing this action asynchronously to increase the server performance. (DO NOT USE ON SERVER SHOTDOWN)
      */
     public static void saveEveryone(boolean async) {
-        for (UUID uuid : BPEconomy.getLoadedPlayers()) {
-            savePlayer(uuid, async);
-            if (Bukkit.getPlayer(uuid) == null) PlayerRegistry.unloadPlayer(uuid);
-        }
+        for (UUID uuid : BPEconomy.getLoadedPlayers())
+            savePlayer(uuid, async, Bukkit.getPlayer(uuid) == null);
     }
 
     /**

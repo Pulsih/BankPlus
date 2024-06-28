@@ -195,7 +195,7 @@ public class BankGui {
 
         List<String> actualLore = new ArrayList<>(), levelLore = bankItem.lore.get(BankUtils.getCurrentLevel(originBank, p));
         if (levelLore == null) levelLore = bankItem.lore.get(0);
-        for (String line : levelLore) actualLore.add(BPChat.color(line));
+        if (levelLore != null) for (String line : levelLore) actualLore.add(BPChat.color(line));
 
         if (BankPlus.INSTANCE().isPlaceholderApiHooked()) {
             meta.setDisplayName(BPChat.color(PlaceholderAPI.setPlaceholders(p, bankItem.displayname)));
