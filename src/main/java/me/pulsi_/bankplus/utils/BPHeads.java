@@ -37,16 +37,16 @@ public class BPHeads {
         UUID id = new UUID(value.hashCode(), value.hashCode());
         try {
             SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
-            skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(id));
+            if (!skullMeta.hasOwner()) skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer("Pulsi_"));
             PlayerProfile profile = skullMeta.getPlayerProfile();
-
             ProfileProperty property = new ProfileProperty("textures", value);
             profile.setProperty(property);
 
             skullMeta.setPlayerProfile(profile);
             skull.setItemMeta(skullMeta);
             return skull;
-        } catch (Exception e) {
+        } catch (Error | Exception e) {
+            BPLogger.warn(e, "Skull exception");
             return Bukkit.getUnsafe().modifyItemStack(skull, "{SkullOwner:{Id:\"" + id + "\",Properties:{textures:[{Value:\"" + value + "\"}]}}}");
         }
     }

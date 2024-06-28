@@ -55,7 +55,7 @@ public class ForceOpenCmd extends BPCommand {
 
     @Override
     public boolean preCmdChecks(CommandSender s, String[] args) {
-        if (ConfigValues.isGuiModuleEnabled()) {
+        if (!ConfigValues.isGuiModuleEnabled()) {
             BPMessages.send(s, "Gui-Module-Disabled");
             return false;
         }

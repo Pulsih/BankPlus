@@ -79,36 +79,31 @@ public class BPSQLMethods {
     }
 
     /**
-     * Update an existing value in a column of a table.
+     * Update an existing values in a column of a table.
      * <p>
      * @param tableName The table name.
-     * @param columnName The name of the columns where to update the value.
-     * @param value The new value to set.
+     * @param values The new values to set. Format: ColumnName='NewValue', ColumnName='NewValue'...
      */
-    public void update(String tableName, String columnName, String value) {
-        update(tableName, columnName, value, null);
+    public void update(String tableName, String values) {
+        update(tableName, null, values);
     }
 
     /**
-     * Update an existing value in a column of a table.
+     * Update an existing values in a column of a table.
      * <p>
      * @param tableName The table name.
-     * @param columnName The name of the columns where to update the value.
-     * @param value The new value to set.
+     * @param values The new values to set. Format: ColumnName='NewValue', ColumnName='NewValue'...
      * @param condition A condition that must be met to update the column. Example: "WHERE uuid=playerUUID"
      */
-    public void update(String tableName, String columnName, String value, String condition) {
+    public void update(String tableName, String condition, String values) {
         if (!isConnected()) return;
 
         try {
             String check = condition != null ? " " + condition : "";
-
-            PreparedStatement statement = connection.prepareStatement("UPDATE " + tableName + " SET " + columnName + "=?" + check);
-            statement.setString(1, value);
-
+            PreparedStatement statement = connection.prepareStatement("UPDATE " + tableName + " SET " + values + check);
             statement.executeUpdate();
         } catch (SQLException e) {
-            BPLogger.error(e, "Could not update the column \"" + columnName + "\" of the table \"" + tableName + "\"!");
+            BPLogger.error(e, "Could not update the table \"" + tableName + "\"!");
         }
     }
 

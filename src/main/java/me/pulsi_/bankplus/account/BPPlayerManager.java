@@ -73,7 +73,7 @@ public class BPPlayerManager {
             }
         }
 
-        if (hasChanges) pManager.savePlayerFile(config, file, true);
+        if (hasChanges) pManager.savePlayerFile(config, file);
     }
 
     public boolean isPlayerRegistered() {
@@ -112,25 +112,7 @@ public class BPPlayerManager {
         return YamlConfiguration.loadConfiguration(file);
     }
 
-    public void savePlayerFile(FileConfiguration config, File file, boolean async) {
-        if (!async) {
-            save(config, file);
-            return;
-        }
-        try {
-            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
-                try {
-                    config.save(file);
-                } catch (Exception e) {
-                    Bukkit.getScheduler().runTask(BankPlus.INSTANCE(), () -> save(config, file));
-                }
-            });
-        } catch (Exception e) {
-            save(config, file);
-        }
-    }
-
-    private void save(FileConfiguration config, File file) {
+    public void savePlayerFile(FileConfiguration config, File file) {
         try {
             config.save(file);
         } catch (IOException e) {

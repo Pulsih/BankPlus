@@ -28,49 +28,77 @@ public class SQLPlayerManager {
         this.methods = bpsql.getSqlMethods();
     }
 
+    /**
+     * Get the selected bank level.
+     * @param bankName The bank table name.
+     * @return An integer.
+     */
     public int getLevel(String bankName) {
         String level = get(bankName, "bank_level");
-        return Integer.parseInt(level == null ? "1" : level);
+        try {
+            return Integer.parseInt(level);
+        } catch (Throwable t) {
+            return 1;
+        }
     }
 
+    /**
+     * Get the selected bank balance.
+     * @param bankName The bank table name.
+     * @return A BigDecimal.
+     */
     public BigDecimal getMoney(String bankName) {
         String money = get(bankName, "money");
-        return new BigDecimal(money == null ? "0" : money);
+        return BPFormatter.getStyledBigDecimal(money);
     }
 
+    /**
+     * Get the selected bank debt.
+     * @param bankName The bank table name.
+     * @return A BigDecimal.
+     */
     public BigDecimal getDebt(String bankName) {
         String debt = get(bankName, "debt");
-        return new BigDecimal(debt == null ? "0" : debt);
+        return BPFormatter.getStyledBigDecimal(debt);
     }
 
+    /**
+     * Get the selected offline interest.
+     * @param bankName The bank table name.
+     * @return A BigDecimal.
+     */
     public BigDecimal getOfflineInterest(String bankName) {
         String interest = get(bankName, "interest");
-        return new BigDecimal(interest == null ? "0" : interest);
+        return BPFormatter.getStyledBigDecimal(interest);
     }
 
-    public void setLevel(int level, String bankName) {
-        set("bank_level", "" + Math.max(1, level), bankName);
+    /**
+     * Update the player database values.
+     *
+     * @param bankName        The bank table name.
+     * @param debt            Player's debt.
+     * @param balance         Player's balance.
+     * @param level           Player's level.
+     * @param offlineInterest Player's offline interest.
+     */
+    public void updatePlayer(String bankName, BigDecimal debt, BigDecimal balance, int level, BigDecimal offlineInterest) {
+        bpsql.fillEmptyRecords(p);
+
+        String condition;
+        if (ConfigValues.isStoringUUIDs()) condition = "WHERE uuid='" + uuid + "'";
+        else condition = "WHERE account_name='" + p.getName() + "'";
+
+        methods.update(
+                bankName,
+                condition,
+                "debt='" + BPFormatter.styleBigDecimal(debt) + "', " +
+                        "money='" + BPFormatter.styleBigDecimal(balance) + "', " +
+                        "bank_level='" + Math.max(1, level) + "', " +
+                        "interest='" + BPFormatter.styleBigDecimal(offlineInterest) + "'"
+        );
     }
 
-    public void setMoney(BigDecimal amount, String bankName) {
-        set("money", BPFormatter.styleBigDecimal(amount.max(BigDecimal.ZERO)), bankName);
-    }
-
-    public void setDebt(BigDecimal amount, String bankName) {
-        set("debt", BPFormatter.styleBigDecimal(amount.max(BigDecimal.ZERO)), bankName);
-    }
-
-    public void setOfflineInterest(BigDecimal amount, String bankName) {
-        set("interest", BPFormatter.styleBigDecimal(amount.max(BigDecimal.ZERO)), bankName);
-    }
-
-    public void set(String valueName, String newValue, String bankName) {
-        if (resultSet(bankName, valueName).isEmpty()) bpsql.createNewDefault(bankName, p);
-        if (ConfigValues.isStoringUUIDs()) methods.update(bankName, valueName, newValue, "WHERE uuid='" + uuid + "'");
-        else  methods.update(bankName, valueName, newValue, "WHERE account_name='" + p.getName() + "'");
-    }
-
-    public String get(String bankName, String valueName) {
+    private String get(String bankName, String valueName) {
         List<String> result = resultSet(bankName, valueName);
         if (result.isEmpty()) return null;
 

@@ -88,10 +88,12 @@ public class TransferCmd extends BPCommand {
     public void onExecution(CommandSender s, String[] args) {
         BPMessages.send(s, "%prefix% &7Task initialized, wait a few moments...", true);
 
-        if (args[1].toLowerCase().equals("filestodatabase")) filesToDatabase();
-        else databaseToFile();
+        Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
+            if (args[1].equalsIgnoreCase("filestodatabase")) filesToDatabase();
+            else databaseToFile();
 
-        BPMessages.send(s, "%prefix% &2Task finished!", true);
+            BPMessages.send(s, "%prefix% &2Task finished!", true);
+        });
     }
 
     @Override
@@ -110,11 +112,13 @@ public class TransferCmd extends BPCommand {
             FileConfiguration pConfig = pManager.getPlayerConfig();
             for (BPEconomy economy : economies) {
                 String bankName = economy.getOriginBank().getIdentifier();
-
-                sqlManager.setDebt(BPFormatter.getStyledBigDecimal(pConfig.getString("banks." + bankName + ".debt")), bankName);
-                sqlManager.setOfflineInterest(BPFormatter.getStyledBigDecimal(pConfig.getString("banks." + bankName + ".interest")), bankName);
-                sqlManager.setLevel(pConfig.getInt("banks." + bankName + ".level"), bankName);
-                sqlManager.setMoney(BPFormatter.getStyledBigDecimal(pConfig.getString("banks." + bankName + ".money")), bankName);
+                sqlManager.updatePlayer(
+                        economy.getOriginBank().getIdentifier(),
+                        BPFormatter.getStyledBigDecimal(pConfig.getString("banks." + bankName + ".debt")),
+                        BPFormatter.getStyledBigDecimal(pConfig.getString("banks." + bankName + ".money")),
+                        pConfig.getInt("banks." + bankName + ".level"),
+                        BPFormatter.getStyledBigDecimal(pConfig.getString("banks." + bankName + ".interest"))
+                );
             }
         }
     }
@@ -140,7 +144,7 @@ public class TransferCmd extends BPCommand {
                 config.set("banks." + bankName + ".money", money);
             }
 
-            pManager.savePlayerFile(config, pManager.getPlayerFile(), true);
+            pManager.savePlayerFile(config, pManager.getPlayerFile());
         }
     }
 }

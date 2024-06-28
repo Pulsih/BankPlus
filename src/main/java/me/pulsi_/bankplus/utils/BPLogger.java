@@ -6,7 +6,7 @@ import org.bukkit.Bukkit;
 
 public class BPLogger {
 
-    public static void error(Exception e, Object error) {
+    public static void error(Throwable e, Object error) {
         error(error);
         error("");
         error("Additional information:");
@@ -32,7 +32,9 @@ public class BPLogger {
         log(BPChat.prefix + " &8[&eWARN&8] &e" + warn);
     }
 
-    public static void warn(Exception e, Object warn) {
+
+
+    public static void warn(Throwable e, Object warn) {
         warn(warn);
         warn("");
         warn("Additional information:");
