@@ -66,7 +66,10 @@ public class PlayerServerListener implements Listener {
         BPSets.removePlayerFromDepositing(p);
         BPSets.removePlayerFromWithdrawing(p);
 
-        if (ConfigValues.isSavingOnQuit())
-            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> EconomyUtils.savePlayer(p.getUniqueId(), true));
+        if (!ConfigValues.isSavingOnQuit()) return;
+
+        UUID uuid = p.getUniqueId();
+        EconomyUtils.savePlayer(uuid, true);
+        PlayerRegistry.unloadPlayer(uuid);
     }
 }

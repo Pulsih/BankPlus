@@ -35,7 +35,7 @@ public class BPEconomy {
     private static final Set<UUID> loadedPlayers = new HashSet<>();
 
     private final Bank originBank;
-    private final HashMap<UUID, Holder> holders = new HashMap<>();
+    private final HashMap<UUID, Holder> balances = new HashMap<>();
     private final Set<UUID> transactions = new HashSet<>();
 
     private final String moneyPath, interestPath, debtPath, levelPath;
@@ -117,59 +117,68 @@ public class BPEconomy {
         return originBank;
     }
 
-    public boolean isPlayerHolderLoaded(OfflinePlayer p) {
-        return isPlayerHolderLoaded(p.getUniqueId());
+    public boolean isPlayerBalanceLoaded(OfflinePlayer p) {
+        return isPlayerBalanceLoaded(p.getUniqueId());
     }
 
-    public boolean isPlayerHolderLoaded(UUID uuid) {
-        return holders.containsKey(uuid);
+    public boolean isPlayerBalanceLoaded(UUID uuid) {
+        return balances.containsKey(uuid);
     }
 
-    public Holder loadPlayerHolder(OfflinePlayer p) {
-        return loadPlayerHolder(p.getUniqueId(), true);
+    public Holder loadPlayerBalance(OfflinePlayer p) {
+        return loadPlayerBalance(p.getUniqueId(), true);
     }
 
-    public Holder loadPlayerHolder(UUID uuid) {
-        return loadPlayerHolder(uuid, true);
+    public Holder loadPlayerBalance(UUID uuid) {
+        return loadPlayerBalance(uuid, true);
     }
 
-    public Holder loadPlayerHolder(OfflinePlayer p, boolean wasRegistered) {
-        return loadPlayerHolder(p.getUniqueId(), wasRegistered);
+    public Holder loadPlayerBalance(OfflinePlayer p, boolean wasRegistered) {
+        return loadPlayerBalance(p.getUniqueId(), wasRegistered);
     }
 
-    public Holder loadPlayerHolder(UUID uuid, boolean wasRegistered) {
+    public Holder loadPlayerBalance(UUID uuid, boolean wasRegistered) {
         loadedPlayers.add(uuid);
-        if (isPlayerHolderLoaded(uuid)) return holders.get(uuid);
+        if (isPlayerBalanceLoaded(uuid)) return balances.get(uuid);
 
         Holder holder = new Holder();
-        holders.put(uuid, holder);
+
+        BigDecimal debt, money, offlineInterest;
+        int level;
 
         boolean useStartAmount = !wasRegistered && BankUtils.isMainBank(originBank);
         if (BankPlus.INSTANCE().getMySql().isConnected()) {
             SQLPlayerManager pManager = new SQLPlayerManager(uuid);
 
             String bankName = originBank.getIdentifier();
-            holder.debt = pManager.getDebt(bankName);
-            holder.money = useStartAmount ? ConfigValues.getStartAmount() : pManager.getMoney(bankName);
-            holder.offlineInterest = pManager.getOfflineInterest(bankName);
-            holder.bankLevel = pManager.getLevel(bankName);
+            debt = pManager.getDebt(bankName);
+            money = useStartAmount ? ConfigValues.getStartAmount() : pManager.getMoney(bankName);
+            offlineInterest = pManager.getOfflineInterest(bankName);
+            level = pManager.getLevel(bankName);
         } else {
             FileConfiguration config = new BPPlayerManager(uuid).getPlayerConfig();
 
-            holder.debt = BPFormatter.getStyledBigDecimal(config.getString(debtPath));
-            holder.money = useStartAmount ? ConfigValues.getStartAmount() : BPFormatter.getStyledBigDecimal(config.getString(moneyPath));
-            holder.offlineInterest = BPFormatter.getStyledBigDecimal(config.getString(interestPath));
-            holder.bankLevel = Math.max(config.getInt(levelPath), 1);
+            debt = BPFormatter.getStyledBigDecimal(config.getString(debtPath));
+            money = useStartAmount ? ConfigValues.getStartAmount() : BPFormatter.getStyledBigDecimal(config.getString(moneyPath));
+            offlineInterest = BPFormatter.getStyledBigDecimal(config.getString(interestPath));
+            level = Math.max(config.getInt(levelPath), 1);
         }
+
+        holder.debt = debt;
+        holder.money = money;
+        holder.offlineInterest = offlineInterest;
+        holder.bankLevel = level;
+
+        balances.put(uuid, holder);
         return holder;
     }
 
     public void unloadPlayerBalance(UUID uuid) {
-        holders.remove(uuid);
+        balances.remove(uuid);
 
         boolean unloadPlayer = true;
         for (BPEconomy economy : list()) {
-            if (!economy.isPlayerHolderLoaded(uuid)) continue;
+            if (!economy.isPlayerBalanceLoaded(uuid)) continue;
 
             unloadPlayer = false;
             break;
@@ -203,7 +212,7 @@ public class BPEconomy {
      * @param uuid The UUID of the player.
      */
     public BigDecimal getBankBalance(UUID uuid) {
-        Holder holder = isPlayerHolderLoaded(uuid) ? holders.get(uuid) : loadPlayerHolder(uuid);
+        Holder holder = isPlayerBalanceLoaded(uuid) ? balances.get(uuid) : loadPlayerBalance(uuid);
         return holder.money;
     }
 
@@ -388,7 +397,7 @@ public class BPEconomy {
      * @return Offline interest.
      */
     public BigDecimal getOfflineInterest(UUID uuid) {
-        Holder holder = isPlayerHolderLoaded(uuid) ? holders.get(uuid) : loadPlayerHolder(uuid);
+        Holder holder = isPlayerBalanceLoaded(uuid) ? balances.get(uuid) : loadPlayerBalance(uuid);
         return holder.offlineInterest;
     }
 
@@ -401,7 +410,7 @@ public class BPEconomy {
     public void setOfflineInterest(OfflinePlayer p, BigDecimal amount) {
         if (startAndCheckTransaction(p)) return;
 
-        Holder holder = isPlayerHolderLoaded(p) ? holders.get(p.getUniqueId()) : loadPlayerHolder(p);
+        Holder holder = isPlayerBalanceLoaded(p) ? balances.get(p.getUniqueId()) : loadPlayerBalance(p);
         holder.setOfflineInterest(amount);
 
         endTransaction(p);
@@ -422,7 +431,7 @@ public class BPEconomy {
      * @param uuid The player UUID.
      */
     public BigDecimal getDebt(UUID uuid) {
-        Holder holder = isPlayerHolderLoaded(uuid) ? holders.get(uuid) : loadPlayerHolder(uuid);
+        Holder holder = isPlayerBalanceLoaded(uuid) ? balances.get(uuid) : loadPlayerBalance(uuid);
         return holder.debt;
     }
 
@@ -435,7 +444,7 @@ public class BPEconomy {
     public void setDebt(OfflinePlayer p, BigDecimal amount) {
         if (startAndCheckTransaction(p)) return;
 
-        Holder holder = isPlayerHolderLoaded(p) ? holders.get(p.getUniqueId()) : loadPlayerHolder(p);
+        Holder holder = isPlayerBalanceLoaded(p) ? balances.get(p.getUniqueId()) : loadPlayerBalance(p);
         holder.setDebt(amount);
 
         endTransaction(p);
@@ -456,14 +465,14 @@ public class BPEconomy {
      * @return The current bank level.
      */
     public int getBankLevel(UUID uuid) {
-        Holder holder = isPlayerHolderLoaded(uuid) ? holders.get(uuid) : loadPlayerHolder(uuid);
+        Holder holder = isPlayerBalanceLoaded(uuid) ? balances.get(uuid) : loadPlayerBalance(uuid);
         return holder.bankLevel;
     }
 
     public void setBankLevel(OfflinePlayer p, int level) {
         if (startAndCheckTransaction(p)) return;
 
-        Holder holder = isPlayerHolderLoaded(p) ? holders.get(p.getUniqueId()) : loadPlayerHolder(p);
+        Holder holder = isPlayerBalanceLoaded(p) ? balances.get(p.getUniqueId()) : loadPlayerBalance(p);
         holder.setBankLevel(level);
 
         endTransaction(p);
@@ -473,7 +482,7 @@ public class BPEconomy {
      * Method internally used to simplify the transactions.
      */
     private void set(OfflinePlayer p, BigDecimal amount) {
-        Holder pHolder = isPlayerHolderLoaded(p) ? holders.get(p.getUniqueId()) : loadPlayerHolder(p);
+        Holder pHolder = isPlayerBalanceLoaded(p) ? balances.get(p.getUniqueId()) : loadPlayerBalance(p);
         pHolder.setMoney(amount);
         endTransaction(p);
     }
