@@ -156,19 +156,19 @@ General-Settings:
   Withdraw-Sound:
     Enabled: true
     # Sound-Type,Volume,Pitch.
-    Sound: "ORB_PICKUP,5,1"
+    Sound: "ENTITY_EXPERIENCE_ORB_PICKUP,5,1"
 
   Deposit-Sound:
     Enabled: true
-    Sound: "ORB_PICKUP,5,1"
+    Sound: "ENTITY_EXPERIENCE_ORB_PICKUP,5,1"
 
   View-Sound:
     Enabled: true
-    Sound: "ORB_PICKUP,5,1"
+    Sound: "ENTITY_EXPERIENCE_ORB_PICKUP,5,1"
 
   Personal-Sound:
     Enabled: true
-    Sound: "ORB_PICKUP,5,1"
+    Sound: "ENTITY_EXPERIENCE_ORB_PICKUP,5,1"
 
 # Interest will increase player bank balance
 # by giving a % of their bank money.
