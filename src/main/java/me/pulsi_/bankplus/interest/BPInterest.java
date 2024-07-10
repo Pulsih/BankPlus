@@ -20,6 +20,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import static me.pulsi_.bankplus.values.ConfigValues.isOfflineInterestDifferentRate;
+
 public class BPInterest {
 
     private static final String defaultInterestPermission = "bankplus.receive.interest";
@@ -44,7 +46,7 @@ public class BPInterest {
 
     public void restartInterest(boolean start) {
         isOfflineInterestEnabled = ConfigValues.isOfflineInterestEnabled();
-        offlineInterestPermission = ConfigValues.isOfflineInterestDifferentRate() ? ConfigValues.getInterestOfflinePermission() : defaultInterestPermission;
+        offlineInterestPermission = isOfflineInterestDifferentRate() ? ConfigValues.getInterestOfflinePermission() : defaultInterestPermission;
 
         long interestSave = 0;
 
@@ -79,6 +81,7 @@ public class BPInterest {
 
     public void giveInterest() {
         boolean interestToVault = ConfigValues.isGivingInterestOnVaultBalance();
+        boolean payOfflineToAfk = ConfigValues.isPayingAfkPlayerOfflineAmount();
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
 
             List<Bank> availableBanks = new ArrayList<>();
@@ -89,14 +92,16 @@ public class BPInterest {
 
             Player oP = p.getPlayer();
             if (oP != null) {
-                if (!oP.hasPermission(defaultInterestPermission) || BankPlus.INSTANCE().getAfkManager().isAFK(oP)) continue;
+                if (!oP.hasPermission(defaultInterestPermission) || (BankPlus.INSTANCE().getAfkManager().isAFK(oP) && !payOfflineToAfk)) continue;
 
                 BigDecimal interestAmount = BigDecimal.ZERO;
                 for (Bank bank : availableBanks) {
                     BPEconomy economy = bank.getBankEconomy();
                     if (economy.getBankBalance(p).compareTo(BigDecimal.ZERO) <= 0) continue;
 
-                    BigDecimal interestMoney = getInterestMoney(bank, p, BankUtils.getInterestRate(bank, p));
+                    BigDecimal interestMoney = ConfigValues.isOfflineInterestDifferentRate() && payOfflineToAfk ?
+                            getInterestMoney(bank, p, BankUtils.getOfflineInterestRate(bank, p)) :
+                            getInterestMoney(bank, p, BankUtils.getInterestRate(bank, p));
 
                     BigDecimal maxAmount = BankUtils.getMaxInterestAmount(bank, p);
                     if (maxAmount.compareTo(BigDecimal.ZERO) > 0) interestMoney = interestMoney.min(maxAmount);
@@ -135,7 +140,7 @@ public class BPInterest {
                     BPEconomy economy = bank.getBankEconomy();
                     if (economy.getBankBalance(p).compareTo(BigDecimal.ZERO) <= 0) continue;
 
-                    BigDecimal interestMoney = ConfigValues.isOfflineInterestDifferentRate() ?
+                    BigDecimal interestMoney = isOfflineInterestDifferentRate() ?
                                     getInterestMoney(bank, p, BankUtils.getOfflineInterestRate(bank, p)) :
                                     getInterestMoney(bank, p, BankUtils.getInterestRate(bank, p));
 

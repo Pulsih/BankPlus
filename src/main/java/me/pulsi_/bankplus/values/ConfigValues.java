@@ -61,6 +61,7 @@ public class ConfigValues extends ValueLoader {
     private static boolean accumulatingInterestLimiter;
     private static boolean savingOnQuit;
     private static boolean ignoringAfkPlayers;
+    private static boolean payingAfkPlayerOfflineAmount;
     private static boolean usingEssentialsXAFK;
     private static boolean usingBankBalanceToUpgrade;
     private static boolean guiActionsNeedingPermissions;
@@ -161,6 +162,7 @@ public class ConfigValues extends ValueLoader {
         accumulatingInterestLimiter = config.getBoolean("Interest.Accumulate-Interest-Limiter");
         savingOnQuit = config.getBoolean("General-Settings.Save-On-Quit");
         ignoringAfkPlayers = config.getBoolean("Interest.AFK-Settings.Ignore-AFK-Players");
+        payingAfkPlayerOfflineAmount = config.getBoolean("Interest.AFK-Settings.Pay-AFK-Players-Offline-Amount");
         usingEssentialsXAFK = config.getBoolean("Interest.AFK-Settings.Use-EssentialsX-AFK");
         usingBankBalanceToUpgrade = config.getBoolean("General-Settings.Use-Bank-Balance-To-Upgrade");
         guiActionsNeedingPermissions = config.getBoolean("General-Settings.Gui-Actions-Need-Permissions");
@@ -519,6 +521,8 @@ public class ConfigValues extends ValueLoader {
     public static boolean isIgnoringAfkPlayers() {
         return ignoringAfkPlayers;
     }
+
+    public static boolean isPayingAfkPlayerOfflineAmount() { return payingAfkPlayerOfflineAmount; }
 
     public static boolean isUsingEssentialsXAFK() {
         return usingEssentialsXAFK;
