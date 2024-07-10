@@ -189,6 +189,10 @@ Interest:
     # (You will need to install EssentialsX)
     Use-EssentialsX-AFK: false
 
+    # Pay the offline amount to AFK Players
+    # Requires Different-Offline-Rate to be true!
+    Pay-AFK-Players-Offline-Amount: false
+
     # The time, in minutes, that will pass
     # before marking a player as AFK
     AFK-Time: 5
