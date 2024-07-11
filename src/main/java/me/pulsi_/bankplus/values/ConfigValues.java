@@ -63,6 +63,7 @@ public class ConfigValues extends ValueLoader {
     private static boolean ignoringAfkPlayers;
     private static boolean payingAfkPlayerOfflineAmount;
     private static boolean usingEssentialsXAFK;
+    private static boolean usingCmiAfk;
     private static boolean usingBankBalanceToUpgrade;
     private static boolean guiActionsNeedingPermissions;
     private static boolean bankTopEnabled;
@@ -164,6 +165,7 @@ public class ConfigValues extends ValueLoader {
         ignoringAfkPlayers = config.getBoolean("Interest.AFK-Settings.Ignore-AFK-Players");
         payingAfkPlayerOfflineAmount = config.getBoolean("Interest.AFK-Settings.Pay-AFK-Players-Offline-Amount");
         usingEssentialsXAFK = config.getBoolean("Interest.AFK-Settings.Use-EssentialsX-AFK");
+        usingCmiAfk = config.getBoolean("Interest.AFK-Settings.Use-CMI-AFK");
         usingBankBalanceToUpgrade = config.getBoolean("General-Settings.Use-Bank-Balance-To-Upgrade");
         guiActionsNeedingPermissions = config.getBoolean("General-Settings.Gui-Actions-Need-Permissions");
         bankTopEnabled = config.getBoolean("BankTop.Enabled");
@@ -527,6 +529,8 @@ public class ConfigValues extends ValueLoader {
     public static boolean isUsingEssentialsXAFK() {
         return usingEssentialsXAFK;
     }
+
+    public static boolean isUsingCmiAfk() { return usingCmiAfk;}
 
     public static boolean isUsingBankBalanceToUpgrade() {
         return usingBankBalanceToUpgrade;

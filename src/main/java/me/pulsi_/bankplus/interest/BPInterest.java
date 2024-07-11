@@ -92,16 +92,17 @@ public class BPInterest {
 
             Player oP = p.getPlayer();
             if (oP != null) {
-                if (!oP.hasPermission(defaultInterestPermission) || (BankPlus.INSTANCE().getAfkManager().isAFK(oP) && !payOfflineToAfk)) continue;
+                boolean isAfk = BankPlus.INSTANCE().getAfkManager().isAFK(oP);
+                if (!oP.hasPermission(defaultInterestPermission) || (isAfk && !payOfflineToAfk)) continue;
 
                 BigDecimal interestAmount = BigDecimal.ZERO;
                 for (Bank bank : availableBanks) {
                     BPEconomy economy = bank.getBankEconomy();
                     if (economy.getBankBalance(p).compareTo(BigDecimal.ZERO) <= 0) continue;
 
-                    BigDecimal interestMoney = ConfigValues.isOfflineInterestDifferentRate() && payOfflineToAfk ?
-                            getInterestMoney(bank, p, BankUtils.getOfflineInterestRate(bank, p)) :
-                            getInterestMoney(bank, p, BankUtils.getInterestRate(bank, p));
+                    BigDecimal interestMoney = (ConfigValues.isOfflineInterestDifferentRate() && payOfflineToAfk && isAfk) ?
+                            getInterestMoney(bank, p, BankUtils.getOfflineInterestRate(bank, oP)) :
+                            getInterestMoney(bank, p, BankUtils.getInterestRate(bank, oP));
 
                     BigDecimal maxAmount = BankUtils.getMaxInterestAmount(bank, p);
                     if (maxAmount.compareTo(BigDecimal.ZERO) > 0) interestMoney = interestMoney.min(maxAmount);

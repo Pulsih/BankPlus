@@ -189,6 +189,10 @@ Interest:
     # (You will need to install EssentialsX)
     Use-EssentialsX-AFK: false
 
+    # Choose if using the CMI AFK.
+    # (You will need to install CMI)
+    Use-CMI-AFK: false
+
     # Pay the offline amount to AFK Players
     # Requires Different-Offline-Rate to be true!
     Pay-AFK-Players-Offline-Amount: false

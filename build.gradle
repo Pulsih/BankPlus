@@ -36,6 +36,7 @@ dependencies {
     compileOnly 'net.essentialsx:EssentialsX:2.20.0'
     compileOnly 'com.github.MilkBowl:VaultAPI:1.7'
     compileOnly 'me.clip:placeholderapi:2.11.3'
+    implementation(fileTree(dir: 'libs', includes: ['*.jar']))
 }
 
 processResources {

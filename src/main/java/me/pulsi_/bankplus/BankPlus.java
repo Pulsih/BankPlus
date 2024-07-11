@@ -43,7 +43,7 @@ public final class BankPlus extends JavaPlugin {
     private BPAFK BPAfk;
     private BPInterest interest;
 
-    private boolean isPlaceholderApiHooked = false, isEssentialsXHooked = false, isUpdated;
+    private boolean isPlaceholderApiHooked = false, isEssentialsXHooked = false, isCmiHooked = false, isUpdated;
 
     private int tries = 1;
 
@@ -117,6 +117,10 @@ public final class BankPlus extends JavaPlugin {
             BPLogger.info("Hooked into Essentials!");
             isEssentialsXHooked = true;
         }
+        if(plManager.getPlugin("CMI") != null) {
+            BPLogger.info("Hooked into CMI!");
+            isCmiHooked = true;
+        }
 
         if (ConfigValues.isUpdateCheckerEnabled())
             Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> isUpdated = isPluginUpdated(), 0, (8 * 1200) * 60 /*8 hours*/);
@@ -155,9 +159,9 @@ public final class BankPlus extends JavaPlugin {
         return isPlaceholderApiHooked;
     }
 
-    public boolean isEssentialsXHooked() {
-        return isEssentialsXHooked;
-    }
+    public boolean isEssentialsXHooked() { return isEssentialsXHooked; }
+
+    public boolean isCmiHooked() {return isCmiHooked;}
 
     public boolean isUpdated() {
         return isUpdated;
