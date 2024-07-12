@@ -193,9 +193,19 @@ Interest:
     # (You will need to install CMI)
     Use-CMI-AFK: false
 
-    # Pay the offline amount to AFK Players
-    # Requires Different-Offline-Rate to be true!
-    Pay-AFK-Players-Offline-Amount: false
+    AFK-Payouts:
+      # Pay the offline amount to AFK Players
+      # Requires Different-Offline-Rate to be true!
+      Pay-AFK-Players-Offline-Amount: false
+
+      # Choose if the AFK rate will be
+      # different from the default one.
+      # Requires Pay-AFK-Players-Offline-Amount to be true!
+      Different-AFK-Rate: false
+
+      # If 'Different-AFK-Rate' is enabled, the AFK
+      # players will receive this interest rate.
+      AFK-Rate: "4%"
 
     # The time, in minutes, that will pass
     # before marking a player as AFK

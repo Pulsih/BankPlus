@@ -205,6 +205,37 @@ public class BankUtils {
     }
 
     /**
+     * Get the bank afk interest rate based on the bank level of the selected player.
+     * This method requires specifying a player because it needs his money to make calculations.
+     * It also already checks if the interest limiter is enabled and returns an amount based on that.
+     *
+     * @param bank The bank.
+     * @param p    The player.
+     * @return The AFK interest amount.
+     */
+    public static BigDecimal getAfkInterestRate(Bank bank, OfflinePlayer p) {
+        return getAfkInterestRate(bank, p, getCurrentLevel(bank, p));
+    }
+
+    /**
+     * Get the bank afk interest rate at the selected level.
+     * This method requires specifying a player because it needs his money to make calculations.
+     * It also already checks if the interest limiter is enabled and returns an amount based on that.
+     *
+     * @param bank  The bank.
+     * @param p     The player.
+     * @param level The level to check.
+     * @return The AFK interest amount.
+     */
+    public static BigDecimal getAfkInterestRate(Bank bank, OfflinePlayer p, int level) {
+        if (ConfigValues.isInterestLimiterEnabled())
+            return getLimitedInterest(bank, p, level, ConfigValues.getAfkInterestRate());
+
+        Bank.BankLevel bankLevel = bank.getBankLevel(level);
+        return bankLevel == null ? ConfigValues.getAfkInterestRate() : bankLevel.afkInterest;
+    }
+
+    /**
      * Get the bank interest limiter at the selected level.
      *
      * @param bank  The bank.
@@ -498,6 +529,9 @@ public class BankUtils {
 
         String offlineInterest = levelSection.getString("Offline-Interest");
         bankLevel.offlineInterest = offlineInterest == null ? ConfigValues.getOfflineInterestRate() : BPFormatter.getStyledBigDecimal(offlineInterest.replace("%", ""));
+
+        String afkInterest = levelSection.getString("Afk-Interest") == null ? levelSection.getString("AFK-Interest") : levelSection.getString("Afk-Interest");
+        bankLevel.afkInterest = afkInterest == null ? ConfigValues.getAfkInterestRate() : BPFormatter.getStyledBigDecimal(afkInterest.replace("%", ""));
 
         String maxInterestAmount = levelSection.getString("Max-Interest-Amount");
         bankLevel.maxInterestAmount = maxInterestAmount == null ? ConfigValues.getInterestMaxAmount() : BPFormatter.getStyledBigDecimal(maxInterestAmount);

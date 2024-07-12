@@ -29,6 +29,7 @@ public class ConfigValues extends ValueLoader {
     private static BigDecimal interestMaxAmount;
     private static BigDecimal interestRate;
     private static BigDecimal offlineInterestRate;
+    private static BigDecimal afkInterestRate;
     private static String bankTopMoneyFormat;
     private static String bankTopUpdateBroadcastMessage;
     private static String bankTopPlayerNotFoundPlaceholder;
@@ -54,6 +55,7 @@ public class ConfigValues extends ValueLoader {
     private static boolean interestLimiterEnabled;
     private static boolean offlineInterestEnabled;
     private static boolean offlineInterestDifferentRate;
+    private static boolean afkInterestDifferentRate;
     private static boolean notifyingNewPlayer;
     private static boolean silentInfoMessages;
     private static boolean updateCheckerEnabled;
@@ -163,7 +165,9 @@ public class ConfigValues extends ValueLoader {
         accumulatingInterestLimiter = config.getBoolean("Interest.Accumulate-Interest-Limiter");
         savingOnQuit = config.getBoolean("General-Settings.Save-On-Quit");
         ignoringAfkPlayers = config.getBoolean("Interest.AFK-Settings.Ignore-AFK-Players");
-        payingAfkPlayerOfflineAmount = config.getBoolean("Interest.AFK-Settings.Pay-AFK-Players-Offline-Amount");
+        payingAfkPlayerOfflineAmount = config.getBoolean("Interest.AFK-Settings.AFK-Payouts.Pay-AFK-Players-Offline-Amount");
+        afkInterestRate = getBigDecimal(config, "Interest.AFK-Settings.AFK-Payouts.AFK-Rate");
+        afkInterestDifferentRate = config.getBoolean("Interest.AFK-Settings.AFK-Payouts.Different-AFK-Rate");
         usingEssentialsXAFK = config.getBoolean("Interest.AFK-Settings.Use-EssentialsX-AFK");
         usingCmiAfk = config.getBoolean("Interest.AFK-Settings.Use-CMI-AFK");
         usingBankBalanceToUpgrade = config.getBoolean("General-Settings.Use-Bank-Balance-To-Upgrade");
@@ -344,6 +348,8 @@ public class ConfigValues extends ValueLoader {
         return offlineInterestRate;
     }
 
+    public static BigDecimal getAfkInterestRate() {return afkInterestRate;}
+
     public static String getBankTopMoneyFormat() {
         return bankTopMoneyFormat;
     }
@@ -483,6 +489,8 @@ public class ConfigValues extends ValueLoader {
     public static boolean isOfflineInterestDifferentRate() {
         return offlineInterestDifferentRate;
     }
+
+    public static boolean isAfkInterestDifferentRate() {return afkInterestDifferentRate;}
 
     public static boolean isNotifyingNewPlayer() {
         return notifyingNewPlayer;

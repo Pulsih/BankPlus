@@ -184,7 +184,7 @@ public class Bank {
     }
 
     public static class BankLevel {
-        BigDecimal cost, capacity, interest, offlineInterest, maxInterestAmount;
+        BigDecimal cost, capacity, interest, offlineInterest, afkInterest, maxInterestAmount;
         List<ItemStack> requiredItems;
         List<String> interestLimiter;
         boolean removeRequiredItems;

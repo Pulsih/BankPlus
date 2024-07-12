@@ -100,9 +100,10 @@ public class BPInterest {
                     BPEconomy economy = bank.getBankEconomy();
                     if (economy.getBankBalance(p).compareTo(BigDecimal.ZERO) <= 0) continue;
 
-                    BigDecimal interestMoney = (ConfigValues.isOfflineInterestDifferentRate() && payOfflineToAfk && isAfk) ?
-                            getInterestMoney(bank, p, BankUtils.getOfflineInterestRate(bank, oP)) :
-                            getInterestMoney(bank, p, BankUtils.getInterestRate(bank, oP));
+                    BigDecimal interestMoney = getInterestMoney(bank, p, BankUtils.getInterestRate(bank, oP));
+                    if (payOfflineToAfk && isAfk) {
+                        interestMoney = ConfigValues.isAfkInterestDifferentRate() ? getInterestMoney(bank, p, BankUtils.getAfkInterestRate(bank, oP)) : getInterestMoney(bank, p, BankUtils.getOfflineInterestRate(bank, oP));
+                    }
 
                     BigDecimal maxAmount = BankUtils.getMaxInterestAmount(bank, p);
                     if (maxAmount.compareTo(BigDecimal.ZERO) > 0) interestMoney = interestMoney.min(maxAmount);
