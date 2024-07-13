@@ -123,7 +123,7 @@ public class BPInterest {
 
                 if (availableBanks.size() > 1) BPMessages.send(oP, MessageValues.getMultiInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
                 else {
-                    if (BankUtils.isFull(availableBanks.get(0), p)) {
+                    if (BankUtils.isFull(availableBanks.get(0), p) && !ConfigValues.isGivingInterestOnVaultBalance()) {
                         BPMessages.send(oP, MessageValues.getInterestBankFull(), BPUtils.placeValues(p, interestAmount), true);
                         continue;
                     }
