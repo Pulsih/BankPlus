@@ -343,6 +343,10 @@ BankTop:
   # The size of the banktop.
   Size: 10
 
+  # Update on request
+  # Negates the Update-Delay
+  Update-On-Request: false
+
   # In ticks, the delay before the top will update.
   Update-Delay: 12000
 
