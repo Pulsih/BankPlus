@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 public class NamePlaceholder extends BPPlaceholder {
     @Override
     public String getIdentifier() {
-        return "name/[displayname]";
+        return "[name/displayname]";
     }
 
     @Override
@@ -22,5 +22,10 @@ public class NamePlaceholder extends BPPlaceholder {
             name = p.getDisplayName();
         }
         return name;
+    }
+
+    @Override
+    public boolean hasPlaceholders() {
+        return false;
     }
 }

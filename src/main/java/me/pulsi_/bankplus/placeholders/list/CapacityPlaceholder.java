@@ -22,4 +22,9 @@ public class CapacityPlaceholder extends BPPlaceholder {
         if (capacity.longValue() <= 0) return ConfigValues.getInfiniteCapacityText();
         return getFormat(identifier, capacity);
     }
+
+    @Override
+    public boolean hasPlaceholders() {
+        return false;
+    }
 }

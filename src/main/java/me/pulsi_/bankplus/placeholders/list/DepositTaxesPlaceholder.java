@@ -16,4 +16,9 @@ public class DepositTaxesPlaceholder extends BPPlaceholder {
     public String getPlaceholder(Player p, String target, String identifier) {
         return BPFormatter.styleBigDecimal(ConfigValues.getDepositTaxes());
     }
+
+    @Override
+    public boolean hasPlaceholders() {
+        return false;
+    }
 }

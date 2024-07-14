@@ -3,11 +3,13 @@ package me.pulsi_.bankplus.placeholders;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.placeholders.list.*;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static me.pulsi_.bankplus.placeholders.BPPlaceholderUtil.getRegisteredPlaceholderIdentifiers;
 
@@ -45,18 +47,38 @@ public class BPPlaceholders extends PlaceholderExpansion {
         if (p == null) return "Player not online";
 
         String target = ConfigValues.getMainGuiName();
-        if (identifier.contains("{") && identifier.endsWith("}"))
-            target = identifier.substring(identifier.indexOf("{") + 1, identifier.indexOf("}"));
 
-        if (identifier.contains("<amount>")) {
-            if (identifier.matches("calculate_(deposit||withdraw)_(percentage||number)_\\d+")) {
-                return new CalculatePercentagePlaceholder().getPlaceholder(p, target, identifier);
-            }
+        Pattern regex = Pattern.compile("\\{.*}");
+        if (regex.matcher(identifier).find()) {
+            target = identifier.substring(identifier.indexOf("{") + 1, identifier.indexOf("}"));
+            identifier = identifier.replaceAll("_" + regex, "");
         }
 
         for (BPPlaceholder placeholder : placeholders) {
-            if (identifier.toLowerCase().startsWith(placeholder.getIdentifier().toLowerCase()))
-                return placeholder.getPlaceholder(p, target, identifier);
+            if (placeholder.hasPlaceholders()) {
+                BPPlaceholder finalPlaceholder = BPPlaceholderUtil.parsePlaceholderPlaceholders(placeholders, identifier);
+                if (finalPlaceholder == null) continue;
+                return new BPPlaceholder() {
+
+                    @Override
+                    public String getIdentifier() {
+                        return finalPlaceholder.getIdentifier();
+                    }
+
+                    @Override
+                    public String getPlaceholder(Player p, String target, String identifier) {
+                        return finalPlaceholder.getPlaceholder(p, target, identifier);
+                    }
+
+                    @Override
+                    public boolean hasPlaceholders() {
+                        return finalPlaceholder.hasPlaceholders();
+                    }
+                }.getPlaceholder(p, target, identifier);
+            } else {
+                if (identifier.toLowerCase().startsWith(placeholder.getIdentifier().toLowerCase()))
+                    return placeholder.getPlaceholder(p, target, identifier);
+            }
         }
         return null;
     }
@@ -65,30 +87,28 @@ public class BPPlaceholders extends PlaceholderExpansion {
         placeholders.clear();
 
         placeholders.add(new BalancePlaceholder());
-        placeholders.add(new BankTopMoneyPlaceholder());
-        placeholders.add(new BankTopNamePlaceholder());
+        placeholders.add(new BankTopPlaceholder());
         placeholders.add(new BankTopPositionPlaceholder());
-        placeholders.add(new CalculateDepositTaxesPlaceholder());
-        placeholders.add(new CalculateWithdrawTaxesPlaceholder());
         placeholders.add(new CapacityPlaceholder());
         placeholders.add(new DebtPlaceholder());
-        placeholders.add(new DepositTaxesPlaceholder());
+        placeholders.add(new TaxesPlaceholder());
         placeholders.add(new InterestCooldownMillisPlaceholder());
         placeholders.add(new InterestCooldownPlaceholder());
         placeholders.add(new InterestRatePlaceholder());
         placeholders.add(new LevelPlaceholder());
         placeholders.add(new NextInterestPlaceholder());
-        placeholders.add(new NextLevelCapacityPlaceholder());
-        placeholders.add(new NextLevelCostPlaceholder());
-        placeholders.add(new NextLevelInterestRatePlaceholder());
-        placeholders.add(new NextLevelOfflineInterestRatePlaceholder());
+//        placeholders.add(new NextLevelCapacityPlaceholder());
+//        placeholders.add(new NextLevelCostPlaceholder());
+//        placeholders.add(new NextLevelInterestRatePlaceholder());
+//        placeholders.add(new NextLevelOfflineInterestRatePlaceholder());
+//        placeholders.add(new NextLevelRequiredItemsPlaceholder());
         placeholders.add(new NextLevelPlaceholder());
-        placeholders.add(new NextLevelRequiredItemsPlaceholder());
         placeholders.add(new NextOfflineInterestPlaceholder());
         placeholders.add(new OfflineInterestRatePlaceholder());
-        placeholders.add(new WithdrawTaxesPlaceholder());
         placeholders.add(new CalculatePercentagePlaceholder());
+        placeholders.add(new CalculateTaxesPlaceholder());
         placeholders.add(new NamePlaceholder());
+        placeholders.add(new NextLevelCompoundPlaceholder());
 
         List<BPPlaceholder> expandedPlaceholders = new ArrayList<>();
         for (BPPlaceholder placeholder : placeholders) {
@@ -114,13 +134,19 @@ public class BPPlaceholders extends PlaceholderExpansion {
                         public String getPlaceholder(Player p, String target, String identifier) {
                             return placeholder.getPlaceholder(p, target, identifier);
                         }
+
+                        @Override
+                        public boolean hasPlaceholders() {
+                            return placeholder.hasPlaceholders();
+                        }
                     });
                 }
             }
         }
 
         placeholders.addAll(expandedPlaceholders);
-
+        // remove original placeholders with variations to avoid duplicates
+        placeholders.removeIf(placeholder -> placeholder.getIdentifier().contains("/"));
 
         List<BPPlaceholder> orderedPlaceholders = new ArrayList<>(), copy = new ArrayList<>(placeholders);
         while (!copy.isEmpty()) {
@@ -147,28 +173,5 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
     public List<String> getRegisteredPlaceholders() {
         return new ArrayList<>(getRegisteredPlaceholderIdentifiers(this.placeholders));
-    }
-
-    private String buildPattern(String identifier) {
-        String[] parts = identifier.split("_");
-        StringBuilder pattern = new StringBuilder();
-
-        for (int i = 0; i < parts.length; i++) {
-            String part = parts[i];
-            if (part.contains("/")) {
-                pattern.append("(?:");
-                String[] options = part.split("/");
-                for (int j = 0; j < options.length; j++) {
-                    pattern.append(options[j]);
-                    if (j < options.length - 1) pattern.append("|");
-                }
-                pattern.append(")");
-            } else {
-                pattern.append(part);
-            }
-            if (i < parts.length - 1) pattern.append("_");
-        }
-
-        return pattern.toString();
     }
 }

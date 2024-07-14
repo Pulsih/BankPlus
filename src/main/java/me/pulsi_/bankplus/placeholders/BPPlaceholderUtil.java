@@ -50,6 +50,11 @@ public class BPPlaceholderUtil {
                         public String getPlaceholder(Player p, String target, String identifier) {
                             return placeholder.getPlaceholder(p, target, identifier);
                         }
+
+                        @Override
+                        public boolean hasPlaceholders() {
+                            return placeholder.hasPlaceholders();
+                        }
                     });
                 }
             } else {
@@ -65,5 +70,19 @@ public class BPPlaceholderUtil {
             registeredPlaceholderIdentifiers.add(placeholder.getIdentifier());
         }
         return registeredPlaceholderIdentifiers;
+    }
+
+    public static BPPlaceholder parsePlaceholderPlaceholders(List<BPPlaceholder> placeholders, String identifier) {
+        // compile a list of special placeholders
+        for (BPPlaceholder placeholder : placeholders) {
+            if (placeholder.getIdentifier().matches(".*<.*?>.*")) {
+                String regex = placeholder.getRegex(placeholder.getIdentifier());
+                if (identifier.matches(regex)) {
+                    return placeholder;
+                }
+            }
+        }
+
+        return null;
     }
 }

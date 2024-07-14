@@ -21,4 +21,9 @@ public class NextLevelPlaceholder extends BPPlaceholder {
 
         return (BankUtils.getCurrentLevel(bank, p) + 1) + "";
     }
+
+    @Override
+    public boolean hasPlaceholders() {
+        return false;
+    }
 }

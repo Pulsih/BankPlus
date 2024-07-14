@@ -5,6 +5,8 @@ import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class BPPlaceholder {
 
@@ -23,6 +25,13 @@ public abstract class BPPlaceholder {
      */
     public abstract String getPlaceholder(Player p, String target, String identifier);
 
+    /**
+     * Check if the placeholder has any placeholders.
+     * Placeholders are anything between < and >.
+     * @return A boolean.
+     */
+    public abstract boolean hasPlaceholders();
+
     public String getFormat(String formatter, BigDecimal value) {
         if (value == null) return "Invalid number!";
 
@@ -33,33 +42,38 @@ public abstract class BPPlaceholder {
     }
 
     public String[] getOptions(String identifier) {
-        String[] args = identifier.split("_"), inputArgs = identifier.split("_");
+        String[] args = identifier.split("_");
 
-        if (args.length != inputArgs.length) {
-            return new String[] {"Invalid input"};
-        }
+        for (String arg : args) {
+            if (arg.startsWith("[") && arg.endsWith("]")) {
+                String[] options = arg.substring(1, arg.length() - 1).split("/");
 
-        for (int i = 0; i < args.length; i++) {
-            if (args[i].startsWith("[") && args[i].endsWith("]")) {
-                String[] options = args[i].replace("[", "").replace("]", "").split("/");
-
-                boolean validOption = false;
-                for (String option : options) {
-                    if (inputArgs[i].equalsIgnoreCase(option)) {
-                        args[i] = inputArgs[i];
-                        validOption = true;
-                        break;
-                    }
-                }
+                boolean validOption = Arrays.stream(options).anyMatch(option -> option.equalsIgnoreCase(arg));
                 if (!validOption) {
-                    return new String[] {"Invalid option. must be " + Arrays.toString(options)};
+                    return new String[]{"Invalid option. must be " + Arrays.toString(options)};
                 }
             }
-            if (args[i].startsWith("<") && args[i].endsWith(">")) {
-                args[i] = inputArgs[i];
-            }
+            // No specific action required for placeholders within angle brackets as per original logic
         }
 
         return args;
+    }
+
+    public String getRegex(String identifier) {
+        String regex = "\\[|]|/|<.*?>";
+
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(identifier);
+
+        return matcher.replaceAll(matchResult -> {
+            String match = matchResult.group();
+            return switch (match) {
+                case "[" -> "(";
+                case "]" -> ")";
+                case "/" -> "||";
+                case "<amount>", "<position>" -> "\\\\d+";
+                default -> "";
+            };
+        });
     }
 }

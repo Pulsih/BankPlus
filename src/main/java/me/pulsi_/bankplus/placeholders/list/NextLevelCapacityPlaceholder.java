@@ -26,4 +26,9 @@ public class NextLevelCapacityPlaceholder extends BPPlaceholder {
 
         return getFormat(identifier, capacity);
     }
+
+    @Override
+    public boolean hasPlaceholders() {
+        return false;
+    }
 }

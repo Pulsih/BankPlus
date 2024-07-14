@@ -19,4 +19,9 @@ public class NextOfflineInterestPlaceholder extends BPPlaceholder {
         Bank bank = BankUtils.getBank(target);
         return getFormat(identifier, BankPlus.INSTANCE().getInterest().getInterestMoney(bank, p, BankUtils.getOfflineInterestRate(bank, p)));
     }
+
+    @Override
+    public boolean hasPlaceholders() {
+        return false;
+    }
 }

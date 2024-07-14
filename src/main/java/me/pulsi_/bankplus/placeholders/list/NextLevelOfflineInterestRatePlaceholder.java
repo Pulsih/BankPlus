@@ -21,4 +21,9 @@ public class NextLevelOfflineInterestRatePlaceholder extends BPPlaceholder {
 
         return BankUtils.getOfflineInterestRate(bank, p, BankUtils.getCurrentLevel(bank, p) + 1) + "";
     }
+
+    @Override
+    public boolean hasPlaceholders() {
+        return false;
+    }
 }

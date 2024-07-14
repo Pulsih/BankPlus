@@ -12,25 +12,29 @@ public class CalculatePercentagePlaceholder extends BPPlaceholder {
 
     @Override
     public String getIdentifier() {
-        return "calculate_[deposit/withdraw]_[percentage/number]_<amount>";
+        return "calculate_[deposit/withdraw]_percentage_<amount>";
     }
 
     @Override
     public String getPlaceholder(Player p, String target, String identifier) {
         String[] args = getOptions(identifier);
-        BigDecimal amount = new BigDecimal(args[3]);
-        String percentage;
+        BigDecimal amount = new BigDecimal(args[3]), percentage;
 
-        if (target == null || p == null) return "Invalid target or player!";
+        if (target == null || p == null) return "Invalid bank or player!";
 
         if (args[1].equals("deposit")) {
             BigDecimal playerBalance = BigDecimal.valueOf(BankPlus.INSTANCE().getVaultEconomy().getBalance(p));
-            percentage = String.valueOf(playerBalance.multiply(amount.divide(BigDecimal.valueOf(100), RoundingMode.UP)));
+            percentage = playerBalance.multiply(amount.divide(BigDecimal.valueOf(100)));
         } else {
             BigDecimal bankBalance = BankUtils.getBank(target).getBankEconomy().getBankBalance(p);
-            percentage = String.valueOf(bankBalance.multiply(amount.divide(BigDecimal.valueOf(100), RoundingMode.UP)));
+            percentage = bankBalance.multiply(amount.divide(BigDecimal.valueOf(100)));
         }
 
-        return percentage;
+        return getFormat(identifier, percentage);
+    }
+
+    @Override
+    public boolean hasPlaceholders() {
+        return true;
     }
 }

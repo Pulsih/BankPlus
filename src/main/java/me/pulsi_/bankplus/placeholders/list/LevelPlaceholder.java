@@ -16,4 +16,9 @@ public class LevelPlaceholder extends BPPlaceholder {
         if (!BankUtils.exist(target)) return "&cThe selected bank does not exist.";
         return String.valueOf(BankUtils.getCurrentLevel(BankUtils.getBank(target), p));
     }
+
+    @Override
+    public boolean hasPlaceholders() {
+        return false;
+    }
 }

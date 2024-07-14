@@ -16,4 +16,9 @@ public class OfflineInterestRatePlaceholder extends BPPlaceholder {
         if (!BankUtils.exist(target)) return "&cThe selected bank does not exist.";
         return BankUtils.getOfflineInterestRate(BankUtils.getBank(target), p) + "";
     }
+
+    @Override
+    public boolean hasPlaceholders() {
+        return false;
+    }
 }

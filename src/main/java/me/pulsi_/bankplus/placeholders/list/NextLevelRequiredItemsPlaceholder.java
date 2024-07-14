@@ -27,4 +27,9 @@ public class NextLevelRequiredItemsPlaceholder extends BPPlaceholder {
         if (requiredItems.isEmpty()) return ConfigValues.getNoUpgradeItemsMessage();
         return BPUtils.getRequiredItems(requiredItems);
     }
+
+    @Override
+    public boolean hasPlaceholders() {
+        return false;
+    }
 }
