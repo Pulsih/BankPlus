@@ -1,3 +1,14 @@
+# Additions
+
+- CMI Hook
+- Various AFK options:
+  - Pay AFK players the offline interest amount
+  - Pay AFK players a different rate
+    - Add `Afk-Interest` to your `bank.yml` for changes to take effect.
+    - `AFK-Interest` is also accepted
+    - Defaults to 4%
+ - Fixed "Your bank is full" message displaying when paying interest to vault balance was enabled
+
 # Building
 
 In order for you to be able to build this version of BankPlus, you'll need to do some extra stuff.
