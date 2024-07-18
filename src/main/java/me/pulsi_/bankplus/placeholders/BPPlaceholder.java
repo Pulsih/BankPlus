@@ -1,10 +1,12 @@
 package me.pulsi_.bankplus.placeholders;
 
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,6 +34,13 @@ public abstract class BPPlaceholder {
      */
     public abstract boolean hasPlaceholders();
 
+    /**
+     * Check if the placeholder has any variables.
+     * Variables are anything between [ and ].
+     * @return A boolean.
+     */
+    public abstract boolean hasVariables();
+
     public String getFormat(String formatter, BigDecimal value) {
         if (value == null) return "Invalid number!";
 
@@ -41,22 +50,33 @@ public abstract class BPPlaceholder {
         return BPFormatter.formatCommas(value);
     }
 
-    public String[] getOptions(String identifier) {
-        String[] args = identifier.split("_");
+    public String[] getSelectedVariantParts(String identifier) {
+        String originalIdentifier = identifier;
+        identifier = inverseRegex(identifier, getIdentifier());
+        List<List<String>> parts = BPPlaceholderUtil.compileParts(getIdentifier()),
+                originalParts = BPPlaceholderUtil.compileParts(originalIdentifier);
+        List<String> selectedParts = new ArrayList<>(), variants = BPPlaceholderUtil.compileVariants(parts, 0);
 
-        for (String arg : args) {
-            if (arg.startsWith("[") && arg.endsWith("]")) {
-                String[] options = arg.substring(1, arg.length() - 1).split("/");
-
-                boolean validOption = Arrays.stream(options).anyMatch(option -> option.equalsIgnoreCase(arg));
-                if (!validOption) {
-                    return new String[]{"Invalid option. must be " + Arrays.toString(options)};
+        for (List<String> strings : parts) {
+            for (String part : strings) {
+                if (identifier.contains(part) &&
+                        (identifier.startsWith(part + "_") || identifier.endsWith("_" + part) || identifier.contains("_" + part + "_"))) {
+                    selectedParts.add(part);
                 }
             }
-            // No specific action required for placeholders within angle brackets as per original logic
         }
 
-        return args;
+        String potentialIdentifier = String.join("_", selectedParts);
+
+        // verify if the placeholders exist
+        if (variants.contains(potentialIdentifier)) {
+            // replace the placeholders with the original parts
+            for (int i = 0; i < selectedParts.size(); i++) {
+                selectedParts.set(i, originalParts.get(i).get(0));
+            }
+            return selectedParts.toArray(new String[0]);
+        }
+        return new String[]{"Invalid identifier"};
     }
 
     public String getRegex(String identifier) {
@@ -75,5 +95,17 @@ public abstract class BPPlaceholder {
                 default -> "";
             };
         });
+    }
+
+    public String inverseRegex(String identifier, String trueIdentifier) {
+        Pattern placeholderPattern = Pattern.compile("<(.*?)>");
+        Matcher placeholderMatcher = placeholderPattern.matcher(trueIdentifier);
+
+        while (placeholderMatcher.find()) {
+            String placeholder = placeholderMatcher.group(1);
+            identifier = identifier.replaceFirst("\\d+", "<" + placeholder + ">");
+        }
+
+        return identifier;
     }
 }

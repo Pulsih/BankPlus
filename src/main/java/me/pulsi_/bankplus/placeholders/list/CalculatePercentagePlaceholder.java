@@ -17,7 +17,7 @@ public class CalculatePercentagePlaceholder extends BPPlaceholder {
 
     @Override
     public String getPlaceholder(Player p, String target, String identifier) {
-        String[] args = getOptions(identifier);
+        String[] args = getSelectedVariantParts(identifier);
         BigDecimal amount = new BigDecimal(args[3]), percentage;
 
         if (target == null || p == null) return "Invalid bank or player!";
@@ -35,6 +35,11 @@ public class CalculatePercentagePlaceholder extends BPPlaceholder {
 
     @Override
     public boolean hasPlaceholders() {
+        return true;
+    }
+
+    @Override
+    public boolean hasVariables() {
         return true;
     }
 }

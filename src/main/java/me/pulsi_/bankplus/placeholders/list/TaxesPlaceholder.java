@@ -13,7 +13,7 @@ public class TaxesPlaceholder extends BPPlaceholder {
 
     @Override
     public String getPlaceholder(Player p, String target, String identifier) {
-        String[] args = getOptions(identifier);
+        String[] args = getSelectedVariantParts(identifier);
         if (args[0].equals("deposit")) {
             return BPFormatter.styleBigDecimal(ConfigValues.getDepositTaxes());
         } else {
@@ -24,5 +24,10 @@ public class TaxesPlaceholder extends BPPlaceholder {
     @Override
     public boolean hasPlaceholders() {
         return false;
+    }
+
+    @Override
+    public boolean hasVariables() {
+        return true;
     }
 }

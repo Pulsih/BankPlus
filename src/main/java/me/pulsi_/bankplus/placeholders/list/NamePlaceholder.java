@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.placeholders.list;
 
 import me.pulsi_.bankplus.placeholders.BPPlaceholder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.entity.Player;
 
 public class NamePlaceholder extends BPPlaceholder {
@@ -11,7 +12,7 @@ public class NamePlaceholder extends BPPlaceholder {
 
     @Override
     public String getPlaceholder(Player p, String target, String identifier) {
-        String[] args = getOptions(identifier);
+        String[] args = getSelectedVariantParts(identifier);
         String name;
 
         if (p == null) return "Invalid player!";
@@ -27,5 +28,10 @@ public class NamePlaceholder extends BPPlaceholder {
     @Override
     public boolean hasPlaceholders() {
         return false;
+    }
+
+    @Override
+    public boolean hasVariables() {
+        return true;
     }
 }

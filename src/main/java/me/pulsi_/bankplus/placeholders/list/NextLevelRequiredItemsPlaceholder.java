@@ -32,4 +32,9 @@ public class NextLevelRequiredItemsPlaceholder extends BPPlaceholder {
     public boolean hasPlaceholders() {
         return false;
     }
+
+    @Override
+    public boolean hasVariables() {
+        return false;
+    }
 }

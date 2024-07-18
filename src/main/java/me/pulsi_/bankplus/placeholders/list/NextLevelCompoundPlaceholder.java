@@ -3,12 +3,14 @@ package me.pulsi_.bankplus.placeholders.list;
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.placeholders.BPPlaceholder;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 
 public class NextLevelCompoundPlaceholder extends BPPlaceholder {
@@ -19,17 +21,14 @@ public class NextLevelCompoundPlaceholder extends BPPlaceholder {
 
     @Override
     public String getPlaceholder(Player p, String target, String identifier) {
-        String[] args = getOptions(identifier);
         if (!BankUtils.exist(target)) return "&cThe selected bank does not exist.";
         Bank bank = BankUtils.getBank(target);
         if (!BankUtils.hasNextLevel(bank, p)) return ConfigValues.getUpgradesMaxedPlaceholder();
+        String[] args = getSelectedVariantParts(identifier);
 
-
-        if (args.length > 3) {
-            for (int i = 3; i < args.length; i++) {
-                args[2] += "_" + args[i];
-            }
-        }
+        BPLogger.log("identifier: " + identifier);
+        BPLogger.log("args: " + Arrays.toString(args));
+        BPLogger.log("args[2]: " + args[2]);
 
         switch (args[2]) {
             case "cost":
@@ -51,14 +50,17 @@ public class NextLevelCompoundPlaceholder extends BPPlaceholder {
                 List<ItemStack> requiredItems = BankUtils.getRequiredItems(bank, BankUtils.getCurrentLevel(bank, p) + 1);
                 if (requiredItems.isEmpty()) return ConfigValues.getNoUpgradeItemsMessage();
                 return BPUtils.getRequiredItems(requiredItems);
-
-            default:
-                return "Placeholder not found!";
         }
+        return "Placeholder not found!";
     }
 
     @Override
     public boolean hasPlaceholders() {
         return false;
+    }
+
+    @Override
+    public boolean hasVariables() {
+        return true;
     }
 }

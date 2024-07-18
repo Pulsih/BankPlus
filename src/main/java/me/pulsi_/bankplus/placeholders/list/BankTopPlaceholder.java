@@ -18,7 +18,7 @@ public class BankTopPlaceholder extends BPPlaceholder {
     @Override
     public String getPlaceholder(Player p, String target, String identifier) {
         if (!ConfigValues.isBankTopEnabled()) return BPChat.color("&cThe banktop is not enabled!");
-        String[] args = getOptions(identifier);
+        String[] args = getSelectedVariantParts(identifier);
         if (args.length != 3) return BPChat.color("&cInvalid placeholder!");
         int position;
 
@@ -46,6 +46,11 @@ public class BankTopPlaceholder extends BPPlaceholder {
 
     @Override
     public boolean hasPlaceholders() {
+        return true;
+    }
+
+    @Override
+    public boolean hasVariables() {
         return true;
     }
 }

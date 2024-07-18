@@ -22,4 +22,9 @@ public class InterestCooldownPlaceholder extends BPPlaceholder {
     public boolean hasPlaceholders() {
         return false;
     }
+
+    @Override
+    public boolean hasVariables() {
+        return false;
+    }
 }

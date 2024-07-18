@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static me.pulsi_.bankplus.placeholders.BPPlaceholderUtil.getRegisteredPlaceholderIdentifiers;
-
 public class BPPlaceholders extends PlaceholderExpansion {
 
     private final List<BPPlaceholder> placeholders = new ArrayList<>();
@@ -45,13 +43,13 @@ public class BPPlaceholders extends PlaceholderExpansion {
     @Override
     public String onPlaceholderRequest(Player p, String identifier) {
         if (p == null) return "Player not online";
-
         String target = ConfigValues.getMainGuiName();
 
-        Pattern regex = Pattern.compile("\\{.*}");
+        // catch the target bank name
+        Pattern regex = Pattern.compile("_\\{.*?\\}");
         if (regex.matcher(identifier).find()) {
             target = identifier.substring(identifier.indexOf("{") + 1, identifier.indexOf("}"));
-            identifier = identifier.replaceAll("_" + regex, "");
+            identifier = identifier.replaceAll("_\\{.*?\\}" + regex, "");
         }
 
         for (BPPlaceholder placeholder : placeholders) {
@@ -73,6 +71,11 @@ public class BPPlaceholders extends PlaceholderExpansion {
                     @Override
                     public boolean hasPlaceholders() {
                         return finalPlaceholder.hasPlaceholders();
+                    }
+
+                    @Override
+                    public boolean hasVariables() {
+                        return finalPlaceholder.hasVariables();
                     }
                 }.getPlaceholder(p, target, identifier);
             } else {
@@ -97,11 +100,6 @@ public class BPPlaceholders extends PlaceholderExpansion {
         placeholders.add(new InterestRatePlaceholder());
         placeholders.add(new LevelPlaceholder());
         placeholders.add(new NextInterestPlaceholder());
-//        placeholders.add(new NextLevelCapacityPlaceholder());
-//        placeholders.add(new NextLevelCostPlaceholder());
-//        placeholders.add(new NextLevelInterestRatePlaceholder());
-//        placeholders.add(new NextLevelOfflineInterestRatePlaceholder());
-//        placeholders.add(new NextLevelRequiredItemsPlaceholder());
         placeholders.add(new NextLevelPlaceholder());
         placeholders.add(new NextOfflineInterestPlaceholder());
         placeholders.add(new OfflineInterestRatePlaceholder());
@@ -110,43 +108,8 @@ public class BPPlaceholders extends PlaceholderExpansion {
         placeholders.add(new NamePlaceholder());
         placeholders.add(new NextLevelCompoundPlaceholder());
 
-        List<BPPlaceholder> expandedPlaceholders = new ArrayList<>();
-        for (BPPlaceholder placeholder : placeholders) {
-            String identifier = placeholder.getIdentifier();
-            if (identifier.contains("/")) {
-                // Split the identifier into parts for variation generation
-                String[] parts = identifier.split("_");
-                List<String[]> variations = BPPlaceholderUtil.constructVariations(parts, 0);
-                for (String[] variation : variations) {
-                    // Clean and reassemble the variation into an identifier
-                    for (int i = 0; i < variation.length; i++) {
-                        variation[i] = variation[i].replace("[", "").replace("]", "");
-                    }
-                    String varIdentifier = String.join("_", variation);
-                    // Create a new placeholder for each variation
-                    expandedPlaceholders.add(new BPPlaceholder() {
-                        @Override
-                        public String getIdentifier() {
-                            return varIdentifier;
-                        }
-
-                        @Override
-                        public String getPlaceholder(Player p, String target, String identifier) {
-                            return placeholder.getPlaceholder(p, target, identifier);
-                        }
-
-                        @Override
-                        public boolean hasPlaceholders() {
-                            return placeholder.hasPlaceholders();
-                        }
-                    });
-                }
-            }
-        }
-
-        placeholders.addAll(expandedPlaceholders);
-        // remove original placeholders with variations to avoid duplicates
-        placeholders.removeIf(placeholder -> placeholder.getIdentifier().contains("/"));
+        List<BPPlaceholder> variablePlaceholders = BPPlaceholderUtil.registerVariations(placeholders);
+        placeholders.addAll(variablePlaceholders);
 
         List<BPPlaceholder> orderedPlaceholders = new ArrayList<>(), copy = new ArrayList<>(placeholders);
         while (!copy.isEmpty()) {
@@ -172,6 +135,6 @@ public class BPPlaceholders extends PlaceholderExpansion {
     }
 
     public List<String> getRegisteredPlaceholders() {
-        return new ArrayList<>(getRegisteredPlaceholderIdentifiers(this.placeholders));
+        return new ArrayList<>(BPPlaceholderUtil.getRegisteredPlaceholderIdentifiers(this.placeholders));
     }
 }
