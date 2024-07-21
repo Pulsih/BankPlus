@@ -106,12 +106,12 @@ Levels:
         Amount: 4
         Name: "§3Diamond"
         Lore:
-          - "6fLevel up"
+          - "§6fLevel up"
       - Material: "EMERALD"
         Amount: 2
         Name: "§aEmerald"
         Lore:
-          - "6fLevel up"
+          - "§6fLevel up"
     Remove-Required-Items: true
     Capacity: "200000"
     Interest: "20%"
