@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * BankPlus main core class to manage the entire server economy.
@@ -412,6 +413,7 @@ public class BankUtils {
                 boolean hasItem = false;
                 for (ItemStack content : p.getInventory().getContents()) {
                     if (content == null || content.getType() != item.getType()) continue;
+                    if (!content.isSimilar(item)) continue;
                     playerAmount += content.getAmount();
 
                     if (playerAmount < amount) continue;
@@ -502,43 +504,12 @@ public class BankUtils {
         String maxInterestAmount = levelSection.getString("Max-Interest-Amount");
         bankLevel.maxInterestAmount = maxInterestAmount == null ? ConfigValues.getInterestMaxAmount() : BPFormatter.getStyledBigDecimal(maxInterestAmount);
 
-        List<ItemStack> requiredItems = new ArrayList<>();
-        String requiredItemsString = levelSection.getString("Required-Items");
-        if (requiredItemsString != null && !requiredItemsString.isEmpty()) {
-
-            List<String> configItems = new ArrayList<>();
-            if (!requiredItemsString.contains(",")) configItems.add(requiredItemsString);
-            else configItems.addAll(Arrays.asList(requiredItemsString.split(",")));
-
-            for (String splitItem : configItems) {
-                if (!splitItem.contains("-")) {
-                    try {
-                        requiredItems.add(new ItemStack(Material.valueOf(splitItem)));
-                    } catch (IllegalArgumentException e) {
-                        BPLogger.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
-                    }
-                } else {
-                    String[] split = splitItem.split("-");
-                    ItemStack item;
-                    try {
-                        item = new ItemStack(Material.valueOf(split[0]));
-                    } catch (IllegalArgumentException e) {
-                        BPLogger.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
-                        continue;
-                    }
-                    int amount = 1;
-                    try {
-                        amount = Integer.parseInt(split[1]);
-                    } catch (NumberFormatException e) {
-                        BPLogger.warn("The bank \"" + bankName + "\" contains an invalid number in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
-                    }
-
-                    item.setAmount(amount);
-                    requiredItems.add(item);
-                }
-            }
+        List<ItemStack> requiredItems;
+        if (levelSection.isList("Required-Items")) {
+            requiredItems = retrieveRequiredItemsFromList(levelSection, bankName);
+        } else {
+            requiredItems =  retrieveRequiredItemsFromString(levelSection, bankName);
         }
-
         bankLevel.requiredItems = requiredItems;
         bankLevel.removeRequiredItems = levelSection.getBoolean("Remove-Required-Items");
 
@@ -613,5 +584,78 @@ public class BankUtils {
                 return interestRate;
         }
         return fallBack;
+    }
+
+    private static List<ItemStack> retrieveRequiredItemsFromList(final ConfigurationSection levelSection,final String bankName) {
+        List<ItemStack> requiredItems = new ArrayList<>();
+        List<?> requiredItemsList = levelSection.getList("Required-Items");
+        if (requiredItemsList == null)
+            return requiredItems;
+
+        for (Object required : requiredItemsList) {
+            if (!(required instanceof Map))
+                continue;
+            Map<?, ?> requiredItem = (Map<?, ?>) required;
+            Material material = Material.getMaterial((String) requiredItem.get("Material"));
+            int amount = 1;
+            try {
+                amount = Integer.valueOf(requiredItem.get("Amount") + "");
+            } catch (NumberFormatException ignore) {
+            }
+            if (material != null) {
+                ItemStack itemStack = new ItemStack(material, amount);
+                ItemMeta itemMeta = itemStack.getItemMeta();
+                if (itemMeta != null) {
+                    itemMeta.setDisplayName(BPChat.color(requiredItem.get("Name") + ""));
+                    List<String> lore = new ArrayList<>();
+                    for (String lines : (List<String>) requiredItem.get("Lore")) lore.add(BPChat.color(lines));
+                    itemMeta.setLore(lore);
+                }
+                itemStack.setItemMeta(itemMeta);
+                requiredItems.add(itemStack);
+            } else {
+                BPLogger.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
+            }
+        }
+        return requiredItems;
+    }
+
+    private static List<ItemStack> retrieveRequiredItemsFromString(final ConfigurationSection levelSection,final String bankName) {
+        List<ItemStack> requiredItems = new ArrayList<>();
+        String requiredItemsString = levelSection.getString("Required-Items");
+        if (requiredItemsString != null && !requiredItemsString.isEmpty()) {
+            List<String> configItems = new ArrayList<>();
+            if (!requiredItemsString.contains(",")) configItems.add(requiredItemsString);
+            else configItems.addAll(Arrays.asList(requiredItemsString.split(",")));
+
+            for (String splitItem : configItems) {
+                if (!splitItem.contains("-")) {
+                    try {
+                        requiredItems.add(new ItemStack(Material.valueOf(splitItem)));
+                    } catch (IllegalArgumentException e) {
+                        BPLogger.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
+                    }
+                } else {
+                    String[] split = splitItem.split("-");
+                    ItemStack item;
+                    try {
+                        item = new ItemStack(Material.valueOf(split[0]));
+                    } catch (IllegalArgumentException e) {
+                        BPLogger.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
+                        continue;
+                    }
+                    int amount = 1;
+                    try {
+                        amount = Integer.parseInt(split[1]);
+                    } catch (NumberFormatException e) {
+                        BPLogger.warn("The bank \"" + bankName + "\" contains an invalid number in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
+                    }
+
+                    item.setAmount(amount);
+                    requiredItems.add(item);
+                }
+            }
+        }
+        return requiredItems;
     }
 }
