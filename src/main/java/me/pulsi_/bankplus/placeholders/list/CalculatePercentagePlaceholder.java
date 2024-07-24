@@ -6,7 +6,6 @@ import me.pulsi_.bankplus.placeholders.BPPlaceholder;
 import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 public class CalculatePercentagePlaceholder extends BPPlaceholder {
 

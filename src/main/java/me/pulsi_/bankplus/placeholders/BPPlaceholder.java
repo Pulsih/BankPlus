@@ -1,6 +1,5 @@
 package me.pulsi_.bankplus.placeholders;
 
-import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import org.bukkit.entity.Player;
 
@@ -51,28 +50,23 @@ public abstract class BPPlaceholder {
     }
 
     public String[] getSelectedVariantParts(String identifier) {
-        String originalIdentifier = identifier;
-        identifier = inverseRegex(identifier, getIdentifier());
-        List<List<String>> parts = BPPlaceholderUtil.compileParts(getIdentifier()),
-                originalParts = BPPlaceholderUtil.compileParts(originalIdentifier);
-        List<String> selectedParts = new ArrayList<>(), variants = BPPlaceholderUtil.compileVariants(parts, 0);
-
-        for (List<String> strings : parts) {
-            for (String part : strings) {
-                if (identifier.contains(part) &&
-                        (identifier.startsWith(part + "_") || identifier.endsWith("_" + part) || identifier.contains("_" + part + "_"))) {
-                    selectedParts.add(part);
-                }
-            }
-        }
-
-        String potentialIdentifier = String.join("_", selectedParts);
+        List<List<String>> parts = BPPlaceholderUtil.compileParts(getIdentifier());
+        List<String> selectedParts = new ArrayList<>(List.of(identifier.split("_"))), variants = BPPlaceholderUtil.compileVariants(parts, 0), reParts = BPPlaceholderUtil.getRecompiledParts(parts, BPPlaceholderUtil.compileParts(identifier));
+        String potentialIdentifier = String.join("_", reParts);
 
         // verify if the placeholders exist
         if (variants.contains(potentialIdentifier)) {
-            // replace the placeholders with the original parts
-            for (int i = 0; i < selectedParts.size(); i++) {
-                selectedParts.set(i, originalParts.get(i).get(0));
+            // join original parts that have "_" in them
+            for (int i = 0; i < reParts.size(); i++) {
+                String part = reParts.get(i);
+                if (part.contains("_")) {
+                    int count = part.split("_").length - 1;
+                    selectedParts.set(i, reParts.get(i));
+                    while (count > 0) {
+                        selectedParts.remove(i + count);
+                        count--;
+                    }
+                }
             }
             return selectedParts.toArray(new String[0]);
         }

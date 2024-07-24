@@ -3,7 +3,6 @@ package me.pulsi_.bankplus.placeholders;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.placeholders.list.*;
-import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.entity.Player;
 

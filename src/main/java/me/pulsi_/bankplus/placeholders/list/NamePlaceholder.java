@@ -1,7 +1,6 @@
 package me.pulsi_.bankplus.placeholders.list;
 
 import me.pulsi_.bankplus.placeholders.BPPlaceholder;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.entity.Player;
 
 public class NamePlaceholder extends BPPlaceholder {

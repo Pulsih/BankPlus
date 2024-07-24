@@ -3,14 +3,12 @@ package me.pulsi_.bankplus.placeholders.list;
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.placeholders.BPPlaceholder;
-import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.List;
 
 public class NextLevelCompoundPlaceholder extends BPPlaceholder {
@@ -25,10 +23,6 @@ public class NextLevelCompoundPlaceholder extends BPPlaceholder {
         Bank bank = BankUtils.getBank(target);
         if (!BankUtils.hasNextLevel(bank, p)) return ConfigValues.getUpgradesMaxedPlaceholder();
         String[] args = getSelectedVariantParts(identifier);
-
-        BPLogger.log("identifier: " + identifier);
-        BPLogger.log("args: " + Arrays.toString(args));
-        BPLogger.log("args[2]: " + args[2]);
 
         switch (args[2]) {
             case "cost":

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class BPPlaceholderUtil {
     public static List<BPPlaceholder> registerVariations(List<BPPlaceholder> placeholders) {
@@ -105,5 +104,32 @@ public class BPPlaceholderUtil {
         }
 
         return result;
+    }
+
+    public static List<String> getRecompiledParts(List<List<String>> parts, List<List<String>> oParts) {
+        List<String> reParts = new ArrayList<>();
+        List<List<String>> oPartsCopy = new ArrayList<>(oParts);
+        for (List<String> part : parts) {
+            if (part.size() > 1) {
+                String current = "", first = oPartsCopy.get(0).toString().replaceAll("[\\[\\]/]", "");
+                for (String p : part) {
+                    if (p.startsWith(first) && !p.equals(current)) {
+                        current = p;
+                        if (current.equalsIgnoreCase(p)) {
+                            reParts.add(p);
+                            int l = p.split("_").length;
+                            while (l > 0) {
+                                oPartsCopy.remove(0);
+                                l--;
+                            }
+                        }
+                    }
+                }
+            } else {
+                reParts.add(part.get(0));
+                oPartsCopy.remove(0);
+            }
+        }
+        return reParts;
     }
 }
