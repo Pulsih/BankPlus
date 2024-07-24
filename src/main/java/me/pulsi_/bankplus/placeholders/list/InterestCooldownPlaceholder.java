@@ -17,4 +17,14 @@ public class InterestCooldownPlaceholder extends BPPlaceholder {
     public String getPlaceholder(Player p, String target, String identifier) {
         return ConfigValues.isInterestEnabled() ? BPFormatter.formatTime(BankPlus.INSTANCE().getInterest().getInterestCooldownMillis()) : "Interest disabled.";
     }
+
+    @Override
+    public boolean hasPlaceholders() {
+        return false;
+    }
+
+    @Override
+    public boolean hasVariables() {
+        return false;
+    }
 }

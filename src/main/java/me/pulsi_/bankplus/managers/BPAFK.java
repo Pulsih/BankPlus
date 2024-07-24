@@ -1,5 +1,6 @@
 package me.pulsi_.bankplus.managers;
 
+import com.Zrips.CMI.CMI;
 import com.earth2me.essentials.Essentials;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.values.ConfigValues;
@@ -21,11 +22,14 @@ public class BPAFK {
     }
 
     public boolean isAFK(Player p) {
-        return ConfigValues.isIgnoringAfkPlayers() && (ConfigValues.isUsingEssentialsXAFK() ? Essentials.getPlugin(Essentials.class).getUser(p).isAfk() : afkPlayers.contains(p));
+        // prevent users from using both... Just in case
+        if (ConfigValues.isUsingEssentialsXAFK() && !ConfigValues.isUsingCmiAfk()) {return Essentials.getPlugin(Essentials.class).getUser(p).isAfk();}
+        if (!ConfigValues.isUsingEssentialsXAFK() && ConfigValues.isUsingCmiAfk()) {return CMI.getInstance().getPlayerManager().getUser(p).isAfk();}
+        return afkPlayers.contains(p);
     }
 
     public void startCountdown() {
-        if (!ConfigValues.isIgnoringAfkPlayers() || ConfigValues.isUsingEssentialsXAFK()) {
+        if (!ConfigValues.isIgnoringAfkPlayers() || ConfigValues.isUsingEssentialsXAFK() || ConfigValues.isUsingCmiAfk()) {
             isPlayerCountdownActive = false;
             return;
         }

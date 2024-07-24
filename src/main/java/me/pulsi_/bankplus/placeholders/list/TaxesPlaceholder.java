@@ -5,16 +5,20 @@ import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.entity.Player;
 
-public class DepositTaxesPlaceholder extends BPPlaceholder {
-
+public class TaxesPlaceholder extends BPPlaceholder {
     @Override
     public String getIdentifier() {
-        return "deposit_taxes";
+        return "[deposit/withdraw]_taxes";
     }
 
     @Override
     public String getPlaceholder(Player p, String target, String identifier) {
-        return BPFormatter.styleBigDecimal(ConfigValues.getDepositTaxes());
+        String[] args = getSelectedVariantParts(identifier);
+        if (args[0].equals("deposit")) {
+            return BPFormatter.styleBigDecimal(ConfigValues.getDepositTaxes());
+        } else {
+            return BPFormatter.styleBigDecimal(ConfigValues.getWithdrawTaxes());
+        }
     }
 
     @Override
@@ -24,6 +28,6 @@ public class DepositTaxesPlaceholder extends BPPlaceholder {
 
     @Override
     public boolean hasVariables() {
-        return false;
+        return true;
     }
 }

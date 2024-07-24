@@ -189,6 +189,24 @@ Interest:
     # (You will need to install EssentialsX)
     Use-EssentialsX-AFK: false
 
+    # Choose if using the CMI AFK.
+    # (You will need to install CMI)
+    Use-CMI-AFK: false
+
+    AFK-Payouts:
+      # Pay the offline amount to AFK Players
+      # Requires Different-Offline-Rate to be true!
+      Pay-AFK-Players-Offline-Amount: false
+
+      # Choose if the AFK rate will be
+      # different from the default one.
+      # Requires Pay-AFK-Players-Offline-Amount to be true!
+      Different-AFK-Rate: false
+
+      # If 'Different-AFK-Rate' is enabled, the AFK
+      # players will receive this interest rate.
+      AFK-Rate: "4%"
+
     # The time, in minutes, that will pass
     # before marking a player as AFK
     AFK-Time: 5
@@ -324,6 +342,10 @@ BankTop:
 
   # The size of the banktop.
   Size: 10
+
+  # Update on request
+  # Negates the Update-Delay
+  Update-On-Request: false
 
   # In ticks, the delay before the top will update.
   Update-Delay: 12000

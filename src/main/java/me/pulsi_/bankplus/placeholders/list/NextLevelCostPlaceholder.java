@@ -24,4 +24,14 @@ public class NextLevelCostPlaceholder extends BPPlaceholder {
         BigDecimal cost = BankUtils.getLevelCost(bank, BankUtils.getCurrentLevel(bank, p) + 1);
         return getFormat(identifier, cost);
     }
+
+    @Override
+    public boolean hasPlaceholders() {
+        return false;
+    }
+
+    @Override
+    public boolean hasVariables() {
+        return false;
+    }
 }
