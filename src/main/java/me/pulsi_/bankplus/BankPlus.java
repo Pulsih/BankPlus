@@ -159,9 +159,13 @@ public final class BankPlus extends JavaPlugin {
         return isPlaceholderApiHooked;
     }
 
-    public boolean isEssentialsXHooked() { return isEssentialsXHooked; }
+    public boolean isEssentialsXHooked() {
+        return isEssentialsXHooked;
+    }
 
-    public boolean isCmiHooked() {return isCmiHooked;}
+    public boolean isCmiHooked() {
+        return isCmiHooked;
+    }
 
     public boolean isUpdated() {
         return isUpdated;
