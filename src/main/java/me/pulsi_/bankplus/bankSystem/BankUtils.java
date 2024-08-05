@@ -5,6 +5,7 @@ import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPItems;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
+import me.pulsi_.bankplus.utils.SetItemNbt;
 import me.pulsi_.bankplus.utils.texts.BPChat;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
@@ -38,7 +39,7 @@ public class BankUtils {
     public BankUtils() throws Exception {
         throw new Exception("This class may not be initialized.");
     }
- 
+
     public static Bank getBank(String bankName) {
         return BankPlus.INSTANCE().getBankRegistry().getBanks().get(bankName);
     }
@@ -49,6 +50,7 @@ public class BankUtils {
 
     /**
      * Checks if the selected bank is registered.
+     *
      * @param bank The bank.
      * @return true if it is registered, false otherwise.
      */
@@ -58,6 +60,7 @@ public class BankUtils {
 
     /**
      * Checks if the selected bank is registered.
+     *
      * @param bank The bank.
      * @return true if it is registered, false otherwise.
      */
@@ -69,6 +72,7 @@ public class BankUtils {
 
     /**
      * Checks if the selected bank name is registered.
+     *
      * @param bankName The bank name.
      * @return true if it is registered, false otherwise.
      */
@@ -78,6 +82,7 @@ public class BankUtils {
 
     /**
      * Checks if the selected bank name is registered, and automatically alert the command sender, if specified, its non-existence.
+     *
      * @param bankName The bank name.
      * @return true if it is registered, false otherwise.
      */
@@ -89,6 +94,7 @@ public class BankUtils {
 
     /**
      * Checks if the selected bank is the main bank.
+     *
      * @param bank The bank.
      * @return true if it is the main bank, false otherwise.
      */
@@ -403,6 +409,7 @@ public class BankUtils {
 
         boolean remove = false;
         List<ItemStack> requiredItems = getRequiredItems(bank, nextLevel);
+        Bank.BankLevel level = bank.getBankLevel(nextLevel);
         if (!requiredItems.isEmpty()) {
             boolean hasItems = false;
 
@@ -413,7 +420,8 @@ public class BankUtils {
                 boolean hasItem = false;
                 for (ItemStack content : p.getInventory().getContents()) {
                     if (content == null || content.getType() != item.getType()) continue;
-                    if (!content.isSimilar(item)) continue;
+                    if (!isValidItem(item, content, level))
+                        continue;
                     playerAmount += content.getAmount();
 
                     if (playerAmount < amount) continue;
@@ -480,6 +488,10 @@ public class BankUtils {
         }
     }
 
+    private static boolean isValidItem(ItemStack item, ItemStack content, Bank.BankLevel level) {
+        return (level.nbt != null && SetItemNbt.isNamespacedKeyExist() && SetItemNbt.getNbt(content.getItemMeta(), level.nbt) != null && content.isSimilar(item)) || content.isSimilar(item);
+    }
+
     /**
      * Create a BankLevel object from a level section.
      *
@@ -506,10 +518,12 @@ public class BankUtils {
 
         List<ItemStack> requiredItems;
         if (levelSection.isList("Required-Items")) {
-            requiredItems = retrieveRequiredItemsFromList(levelSection, bankName);
+            requiredItems = retrieveRequiredItemsFromList(levelSection,bankLevel, bankName);
         } else {
-            requiredItems =  retrieveRequiredItemsFromString(levelSection, bankName);
+            requiredItems = retrieveRequiredItemsFromString(levelSection,bankLevel, bankName);
         }
+
+
         bankLevel.requiredItems = requiredItems;
         bankLevel.removeRequiredItems = levelSection.getBoolean("Remove-Required-Items");
 
@@ -586,7 +600,7 @@ public class BankUtils {
         return fallBack;
     }
 
-    private static List<ItemStack> retrieveRequiredItemsFromList(final ConfigurationSection levelSection,final String bankName) {
+    private static List<ItemStack> retrieveRequiredItemsFromList(final ConfigurationSection levelSection, Bank.BankLevel bankLevel, final String bankName) {
         List<ItemStack> requiredItems = new ArrayList<>();
         List<?> requiredItemsList = levelSection.getList("Required-Items");
         if (requiredItemsList == null)
@@ -610,8 +624,14 @@ public class BankUtils {
                     List<String> lore = new ArrayList<>();
                     for (String lines : (List<String>) requiredItem.get("Lore")) lore.add(BPChat.color(lines));
                     itemMeta.setLore(lore);
+                    String nbtKey = requiredItem.get("Set-Nbt") + "";
+                    if (!nbtKey.isEmpty()) {
+                        SetItemNbt.setNbt(itemMeta, nbtKey,  " ");
+                        bankLevel.nbt = nbtKey;
+                    }
                 }
                 itemStack.setItemMeta(itemMeta);
+
                 requiredItems.add(itemStack);
             } else {
                 BPLogger.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
@@ -620,7 +640,7 @@ public class BankUtils {
         return requiredItems;
     }
 
-    private static List<ItemStack> retrieveRequiredItemsFromString(final ConfigurationSection levelSection,final String bankName) {
+    private static List<ItemStack> retrieveRequiredItemsFromString(final ConfigurationSection levelSection, Bank.BankLevel bankLevel, final String bankName) {
         List<ItemStack> requiredItems = new ArrayList<>();
         String requiredItemsString = levelSection.getString("Required-Items");
         if (requiredItemsString != null && !requiredItemsString.isEmpty()) {
@@ -631,7 +651,13 @@ public class BankUtils {
             for (String splitItem : configItems) {
                 if (!splitItem.contains("-")) {
                     try {
+                        ItemStack item = new ItemStack(Material.valueOf(splitItem));
                         requiredItems.add(new ItemStack(Material.valueOf(splitItem)));
+                        String nbtKey = levelSection.getString("Set-Nbt");
+                        if (nbtKey != null && !nbtKey.isEmpty()) {
+                            SetItemNbt.setNbt(item, nbtKey,  " ");
+                            bankLevel.nbt = nbtKey;
+                        }
                     } catch (IllegalArgumentException e) {
                         BPLogger.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
                     }
@@ -649,6 +675,11 @@ public class BankUtils {
                         amount = Integer.parseInt(split[1]);
                     } catch (NumberFormatException e) {
                         BPLogger.warn("The bank \"" + bankName + "\" contains an invalid number in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
+                    }
+                    String nbtKey = levelSection.getString("Set-Nbt");
+                    if (nbtKey != null && !nbtKey.isEmpty()) {
+                        SetItemNbt.setNbt(item, nbtKey,  " ");
+                        bankLevel.nbt = nbtKey;
                     }
 
                     item.setAmount(amount);
