@@ -246,6 +246,7 @@ Items:
         - "&7Level: &7%bankplus_level% &8-> &a%bankplus_next_level%"
         - "&7Upgrade Cost: &a%bankplus_next_level_cost%"
         - "&7Required Items: &b%bankplus_next_level_required_items%"
+        - "&7Name: &b%bankplus_next_level_required_items-name%"
         - ""
         - "&bNew statistics:"
         - " &8* &aCapacity: &f%bankplus_next_level_capacity%"

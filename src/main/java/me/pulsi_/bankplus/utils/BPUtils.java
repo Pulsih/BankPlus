@@ -17,6 +17,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -287,6 +288,20 @@ public class BPUtils {
             String material = (item.getType() + (amount > 1 ? "s" : "")).toLowerCase();
 
             builder.append(amount).append(" ").append(material);
+            if (i == requiredItems.size() - 1) continue;
+            if (i + 1 == requiredItems.size() - 1) builder.append(" and ");
+            else builder.append(", ");
+        }
+        return builder.toString();
+    }
+
+    public static String getRequiredItemsName(List<ItemStack> requiredItems) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < requiredItems.size(); i++) {
+            ItemStack item = requiredItems.get(i);
+            ItemMeta itemMeta = item.getItemMeta();
+
+            builder.append(" ").append(itemMeta.getDisplayName());
             if (i == requiredItems.size() - 1) continue;
             if (i + 1 == requiredItems.size() - 1) builder.append(" and ");
             else builder.append(", ");
