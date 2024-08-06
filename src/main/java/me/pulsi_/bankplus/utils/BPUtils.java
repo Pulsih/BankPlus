@@ -299,9 +299,11 @@ public class BPUtils {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < requiredItems.size(); i++) {
             ItemStack item = requiredItems.get(i);
+            int amount = item.getAmount();
             ItemMeta itemMeta = item.getItemMeta();
+            String material = ((itemMeta == null ? "" : itemMeta.getDisplayName()) + (amount > 1 ? "s" : ""));
 
-            builder.append(" ").append(itemMeta.getDisplayName());
+            builder.append(" ").append(material);
             if (i == requiredItems.size() - 1) continue;
             if (i + 1 == requiredItems.size() - 1) builder.append(" and ");
             else builder.append(", ");
