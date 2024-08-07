@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'me.pulsi_'
-version = '6.2'
+version = '6.4'
 
 // Remove comments when testing the plugin.
 //setLibsDirName("plugins");
