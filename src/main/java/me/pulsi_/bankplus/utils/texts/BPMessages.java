@@ -22,7 +22,7 @@ public class BPMessages {
      * @param identifier The message identifier in the messages file.
      */
     public static void send(Player p, String identifier) {
-        send(p, identifier, null);
+        send(p, identifier, (Object) null);
     }
 
     /**
@@ -51,7 +51,7 @@ public class BPMessages {
      * @param identifier The message identifier in the messages file.
      */
     public static void send(CommandSender s, String identifier) {
-        send(s, identifier, null);
+        send(s, identifier, (Object) null);
     }
 
     /**
@@ -115,7 +115,7 @@ public class BPMessages {
 
         FileConfiguration config = BankPlus.INSTANCE().getConfigs().getConfig("messages.yml");
 
-        for (String identifier : config.getConfigurationSection("").getKeys(false)) {
+        for (String identifier : Objects.requireNonNull(config.getConfigurationSection("")).getKeys(false)) {
             if (!identifier.equals("Enable-Missing-Message-Alert") && !identifier.equals("Prefix") && !identifier.equals("Title-Custom-Transaction") && !identifier.equals("Interest-Broadcast"))
                 messages.put(identifier, getPossibleMessages(config, identifier));
         }

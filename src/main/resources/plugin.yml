@@ -8,6 +8,7 @@ softdepend:
   - PlaceholderAPI
   - Essentials
   - EconomyPlus
+  - CMI
 authors: [ Pulsi_ ]
 load: POSTWORLD
 description: The best bank plugin on Spigot!

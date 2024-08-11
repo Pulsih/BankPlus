@@ -6,7 +6,6 @@ import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.economy.TransactionType;
 import me.pulsi_.bankplus.managers.BPTaskManager;
-import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.ConfigValues;
@@ -19,6 +18,8 @@ import org.bukkit.entity.Player;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+
+import static me.pulsi_.bankplus.values.ConfigValues.isOfflineInterestDifferentRate;
 
 public class BPInterest {
 
@@ -44,7 +45,7 @@ public class BPInterest {
 
     public void restartInterest(boolean start) {
         isOfflineInterestEnabled = ConfigValues.isOfflineInterestEnabled();
-        offlineInterestPermission = ConfigValues.isOfflineInterestDifferentRate() ? ConfigValues.getInterestOfflinePermission() : defaultInterestPermission;
+        offlineInterestPermission = isOfflineInterestDifferentRate() ? ConfigValues.getInterestOfflinePermission() : defaultInterestPermission;
 
         long interestSave = 0;
 
@@ -79,6 +80,7 @@ public class BPInterest {
 
     public void giveInterest() {
         boolean interestToVault = ConfigValues.isGivingInterestOnVaultBalance();
+        boolean payOfflineToAfk = ConfigValues.isPayingAfkPlayerOfflineAmount();
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
 
             List<Bank> availableBanks = new ArrayList<>();
@@ -89,14 +91,18 @@ public class BPInterest {
 
             Player oP = p.getPlayer();
             if (oP != null) {
-                if (!oP.hasPermission(defaultInterestPermission) || BankPlus.INSTANCE().getAfkManager().isAFK(oP)) continue;
+                boolean isAfk = BankPlus.INSTANCE().getAfkManager().isAFK(oP);
+                if (!oP.hasPermission(defaultInterestPermission) || (isAfk && !payOfflineToAfk)) continue;
 
                 BigDecimal interestAmount = BigDecimal.ZERO;
                 for (Bank bank : availableBanks) {
                     BPEconomy economy = bank.getBankEconomy();
                     if (economy.getBankBalance(p).compareTo(BigDecimal.ZERO) <= 0) continue;
 
-                    BigDecimal interestMoney = getInterestMoney(bank, p, BankUtils.getInterestRate(bank, p));
+                    BigDecimal interestMoney = getInterestMoney(bank, p, BankUtils.getInterestRate(bank, oP));
+                    if (payOfflineToAfk && isAfk) {
+                        interestMoney = ConfigValues.isAfkInterestDifferentRate() ? getInterestMoney(bank, p, BankUtils.getAfkInterestRate(bank, oP)) : getInterestMoney(bank, p, BankUtils.getOfflineInterestRate(bank, oP));
+                    }
 
                     BigDecimal maxAmount = BankUtils.getMaxInterestAmount(bank, p);
                     if (maxAmount.compareTo(BigDecimal.ZERO) > 0) interestMoney = interestMoney.min(maxAmount);
@@ -116,7 +122,7 @@ public class BPInterest {
 
                 if (availableBanks.size() > 1) BPMessages.send(oP, MessageValues.getMultiInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
                 else {
-                    if (BankUtils.isFull(availableBanks.get(0), p)) {
+                    if (BankUtils.isFull(availableBanks.get(0), p) && !ConfigValues.isGivingInterestOnVaultBalance()) {
                         BPMessages.send(oP, MessageValues.getInterestBankFull(), BPUtils.placeValues(p, interestAmount), true);
                         continue;
                     }
@@ -135,7 +141,7 @@ public class BPInterest {
                     BPEconomy economy = bank.getBankEconomy();
                     if (economy.getBankBalance(p).compareTo(BigDecimal.ZERO) <= 0) continue;
 
-                    BigDecimal interestMoney = ConfigValues.isOfflineInterestDifferentRate() ?
+                    BigDecimal interestMoney = isOfflineInterestDifferentRate() ?
                                     getInterestMoney(bank, p, BankUtils.getOfflineInterestRate(bank, p)) :
                                     getInterestMoney(bank, p, BankUtils.getInterestRate(bank, p));
 

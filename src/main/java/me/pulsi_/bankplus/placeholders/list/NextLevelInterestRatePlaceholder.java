@@ -21,4 +21,14 @@ public class NextLevelInterestRatePlaceholder extends BPPlaceholder {
 
         return BankUtils.getInterestRate(bank, p, BankUtils.getCurrentLevel(bank, p) + 1) + "";
     }
+
+    @Override
+    public boolean hasPlaceholders() {
+        return false;
+    }
+
+    @Override
+    public boolean hasVariables() {
+        return false;
+    }
 }
