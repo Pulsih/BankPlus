@@ -19,4 +19,14 @@ public class NextInterestPlaceholder extends BPPlaceholder {
         Bank bank = BankUtils.getBank(target);
         return getFormat(identifier, BankPlus.INSTANCE().getInterest().getInterestMoney(bank, p, BankUtils.getInterestRate(bank, p)));
     }
+
+    @Override
+    public boolean hasPlaceholders() {
+        return false;
+    }
+
+    @Override
+    public boolean hasVariables() {
+        return false;
+    }
 }

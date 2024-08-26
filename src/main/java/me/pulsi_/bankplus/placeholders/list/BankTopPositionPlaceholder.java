@@ -20,4 +20,14 @@ public class BankTopPositionPlaceholder extends BPPlaceholder {
 
         return BPBankTop.getPlayerBankTopPosition(p) + "";
     }
+
+    @Override
+    public boolean hasPlaceholders() {
+        return false;
+    }
+
+    @Override
+    public boolean hasVariables() {
+        return false;
+    }
 }

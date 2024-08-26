@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'me.pulsi_'
-version = '6.4'
+version = '6.2.1'
 
 // Remove comments when testing the plugin.
 //setLibsDirName("plugins");
@@ -36,6 +36,7 @@ dependencies {
     compileOnly 'net.essentialsx:EssentialsX:2.20.0'
     compileOnly 'com.github.MilkBowl:VaultAPI:1.7'
     compileOnly 'me.clip:placeholderapi:2.11.3'
+    implementation(fileTree(dir: 'libs', includes: ['*.jar']))
 }
 
 processResources {

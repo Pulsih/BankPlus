@@ -1,7 +1,6 @@
 package me.pulsi_.bankplus.values;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.utils.BPLogger;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.math.BigDecimal;
@@ -29,6 +28,7 @@ public class ConfigValues extends ValueLoader {
     private static BigDecimal interestMaxAmount;
     private static BigDecimal interestRate;
     private static BigDecimal offlineInterestRate;
+    private static BigDecimal afkInterestRate;
     private static String bankTopMoneyFormat;
     private static String bankTopUpdateBroadcastMessage;
     private static String bankTopPlayerNotFoundPlaceholder;
@@ -54,6 +54,7 @@ public class ConfigValues extends ValueLoader {
     private static boolean interestLimiterEnabled;
     private static boolean offlineInterestEnabled;
     private static boolean offlineInterestDifferentRate;
+    private static boolean afkInterestDifferentRate;
     private static boolean notifyingNewPlayer;
     private static boolean silentInfoMessages;
     private static boolean updateCheckerEnabled;
@@ -61,10 +62,13 @@ public class ConfigValues extends ValueLoader {
     private static boolean accumulatingInterestLimiter;
     private static boolean savingOnQuit;
     private static boolean ignoringAfkPlayers;
+    private static boolean payingAfkPlayerOfflineAmount;
     private static boolean usingEssentialsXAFK;
+    private static boolean usingCmiAfk;
     private static boolean usingBankBalanceToUpgrade;
     private static boolean guiActionsNeedingPermissions;
     private static boolean bankTopEnabled;
+    private static boolean bankTopUpdateOnRequest;
     private static boolean bankTopUpdateBroadcastEnabled, bankTopUpdateBroadcastSilentConsole;
     private static boolean broadcastingSaves;
     private static boolean guiModuleEnabled;
@@ -161,10 +165,15 @@ public class ConfigValues extends ValueLoader {
         accumulatingInterestLimiter = config.getBoolean("Interest.Accumulate-Interest-Limiter");
         savingOnQuit = config.getBoolean("General-Settings.Save-On-Quit");
         ignoringAfkPlayers = config.getBoolean("Interest.AFK-Settings.Ignore-AFK-Players");
+        payingAfkPlayerOfflineAmount = config.getBoolean("Interest.AFK-Settings.AFK-Payouts.Pay-AFK-Players-Offline-Amount");
+        afkInterestRate = getBigDecimal(config, "Interest.AFK-Settings.AFK-Payouts.AFK-Rate");
+        afkInterestDifferentRate = config.getBoolean("Interest.AFK-Settings.AFK-Payouts.Different-AFK-Rate");
         usingEssentialsXAFK = config.getBoolean("Interest.AFK-Settings.Use-EssentialsX-AFK");
+        usingCmiAfk = config.getBoolean("Interest.AFK-Settings.Use-CMI-AFK");
         usingBankBalanceToUpgrade = config.getBoolean("General-Settings.Use-Bank-Balance-To-Upgrade");
         guiActionsNeedingPermissions = config.getBoolean("General-Settings.Gui-Actions-Need-Permissions");
         bankTopEnabled = config.getBoolean("BankTop.Enabled");
+        bankTopUpdateOnRequest = config.getBoolean("BankTop.Update-On-Request");
         bankTopUpdateBroadcastEnabled = config.getBoolean("BankTop.Update-Broadcast.Enabled");
         bankTopUpdateBroadcastSilentConsole = config.getBoolean("BankTop.Update-Broadcast.Silent-Console");
         broadcastingSaves = config.getBoolean("General-Settings.Save-Broadcast");
@@ -340,6 +349,10 @@ public class ConfigValues extends ValueLoader {
         return offlineInterestRate;
     }
 
+    public static BigDecimal getAfkInterestRate() {
+        return afkInterestRate;
+    }
+
     public static String getBankTopMoneyFormat() {
         return bankTopMoneyFormat;
     }
@@ -480,6 +493,10 @@ public class ConfigValues extends ValueLoader {
         return offlineInterestDifferentRate;
     }
 
+    public static boolean isAfkInterestDifferentRate() {
+        return afkInterestDifferentRate;
+    }
+
     public static boolean isNotifyingNewPlayer() {
         return notifyingNewPlayer;
     }
@@ -520,9 +537,15 @@ public class ConfigValues extends ValueLoader {
         return ignoringAfkPlayers;
     }
 
+    public static boolean isPayingAfkPlayerOfflineAmount() {
+        return payingAfkPlayerOfflineAmount;
+    }
+
     public static boolean isUsingEssentialsXAFK() {
         return usingEssentialsXAFK;
     }
+
+    public static boolean isUsingCmiAfk() { return usingCmiAfk;}
 
     public static boolean isUsingBankBalanceToUpgrade() {
         return usingBankBalanceToUpgrade;
@@ -534,6 +557,10 @@ public class ConfigValues extends ValueLoader {
 
     public static boolean isBankTopEnabled() {
         return bankTopEnabled;
+    }
+
+    public static boolean isBankTopUpdateOnRequest() {
+        return bankTopUpdateOnRequest;
     }
 
     public static boolean isBankTopUpdateBroadcastEnabled() {
