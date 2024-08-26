@@ -13,14 +13,16 @@ public abstract class BPPlaceholder {
 
     /**
      * Get the placeholder identifier
+     *
      * @return A string.
      */
     public abstract String getIdentifier();
 
     /**
      * Get the placeholder string.
-     * @param p The player.
-     * @param target Target string that can be a bank or player name.
+     *
+     * @param p          The player.
+     * @param target     Target string that can be a bank or player name.
      * @param identifier The full placeholder identifier.
      * @return A string.
      */
@@ -29,6 +31,7 @@ public abstract class BPPlaceholder {
     /**
      * Check if the placeholder has any placeholders.
      * Placeholders are anything between < and >.
+     *
      * @return A boolean.
      */
     public abstract boolean hasPlaceholders();
@@ -36,16 +39,24 @@ public abstract class BPPlaceholder {
     /**
      * Check if the placeholder has any variables.
      * Variables are anything between [ and ].
+     *
      * @return A boolean.
      */
     public abstract boolean hasVariables();
 
-    public String getFormat(String formatter, BigDecimal value) {
+    /**
+     * From the given placeholder and amount, get the formatted amount based on the placeholder format keyword.
+     *
+     * @param placeholder The placeholder id.
+     * @param value       The amount to format.
+     * @return The formatted amount.
+     */
+    public String getFormat(String placeholder, BigDecimal value) {
         if (value == null) return "Invalid number!";
 
-        if (formatter.contains("_long")) return value.toPlainString();
-        if (formatter.contains("_formatted")) return BPFormatter.formatPrecise(value);
-        if (formatter.contains("_formatted_long")) return BPFormatter.formatLong(value);
+        if (placeholder.contains("_long")) return value.toPlainString();
+        if (placeholder.contains("_formatted")) return BPFormatter.formatPrecise(value);
+        if (placeholder.contains("_formatted_long")) return BPFormatter.formatLong(value);
         return BPFormatter.formatCommas(value);
     }
 

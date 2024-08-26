@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class BPPlaceholderUtil {
+
     public static List<BPPlaceholder> registerVariations(List<BPPlaceholder> placeholders) {
         List<BPPlaceholder> registeredPlaceholders = new ArrayList<>();
         for (BPPlaceholder placeholder : placeholders) {

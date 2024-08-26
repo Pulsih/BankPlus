@@ -181,36 +181,6 @@ Interest:
   # Enable or disable the interest feature.
   Enabled: true
 
-  AFK-Settings:
-    # If a player is AFK, it won't receive the interest.
-    Ignore-AFK-Players: false
-
-    # Choose if using the EssentialsX AFK.
-    # (You will need to install EssentialsX)
-    Use-EssentialsX-AFK: false
-
-    # Choose if using the CMI AFK.
-    # (You will need to install CMI)
-    Use-CMI-AFK: false
-
-    AFK-Payouts:
-      # Pay the offline amount to AFK Players
-      # Requires Different-Offline-Rate to be true!
-      Pay-AFK-Players-Offline-Amount: false
-
-      # Choose if the AFK rate will be
-      # different from the default one.
-      # Requires Pay-AFK-Players-Offline-Amount to be true!
-      Different-AFK-Rate: false
-
-      # If 'Different-AFK-Rate' is enabled, the AFK
-      # players will receive this interest rate.
-      AFK-Rate: "4%"
-
-    # The time, in minutes, that will pass
-    # before marking a player as AFK
-    AFK-Time: 5
-
   # The interest rate. (Default: 5%)
   #
   # IMPORTANT! This amount is defined in the BANK FILE!
@@ -231,26 +201,26 @@ Interest:
   # (You must put the space to specify the time!)
   Delay: "5 m"
 
-  # Select a number where the interest message won't
-  # be shown if the total interest isn't greater than the
-  # specified amount.
+  # Select a number where the interest message won't be shown if
+  # the total interest isn't greater than the specified amount.
   #
   # Put "0" to disable this feature.
   Skip-Message-If-Lower-Than: "0"
 
   # The max amount that you can receive with interest.
   # This is a fallback value, in case the bank level does not specify one. (Max-Interest-Amount)
-  # Put 0 to disable.
+  #
+  # Put "0" to disable.
   Max-Amount: "500000"
 
   # Choose if also giving interest to offline players.
-  Give-To-Offline-Players: false
+  Give-To-Offline-Players: true
 
   # The time before the offline interest
   # will stop working if the player doesn't join.
   # Put 0 to have no limit.
   #
-  # The format is the same as Interest.Delay
+  # The format is the same as "Interest.Delay".
   Offline-Limit: "3 d"
 
   # Choose if the interest rate for offline players
@@ -282,6 +252,33 @@ Interest:
   # Example: Having 100000 money will give you 10% of 5000 + 4% of 100000
   # (Based on the default interest limiter configuration)
   Accumulate-Interest-Limiter: false
+
+  AFK-Settings:
+    # Enable this option to activate the afk counting system.
+    # (If you don't want to use it, disable that to improve the performance)
+    Enabled: false
+
+    # The time, in minutes, that will pass
+    # before marking a player as AFK.
+    AFK-Time: 5
+
+    # Choose if using the EssentialsX AFK.
+    # (You will need to install EssentialsX)
+    Use-EssentialsX-AFK: false
+
+    # Choose if using the CMI AFK.
+    # (You will need to install CMI)
+    Use-CMI-AFK: false
+
+    # If a player is AFK, it won't receive the interest.
+    # AFK = When a player is online on the server but
+    # is not doing anything for the specified time.
+    Ignore-AFK-Players: false
+
+    # The interest rate that AFK players will receive.
+    # The option "Ignore-AFK-Players" needs
+    # to be disabled to make this work.
+    AFK-Rate: "4%"
 
 # The player needs to have the permission
 # "bankplus.deposit" to be able to deposit.

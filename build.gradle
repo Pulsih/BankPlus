@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'me.pulsi_'
-version = '6.2.1'
+version = '6.3-Alpha2'
 
 // Remove comments when testing the plugin.
 //setLibsDirName("plugins");
@@ -46,9 +46,4 @@ processResources {
     filesMatching('plugin.yml') {
         expand props
     }
-}
-
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
-    options.release = 17  // Ensures compatibility with Java 17
 }

@@ -81,8 +81,8 @@ Loan-Returned-Debt-Bank: "%prefix% &cSadly, you did not have enough money to ret
 # Titles
 Title-Custom-Transaction:
   Enabled: true
-  Title-Deposit: "%prefix% &fType in &achat &fan, amount to &adeposit,10,40,10"
-  Title-Withdraw: "%prefix% &fType in &achat &fan, amount to &awithdraw,10,40,10"
+  Title-Deposit: "%prefix% &fType in &achat &fan,amount to &adeposit,10,40,10"
+  Title-Withdraw: "%prefix% &fType in &achat &fan,amount to &awithdraw,10,40,10"
 
 # Interest Messages
 Interest-Broadcast:
