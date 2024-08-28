@@ -100,6 +100,8 @@ public class BPPlaceholders extends PlaceholderExpansion {
         placeholders.add(new LevelPlaceholder());
         placeholders.add(new NextInterestPlaceholder());
         placeholders.add(new NextLevelPlaceholder());
+        placeholders.add(new NextLevelRequiredItemsPlaceholder());
+        placeholders.add(new NextLevelRequiredItemsNamePlaceholder());
         placeholders.add(new NextOfflineInterestPlaceholder());
         placeholders.add(new OfflineInterestRatePlaceholder());
         placeholders.add(new CalculatePercentagePlaceholder());
