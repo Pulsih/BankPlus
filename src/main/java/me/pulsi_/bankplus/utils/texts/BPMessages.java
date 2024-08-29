@@ -110,10 +110,12 @@ public class BPMessages {
         return finalMessages;
     }
 
-    public static void loadMessages() {
+    /**
+     * Load all the message values from the given config file.
+     * @param config The messages config file.
+     */
+    public static void loadMessages(FileConfiguration config) {
         messages.clear();
-
-        FileConfiguration config = BankPlus.INSTANCE().getConfigs().getConfig("messages.yml");
 
         for (String identifier : Objects.requireNonNull(config.getConfigurationSection("")).getKeys(false)) {
             if (!identifier.equals("Enable-Missing-Message-Alert") && !identifier.equals("Prefix") && !identifier.equals("Title-Custom-Transaction") && !identifier.equals("Interest-Broadcast"))

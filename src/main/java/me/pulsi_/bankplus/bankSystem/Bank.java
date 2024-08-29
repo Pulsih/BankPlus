@@ -189,6 +189,5 @@ public class Bank {
         List<ItemStack> requiredItems;
         List<String> interestLimiter;
         boolean removeRequiredItems;
-        String nbt;
     }
 }

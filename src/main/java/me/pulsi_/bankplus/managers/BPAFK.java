@@ -22,9 +22,8 @@ public class BPAFK {
     }
 
     public boolean isAFK(Player p) {
-        // prevent users from using both... Just in case
-        if (ConfigValues.isUsingEssentialsXAFK() && !ConfigValues.isUsingCmiAfk()) {return Essentials.getPlugin(Essentials.class).getUser(p).isAfk();}
-        if (!ConfigValues.isUsingEssentialsXAFK() && ConfigValues.isUsingCmiAfk()) {return CMI.getInstance().getPlayerManager().getUser(p).isAfk();}
+        if (ConfigValues.isUsingEssentialsXAFK()) {return Essentials.getPlugin(Essentials.class).getUser(p).isAfk();}
+        if (ConfigValues.isUsingCmiAfk()) {return CMI.getInstance().getPlayerManager().getUser(p).isAfk();}
         return afkPlayers.contains(p);
     }
 

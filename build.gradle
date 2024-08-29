@@ -7,7 +7,7 @@ version = '6.3-Alpha2'
 
 // Remove comments when testing the plugin.
 //setLibsDirName("plugins");
-//setBuildDir(new File("C:\\Users\\faste\\Desktop\\Test Server"));
+//setBuildDir(new File("C:\\Users\\faste\\Desktop\\Test Servers\\1.16.4"));
 
 repositories {
     mavenCentral()
@@ -36,7 +36,7 @@ dependencies {
     compileOnly 'net.essentialsx:EssentialsX:2.20.0'
     compileOnly 'com.github.MilkBowl:VaultAPI:1.7'
     compileOnly 'me.clip:placeholderapi:2.11.3'
-    implementation(fileTree(dir: 'libs', includes: ['*.jar']))
+    implementation(fileTree(dir: 'libs', includes: ['*.jar'])) // For CMI Api (https://github.com/Zrips/CMI-API/releases)
 }
 
 processResources {

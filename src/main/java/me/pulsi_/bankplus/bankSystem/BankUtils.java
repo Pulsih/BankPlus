@@ -5,7 +5,6 @@ import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPItems;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
-import me.pulsi_.bankplus.utils.SetItemNbt;
 import me.pulsi_.bankplus.utils.texts.BPChat;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
@@ -440,7 +439,6 @@ public class BankUtils {
 
         boolean remove = false;
         List<ItemStack> requiredItems = getRequiredItems(bank, nextLevel);
-        Bank.BankLevel level = bank.getBankLevel(nextLevel);
         if (!requiredItems.isEmpty()) {
             boolean hasItems = false;
 
@@ -451,8 +449,7 @@ public class BankUtils {
                 boolean hasItem = false;
                 for (ItemStack content : p.getInventory().getContents()) {
                     if (content == null || content.getType() != item.getType()) continue;
-                    if (!isValidItem(item, content, level))
-                        continue;
+
                     playerAmount += content.getAmount();
 
                     if (playerAmount < amount) continue;
@@ -519,10 +516,6 @@ public class BankUtils {
         }
     }
 
-    private static boolean isValidItem(ItemStack item, ItemStack content, Bank.BankLevel level) {
-        return (level.nbt != null && SetItemNbt.isNamespacedKeyExist() && SetItemNbt.getNbt(content.getItemMeta(), level.nbt) != null && content.isSimilar(item)) || content.isSimilar(item);
-    }
-
     /**
      * Create a BankLevel object from a level section.
      *
@@ -544,21 +537,14 @@ public class BankUtils {
         String offlineInterest = levelSection.getString("Offline-Interest");
         bankLevel.offlineInterest = offlineInterest == null ? ConfigValues.getOfflineInterestRate() : BPFormatter.getStyledBigDecimal(offlineInterest.replace("%", ""));
 
-        String afkInterest = levelSection.getString("Afk-Interest") == null ? levelSection.getString("AFK-Interest") : levelSection.getString("Afk-Interest");
+        String afkInterest = levelSection.getString("AFK-Interest");
         bankLevel.afkInterest = afkInterest == null ? ConfigValues.getAfkInterestRate() : BPFormatter.getStyledBigDecimal(afkInterest.replace("%", ""));
 
         String maxInterestAmount = levelSection.getString("Max-Interest-Amount");
         bankLevel.maxInterestAmount = maxInterestAmount == null ? ConfigValues.getInterestMaxAmount() : BPFormatter.getStyledBigDecimal(maxInterestAmount);
 
-        List<ItemStack> requiredItems;
-        if (levelSection.isList("Required-Items")) {
-            requiredItems = retrieveRequiredItemsFromList(levelSection,bankLevel, bankName);
-        } else {
-            requiredItems = retrieveRequiredItemsFromString(levelSection,bankLevel, bankName);
-        }
+        bankLevel.requiredItems = levelSection.isList("Required-Items") ? retrieveRequiredItemsFromList(levelSection, bankName) : retrieveRequiredItemsFromString(levelSection, bankName);
 
-
-        bankLevel.requiredItems = requiredItems;
         bankLevel.removeRequiredItems = levelSection.getBoolean("Remove-Required-Items");
 
         List<String> limiter = levelSection.getStringList("Interest-Limiter");
@@ -608,76 +594,20 @@ public class BankUtils {
         return guiItem;
     }
 
-    private static BigDecimal getLimitedInterest(Bank bank, OfflinePlayer p, int level, BigDecimal fallBack) {
-        for (String limiter : getInterestLimiter(bank, level)) {
-            if (!limiter.contains(":")) continue;
-
-            String[] split1 = limiter.split(":");
-            if (BPUtils.isInvalidNumber(split1[1])) continue;
-
-            String[] split2 = split1[0].split("-");
-            if (BPUtils.isInvalidNumber(split2[0]) || BPUtils.isInvalidNumber(split2[1])) continue;
-
-            String interest = split1[1].replace("%", ""), from = split2[0], to = split2[1];
-            BigDecimal interestRate = new BigDecimal(interest), fromNumber = new BigDecimal(from), toNumber = new BigDecimal(to);
-
-            if (fromNumber.doubleValue() > toNumber.doubleValue()) {
-                BigDecimal temp = toNumber;
-                fromNumber = toNumber;
-                toNumber = temp;
-            }
-
-            BigDecimal balance = bank.getBankEconomy().getBankBalance(p);
-            if (fromNumber.doubleValue() <= balance.doubleValue() && toNumber.doubleValue() >= balance.doubleValue())
-                return interestRate;
-        }
-        return fallBack;
-    }
-
-    private static List<ItemStack> retrieveRequiredItemsFromList(final ConfigurationSection levelSection, Bank.BankLevel bankLevel, final String bankName) {
-        List<ItemStack> requiredItems = new ArrayList<>();
-        List<?> requiredItemsList = levelSection.getList("Required-Items");
-        if (requiredItemsList == null)
-            return requiredItems;
-
-        for (Object required : requiredItemsList) {
-            if (!(required instanceof Map))
-                continue;
-            Map<?, ?> requiredItem = (Map<?, ?>) required;
-            Material material = Material.getMaterial((String) requiredItem.get("Material"));
-            int amount = 1;
-            try {
-                amount = Integer.valueOf(requiredItem.get("Amount") + "");
-            } catch (NumberFormatException ignore) {
-            }
-            if (material != null) {
-                ItemStack itemStack = new ItemStack(material, amount);
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                if (itemMeta != null) {
-                    itemMeta.setDisplayName(BPChat.color(requiredItem.get("Name") + ""));
-                    List<String> lore = new ArrayList<>();
-                    for (String lines : (List<String>) requiredItem.get("Lore")) lore.add(BPChat.color(lines));
-                    itemMeta.setLore(lore);
-                    String nbtKey = requiredItem.get("Set-Nbt") + "";
-                    if (!nbtKey.isEmpty()) {
-                        SetItemNbt.setNbt(itemMeta, nbtKey,  " ");
-                        bankLevel.nbt = nbtKey;
-                    }
-                }
-                itemStack.setItemMeta(itemMeta);
-
-                requiredItems.add(itemStack);
-            } else {
-                BPLogger.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
-            }
-        }
-        return requiredItems;
-    }
-
-    private static List<ItemStack> retrieveRequiredItemsFromString(final ConfigurationSection levelSection, Bank.BankLevel bankLevel, final String bankName) {
+    /**
+     * Method to retrieve required items in the simpler way (using material and amount).
+     * The string format must be the following: [ITEM_MATERIAL-AMOUNT,ITEM2_MATERIAL-AMOUNT].
+     * To use more specific items for upgrades, use {@link BankUtils#retrieveRequiredItemsFromList(ConfigurationSection, String) this} method.
+     *
+     * @param levelSection The section of the bank level where to get the required items.
+     * @param bankName     The name of the selected bank.
+     * @return A list of required items.
+     */
+    public static List<ItemStack> retrieveRequiredItemsFromString(ConfigurationSection levelSection, String bankName) {
         List<ItemStack> requiredItems = new ArrayList<>();
         String requiredItemsString = levelSection.getString("Required-Items");
         if (requiredItemsString != null && !requiredItemsString.isEmpty()) {
+
             List<String> configItems = new ArrayList<>();
             if (!requiredItemsString.contains(",")) configItems.add(requiredItemsString);
             else configItems.addAll(Arrays.asList(requiredItemsString.split(",")));
@@ -685,13 +615,7 @@ public class BankUtils {
             for (String splitItem : configItems) {
                 if (!splitItem.contains("-")) {
                     try {
-                        ItemStack item = new ItemStack(Material.valueOf(splitItem));
                         requiredItems.add(new ItemStack(Material.valueOf(splitItem)));
-                        String nbtKey = levelSection.getString("Set-Nbt");
-                        if (nbtKey != null && !nbtKey.isEmpty()) {
-                            SetItemNbt.setNbt(item, nbtKey,  " ");
-                            bankLevel.nbt = nbtKey;
-                        }
                     } catch (IllegalArgumentException e) {
                         BPLogger.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
                     }
@@ -710,11 +634,6 @@ public class BankUtils {
                     } catch (NumberFormatException e) {
                         BPLogger.warn("The bank \"" + bankName + "\" contains an invalid number in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
                     }
-                    String nbtKey = levelSection.getString("Set-Nbt");
-                    if (nbtKey != null && !nbtKey.isEmpty()) {
-                        SetItemNbt.setNbt(item, nbtKey,  " ");
-                        bankLevel.nbt = nbtKey;
-                    }
 
                     item.setAmount(amount);
                     requiredItems.add(item);
@@ -722,5 +641,101 @@ public class BankUtils {
             }
         }
         return requiredItems;
+    }
+
+    /**
+     * Method to retrieve specific required items.
+     * This method will take care of the item displayname, lore, material, amount and other
+     * characteristics, giving the ability to use more specific items as requirement for the upgrade.
+     * To use simpler items for upgrades, use {@link BankUtils#retrieveRequiredItemsFromString(ConfigurationSection, String)} this} method.
+     *
+     * @param levelSection The section of the bank level where to get the required items.
+     * @param bankName     The name of the selected bank.
+     * @return A list of required items.
+     */
+    public static List<ItemStack> retrieveRequiredItemsFromList(ConfigurationSection levelSection, String bankName) {
+        List<ItemStack> requiredItems = new ArrayList<>();
+        List<?> requiredItemsList = levelSection.getList("Required-Items");
+        if (requiredItemsList == null) return requiredItems;
+
+        int objectCount = 1;
+        for (Object itemInfoMap : requiredItemsList) {
+            if (!(itemInfoMap instanceof Map)) continue;
+            Map<?, ?> itemValues = (Map<?, ?>) itemInfoMap;
+
+            String type = (String) itemValues.get("Material");
+            if (type == null) {
+                BPLogger.warn("Could not load " + objectCount + "* required item in the \"" + levelSection + "\" level section of the \"" + bankName + "\" bank. (No material specified)");
+                continue;
+            }
+
+            Material material = Material.getMaterial(type);
+            if (material == null) {
+                BPLogger.warn("Could not load " + objectCount + "* required item in the \"" + levelSection + "\" level section of the \"" + bankName + "\" bank. (Specified an invalid material)");
+                continue;
+            }
+
+            int amount = 1;
+            String amountString = (itemValues.get("Amount")) + "";
+
+            if (!amountString.isEmpty()) {
+                try {
+                    amount = Integer.parseInt(amountString);
+                } catch (NumberFormatException e) {
+                    BPLogger.warn(objectCount + "* required item in the \"" + levelSection + "\" level section of the \"" + bankName + "\" bank specified an invalid amount. (Using 1 as default)");
+                }
+            }
+
+            ItemStack itemStack = new ItemStack(material, amount);
+            ItemMeta itemMeta = itemStack.getItemMeta();
+
+            String displayName = (String) itemValues.get("Displayname");
+            if (displayName != null) itemMeta.setDisplayName(BPChat.color(displayName));
+
+            List<String> lore = (List<String>) itemValues.get("Lore");
+            if (lore != null && !lore.isEmpty()) {
+                List<String> coloredLore = new ArrayList<>();
+                for (String line : lore) coloredLore.add(BPChat.color(line));
+                itemMeta.setLore(coloredLore);
+            }
+
+            itemStack.setItemMeta(itemMeta);
+            requiredItems.add(itemStack);
+        }
+        return requiredItems;
+    }
+
+    /**
+     * Method to simplify the calculation of the limited interest.
+     *
+     * @param bank     The bank where the interest is calculated.
+     * @param p        The player.
+     * @param level    The level to check.
+     * @param fallBack The default interest in case something goes wrong.
+     * @return An interest rate limited.
+     */
+    private static BigDecimal getLimitedInterest(Bank bank, OfflinePlayer p, int level, BigDecimal fallBack) {
+        BigDecimal balance = bank.getBankEconomy().getBankBalance(p);
+        for (String limiter : getInterestLimiter(bank, level)) {
+            if (!limiter.contains(":")) continue;
+
+            String[] split1 = limiter.split(":");
+            if (BPUtils.isInvalidNumber(split1[1])) continue;
+
+            String[] split2 = split1[0].split("-");
+            if (BPUtils.isInvalidNumber(split2[0]) || BPUtils.isInvalidNumber(split2[1])) continue;
+
+            String interest = split1[1].replace("%", ""), from = split2[0], to = split2[1];
+            BigDecimal interestRate = new BigDecimal(interest), fromNumber = new BigDecimal(from), toNumber = new BigDecimal(to);
+
+            if (fromNumber.compareTo(toNumber) > 0) {
+                BigDecimal temp = fromNumber;
+                fromNumber = toNumber;
+                toNumber = temp;
+            }
+
+            if (fromNumber.compareTo(balance) <= 0 && toNumber.compareTo(balance) >= 0) return interestRate;
+        }
+        return fallBack;
     }
 }

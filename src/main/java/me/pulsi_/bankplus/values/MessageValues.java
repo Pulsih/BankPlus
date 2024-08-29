@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.values;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.utils.texts.BPMessages;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class MessageValues {
@@ -11,6 +12,7 @@ public class MessageValues {
 
     public static void setupValues() {
         FileConfiguration messages = BankPlus.INSTANCE().getConfigs().getConfig("messages.yml");
+        BPMessages.loadMessages(messages);
 
         isTitleCustomAmountEnabled = messages.getBoolean("Title-Custom-Transaction.Enabled");
         isInterestBroadcastEnabled = messages.getBoolean("Interest-Broadcast.Enabled");

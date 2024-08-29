@@ -10,15 +10,20 @@ public class BPLogger {
         error(error);
         error("");
         error("Additional information:");
-        error("Error message: " + e.getMessage());
-        error("Involved classes:");
-        for (StackTraceElement stackTraceElement : e.getStackTrace()) {
-            String iClass = stackTraceElement.getClassName();
-            if (!iClass.contains("me.pulsi_.bankplus")) continue;
+        error("| Error message:");
+        error("| | " + e.getMessage());
+        error("| Interested classes:");
 
+        int priority = 1;
+        for (StackTraceElement stackTraceElement : e.getStackTrace()) {
+            String path = stackTraceElement.getClassName();
+            if (!path.contains("me.pulsi_.bankplus")) continue;
+
+            String name = path.substring(path.lastIndexOf(".") + 1), method = stackTraceElement.getMethodName();
             int line = stackTraceElement.getLineNumber();
-            String method = stackTraceElement.getMethodName();
-            error("  * " + iClass + " (Line: " + line + ") [Method: " + method + "()]");
+
+            error("| | [" + priority + "*] " + path + " - " + name + "#" + method + "(); [&f" + line + "&c]");
+            priority++;
         }
     }
 
@@ -38,15 +43,20 @@ public class BPLogger {
         warn(warn);
         warn("");
         warn("Additional information:");
-        warn("Error message: " + e.getMessage());
-        warn("Involved classes:");
-        for (StackTraceElement stackTraceElement : e.getStackTrace()) {
-            String iClass = stackTraceElement.getClassName();
-            if (!iClass.contains("me.pulsi_.bankplus")) continue;
+        warn("| Error message:");
+        warn("| | " + e.getMessage());
+        warn("| Interested classes:");
 
+        int priority = 1;
+        for (StackTraceElement stackTraceElement : e.getStackTrace()) {
+            String path = stackTraceElement.getClassName();
+            if (!path.contains("me.pulsi_.bankplus")) continue;
+
+            String name = path.substring(path.lastIndexOf(".") + 1), method = stackTraceElement.getMethodName();
             int line = stackTraceElement.getLineNumber();
-            String method = stackTraceElement.getMethodName();
-            warn("  * " + iClass + " (Line: " + line + ") [Method: " + method + "()]");
+
+            warn("| | [" + priority + "*] " + path + " - " + name + "#" + method + "(); [&f" + line + "&e]");
+            priority++;
         }
     }
 

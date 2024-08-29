@@ -96,7 +96,6 @@ public class BPData {
             MessageValues.setupValues();
             MultipleBanksValues.setupValues();
 
-            BPMessages.loadMessages();
             BPCmdRegistry.registerPluginCommands();
             BPHeads.loadSkullBasedOnVersion();
 
@@ -127,7 +126,7 @@ public class BPData {
                 if (player != null && player.getOpenedBankGui() != null) p.closeInventory();
             });
         } catch (Exception e) {
-            BPLogger.warn(e, "Something went wrong while trying to reload the plugin, check the console logs and if the error persist, ask for support in the support discord.");
+            BPLogger.warn(e, "Something went wrong while trying to reload the plugin.");
             success = false;
         }
         return success;

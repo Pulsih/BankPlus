@@ -23,16 +23,8 @@ import static me.pulsi_.bankplus.values.ConfigValues.isOfflineInterestDifferentR
 
 public class BPInterest {
 
-    private static final String defaultInterestPermission = "bankplus.receive.interest";
-    private static String offlineInterestPermission;
-
-    public static String getDefaultInterestPermission() {
-        return defaultInterestPermission;
-    }
-
-    public static String getOfflineInterestPermission() {
-        return offlineInterestPermission;
-    }
+    private final String defaultInterestPermission = "bankplus.receive.interest";
+    private String offlineInterestPermission;
 
     private long cooldown = 0;
     private boolean wasDisabled = true, isOfflineInterestEnabled;
@@ -59,6 +51,14 @@ public class BPInterest {
         loopInterest();
     }
 
+    public String getDefaultInterestPermission() {
+        return defaultInterestPermission;
+    }
+
+    public String getOfflineInterestPermission() {
+        return offlineInterestPermission;
+    }
+
     public long getInterestCooldownMillis() {
         return cooldown - System.currentTimeMillis();
     }
@@ -79,8 +79,7 @@ public class BPInterest {
     }
 
     public void giveInterest() {
-        boolean interestToVault = ConfigValues.isGivingInterestOnVaultBalance();
-        boolean payOfflineToAfk = ConfigValues.isPayingAfkPlayerOfflineAmount();
+        boolean interestToVault = ConfigValues.isGivingInterestOnVaultBalance(), ignoreAfkPlayers = ConfigValues.isIgnoringAfkPlayers();
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
 
             List<Bank> availableBanks = new ArrayList<>();
@@ -90,19 +89,20 @@ public class BPInterest {
             if (availableBanks.isEmpty()) continue;
 
             Player oP = p.getPlayer();
-            if (oP != null) {
+            if (oP != null) { // If the player is online.
+                if (!oP.hasPermission(defaultInterestPermission)) continue;
+
                 boolean isAfk = BankPlus.INSTANCE().getAfkManager().isAFK(oP);
-                if (!oP.hasPermission(defaultInterestPermission) || (isAfk && !payOfflineToAfk)) continue;
+                if (ignoreAfkPlayers && isAfk) continue;
 
                 BigDecimal interestAmount = BigDecimal.ZERO;
                 for (Bank bank : availableBanks) {
                     BPEconomy economy = bank.getBankEconomy();
                     if (economy.getBankBalance(p).compareTo(BigDecimal.ZERO) <= 0) continue;
 
-                    BigDecimal interestMoney = getInterestMoney(bank, p, BankUtils.getInterestRate(bank, oP));
-                    if (payOfflineToAfk && isAfk) {
-                        interestMoney = ConfigValues.isAfkInterestDifferentRate() ? getInterestMoney(bank, p, BankUtils.getAfkInterestRate(bank, oP)) : getInterestMoney(bank, p, BankUtils.getOfflineInterestRate(bank, oP));
-                    }
+                    BigDecimal interestMoney;
+                    if (isAfk) interestMoney = getInterestMoney(bank, p, BankUtils.getAfkInterestRate(bank, oP));
+                    else interestMoney = getInterestMoney(bank, p, BankUtils.getInterestRate(bank, oP));
 
                     BigDecimal maxAmount = BankUtils.getMaxInterestAmount(bank, p);
                     if (maxAmount.compareTo(BigDecimal.ZERO) > 0) interestMoney = interestMoney.min(maxAmount);
@@ -120,7 +120,8 @@ public class BPInterest {
                 BigDecimal skipAmount = ConfigValues.getInterestMessageSkipAmount();
                 if (skipAmount.compareTo(BigDecimal.ZERO) > 0 && skipAmount.compareTo(interestAmount) >= 0) continue;
 
-                if (availableBanks.size() > 1) BPMessages.send(oP, MessageValues.getMultiInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
+                if (availableBanks.size() > 1)
+                    BPMessages.send(oP, MessageValues.getMultiInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
                 else {
                     if (BankUtils.isFull(availableBanks.get(0), p) && !ConfigValues.isGivingInterestOnVaultBalance()) {
                         BPMessages.send(oP, MessageValues.getInterestBankFull(), BPUtils.placeValues(p, interestAmount), true);
@@ -134,7 +135,7 @@ public class BPInterest {
 
                     BPMessages.send(oP, MessageValues.getInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
                 }
-            } else {
+            } else { // If the player is offline.
                 if (!isOfflineInterestEnabled || offlineTimeExpired(p) || !BPUtils.hasOfflinePermission(p, offlineInterestPermission)) continue;
 
                 for (Bank bank : availableBanks) {
@@ -142,8 +143,8 @@ public class BPInterest {
                     if (economy.getBankBalance(p).compareTo(BigDecimal.ZERO) <= 0) continue;
 
                     BigDecimal interestMoney = isOfflineInterestDifferentRate() ?
-                                    getInterestMoney(bank, p, BankUtils.getOfflineInterestRate(bank, p)) :
-                                    getInterestMoney(bank, p, BankUtils.getInterestRate(bank, p));
+                            getInterestMoney(bank, p, BankUtils.getOfflineInterestRate(bank, p)) :
+                            getInterestMoney(bank, p, BankUtils.getInterestRate(bank, p));
 
                     BigDecimal maxAmount = BankUtils.getMaxInterestAmount(bank, p);
                     if (maxAmount.compareTo(BigDecimal.ZERO) > 0) interestMoney = interestMoney.min(maxAmount);
@@ -160,6 +161,14 @@ public class BPInterest {
         }
     }
 
+    /**
+     * Calculate the amount of money that the player will receive from the interest.
+     *
+     * @param bank            The bank where the money should be deposited.
+     * @param p               The player.
+     * @param defaultInterest The interest rate.
+     * @return The amount of money with all calculations already made (interest limiter).
+     */
     public BigDecimal getInterestMoney(Bank bank, OfflinePlayer p, BigDecimal defaultInterest) {
         BigDecimal playerBalance = bank.getBankEconomy().getBankBalance(p);
 
