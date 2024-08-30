@@ -79,7 +79,7 @@ Levels:
     # Specify what items a player needs to have to upgrade to the level 2.
     # Format: ITEM_NAME-AMOUNT
     # You can also use "," to specify more items, check the 3* upgrade for an example.
-    Required-Items: "DIAMOND-2"
+    Required-Items: "DIAMOND-2,EMERALD-2"
 
     # Put false or remove this to not remove any item.
     # Choose if removing or not the required items in the player inventory.
@@ -104,14 +104,14 @@ Levels:
     Required-Items:
       - Material: "DIAMOND"
         Amount: 4
-        Name: "§3Diamond"
+        Displayname: "&6Special Diamond"
         Lore:
-          - "§6fLevel up"
+          - "&7A diamond uniquely to upgrade your bank."
       - Material: "EMERALD"
         Amount: 2
-        Name: "§aEmerald"
+        Name: "&2Special Diamond"
         Lore:
-          - "§6fLevel up"
+          - "&7An emerald uniquely to upgrade your bank."
     Remove-Required-Items: true
     Capacity: "200000"
     Interest: "20%"

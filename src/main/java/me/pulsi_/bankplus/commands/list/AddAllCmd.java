@@ -68,7 +68,7 @@ public class AddAllCmd extends BPCommand {
     public void onExecution(CommandSender s, String[] args) {
         BigDecimal num = new BigDecimal(args[1]);
         BPMessages.send(s, "%prefix% &aSuccessfully added &f" + num + " &amoney to all online players!", true);
-        addAll(Bukkit.getOnlinePlayers(), num, BPEconomy.get(getPossibleBank(args, 2)));
+        addAll(Bukkit.getOnlinePlayers(), num, BPEconomy.get(args[2]));
     }
 
     @Override

@@ -90,6 +90,8 @@ public class BPMessages {
         for (String message : messagesToSend) {
             if (replacers != null) {
                 for (Object object : replacers) {
+                    if (object == null) continue;
+
                     List<String> possibleReplacers = new ArrayList<>();
 
                     if (!(object instanceof Collection)) possibleReplacers.add(object.toString());

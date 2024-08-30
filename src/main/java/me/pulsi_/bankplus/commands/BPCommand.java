@@ -71,7 +71,8 @@ public abstract class BPCommand {
 
     /**
      * Check if the selected argument position exist and use that bank, otherwise use the main bank.
-     * @param args The cmd arguments.
+     *
+     * @param args             The cmd arguments.
      * @param argumentPosition The argument position where the bank name should be present.
      * @return A bank name.
      */
@@ -81,6 +82,7 @@ public abstract class BPCommand {
 
     /**
      * Register the selected command to the bankplus system, and checks if the commands file has been modified.
+     *
      * @return true if the config file has been modified, false otherwise.
      */
     public boolean register() {
@@ -113,6 +115,7 @@ public abstract class BPCommand {
 
     /**
      * Execute the command, only, and only if it passes all the required checks (permission, cooldown, confirm).
+     * The cmd arguments starts from [2], the first argument is the cmd identifier.
      *
      * @param s    The command sender.
      * @param args The cmd arguments.
@@ -137,6 +140,7 @@ public abstract class BPCommand {
     /**
      * Check if the cmd sender is still in cooldown.
      * This method automatically send a message to the sender in case he's in cooldown.
+     *
      * @param s The command sender.
      * @return true if in cooldown, false otherwise.
      */
@@ -177,6 +181,7 @@ public abstract class BPCommand {
 
     /**
      * Makes all the needed checks before executing the cmd.
+     * The cmd arguments starts from [2], the first argument is the cmd identifier.
      *
      * @param s    The command sender.
      * @param args The cmd arguments.
@@ -186,11 +191,20 @@ public abstract class BPCommand {
 
     /**
      * Method ran when the {@link #preCmdChecks(CommandSender, String[])} returns true.
+     * The cmd arguments starts from [2], the first argument is the cmd identifier.
      *
      * @param s    The command sender.
      * @param args The cmd arguments.
      */
     public abstract void onExecution(CommandSender s, String[] args);
 
+    /**
+     * Method to show the arguments when tab completing.
+     * The cmd arguments starts from [2], the first argument is the cmd identifier.
+     *
+     * @param s    The command sender.
+     * @param args The cmd arguments.
+     * @return A list of arguments.
+     */
     public abstract List<String> tabCompletion(CommandSender s, String[] args);
 }

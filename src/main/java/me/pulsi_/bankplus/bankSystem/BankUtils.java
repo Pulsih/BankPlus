@@ -297,6 +297,8 @@ public class BankUtils {
      */
     public static List<String> getLevels(Bank bank) {
         List<String> levels = new ArrayList<>();
+        if (bank == null) return levels;
+
         for (int level : bank.getBankLevels().keySet()) levels.add(level + "");
         return levels;
     }
@@ -316,14 +318,25 @@ public class BankUtils {
     }
 
     /**
-     * Check if the selected bank has a level next the player current bank level.
+     * Check if the selected bank has the specified level.
      *
-     * @param bank The bank.
-     * @param p    The player.
-     * @return true if the bank has another level, false otherwise.
+     * @param bank  The bank.
+     * @param level The level to check.
+     * @return true if the bank has that level, false otherwise.
      */
-    public static boolean hasNextLevel(Bank bank, OfflinePlayer p) {
-        return bank != null && hasNextLevel(bank, getCurrentLevel(bank, p));
+    public static boolean hasLevel(Bank bank, String level) {
+        return bank != null && getLevels(bank).contains(level);
+    }
+
+    /**
+     * Check if the selected bank has the specified level.
+     *
+     * @param bank  The bank.
+     * @param level The level to check.
+     * @return true if the bank has that level, false otherwise.
+     */
+    public static boolean hasLevel(Bank bank, int level) {
+        return hasLevel(bank, level + "");
     }
 
     /**
@@ -334,7 +347,18 @@ public class BankUtils {
      * @return true if the bank has another level, false otherwise.
      */
     public static boolean hasNextLevel(Bank bank, int currentLevel) {
-        return bank != null && getLevels(bank).contains(String.valueOf(currentLevel + 1));
+        return hasLevel(bank, currentLevel + 1);
+    }
+
+    /**
+     * Check if the selected bank has a level next the player current bank level.
+     *
+     * @param bank The bank.
+     * @param p    The player.
+     * @return true if the bank has another level, false otherwise.
+     */
+    public static boolean hasNextLevel(Bank bank, OfflinePlayer p) {
+        return hasNextLevel(bank, getCurrentLevel(bank, p));
     }
 
     /**
