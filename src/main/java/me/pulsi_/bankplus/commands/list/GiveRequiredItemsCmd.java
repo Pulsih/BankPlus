@@ -7,7 +7,6 @@ import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -18,15 +17,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class GetRequiredItemsCmd extends BPCommand {
+public class GiveRequiredItemsCmd extends BPCommand {
 
-    public GetRequiredItemsCmd(FileConfiguration commandsConfig, String... aliases) {
+    public GiveRequiredItemsCmd(FileConfiguration commandsConfig, String... aliases) {
         super(commandsConfig, aliases);
     }
 
     @Override
     public List<String> defaultUsage() {
-        return Collections.singletonList("%prefix% &cUsage: &7/bank getRequiredItems <bankName> <bankLevel> [1,2../all]");
+        return Collections.singletonList("%prefix% &cUsage: &7/bank giveRequiredItems <player> <bankName> <bankLevel> [1,2../all]");
     }
 
     @Override
@@ -51,7 +50,7 @@ public class GetRequiredItemsCmd extends BPCommand {
 
     @Override
     public boolean playerOnly() {
-        return true;
+        return false;
     }
 
     @Override
@@ -61,18 +60,23 @@ public class GetRequiredItemsCmd extends BPCommand {
 
     @Override
     public boolean preCmdChecks(CommandSender s, String[] args) {
-        Bank bank = BankUtils.getBank(getPossibleBank(args, 1));
+        if (Bukkit.getPlayerExact(args[1]) == null) {
+            BPMessages.send(s, "Invalid-Player");
+            return false;
+        }
+
+        Bank bank = BankUtils.getBank(getPossibleBank(args, 2));
         if (bank == null) {
             BPMessages.send(s, "Invalid-Bank");
             return false;
         }
 
-        if (args.length == 2) {
+        if (args.length == 3) {
             BPMessages.send(s, "Specify-Number");
             return false;
         }
 
-        String level = args[2];
+        String level = args[3];
         if (BPUtils.isInvalidNumber(level, s)) return false;
 
         if (!BankUtils.hasLevel(bank, level)) {
@@ -80,13 +84,19 @@ public class GetRequiredItemsCmd extends BPCommand {
             return false;
         }
 
-        if (args.length > 3) {
-            String choose = args[3];
+        List<ItemStack> requiredItems = BankUtils.getRequiredItems(bank, Integer.parseInt(level));
+        if (requiredItems.isEmpty()) {
+            BPMessages.send(s, "No-Available-Items");
+            return false;
+        }
+
+        if (args.length > 4) {
+            String choose = args[4];
             if (!choose.equalsIgnoreCase("all")) {
                 if (BPUtils.isInvalidNumber(choose, s)) return false;
 
                 int item = Integer.parseInt(choose);
-                if (item <= 0 || item > BankUtils.getRequiredItems(bank, Integer.parseInt(level)).size()) {
+                if (item <= 0 || item > requiredItems.size()) {
                     BPMessages.send(s, "Invalid-Number");
                     return false;
                 }
@@ -97,17 +107,17 @@ public class GetRequiredItemsCmd extends BPCommand {
 
     @Override
     public void onExecution(CommandSender s, String[] args) {
-        Player p = (Player) s;
+        Player p = Bukkit.getPlayerExact(args[1]);
 
-        String bankName = args[1], level = args[2];
+        String bankName = args[2], level = args[3];
         List<ItemStack> requiredItems = BankUtils.getRequiredItems(BankUtils.getBank(bankName), Integer.parseInt(level));
 
-        if (args.length == 3) {
+        if (args.length == 4) {
             for (ItemStack item : requiredItems) p.getInventory().addItem(item);
             return;
         }
 
-        String choose = args[3];
+        String choose = args[4];
         if (choose.equalsIgnoreCase("all")) {
             for (ItemStack item : requiredItems) p.getInventory().addItem(item);
             return;
@@ -120,17 +130,27 @@ public class GetRequiredItemsCmd extends BPCommand {
     public List<String> tabCompletion(CommandSender s, String[] args) {
 
         if (args.length == 2)
-            return BPArgs.getBanks(args);
+            return BPArgs.getOnlinePlayers(args);
 
         if (args.length == 3)
-            return BPArgs.getArgs(args, BankUtils.getLevels(BankUtils.getBank(args[1])));
+            return BPArgs.getBanks(args);
 
         if (args.length == 4) {
+            Bank bank = BankUtils.getBank(args[2]);
+            List<String> levelsWithItems = new ArrayList<>();
+            for (String level : BankUtils.getLevels(bank))
+                if (!BankUtils.getRequiredItems(bank, Integer.parseInt(level)).isEmpty()) levelsWithItems.add(level);
+
+            return BPArgs.getArgs(args, levelsWithItems);
+        }
+
+        if (args.length == 5) {
+            List<ItemStack> requiredItems = BankUtils.getRequiredItems(BankUtils.getBank(args[2]), Integer.parseInt(args[3]));
+            if (requiredItems.isEmpty()) return null;
+
             List<String> choose = new ArrayList<>();
             choose.add("all");
-
-            for (int i = 1; i <= BankUtils.getRequiredItems(BankUtils.getBank(args[1]), Integer.parseInt(args[2])).size(); i++)
-                choose.add(i + "");
+            for (int i = 1; i <= requiredItems.size(); i++) choose.add(i + "");
 
             return BPArgs.getArgs(args, choose);
         }

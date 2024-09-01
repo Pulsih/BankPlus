@@ -461,36 +461,30 @@ public class BankUtils {
 
         int nextLevel = getCurrentLevel(bank, p) + 1;
 
-        boolean remove = false;
+        // variable to make sure to remove the items only when there are
+        // some and not removing possible items from the player's inventory.
+        boolean canRemoveSafely = false;
         List<ItemStack> requiredItems = getRequiredItems(bank, nextLevel);
         if (!requiredItems.isEmpty()) {
-            boolean hasItems = false;
-
-            for (ItemStack item : requiredItems) {
-                int amount = item.getAmount();
+            for (ItemStack requiredItem : requiredItems) {
+                int amount = requiredItem.getAmount();
                 int playerAmount = 0;
 
                 boolean hasItem = false;
-                for (ItemStack content : p.getInventory().getContents()) {
-                    if (content == null || content.getType() != item.getType()) continue;
-
-                    playerAmount += content.getAmount();
+                for (ItemStack item : p.getInventory().getContents()) {
+                    if (item == null || !isRequiredItem(requiredItem, item)) continue;
+                    playerAmount += item.getAmount();
 
                     if (playerAmount < amount) continue;
                     hasItem = true;
                     break;
                 }
                 if (!hasItem) {
-                    hasItems = false;
-                    break;
+                    BPMessages.send(p, "Insufficient-Items", "%items%$" + BPUtils.getRequiredItemsFormatted(requiredItems));
+                    return;
                 }
-                hasItems = true;
             }
-            if (!hasItems) {
-                BPMessages.send(p, "Insufficient-Items", "%items%$" + BPUtils.getRequiredItems(requiredItems));
-                return;
-            }
-            remove = true;
+            canRemoveSafely = true;
         }
 
         BigDecimal cost = getLevelCost(bank, nextLevel);
@@ -518,7 +512,7 @@ public class BankUtils {
             vaultEconomy.withdrawPlayer(p, cost.doubleValue());
         }
 
-        if (isRemovingRequiredItems(bank, nextLevel) && remove)
+        if (isRemovingRequiredItems(bank, nextLevel) && canRemoveSafely)
             for (ItemStack item : requiredItems) p.getInventory().removeItem(item);
 
         setLevel(bank, p, nextLevel);
@@ -723,10 +717,44 @@ public class BankUtils {
                 itemMeta.setLore(coloredLore);
             }
 
+            Boolean glowingValue = (Boolean) itemValues.get("Glowing");
+            if (glowingValue != null && glowingValue) {
+                itemMeta.addEnchant(Enchantment.DURABILITY, 1, true);
+                itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            }
+
             itemStack.setItemMeta(itemMeta);
             requiredItems.add(itemStack);
+            objectCount++;
         }
         return requiredItems;
+    }
+
+    /**
+     * Check if the item to check is equals to the required item.
+     * The items must not be swapped due to its particular calculations.
+     *
+     * @param requiredItem The base required item.
+     * @param itemToCheck  The item to check.
+     * @return true if the checked item is a required item.
+     */
+    public static boolean isRequiredItem(ItemStack requiredItem, ItemStack itemToCheck) {
+        Material requiredMaterial = requiredItem.getType(), givenMaterial = itemToCheck.getType();
+        if (!requiredMaterial.equals(givenMaterial)) return false;
+
+        ItemMeta requiredMeta = requiredItem.getItemMeta(), givenMeta = itemToCheck.getItemMeta();
+        if (requiredMeta != null) {
+            if (requiredMeta.hasDisplayName()) {
+                String requiredDisplayname = requiredMeta.getDisplayName(), givenDisplayname = givenMeta.getDisplayName();
+                if (!requiredDisplayname.equals(givenDisplayname)) return false;
+            }
+
+            if (requiredMeta.hasLore()) {
+                List<String> requiredLore = requiredMeta.getLore(), givenLore = givenMeta.getLore();
+                if (!requiredLore.equals(givenLore)) return false;
+            }
+        }
+        return true;
     }
 
     /**

@@ -36,8 +36,8 @@ public class BPCmdRegistry {
         if (new ForceOpenCmd(commandsConfig, "forceOpen").register()) save = true;
         if (new ForceUpgradeCmd(commandsConfig, "forceUpgrade").register()) save = true;
         if (new ForceWithdrawCmd(commandsConfig, "forceWithdraw").register()) save = true;
-        if (new GetRequiredItemsCmd(commandsConfig, "getRequiredItems").register()) save = true;
         if (new GiveInterestCmd(commandsConfig, "giveInterest").register()) save = true;
+        if (new GiveRequiredItemsCmd(commandsConfig, "giveRequiredItems").register()) save = true;
         if (new HelpCmd(commandsConfig, "help").register()) save = true;
         if (new InterestCmd(commandsConfig, "interest").register()) save = true;
         if (new InterestMillisCmd(commandsConfig, "interestMillis").register()) save = true;

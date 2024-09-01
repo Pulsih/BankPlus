@@ -288,7 +288,7 @@ public class BPUtils {
      * @param requiredItems A list of required items.
      * @return A string of required items.
      */
-    public static String getRequiredItems(List<ItemStack> requiredItems) {
+    public static String getRequiredItemsFormatted(List<ItemStack> requiredItems) {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < requiredItems.size(); i++) {
             ItemStack item = requiredItems.get(i);

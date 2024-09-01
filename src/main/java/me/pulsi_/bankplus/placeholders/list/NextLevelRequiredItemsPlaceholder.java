@@ -25,6 +25,6 @@ public class NextLevelRequiredItemsPlaceholder extends BPPlaceholder {
 
         List<ItemStack> requiredItems = BankUtils.getRequiredItems(bank, BankUtils.getCurrentLevel(bank, p) + 1);
         if (requiredItems.isEmpty()) return ConfigValues.getNoUpgradeItemsMessage();
-        return BPUtils.getRequiredItems(requiredItems);
+        return BPUtils.getRequiredItemsFormatted(requiredItems);
     }
 }

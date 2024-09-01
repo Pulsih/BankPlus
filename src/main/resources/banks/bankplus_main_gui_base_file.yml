@@ -106,12 +106,13 @@ Levels:
         Amount: 4
         Displayname: "&6Special Diamond"
         Lore:
-          - "&7A diamond uniquely to upgrade your bank."
+          - "&7A diamond uniquely used to upgrade your bank."
       - Material: "EMERALD"
         Amount: 2
-        Name: "&2Special Diamond"
+        Displayname: "&2Special Emerald"
         Lore:
-          - "&7An emerald uniquely to upgrade your bank."
+          - "&7An emerald uniquely used to upgrade your bank."
+        Glowing: true
     Remove-Required-Items: true
     Capacity: "200000"
     Interest: "20%"
