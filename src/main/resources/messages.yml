@@ -64,8 +64,8 @@ Loan-Give-Request-Received:
 
 Received-Loan: "%prefix% &aSuccessfully received &aa loan of &f%amount_formatted% &amoney from &f%player%&a."
 Received-Loan-Full: "%prefix% &aSuccessfully received &aa loan of &f%amount_formatted% &amoney from &f%player%&a, but since your bank was full, &f%extra_formatted% &amoney went to your wallet."
-Received-Loan-Bank: "%prefix% &aSuccessfully received &aa loan of &f%amount_formatted% &amoney from the bank &f\"%bank%\"&a."
-Received-Loan-Full-Bank: "%prefix% &aSuccessfully received &aa loan of &f%amount_formatted% &amoney from the bank &f\"%bank%\"&a, but since your bank was full, &f%extra_formatted% &amoney went to your wallet."
+Received-Loan-Bank: "%prefix% &aSuccessfully received &aa loan of &f%amount_formatted% &amoney from the bank &f%bank%&a."
+Received-Loan-Full-Bank: "%prefix% &aSuccessfully received &aa loan of &f%amount_formatted% &amoney from the bank &f%bank%&a, but since your bank was full, &f%extra_formatted% &amoney went to your wallet."
 Given-Loan: "%prefix% &aSuccessfully sent to &f%player% &aa loan of &f%amount_formatted% &amoney."
 Loan-Request-Sent-Denied: "%prefix% &f%player% &chas denied your loan request!"
 Loan-Request-Sent-Cancelled: "%prefix% &aYou have cancelled your loan request."
@@ -75,8 +75,8 @@ Loan-Payback: "%prefix% &aYou have received &f%amount_formatted% &afrom the loan
 Loan-Payback-Full: "%prefix% &aYou have received &f%amount_formatted% &afrom the loan given to &f%player%&a, but since your bank was full, &f%extra_formatted% &amoney has been added to your wallet."
 Loan-Returned: "%prefix% &aYou have returned &f%amount_formatted% &amoney to &f%player% &afor his loan."
 Loan-Returned-Debt: "%prefix% &cSadly, you did not have enough money to pay back &f%player%&c, so you are now in debt for &f%amount_formatted%&c."
-Loan-Returned-Bank: "%prefix% &aYou have returned &f%amount_formatted% &amoney the &f\"%bank%\"&a bank for his loan."
-Loan-Returned-Debt-Bank: "%prefix% &cSadly, you did not have enough money to return to the bank &f\"%bank%\"&c, so you are now in debt for &f%amount_formatted%&c."
+Loan-Returned-Bank: "%prefix% &aYou have returned &f%amount_formatted% &amoney the &f%bank%&a bank for his loan."
+Loan-Returned-Debt-Bank: "%prefix% &cSadly, you did not have enough money to return to the bank &f%bank%&c, so you are now in debt for &f%amount_formatted%&c."
 
 # Titles
 Title-Custom-Transaction:
