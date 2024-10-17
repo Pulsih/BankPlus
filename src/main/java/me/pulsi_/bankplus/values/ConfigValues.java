@@ -17,7 +17,7 @@ public class ConfigValues extends ValueLoader {
     private static String bankClickPriority;
     private static String second, seconds, minute, minutes, hour, hours, day, days;
     private static String interestTimeSeparator, interestTimeFinalSeparator, interestTimeFormat;
-    private static String k, m, b, t, q, qq;
+    private static String k, m, b, t, q, qq, thousandsSeparator, decimalsSeparator;
     private static String infiniteCapacityText, personalSound, withdrawSound, depositSound, viewSound;
     private static BigDecimal maxDepositAmount, maxWithdrawAmount;
     private static BigDecimal depositTaxes, withdrawTaxes;
@@ -72,7 +72,7 @@ public class ConfigValues extends ValueLoader {
     private static boolean guiModuleEnabled;
     private static boolean givingInterestOnVaultBalance;
     private static BigDecimal loanMaxAmount, loanInterest;
-    private static int loanInstalments, loanAcceptTime;
+    private static int loanInstalments, loanAcceptTime, loadDelay;
 
     public static void setupValues() {
         FileConfiguration config = BankPlus.INSTANCE().getConfigs().getConfig("config.yml");
@@ -101,6 +101,8 @@ public class ConfigValues extends ValueLoader {
         t = getString(config, "Placeholders.Money.Trillions", "T");
         q = getString(config, "Placeholders.Money.Quadrillions", "Q");
         qq = getString(config, "Placeholders.Money.Quintillions", "QQ");
+        thousandsSeparator = getString(config, "Placeholders.Money.Thousands-Separator", ".");
+        decimalsSeparator = getString(config, "Placeholders.Money.Decimals-Separator", ",");
         infiniteCapacityText = getString(config, "General-Settings.Infinite-Capacity-Text");
         withdrawSound = getString(config, "General-Settings.Withdraw-Sound.Sound");
         depositSound = getString(config, "General-Settings.Deposit-Sound.Sound");
@@ -162,6 +164,7 @@ public class ConfigValues extends ValueLoader {
         viewSoundEnabled = config.getBoolean("General-Settings.View-Sound.Enabled");
         accumulatingInterestLimiter = config.getBoolean("Interest.Accumulate-Interest-Limiter");
         savingOnQuit = config.getBoolean("General-Settings.Save-On-Quit");
+        loadDelay = config.getInt("General-Settings.Load-Delay");
         ignoringAfkPlayers = config.getBoolean("Interest.AFK-Settings.Ignore-AFK-Players");
         afkInterestRate = getBigDecimal(config, "Interest.AFK-Settings.AFK-Rate");
         usingEssentialsXAFK = config.getBoolean("Interest.AFK-Settings.Use-EssentialsX-AFK");
@@ -275,6 +278,14 @@ public class ConfigValues extends ValueLoader {
 
     public static String getQq() {
         return qq;
+    }
+
+    public static String getThousandsSeparator() {
+        return thousandsSeparator;
+    }
+
+    public static String getDecimalsSeparator() {
+        return decimalsSeparator;
     }
 
     public static String getInfiniteCapacityText() {
@@ -585,5 +596,9 @@ public class ConfigValues extends ValueLoader {
 
     public static int getLoanAcceptTime() {
         return loanAcceptTime;
+    }
+
+    public static int getLoadDelay() {
+        return loadDelay;
     }
 }

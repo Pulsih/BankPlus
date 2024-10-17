@@ -1,8 +1,10 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.bankSystem.BankUtils;
+import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
@@ -52,30 +54,36 @@ public class SetCmd extends BPCommand {
     }
 
     @Override
-    public boolean skipUsageWarn() {
+    public boolean skipUsage() {
         return false;
     }
 
     @Override
-    public boolean preCmdChecks(CommandSender s, String[] args) {
-        if (!Bukkit.getOfflinePlayer(args[1]).hasPlayedBefore()) {
+    public BPCmdExecution onExecution(CommandSender s, String[] args) {
+        OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
+        if (!p.hasPlayedBefore()) {
             BPMessages.send(s, "Invalid-Player");
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
 
         if (args.length == 2) {
             BPMessages.send(s, "Specify-Number");
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
 
-        return !BPUtils.isInvalidNumber(args[2], s) && BankUtils.exist(getPossibleBank(args, 3), s);
-    }
+        String amount = args[2];
+        if (BPUtils.isInvalidNumber(amount, s)) return BPCmdExecution.invalidExecution();
 
-    @Override
-    public void onExecution(CommandSender s, String[] args) {
-        OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
-        BigDecimal set = BPEconomy.get(getPossibleBank(args, 3)).setBankBalance(p, new BigDecimal(args[2]));
-        if (!isSilent(args)) BPMessages.send(s, "Set-Message", BPUtils.placeValues(p, set));
+        String bankName = getPossibleBank(args, 3);
+        if (!BankUtils.exist(bankName, s)) return BPCmdExecution.invalidExecution();
+
+        return new BPCmdExecution() {
+            @Override
+            public void execute() {
+                BigDecimal set = BPEconomy.get(bankName).setBankBalance(p, new BigDecimal(amount));
+                if (!isSilent(args)) BPMessages.send(s, "Set-Message", BPUtils.placeValues(p, set));
+            }
+        };
     }
 
     @Override

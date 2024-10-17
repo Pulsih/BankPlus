@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayerManager;
+import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
@@ -59,41 +60,42 @@ public class TransferCmd extends BPCommand {
     }
 
     @Override
-    public boolean skipUsageWarn() {
+    public boolean skipUsage() {
         return false;
     }
 
     @Override
-    public boolean preCmdChecks(CommandSender s, String[] args) {
+    public BPCmdExecution onExecution(CommandSender s, String[] args) {
         String mode = args[1].toLowerCase();
 
         if (!mode.equals("filestodatabase") && !mode.equals("databasetofiles")) {
             BPMessages.send(s, "Invalid-Action");
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
 
         if (!ConfigValues.isSqlEnabled()) {
-            BPMessages.send(s, "%prefix% &cCould not initialize the task, MySQL hasn't been enabled in the config file!", true);
-            return false;
+            BPMessages.send(s, "%prefix% &cCould not initialize the task, MySQL hasn't been enabled in the config file!");
+            return BPCmdExecution.invalidExecution();
         }
 
         if (!BankPlus.INSTANCE().getMySql().isConnected()) {
-            BPMessages.send(s, "%prefix% &cCould not initialize the task, MySQL hasn't been connected to it's database yet! &8(Try typing /bp reload)", true);
-            return false;
+            BPMessages.send(s, "%prefix% &cCould not initialize the task, MySQL hasn't been connected to it's database yet! &8(Try typing /bp reload)");
+            return BPCmdExecution.invalidExecution();
         }
-        return true;
-    }
 
-    @Override
-    public void onExecution(CommandSender s, String[] args) {
-        BPMessages.send(s, "%prefix% &7Task initialized, wait a few moments...", true);
+        return new BPCmdExecution() {
+            @Override
+            public void execute() {
+                BPMessages.send(s, "%prefix% &7Task initialized, wait a few moments...");
 
-        Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
-            if (args[1].equalsIgnoreCase("filestodatabase")) filesToDatabase();
-            else databaseToFile();
+                Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
+                    if (args[1].equalsIgnoreCase("filestodatabase")) filesToDatabase();
+                    else databaseToFile();
 
-            BPMessages.send(s, "%prefix% &2Task finished!", true);
-        });
+                    BPMessages.send(s, "%prefix% &2Task finished!");
+                });
+            }
+        };
     }
 
     @Override

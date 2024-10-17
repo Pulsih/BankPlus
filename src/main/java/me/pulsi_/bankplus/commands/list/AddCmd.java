@@ -1,8 +1,10 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.bankSystem.BankUtils;
+import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
@@ -52,34 +54,39 @@ public class AddCmd extends BPCommand {
     }
 
     @Override
-    public boolean skipUsageWarn() {
+    public boolean skipUsage() {
         return false;
     }
 
     @Override
-    public boolean preCmdChecks(CommandSender s, String[] args) {
-        if (!Bukkit.getOfflinePlayer(args[1]).hasPlayedBefore()) {
+    public BPCmdExecution onExecution(CommandSender s, String[] args) {
+        OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
+        if (!target.hasPlayedBefore()) {
             BPMessages.send(s, "Invalid-Player");
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
 
         if (args.length == 2) {
             BPMessages.send(s, "Specify-Number");
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
 
-        return !BPUtils.isInvalidNumber(args[2], s) && BankUtils.exist(getPossibleBank(args, 3));
-    }
+        String amount = args[2];
+        if (BPUtils.isInvalidNumber(amount, s)) return BPCmdExecution.invalidExecution();
 
-    @Override
-    public void onExecution(CommandSender s, String[] args) {
-        OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
-        BigDecimal added = BPEconomy.get(getPossibleBank(args, 3)).addBankBalance(p, new BigDecimal(args[2]));
+        String bankName = getPossibleBank(args, 3);
+        if (!BankUtils.exist(bankName, s)) return BPCmdExecution.invalidExecution();
 
-        if (isSilent(args)) return;
+        return new BPCmdExecution() {
+            @Override
+            public void execute() {
+                BigDecimal added = BPEconomy.get(bankName).addBankBalance(target, new BigDecimal(amount));
 
-        if (added.doubleValue() <= 0D) BPMessages.send(s, "Bank-Full", "%player%$" + p.getName());
-        else BPMessages.send(s, "Add-Message", BPUtils.placeValues(p, added));
+                if (isSilent(args)) return;
+                if (added.compareTo(BigDecimal.ZERO) <= 0) BPMessages.send(s, "Bank-Full", "%player%$" + target.getName());
+                else BPMessages.send(s, "Add-Message", BPUtils.placeValues(target, added));
+            }
+        };
     }
 
     @Override

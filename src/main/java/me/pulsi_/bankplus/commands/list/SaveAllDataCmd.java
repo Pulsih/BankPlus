@@ -1,5 +1,6 @@
 package me.pulsi_.bankplus.commands.list;
 
+import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.EconomyUtils;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -48,22 +49,22 @@ public class SaveAllDataCmd extends BPCommand {
     }
 
     @Override
-    public boolean skipUsageWarn() {
+    public boolean skipUsage() {
         return true;
     }
 
     @Override
-    public boolean preCmdChecks(CommandSender s, String[] args) {
-        return true;
-    }
+    public BPCmdExecution onExecution(CommandSender s, String[] args) {
+        return new BPCmdExecution() {
+            @Override
+            public void execute() {
+                EconomyUtils.saveEveryone(true);
+                EconomyUtils.restartSavingInterval();
 
-    @Override
-    public void onExecution(CommandSender s, String[] args) {
-        EconomyUtils.saveEveryone(true);
-        EconomyUtils.restartSavingInterval();
-
-        if (ConfigValues.isBroadcastingSaves()) BPLogger.info("All player data have been saved!");
-        BPMessages.send(s, "%prefix% &aSuccessfully saved all player data!", true);
+                if (ConfigValues.isBroadcastingSaves()) BPLogger.info("All player data have been saved!");
+                BPMessages.send(s, "%prefix% &aSuccessfully saved all player data!");
+            }
+        };
     }
 
     @Override

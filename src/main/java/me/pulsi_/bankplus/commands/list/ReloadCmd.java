@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import org.bukkit.command.CommandSender;
@@ -46,23 +47,24 @@ public class ReloadCmd extends BPCommand {
     }
 
     @Override
-    public boolean skipUsageWarn() {
+    public boolean skipUsage() {
         return true;
     }
 
     @Override
-    public boolean preCmdChecks(CommandSender s, String[] args) {
-        return true;
-    }
+    public BPCmdExecution onExecution(CommandSender s, String[] args) {
+        return new BPCmdExecution() {
+            @Override
+            public void execute() {
+                long time = System.currentTimeMillis();
+                BPMessages.send(s, "%prefix% &aThe plugin will now try to reload...");
 
-    @Override
-    public void onExecution(CommandSender s, String[] args) {
-       long time = System.currentTimeMillis();
-        BPMessages.send(s, "%prefix% &aThe plugin will now try to reload...", true);
+                boolean reloaded = BankPlus.INSTANCE().getDataManager().reloadPlugin();
+                if (reloaded) BPMessages.send(s, "%prefix% &2Plugin successfully reloaded! &8(&b" + (System.currentTimeMillis() - time) + "ms&8)");
+                else BPMessages.send(s, "%prefix% &cThe plugin may not have fully reloaded due to an error, please check the console for more info.");
 
-        boolean reloaded = BankPlus.INSTANCE().getDataManager().reloadPlugin();
-        if (reloaded) BPMessages.send(s, "%prefix% &2Plugin successfully reloaded! &8(&b" + (System.currentTimeMillis() - time) + "ms&8)", true);
-        else BPMessages.send(s, "%prefix% &cThe plugin may not have fully reloaded due to an error, please check the console for more info.", true);
+            }
+        };
     }
 
     @Override

@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
+import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPUtils;
@@ -53,37 +54,39 @@ public class RemoveCmd extends BPCommand {
     }
 
     @Override
-    public boolean skipUsageWarn() {
+    public boolean skipUsage() {
         return false;
     }
 
     @Override
-    public boolean preCmdChecks(CommandSender s, String[] args) {
-        if (!Bukkit.getOfflinePlayer(args[1]).hasPlayedBefore()) {
+    public BPCmdExecution onExecution(CommandSender s, String[] args) {
+        OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
+        if (!target.hasPlayedBefore()) {
             BPMessages.send(s, "Invalid-Player");
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
 
         if (args.length == 2) {
             BPMessages.send(s, "Specify-Number");
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
-        String num = args[2];
+        String amount = args[2];
 
-        if (BPUtils.isInvalidNumber(num, s)) return false;
+        if (BPUtils.isInvalidNumber(amount, s)) return BPCmdExecution.invalidExecution();
 
         Bank bank = BankUtils.getBank(getPossibleBank(args, 3));
-        return BankUtils.exist(bank, s);
-    }
+        if (!BankUtils.exist(bank, s)) return BPCmdExecution.invalidExecution();
 
-    @Override
-    public void onExecution(CommandSender s, String[] args) {
-        OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
-        BigDecimal removed = BPEconomy.get(getPossibleBank(args, 3)).removeBankBalance(p, new BigDecimal(args[2]));
-        if (isSilent(args)) return;
+        return new BPCmdExecution() {
+            @Override
+            public void execute() {
+                BigDecimal removed = bank.getBankEconomy().removeBankBalance(target, new BigDecimal(amount));
 
-        if (removed.doubleValue() <= 0D) BPMessages.send(s, "Bank-Empty", "%player%$" + p.getName());
-        else BPMessages.send(s, "Remove-Message", BPUtils.placeValues(p, removed));
+                if (isSilent(args)) return;
+                if (removed.compareTo(BigDecimal.ZERO) <= 0) BPMessages.send(s, "Bank-Empty", "%player%$" + target.getName());
+                else BPMessages.send(s, "Remove-Message", BPUtils.placeValues(target, removed));
+            }
+        };
     }
 
     @Override

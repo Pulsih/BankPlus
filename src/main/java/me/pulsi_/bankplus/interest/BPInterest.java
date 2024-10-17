@@ -35,13 +35,19 @@ public class BPInterest {
         this.plugin = plugin;
     }
 
-    public void restartInterest(boolean start) {
+    /**
+     * Restart the interest cooldown.
+     *
+     * @param loadFromFile Set to true if you want to restart the interest
+     *                     cooldown to the one saved in the interest-save file.
+     */
+    public void restartInterest(boolean loadFromFile) {
         isOfflineInterestEnabled = ConfigValues.isOfflineInterestEnabled();
         offlineInterestPermission = isOfflineInterestDifferentRate() ? ConfigValues.getInterestOfflinePermission() : defaultInterestPermission;
 
         long interestSave = 0;
 
-        if (start) {
+        if (loadFromFile) {
             FileConfiguration config = plugin.getConfigs().getConfig("saves.yml");
             if (config != null) interestSave = config.getLong("interest-save");
         }
@@ -121,22 +127,23 @@ public class BPInterest {
                 if (skipAmount.compareTo(BigDecimal.ZERO) > 0 && skipAmount.compareTo(interestAmount) >= 0) continue;
 
                 if (availableBanks.size() > 1)
-                    BPMessages.send(oP, MessageValues.getMultiInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
+                    BPMessages.send(oP, MessageValues.getMultiInterestMoney(), BPUtils.placeValues(p, interestAmount));
                 else {
                     if (BankUtils.isFull(availableBanks.get(0), p) && !ConfigValues.isGivingInterestOnVaultBalance()) {
-                        BPMessages.send(oP, MessageValues.getInterestBankFull(), BPUtils.placeValues(p, interestAmount), true);
+                        BPMessages.send(oP, MessageValues.getInterestBankFull(), BPUtils.placeValues(p, interestAmount));
                         continue;
                     }
 
                     if (interestAmount.compareTo(BigDecimal.ZERO) <= 0) {
-                        BPMessages.send(oP, MessageValues.getInterestNoMoney(), BPUtils.placeValues(p, interestAmount), true);
+                        BPMessages.send(oP, MessageValues.getInterestNoMoney(), BPUtils.placeValues(p, interestAmount));
                         continue;
                     }
 
-                    BPMessages.send(oP, MessageValues.getInterestMoney(), BPUtils.placeValues(p, interestAmount), true);
+                    BPMessages.send(oP, MessageValues.getInterestMoney(), BPUtils.placeValues(p, interestAmount));
                 }
             } else { // If the player is offline.
-                if (!isOfflineInterestEnabled || offlineTimeExpired(p) || !BPUtils.hasOfflinePermission(p, offlineInterestPermission)) continue;
+                if (!isOfflineInterestEnabled || offlineTimeExpired(p) || !BPUtils.hasOfflinePermission(p, offlineInterestPermission))
+                    continue;
 
                 for (Bank bank : availableBanks) {
                     BPEconomy economy = bank.getBankEconomy();

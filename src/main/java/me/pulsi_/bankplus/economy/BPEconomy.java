@@ -246,7 +246,7 @@ public class BPEconomy {
     }
 
     private BigDecimal setBankBalance(OfflinePlayer p, BigDecimal amount, boolean ignoreEvents, TransactionType type) {
-        BigDecimal result = new BigDecimal(0);
+        BigDecimal result = BigDecimal.ZERO;
         if (startAndCheckTransaction(p)) return result;
 
         if (!ignoreEvents) {
@@ -259,7 +259,10 @@ public class BPEconomy {
             amount = event.getTransactionAmount();
         }
 
-        result = result.max(amount.min(BankUtils.getCapacity(originBank, p)));
+        BigDecimal capacity = BankUtils.getCapacity(originBank, p);
+        if (capacity.compareTo(BigDecimal.ZERO) > 0) amount = amount.min(capacity);
+
+        result = result.max(amount);
         set(p, result);
 
         if (!ignoreEvents) afterTransactionEvent(p, type, amount);
@@ -296,7 +299,7 @@ public class BPEconomy {
     }
 
     private BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount, boolean ignoreEvents, TransactionType type) {
-        BigDecimal result = new BigDecimal(0);
+        BigDecimal result = BigDecimal.ZERO;
         if (startAndCheckTransaction(p)) return result;
 
         if (!ignoreEvents) {
@@ -523,7 +526,11 @@ public class BPEconomy {
         if (BPUtils.hasFailed(p, depositResponse)) return;
 
         addBankBalance(p, actualDepositingMoney, true);
-        BPMessages.send(p, "Success-Deposit", BPUtils.placeValues(p, actualDepositingMoney), BPUtils.placeValues(taxes, "taxes"));
+
+        List<String> replacers = BPUtils.placeValues(p, actualDepositingMoney);
+        replacers.addAll(BPUtils.placeValues(taxes, "taxes"));
+        BPMessages.send(p, "Success-Deposit", replacers);
+
         if (ConfigValues.isDepositSoundEnabled()) {
             if (!BPUtils.playSound(ConfigValues.getDepositSound(), p))
                 BPLogger.warn("Occurred while trying to play DEPOSIT sound for player \"" + p.getName() + "\".");
@@ -558,7 +565,11 @@ public class BPEconomy {
         if (BPUtils.hasFailed(p, withdrawResponse)) return;
 
         removeBankBalance(p, amount, true);
-        BPMessages.send(p, "Success-Withdraw", BPUtils.placeValues(p, amount.subtract(taxes)), BPUtils.placeValues(taxes, "taxes"));
+
+        List<String> replacers = BPUtils.placeValues(p, amount.subtract(taxes));
+        replacers.addAll(BPUtils.placeValues(taxes, "taxes"));
+        BPMessages.send(p, "Success-Withdraw", replacers);
+
         if (ConfigValues.isWithdrawSoundEnabled()) {
             if (!BPUtils.playSound(ConfigValues.getWithdrawSound(), p))
                 BPLogger.warn("Occurred while trying to play WITHDRAW sound for player \"" + p.getName() + "\".");
@@ -679,19 +690,20 @@ public class BPEconomy {
     }
 
     private static class Holder {
+
         private BigDecimal money = BigDecimal.ZERO, offlineInterest = BigDecimal.ZERO, debt = BigDecimal.ZERO;
         private int bankLevel = 1;
 
         public void setMoney(BigDecimal money) {
-            this.money = BPFormatter.getStyledBigDecimal(money).max(BigDecimal.ZERO);
+            this.money = money.max(BigDecimal.ZERO);
         }
 
         public void setOfflineInterest(BigDecimal offlineInterest) {
-            this.offlineInterest = BPFormatter.getStyledBigDecimal(offlineInterest).max(BigDecimal.ZERO);
+            this.offlineInterest = offlineInterest.max(BigDecimal.ZERO);
         }
 
         public void setDebt(BigDecimal debt) {
-            this.debt = BPFormatter.getStyledBigDecimal(debt).max(BigDecimal.ZERO);
+            this.debt = debt.max(BigDecimal.ZERO);
         }
 
         public void setBankLevel(int bankLevel) {

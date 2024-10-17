@@ -2,12 +2,14 @@ package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
+import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -54,59 +56,57 @@ public class ForceWithdrawCmd extends BPCommand {
     }
 
     @Override
-    public boolean skipUsageWarn() {
+    public boolean skipUsage() {
         return false;
     }
 
     @Override
-    public boolean preCmdChecks(CommandSender s, String[] args) {
+    public BPCmdExecution onExecution(CommandSender s, String[] args) {
         Player target = Bukkit.getPlayerExact(args[1]);
         if (target == null) {
             BPMessages.send(s, "Invalid-Player");
-            return false;
-        }
-
-        Bank bank = BankUtils.getBank(getPossibleBank(args, 3));
-        if (!BankUtils.exist(getPossibleBank(args, 3))) return false;
-
-        if (!BankUtils.isAvailable(bank, target)) {
-            BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
 
         if (args.length == 2) {
             BPMessages.send(s, "Specify-Number");
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
 
-        String arg2 = args[2].toLowerCase();
-        return arg2.equals("custom") || arg2.equals("all") || arg2.equals("half") || !BPUtils.isInvalidNumber(arg2, s);
-    }
+        String amount = args[2].toLowerCase();
+        if (!amount.equals("custom") && !amount.equals("all") && !amount.equals("half") && BPUtils.isInvalidNumber(amount, s))
+            return BPCmdExecution.invalidExecution();
 
-    @Override
-    public void onExecution(CommandSender s, String[] args) {
-        Player target = Bukkit.getPlayerExact(args[1]);
-        BPEconomy economy = BPEconomy.get(getPossibleBank(args, 3));
+        Bank bank = BankUtils.getBank(getPossibleBank(args, 3));
+        if (!BankUtils.exist(bank)) return BPCmdExecution.invalidExecution();
 
-        BigDecimal amount;
-        String arg2 = args[2].toLowerCase();
-        switch (arg2) {
-            case "all":
-                amount = economy.getBankBalance(target);
-                break;
-
-            case "half":
-                amount = economy.getBankBalance(target).divide(BigDecimal.valueOf(2));
-                break;
-
-            case "custom":
-                economy.customWithdraw(target);
-                return;
-
-            default:
-                amount = BPFormatter.getStyledBigDecimal(arg2);
+        if (!BankUtils.isAvailable(bank, target)) {
+            BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
+            return BPCmdExecution.invalidExecution();
         }
-        economy.withdraw(target, amount);
+
+        return new BPCmdExecution() {
+            @Override
+            public void execute() {
+                BPEconomy economy = bank.getBankEconomy();
+                switch (amount) {
+                    case "all":
+                        economy.withdraw(target, economy.getBankBalance(target));
+                        break;
+
+                    case "half":
+                        economy.withdraw(target, economy.getBankBalance(target).divide(BigDecimal.valueOf(2)));
+                        break;
+
+                    case "custom":
+                        economy.customWithdraw(target);
+                        return;
+
+                    default:
+                        economy.withdraw(target, BPFormatter.getStyledBigDecimal(amount));
+                }
+            }
+        };
     }
 
     @Override

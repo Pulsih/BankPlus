@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.bankTop.BPBankTop;
+import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import org.bukkit.command.CommandSender;
@@ -46,20 +47,20 @@ public class UpdateBankTopCmd extends BPCommand {
     }
 
     @Override
-    public boolean skipUsageWarn() {
+    public boolean skipUsage() {
         return true;
     }
 
     @Override
-    public boolean preCmdChecks(CommandSender s, String[] args) {
-        return true;
-    }
-
-    @Override
-    public void onExecution(CommandSender s, String[] args) {
-        BPBankTop.updateBankTop();
-        BPBankTop.restartBankTopUpdateTask();
-        BPMessages.send(s, "BankTop-Updated");
+    public BPCmdExecution onExecution(CommandSender s, String[] args) {
+        return new BPCmdExecution() {
+            @Override
+            public void execute() {
+                BPBankTop.updateBankTop();
+                BPBankTop.restartBankTopUpdateTask();
+                BPMessages.send(s, "BankTop-Updated");
+            }
+        };
     }
 
     @Override

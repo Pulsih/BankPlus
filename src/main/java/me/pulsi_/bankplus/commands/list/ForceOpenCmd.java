@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.bankSystem.BankUtils;
+import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
@@ -49,32 +50,33 @@ public class ForceOpenCmd extends BPCommand {
     }
 
     @Override
-    public boolean skipUsageWarn() {
+    public boolean skipUsage() {
         return false;
     }
 
     @Override
-    public boolean preCmdChecks(CommandSender s, String[] args) {
+    public BPCmdExecution onExecution(CommandSender s, String[] args) {
         if (!ConfigValues.isGuiModuleEnabled()) {
             BPMessages.send(s, "Gui-Module-Disabled");
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
 
-        if (Bukkit.getPlayerExact(args[1]) == null) {
-            BPMessages.send(s, "Invalid-Player");
-            return false;
-        }
-
-        return BankUtils.exist(getPossibleBank(args, 2), s);
-    }
-
-    @Override
-    public void onExecution(CommandSender s, String[] args) {
         Player target = Bukkit.getPlayerExact(args[1]);
-        String bankName = getPossibleBank(args, 2);
+        if (target == null) {
+            BPMessages.send(s, "Invalid-Player");
+            return BPCmdExecution.invalidExecution();
+        }
 
-        BankUtils.getBank(bankName).getBankGui().openBankGui(target, true);
-        if (!isSilent(args)) BPMessages.send(s, "Force-Open", "%player%$" + target.getName(), "%bank%$" + bankName);
+        String bankName = getPossibleBank(args, 2);
+        if (!BankUtils.exist(bankName, s)) return BPCmdExecution.invalidExecution();
+
+        return new BPCmdExecution() {
+            @Override
+            public void execute() {
+                BankUtils.getBank(bankName).getBankGui().openBankGui(target, true);
+                if (!isSilent(args)) BPMessages.send(s, "Force-Open", "%player%$" + target.getName(), "%bank%$" + bankName);
+            }
+        };
     }
 
     @Override

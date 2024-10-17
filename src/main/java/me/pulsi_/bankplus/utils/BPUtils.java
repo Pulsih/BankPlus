@@ -85,7 +85,7 @@ public class BPUtils {
     public static void sendTitle(String title, Player p) {
         if (title == null || p == null) return;
 
-        title = BPMessages.addPrefix(title);
+        title = BPMessages.format(title);
         if (title.contains(",")) {
             String[] titles = title.split(",");
             String title1 = titles[0], title2 = titles[1];

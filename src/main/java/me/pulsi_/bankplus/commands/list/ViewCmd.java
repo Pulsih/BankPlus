@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
+import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -15,6 +16,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -55,55 +57,61 @@ public class ViewCmd extends BPCommand {
     }
 
     @Override
-    public boolean skipUsageWarn() {
+    public boolean skipUsage() {
         return false;
     }
 
     @Override
-    public boolean preCmdChecks(CommandSender s, String[] args) {
+    public BPCmdExecution onExecution(CommandSender s, String[] args) {
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
         if (!target.hasPlayedBefore()) {
             BPMessages.send(s, "Invalid-Player");
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
 
-        if (args.length > 2) {
-            Bank bank = BankUtils.getBank(getPossibleBank(args, 2));
-            if (!BankUtils.exist(bank, s)) return false;
+        List<Bank> banks = new ArrayList<>();
+        if (args.length == 2) {
+            banks.addAll(BankUtils.getAvailableBanks(target));
+            if (banks.isEmpty()) {
+                BPMessages.send(s, "No-Available-Banks-Others", "%player%$" + target.getName());
+                return BPCmdExecution.invalidExecution();
+            }
+
+        } else {
+            Bank bank = BankUtils.getBank(args[2]);
+            if (!BankUtils.exist(bank, s)) return BPCmdExecution.invalidExecution();
 
             if (!BankUtils.isAvailable(bank, target)) {
-                BPMessages.send(s, "Cannot-Access-Bank");
-                return false;
+                BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
+                return BPCmdExecution.invalidExecution();
             }
-        }
-        return true;
-    }
-
-    @Override
-    public void onExecution(CommandSender s, String[] args) {
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
-        if (args.length == 2) {
-            if (s instanceof Player && ConfigValues.isViewSoundEnabled()) {
-                if (!BPUtils.playSound(ConfigValues.getViewSound(), (Player) s))
-                    BPLogger.warn("Occurred while trying to play VIEW sound for player \"" + s.getName() + "\".");
-            }
-
-            List<Bank> availableBanks = BankUtils.getAvailableBanks(target);
-            if (availableBanks.size() > 1)
-                BPMessages.send(s, "Multiple-Bank-Others", BPUtils.placeValues(target, BPEconomy.getBankBalancesSum(target)));
-            else {
-                Bank bank = availableBanks.get(0);
-                BPMessages.send(s, "Bank-Others", BPUtils.placeValues(target, bank.getBankEconomy().getBankBalance(target), BankUtils.getCurrentLevel(bank, target)));
-            }
-            return;
+            banks.add(bank);
         }
 
-        if (s instanceof Player && ConfigValues.isViewSoundEnabled()) {
-            if (!BPUtils.playSound(ConfigValues.getViewSound(), (Player) s))
-                BPLogger.warn("Occurred while trying to play VIEW sound for player \"" + s.getName() + "\".");
-        }
-        Bank bank = BankUtils.getBank(getPossibleBank(args, 2));
-        BPMessages.send(s, "Bank-Others", BPUtils.placeValues(target, bank.getBankEconomy().getBankBalance(target), BankUtils.getCurrentLevel(bank, target)));
+        return new BPCmdExecution() {
+            @Override
+            public void execute() {
+                if (banks.size() > 1)
+                    BPMessages.send(
+                            s,
+                            "Multiple-Bank-Others",
+                            BPUtils.placeValues(target, BPEconomy.getBankBalancesSum(target))
+                    );
+                else {
+                    Bank bank = banks.get(0);
+                    BPMessages.send(
+                            s,
+                            "Bank-Others",
+                            BPUtils.placeValues(target, bank.getBankEconomy().getBankBalance(target), BankUtils.getCurrentLevel(bank, target))
+                    );
+                }
+
+                if (s instanceof Player && ConfigValues.isViewSoundEnabled())
+                    if (!BPUtils.playSound(ConfigValues.getPersonalSound(), (Player) s))
+                        BPLogger.warn("Occurred while trying to play PERSONAL sound for player \"" + s.getName() + "\".");
+
+            }
+        };
     }
 
     @Override

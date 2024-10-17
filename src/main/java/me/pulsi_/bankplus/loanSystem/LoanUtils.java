@@ -10,6 +10,7 @@ import me.pulsi_.bankplus.utils.texts.BPMessages;
 import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class LoanUtils {
 
@@ -101,7 +102,9 @@ public class LoanUtils {
             BigDecimal extra = amount.subtract(receiverCapacity.subtract(receiverBalance));
 
             BankPlus.INSTANCE().getVaultEconomy().depositPlayer(receiver, extra.doubleValue());
-            BPMessages.send(receiver, "Received-Loan-Full", BPUtils.placeValues(sender, amount), BPUtils.placeValues(extra, "extra"));
+            List<String> replacers = BPUtils.placeValues(sender, amount);
+            replacers.addAll(BPUtils.placeValues(extra, "extra"));
+            BPMessages.send(receiver, "Received-Loan-Full", replacers);
         } else {
             receiverBankEconomy.addBankBalance(receiver, amount, TransactionType.LOAN);
             BPMessages.send(receiver, "Received-Loan", BPUtils.placeValues(sender, amount));
@@ -178,7 +181,10 @@ public class LoanUtils {
             BigDecimal extra = amount.subtract(receiverCapacity.subtract(receiverBalance));
 
             BankPlus.INSTANCE().getVaultEconomy().depositPlayer(receiver, extra.doubleValue());
-            BPMessages.send(receiver, "Received-Loan-Full-Bank", BPUtils.placeValues(bankSender.getIdentifier(), amount), BPUtils.placeValues(extra, "extra"));
+
+            List<String> replacers = BPUtils.placeValues(bankSender.getIdentifier(), amount);
+            replacers.addAll(BPUtils.placeValues(extra, "extra"));
+            BPMessages.send(receiver, "Received-Loan-Full-Bank", replacers);
         } else {
             bankSenderEconomy.addBankBalance(receiver, amount, TransactionType.LOAN);
             BPMessages.send(receiver, "Received-Loan-Bank", BPUtils.placeValues(bankSender.getIdentifier(), amount));

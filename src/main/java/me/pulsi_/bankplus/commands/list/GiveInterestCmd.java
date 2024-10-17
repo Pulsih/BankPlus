@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.ConfigValues;
@@ -47,23 +48,24 @@ public class GiveInterestCmd extends BPCommand {
     }
 
     @Override
-    public boolean skipUsageWarn() {
+    public boolean skipUsage() {
         return true;
     }
 
     @Override
-    public boolean preCmdChecks(CommandSender s, String[] args) {
+    public BPCmdExecution onExecution(CommandSender s, String[] args) {
         if (!ConfigValues.isInterestEnabled()) {
             BPMessages.send(s, "Interest-Disabled");
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
-        return true;
-    }
 
-    @Override
-    public void onExecution(CommandSender s, String[] args) {
-        BPMessages.send(s, "%prefix% &2Successfully given the interest! The countdown has been restarted.", true);
-        BankPlus.INSTANCE().getInterest().giveInterestToEveryone();
+        return new BPCmdExecution() {
+            @Override
+            public void execute() {
+                BPMessages.send(s, "%prefix% &2Successfully given the interest! The countdown has been restarted.");
+                BankPlus.INSTANCE().getInterest().giveInterestToEveryone();
+            }
+        };
     }
 
     @Override

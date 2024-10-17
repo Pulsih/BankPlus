@@ -10,6 +10,7 @@ public class BPPlayer {
 
     private BankGui openedBankGui;
     private BukkitTask bankUpdatingTask, closingTask;
+    private boolean loaded = false;
 
     public BPPlayer(Player player) {
         this.player = player;
@@ -31,6 +32,10 @@ public class BPPlayer {
         return closingTask;
     }
 
+    public boolean isLoaded() {
+        return loaded;
+    }
+
     public void setOpenedBankGui(BankGui openedBankGui) {
         this.openedBankGui = openedBankGui;
     }
@@ -41,5 +46,9 @@ public class BPPlayer {
 
     public void setClosingTask(BukkitTask closingTask) {
         this.closingTask = closingTask;
+    }
+
+    public void setLoaded(boolean loaded) {
+        this.loaded = loaded;
     }
 }

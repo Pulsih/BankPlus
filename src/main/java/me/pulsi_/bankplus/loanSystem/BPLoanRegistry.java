@@ -180,7 +180,9 @@ public class BPLoanRegistry {
             BigDecimal addedToSender = senderBank.getBankEconomy().addBankBalance(sender, currentTaskAmount, TransactionType.LOAN), extra = currentTaskAmount.subtract(addedToSender);
             if (extra.compareTo(BigDecimal.ZERO) <= 0) BPMessages.send(sender.getPlayer(), "Loan-Payback", BPUtils.placeValues(receiver, addedToSender));
             else {
-                BPMessages.send(sender.getPlayer(), "Loan-Payback-Full", BPUtils.placeValues(currentTaskAmount), BPUtils.placeValues(receiver, extra, "extra"));
+                List<String> replacers = BPUtils.placeValues(currentTaskAmount);
+                replacers.addAll(BPUtils.placeValues(receiver, extra, "extra"));
+                BPMessages.send(sender.getPlayer(), "Loan-Payback-Full", replacers);
                 BankPlus.INSTANCE().getVaultEconomy().depositPlayer(sender, extra.doubleValue());
             }
         }

@@ -2,9 +2,6 @@
 # BankPlus messages support PlaceholderApi, and you can
 # use every type of placeholder inside the messages.
 
-# Enable the alert message when a message is missing in the file.
-Enable-Missing-Message-Alert: true
-
 # The main plugin prefix.
 Prefix: "&a&lBank&9&lPlus"
 
@@ -135,4 +132,5 @@ Loan-Already-Sent: "%prefix% &cYou have already sent a loan request."
 Cannot-Afford-Loan: "%prefix% &cYou can't afford for this loan."
 Cannot-Afford-Loan-Others: "%prefix% &c%player% can't afford for this loan."
 No-Available-Banks: "%prefix% &cYou have no available banks."
+No-Available-Banks-Others: "%prefix% &c%player% has no available banks."
 No-Available-Items: "%prefix% &cNo available items."

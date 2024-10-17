@@ -54,7 +54,7 @@ public class BPBankTop {
 
             String message = ConfigValues.getBankTopUpdateBroadcastMessage();
             if (!ConfigValues.isBankTopUpdateBroadcastSilentConsole()) BPLogger.log(message);
-            for (Player p : Bukkit.getOnlinePlayers()) BPMessages.send(p, message, true);
+            for (Player p : Bukkit.getOnlinePlayers()) BPMessages.send(p, message);
         });
     }
 

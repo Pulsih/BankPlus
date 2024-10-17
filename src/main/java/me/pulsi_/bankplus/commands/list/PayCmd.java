@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
+import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
@@ -58,52 +59,48 @@ public class PayCmd extends BPCommand {
     }
 
     @Override
-    public boolean skipUsageWarn() {
+    public boolean skipUsage() {
         return false;
     }
 
     @Override
-    public boolean preCmdChecks(CommandSender s, String[] args) {
-        Player target = Bukkit.getPlayerExact(args[1]);
+    public BPCmdExecution onExecution(CommandSender s, String[] args) {
+        Player sender = (Player) s, target = Bukkit.getPlayerExact(args[1]);
         if (target == null || target.equals(s)) {
             BPMessages.send(s, "Invalid-Player");
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
 
         if (args.length == 2) {
             BPMessages.send(s, "Specify-Number");
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
 
         String num = args[2];
-        if (BPUtils.isInvalidNumber(num, s)) return false;
+        if (BPUtils.isInvalidNumber(num, s)) return BPCmdExecution.invalidExecution();
 
         Bank fromBank = BankUtils.getBank(getPossibleBank(args, 3));
 
-        if (!BankUtils.exist(fromBank, s)) return false;
-        if (!BankUtils.isAvailable(fromBank, (Player) s)) {
+        if (!BankUtils.exist(fromBank, s)) return BPCmdExecution.invalidExecution();
+        if (!BankUtils.isAvailable(fromBank, sender)) {
             BPMessages.send(s, "Cannot-Access-Bank");
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
 
         Bank toBank = BankUtils.getBank(getPossibleBank(args, 4));
 
-        if (!BankUtils.exist(toBank, s)) return false;
+        if (!BankUtils.exist(toBank, s)) return BPCmdExecution.invalidExecution();
         if (!BankUtils.isAvailable(toBank, target)) {
             BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
-        return true;
-    }
 
-    @Override
-    public void onExecution(CommandSender s, String[] args) {
-        BankUtils.getBank(getPossibleBank(args, 3)).getBankEconomy().pay(
-                (Player) s,
-                Bukkit.getPlayerExact(args[1]),
-                new BigDecimal(args[2]),
-                BankUtils.getBank(getPossibleBank(args, 4))
-        );
+        return new BPCmdExecution() {
+            @Override
+            public void execute() {
+                fromBank.getBankEconomy().pay(sender, target, new BigDecimal(args[2]), toBank);
+            }
+        };
     }
 
     @Override

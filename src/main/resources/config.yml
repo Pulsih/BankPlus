@@ -99,6 +99,10 @@ General-Settings:
   # storage, you will need to enable this option.
   Save-On-Quit: false
 
+  # The delay, in ticks, to wait before loading the player data. (1 tick = 50m)
+  # Put 0 for no delay.
+  Load-Delay: 1
+
   # Choose if sending a message to the console
   # when the plugin saves all balances. (Only console)
   Save-Broadcast: true
@@ -389,6 +393,8 @@ Placeholders:
     Trillions: "T"
     Quadrillions: "Q"
     Quintillions: "QQ"
+    Thousands-Separator: "."
+    Decimals-Separator: ","
 
   Time:
     Second: "s"

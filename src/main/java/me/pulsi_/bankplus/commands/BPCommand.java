@@ -104,7 +104,7 @@ public abstract class BPCommand {
             String name = s.getName();
             if (!confirm.contains(name)) {
                 Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> confirm.remove(name), confirmCooldown * 20L);
-                for (String message : confirmMessage) BPMessages.send(s, message, true);
+                for (String message : confirmMessage) BPMessages.send(s, message);
                 confirm.add(name);
                 return false;
             }
@@ -123,14 +123,17 @@ public abstract class BPCommand {
     public void execute(CommandSender s, String[] args) {
         if (!BPUtils.hasPermission(s, permission) || (playerOnly() && !BPUtils.isPlayer(s))) return;
 
-        if (!skipUsageWarn() && args.length == 1) {
-            for (String usage : usage) BPMessages.send(s, usage, true);
+        if (!skipUsage() && args.length == 1) {
+            for (String usage : usage) BPMessages.send(s, usage);
             return;
         }
-        if (isInCooldown(s) || !preCmdChecks(s, args) || !hasConfirmed(s)) return;
+        if (isInCooldown(s)) return;
 
-        onExecution(s, args);
+        BPCmdExecution execution = onExecution(s, args);
+        if (execution.executionType == BPCmdExecution.ExecutionType.INVALID_EXECUTION) return;
+        if (!hasConfirmed(s)) return;
 
+        execution.execute();
         if (cooldown > 0 && !(s instanceof ConsoleCommandSender)) {
             cooldowns.put(s.getName(), System.currentTimeMillis() + (cooldown * 1000L));
             Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> cooldowns.remove(s.getName()), cooldown * 20L);
@@ -152,7 +155,7 @@ public abstract class BPCommand {
         if (get <= cur) return false;
 
         for (String message : cooldownMessage)
-            BPMessages.send(s, message, true, "%time%$" + BPFormatter.formatTime(get - cur));
+            BPMessages.send(s, message, "%time%$" + BPFormatter.formatTime(get - cur));
         return true;
     }
 
@@ -177,7 +180,16 @@ public abstract class BPCommand {
 
     public abstract boolean playerOnly();
 
-    public abstract boolean skipUsageWarn();
+    /**
+     * Check if that command will skip the usage message.
+     * The usage message appears when typing only the cmd identifier. (Example: /bp deposit)
+     * <p>
+     * If the usage has been skipped, there could a probability that the args[1] is null.
+     * So when setting this to true, you should be careful and check for the existence of the first cmd argument.
+     *
+     * @return true if skips the usage message, false otherwise.
+     */
+    public abstract boolean skipUsage();
 
     /**
      * Makes all the needed checks before executing the cmd.
@@ -185,18 +197,8 @@ public abstract class BPCommand {
      *
      * @param s    The command sender.
      * @param args The cmd arguments.
-     * @return true if the cmd pass the checks, false otherwise.
      */
-    public abstract boolean preCmdChecks(CommandSender s, String[] args);
-
-    /**
-     * Method ran when the {@link #preCmdChecks(CommandSender, String[])} returns true.
-     * The cmd arguments starts from [2], the first argument is the cmd identifier.
-     *
-     * @param s    The command sender.
-     * @param args The cmd arguments.
-     */
-    public abstract void onExecution(CommandSender s, String[] args);
+    public abstract BPCmdExecution onExecution(CommandSender s, String[] args);
 
     /**
      * Method to show the arguments when tab completing.

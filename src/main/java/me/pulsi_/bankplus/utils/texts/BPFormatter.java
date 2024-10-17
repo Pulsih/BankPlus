@@ -3,6 +3,8 @@ package me.pulsi_.bankplus.utils.texts;
 import me.pulsi_.bankplus.values.ConfigValues;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.Locale;
 
@@ -18,127 +20,100 @@ public class BPFormatter {
 
     /**
      * Return numbers like as 23.54k, 765.536M, 91.3T.
+     * This formatting method correspond to the placeholder %balance_formatted%.
+     *
      * @param amount The amount.
      * @return A string.
      */
     public static String formatPrecise(BigDecimal amount) {
-        return formatPrecise(amount.doubleValue());
-    }
+        BigDecimal thousand = new BigDecimal(1000), scale = thousand;
+        int count = 0;
 
-    /**
-     * Return numbers like as 23.54k, 765.536M, 91.3T.
-     * @param amount The amount.
-     * @return A string.
-     */
-    public static String formatPrecise(double amount) {
-        int i = 0;
-        double scale = 1000D;
-
-        while (amount >= scale && i < limit) {
-            i++;
-            scale *= 1000D;
+        while (amount.compareTo(scale) >= 0 && count < limit) {
+            scale = scale.multiply(thousand);
+            count++;
         }
 
-        return setMaxDigits(amount / (scale / 1000D)) + order[i];
+        return styleBigDecimal(amount.divide(scale.divide(thousand)), 2) + order[count];
     }
 
     /**
      * Return numbers like as 657k, 123k, 97M.
+     * This formatting method correspond to the placeholder %balance_formatted_long%.
+     *
      * @param amount The amount.
      * @return A string.
      */
     public static String formatLong(BigDecimal amount) {
-        double bal = amount.doubleValue();
+        BigDecimal thousand = new BigDecimal(1000), scale = thousand;
+        int count = 0;
 
-        int i = 0;
-        long scale = 1000L;
-
-        while (bal >= scale && i < limit) {
-            i++;
-            scale *= 1000L;
+        while (amount.compareTo(scale) >= 0 && count < limit) {
+            scale = scale.multiply(thousand);
+            count++;
         }
 
-        return Math.round(bal / (scale / 1000D)) + order[i];
+        return styleBigDecimal(amount.divide(scale.divide(thousand)), 0) + order[count];
     }
 
     /**
      * Return numbers like as 14.243,12, 75.249, 231.785.
+     * This formatting method correspond to the placeholder %balance%.
+     *
      * @param amount The amount.
      * @return A string.
      */
     public static String formatCommas(BigDecimal amount) {
         String number = styleBigDecimal(amount), numbers = number, decimals = "", result;
 
-        if (number.contains(".")) {
+        if (number.contains(".")) { // In BigDecimals numbers, decimals are divided by .
             String[] split = number.split("\\.");
             numbers = split[0];
             decimals = split[1];
         }
 
+        String thousands = ConfigValues.getThousandsSeparator(), tens = ConfigValues.getDecimalsSeparator();
         StringBuilder builder = new StringBuilder();
         for (int i = numbers.length() - 1, count = 0; i >= 0; i--, count++) {
             if (count >= 3) {
-                builder.append(".");
+                builder.append(thousands);
                 count = 0;
             }
             builder.append(numbers.charAt(i));
         }
         builder.reverse();
-        result = builder + (decimals.isEmpty() ? "" : ("," + decimals));
+        result = builder + (decimals.isEmpty() ? "" : (tens + decimals));
 
         return result;
     }
 
     /**
      * Get a BigDecimal amount and format it with the BankPlus style.
+     *
      * @param amount The amount.
      * @return A string.
      */
     public static String styleBigDecimal(BigDecimal amount) {
-        String balance = amount.toPlainString();
-
-        int maxDecimals = ConfigValues.getMaxDecimalsAmount();
-
-        // 0 or below.
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            if (maxDecimals <= 0) return "0";
-
-            StringBuilder decimals = new StringBuilder(maxDecimals);
-            for (int i = 0; i < maxDecimals; i++) decimals.append("0");
-            return "0." + decimals;
-        }
-
-        boolean hasDecimals = balance.contains(".");
-        // if not using decimals, return the number without them.
-        if (maxDecimals <= 0) return hasDecimals ? balance.split("\\.")[0] : balance;
-
-        if (hasDecimals) {
-            String[] split = balance.split("\\.");
-            String decimals = split[1];
-            int decimalAmount = decimals.length();
-
-            // if the number has decimals more than the limit, cut them.
-            if (decimalAmount > maxDecimals) balance = split[0] + "." + decimals.substring(0, maxDecimals);
-
-            // if the number has fewer decimals than the limit, add the missing ones with a 0.
-            if (decimalAmount < maxDecimals) {
-                StringBuilder builder = new StringBuilder(maxDecimals);
-                for (int i = 0; i < (maxDecimals - decimalAmount); i++) builder.append("0");
-                balance = balance + builder;
-            }
-        } else {
-            StringBuilder decimals = new StringBuilder(maxDecimals);
-            for (int i = 0; i < maxDecimals; i++) decimals.append("0");
-            balance = balance + "." + decimals;
-        }
-
-        return balance;
+        return styleBigDecimal(amount, ConfigValues.getMaxDecimalsAmount());
     }
 
-    public static BigDecimal getStyledBigDecimal(BigDecimal amount) {
-        return new BigDecimal(styleBigDecimal(amount));
+    /**
+     * Get a BigDecimal amount and format it with the BankPlus style.
+     *
+     * @param amount         The amount.
+     * @param decimalsAmount The max decimals amount.
+     * @return A string.
+     */
+    public static String styleBigDecimal(BigDecimal amount, int decimalsAmount) {
+        return amount.setScale(decimalsAmount, RoundingMode.HALF_UP).toPlainString();
     }
 
+    /**
+     * Create a BigDecimal formatted from the given string.
+     *
+     * @param amount The amount as string.
+     * @return A BigDecimal or ZERO if invalid.
+     */
     public static BigDecimal getStyledBigDecimal(String amount) {
         BigDecimal bD;
         try {
@@ -149,13 +124,12 @@ public class BPFormatter {
         return new BigDecimal(styleBigDecimal(bD));
     }
 
-    private static String setMaxDigits(double balance) {
-        NumberFormat format = NumberFormat.getInstance(Locale.ENGLISH);
-        format.setMaximumFractionDigits(ConfigValues.getMaxDecimalsAmount());
-        format.setMinimumFractionDigits(0);
-        return format.format(balance);
-    }
-
+    /**
+     * Format the given milliseconds in the BankPlus's time format.
+     *
+     * @param milliseconds The milliseconds time.
+     * @return A string of formatted time.
+     */
     public static String formatTime(long milliseconds) {
         long seconds = milliseconds / 1000;
         long minutes = seconds / 60;

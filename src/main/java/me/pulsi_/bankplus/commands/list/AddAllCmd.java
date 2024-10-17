@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
+import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPUtils;
@@ -55,20 +56,25 @@ public class AddAllCmd extends BPCommand {
     }
 
     @Override
-    public boolean skipUsageWarn() {
+    public boolean skipUsage() {
         return false;
     }
 
     @Override
-    public boolean preCmdChecks(CommandSender s, String[] args) {
-        return !BPUtils.isInvalidNumber(args[1], s) && BankUtils.exist(getPossibleBank(args, 2), s);
-    }
+    public BPCmdExecution onExecution(CommandSender s, String[] args) {
+        String amount = args[1];
+        if (BPUtils.isInvalidNumber(amount, s)) return BPCmdExecution.invalidExecution();
 
-    @Override
-    public void onExecution(CommandSender s, String[] args) {
-        BigDecimal num = new BigDecimal(args[1]);
-        BPMessages.send(s, "%prefix% &aSuccessfully added &f" + num + " &amoney to all online players!", true);
-        addAll(Bukkit.getOnlinePlayers(), num, BPEconomy.get(args[2]));
+        String bankName = getPossibleBank(args, 2);
+        if (!BankUtils.exist(bankName, s)) return BPCmdExecution.invalidExecution();
+
+        return new BPCmdExecution() {
+            @Override
+            public void execute() {
+                BPMessages.send(s, "%prefix% &aSuccessfully added &f" + amount + " &amoney to all online players!");
+                addAll(Bukkit.getOnlinePlayers(), new BigDecimal(amount), BPEconomy.get(bankName));
+            }
+        };
     }
 
     @Override
@@ -84,9 +90,10 @@ public class AddAllCmd extends BPCommand {
     /**
      * Method to add to each online player the selected amount, split
      * the task every 80 players to avoid freezing in bigger servers.
+     *
      * @param onlinePlayers The initial online players list.
-     * @param amount The selected amount to add.
-     * @param economy The bank economy where to add the money.
+     * @param amount        The selected amount to add.
+     * @param economy       The bank economy where to add the money.
      */
     private void addAll(Collection<? extends Player> onlinePlayers, BigDecimal amount, BPEconomy economy) {
         List<Player> copy = new ArrayList<>(onlinePlayers);

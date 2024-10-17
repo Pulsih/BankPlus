@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
+import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
@@ -54,76 +55,65 @@ public class GiveRequiredItemsCmd extends BPCommand {
     }
 
     @Override
-    public boolean skipUsageWarn() {
+    public boolean skipUsage() {
         return false;
     }
 
     @Override
-    public boolean preCmdChecks(CommandSender s, String[] args) {
-        if (Bukkit.getPlayerExact(args[1]) == null) {
+    public BPCmdExecution onExecution(CommandSender s, String[] args) {
+        Player target = Bukkit.getPlayerExact(args[1]);
+        if (target == null) {
             BPMessages.send(s, "Invalid-Player");
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
 
         Bank bank = BankUtils.getBank(getPossibleBank(args, 2));
-        if (bank == null) {
-            BPMessages.send(s, "Invalid-Bank");
-            return false;
-        }
+        if (!BankUtils.exist(bank, s)) return BPCmdExecution.invalidExecution();
 
         if (args.length == 3) {
             BPMessages.send(s, "Specify-Number");
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
 
-        String level = args[3];
-        if (BPUtils.isInvalidNumber(level, s)) return false;
+        String levelString = args[3];
+        if (BPUtils.isInvalidNumber(levelString, s)) return BPCmdExecution.invalidExecution();
 
+        int level = Integer.parseInt(levelString);
         if (!BankUtils.hasLevel(bank, level)) {
             BPMessages.send(s, "Invalid-Bank-Level");
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
 
-        List<ItemStack> requiredItems = BankUtils.getRequiredItems(bank, Integer.parseInt(level));
+        List<ItemStack> requiredItems = new ArrayList<>(BankUtils.getRequiredItems(bank, level));
+
         if (requiredItems.isEmpty()) {
             BPMessages.send(s, "No-Available-Items");
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
 
         if (args.length > 4) {
             String choose = args[4];
             if (!choose.equalsIgnoreCase("all")) {
-                if (BPUtils.isInvalidNumber(choose, s)) return false;
+                if (BPUtils.isInvalidNumber(choose, s)) return BPCmdExecution.invalidExecution();
 
                 int item = Integer.parseInt(choose);
                 if (item <= 0 || item > requiredItems.size()) {
                     BPMessages.send(s, "Invalid-Number");
-                    return false;
+                    return BPCmdExecution.invalidExecution();
+                } else {
+                    ItemStack requiredItem = requiredItems.get(item - 1);
+                    requiredItems.clear();
+                    requiredItems.add(requiredItem);
                 }
             }
         }
-        return true;
-    }
 
-    @Override
-    public void onExecution(CommandSender s, String[] args) {
-        Player p = Bukkit.getPlayerExact(args[1]);
-
-        String bankName = args[2], level = args[3];
-        List<ItemStack> requiredItems = BankUtils.getRequiredItems(BankUtils.getBank(bankName), Integer.parseInt(level));
-
-        if (args.length == 4) {
-            for (ItemStack item : requiredItems) p.getInventory().addItem(item);
-            return;
-        }
-
-        String choose = args[4];
-        if (choose.equalsIgnoreCase("all")) {
-            for (ItemStack item : requiredItems) p.getInventory().addItem(item);
-            return;
-        }
-
-        p.getInventory().addItem(requiredItems.get(Integer.parseInt(choose) - 1));
+        return new BPCmdExecution() {
+            @Override
+            public void execute() {
+                for (ItemStack item : requiredItems) target.getInventory().addItem(item);
+            }
+        };
     }
 
     @Override

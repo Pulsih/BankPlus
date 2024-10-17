@@ -27,15 +27,23 @@ public class PlayerServerListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
+
+        boolean wasRegistered;
         BPPlayerManager pManager = new BPPlayerManager(p);
-        boolean wasRegistered = true;
-        if (!pManager.isPlayerRegistered()) {
+        if (pManager.isPlayerRegistered()) wasRegistered = true;
+        else {
             pManager.registerPlayer();
             if (ConfigValues.isNotifyingNewPlayer()) BPLogger.info("Successfully registered " + p.getName() + "!");
             wasRegistered = false;
         }
+
         pManager.checkForFileFixes(p, pManager);
-        PlayerRegistry.loadPlayer(p, wasRegistered);
+
+        int loadDelay = ConfigValues.getLoadDelay();
+        if (loadDelay <= 0) PlayerRegistry.loadPlayer(p, wasRegistered);
+        else {
+            Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> PlayerRegistry.loadPlayer(p, wasRegistered), loadDelay);
+        }
 
         if (!ConfigValues.isNotifyingOfflineInterest()) return;
 
@@ -49,7 +57,7 @@ public class PlayerServerListener implements Listener {
         BigDecimal finalAmount = amount;
         if (finalAmount.compareTo(BigDecimal.ZERO) > 0)
             Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () ->
-                            BPMessages.send(p, ConfigValues.getOfflineInterestMessage(), BPUtils.placeValues(finalAmount), true),
+                            BPMessages.send(p, ConfigValues.getOfflineInterestMessage(), BPUtils.placeValues(finalAmount)),
                     ConfigValues.getNotifyOfflineInterestDelay() * 20L);
     }
 

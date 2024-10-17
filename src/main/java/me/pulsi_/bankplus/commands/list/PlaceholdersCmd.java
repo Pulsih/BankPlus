@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
+import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
@@ -49,30 +50,30 @@ public class PlaceholdersCmd extends BPCommand {
     }
 
     @Override
-    public boolean skipUsageWarn() {
+    public boolean skipUsage() {
         return true;
     }
 
     @Override
-    public boolean preCmdChecks(CommandSender s, String[] args) {
-        return true;
-    }
+    public BPCmdExecution onExecution(CommandSender s, String[] args) {
+        return new BPCmdExecution() {
+            @Override
+            public void execute() {
+                List<String> placeholders =  BankPlus.INSTANCE().getBpPlaceholders().getRegisteredPlaceholders();
+                int size = placeholders.size();
 
-    @Override
-    public void onExecution(CommandSender s, String[] args) {
-        List<String> placeholders =  BankPlus.INSTANCE().getBpPlaceholders().getRegisteredPlaceholders();
-        int size = placeholders.size();
+                BPMessages.send(s, "%prefix% &7Currently registered placeholders &8(&a" + size + "&8)&7:");
 
-        BPMessages.send(s, "%prefix% &7Currently registered placeholders &8(&a" + size + "&8)&7:", true);
+                StringBuilder builder = new StringBuilder("  &8* ");
+                for (int i = 0; i < size; i++) {
+                    builder.append("&8[&a").append(placeholders.get(i));
 
-        StringBuilder builder = new StringBuilder("  &8* ");
-        for (int i = 0; i < size; i++) {
-            builder.append("&8[&a").append(placeholders.get(i));
-
-            if (i + 1 >= size) builder.append("&8]&7.");
-            else builder.append("&8]&7, ");
-        }
-        BPMessages.send(s, builder.toString(), true);
+                    if (i + 1 >= size) builder.append("&8]&7.");
+                    else builder.append("&8]&7, ");
+                }
+                BPMessages.send(s, builder.toString());
+            }
+        };
     }
 
     @Override

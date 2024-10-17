@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class BPTransactionListener implements Listener {
@@ -59,10 +60,9 @@ public class BPTransactionListener implements Listener {
             newTransactionAmount = BigDecimal.valueOf(0);
         }
 
-        BPMessages.send(Bukkit.getPlayer(p.getUniqueId()), "Debt-Money-Taken",
-                BPUtils.placeValues(e.getTransactionAmount().min(debt)),
-                BPUtils.placeValues(debtLeft, "debt")
-        );
+        List<String> replacers = BPUtils.placeValues(e.getTransactionAmount().min(debt));
+        replacers.addAll(BPUtils.placeValues(debtLeft, "debt"));
+        BPMessages.send(Bukkit.getPlayer(p.getUniqueId()), "Debt-Money-Taken", replacers);
 
         economy.setDebt(p, debtLeft);
         e.setTransactionAmount(newTransactionAmount);
@@ -123,8 +123,8 @@ public class BPTransactionListener implements Listener {
                         .replace("%2", e.getBankName())
                         .replace("%3", BPFormatter.styleBigDecimal(pair.getKey()))
                         .replace("%4", BPFormatter.styleBigDecimal(e.getNewBalance()))
-                        .replace("%5", BPFormatter.formatPrecise(pair.getValue()))
-                        .replace("%6", BPFormatter.formatPrecise(e.getNewVaultBalance()))
+                        .replace("%5", pair.getValue() + "")
+                        .replace("%6", e.getNewVaultBalance() + "")
         );
 
         try {

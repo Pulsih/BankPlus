@@ -4,6 +4,7 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
+import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.loanSystem.LoanUtils;
 import me.pulsi_.bankplus.utils.BPUtils;
@@ -70,112 +71,112 @@ public class LoanCmd extends BPCommand {
     }
 
     @Override
-    public boolean skipUsageWarn() {
+    public boolean skipUsage() {
         return false;
     }
 
     @Override
-    public boolean preCmdChecks(CommandSender s, String[] args) {
+    public BPCmdExecution onExecution(CommandSender s, String[] args) {
         Player sender = (Player) s;
 
         String action = args[1].toLowerCase();
         switch (action) {
             case "accept":
+                return new BPCmdExecution() {
+                    @Override
+                    public void execute() {
+                        LoanUtils.acceptRequest(sender);
+                    }
+                };
+
             case "cancel":
+                return new BPCmdExecution() {
+                    @Override
+                    public void execute() {
+                        LoanUtils.cancelRequest(sender);
+                    }
+                };
+
             case "deny":
-                return true;
+                return new BPCmdExecution() {
+                    @Override
+                    public void execute() {
+                        LoanUtils.denyRequest(sender);
+                    }
+                };
         }
 
         if (LoanUtils.hasSentRequest(sender)) {
             BPMessages.send(sender, "Loan-Already-Sent");
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
 
         if (!action.equals("give") && !action.equals("request")) {
             BPMessages.send(sender, "Invalid-Action");
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
 
         if (args.length == 2) {
             BPMessages.send(sender, "Specify-Player");
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
-        String receiverName = args[2];
-
         if (args.length == 3) {
             BPMessages.send(sender, "Specify-Number");
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
 
-        String num = args[3];
-        if (BPUtils.isInvalidNumber(num, sender)) return false;
+        String targetName = args[2], amountString = args[3];
 
-        // Request bank-to-player, if this passes, the request will be player-to-player.
-        if (action.equals("request") && registry.getBanks().containsKey(receiverName)) {
-            if (!BankUtils.isAvailable(receiverName, sender)) {
+        if (BPUtils.isInvalidNumber(amountString, sender)) return BPCmdExecution.invalidExecution();
+        BigDecimal amount = new BigDecimal(amountString);
+
+        // If the target name is the name of a bank, it means that
+        // the player is trying to request a loan from a bank.
+        if (action.equals("request") && registry.getBanks().containsKey(targetName)) {
+            if (!BankUtils.isAvailable(targetName, sender)) {
                 BPMessages.send(sender, "Cannot-Access-Bank");
-                return false;
+                return BPCmdExecution.invalidExecution();
             }
-            return true;
+
+            return new BPCmdExecution() {
+                @Override
+                public void execute() {
+                    LoanUtils.sendLoan(sender, BankUtils.getBank(targetName), amount);
+                }
+            };
+        } else {
+            Player target = Bukkit.getPlayerExact(targetName);
+            if (target == null || target.equals(s)) {
+                BPMessages.send(s, "Invalid-Player");
+                return BPCmdExecution.invalidExecution();
+            }
+
+            // Check if the bank specified by the request sender is available for him.
+            Bank senderBank = BankUtils.getBank(getPossibleBank(args, 4));
+
+            if (!BankUtils.exist(senderBank, s)) return BPCmdExecution.invalidExecution();
+            if (!BankUtils.isAvailable(senderBank, sender)) {
+                BPMessages.send(sender, "Cannot-Access-Bank");
+                return BPCmdExecution.invalidExecution();
+            }
+
+            // Check if the bank specified by the request sender is available for the request target.
+            Bank receiverBank = BankUtils.getBank(getPossibleBank(args, 5));
+
+            if (!BankUtils.exist(receiverBank, s)) return BPCmdExecution.invalidExecution();
+            if (!BankUtils.isAvailable(receiverBank, target)) {
+                BPMessages.send(sender, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
+                return BPCmdExecution.invalidExecution();
+            }
+
+            return new BPCmdExecution() {
+                @Override
+                public void execute() {
+                    LoanUtils.sendRequest(sender, target, amount, senderBank, receiverBank, action);
+                }
+            };
         }
 
-        Player target = Bukkit.getPlayerExact(receiverName);
-        if (target == null || target.equals(s)) {
-            BPMessages.send(s, "Invalid-Player");
-            return false;
-        }
-
-        // Check if the bank specified by the request sender is available for him.
-        Bank senderBank = BankUtils.getBank(getPossibleBank(args, 4));
-
-        if (!BankUtils.exist(senderBank, s)) return false;
-        if (!BankUtils.isAvailable(senderBank, sender)) {
-            BPMessages.send(sender, "Cannot-Access-Bank");
-            return false;
-        }
-
-        // Check if the bank specified by the request sender is available for the request target.
-        Bank receiverBank = BankUtils.getBank(getPossibleBank(args, 5));
-
-        if (!BankUtils.exist(receiverBank, s)) return false;
-        if (!BankUtils.isAvailable(receiverBank, target)) {
-            BPMessages.send(sender, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public void onExecution(CommandSender s, String[] args) {
-        Player sender = (Player) s;
-
-        String action = args[1].toLowerCase();
-        switch (action) {
-            case "accept":
-                LoanUtils.acceptRequest(sender);
-                return;
-
-            case "deny":
-                LoanUtils.denyRequest(sender);
-                return;
-
-            case "cancel":
-                LoanUtils.cancelRequest(sender);
-                return;
-        }
-
-        String receiverName = args[2];
-        BigDecimal amount = new BigDecimal(args[3]);
-
-        if (action.equals("request") && registry.getBanks().containsKey(receiverName)) {
-            LoanUtils.sendLoan(sender, BankUtils.getBank(receiverName), amount);
-            return;
-        }
-
-        Player target = Bukkit.getPlayerExact(receiverName);
-        Bank senderBank = BankUtils.getBank(getPossibleBank(args, 4));
-        Bank receiverBank = BankUtils.getBank(getPossibleBank(args, 5));
-        LoanUtils.sendRequest(sender, target, amount, senderBank, receiverBank, action);
     }
 
     @Override

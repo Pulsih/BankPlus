@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
+import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
@@ -49,24 +50,27 @@ public class OpenCmd extends BPCommand {
     }
 
     @Override
-    public boolean skipUsageWarn() {
+    public boolean skipUsage() {
         return true;
     }
 
     @Override
-    public boolean preCmdChecks(CommandSender s, String[] args) {
+    public BPCmdExecution onExecution(CommandSender s, String[] args) {
         Bank bank = BankUtils.getBank(getPossibleBank(args, 1));
-        if (!BankUtils.exist(bank, s)) return false;
-        if (!BankUtils.isAvailable(bank, (Player) s)) {
-            BPMessages.send(s, "Cannot-Access-Bank");
-            return false;
-        }
-        return true;
-    }
+        if (!BankUtils.exist(bank, s)) return BPCmdExecution.invalidExecution();
 
-    @Override
-    public void onExecution(CommandSender s, String[] args) {
-        BankUtils.getBank(getPossibleBank(args, 1)).getBankGui().openBankGui((Player) s);
+        Player p = (Player) s;
+        if (!BankUtils.isAvailable(bank, p)) {
+            BPMessages.send(s, "Cannot-Access-Bank");
+            return BPCmdExecution.invalidExecution();
+        }
+
+        return new BPCmdExecution() {
+            @Override
+            public void execute() {
+                bank.getBankGui().openBankGui(p);
+            }
+        };
     }
 
     @Override

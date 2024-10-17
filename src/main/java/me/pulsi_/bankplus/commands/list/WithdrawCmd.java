@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
+import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPUtils;
@@ -53,45 +54,42 @@ public class WithdrawCmd extends BPCommand {
     }
 
     @Override
-    public boolean skipUsageWarn() {
+    public boolean skipUsage() {
         return false;
     }
 
     @Override
-    public boolean preCmdChecks(CommandSender s, String[] args) {
+    public BPCmdExecution onExecution(CommandSender s, String[] args) {
+        String amount = args[1].toLowerCase();
+        if (!amount.equals("all") && !amount.equals("half") && BPUtils.isInvalidNumber(amount, s)) return BPCmdExecution.invalidExecution();
+
         Bank bank = BankUtils.getBank(getPossibleBank(args, 2));
-        if (!BankUtils.exist(bank, s)) return false;
+        if (!BankUtils.exist(bank, s)) return BPCmdExecution.invalidExecution();
 
-        if (!BankUtils.isAvailable(bank, (Player) s)) {
-            BPMessages.send(s, "Cannot-Access-Bank");
-            return false;
-        }
-
-        String arg1 = args[1].toLowerCase();
-        return arg1.equals("all") || arg1.equals("half") || !BPUtils.isInvalidNumber(arg1, s);
-    }
-
-    @Override
-    public void onExecution(CommandSender s, String[] args) {
         Player p = (Player) s;
-
-        BPEconomy economy = BPEconomy.get(getPossibleBank(args, 2));
-
-        BigDecimal amount;
-        String arg1 = args[1].toLowerCase();
-        switch (arg1) {
-            case "all":
-                amount = economy.getBankBalance(p);
-                break;
-
-            case "half":
-                amount = economy.getBankBalance(p).divide(BigDecimal.valueOf(2));
-                break;
-
-            default:
-                amount = BPFormatter.getStyledBigDecimal(arg1);
+        if (!BankUtils.isAvailable(bank, p)) {
+            BPMessages.send(s, "Cannot-Access-Bank");
+            return BPCmdExecution.invalidExecution();
         }
-        economy.withdraw((Player) s, amount);
+
+         return new BPCmdExecution() {
+             @Override
+             public void execute() {
+                 BPEconomy economy = bank.getBankEconomy();
+                 switch (amount) {
+                     case "all":
+                         economy.withdraw(p, economy.getBankBalance(p));
+                         break;
+
+                     case "half":
+                         economy.withdraw(p, economy.getBankBalance(p).divide(BigDecimal.valueOf(2)));
+                         break;
+
+                     default:
+                         economy.withdraw(p, BPFormatter.getStyledBigDecimal(amount));
+                 }
+             }
+         };
     }
 
     @Override

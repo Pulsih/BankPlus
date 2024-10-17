@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
@@ -49,24 +50,24 @@ public class InterestCmd extends BPCommand {
     }
 
     @Override
-    public boolean skipUsageWarn() {
+    public boolean skipUsage() {
         return true;
     }
 
     @Override
-    public boolean preCmdChecks(CommandSender s, String[] args) {
+    public BPCmdExecution onExecution(CommandSender s, String[] args) {
         if (!ConfigValues.isInterestEnabled()) {
             BPMessages.send(s, "Interest-Disabled");
-            return false;
+            return BPCmdExecution.invalidExecution();
         }
-        return true;
-    }
 
-    @Override
-    public void onExecution(CommandSender s, String[] args) {
-        BPMessages.send(s, "Interest-Time", "%time%$" + BPFormatter.formatTime(BankPlus.INSTANCE().getInterest().getInterestCooldownMillis()));
+        return new BPCmdExecution() {
+            @Override
+            public void execute() {
+                BPMessages.send(s, "Interest-Time", "%time%$" + BPFormatter.formatTime(BankPlus.INSTANCE().getInterest().getInterestCooldownMillis()));
+            }
+        };
     }
-
     @Override
     public List<String> tabCompletion(CommandSender s, String[] args) {
         return null;
