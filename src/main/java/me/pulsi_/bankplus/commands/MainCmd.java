@@ -32,7 +32,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 0) {
-            if (!BPUtils.hasPermission(s, "bankplus.use")) return true;
+            if (!BPUtils.hasPermission(s, "bankplus.use.dc")) return true;
 
             if (s instanceof Player) {
                 if (BankUtils.getAvailableBankNames((Player) s).isEmpty()) {
