@@ -216,7 +216,7 @@ public class BankGui {
 
         private ItemStack item;
         private String material = "STONE", displayname = "* DISPLAYNAME NOT FOUND *";
-        private List<String> actions = new ArrayList<>();
+        private List<String> actions = new ArrayList<>(), flags = new ArrayList<>();
         private final HashMap<Integer, List<String>> lore = new HashMap<>();
 
         public ItemStack getItem() {
@@ -233,6 +233,10 @@ public class BankGui {
 
         public List<String> getActions() {
             return actions;
+        }
+
+        public List<String> getFlags() {
+            return flags;
         }
 
         public HashMap<Integer, List<String>> getLore() {
@@ -253,6 +257,10 @@ public class BankGui {
 
         public void setActions(List<String> actions) {
             this.actions = actions;
+        }
+
+        public void setFlags(List<String> flags) {
+            this.flags = flags;
         }
     }
 }

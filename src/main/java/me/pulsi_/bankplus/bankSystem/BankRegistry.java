@@ -35,12 +35,12 @@ public class BankRegistry {
             newRegisteredBanks.add(identifier);
 
             if (banks.containsKey(identifier)) {
-                banks.get(identifier).updateBankSettings(bankFile);
+                banks.get(identifier).loadBankProperties(bankFile);
                 continue;
             }
 
             Bank bank = new Bank(identifier);
-            bank.updateBankSettings(bankFile);
+            bank.loadBankProperties(bankFile);
             banks.put(identifier, bank);
         }
 

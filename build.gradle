@@ -3,21 +3,17 @@ plugins {
 }
 
 group = 'me.pulsi_'
-version = '6.4-alpha2'
-
-// Remove comments when testing the plugin.
-//setLibsDirName("plugins");
-//setBuildDir(new File("C:\\Users\\faste\\Desktop\\Test Servers\\1.16.4"));
+version = '4.7'
 
 repositories {
     mavenCentral()
     maven {
-        name = 'papermc-repo'
-        url = 'https://papermc.io/repo/repository/maven-public/'
+        name = "sonatype"
+        url = "https://oss.sonatype.org/content/groups/public/"
     }
     maven {
-        name = 'sonatype'
-        url = 'https://oss.sonatype.org/content/groups/public/'
+        name = "papermc-repo"
+        url = "https://repo.papermc.io/repository/maven-public/"
     }
     maven {
         name "essentialsx-releases"
@@ -32,11 +28,29 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT'
+    compileOnly "com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT"
     compileOnly 'net.essentialsx:EssentialsX:2.20.0'
     compileOnly 'com.github.MilkBowl:VaultAPI:1.7'
-    compileOnly 'me.clip:placeholderapi:2.11.3'
+    compileOnly 'me.clip:placeholderapi:2.11.6'
     implementation(fileTree(dir: 'libs', includes: ['*.jar'])) // For CMI Api (https://github.com/Zrips/CMI-API/releases)
+}
+
+def targetJavaVersion = 8
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release.set(targetJavaVersion)
+    }
 }
 
 processResources {

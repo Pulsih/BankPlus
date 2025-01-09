@@ -599,6 +599,14 @@ public class BankUtils {
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
 
+        for (String flag : itemSection.getStringList("ItemFlags")) {
+            try {
+                meta.addItemFlags(ItemFlag.valueOf(flag));
+            } catch (IllegalArgumentException e) {
+                BPLogger.warn("Could not set item flag \"" + flag + "\" to item \"" + itemSection + "\" because it's not a valid item flag.");
+            }
+        }
+
         int modelData = itemSection.getInt("CustomModelData");
         if (modelData > 0) {
             try {

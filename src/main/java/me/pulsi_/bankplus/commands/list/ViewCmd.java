@@ -63,6 +63,7 @@ public class ViewCmd extends BPCommand {
 
     @Override
     public BPCmdExecution onExecution(CommandSender s, String[] args) {
+
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
         if (!target.hasPlayedBefore()) {
             BPMessages.send(s, "Invalid-Player");
@@ -71,6 +72,7 @@ public class ViewCmd extends BPCommand {
 
         List<Bank> banks = new ArrayList<>();
         if (args.length == 2) {
+
             banks.addAll(BankUtils.getAvailableBanks(target));
             if (banks.isEmpty()) {
                 BPMessages.send(s, "No-Available-Banks-Others", "%player%$" + target.getName());

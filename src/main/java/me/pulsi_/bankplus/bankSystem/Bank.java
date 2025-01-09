@@ -71,16 +71,16 @@ public class Bank {
         this.giveInterestIfNotAvailable = giveInterestIfNotAvailable;
     }
 
-    public void updateBankSettings() {
-        updateBankSettings(new File(BankPlus.INSTANCE().getDataFolder(), "banks" + File.separator + identifier + ".yml"));
+    public void loadBankProperties() {
+        loadBankProperties(new File(BankPlus.INSTANCE().getDataFolder(), "banks" + File.separator + identifier + ".yml"));
     }
 
     /**
-     * Update the bank settings, such as access permission, levels and other.
+     * Update the bank settings, such as access permission, levels, items and more.
      *
      * @param file The bank file.
      */
-    public void updateBankSettings(File file) {
+    public void loadBankProperties(File file) {
         FileConfiguration config = new YamlConfiguration();
         try {
             config.load(file);
