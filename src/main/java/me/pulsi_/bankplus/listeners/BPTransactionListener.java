@@ -33,8 +33,13 @@ public class BPTransactionListener implements Listener {
         private final K key;
         private final V value;
 
-        public K getKey() { return key; }
-        public V getValue() { return value; }
+        public K getKey() {
+            return key;
+        }
+
+        public V getValue() {
+            return value;
+        }
 
         public Pair(K key, V value) {
             this.key = key;
@@ -44,39 +49,32 @@ public class BPTransactionListener implements Listener {
 
     private final HashMap<UUID, Pair<BigDecimal, Double>> logHolder = new HashMap<>();
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void processDebt(BPPreTransactionEvent e) {
-        OfflinePlayer p = e.getPlayer();
-
-        BPEconomy economy = BPEconomy.get(e.getBankName());
-        BigDecimal debt = economy.getDebt(p);
-        TransactionType type = e.getTransactionType();
-        if (debt.doubleValue() <= 0d || (type != TransactionType.ADD && type != TransactionType.DEPOSIT && type != TransactionType.INTEREST && type != TransactionType.SET)) return;
-
-        BigDecimal debtLeft = new BigDecimal(0), newTransactionAmount = e.getTransactionAmount().subtract(debt);
-
-        if (newTransactionAmount.doubleValue() < 0d) {
-            debtLeft = newTransactionAmount.abs();
-            newTransactionAmount = BigDecimal.valueOf(0);
-        }
-
-        List<String> replacers = BPUtils.placeValues(e.getTransactionAmount().min(debt));
-        replacers.addAll(BPUtils.placeValues(debtLeft, "debt"));
-        BPMessages.send(Bukkit.getPlayer(p.getUniqueId()), "Debt-Money-Taken", replacers);
-
-        economy.setDebt(p, debtLeft);
-        e.setTransactionAmount(newTransactionAmount);
-    }
-
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onTransactionStart(BPPreTransactionEvent e) {
         if (ConfigValues.isLoggingTransactions())
             logHolder.put(e.getPlayer().getUniqueId(), new Pair<>(e.getCurrentBalance(), e.getCurrentVaultBalance()));
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onTransactionEnd(BPAfterTransactionEvent e) {
         if (ConfigValues.isLoggingTransactions()) log(e);
+
+        BPEconomy economy = BPEconomy.get(e.getBankName());
+        if (economy == null) return;
+
+        OfflinePlayer p = e.getPlayer();
+        BigDecimal debt = economy.getDebt(p);
+        if (debt.compareTo(BigDecimal.ZERO) <= 0) return;
+
+        BigDecimal removed = economy.removeBankBalance(p, debt);
+        if (removed.compareTo(BigDecimal.ZERO) <= 0) return;
+
+        BigDecimal newDebt = debt.subtract(removed);
+        economy.setDebt(p, newDebt);
+
+        List<String> replacers = BPUtils.placeValues(e.getTransactionAmount().min(debt));
+        replacers.addAll(BPUtils.placeValues(newDebt, "debt"));
+        BPMessages.send(Bukkit.getPlayer(p.getUniqueId()), "Debt-Money-Taken", replacers);
     }
 
     private void log(BPAfterTransactionEvent e) {

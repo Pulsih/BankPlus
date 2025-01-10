@@ -34,6 +34,7 @@ public class PlayerChatMethod {
         }
 
         String message = ChatColor.stripColor(e.getMessage());
+        if (message.endsWith(".")) message = message.substring(0, message.length() - 1);
 
         if (hasTypedExit(message, p, e)) {
             reopenBank(p, openedBank);
