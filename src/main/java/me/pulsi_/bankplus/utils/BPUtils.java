@@ -199,19 +199,16 @@ public class BPUtils {
 
     public static boolean hasOfflinePermission(OfflinePlayer p, String permission) {
         Permission perm = BankPlus.INSTANCE().getPermissions();
-        AtomicBoolean hasPermission = new AtomicBoolean(false);
+        boolean hasPermission = false;
+        if (perm != null && permission != null && !permission.isEmpty()) {
+            for (World world : Bukkit.getWorlds()) {
+                if (!perm.playerHas(world.getName(), p, permission)) continue;
 
-        Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
-            if (perm != null && permission != null && !permission.isEmpty()) {
-                for (World world : Bukkit.getWorlds()) {
-                    if (!perm.playerHas(world.getName(), p, permission)) continue;
-
-                    hasPermission.set(true);
-                    break;
-                }
+                hasPermission = true;
+                break;
             }
-        });
-        return hasPermission.get();
+        }
+        return hasPermission;
     }
 
     public static List<String> placeValues(BigDecimal amount) {

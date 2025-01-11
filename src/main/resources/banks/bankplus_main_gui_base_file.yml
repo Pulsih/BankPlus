@@ -102,6 +102,11 @@ Levels:
   3:
     Cost: "10000"
     Required-Items:
+      # "Special Diamond" and "Special Emerald" are just example
+      # items to show that you can use custom required items.
+      #
+      # By doing that, you will be able to upgrade the bank only
+      # if the item has the same Material, Displayname and Lore
       - Material: "DIAMOND"
         Amount: 4
         Displayname: "&6Special Diamond"

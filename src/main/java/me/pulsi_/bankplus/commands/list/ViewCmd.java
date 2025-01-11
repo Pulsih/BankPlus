@@ -1,5 +1,6 @@
 package me.pulsi_.bankplus.commands.list;
 
+import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCmdExecution;
@@ -70,48 +71,49 @@ public class ViewCmd extends BPCommand {
             return BPCmdExecution.invalidExecution();
         }
 
-        List<Bank> banks = new ArrayList<>();
-        if (args.length == 2) {
-
-            banks.addAll(BankUtils.getAvailableBanks(target));
-            if (banks.isEmpty()) {
-                BPMessages.send(s, "No-Available-Banks-Others", "%player%$" + target.getName());
-                return BPCmdExecution.invalidExecution();
-            }
-
-        } else {
-            Bank bank = BankUtils.getBank(args[2]);
-            if (!BankUtils.exist(bank, s)) return BPCmdExecution.invalidExecution();
-
-            if (!BankUtils.isAvailable(bank, target)) {
-                BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
-                return BPCmdExecution.invalidExecution();
-            }
-            banks.add(bank);
-        }
-
         return new BPCmdExecution() {
             @Override
             public void execute() {
-                if (banks.size() > 1)
-                    BPMessages.send(
-                            s,
-                            "Multiple-Bank-Others",
-                            BPUtils.placeValues(target, BPEconomy.getBankBalancesSum(target))
-                    );
-                else {
-                    Bank bank = banks.get(0);
-                    BPMessages.send(
-                            s,
-                            "Bank-Others",
-                            BPUtils.placeValues(target, bank.getBankEconomy().getBankBalance(target), BankUtils.getCurrentLevel(bank, target))
-                    );
-                }
+                Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
+                    // Do that on the cmd execution because to check offline
+                    // permissions we need to run it asynchronously.
+                    List<Bank> banks = new ArrayList<>();
+                    if (args.length == 2) {
+                        banks.addAll(BankUtils.getAvailableBanks(target));
+                        if (banks.isEmpty()) {
+                            BPMessages.send(s, "No-Available-Banks-Others", "%player%$" + target.getName());
+                            return;
+                        }
+                    } else {
+                        Bank bank = BankUtils.getBank(args[2]);
+                        if (!BankUtils.exist(bank, s)) return;
 
-                if (s instanceof Player && ConfigValues.isViewSoundEnabled())
-                    if (!BPUtils.playSound(ConfigValues.getPersonalSound(), (Player) s))
-                        BPLogger.warn("Occurred while trying to play PERSONAL sound for player \"" + s.getName() + "\".");
+                        if (!BankUtils.isAvailable(bank, target)) {
+                            BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
+                            return;
+                        }
+                        banks.add(bank);
+                    }
 
+                    if (banks.size() > 1)
+                        BPMessages.send(
+                                s,
+                                "Multiple-Bank-Others",
+                                BPUtils.placeValues(target, BPEconomy.getBankBalancesSum(target))
+                        );
+                    else {
+                        Bank bank = banks.get(0);
+                        BPMessages.send(
+                                s,
+                                "Bank-Others",
+                                BPUtils.placeValues(target, bank.getBankEconomy().getBankBalance(target), BankUtils.getCurrentLevel(bank, target))
+                        );
+                    }
+
+                    if (s instanceof Player && ConfigValues.isViewSoundEnabled())
+                        if (!BPUtils.playSound(ConfigValues.getPersonalSound(), (Player) s))
+                            BPLogger.warn("Occurred while trying to play PERSONAL sound for player \"" + s.getName() + "\".");
+                });
             }
         };
     }
