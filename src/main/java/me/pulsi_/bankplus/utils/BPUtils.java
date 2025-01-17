@@ -22,7 +22,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BPUtils {
 
@@ -271,7 +270,12 @@ public class BPUtils {
     public static boolean hasFailed(Player p, EconomyResponse response) {
         if (!response.transactionSuccess()) {
             BPMessages.send(p, "Internal-Error");
-            BPLogger.warn("Vault has failed his transaction task. To avoid dupe bugs, bankplus has also cancelled the transaction. Reason: " + response.errorMessage);
+            BPLogger.warn("Vault has failed his transaction task. To avoid dupe bugs, bankplus has also cancelled the transaction.");
+            BPLogger.warn("Additional Vault error info:");
+            BPLogger.warn("  Error message: " + response.errorMessage);
+            BPLogger.warn("  Transaction amount: " + response.amount);
+            BPLogger.warn("  Transaction type: " + response.type);
+            BPLogger.warn("  Player wallet: " + response.balance);
             return true;
         }
         return false;

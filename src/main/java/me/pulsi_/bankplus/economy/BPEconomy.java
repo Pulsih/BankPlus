@@ -80,6 +80,7 @@ public class BPEconomy {
     /**
      * Get a set of all loaded player uuids.
      * A player is loaded even if one balance holder instance is loaded in a bank economy.
+     *
      * @return A set of UUIDs.
      */
     public static Set<UUID> getLoadedPlayers() {
@@ -95,7 +96,8 @@ public class BPEconomy {
         LinkedHashMap<String, BigDecimal> balances = new LinkedHashMap<>();
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
             BigDecimal balance = BigDecimal.ZERO;
-            for (String bankName : BankUtils.getAvailableBankNames(p)) balance = balance.add(get(bankName).getBankBalance(p));
+            for (String bankName : BankUtils.getAvailableBankNames(p))
+                balance = balance.add(get(bankName).getBankBalance(p));
             balances.put(p.getName(), balance);
         }
         return balances;
@@ -126,19 +128,27 @@ public class BPEconomy {
     }
 
     public Holder loadPlayerHolder(OfflinePlayer p) {
-        return loadPlayerHolder(p.getUniqueId(), true);
+        return loadPlayerHolder(p.getUniqueId(), true, true);
     }
 
     public Holder loadPlayerHolder(UUID uuid) {
-        return loadPlayerHolder(uuid, true);
+        return loadPlayerHolder(uuid, true, true);
     }
 
     public Holder loadPlayerHolder(OfflinePlayer p, boolean wasRegistered) {
-        return loadPlayerHolder(p.getUniqueId(), wasRegistered);
+        return loadPlayerHolder(p.getUniqueId(), wasRegistered, true);
     }
 
-    public Holder loadPlayerHolder(UUID uuid, boolean wasRegistered) {
-        loadedPlayers.add(uuid);
+    /**
+     * Load the specified UUID holder.
+     *
+     * @param uuid          The uuid to load.
+     * @param wasRegistered If not, it will load the holder with the join start amount.
+     * @param load          If false, this method will only return the holder object and won't register it to the hashmap.
+     * @return The holder created.
+     */
+    public Holder loadPlayerHolder(UUID uuid, boolean wasRegistered, boolean load) {
+        if (load) loadedPlayers.add(uuid);
         if (isPlayerBalanceLoaded(uuid)) return holders.get(uuid);
 
         Holder holder = new Holder();
@@ -169,7 +179,7 @@ public class BPEconomy {
         holder.offlineInterest = offlineInterest;
         holder.bankLevel = level;
 
-        holders.put(uuid, holder);
+        if (load) holders.put(uuid, holder);
         return holder;
     }
 
@@ -203,7 +213,17 @@ public class BPEconomy {
      * @param p The player.
      */
     public BigDecimal getBankBalance(OfflinePlayer p) {
-        return getBankBalance(p.getUniqueId());
+        return getBankBalance(p.getUniqueId(), false);
+    }
+
+    /**
+     * Get the player bank balance of the selected bank.
+     *
+     * @param player The player.
+     * @param load   Choose if loading the balance on the hashmap or not.
+     */
+    public BigDecimal getBankBalance(OfflinePlayer player, boolean load) {
+        return getBankBalance(player.getUniqueId(), load);
     }
 
     /**
@@ -212,7 +232,17 @@ public class BPEconomy {
      * @param uuid The UUID of the player.
      */
     public BigDecimal getBankBalance(UUID uuid) {
-        Holder holder = isPlayerBalanceLoaded(uuid) ? holders.get(uuid) : loadPlayerHolder(uuid);
+        return getBankBalance(uuid, true);
+    }
+
+    /**
+     * Get the player bank balance of the selected bank.
+     *
+     * @param uuid The UUID of the player.
+     * @param load Choose if loading the balance on the hashmap or not.
+     */
+    public BigDecimal getBankBalance(UUID uuid, boolean load) {
+        Holder holder = isPlayerBalanceLoaded(uuid) ? holders.get(uuid) : loadPlayerHolder(uuid, true, load);
         return holder.money;
     }
 
@@ -455,6 +485,7 @@ public class BPEconomy {
 
     /**
      * Get the current bank level of that player.
+     *
      * @param p The player.
      * @return The current bank level.
      */
@@ -464,6 +495,7 @@ public class BPEconomy {
 
     /**
      * Get the current bank level of that player.
+     *
      * @param uuid The player UUID.
      * @return The current bank level.
      */
@@ -490,6 +522,12 @@ public class BPEconomy {
         endTransaction(p);
     }
 
+    /**
+     * Shortcut for the deposit method of BankPlus.
+     *
+     * @param p      The player depositing.
+     * @param amount The amount to deposit.
+     */
     public void deposit(Player p, BigDecimal amount) {
         if (BPUtils.isBankFull(p, originBank) || isInTransaction(p)) return;
 
@@ -503,15 +541,18 @@ public class BPEconomy {
         BigDecimal wallet = BigDecimal.valueOf(economy.getBalance(p));
         if (!BPUtils.checkPreRequisites(wallet, amount, p)) return;
 
-        BigDecimal maxDeposit = ConfigValues.getMaxDepositAmount();
+        if (wallet.compareTo(amount) < 0)
+            amount = wallet; // If it's more than the player's wallet, use the wallet amount.
+
+        BigDecimal maxDeposit = ConfigValues.getMaxDepositAmount(); // If it's more than the max deposit amount, use the max amount.
         if (maxDeposit.compareTo(BigDecimal.ZERO) > 0 && amount.compareTo(maxDeposit) >= 0) amount = maxDeposit;
-        if (wallet.doubleValue() < amount.doubleValue()) amount = wallet;
 
         BigDecimal capacity = BankUtils.getCapacity(originBank, p).subtract(getBankBalance(p)), finalAmount = amount.min(capacity);
 
         BigDecimal depositTaxes = ConfigValues.getDepositTaxes(), taxes = BigDecimal.ZERO;
         if (depositTaxes.compareTo(BigDecimal.ZERO) > 0 && !p.hasPermission("bankplus.deposit.bypass-taxes")) {
-            if (amount.compareTo(capacity) <= 0) taxes = finalAmount.multiply(depositTaxes.divide(BigDecimal.valueOf(100)));
+            if (amount.compareTo(capacity) <= 0)
+                taxes = finalAmount.multiply(depositTaxes.divide(BigDecimal.valueOf(100)));
             else {
                 // Makes it able to fill the bank if a higher number is used.
                 taxes = capacity.multiply(depositTaxes).divide(BigDecimal.valueOf(100), RoundingMode.DOWN);
@@ -539,6 +580,12 @@ public class BPEconomy {
         afterTransactionEvent(p, TransactionType.DEPOSIT, amount);
     }
 
+    /**
+     * Shortcut for the withdraw method of BankPlus.
+     *
+     * @param p      The player withdrawing.
+     * @param amount The amount to withdraw.
+     */
     public void withdraw(Player p, BigDecimal amount) {
         if (isInTransaction(p)) return;
 
@@ -580,6 +627,7 @@ public class BPEconomy {
 
     /**
      * Initialize the custom withdraw task for the selected player (Withdraw through chat).
+     *
      * @param p The player.
      */
     public void customDeposit(Player p) {
@@ -601,6 +649,7 @@ public class BPEconomy {
 
     /**
      * Initialize the custom deposit task for the selected player (Deposit through chat).
+     *
      * @param p The player.
      */
     public void customWithdraw(Player p) {
@@ -623,10 +672,10 @@ public class BPEconomy {
     /**
      * Method used to execute the pay transaction.
      *
-     * @param from     The player that will give the money.
-     * @param to       The player that will receive your money.
-     * @param amount   How much money you want to pay.
-     * @param toBank   The bank where the money will be added.
+     * @param from   The player that will give the money.
+     * @param to     The player that will receive your money.
+     * @param amount How much money you want to pay.
+     * @param toBank The bank where the money will be added.
      */
     public void pay(Player from, Player to, BigDecimal amount, Bank toBank) {
         if (isInTransaction(from)) return;

@@ -3,10 +3,7 @@ package me.pulsi_.bankplus.utils.texts;
 import me.pulsi_.bankplus.values.ConfigValues;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.math.RoundingMode;
-import java.text.NumberFormat;
-import java.util.Locale;
 
 public class BPFormatter {
 

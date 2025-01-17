@@ -4,10 +4,6 @@ import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public abstract class BPPlaceholder {
 

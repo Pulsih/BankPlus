@@ -91,6 +91,11 @@ General-Settings:
   # In minutes, the delay to save all players balances. It is used
   # to prevent players from losing their money if the server crashes.
   # Put 0 to disable this option.
+  #
+  # It is strongly advice to NOT disable this option to avoid data loss
+  # problems in case the server restart: disabling it will result in bankplus
+  # saving all the data when the server restart, in that short period of
+  # time, bankplus may fail saving all the data if many players joined.
   Save-Delay: 10
 
   # This option is not recommended, however; in cases where you are not

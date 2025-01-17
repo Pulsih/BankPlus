@@ -16,6 +16,7 @@ public class BPHeads {
 
     /**
      * Get a skull with the head of that player.
+     *
      * @param owner The player name.
      * @return A skull with that player head.
      */
@@ -29,6 +30,7 @@ public class BPHeads {
 
     /**
      * Get a skull with the given texture.
+     *
      * @param value The textureValue.
      * @return A skull with that texture.
      */

@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class BPPlaceholders extends PlaceholderExpansion {
 
