@@ -105,14 +105,16 @@ Levels:
       # "Special Diamond" and "Special Emerald" are just example
       # items to show that you can use custom required items.
       #
-      # By doing that, you will be able to upgrade the bank only
-      # if the item has the same Material, Displayname and Lore
-      - Material: "DIAMOND"
+      # By doing that, you will be able to upgrade the bank only if
+      # the item has the same properties of the one specified here.
+      CustomDiamond:
+        Material: "DIAMOND"
         Amount: 4
         Displayname: "&6Special Diamond"
         Lore:
           - "&7A diamond uniquely used to upgrade your bank."
-      - Material: "EMERALD"
+      CustomEmerald:
+        Material: "EMERALD"
         Amount: 2
         Displayname: "&2Special Emerald"
         Lore:

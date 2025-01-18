@@ -12,6 +12,8 @@ import me.pulsi_.bankplus.utils.texts.BPChat;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -144,7 +146,8 @@ public class BankGui {
         placeContent(bankItems, bankInventory, p);
         updateBankGuiMeta(bankInventory, p);
 
-        if (updateDelay >= 0) player.setBankUpdatingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE(), () -> updateBankGuiMeta(bankInventory, p), updateDelay, updateDelay));
+        if (updateDelay >= 0)
+            player.setBankUpdatingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE(), () -> updateBankGuiMeta(bankInventory, p), updateDelay, updateDelay));
 
         player.setOpenedBankGui(this);
         if (ConfigValues.isPersonalSoundEnabled()) {
@@ -156,9 +159,10 @@ public class BankGui {
 
     /**
      * Method to place all the bank items WITHOUT the lore.
-     * @param items The bank items.
+     *
+     * @param items         The bank items.
      * @param bankInventory The bank inventory.
-     * @param p The player needed for possible skulls.
+     * @param p             The player needed for possible skulls.
      */
     public void placeContent(HashMap<Integer, BankItem> items, Inventory bankInventory, Player p) {
         if (fillerEnabled) {
@@ -169,15 +173,16 @@ public class BankGui {
 
         for (int slot : items.keySet()) {
             BankItem item = items.get(slot);
-            if (item.material.equalsIgnoreCase("head-%player%")) bankInventory.setItem(slot,  BPHeads.getNameHead(p.getName()));
+            if (item.isPlayerHead()) bankInventory.setItem(slot, BPHeads.getNameHead(p.getName()));
             else bankInventory.setItem(slot, items.get(slot).item);
         }
     }
 
     /**
      * Method to update every item meta in the bank inventory: lore, displayname and placeholders.
+     *
      * @param playerOpenedInventory The inventory opened by the player, should check if he has opened a bank.
-     * @param p The player to update placeholders and lore.
+     * @param p                     The player to update placeholders and lore.
      */
     public void updateBankGuiMeta(Inventory playerOpenedInventory, Player p) {
         for (int slot : bankItems.keySet()) updateBankGuiItemMeta(slot, playerOpenedInventory, p);
@@ -185,6 +190,7 @@ public class BankGui {
 
     /**
      * Method to update a single item meta: lore, displayname and placeholders.
+     *
      * @param slot The slot of the item.
      */
     public void updateBankGuiItemMeta(int slot, Inventory playerOpenedInventory, Player p) {
@@ -197,11 +203,12 @@ public class BankGui {
         if (levelLore == null) levelLore = bankItem.lore.get(0);
         if (levelLore != null) for (String line : levelLore) actualLore.add(BPChat.color(line));
 
+        String displayName = bankItem.getItem().getItemMeta().getDisplayName();
         if (BankPlus.INSTANCE().isPlaceholderApiHooked()) {
-            meta.setDisplayName(BPChat.color(PlaceholderAPI.setPlaceholders(p, bankItem.displayname)));
+            meta.setDisplayName(BPChat.color(PlaceholderAPI.setPlaceholders(p, displayName)));
             meta.setLore(PlaceholderAPI.setPlaceholders(p, actualLore));
         } else {
-            meta.setDisplayName(BPChat.color(bankItem.displayname));
+            meta.setDisplayName(BPChat.color(displayName));
             meta.setLore(actualLore);
         }
         inventoryItem.setItemMeta(meta);
@@ -214,53 +221,48 @@ public class BankGui {
      */
     public static class BankItem {
 
-        private ItemStack item;
-        private String material = "STONE", displayname = "* DISPLAYNAME NOT FOUND *";
-        private List<String> actions = new ArrayList<>(), flags = new ArrayList<>();
-        private final HashMap<Integer, List<String>> lore = new HashMap<>();
+        private ItemStack item; // The item stack containing displayname, material etc..
+        private List<String> actions = new ArrayList<>();
+        private HashMap<Integer, List<String>> lore = new HashMap<>();
+        private boolean playerHead;
 
         public ItemStack getItem() {
             return item;
-        }
-
-        public String getMaterial() {
-            return material;
-        }
-
-        public String getDisplayname() {
-            return displayname;
         }
 
         public List<String> getActions() {
             return actions;
         }
 
-        public List<String> getFlags() {
-            return flags;
-        }
-
         public HashMap<Integer, List<String>> getLore() {
             return lore;
+        }
+
+        public boolean isPlayerHead() {
+            return playerHead;
         }
 
         public void setItem(ItemStack item) {
             this.item = item;
         }
 
-        public void setMaterial(String material) {
-            if (material != null) this.material = material;
-        }
-
-        public void setDisplayname(String displayname) {
-            if (displayname != null) this.displayname = displayname;
-        }
-
         public void setActions(List<String> actions) {
             this.actions = actions;
         }
 
-        public void setFlags(List<String> flags) {
-            this.flags = flags;
+        public void setLore(HashMap<Integer, List<String>> lore) {
+            this.lore = lore;
+        }
+
+        public void setPlayerHead(boolean playerHead) {
+            this.playerHead = playerHead;
+        }
+
+        public BankItem loadBankItem(ConfigurationSection itemSection) {
+            item = BankUtils.getItemStackFromSection(itemSection);
+            actions = itemSection.getStringList("Actions");
+            lore = BankUtils.getLevelLore(itemSection);
+            return this;
         }
     }
 }

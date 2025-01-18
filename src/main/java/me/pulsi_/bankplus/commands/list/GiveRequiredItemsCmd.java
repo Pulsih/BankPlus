@@ -13,9 +13,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class GiveRequiredItemsCmd extends BPCommand {
 
@@ -25,7 +23,7 @@ public class GiveRequiredItemsCmd extends BPCommand {
 
     @Override
     public List<String> defaultUsage() {
-        return Collections.singletonList("%prefix% &cUsage: &7/bank giveRequiredItems <player> <bankName> <bankLevel> [1,2../all]");
+        return Collections.singletonList("%prefix% &cUsage: &7/bank giveRequiredItems <player> <bankName> <bankLevel> [itemName/all]");
     }
 
     @Override
@@ -83,7 +81,8 @@ public class GiveRequiredItemsCmd extends BPCommand {
             return BPCmdExecution.invalidExecution();
         }
 
-        List<ItemStack> requiredItems = new ArrayList<>(BankUtils.getRequiredItems(bank, level));
+        HashMap<String, ItemStack> requiredItems = BankUtils.getRequiredItems(bank, level);
+        Set<ItemStack> givenItems = new HashSet<>();
 
         if (requiredItems.isEmpty()) {
             BPMessages.send(s, "No-Available-Items");
@@ -92,25 +91,21 @@ public class GiveRequiredItemsCmd extends BPCommand {
 
         if (args.length > 4) {
             String choose = args[4];
-            if (!choose.equalsIgnoreCase("all")) {
-                if (BPUtils.isInvalidNumber(choose, s)) return BPCmdExecution.invalidExecution();
-
-                int item = Integer.parseInt(choose);
-                if (item <= 0 || item > requiredItems.size()) {
-                    BPMessages.send(s, "Invalid-Number");
+            if (choose.equalsIgnoreCase("all")) givenItems.addAll(requiredItems.values());
+            else {
+                if (!requiredItems.containsKey(choose)) {
+                    BPMessages.send(s, "Invalid-Required-Item");
                     return BPCmdExecution.invalidExecution();
-                } else {
-                    ItemStack requiredItem = requiredItems.get(item - 1);
-                    requiredItems.clear();
-                    requiredItems.add(requiredItem);
                 }
+
+                givenItems.add(requiredItems.get(choose));
             }
         }
 
         return new BPCmdExecution() {
             @Override
             public void execute() {
-                for (ItemStack item : requiredItems) target.getInventory().addItem(item);
+                for (ItemStack item : requiredItems.values()) target.getInventory().addItem(item);
             }
         };
     }
@@ -124,8 +119,9 @@ public class GiveRequiredItemsCmd extends BPCommand {
         if (args.length == 3)
             return BPArgs.getBanks(args);
 
+        Bank bank = BankUtils.getBank(args[2]);
+
         if (args.length == 4) {
-            Bank bank = BankUtils.getBank(args[2]);
             List<String> levelsWithItems = new ArrayList<>();
             for (String level : BankUtils.getLevels(bank))
                 if (!BankUtils.getRequiredItems(bank, Integer.parseInt(level)).isEmpty()) levelsWithItems.add(level);
@@ -134,12 +130,12 @@ public class GiveRequiredItemsCmd extends BPCommand {
         }
 
         if (args.length == 5) {
-            List<ItemStack> requiredItems = BankUtils.getRequiredItems(BankUtils.getBank(args[2]), Integer.parseInt(args[3]));
+            HashMap<String, ItemStack> requiredItems = BankUtils.getRequiredItems(bank, Integer.parseInt(args[3]));
             if (requiredItems.isEmpty()) return null;
 
             List<String> choose = new ArrayList<>();
             choose.add("all");
-            for (int i = 1; i <= requiredItems.size(); i++) choose.add(i + "");
+            choose.addAll(requiredItems.keySet());
 
             return BPArgs.getArgs(args, choose);
         }

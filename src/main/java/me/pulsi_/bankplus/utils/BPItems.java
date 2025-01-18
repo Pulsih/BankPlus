@@ -31,6 +31,11 @@ public class BPItems {
         return result;
     }
 
+    /**
+     * Get the custom head based on the specified material.
+     * @param material The material.
+     * @return The custom head if found.
+     */
     public static ItemStack getHead(String material) {
         if (material == null) return UNKNOWN_ITEM.clone();
 
@@ -41,7 +46,7 @@ public class BPItems {
         } else if (material.startsWith("HEAD-<")) {
             String textureValue = material.replace("HEAD-<", "").replace(">", "");
             item = BPHeads.getValueHead(textureValue);
-        }
+        } // If the head is the player's head, skip it and place it later when opening the bank.
         return item;
     }
 

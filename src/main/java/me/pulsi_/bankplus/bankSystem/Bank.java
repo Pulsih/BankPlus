@@ -3,7 +3,6 @@ package me.pulsi_.bankplus.bankSystem;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
-import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.ConfigValues;
 import me.pulsi_.bankplus.values.MultipleBanksValues;
 import org.bukkit.configuration.ConfigurationSection;
@@ -126,29 +125,7 @@ public class Bank {
                 ConfigurationSection itemSection = items.getConfigurationSection(item);
                 if (itemSection == null) continue;
 
-                ItemStack itemStack = BankUtils.getItemFromSection(itemSection);
-                BankGui.BankItem bankItem = new BankGui.BankItem();
-                bankItem.setItem(itemStack);
-                bankItem.setMaterial(itemSection.getString("Material"));
-                bankItem.setDisplayname(itemSection.getString("Displayname"));
-                bankItem.setActions(itemSection.getStringList("Actions"));
-
-                List<String> configLore = itemSection.getStringList("Lore");
-                if (!configLore.isEmpty()) bankItem.getLore().put(0, configLore);
-                else {
-                    ConfigurationSection loreSection = itemSection.getConfigurationSection("Lore");
-                    if (loreSection != null) {
-                        List<String> defaultLore = loreSection.getStringList("Default");
-                        bankItem.getLore().put(0, defaultLore);
-
-                        for (String level : loreSection.getKeys(false)) {
-                            if (level.equalsIgnoreCase("default") || BPUtils.isInvalidNumber(level)) continue;
-
-                            List<String> levelLore = loreSection.getStringList(level);
-                            bankItem.getLore().put(Integer.parseInt(level), levelLore);
-                        }
-                    }
-                }
+                BankGui.BankItem bankItem = new BankGui.BankItem().loadBankItem(itemSection);
 
                 List<Integer> slots = itemSection.getIntegerList("Slot");
                 if (slots.isEmpty()) bankGui.setBankItem(itemSection.getInt("Slot") - 1, bankItem);
@@ -162,31 +139,16 @@ public class Bank {
             return;
         }
 
-        ConfigurationSection availableSection = config.getConfigurationSection("Settings.BanksGuiItem.Available"),
-                unavailableSection = config.getConfigurationSection("Settings.BanksGuiItem.Unavailable");
+        ConfigurationSection availableSection = config.getConfigurationSection("Settings.BanksGuiItem.Available");
+        bankGui.setAvailableBankListItem(new BankGui.BankItem().loadBankItem(availableSection));
 
-        BankGui.BankItem availableItem = new BankGui.BankItem();
-        availableItem.setItem(BankUtils.getItemFromSection(availableSection));
-        if (availableSection != null) {
-            availableItem.setMaterial(availableSection.getString("Material"));
-            availableItem.setDisplayname(availableSection.getString("Displayname"));
-            availableItem.getLore().put(0, availableSection.getStringList("Lore"));
-        }
-        bankGui.setAvailableBankListItem(availableItem);
-
-        BankGui.BankItem unavailableItem = new BankGui.BankItem();
-        availableItem.setItem(BankUtils.getItemFromSection(unavailableSection));
-        if (unavailableSection != null) {
-            unavailableItem.setMaterial(unavailableSection.getString("Material"));
-            unavailableItem.setDisplayname(unavailableSection.getString("Displayname"));
-            unavailableItem.getLore().put(0, unavailableSection.getStringList("Lore"));
-        }
-        bankGui.setUnavailableBankListItem(unavailableItem);
+        ConfigurationSection unavailableSection = config.getConfigurationSection("Settings.BanksGuiItem.Unavailable");
+        bankGui.setUnavailableBankListItem(new BankGui.BankItem().loadBankItem(unavailableSection));
     }
 
     public static class BankLevel {
         BigDecimal cost, capacity, interest, offlineInterest, afkInterest, maxInterestAmount;
-        List<ItemStack> requiredItems;
+        HashMap<String, ItemStack> requiredItems;
         List<String> interestLimiter;
         boolean removeRequiredItems;
     }

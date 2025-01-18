@@ -69,7 +69,7 @@ public final class BankPlus extends JavaPlugin {
                 return;
             }
             BPLogger.log("");
-            BPLogger.log("&cCannot load " + BPChat.prefix + ", No economy plugin found!");
+            BPLogger.log("&cCannot load " + BPChat.prefix + "&c, No economy plugin found!");
             BPLogger.log("&cPlease download an economy plugin to use BankPlus!");
             BPLogger.log("");
             getServer().getPluginManager().disablePlugin(this);

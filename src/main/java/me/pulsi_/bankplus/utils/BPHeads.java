@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public class BPHeads {
 
-    private static ItemStack skull = null;
+    private static ItemStack SKULL = null;
 
     /**
      * Get a skull with the head of that player.
@@ -21,7 +21,7 @@ public class BPHeads {
      * @return A skull with that player head.
      */
     public static ItemStack getNameHead(String owner) {
-        ItemStack skull = BPHeads.skull.clone();
+        ItemStack skull = BPHeads.SKULL.clone();
         SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
         skullMeta.setOwner(owner);
         skull.setItemMeta(skullMeta);
@@ -35,7 +35,7 @@ public class BPHeads {
      * @return A skull with that texture.
      */
     public static ItemStack getValueHead(String value) {
-        ItemStack skull = BPHeads.skull.clone();
+        ItemStack skull = BPHeads.SKULL.clone();
         UUID id = new UUID(value.hashCode(), value.hashCode());
         try {
             SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
@@ -58,9 +58,9 @@ public class BPHeads {
      */
     public static void loadSkullBasedOnVersion() {
         try {
-            skull = new ItemStack(Material.PLAYER_HEAD);
+            SKULL = new ItemStack(Material.PLAYER_HEAD);
         } catch (NoSuchFieldError er) {
-            skull = new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal());
+            SKULL = new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (short) SkullType.PLAYER.ordinal());
         }
     }
 }

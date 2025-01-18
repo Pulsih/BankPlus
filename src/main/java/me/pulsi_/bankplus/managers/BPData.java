@@ -46,11 +46,12 @@ public class BPData {
         long startTime = System.currentTimeMillis();
 
         BPLogger.log("");
-        BPLogger.log("    " + BPChat.prefix + " &2Enabling plugin...");
+        BPLogger.log("    " + BPChat.prefix + "&2 Enabling plugin...");
         BPLogger.log("    &aRunning on version &f" + plugin.getDescription().getVersion() + "&a!");
         BPLogger.log("    &aDetected server version: &f" + BankPlus.getServerVersion());
-
         BPLogger.log("    &aSetting up the plugin...");
+        BPLogger.log("");
+
         new bStats(plugin);
         plugin.getConfigs().setupConfigs();
         reloadPlugin();

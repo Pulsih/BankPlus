@@ -8,6 +8,7 @@ import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class NextLevelRequiredItemsPlaceholder extends BPPlaceholder {
@@ -23,8 +24,8 @@ public class NextLevelRequiredItemsPlaceholder extends BPPlaceholder {
         Bank bank = BankUtils.getBank(target);
         if (!BankUtils.hasNextLevel(bank, p)) return ConfigValues.getUpgradesMaxedPlaceholder();
 
-        List<ItemStack> requiredItems = BankUtils.getRequiredItems(bank, BankUtils.getCurrentLevel(bank, p) + 1);
+        HashMap<String, ItemStack> requiredItems = BankUtils.getRequiredItems(bank, BankUtils.getCurrentLevel(bank, p) + 1);
         if (requiredItems.isEmpty()) return ConfigValues.getNoUpgradeItemsMessage();
-        return BPUtils.getRequiredItemsFormatted(requiredItems);
+        return BPUtils.getRequiredItemsFormatted((List<ItemStack>) requiredItems.values());
     }
 }

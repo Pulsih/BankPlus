@@ -22,6 +22,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -30,6 +31,23 @@ import java.util.*;
  * In this class, you'll find many useful methods that will help you get, modify and set player's balances.
  */
 public class BankUtils {
+
+    public static final String MATERIAL_FIELD = "Material";
+    public static final String AMOUNT_FIELD = "Amount";
+    public static final String DISPLAYNAME_FIELD = "Displayname";
+    public static final String LORE_FIELD = "Lore";
+    public static final String ITEM_FLAGS_FIELD = "ItemFlags";
+    public static final String GLOWING_FIELD = "Glowing";
+    public static final String CUSTOM_MODEL_DATA_FIELD = "CustomModelData";
+    public static final String COST_FIELD = "Cost";
+    public static final String CAPACITY_FIELD = "Capacity";
+    public static final String INTEREST_FIELD = "Interest";
+    public static final String OFFLINE_INTEREST_FIELD = "Offline-Interest";
+    public static final String AFK_INTEREST_FIELD = "AFK-Interest";
+    public static final String MAX_INTEREST_AMOUNT_FIELD = "Max-Interest-Amount";
+    public static final String REQUIRED_ITEMS_FIELD = "Required-Items";
+    public static final String REMOVE_REQUIRED_ITEMS_FIELD = "Remove-Required-Items";
+    public static final String INTEREST_LIMITER_FIELD = "Interest-Limiter";
 
     public BankUtils() throws Exception {
         throw new Exception("This class may not be initialized.");
@@ -266,11 +284,11 @@ public class BankUtils {
      *
      * @param bank  The bank.
      * @param level The level to check.
-     * @return A list of itemstack representing the required items with its amount set, null if not specified.
+     * @return An HashMap with K = Required Item Name. V = ItemStack.
      */
-    public static List<ItemStack> getRequiredItems(Bank bank, int level) {
+    public static HashMap<String, ItemStack> getRequiredItems(Bank bank, int level) {
         Bank.BankLevel bankLevel = bank.getBankLevel(level);
-        return bankLevel == null ? new ArrayList<>() : bankLevel.requiredItems;
+        return bankLevel == null ? new HashMap<>() : bankLevel.requiredItems;
     }
 
     /**
@@ -460,7 +478,7 @@ public class BankUtils {
         // variable to make sure to remove the items only when there are
         // some and not removing possible items from the player's inventory.
         boolean canRemoveSafely = false;
-        List<ItemStack> requiredItems = getRequiredItems(bank, nextLevel);
+        Collection<ItemStack> requiredItems = getRequiredItems(bank, nextLevel).values();
         if (!requiredItems.isEmpty()) {
             for (ItemStack requiredItem : requiredItems) {
                 int amount = requiredItem.getAmount();
@@ -476,7 +494,7 @@ public class BankUtils {
                     break;
                 }
                 if (!hasItem) {
-                    BPMessages.send(p, "Insufficient-Items", "%items%$" + BPUtils.getRequiredItemsFormatted(requiredItems));
+                    BPMessages.send(p, "Insufficient-Items", "%items%$" + BPUtils.getRequiredItemsFormatted((List<ItemStack>) requiredItems));
                     return;
                 }
             }
@@ -540,62 +558,91 @@ public class BankUtils {
     public static Bank.BankLevel buildBankLevel(ConfigurationSection levelSection, String bankName) {
         Bank.BankLevel bankLevel = new Bank.BankLevel();
 
-        bankLevel.cost = BPFormatter.getStyledBigDecimal(levelSection.getString("Cost"));
+        bankLevel.cost = BPFormatter.getStyledBigDecimal(levelSection.getString(COST_FIELD));
 
-        String capacity = levelSection.getString("Capacity");
+        String capacity = levelSection.getString(CAPACITY_FIELD);
         bankLevel.capacity = capacity == null ? ConfigValues.getMaxBankCapacity() : BPFormatter.getStyledBigDecimal(capacity);
 
-        String interest = levelSection.getString("Interest");
+        String interest = levelSection.getString(INTEREST_FIELD);
         bankLevel.interest = interest == null ? ConfigValues.getInterestRate() : BPFormatter.getStyledBigDecimal(interest.replace("%", ""));
 
-        String offlineInterest = levelSection.getString("Offline-Interest");
+        String offlineInterest = levelSection.getString(OFFLINE_INTEREST_FIELD);
         bankLevel.offlineInterest = offlineInterest == null ? ConfigValues.getOfflineInterestRate() : BPFormatter.getStyledBigDecimal(offlineInterest.replace("%", ""));
 
-        String afkInterest = levelSection.getString("AFK-Interest");
+        String afkInterest = levelSection.getString(AFK_INTEREST_FIELD);
         bankLevel.afkInterest = afkInterest == null ? ConfigValues.getAfkInterestRate() : BPFormatter.getStyledBigDecimal(afkInterest.replace("%", ""));
 
-        String maxInterestAmount = levelSection.getString("Max-Interest-Amount");
+        String maxInterestAmount = levelSection.getString(MAX_INTEREST_AMOUNT_FIELD);
         bankLevel.maxInterestAmount = maxInterestAmount == null ? ConfigValues.getInterestMaxAmount() : BPFormatter.getStyledBigDecimal(maxInterestAmount);
 
-        bankLevel.requiredItems = levelSection.isList("Required-Items") ? retrieveRequiredItemsFromList(levelSection, bankName) : retrieveRequiredItemsFromString(levelSection, bankName);
+        bankLevel.requiredItems = retrieveRequiredItems(levelSection, bankName);
 
-        bankLevel.removeRequiredItems = levelSection.getBoolean("Remove-Required-Items");
+        bankLevel.removeRequiredItems = levelSection.getBoolean(REMOVE_REQUIRED_ITEMS_FIELD);
 
-        List<String> limiter = levelSection.getStringList("Interest-Limiter");
+        List<String> limiter = levelSection.getStringList(INTEREST_LIMITER_FIELD);
         bankLevel.interestLimiter = limiter.isEmpty() ? ConfigValues.getInterestLimiter() : limiter;
 
         return bankLevel;
     }
 
     /**
-     * Automatically get the itemstack with all attributes from the item section.
+     * Get the different level lores of the specified item section.
+     *
+     * @param itemSection The item section.
+     * @return An HashMap containing K = Lore Level. V = Lore List.
+     */
+    public static HashMap<Integer, List<String>> getLevelLore(ConfigurationSection itemSection) {
+        HashMap<Integer, List<String>> lore = new HashMap<>();
+
+        List<String> configLore = itemSection.getStringList(LORE_FIELD);
+        if (!configLore.isEmpty()) lore.put(0, configLore);
+        else { // If its empty and the path exist, it contains level lore.
+            ConfigurationSection loreSection = itemSection.getConfigurationSection(LORE_FIELD);
+            if (loreSection != null) {
+                List<String> defaultLore = loreSection.getStringList("Default");
+                lore.put(0, defaultLore);
+
+                for (String level : loreSection.getKeys(false)) {
+                    if (level.equalsIgnoreCase("default") || BPUtils.isInvalidNumber(level)) continue;
+
+                    List<String> levelLore = loreSection.getStringList(level);
+                    lore.put(Integer.parseInt(level), levelLore);
+                }
+            }
+        }
+        return lore;
+    }
+
+    /**
+     * Automatically get the item stack with all attributes from the item section.
      *
      * @param itemSection The item section in the config.
      * @return An ItemStack.
      */
-    public static ItemStack getItemFromSection(ConfigurationSection itemSection) {
+    public static ItemStack getItemStackFromSection(ConfigurationSection itemSection) {
         if (itemSection == null) return BPItems.UNKNOWN_ITEM.clone();
 
-        ItemStack guiItem = BPItems.createItemStack(itemSection.getString("Material"));
+        ItemStack guiItem = BPItems.createItemStack(itemSection.getString(MATERIAL_FIELD));
 
-        int amount = itemSection.getInt("amount");
+        int amount = itemSection.getInt(AMOUNT_FIELD);
         if (amount > 1) guiItem.setAmount(amount);
 
         ItemMeta meta = guiItem.getItemMeta();
+        if (meta == null) return guiItem;
 
-        String displayname = itemSection.getString("Displayname");
+        String displayname = itemSection.getString(DISPLAYNAME_FIELD);
         meta.setDisplayName(BPChat.color(displayname == null ? "&c&l*CANNOT FIND DISPLAYNAME*" : displayname));
 
         List<String> lore = new ArrayList<>();
-        for (String lines : itemSection.getStringList("Lore")) lore.add(BPChat.color(lines));
+        for (String lines : itemSection.getStringList(LORE_FIELD)) lore.add(BPChat.color(lines));
         meta.setLore(lore);
 
-        if (itemSection.getBoolean("Glowing")) {
+        if (itemSection.getBoolean(GLOWING_FIELD)) {
             meta.addEnchant(Enchantment.DURABILITY, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
 
-        for (String flag : itemSection.getStringList("ItemFlags")) {
+        for (String flag : itemSection.getStringList(ITEM_FLAGS_FIELD)) {
             try {
                 meta.addItemFlags(ItemFlag.valueOf(flag));
             } catch (IllegalArgumentException e) {
@@ -603,7 +650,7 @@ public class BankUtils {
             }
         }
 
-        int modelData = itemSection.getInt("CustomModelData");
+        int modelData = itemSection.getInt(CUSTOM_MODEL_DATA_FIELD);
         if (modelData > 0) {
             try {
                 meta.setCustomModelData(modelData);
@@ -617,35 +664,43 @@ public class BankUtils {
     }
 
     /**
-     * Method to retrieve required items in the simpler way (using material and amount).
-     * The string format must be the following: [ITEM_MATERIAL-AMOUNT,ITEM2_MATERIAL-AMOUNT].
-     * To use more specific items for upgrades, use {@link BankUtils#retrieveRequiredItemsFromList(ConfigurationSection, String) this} method.
+     * Method to retrieve required items.
+     * Both from short (ItemType-Amount) and advanced method (ConfigurationSection).
      *
      * @param levelSection The section of the bank level where to get the required items.
-     * @param bankName     The name of the selected bank.
+     * @param bankName     The name of the bank where to retrieve the items (used for debugging).
      * @return A list of required items.
      */
-    public static List<ItemStack> retrieveRequiredItemsFromString(ConfigurationSection levelSection, String bankName) {
-        List<ItemStack> requiredItems = new ArrayList<>();
-        String requiredItemsString = levelSection.getString("Required-Items");
-        if (requiredItemsString != null && !requiredItemsString.isEmpty()) {
+    public static @Nonnull HashMap<String, ItemStack> retrieveRequiredItems(ConfigurationSection levelSection, String bankName) {
+        HashMap<String, ItemStack> requiredItems = new HashMap<>();
 
-            List<String> configItems = new ArrayList<>();
-            if (!requiredItemsString.contains(",")) configItems.add(requiredItemsString);
-            else configItems.addAll(Arrays.asList(requiredItemsString.split(",")));
+        ConfigurationSection requiredItemsSection = levelSection.getConfigurationSection(REQUIRED_ITEMS_FIELD);
+        if (requiredItemsSection != null) {
+            for (String itemName : requiredItemsSection.getKeys(false))
+                requiredItems.put(itemName, getItemStackFromSection(requiredItemsSection.getConfigurationSection(itemName)));
+        } else {
+            String requiredItemsString = levelSection.getString(REQUIRED_ITEMS_FIELD);
+            if (requiredItemsString == null || requiredItemsString.isEmpty()) return requiredItems;
 
-            for (String splitItem : configItems) {
-                if (!splitItem.contains("-")) {
+            List<String> items = new ArrayList<>();
+            if (!requiredItemsString.contains(",")) items.add(requiredItemsString);
+            else items.addAll(Arrays.asList(requiredItemsString.split(",")));
+
+            for (String itemID : items) {
+                if (!itemID.contains("-")) {
                     try {
-                        requiredItems.add(new ItemStack(Material.valueOf(splitItem)));
+                        requiredItems.put(itemID, new ItemStack(Material.valueOf(itemID)));
                     } catch (IllegalArgumentException e) {
                         BPLogger.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
                     }
                 } else {
-                    String[] split = splitItem.split("-");
+                    String[] split = itemID.split("-");
                     ItemStack item;
+                    String id;
                     try {
-                        item = new ItemStack(Material.valueOf(split[0]));
+                        Material material = Material.valueOf(split[0]);
+                        id = String.valueOf(material);
+                        item = new ItemStack(material);
                     } catch (IllegalArgumentException e) {
                         BPLogger.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
                         continue;
@@ -658,78 +713,9 @@ public class BankUtils {
                     }
 
                     item.setAmount(amount);
-                    requiredItems.add(item);
+                    requiredItems.put(id, item);
                 }
             }
-        }
-        return requiredItems;
-    }
-
-    /**
-     * Method to retrieve specific required items.
-     * This method will take care of the item displayname, lore, material, amount and other
-     * characteristics, giving the ability to use more specific items as requirement for the upgrade.
-     * To use simpler items for upgrades, use {@link BankUtils#retrieveRequiredItemsFromString(ConfigurationSection, String)} this} method.
-     *
-     * @param levelSection The section of the bank level where to get the required items.
-     * @param bankName     The name of the selected bank.
-     * @return A list of required items.
-     */
-    public static List<ItemStack> retrieveRequiredItemsFromList(ConfigurationSection levelSection, String bankName) {
-        List<ItemStack> requiredItems = new ArrayList<>();
-        List<?> requiredItemsList = levelSection.getList("Required-Items");
-        if (requiredItemsList == null) return requiredItems;
-
-        int objectCount = 1;
-        for (Object itemInfoMap : requiredItemsList) {
-            if (!(itemInfoMap instanceof Map)) continue;
-            Map<?, ?> itemValues = (Map<?, ?>) itemInfoMap;
-
-            String type = (String) itemValues.get("Material");
-            if (type == null) {
-                BPLogger.warn("Could not load " + objectCount + "* required item in the \"" + levelSection + "\" level section of the \"" + bankName + "\" bank. (No material specified)");
-                continue;
-            }
-
-            Material material = Material.getMaterial(type);
-            if (material == null) {
-                BPLogger.warn("Could not load " + objectCount + "* required item in the \"" + levelSection + "\" level section of the \"" + bankName + "\" bank. (Specified an invalid material)");
-                continue;
-            }
-
-            int amount = 1;
-            String amountString = (itemValues.get("Amount")) + "";
-
-            if (!amountString.isEmpty()) {
-                try {
-                    amount = Integer.parseInt(amountString);
-                } catch (NumberFormatException e) {
-                    BPLogger.warn(objectCount + "* required item in the \"" + levelSection + "\" level section of the \"" + bankName + "\" bank specified an invalid amount. (Using 1 as default)");
-                }
-            }
-
-            ItemStack itemStack = new ItemStack(material, amount);
-            ItemMeta itemMeta = itemStack.getItemMeta();
-
-            String displayName = (String) itemValues.get("Displayname");
-            if (displayName != null) itemMeta.setDisplayName(BPChat.color(displayName));
-
-            List<String> lore = (List<String>) itemValues.get("Lore");
-            if (lore != null && !lore.isEmpty()) {
-                List<String> coloredLore = new ArrayList<>();
-                for (String line : lore) coloredLore.add(BPChat.color(line));
-                itemMeta.setLore(coloredLore);
-            }
-
-            Boolean glowingValue = (Boolean) itemValues.get("Glowing");
-            if (glowingValue != null && glowingValue) {
-                itemMeta.addEnchant(Enchantment.DURABILITY, 1, true);
-                itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            }
-
-            itemStack.setItemMeta(itemMeta);
-            requiredItems.add(itemStack);
-            objectCount++;
         }
         return requiredItems;
     }
@@ -756,6 +742,13 @@ public class BankUtils {
             if (requiredMeta.hasLore()) {
                 List<String> requiredLore = requiredMeta.getLore(), givenLore = givenMeta.getLore();
                 if (!requiredLore.equals(givenLore)) return false;
+            }
+
+            try {
+                int requiredData = requiredMeta.getCustomModelData(), givenData = givenMeta.getCustomModelData();
+                if (requiredData != givenData) return false;
+            } catch (NoSuchMethodError e) {
+                BPLogger.warn("Cannot check for custom model data in the custom required items: Custom model data is only available on 1.14.4+ servers!");
             }
         }
         return true;

@@ -29,12 +29,12 @@ public class BPLogger {
 
     public static void error(Object error) {
         if (error == null) error = "null";
-        log(BPChat.prefix + " &8[&cERROR&8] &c" + error);
+        log(BPChat.prefix + "&8 [&cERROR&8] &c" + error);
     }
 
     public static void warn(Object warn) {
         if (warn == null) warn = "null";
-        log(BPChat.prefix + " &8[&eWARN&8] &e" + warn);
+        log(BPChat.prefix + "&8 [&eWARN&8] &e" + warn);
     }
 
 
@@ -61,7 +61,7 @@ public class BPLogger {
     }
 
     public static void info(Object info) {
-        log(BPChat.prefix + " &8[&9INFO&8] &9" + info);
+        log(BPChat.prefix + "&8 [&9INFO&8] &9" + info);
     }
 
     public static void log(String message) {
