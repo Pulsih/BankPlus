@@ -262,6 +262,9 @@ public class BankGui {
             item = BankUtils.getItemStackFromSection(itemSection);
             actions = itemSection.getStringList("Actions");
             lore = BankUtils.getLevelLore(itemSection);
+
+            String material = itemSection.getString(BankUtils.MATERIAL_FIELD);
+            if (material != null && material.equalsIgnoreCase("head-%player%")) playerHead = true;
             return this;
         }
     }

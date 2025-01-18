@@ -26,7 +26,7 @@ public class BalanceCmd extends BPCommand {
 
     @Override
     public List<String> defaultUsage() {
-        return Collections.emptyList();
+        return Collections.singletonList("%prefix% &cUsage: &7/bank balance <bankName>");
     }
 
     @Override

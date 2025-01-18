@@ -82,7 +82,7 @@ public class GiveRequiredItemsCmd extends BPCommand {
         }
 
         HashMap<String, ItemStack> requiredItems = BankUtils.getRequiredItems(bank, level);
-        Set<ItemStack> givenItems = new HashSet<>();
+        Set<ItemStack> givenItems = new HashSet<>(requiredItems.values());
 
         if (requiredItems.isEmpty()) {
             BPMessages.send(s, "No-Available-Items");
@@ -91,13 +91,13 @@ public class GiveRequiredItemsCmd extends BPCommand {
 
         if (args.length > 4) {
             String choose = args[4];
-            if (choose.equalsIgnoreCase("all")) givenItems.addAll(requiredItems.values());
-            else {
+            if (!choose.equalsIgnoreCase("all")) {
                 if (!requiredItems.containsKey(choose)) {
                     BPMessages.send(s, "Invalid-Required-Item");
                     return BPCmdExecution.invalidExecution();
                 }
 
+                givenItems.clear();
                 givenItems.add(requiredItems.get(choose));
             }
         }
@@ -105,7 +105,7 @@ public class GiveRequiredItemsCmd extends BPCommand {
         return new BPCmdExecution() {
             @Override
             public void execute() {
-                for (ItemStack item : requiredItems.values()) target.getInventory().addItem(item);
+                for (ItemStack item : givenItems) target.getInventory().addItem(item);
             }
         };
     }

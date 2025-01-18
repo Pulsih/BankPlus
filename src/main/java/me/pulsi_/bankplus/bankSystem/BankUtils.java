@@ -27,8 +27,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 /**
- * BankPlus main core class to manage the entire server economy.
- * In this class, you'll find many useful methods that will help you get, modify and set player's balances.
+ * Class containing tons of useful methods to manage banks and retrieve useful information.
  */
 public class BankUtils {
 
@@ -494,7 +493,7 @@ public class BankUtils {
                     break;
                 }
                 if (!hasItem) {
-                    BPMessages.send(p, "Insufficient-Items", "%items%$" + BPUtils.getRequiredItemsFormatted((List<ItemStack>) requiredItems));
+                    BPMessages.send(p, "Insufficient-Items", "%items%$" + BPUtils.getRequiredItemsFormatted(requiredItems));
                     return;
                 }
             }
@@ -654,7 +653,7 @@ public class BankUtils {
         if (modelData > 0) {
             try {
                 meta.setCustomModelData(modelData);
-            } catch (NoSuchMethodError e) {
+            } catch (NoSuchMethodError e) { // Do that to add support for older minecraft versions.
                 BPLogger.warn("Cannot set custom model data to the item: \"" + displayname + "\"&e. Custom model data is only available on 1.14.4+ servers!");
             }
         }
@@ -748,7 +747,6 @@ public class BankUtils {
                 int requiredData = requiredMeta.getCustomModelData(), givenData = givenMeta.getCustomModelData();
                 if (requiredData != givenData) return false;
             } catch (NoSuchMethodError e) {
-                BPLogger.warn("Cannot check for custom model data in the custom required items: Custom model data is only available on 1.14.4+ servers!");
             }
         }
         return true;

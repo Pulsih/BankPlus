@@ -1,5 +1,6 @@
 package me.pulsi_.bankplus.utils;
 
+import javafx.print.Collation;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
@@ -21,6 +22,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class BPUtils {
@@ -292,21 +294,22 @@ public class BPUtils {
      * @param requiredItems A list of required items.
      * @return A string of required items.
      */
-    public static String getRequiredItemsFormatted(List<ItemStack> requiredItems) {
+    public static String getRequiredItemsFormatted(Collection<ItemStack> requiredItems) {
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < requiredItems.size(); i++) {
-            ItemStack item = requiredItems.get(i);
-            int amount = item.getAmount();
+        int i = 0;
+        for (ItemStack requiredItem : requiredItems) {
+            int amount = requiredItem.getAmount();
 
             String name;
-            ItemMeta meta = item.getItemMeta();
+            ItemMeta meta = requiredItem.getItemMeta();
             if (meta != null && meta.hasDisplayName()) name = meta.getDisplayName();
-            else name = item.getType().toString();
+            else name = requiredItem.getType().toString();
 
             builder.append(amount).append(" ").append(name);
             if (i == requiredItems.size() - 1) continue;
             if (i + 1 == requiredItems.size() - 1) builder.append(" and ");
             else builder.append(", ");
+            i++;
         }
         return builder.toString();
     }

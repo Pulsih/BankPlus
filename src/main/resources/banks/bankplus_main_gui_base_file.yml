@@ -1,8 +1,8 @@
 # If you want to know more about bank guis: https://github.com/Pulsih/BankPlus/wiki/Bank-Config
-Title: "&a&lBANK"
-Lines: 5
-Update-Delay: 10
-Filler:
+Title: "&a&lBANK" # The bank title.
+Lines: 5 # The lines of the gui (Min: 1, Max: 6)
+Update-Delay: 10 # The delay before updating the gui lore, in ticks. (20 ticks = 1 second)
+Filler: # Option to fill the empty slots in the gui easily.
   Enabled: true
   Material: "WHITE_STAINED_GLASS_PANE"
   Glowing: false
@@ -26,9 +26,8 @@ Settings:
   #
   # You can also use heads and placeholders.
   BanksGuiItem:
-    # The item showed in the banks gui
-    # if this bank is available.
-    Available:
+    # The item showed in the banks gui if this bank is available.
+    Available: # It works exactly the same as the configuration of items in the "Items" section.
       Material: "CHEST"
       Displayname: "&a&lBANK"
       Lore:
@@ -41,8 +40,7 @@ Settings:
         - "&aAvailable: &2YES"
       Glowing: true
 
-    # The item showed in the banks gui
-    # if this bank is unavailable.
+    # The item showed in the banks gui if this bank is unavailable.
     Unavailable:
       Material: "CHEST"
       Displayname: "&a&lBANK"
@@ -89,6 +87,7 @@ Levels:
     # have the default capacity set in the config.yml
     Capacity: "100000"
 
+    # The bank interest % at this level.
     # If the interest is not specified, the bank will
     # use the default interest rate from the config.yml
     Interest: "10%"
@@ -99,9 +98,14 @@ Levels:
 
     # The max amount that a player can receive in interest.
     # Max-Interest-Amount: 10000
+
+    # The bank AFK interest % at this level.
+    # If the AFK interest is not specified, the bank will
+    # use the default AFK interest rate from the config.yml
+    # AFK-Interest: 10000
   3:
     Cost: "10000"
-    Required-Items:
+    Required-Items: # This works exactly the same as the items in "Items" section.
       # "Special Diamond" and "Special Emerald" are just example
       # items to show that you can use custom required items.
       #
