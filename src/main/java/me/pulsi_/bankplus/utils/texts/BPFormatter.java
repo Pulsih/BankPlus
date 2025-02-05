@@ -60,7 +60,7 @@ public class BPFormatter {
      * @param amount The amount.
      * @return A string.
      */
-    public static String formatCommas(BigDecimal amount) {
+    public static String formatDecimals(BigDecimal amount) {
         String number = styleBigDecimal(amount), numbers = number, decimals = "", result;
 
         if (number.contains(".")) { // In BigDecimals numbers, decimals are divided by .
@@ -80,6 +80,34 @@ public class BPFormatter {
         }
         builder.reverse();
         result = builder + (decimals.isEmpty() ? "" : (tens + decimals));
+
+        return result;
+    }
+
+    /**
+     * Return numbers like as 14,243.12, 75,249, 231,785.
+     * @param amount The amount.
+     * @return A string.
+     */
+    public static String formatCommas(BigDecimal amount) {
+        String number = styleBigDecimal(amount), numbers = number, decimals = "", result;
+
+        if (number.contains(".")) {
+            String[] split = number.split("\\.");
+            numbers = split[0];
+            decimals = split[1];
+        }
+
+        StringBuilder builder = new StringBuilder();
+        for (int i = numbers.length() - 1, count = 0; i >= 0; i--, count++) {
+            if (count >= 3) {
+                builder.append(",");
+                count = 0;
+            }
+            builder.append(numbers.charAt(i));
+        }
+        builder.reverse();
+        result = builder + (decimals.isEmpty() ? "" : ("." + decimals));
 
         return result;
     }
