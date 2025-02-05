@@ -35,13 +35,15 @@ public class BankTopMoneyPlaceholder extends BPPlaceholder {
         BigDecimal money = BPBankTop.getBankTopBalancePlayer(position);
         switch (ConfigValues.getBankTopMoneyFormat()) {
             case "default_amount":
-                return BPFormatter.formatCommas(money);
+                return BPFormatter.formatDecimals(money);
             case "amount_long":
                 return money.toPlainString();
             default:
                 return BPFormatter.formatPrecise(money);
             case "amount_formatted_long":
                 return BPFormatter.formatLong(money);
+            case "amount_formatted_commas":
+                return BPFormatter.formatCommas(money);
         }
     }
 }

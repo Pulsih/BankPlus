@@ -53,7 +53,7 @@ public class BankTopCmd implements CommandExecutor {
         BigDecimal money = BPBankTop.getBankTopBalancePlayer(position);
         switch (ConfigValues.getBankTopMoneyFormat()) {
             case "default_amount":
-                stringToReplace = BPFormatter.formatCommas(money);
+                stringToReplace = BPFormatter.formatDecimals(money);
                 break;
             case "amount_long":
                 stringToReplace = String.valueOf(money);
@@ -63,6 +63,9 @@ public class BankTopCmd implements CommandExecutor {
                 break;
             case "amount_formatted_long":
                 stringToReplace = BPFormatter.formatLong(money);
+                break;
+            case "amount_formatted_commas":
+                stringToReplace = BPFormatter.formatCommas(money);
                 break;
         }
         return message.replace("%bankplus_banktop_money_" + position + "%", stringToReplace);

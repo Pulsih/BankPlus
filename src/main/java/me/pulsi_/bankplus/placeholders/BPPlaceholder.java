@@ -41,6 +41,7 @@ public abstract class BPPlaceholder {
         if (placeholder.contains("_long")) return value.toPlainString();
         if (placeholder.contains("_formatted")) return BPFormatter.formatPrecise(value);
         if (placeholder.contains("_formatted_long")) return BPFormatter.formatLong(value);
-        return BPFormatter.formatCommas(value);
+        if (placeholder.contains("_formatted_commas")) return BPFormatter.formatCommas(value);
+        return BPFormatter.formatDecimals(value);
     }
 }
