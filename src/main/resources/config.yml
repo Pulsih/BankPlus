@@ -232,8 +232,8 @@ Interest:
   # The format is the same as "Interest.Delay".
   Offline-Limit: "3 d"
 
-  # Choose if the interest rate for offline players
-  # will be different from the default one.
+  # Choose if the offline interest will be
+  # different from the online rate.
   Different-Offline-Rate: false
 
   # If 'Different-Offline-Rate' is enabled, the offline players

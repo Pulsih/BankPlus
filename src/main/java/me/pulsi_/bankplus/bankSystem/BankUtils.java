@@ -746,7 +746,7 @@ public class BankUtils {
             try {
                 int requiredData = requiredMeta.getCustomModelData(), givenData = givenMeta.getCustomModelData();
                 if (requiredData != givenData) return false;
-            } catch (NoSuchMethodError e) {
+            } catch (IllegalStateException | NoSuchMethodError e) {
             }
         }
         return true;
