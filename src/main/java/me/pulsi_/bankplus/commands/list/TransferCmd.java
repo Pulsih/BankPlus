@@ -100,7 +100,7 @@ public class TransferCmd extends BPCommand {
 
     @Override
     public List<String> tabCompletion(CommandSender s, String[] args) {
-        if (args.length == 1)
+        if (args.length == 2)
             return BPArgs.getArgs(args, "databaseToFiles", "filesToDatabase");
         return null;
     }
