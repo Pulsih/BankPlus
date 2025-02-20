@@ -152,13 +152,10 @@ public class BPMessages {
     public static void loadMessages(FileConfiguration config) {
         messages.clear();
 
-        ConfigurationSection section = config.getConfigurationSection("");
-        if (section == null) return;
-
-        for (String identifier : section.getKeys(false))
+        for (String identifier : config.getKeys(false))
             if (!isIgnoredId(identifier)) messages.put(identifier, getPossibleMessages(config, identifier));
 
-        String prefixString = section.getString("Prefix");
+        String prefixString = config.getString("Prefix");
         prefix = prefixString == null ? BPChat.prefix : prefixString;
     }
 

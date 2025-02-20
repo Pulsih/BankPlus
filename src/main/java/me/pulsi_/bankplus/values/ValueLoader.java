@@ -57,28 +57,4 @@ public class ValueLoader {
                 return BPUtils.daysInMilliseconds(delay);
         }
     }
-
-    /**
-     * Get a string from that config from the given path.
-     *
-     * @param config The config.
-     * @param path   The path.
-     * @return A string.
-     */
-    protected static String getString(FileConfiguration config, String path) {
-        return getString(config, path, null);
-    }
-
-    /**
-     * Get a string from that config from the given path.
-     *
-     * @param config   The config.
-     * @param path     The path.
-     * @param fallBack The returning value if none has been found.
-     * @return A string.
-     */
-    protected static String getString(FileConfiguration config, String path, String fallBack) {
-        String get = config.getString(path);
-        return get == null ? fallBack : get;
-    }
 }
