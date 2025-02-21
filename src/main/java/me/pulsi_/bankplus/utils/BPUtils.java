@@ -245,10 +245,11 @@ public class BPUtils {
 
         if (bank != null) values.add("%bank%$" + bank);
 
-        values.add("%" + identifier + "%$" + BPFormatter.formatCommas(amount));
+        values.add("%" + identifier + "%$" + BPFormatter.formatDecimals(amount));
         values.add("%" + identifier + "_long%$" + amount.toPlainString());
         values.add("%" + identifier + "_formatted%$" + BPFormatter.formatPrecise(amount));
         values.add("%" + identifier + "_formatted_long%$" + BPFormatter.formatLong(amount));
+        values.add("%" + identifier + "_formatted_commas%$" + BPFormatter.formatCommas(amount));
 
         if (level > 0) values.add("%level%$" + level);
         return values;
