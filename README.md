@@ -7,33 +7,34 @@ After years of modelling, improving and adding suggestions, this is what bankplu
 Support will be only given on discord.
 Do not use the review section to report bugs, ask questions or leave suggestions.
 
-**Plugin requirements**
+# **Plugin requirements**
 1. Vault (Economy Hook)
 2. Economy Plugin (For example EssentialsX or one of the listed plugins on the Vault page)
 
-Without these 2 requirements, BankPlus won't start.
+_Without these 2 requirements, BankPlus won't start._
 
 
-Plugin optional requirements
+# **Plugin optional requirements**
 1. PlaceholderAPI (Displays placeholders in the gui and shows BankPlus placeholders)
 
 
-[ATTACH=full]825886[/ATTACH]
-Built-in GUI system.
-Unlimited amount of banks.
-MySQL support.
-GUI with custom heads & custom model data items support.
-Interest system, both online and offline.
-Actions followed by sound effects.
-Various ways to deposit / withdraw money.
-BankTop fully customizable.
-Bank upgrades with cost and custom items.
-Transtaction taxes.
-Loan system with debts.
-Efficient code, every resource is used with efficiecy and lightweight in mind.
-Complete wiki.
-Much much more..
-If you want to test the plugin, you can join on our test server pulsi.jifercraft.com that is hosted thanks to jainagam3r45's JiferCraft studios!
+![image](https://github.com/user-attachments/assets/bda13791-8355-44be-8e1a-4f55adb4da60)
+
+- Built-in GUI system.
+- Unlimited amount of banks.
+- MySQL support.
+- GUI with custom heads & custom model data items support.
+- Interest system, both online and offline.
+- Actions followed by sound effects.
+- Various ways to deposit / withdraw money.
+- BankTop fully customizable.
+- Bank upgrades with cost and custom items.
+- Transtaction taxes.
+- Loan system with debts.
+- Efficient code, every resource is used with efficiecy and lightweight in mind.
+- Complete wiki.
+- Much much more..
+- If you want to test the plugin, you can join on our test server pulsi.jifercraft.com that is hosted thanks to jainagam3r45's JiferCraft studios!
 
 Images
 [SPOILER="6 Images"]
