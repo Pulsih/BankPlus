@@ -36,40 +36,29 @@ _Without these 2 requirements, BankPlus won't start._
 - Much much more..
 - If you want to test the plugin, you can join on our test server pulsi.jifercraft.com that is hosted thanks to jainagam3r45's JiferCraft studios!
 
+Make sure to check the [wiki](https://github.com/Pulsih/BankPlus/wiki)!
+
+
+# Plugin Gallery
 Images
-[SPOILER="6 Images"]
+
 Bank gui fully costumizable
-[ATTACH=full]802762[/ATTACH]
+![image](https://github.com/user-attachments/assets/514e4c63-3de4-4264-8626-57970642e6fd)
 
 Bank upgrades
-[ATTACH=full]802763[/ATTACH]
+![image](https://github.com/user-attachments/assets/d69b019c-5986-4a2f-9b8d-c964f30a7a43)
 
 Various ways to deposit / withdraw
-[ATTACH=full]802766[/ATTACH]
-[ATTACH=full]802767[/ATTACH]
+![image](https://github.com/user-attachments/assets/6cd60d4a-dea6-4b77-917e-dbde2206799e)
+![image](https://github.com/user-attachments/assets/c8b58f42-f7bc-47d4-85da-50cc2308b90c)
+
 
 Online and offline interest
-[ATTACH=full]802769[/ATTACH]
-[ATTACH=full]802770[/ATTACH]
+![image](https://github.com/user-attachments/assets/22704596-9b99-4617-8d8e-85cd39c8aac3)
+![image](https://github.com/user-attachments/assets/69231e0b-2d94-4e3a-965d-2632efbc44cb)
+
 
 And many other features that you will discover only using the plugin!
-[/SPOILER]
 
-
-Youtube videos
-[SPOILER="1 Video"]
-[MEDIA=youtube]_iA5vi1dHss[/MEDIA]
-[/SPOILER]
-
-
-[ATTACH=full]826070[/ATTACH]
-(Official GitHub Wiki ^^)
-
-
-
-
-
-
-
-
-
+# Videos
+[![VideoImage](http://img.youtube.com/vi/_iA5vi1dHss/0.jpg)](https://youtu.be/_iA5vi1dHss)
