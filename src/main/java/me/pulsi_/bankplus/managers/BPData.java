@@ -19,7 +19,6 @@ import me.pulsi_.bankplus.listeners.bankListener.*;
 import me.pulsi_.bankplus.listeners.playerChat.*;
 import me.pulsi_.bankplus.loanSystem.BPLoanRegistry;
 import me.pulsi_.bankplus.mySQL.BPSQL;
-import me.pulsi_.bankplus.utils.BPHeads;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.texts.BPChat;
 import me.pulsi_.bankplus.values.ConfigValues;

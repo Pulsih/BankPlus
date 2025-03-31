@@ -1,7 +1,7 @@
 plugins { java }
 
 group = "me.pulsi_"
-version = "2.3.0"
+version = "6.4-Alpha7"
 
 repositories {
     mavenCentral()
@@ -60,5 +60,14 @@ tasks.withType<JavaCompile>().configureEach {
 
     if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible) {
         options.release.set(targetJavaVersion)
+    }
+}
+
+tasks.processResources {
+    val props = mapOf("version" to version)
+    inputs.properties(props)
+    filteringCharset = "UTF-8"
+    filesMatching("plugin.yml") {
+        expand(props)
     }
 }

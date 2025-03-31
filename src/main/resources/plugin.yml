@@ -1,5 +1,5 @@
 name: BankPlus
-version: '6.3' # Remember to also change in BankPlus.java and build.gradle
+version: '${version}' # Remember to change the one in BankPlus main class.
 main: me.pulsi_.bankplus.BankPlus
 api-version: '1.21'
 authors: [ Pulsi_ ]

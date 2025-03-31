@@ -11,6 +11,9 @@ import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.ConfigValues;
 import me.pulsi_.bankplus.values.MultipleBanksValues;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.ComponentDecoder;
+import net.kyori.adventure.text.serializer.ComponentSerializer;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -32,14 +35,6 @@ import java.util.List;
  */
 public class BankUtils {
 
-    public static final Component DISPLAYNAME_NOT_FOUND = BPChat.color("<red>Displayname not found.");
-    public static final String MATERIAL_KEY = "Material";
-    public static final String AMOUNT_KEY = "Amount";
-    public static final String DISPLAYNAME_KEY = "Displayname";
-    public static final String LORE_KEY = "Lore";
-    public static final String ITEM_FLAGS_KEY = "ItemFlags";
-    public static final String GLOWING_KEY = "Glowing";
-    public static final String CUSTOM_MODEL_DATA_KEY = "CustomModelData";
     public static final String COST_FIELD = "Cost";
     public static final String CAPACITY_FIELD = "Capacity";
     public static final String INTEREST_FIELD = "Interest";
@@ -587,77 +582,29 @@ public class BankUtils {
     }
 
     /**
-     * Get the different level lores of the specified item section.
+     * Get the different level lore's of the specified item section.
      *
      * @param itemSection The item section.
      * @return An HashMap containing K = Lore Level. V = Lore List.
      */
-    public static HashMap<Integer, List<String>> getLevelLore(ConfigurationSection itemSection) {
-        HashMap<Integer, List<String>> lore = new HashMap<>();
+    public static HashMap<Integer, List<Component>> getLevelLore(ConfigurationSection itemSection) {
+        HashMap<Integer, List<Component>> lore = new HashMap<>();
 
-        List<String> configLore = itemSection.getStringList(LORE_KEY);
-        if (!configLore.isEmpty()) lore.put(0, configLore);
+        List<String> configLore = itemSection.getStringList(BPItems.LORE_KEY);
+        if (!configLore.isEmpty()) lore.put(0, BPUtils.stringListToComponentList(configLore));
         else { // If its empty and the path exist, it contains level lore.
-            ConfigurationSection loreSection = itemSection.getConfigurationSection(LORE_KEY);
-            if (loreSection != null) {
-                List<String> defaultLore = loreSection.getStringList("Default");
-                lore.put(0, defaultLore);
+            ConfigurationSection loreSection = itemSection.getConfigurationSection(BPItems.LORE_KEY);
+            if (loreSection == null) return lore;
 
-                for (String level : loreSection.getKeys(false)) {
-                    if (level.equalsIgnoreCase("default") || BPUtils.isInvalidNumber(level)) continue;
+            for (String level : loreSection.getKeys(false)) {
+                List<Component> levelLore = BPUtils.stringListToComponentList(loreSection.getStringList(level));
 
-                    List<String> levelLore = loreSection.getStringList(level);
-                    lore.put(Integer.parseInt(level), levelLore);
-                }
+                // If it's the default, place it at position 0.
+                if (level.equalsIgnoreCase("Default")) lore.put(Integer.parseInt(level), levelLore);
+                else if (BPUtils.isInvalidNumber(level)) lore.put(Integer.parseInt(level), levelLore);
             }
         }
         return lore;
-    }
-
-    /**
-     * Automatically get the item stack with all attributes from the item section.
-     *
-     * @param itemSection The item section in the config.
-     * @return An ItemStack.
-     */
-    public static ItemStack getItemStackFromSection(ConfigurationSection itemSection) {
-        if (itemSection == null) return BPItems.UNKNOWN_ITEM.clone();
-
-        ItemStack item = BPItems.createItemStack(itemSection.getString(MATERIAL_KEY));
-
-        int amount = itemSection.getInt(AMOUNT_KEY);
-        if (amount > 1) item.setAmount(amount);
-
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null) return item;
-
-        String displayname = itemSection.getString(DISPLAYNAME_KEY);
-        meta.displayName(displayname == null ? DISPLAYNAME_NOT_FOUND : BPChat.color(displayname));
-
-        List<Component> lore = new ArrayList<>();
-        for (String lines : itemSection.getStringList(LORE_KEY)) lore.add(BPChat.color(lines));
-        meta.lore(lore);
-
-        for (String flag : itemSection.getStringList(ITEM_FLAGS_KEY)) {
-            try {
-                meta.addItemFlags(ItemFlag.valueOf(flag));
-            } catch (IllegalArgumentException e) {
-                BPLogger.warn("Could not set item flag \"" + flag + "\" to item \"" + itemSection + "\" because it's not a valid item flag.");
-            }
-        }
-
-        int modelData = itemSection.getInt(CUSTOM_MODEL_DATA_KEY);
-        if (modelData > 0) {
-            try {
-                meta.setCustomModelData(modelData);
-            } catch (NoSuchMethodError e) { // Do that to add support for older minecraft versions.
-                BPLogger.warn("Cannot set custom model data to the item: \"" + displayname + "\"&e. Custom model data is only available on 1.14.4+ servers!");
-            }
-        }
-        item.setItemMeta(meta);
-
-        if (itemSection.getBoolean(GLOWING_KEY)) item.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
-        return item;
     }
 
     /**
@@ -672,10 +619,10 @@ public class BankUtils {
         HashMap<String, ItemStack> requiredItems = new HashMap<>();
 
         ConfigurationSection requiredItemsSection = levelSection.getConfigurationSection(REQUIRED_ITEMS_FIELD);
-        if (requiredItemsSection != null) {
+        if (requiredItemsSection != null) { // If its the long format, get the item from each section.
             for (String itemName : requiredItemsSection.getKeys(false))
-                requiredItems.put(itemName, getItemStackFromSection(requiredItemsSection.getConfigurationSection(itemName)));
-        } else {
+                requiredItems.put(itemName, BPItems.getItemStackFromSection(requiredItemsSection.getConfigurationSection(itemName)));
+        } else { // Process the short format and create the required items.
             String requiredItemsString = levelSection.getString(REQUIRED_ITEMS_FIELD);
             if (requiredItemsString == null || requiredItemsString.isEmpty()) return requiredItems;
 

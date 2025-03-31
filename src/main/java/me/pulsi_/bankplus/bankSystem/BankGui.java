@@ -4,7 +4,6 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
-import me.pulsi_.bankplus.utils.BPHeads;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPChat;
@@ -33,17 +32,17 @@ public class BankGui {
     }
 
     // Pseudo inventory content to keep track of items, lore and actions. K = Inventory slot V = BankItem
-    private final HashMap<Integer, BankItem> bankItems = new HashMap<>();
+    private final HashMap<Integer, BPGuiItem> bankItems = new HashMap<>();
 
-    private Component title = BankUtils.DISPLAYNAME_NOT_FOUND;
+    private Component title = BPItems.DISPLAYNAME_NOT_FOUND;
     private int size, updateDelay;
-    private BankItem filler, availableBankListItem, unavailableBankListItem;
+    private BPGuiItem filler, availableBankListItem, unavailableBankListItem;
 
     public Bank getOriginBank() {
         return originBank;
     }
 
-    public HashMap<Integer, BankItem> getBankItems() {
+    public HashMap<Integer, BPGuiItem> getBankItems() {
         return bankItems;
     }
 
@@ -59,27 +58,15 @@ public class BankGui {
         return updateDelay;
     }
 
-    public String getFillerMaterial() {
-        return fillerMaterial;
-    }
-
-    public boolean isFillerEnabled() {
-        return fillerEnabled;
-    }
-
-    public boolean isFillerGlowing() {
-        return fillerGlowing;
-    }
-
-    public BankItem getAvailableBankListItem() {
+    public BPGuiItem getAvailableBankListItem() {
         return availableBankListItem;
     }
 
-    public BankItem getUnavailableBankListItem() {
+    public BPGuiItem getUnavailableBankListItem() {
         return unavailableBankListItem;
     }
 
-    public void setBankItem(int slot, BankItem item) {
+    public void setBankItem(int slot, BPGuiItem item) {
         bankItems.put(slot, item);
     }
 
@@ -95,23 +82,11 @@ public class BankGui {
         this.updateDelay = updateDelay;
     }
 
-    public void setFillerMaterial(String fillerMaterial) {
-        this.fillerMaterial = fillerMaterial;
-    }
-
-    public void setFillerEnabled(boolean fillerEnabled) {
-        this.fillerEnabled = fillerEnabled;
-    }
-
-    public void setFillerGlowing(boolean fillerGlowing) {
-        this.fillerGlowing = fillerGlowing;
-    }
-
-    public void setAvailableBankListItem(BankItem availableBankListItem) {
+    public void setAvailableBankListItem(BPGuiItem availableBankListItem) {
         this.availableBankListItem = availableBankListItem;
     }
 
-    public void setUnavailableBankListItem(BankItem unavailableBankListItem) {
+    public void setUnavailableBankListItem(BPGuiItem unavailableBankListItem) {
         this.unavailableBankListItem = unavailableBankListItem;
     }
 
@@ -162,17 +137,16 @@ public class BankGui {
      * @param bankInventory The bank inventory.
      * @param p             The player needed for possible skulls.
      */
-    public void placeContent(HashMap<Integer, BankItem> items, Inventory bankInventory, Player p) {
-        if (fillerEnabled) {
-            ItemStack filler = BPItems.getFiller(this);
+    public void placeContent(HashMap<Integer, BPGuiItem> items, Inventory bankInventory, Player p) {
+        if (filler != null) {
             int size = bankInventory.getSize();
-            for (int i = 0; i < size; i++) bankInventory.setItem(i, filler);
+            for (int i = 0; i < size; i++) bankInventory.setItem(i, filler.item);
         }
 
         for (int slot : items.keySet()) {
-            BankItem item = items.get(slot);
-            if (item.isPlayerHead()) bankInventory.setItem(slot, BPHeads.getNameHead(p.getName()));
-            else bankInventory.setItem(slot, items.get(slot).item);
+            BPGuiItem item = items.get(slot);
+            if (!item.isPlayerHead()) bankInventory.setItem(slot, item.item);
+            else bankInventory.setItem(slot, BPItems.getNameHead(p.getName()));
         }
     }
 
@@ -194,7 +168,7 @@ public class BankGui {
      * @param p                     The player that have the inventory open.
      */
     public void updateBankGuiItemMeta(int slot, Inventory playerOpenedInventory, Player p) {
-        BankItem bankItem = bankItems.get(slot);
+        BPGuiItem bankItem = bankItems.get(slot);
 
         ItemStack inventoryItem = playerOpenedInventory.getItem(slot);
         ItemMeta meta = inventoryItem.getItemMeta();
@@ -212,5 +186,59 @@ public class BankGui {
             meta.setLore(actualLore);
         }
         inventoryItem.setItemMeta(meta);
+    }
+
+    /**
+     * Represent a bankplus item that has no lore (because it is supposed to be updated
+     * from internal gui processes and can changes between levels) and has actions to
+     * be run when clicked on the gui.
+     */
+    public static class BPGuiItem {
+
+        private ItemStack item; // The item stack containing displayname, lore, material etc..
+        private HashMap<Integer, List<Component>> lore = new HashMap<>(); // Different lore between levels, 0 for default.
+        private List<String> actions = new ArrayList<>(); // Actions on click.
+        private boolean playerHead; // Boolean to check if it's a HEAD-%player% to place it when opening the gui.
+
+        public ItemStack getItem() {
+            return item;
+        }
+
+        public HashMap<Integer, List<Component>> getLore() {
+            return lore;
+        }
+
+        public List<String> getActions() {
+            return actions;
+        }
+
+        public boolean isPlayerHead() {
+            return playerHead;
+        }
+
+        public void setItem(ItemStack item) {
+            this.item = item;
+        }
+
+        public void setLore(HashMap<Integer, List<Component>> lore) {
+            this.lore = lore;
+        }
+
+        public void setActions(List<String> actions) {
+            this.actions = actions;
+        }
+
+        public void setPlayerHead(boolean playerHead) {
+            this.playerHead = playerHead;
+        }
+
+        public static BPGuiItem loadBankItem(ConfigurationSection itemSection) {
+            BPGuiItem guiItem = new BPGuiItem();
+            guiItem.setItem(BPItems.getItemStackFromSection(itemSection));
+            guiItem.setLore(BankUtils.getLevelLore(itemSection));
+            guiItem.setActions(itemSection.getStringList("Actions"));
+            guiItem.setPlayerHead("head-%player%".equalsIgnoreCase(itemSection.getString(BPItems.MATERIAL_KEY)));
+            return guiItem;
+        }
     }
 }

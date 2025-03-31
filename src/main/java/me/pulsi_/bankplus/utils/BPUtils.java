@@ -6,6 +6,8 @@ import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.ConfigValues;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
@@ -159,6 +161,19 @@ public class BPUtils {
 
         p.playSound(p.getLocation(), sound, volume, pitch);
         return true;
+    }
+
+    /**
+     * Convert a list of string to a list of MiniMessage components.
+     *
+     * @param list The list to convert.
+     * @return A list of Components.
+     */
+    public static List<Component> stringListToComponentList(List<String> list) {
+        List<Component> result = new ArrayList<>();
+        MiniMessage mm = MiniMessage.miniMessage();
+        for (String line : list) result.add(mm.deserialize(line));
+        return result;
     }
 
     public static long secondsInMilliseconds(int seconds) {
