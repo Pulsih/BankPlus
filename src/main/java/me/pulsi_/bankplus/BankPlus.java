@@ -118,7 +118,7 @@ public final class BankPlus extends JavaPlugin {
             BPLogger.info("Hooked into Essentials!");
             isEssentialsXHooked = true;
         }
-        if(plManager.getPlugin("CMI") != null) {
+        if (plManager.getPlugin("CMI") != null) {
             BPLogger.info("Hooked into CMI!");
             isCmiHooked = true;
         }

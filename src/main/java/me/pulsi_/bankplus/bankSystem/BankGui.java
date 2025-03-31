@@ -12,7 +12,6 @@ import me.pulsi_.bankplus.utils.texts.BPChat;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -35,7 +34,6 @@ public class BankGui {
     // Pseudo inventory content to keep track of items, lore and actions. K = Inventory slot V = BankItem
     private final HashMap<Integer, BankItem> bankItems = new HashMap<>();
 
-    private String title = "&c&l * TITLE NOT FOUND *";
     private int size, updateDelay;
     private String fillerMaterial;
     private boolean fillerEnabled, fillerGlowing;
@@ -49,7 +47,6 @@ public class BankGui {
         return bankItems;
     }
 
-    public String getTitle() {
         return title;
     }
 
@@ -85,8 +82,6 @@ public class BankGui {
         bankItems.put(slot, item);
     }
 
-    public void setTitle(String title) {
-        if (title != null && !title.isEmpty()) this.title = title;
     }
 
     public void setSize(int size) {
@@ -138,9 +133,6 @@ public class BankGui {
         BukkitTask updating = player.getBankUpdatingTask();
         if (updating != null) updating.cancel();
 
-        String title = this.title;
-        if (!BankPlus.INSTANCE().isPlaceholderApiHooked()) title = BPChat.color(title);
-        else title = PlaceholderAPI.setPlaceholders(p, BPChat.color(title));
 
         Inventory bankInventory = Bukkit.createInventory(new BankHolder(), getSize(), title);
         placeContent(bankItems, bankInventory, p);
@@ -263,7 +255,6 @@ public class BankGui {
             actions = itemSection.getStringList("Actions");
             lore = BankUtils.getLevelLore(itemSection);
 
-            String material = itemSection.getString(BankUtils.MATERIAL_FIELD);
             if (material != null && material.equalsIgnoreCase("head-%player%")) playerHead = true;
             return this;
         }
