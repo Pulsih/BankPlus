@@ -1,20 +1,6 @@
 name: BankPlus
-version: '${version}'
+version: '6.3' # Remember to also change in BankPlus.java and build.gradle
 main: me.pulsi_.bankplus.BankPlus
-api-version: 1.13
-depend:
-  - Vault
-softdepend:
-  - PlaceholderAPI
-  - Essentials
-  - EconomyPlus
-  - CMI
+api-version: '1.21'
 authors: [ Pulsi_ ]
-load: POSTWORLD
-description: The best bank plugin on Spigot!
-commands:
-  bankplus:
-    aliases: [bankp, bank, bp]
-
-  banktop:
-    aliases: [btop]
+description: Bank plugin fully customizable.

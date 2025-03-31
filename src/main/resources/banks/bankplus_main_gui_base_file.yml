@@ -2,10 +2,6 @@
 Title: "&a&lBANK" # The bank title.
 Lines: 5 # The lines of the gui (Min: 1, Max: 6)
 Update-Delay: 10 # The delay before updating the gui lore, in ticks. (20 ticks = 1 second)
-Filler: # Option to fill the empty slots in the gui easily.
-  Enabled: true
-  Material: "WHITE_STAINED_GLASS_PANE"
-  Glowing: false
 
 # If the settings are not specified and the multiple
 # bank module is enabled, the plugin will use the
@@ -114,15 +110,15 @@ Levels:
       CustomDiamond:
         Material: "DIAMOND"
         Amount: 4
-        Displayname: "&6Special Diamond"
+        Displayname: "<gold>Test Upgrade Diamond"
         Lore:
-          - "&7A diamond uniquely used to upgrade your bank."
+          - "<gray>A diamond created for showing how the custom upgrade item works :)."
       CustomEmerald:
         Material: "EMERALD"
         Amount: 2
-        Displayname: "&2Special Emerald"
+        Displayname: "<gold>Test Upgrade Emerald"
         Lore:
-          - "&7An emerald uniquely used to upgrade your bank."
+          - "<gray>An emerald created for showing how the custom upgrade item works :)."
         Glowing: true
     Remove-Required-Items: true
     Capacity: "200000"
@@ -130,8 +126,14 @@ Levels:
     Offline-Interest: "10%"
 
 Items:
+  # This is a special name, the item named as "Filler"
+  # will be placed everywhere in the gui where there is free space.
+  Filler:
+    Displayname: " "
+    Material: "BLACK_STAINED_GLASS_PANE"
+
   # You can add as many items as you want.
-  WithdrawButton1:
+  WithdrawButton1: # The name of the item can be whatever you want. (Except for "Filler")
     Material: "EMERALD"
     Amount: 1
     Displayname: "&8&l[&a&lWITHDRAW&8&l] &f500$"

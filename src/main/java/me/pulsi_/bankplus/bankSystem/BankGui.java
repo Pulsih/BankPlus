@@ -5,12 +5,13 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.utils.BPHeads;
-import me.pulsi_.bankplus.utils.BPItems;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPChat;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.ConfigValues;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -34,10 +35,9 @@ public class BankGui {
     // Pseudo inventory content to keep track of items, lore and actions. K = Inventory slot V = BankItem
     private final HashMap<Integer, BankItem> bankItems = new HashMap<>();
 
+    private Component title = BankUtils.DISPLAYNAME_NOT_FOUND;
     private int size, updateDelay;
-    private String fillerMaterial;
-    private boolean fillerEnabled, fillerGlowing;
-    private BankItem availableBankListItem, unavailableBankListItem;
+    private BankItem filler, availableBankListItem, unavailableBankListItem;
 
     public Bank getOriginBank() {
         return originBank;
@@ -47,6 +47,7 @@ public class BankGui {
         return bankItems;
     }
 
+    public Component getTitle() {
         return title;
     }
 
@@ -82,6 +83,8 @@ public class BankGui {
         bankItems.put(slot, item);
     }
 
+    public void setTitle(Component title) {
+        if (title != null) this.title = title;
     }
 
     public void setSize(int size) {
@@ -133,6 +136,9 @@ public class BankGui {
         BukkitTask updating = player.getBankUpdatingTask();
         if (updating != null) updating.cancel();
 
+        Component title = this.title;
+        if (BankPlus.INSTANCE().isPlaceholderApiHooked())
+            title = BPChat.color(PlaceholderAPI.setPlaceholders(p, MiniMessage.miniMessage().serialize(title)));
 
         Inventory bankInventory = Bukkit.createInventory(new BankHolder(), getSize(), title);
         placeContent(bankItems, bankInventory, p);
@@ -183,7 +189,9 @@ public class BankGui {
     /**
      * Method to update a single item meta: lore, displayname and placeholders.
      *
-     * @param slot The slot of the item.
+     * @param slot                  The slot of the item.
+     * @param playerOpenedInventory The player inventory where to find the item.
+     * @param p                     The player that have the inventory open.
      */
     public void updateBankGuiItemMeta(int slot, Inventory playerOpenedInventory, Player p) {
         BankItem bankItem = bankItems.get(slot);
@@ -204,59 +212,5 @@ public class BankGui {
             meta.setLore(actualLore);
         }
         inventoryItem.setItemMeta(meta);
-    }
-
-    /**
-     * Class used to keep track of item settings.
-     * The ItemStack holds final settings such as material, item flags and enchantments.
-     * The lore and displayname are the values that are going to be updated.
-     */
-    public static class BankItem {
-
-        private ItemStack item; // The item stack containing displayname, material etc..
-        private List<String> actions = new ArrayList<>();
-        private HashMap<Integer, List<String>> lore = new HashMap<>();
-        private boolean playerHead;
-
-        public ItemStack getItem() {
-            return item;
-        }
-
-        public List<String> getActions() {
-            return actions;
-        }
-
-        public HashMap<Integer, List<String>> getLore() {
-            return lore;
-        }
-
-        public boolean isPlayerHead() {
-            return playerHead;
-        }
-
-        public void setItem(ItemStack item) {
-            this.item = item;
-        }
-
-        public void setActions(List<String> actions) {
-            this.actions = actions;
-        }
-
-        public void setLore(HashMap<Integer, List<String>> lore) {
-            this.lore = lore;
-        }
-
-        public void setPlayerHead(boolean playerHead) {
-            this.playerHead = playerHead;
-        }
-
-        public BankItem loadBankItem(ConfigurationSection itemSection) {
-            item = BankUtils.getItemStackFromSection(itemSection);
-            actions = itemSection.getStringList("Actions");
-            lore = BankUtils.getLevelLore(itemSection);
-
-            if (material != null && material.equalsIgnoreCase("head-%player%")) playerHead = true;
-            return this;
-        }
     }
 }

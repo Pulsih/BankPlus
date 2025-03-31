@@ -1,8 +1,8 @@
 package me.pulsi_.bankplus.bankSystem;
 
+import io.papermc.paper.datacomponent.DataComponentTypes;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.economy.BPEconomy;
-import me.pulsi_.bankplus.utils.BPItems;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPChat;
@@ -10,13 +10,13 @@ import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.ConfigValues;
 import me.pulsi_.bankplus.values.MultipleBanksValues;
+import net.kyori.adventure.text.Component;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -25,19 +25,21 @@ import org.bukkit.inventory.meta.ItemMeta;
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.List;
 
 /**
  * Class containing tons of useful methods to manage banks and retrieve useful information.
  */
 public class BankUtils {
 
-    public static final String MATERIAL_FIELD = "Material";
-    public static final String AMOUNT_FIELD = "Amount";
-    public static final String DISPLAYNAME_FIELD = "Displayname";
-    public static final String LORE_FIELD = "Lore";
-    public static final String ITEM_FLAGS_FIELD = "ItemFlags";
-    public static final String GLOWING_FIELD = "Glowing";
-    public static final String CUSTOM_MODEL_DATA_FIELD = "CustomModelData";
+    public static final Component DISPLAYNAME_NOT_FOUND = BPChat.color("<red>Displayname not found.");
+    public static final String MATERIAL_KEY = "Material";
+    public static final String AMOUNT_KEY = "Amount";
+    public static final String DISPLAYNAME_KEY = "Displayname";
+    public static final String LORE_KEY = "Lore";
+    public static final String ITEM_FLAGS_KEY = "ItemFlags";
+    public static final String GLOWING_KEY = "Glowing";
+    public static final String CUSTOM_MODEL_DATA_KEY = "CustomModelData";
     public static final String COST_FIELD = "Cost";
     public static final String CAPACITY_FIELD = "Capacity";
     public static final String INTEREST_FIELD = "Interest";
@@ -593,10 +595,10 @@ public class BankUtils {
     public static HashMap<Integer, List<String>> getLevelLore(ConfigurationSection itemSection) {
         HashMap<Integer, List<String>> lore = new HashMap<>();
 
-        List<String> configLore = itemSection.getStringList(LORE_FIELD);
+        List<String> configLore = itemSection.getStringList(LORE_KEY);
         if (!configLore.isEmpty()) lore.put(0, configLore);
         else { // If its empty and the path exist, it contains level lore.
-            ConfigurationSection loreSection = itemSection.getConfigurationSection(LORE_FIELD);
+            ConfigurationSection loreSection = itemSection.getConfigurationSection(LORE_KEY);
             if (loreSection != null) {
                 List<String> defaultLore = loreSection.getStringList("Default");
                 lore.put(0, defaultLore);
@@ -621,27 +623,22 @@ public class BankUtils {
     public static ItemStack getItemStackFromSection(ConfigurationSection itemSection) {
         if (itemSection == null) return BPItems.UNKNOWN_ITEM.clone();
 
-        ItemStack guiItem = BPItems.createItemStack(itemSection.getString(MATERIAL_FIELD));
+        ItemStack item = BPItems.createItemStack(itemSection.getString(MATERIAL_KEY));
 
-        int amount = itemSection.getInt(AMOUNT_FIELD);
-        if (amount > 1) guiItem.setAmount(amount);
+        int amount = itemSection.getInt(AMOUNT_KEY);
+        if (amount > 1) item.setAmount(amount);
 
-        ItemMeta meta = guiItem.getItemMeta();
-        if (meta == null) return guiItem;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return item;
 
-        String displayname = itemSection.getString(DISPLAYNAME_FIELD);
-        meta.setDisplayName(BPChat.color(displayname == null ? "&c&l*CANNOT FIND DISPLAYNAME*" : displayname));
+        String displayname = itemSection.getString(DISPLAYNAME_KEY);
+        meta.displayName(displayname == null ? DISPLAYNAME_NOT_FOUND : BPChat.color(displayname));
 
-        List<String> lore = new ArrayList<>();
-        for (String lines : itemSection.getStringList(LORE_FIELD)) lore.add(BPChat.color(lines));
-        meta.setLore(lore);
+        List<Component> lore = new ArrayList<>();
+        for (String lines : itemSection.getStringList(LORE_KEY)) lore.add(BPChat.color(lines));
+        meta.lore(lore);
 
-        if (itemSection.getBoolean(GLOWING_FIELD)) {
-            meta.addEnchant(Enchantment.DURABILITY, 1, true);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        }
-
-        for (String flag : itemSection.getStringList(ITEM_FLAGS_FIELD)) {
+        for (String flag : itemSection.getStringList(ITEM_FLAGS_KEY)) {
             try {
                 meta.addItemFlags(ItemFlag.valueOf(flag));
             } catch (IllegalArgumentException e) {
@@ -649,7 +646,7 @@ public class BankUtils {
             }
         }
 
-        int modelData = itemSection.getInt(CUSTOM_MODEL_DATA_FIELD);
+        int modelData = itemSection.getInt(CUSTOM_MODEL_DATA_KEY);
         if (modelData > 0) {
             try {
                 meta.setCustomModelData(modelData);
@@ -657,9 +654,10 @@ public class BankUtils {
                 BPLogger.warn("Cannot set custom model data to the item: \"" + displayname + "\"&e. Custom model data is only available on 1.14.4+ servers!");
             }
         }
+        item.setItemMeta(meta);
 
-        guiItem.setItemMeta(meta);
-        return guiItem;
+        if (itemSection.getBoolean(GLOWING_KEY)) item.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
+        return item;
     }
 
     /**
