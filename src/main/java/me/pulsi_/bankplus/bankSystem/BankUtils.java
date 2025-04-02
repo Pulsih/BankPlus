@@ -600,8 +600,8 @@ public class BankUtils {
                 List<Component> levelLore = BPUtils.stringListToComponentList(loreSection.getStringList(level));
 
                 // If it's the default, place it at position 0.
-                if (level.equalsIgnoreCase("Default")) lore.put(Integer.parseInt(level), levelLore);
-                else if (BPUtils.isInvalidNumber(level)) lore.put(Integer.parseInt(level), levelLore);
+                if (level.equalsIgnoreCase("Default")) lore.put(0, levelLore);
+                else if (!BPUtils.isInvalidNumber(level)) lore.put(Integer.parseInt(level), levelLore);
             }
         }
         return lore;

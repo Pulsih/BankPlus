@@ -5,6 +5,7 @@ import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.values.ConfigValues;
 import me.pulsi_.bankplus.values.MultipleBanksValues;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -17,7 +18,13 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Bank class, that contains an economy, a gui (if enabled) and bank levels.
+ */
 public class Bank {
+
+    // If the item name is "Filler", it will be placed in the whole gui.
+    public static final String FILLER_IDENTIFIER = "Filler";
 
     private final String identifier;
     private final BPEconomy bankEconomy;
@@ -30,8 +37,9 @@ public class Bank {
 
     public Bank(String identifier) {
         this.identifier = identifier;
-        bankEconomy = new BPEconomy(this);
-        bankGui = new BankGui(this);
+        this.bankEconomy = new BPEconomy(this);
+        if (!ConfigValues.isGuiModuleEnabled()) this.bankGui = null;
+        else this.bankGui = new BankGui(this);
     }
 
     public String getIdentifier() {
@@ -109,23 +117,25 @@ public class Bank {
             }
         }
 
-        if (!ConfigValues.isGuiModuleEnabled()) return;
+        if (bankGui == null) return;
         bankGui.getBankItems().clear();
 
-        bankGui.setTitle(config.getString("Title"));
+        bankGui.setTitle(config.getComponent("Title", MiniMessage.miniMessage()));
         bankGui.setSize(config.getInt("Lines"));
         bankGui.setUpdateDelay(config.getInt("Update-Delay"));
-        bankGui.setFillerEnabled(config.getBoolean("Filler.Enabled"));
-        bankGui.setFillerMaterial(config.getString("Filler.Material"));
-        bankGui.setFillerGlowing(config.getBoolean("Filler.Glowing"));
 
         ConfigurationSection items = config.getConfigurationSection("Items");
         if (items != null) {
-            for (String item : items.getKeys(false)) {
-                ConfigurationSection itemSection = items.getConfigurationSection(item);
+            for (String itemName : items.getKeys(false)) {
+                ConfigurationSection itemSection = items.getConfigurationSection(itemName);
                 if (itemSection == null) continue;
 
-                BankGui.BankItem bankItem = new BankGui.BankItem().loadBankItem(itemSection);
+                BankGui.BPGuiItem bankItem = BankGui.BPGuiItem.loadBankItem(itemSection);
+
+                if (itemName.equals(FILLER_IDENTIFIER)) { // If it's the Filler item, update it in the bank.
+                    bankGui.setFiller(bankItem);
+                    continue;
+                }
 
                 List<Integer> slots = itemSection.getIntegerList("Slot");
                 if (slots.isEmpty()) bankGui.setBankItem(itemSection.getInt("Slot") - 1, bankItem);
@@ -133,17 +143,14 @@ public class Bank {
             }
         }
 
-        if (!MultipleBanksValues.enableMultipleBanksModule()) {
-            bankGui.setAvailableBankListItem(null);
-            bankGui.setUnavailableBankListItem(null);
-            return;
-        }
-
+        // If the multiple banks gui is not enabled, is not necessary to
+        // load the available / unavailable items, saving a bit of space.
+        if (!MultipleBanksValues.enableMultipleBanksModule()) return;
         ConfigurationSection availableSection = config.getConfigurationSection("Settings.BanksGuiItem.Available");
-        bankGui.setAvailableBankListItem(new BankGui.BankItem().loadBankItem(availableSection));
+        bankGui.setAvailableBankListItem(BankGui.BPGuiItem.loadBankItem(availableSection));
 
         ConfigurationSection unavailableSection = config.getConfigurationSection("Settings.BanksGuiItem.Unavailable");
-        bankGui.setUnavailableBankListItem(new BankGui.BankItem().loadBankItem(unavailableSection));
+        bankGui.setUnavailableBankListItem(BankGui.BPGuiItem.loadBankItem(unavailableSection));
     }
 
     public static class BankLevel {

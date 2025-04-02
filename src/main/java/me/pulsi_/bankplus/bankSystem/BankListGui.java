@@ -9,6 +9,8 @@ import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPChat;
 import me.pulsi_.bankplus.values.ConfigValues;
 import me.pulsi_.bankplus.values.MultipleBanksValues;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -44,14 +46,14 @@ public class BankListGui extends BankGui {
         if (MultipleBanksValues.isDirectlyOpenIf1IsAvailable()) {
             List<Bank> availableBanks = BankUtils.getAvailableBanks(p);
             if (availableBanks.size() == 1) {
-                availableBanks.get(0).getBankGui().openBankGui(p);
+                availableBanks.getFirst().getBankGui().openBankGui(p);
                 return;
             }
         }
 
-        String title = MultipleBanksValues.getBanksGuiTitle();
-        if (!BankPlus.INSTANCE().isPlaceholderApiHooked()) title = BPChat.color(title);
-        else title = PlaceholderAPI.setPlaceholders(p, BPChat.color(title));
+        Component title = MultipleBanksValues.getBanksGuiTitle();
+        if (BankPlus.INSTANCE().isPlaceholderApiHooked())
+            title = BPChat.color(PlaceholderAPI.setPlaceholders(p, MiniMessage.miniMessage().serialize(title)));
 
         Inventory bankListInventory = Bukkit.createInventory(new BankHolder(), MultipleBanksValues.getBankListGuiLines(), title);
         placeContent(getBankItems(), bankListInventory, p);
@@ -61,26 +63,23 @@ public class BankListGui extends BankGui {
         if (delay >= 0) player.setBankUpdatingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE(), () -> updateBankGuiMeta(bankListInventory, p), delay, delay));
 
         player.setOpenedBankGui(this);
-        if (ConfigValues.isPersonalSoundEnabled()) {
-            if (!BPUtils.playSound(ConfigValues.getPersonalSound(), p))
-                BPLogger.warn("Occurred while trying to play PERSONAL sound for player \"" + p.getName() + "\".");
-        }
+        if (ConfigValues.isPersonalSoundEnabled()) BPUtils.playSound(ConfigValues.getPersonalSound(), p);
         p.openInventory(bankListInventory);
     }
 
     @Override
-    public void placeContent(HashMap<Integer, BankItem> items, Inventory bankInventory, Player p) {
+    public void placeContent(HashMap<Integer, BPGuiItem> items, Inventory bankInventory, Player p) {
         int slot = 0;
 
         for (Bank bank : BankPlus.INSTANCE().getBankRegistry().getBanks().values()) {
             if (MultipleBanksValues.isShowNotAvailableBanks() && !BankUtils.isAvailable(bank, p)) continue;
 
             BankGui gui = bank.getBankGui();
-            BankItem bankItem = BankUtils.isAvailable(bank, p) ? gui.getAvailableBankListItem() : gui.getUnavailableBankListItem();
+            BPGuiItem showBankItem = BankUtils.isAvailable(bank, p) ? gui.getAvailableBankListItem() : gui.getUnavailableBankListItem();
 
-            bankInventory.setItem(slot, bankItem.getItem());
+            bankInventory.setItem(slot, showBankItem.getItem());
             bankListGuiClickHolder.put(slot, bank);
-            getBankItems().put(slot, bankItem);
+            getBankItems().put(slot, showBankItem);
             slot++;
         }
     }

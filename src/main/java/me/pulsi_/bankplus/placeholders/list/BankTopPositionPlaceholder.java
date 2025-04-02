@@ -15,9 +15,7 @@ public class BankTopPositionPlaceholder extends BPPlaceholder {
 
     @Override
     public String getPlaceholder(Player p, String target, String identifier) {
-        if (!ConfigValues.isBankTopEnabled())
-            return BPChat.color("&cThe banktop is not enabled!");
-
+        if (!ConfigValues.isBankTopEnabled()) return bankTopNotEnabled;
         return BPBankTop.getPlayerBankTopPosition(p) + "";
     }
 }

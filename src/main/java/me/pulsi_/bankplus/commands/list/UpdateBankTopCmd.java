@@ -12,8 +12,12 @@ import java.util.List;
 
 public class UpdateBankTopCmd extends BPCommand {
 
-    public UpdateBankTopCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public UpdateBankTopCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
+    }
+
+    public UpdateBankTopCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
     }
 
     @Override

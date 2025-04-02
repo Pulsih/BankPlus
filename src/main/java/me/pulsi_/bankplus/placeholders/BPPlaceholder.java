@@ -7,6 +7,9 @@ import java.math.BigDecimal;
 
 public abstract class BPPlaceholder {
 
+    public final String bankTopNotEnabled = "The banktop is not enabled.";
+    public final String bankDoesNotExist = "The selected bank does not exist.";
+
     /**
      * Get the placeholder identifier
      *

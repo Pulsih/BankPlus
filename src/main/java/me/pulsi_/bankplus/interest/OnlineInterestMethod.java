@@ -66,17 +66,17 @@ public class OnlineInterestMethod extends BPInterest.InterestMethod {
 
         if (availableBanks.size() > 1) BPMessages.send(p, MessageValues.getMultiInterestMoney(), BPUtils.placeValues(p, interestAmount));
         else {
-            if (BankUtils.isFull(availableBanks.get(0), p) && !ConfigValues.isGivingInterestOnVaultBalance()) {
-                BPMessages.send(p, MessageValues.getInterestBankFull(), BPUtils.placeValues(p, interestAmount));
+            if (BankUtils.isFull(availableBanks.getFirst(), p) && !ConfigValues.isGivingInterestOnVaultBalance()) {
+                BPMessages.send(p, MessageValues.getInterestBankFull(), BPUtils.placeValues(p, interestAmount), false);
                 return;
             }
 
             if (interestAmount.compareTo(BigDecimal.ZERO) <= 0) { // If interest earned is 0.
-                BPMessages.send(p, MessageValues.getInterestNoMoney(), BPUtils.placeValues(p, interestAmount));
+                BPMessages.send(p, MessageValues.getInterestNoMoney(), BPUtils.placeValues(p, interestAmount), false);
                 return;
             }
 
-            BPMessages.send(p, MessageValues.getInterestMoney(), BPUtils.placeValues(p, interestAmount));
+            BPMessages.send(p, MessageValues.getInterestMoney(), BPUtils.placeValues(p, interestAmount), false);
         }
     }
 }

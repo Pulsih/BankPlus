@@ -14,7 +14,7 @@ public class DebtPlaceholder extends BPPlaceholder {
 
     @Override
     public String getPlaceholder(Player p, String target, String identifier) {
-        if (!BankUtils.exist(target)) return "&cThe selected bank does not exist.";
+        if (!BankUtils.exist(target)) return bankDoesNotExist;
         return getFormat(identifier, BPEconomy.get(target).getDebt(p));
     }
 }

@@ -11,9 +11,9 @@ public class MessageValues {
     private static String interestMoney, interestNoMoney, multiInterestMoney, interestBankFull;
 
     public static void setupValues() {
-        FileConfiguration messages = BankPlus.INSTANCE().getConfigs().getConfig("messages.yml");
-        BPMessages.loadMessages(messages);
+        BPMessages.loadMessages();
 
+        FileConfiguration messages = BankPlus.INSTANCE().getConfigs().getConfig("messages.yml");
         isTitleCustomAmountEnabled = messages.getBoolean("Title-Custom-Transaction.Enabled");
         isInterestBroadcastEnabled = messages.getBoolean("Interest-Broadcast.Enabled");
         customDepositTitle = messages.getString("Title-Custom-Transaction.Title-Deposit");

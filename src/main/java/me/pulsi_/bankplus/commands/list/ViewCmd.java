@@ -23,13 +23,17 @@ import java.util.List;
 
 public class ViewCmd extends BPCommand {
 
-    public ViewCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public ViewCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
+    }
+
+    public ViewCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
     }
 
     @Override
     public List<String> defaultUsage() {
-        return Collections.singletonList("%prefix% &cUsage: &7/bank view [player] <bankName>");
+        return Collections.singletonList("%prefix% Usage: /bank view [player] [bankName]");
     }
 
     @Override
@@ -110,9 +114,7 @@ public class ViewCmd extends BPCommand {
                         );
                     }
 
-                    if (s instanceof Player && ConfigValues.isViewSoundEnabled())
-                        if (!BPUtils.playSound(ConfigValues.getPersonalSound(), (Player) s))
-                            BPLogger.warn("Occurred while trying to play PERSONAL sound for player \"" + s.getName() + "\".");
+                    if (s instanceof Player p && ConfigValues.isViewSoundEnabled()) BPUtils.playSound(ConfigValues.getPersonalSound(), p);
                 });
             }
         };

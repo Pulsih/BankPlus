@@ -13,8 +13,12 @@ import java.util.List;
 
 public class InterestMillisCmd extends BPCommand {
 
-    public InterestMillisCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public InterestMillisCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
+    }
+
+    public InterestMillisCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
     }
 
     @Override

@@ -1,6 +1,8 @@
 package me.pulsi_.bankplus.values;
 
 import me.pulsi_.bankplus.BankPlus;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.List;
@@ -11,7 +13,7 @@ public class MultipleBanksValues {
     private static boolean showNotAvailableBanks;
     private static boolean directlyOpenIf1IsAvailable;
     private static boolean previousItemGlowing, nextItemGlowing;
-    private static String banksGuiTitle;
+    private static Component banksGuiTitle;
     private static String previousItemMaterial, nextItemMaterial, previousItemDisplayname, nextItemDisplayname, fillerMaterial;
     private static List<String> previousItemLore, nextItemLore, autoBanksUnlocker;
     private static int bankListGuiLines, previousItemSlot, nextItemSlot, updateDelay;
@@ -26,7 +28,7 @@ public class MultipleBanksValues {
         autoBanksUnlocker = multipleBanks.getStringList("Auto-Banks-Unlocker");
         previousItemGlowing = multipleBanks.getBoolean("Banks-Gui.Previous-Page.Glowing");
         nextItemGlowing = multipleBanks.getBoolean("Banks-Gui.Next-Page.Glowing");
-        banksGuiTitle = multipleBanks.getString("Banks-Gui.Title");
+        banksGuiTitle = multipleBanks.getComponent("Banks-Gui.Title", MiniMessage.miniMessage());
         previousItemMaterial = multipleBanks.getString("Banks-Gui.Previous-Page.Material");
         nextItemMaterial = multipleBanks.getString("Banks-Gui.Next-Page.Material");
         previousItemDisplayname = multipleBanks.getString("Banks-Gui.Previous-Page.DisplayName");
@@ -66,7 +68,7 @@ public class MultipleBanksValues {
         return nextItemGlowing;
     }
 
-    public static String getBanksGuiTitle() {
+    public static Component getBanksGuiTitle() {
         return banksGuiTitle;
     }
 

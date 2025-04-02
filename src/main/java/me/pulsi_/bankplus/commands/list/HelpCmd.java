@@ -11,8 +11,12 @@ import java.util.List;
 
 public class HelpCmd extends BPCommand {
 
-    public HelpCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public HelpCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
+    }
+
+    public HelpCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
     }
 
     @Override

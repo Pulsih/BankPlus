@@ -14,8 +14,12 @@ import java.util.List;
 
 public class SaveAllDataCmd extends BPCommand {
 
-    public SaveAllDataCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public SaveAllDataCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
+    }
+
+    public SaveAllDataCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
     }
 
     @Override
@@ -62,7 +66,7 @@ public class SaveAllDataCmd extends BPCommand {
                 EconomyUtils.restartSavingInterval();
 
                 if (ConfigValues.isBroadcastingSaves()) BPLogger.info("All player data have been saved!");
-                BPMessages.send(s, "%prefix% &aSuccessfully saved all player data!");
+                BPMessages.send(s, "%prefix% Successfully saved all player data!", false);
             }
         };
     }

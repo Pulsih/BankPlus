@@ -13,8 +13,12 @@ import java.util.List;
 
 public class RestartInterestCmd extends BPCommand {
 
-    public RestartInterestCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public RestartInterestCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
+    }
+
+    public RestartInterestCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
     }
 
     @Override
@@ -63,7 +67,7 @@ public class RestartInterestCmd extends BPCommand {
             @Override
             public void execute() {
                 BankPlus.INSTANCE().getInterest().restartInterest(false);
-                BPMessages.send(s, "%prefix% &aInterest cooldown restarted!");
+                BPMessages.send(s, "%prefix% Interest cooldown restarted!", false);
             }
         };
     }

@@ -15,8 +15,12 @@ import java.util.List;
 
 public class PlaceholdersCmd extends BPCommand {
 
-    public PlaceholdersCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public PlaceholdersCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
+    }
+
+    public PlaceholdersCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
     }
 
     @Override
@@ -62,16 +66,16 @@ public class PlaceholdersCmd extends BPCommand {
                 List<String> placeholders =  BankPlus.INSTANCE().getBpPlaceholders().getRegisteredPlaceholders();
                 int size = placeholders.size();
 
-                BPMessages.send(s, "%prefix% &7Currently registered placeholders &8(&a" + size + "&8)&7:");
+                BPMessages.send(s, "%prefix% Currently registered placeholders <dark_gray>(<aqua>" + size + "</aqua>)</dark_gray>:", false);
 
-                StringBuilder builder = new StringBuilder("  &8* ");
+                StringBuilder builder = new StringBuilder(" <dark_gray>* ");
                 for (int i = 0; i < size; i++) {
-                    builder.append("&8[&a").append(placeholders.get(i));
+                    builder.append("<dark_gray>[<green>").append(placeholders.get(i));
 
-                    if (i + 1 >= size) builder.append("&8]&7.");
-                    else builder.append("&8]&7, ");
+                    if (i + 1 >= size) builder.append("<dark_gray>]<gray>.");
+                    else builder.append("<dark_gray>]<gray>, ");
                 }
-                BPMessages.send(s, builder.toString());
+                BPMessages.send(s, builder.toString(), false);
             }
         };
     }

@@ -2,222 +2,173 @@ package me.pulsi_.bankplus.utils.texts;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.utils.BPLogger;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
 public class BPMessages {
 
+    public static final String DEFAULT_GRADIENT = "<gradient:green:blue:green>";
+
     private static final HashMap<String, List<String>> messages = new HashMap<>();
-    private static final String[] idsToSkip = {
-            "Prefix",
-            "Enable-Missing-Message-Alert",
-            "Title-Custom-Transaction",
-            "Interest-Broadcast"
-    };
 
-    private static String prefix = BPChat.prefix;
+    private static String messagesPrefix = null;
+    private static boolean alertMissingMessages;
 
     /**
-     * Send the desired message to the specified target.
-     * You can choose to send a message from the
-     * messages file using its identifier or a text.
+     * Send the desired message to the receiver.
      *
-     * @param target     The target.
-     * @param identifier The message identifier in the messages file or the text to send.
+     * @param receiver   The receiver.
+     * @param identifier The message identifier in the messages file.
      */
-    public static void send(Player target, String identifier) {
-        send(target, identifier, new String[0]);
+    public static void send(Object receiver, String identifier) {
+        send(receiver, identifier, null);
     }
 
     /**
-     * Send the desired message to the specified target.
-     * You can choose to send a message from the
-     * messages file using its identifier or a text.
-     *
-     * @param target     The target.
-     * @param identifier The message identifier in the messages file or the text to send.
-     * @param replacers  A list of possible replacements.
-     */
-    public static void send(Player target, String identifier, List<String> replacers) {
-        send(target, identifier, replacers.toArray(new String[0]));
-    }
-
-    /**
-     * Send the desired message to the specified target.
-     * You can choose to send a message from the
-     * messages file using its identifier or a text.
-     *
-     * @param target     The target.
-     * @param identifier The message identifier in the messages file or the text to send.
-     * @param replacers  A list of possible replacements.
-     */
-    public static void send(Player target, String identifier, String... replacers) {
-        if (target == null || identifier == null || identifier.isEmpty()) return;
-
-        List<String> texts = new ArrayList<>();
-        if (!messages.containsKey(identifier)) texts.add(identifier);
-        else {
-            for (String message : messages.get(identifier))
-                if (!message.isEmpty()) texts.add(message);
-        }
-
-        for (String message : applyReplacers(texts, replacers)) target.sendMessage(format(target, message));
-    }
-
-    /**
-     * Send the desired message to the specified target.
-     * You can choose to send a message from the
-     * messages file using its identifier or a text.
-     *
-     * @param target     The target.
-     * @param identifier The message identifier in the messages file or the text to send.
-     */
-    public static void send(CommandSender target, String identifier) {
-        send(target, identifier, new String[0]);
-    }
-
-    /**
-     * Send the desired message to the specified target.
-     * You can choose to send a message from the
-     * messages file using its identifier or a text.
-     *
-     * @param target     The target.
-     * @param identifier The message identifier in the messages file or the text to send.
-     * @param replacers  A list of possible replacements.
-     */
-    public static void send(CommandSender target, String identifier, List<String> replacers) {
-        send(target, identifier, replacers.toArray(new String[0]));
-    }
-
-    /**
-     * Send the desired message to the specified target.
-     * You can choose to send a message from the
-     * messages file using its identifier or a text.
-     *
-     * @param target     The target.
-     * @param identifier The message identifier in the messages file or the text to send.
-     * @param replacers  A list of possible replacements.
-     */
-    public static void send(CommandSender target, String identifier, String... replacers) {
-        if (target == null || identifier == null || identifier.isEmpty()) return;
-
-        List<String> texts = new ArrayList<>();
-        if (!messages.containsKey(identifier)) texts.add(identifier);
-        else {
-            for (String message : messages.get(identifier))
-                if (!message.isEmpty()) texts.add(message);
-        }
-
-        for (String message : applyReplacers(texts, replacers)) target.sendMessage(format(target, message));
-    }
-
-    /**
-     * Return a list of the input text list with all the replacers applied.
+     * Send the desired message to the specified receiver.
      * <p>
-     * The BankPlus replacer has the following format: "textToReplace$replacement"
+     * Put a negative boolean somewhere in the replacers to send the whole
+     * identifier as message, instead of searching it in the messages file.
+     * <p>
+     * If the message is not from the messages file, a default gradient will be applied.
      *
-     * @param texts     The text list input.
-     * @param replacers A list of possible replacements.
-     * @return A copy of the input list with replacers applied.
+     * @param receiver   The receiver (Player or CommandSender).
+     * @param identifier The message identifier in the messages file.
+     * @param replacers  A list of possible replacements.
      */
-    public static List<String> applyReplacers(List<String> texts, String... replacers) {
-        if (replacers == null || replacers.length == 0) return texts;
+    public static void send(Object receiver, String identifier, Object... replacers) {
+        if (receiver == null || identifier == null || identifier.isEmpty()) return;
 
-        List<String> replacedTexts = new ArrayList<>();
-        for (String message : texts) {
-            if (message == null || message.isEmpty()) continue;
-
-            for (String replacer : replacers) {
-                if (replacer == null || !replacer.contains("$")) continue;
-
-                String[] split = replacer.split("\\$");
-                message = message.replace(split[0], split[1]);
-            }
-            replacedTexts.add(message);
+        boolean search = searchInMessages(replacers);
+        if (search && !messages.containsKey(identifier)) {
+            if (alertMissingMessages)
+                sendMessage(
+                        receiver,
+                        "%prefix% <red>The message \"" + identifier + "\" is missing in the messages file!"
+                );
+            return;
         }
-        return replacedTexts;
+
+        for (String message : getReplacedMessages(identifier, search, replacers)) sendMessage(receiver, message);
     }
 
     /**
-     * Load all the message values from the given config file.
+     * Get a list of all messages from the identifier, with all the replacement applied.
      *
-     * @param config The messages config file.
+     * @param identifier       The message identifier.
+     * @param searchInMessages Search the id in the messages file or not.
+     * @param replacers        A list of possible replacements.
+     * @return A list of messages replaced.
      */
-    public static void loadMessages(FileConfiguration config) {
+    public static List<String> getReplacedMessages(String identifier, boolean searchInMessages, Object... replacers) {
+        List<String> messagesToSend = new ArrayList<>();
+        if (searchInMessages) messagesToSend.addAll(messages.get(identifier));
+        else messagesToSend.add(DEFAULT_GRADIENT + identifier);
+
+        List<String> finalMessages = new ArrayList<>();
+        for (String message : messagesToSend) {
+            if (replacers != null) {
+                for (Object object : replacers) {
+                    if (object == null) continue;
+                    List<String> possibleReplacers = new ArrayList<>();
+
+                    if (!(object instanceof Collection)) possibleReplacers.add(object.toString());
+                    else for (Object collectionObject : ((Collection<?>) object).toArray())
+                        possibleReplacers.add(collectionObject.toString());
+
+                    for (String replacer : possibleReplacers) {
+                        if (!replacer.contains("$")) continue;
+
+                        String[] split = replacer.split("\\$");
+                        String target = split[0], replacement = split[1];
+                        message = message.replace(target, replacement);
+                    }
+                }
+            }
+            if (!message.isEmpty()) finalMessages.add(message);
+        }
+        return finalMessages;
+    }
+
+    public static void loadMessages() {
         messages.clear();
 
-        for (String identifier : config.getKeys(false))
-            if (!isIgnoredId(identifier)) messages.put(identifier, getPossibleMessages(config, identifier));
+        FileConfiguration config = BankPlus.INSTANCE().getConfigs().getConfig("messages.yml");
+        for (String identifier : config.getKeys(false)) {
+            List<String> configMessages = config.getStringList(identifier);
 
-        String prefixString = config.getString("Prefix");
-        prefix = prefixString == null ? BPChat.prefix : prefixString;
-    }
+            if (configMessages.isEmpty()) {
+                String singleMessage = config.getString(identifier);
+                if (singleMessage != null && !singleMessage.isEmpty()) configMessages.add(singleMessage);
+            }
 
-    /**
-     * Get a list of possible messages from the given identifier.
-     *
-     * @param section The section of the messages.yml.
-     * @param id      The identifier name.
-     * @return A list of messages.
-     */
-    public static List<String> getPossibleMessages(ConfigurationSection section, String id) {
-        List<String> configMessages = section.getStringList(id);
-        if (configMessages.isEmpty()) {
-            String singleMessage = section.getString(id);
-            if (singleMessage != null && !singleMessage.isEmpty()) configMessages.add(singleMessage);
+            messages.put(identifier, configMessages);
         }
-        return configMessages;
+
+        if (!messages.containsKey("Prefix")) messagesPrefix = BPChat.PREFIX;
+        else {
+            List<String> prefixes = messages.get("Prefix");
+            messagesPrefix = prefixes.isEmpty() ? BPChat.PREFIX : prefixes.getFirst();
+        }
+
+        alertMissingMessages = config.getBoolean("Enable-Missing-Message-Alert");
     }
 
     /**
-     * Return the specified message formatted with the existing placeholders.
+     * Simplify the method to send messages to the receiver (must be
+     * Player or CommandSender), formatting and placing values.
      *
-     * @param text The origin text.
-     * @return The formatted message.
+     * @param receiver The message receiver.
+     * @param message  The message.
      */
-    public static String format(String text) {
-        return BPChat.color(text.replace("%prefix%", prefix));
+    private static void sendMessage(Object receiver, String message) {
+        message = applyMessagesPrefix(message);
+
+        if (receiver instanceof Player player) {
+            if (BankPlus.INSTANCE().isPlaceholderApiHooked())
+                message = PlaceholderAPI.setPlaceholders(player, message);
+            player.sendMessage(BPChat.color(message));
+            return;
+        }
+
+        if (receiver instanceof CommandSender sender) {
+            sender.sendMessage(BPChat.color(message));
+            return;
+        }
+
+        BPLogger.error("Could not send message because receiver is neither a Player or CommandSender: " + receiver.toString());
     }
 
     /**
-     * Return the specified message formatted with the existing placeholders.
+     * Method to simplify the method to replace the prefix with the
+     * one the user set in messages.yml to the specified message.
      *
-     * @param p    The player, for placeholderApi placeholders.
-     * @param text The origin text.
-     * @return The formatted message.
+     * @param message The message where to apply the prefix.
+     * @return The message with %prefix% replaced.
      */
-    public static String format(Player p, String text) {
-        text = BPChat.color(text.replace("%prefix%", prefix));
-        return BankPlus.INSTANCE().isPlaceholderApiHooked() ? PlaceholderAPI.setPlaceholders(p, text) : text;
+    public static String applyMessagesPrefix(String message) {
+        return message.replace("%prefix%", messagesPrefix);
     }
 
     /**
-     * Return the specified message formatted with the existing placeholders.
+     * Method to check if inside the given replacers, there is a negative boolean,
+     * sending the whole identifier as message instead of searching it in the messages file.
      *
-     * @param s    The command sender.
-     * @param text The origin text.
-     * @return The formatted message.
+     * @param objects The list of replacers.
+     * @return true if the identifier is to search in the messages file, false if it needs to be sent entirely.
      */
-    public static String format(CommandSender s, String text) {
-        text = BPChat.color(text.replace("%prefix%", prefix));
-        return s instanceof Player ? format((Player) s, text) : text;
-    }
+    private static boolean searchInMessages(Object... objects) {
+        if (objects == null) return true;
 
-    /**
-     * Check if the specified id is to be skipped. (Example: "Prefix")
-     *
-     * @param id The id to check.
-     * @return true if is skippable, false otherwise.
-     */
-    public static boolean isIgnoredId(String id) {
-        for (String idToSkip : idsToSkip)
-            if (id.equals(idToSkip)) return true;
-        return false;
+        for (Object object : objects)
+            if (object instanceof Boolean && !((boolean) object)) return false;
+        return true;
     }
 }

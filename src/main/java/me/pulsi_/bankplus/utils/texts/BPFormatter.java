@@ -4,6 +4,7 @@ import me.pulsi_.bankplus.values.ConfigValues;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
 
 public class BPFormatter {
 
@@ -16,6 +17,20 @@ public class BPFormatter {
     private static final int limit = order.length - 1;
 
     /**
+     * Return a percentage removing unnecessary 0 in the decimals part.
+     * Example: 0.0%, 43.0%, 12.50% -> 0%, 43%, 12.5%
+     *
+     * @param amount The amount.
+     * @return A string.
+     */
+    public static String formatPercentage(double amount) {
+        DecimalFormat f = new DecimalFormat("#");
+        f.setMaximumFractionDigits(2);
+        f.setMinimumFractionDigits(0);
+        return f.format(amount);
+    }
+
+    /**
      * Return numbers like as 23.54k, 765.536M, 91.3T.
      * This formatting method correspond to the placeholder %balance_formatted%.
      *
@@ -24,8 +39,9 @@ public class BPFormatter {
      */
     public static String formatPrecise(BigDecimal amount) {
         BigDecimal thousand = new BigDecimal(1000), scale = thousand;
-        int count = 0;
+        if (amount.compareTo(thousand) < 0) return amount.toPlainString();
 
+        int count = 0;
         while (amount.compareTo(scale) >= 0 && count < limit) {
             scale = scale.multiply(thousand);
             count++;
@@ -43,8 +59,9 @@ public class BPFormatter {
      */
     public static String formatLong(BigDecimal amount) {
         BigDecimal thousand = new BigDecimal(1000), scale = thousand;
-        int count = 0;
+        if (amount.compareTo(thousand) < 0) return amount.toPlainString();
 
+        int count = 0;
         while (amount.compareTo(scale) >= 0 && count < limit) {
             scale = scale.multiply(thousand);
             count++;
@@ -69,17 +86,16 @@ public class BPFormatter {
             decimals = split[1];
         }
 
-        String thousands = ConfigValues.getThousandsSeparator(), tens = ConfigValues.getDecimalsSeparator();
         StringBuilder builder = new StringBuilder();
         for (int i = numbers.length() - 1, count = 0; i >= 0; i--, count++) {
             if (count >= 3) {
-                builder.append(thousands);
+                builder.append(ConfigValues.getThousandsSeparator());
                 count = 0;
             }
             builder.append(numbers.charAt(i));
         }
         builder.reverse();
-        result = builder + (decimals.isEmpty() ? "" : (tens + decimals));
+        result = builder + (decimals.isEmpty() ? "" : (ConfigValues.getDecimalsSeparator() + decimals));
 
         return result;
     }

@@ -53,8 +53,8 @@ public class BPBankTop {
             if (!ConfigValues.isBankTopUpdateBroadcastEnabled()) return;
 
             String message = ConfigValues.getBankTopUpdateBroadcastMessage();
-            if (!ConfigValues.isBankTopUpdateBroadcastSilentConsole()) BPLogger.log(message);
-            for (Player p : Bukkit.getOnlinePlayers()) BPMessages.send(p, message);
+            if (!ConfigValues.isBankTopUpdateBroadcastSilentConsole()) BPLogger.log(BPMessages.applyMessagesPrefix(message));
+            for (Player p : Bukkit.getOnlinePlayers()) BPMessages.send(p, message, false);
         });
     }
 

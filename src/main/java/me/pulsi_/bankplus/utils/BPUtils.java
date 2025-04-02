@@ -8,12 +8,10 @@ import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.ConfigValues;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.title.Title;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.milkbowl.vault.permission.Permission;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Sound;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -22,8 +20,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 public class BPUtils {
@@ -85,94 +85,149 @@ public class BPUtils {
         return false;
     }
 
-    public static void sendTitle(String title, Player p) {
-        if (title == null || p == null) return;
-
-        title = BPMessages.format(title);
-        if (title.contains(",")) {
-            String[] titles = title.split(",");
-            String title1 = titles[0], title2 = titles[1];
-
-            if (titles.length == 2) p.sendTitle(title1, title2);
-            else {
-                int[] values = {20, 20, 20};
-                boolean error = false;
-
-                for (int i = 2; i < titles.length; i++) {
-                    try {
-                        values[i - 2] = Integer.parseInt(titles[i]);
-                    } catch (NumberFormatException e) {
-                        error = true;
-                    }
-                }
-                if (error)
-                    BPLogger.warn("Invalid number in the title fades values! Please correct it as soon as possible! (Title: " + title + "&a)");
-
-                try {
-                    p.sendTitle(title1, title2, values[0], values[1], values[2]);
-                } catch (NoSuchMethodError e) {
-                    p.sendTitle(title1, title2);
-                }
-            }
-        } else p.sendTitle(title, "");
+    /**
+     * Tries to convert the specified string to a number, or returns
+     * the fallback value in case the string is not a valid number.
+     *
+     * @param number The number string to convert.
+     * @param fallBack The fall-back value in case the string is not a valid number.
+     * @return The converted string or fall-back.
+     */
+    public static Number convertToNumber(String number, Number fallBack) {
+        return convertToNumber(number, fallBack, null);
     }
 
     /**
-     * Play a sound for that player.
+     * Tries to convert the specified string to a number, or returns
+     * the fallback value in case the string is not a valid number.
      *
-     * @param soundString The sound string.
-     * @param p           The player target.
-     * @return Return true on successfully play.
+     * @param number The number string to convert.
+     * @param fallBack The fall-back value in case the string is not a valid number.
+     * @param errorMessage The message to show in the console warning.
+     * @return The converted string or fall-back.
      */
-    public static boolean playSound(String soundString, Player p) {
-        if (soundString == null || soundString.isEmpty()) {
-            BPLogger.warn("No sound have been specified.");
-            return false;
+    public static <T extends Number> T convertToNumber(String number, T fallBack, String errorMessage) {
+        try {
+            if (fallBack instanceof Integer) {
+                return (T) Integer.valueOf(number);
+            } else if (fallBack instanceof Double) {
+                return (T) Double.valueOf(number);
+            } else if (fallBack instanceof Float) {
+                return (T) Float.valueOf(number);
+            } else if (fallBack instanceof Long) {
+                return (T) Long.valueOf(number);
+            } else if (fallBack instanceof Short) {
+                return (T) Short.valueOf(number);
+            } else if (fallBack instanceof Byte) {
+                return (T) Byte.valueOf(number);
+            }
+        } catch (NumberFormatException e) {
+            if (errorMessage != null) BPLogger.warn(errorMessage);
+        }
+        return fallBack;
+    }
+
+    /**
+     * Send the specified title to the player, analyzing and splitting the title in different values.
+     * <p>
+     * The format is: Title,Subtitle,fadeInTicks,stayTicks,fadeOutTicks.
+     *
+     * @param titleString The title format.
+     * @param p           The receiver of the title.
+     */
+    public static void sendTitle(String titleString, Player p) {
+        if (titleString == null || p == null) return;
+
+        MiniMessage mm = MiniMessage.miniMessage();
+        Component title, subtitle;
+        int fadeIn = 20, stay = 20, fadeOut = 20;
+
+        if (!titleString.contains(",")) {
+            title = mm.deserialize(titleString);
+            subtitle = mm.deserialize(" ");
+        } else {
+            String[] values = titleString.split(",");
+            int l = values.length;
+
+            title = mm.deserialize(values[0]);
+            subtitle = mm.deserialize(values[1]);
+            if (l > 2) fadeIn = convertToNumber(values[2], fadeIn, "The fadeIn value in the title \"" + titleString + "\" is invalid.");
+            if (l > 3) stay = convertToNumber(values[3], stay, "The stay value in the title \"" + titleString + "\" is invalid.");
+            if (l > 4) fadeOut = convertToNumber(values[4], fadeOut, "The fadeOut value in the title \"" + titleString + "\" is invalid.");
         }
 
-        String[] values;
-        if (soundString.contains(",")) values = soundString.split(",");
-        else values = new String[]{soundString};
+        p.showTitle(Title.title(title, subtitle, Title.Times.times(toTicks(fadeIn), toTicks(stay), toTicks(fadeOut))));
+    }
 
-        Sound sound;
+    /**
+     * Play the specified title to the player, analyzing and splitting the sound in different values.
+     * <p>
+     * The format is: Sound,Volume,Pitch.
+     *
+     * @param soundString The sound format.
+     * @param p           The receiver of the sound.
+     */
+    public static void playSound(String soundString, Player p) {
+        if (soundString == null || p == null) return;
+
+        String soundName;
         float volume = 5, pitch = 1;
 
+        // Catch IllegalArgumentException for registry
+        if (!soundString.contains(",")) soundName = soundString;
+        else {
+            String[] values = soundString.split(",");
+            int l = values.length;
+
+            soundName = values[0]; // If there is a "," there will be 2 values.
+            volume = convertToNumber(values[1], volume, "The volume value in the sound \"" + soundString + "\" is invalid.");
+            if (l > 2) pitch = convertToNumber(values[2], pitch, "The pitch value in the sound \"" + soundString + "\" is invalid.");
+        }
+
+        Sound sound;
         try {
-            sound = Sound.valueOf(values[0]);
+            sound = Registry.SOUNDS.get(NamespacedKey.minecraft(soundName));
         } catch (IllegalArgumentException e) {
-            BPLogger.warn("\"" + values[0] + "\" is an invalid sound enum, change it in config.yml searching the correct enum name based on your server version. (This is not an error)");
-            return false;
+            BPLogger.warn("The sound \"" + soundString + "\" has an invalid sound namespacekey.");
+            return;
         }
 
-        if (values.length > 1) {
-            try {
-                volume = Float.parseFloat(values[1]);
-            } catch (NumberFormatException e) {
-                BPLogger.warn("\"" + values[1] + "\" is not a valid volume number.");
-            }
-        }
-        if (values.length > 2) {
-            try {
-                pitch = Float.parseFloat(values[2]);
-            } catch (NumberFormatException e) {
-                BPLogger.warn("\"" + values[2] + "\" is not a valid pitch number.");
-            }
-        }
+        if (sound != null) p.playSound(p.getLocation(), sound, volume, pitch);
+        else BPLogger.warn("The sound \"" + soundString + "\" has an invalid sound namespacekey.");
+    }
 
-        p.playSound(p.getLocation(), sound, volume, pitch);
-        return true;
+    /**
+     * Create a Duration instance of delay in ticks.
+     * @param ticks The ticks.
+     * @return The duration instance in ticks.
+     */
+    public static Duration toTicks(int ticks) {
+        return Duration.ofMillis(ticks * 50L);
     }
 
     /**
      * Convert a list of string to a list of MiniMessage components.
      *
      * @param list The list to convert.
-     * @return A list of Components.
+     * @return A list of components.
      */
     public static List<Component> stringListToComponentList(List<String> list) {
         List<Component> result = new ArrayList<>();
         MiniMessage mm = MiniMessage.miniMessage();
         for (String line : list) result.add(mm.deserialize(line));
+        return result;
+    }
+
+    /**
+     * Convert a list of MiniMessage components to a list of strings.
+     *
+     * @param list The list to convert.
+     * @return A list of string.
+     */
+    public static List<String> componentListToStringList(List<Component> list) {
+        List<String> result = new ArrayList<>();
+        MiniMessage mm = MiniMessage.miniMessage();
+        for (Component line : list) result.add(mm.serialize(line));
         return result;
     }
 

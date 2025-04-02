@@ -50,7 +50,6 @@ public class BPPlaceholders extends PlaceholderExpansion {
             if (identifier.toLowerCase().startsWith(placeholder.getIdentifier().toLowerCase()))
                 return placeholder.getPlaceholder(p, target, identifier);
         }
-
         return null;
     }
 

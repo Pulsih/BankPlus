@@ -13,8 +13,12 @@ import java.util.List;
 
 public class GiveInterestCmd extends BPCommand {
 
-    public GiveInterestCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public GiveInterestCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
+    }
+
+    public GiveInterestCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
     }
 
     @Override
@@ -62,7 +66,7 @@ public class GiveInterestCmd extends BPCommand {
         return new BPCmdExecution() {
             @Override
             public void execute() {
-                BPMessages.send(s, "%prefix% &2Successfully given the interest! The countdown has been restarted.");
+                BPMessages.send(s, "%prefix% Successfully given the interest! The countdown has been restarted.", false);
                 BankPlus.INSTANCE().getInterest().giveInterestToEveryone();
             }
         };

@@ -3,11 +3,7 @@ package me.pulsi_.bankplus.external;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.utils.texts.BPChat;
 import me.pulsi_.bankplus.values.ConfigValues;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -19,18 +15,24 @@ public class UpdateChecker implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
-        if (!ConfigValues.isUpdateCheckerEnabled() || (!p.isOp() && !p.hasPermission("bankplus.notify")) || BankPlus.INSTANCE().isUpdated()) return;
+        if (!ConfigValues.isUpdateCheckerEnabled() || (!p.isOp() && !p.hasPermission("bankplus.notify"))) return;
 
-        TextComponent text = new TextComponent(BPChat.color("&a&lBank&9&lPlus &aNew update available! "));
-        TextComponent button = new TextComponent(BPChat.color("&9&l[CLICK HERE]"));
-        button.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.spigotmc.org/resources/%E2%9C%A8-bankplus-%E2%9C%A8.93130/"));
-        button.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click here to download it!").color(ChatColor.GRAY).create()));
-        text.addExtra(button);
+        String message;
+        if (!BankPlus.INSTANCE().isUpdated())
+            message = BPChat.PREFIX + " <green>A new update is available! " +
+                    "<hover:show_text:'<aqua>Click to download it!'>" +
+                    "<click:open_url:https://www.spigotmc.org/resources/%E2%9C%A8-bankplus-%E2%9C%A8.93130/>" +
+                    "<aqua>[INFO]";
+        else if (BankPlus.isAlphaVersion())
+            message = BPChat.PREFIX + " <aqua>You are using an alpha " +
+                    "version of the plugin, if you find any bug make sure to report it in my discord server. Thanks! :)";
+        else message = null;
 
-        Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> {
-            p.sendMessage("");
-            p.spigot().sendMessage(text);
-            p.sendMessage("");
-        }, 80);
+        if (message != null)
+            Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> {
+                p.sendMessage(" ");
+                p.sendMessage(MiniMessage.miniMessage().deserialize(message));
+                p.sendMessage(" ");
+            }, 80);
     }
 }

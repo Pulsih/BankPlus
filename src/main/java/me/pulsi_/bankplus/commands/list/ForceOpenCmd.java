@@ -16,13 +16,17 @@ import java.util.List;
 
 public class ForceOpenCmd extends BPCommand {
 
-    public ForceOpenCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public ForceOpenCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
+    }
+
+    public ForceOpenCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
     }
 
     @Override
     public List<String> defaultUsage() {
-        return Collections.singletonList("%prefix% &cUsage: &7/bank forceopen [player] <bankName>");
+        return Collections.singletonList("%prefix% Usage: /bank forceopen [player] [bankName]");
     }
     @Override
     public int defaultConfirmCooldown() {

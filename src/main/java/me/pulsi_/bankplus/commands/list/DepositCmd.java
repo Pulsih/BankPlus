@@ -21,13 +21,17 @@ import java.util.List;
 
 public class DepositCmd extends BPCommand {
 
-    public DepositCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public DepositCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
+    }
+
+    public DepositCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
     }
 
     @Override
     public List<String> defaultUsage() {
-        return Collections.singletonList("%prefix% &cUsage: &7/bank deposit [amount/half/all] <bankName>");
+        return Collections.singletonList("%prefix% Usage: /bank deposit [amount/half/all] [bankName]");
     }
 
     @Override
@@ -63,8 +67,7 @@ public class DepositCmd extends BPCommand {
     @Override
     public BPCmdExecution onExecution(CommandSender s, String[] args) {
         String amount = args[1].toLowerCase();
-        if (!amount.equals("all") && !amount.equals("half") && BPUtils.isInvalidNumber(amount, s))
-            return BPCmdExecution.invalidExecution();
+        if (BPUtils.isInvalidNumber(amount, s)) return BPCmdExecution.invalidExecution();
 
         Bank bank = BankUtils.getBank(getPossibleBank(args, 2));
         if (!BankUtils.exist(bank, s)) return BPCmdExecution.invalidExecution();
@@ -75,24 +78,27 @@ public class DepositCmd extends BPCommand {
             return BPCmdExecution.invalidExecution();
         }
 
-
         return new BPCmdExecution() {
             @Override
             public void execute() {
-                Economy vault = BankPlus.INSTANCE().getVaultEconomy();
-                BPEconomy economy = bank.getBankEconomy();
-                switch (amount) {
-                    case "all":
-                        economy.deposit(p, BigDecimal.valueOf(vault.getBalance(p)));
-                        break;
+                BigDecimal result, h = BigDecimal.valueOf(100);
+                if (!amount.contains("%")) result = new BigDecimal(amount);
+                else {
+                    BigDecimal percentage = new BigDecimal(amount.replace("%", ""));
 
-                    case "half":
-                        economy.deposit(p, BigDecimal.valueOf(vault.getBalance(p) / 2));
-                        break;
+                    // If the percentage is <= 0 or > 100 return.
+                    if (percentage.compareTo(BigDecimal.ZERO) <= 0 || percentage.compareTo(h) > 0) {
+                        BPMessages.send(p, "Invalid-Number");
+                        return;
+                    }
 
-                    default:
-                        economy.deposit(p, BPFormatter.getStyledBigDecimal(amount));
+                    // Start from the player wallet, then modify it if it's not 100%.
+                    result = BigDecimal.valueOf(BankPlus.INSTANCE().getVaultEconomy().getBalance(p));
+
+                    // Do that only if the % is < 100% to avoid odd numbers bug.
+                    if (percentage.compareTo(h) < 0) result = result.divide(h).multiply(percentage);
                 }
+                bank.getBankEconomy().deposit(p, result);
             }
         };
     }
@@ -100,7 +106,7 @@ public class DepositCmd extends BPCommand {
     @Override
     public List<String> tabCompletion(CommandSender s, String[] args) {
         if (args.length == 2)
-            return BPArgs.getArgs(args, "1", "2", "3");
+            return BPArgs.getArgs(args, "1", "2", "3", "10%", "20%");
 
         if (args.length == 3)
             return BPArgs.getArgs(args, BankUtils.getAvailableBankNames((Player) s));

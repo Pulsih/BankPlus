@@ -18,13 +18,17 @@ import java.util.List;
 
 public class RemoveCmd extends BPCommand {
 
-    public RemoveCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public RemoveCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
+    }
+
+    public RemoveCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
     }
 
     @Override
     public List<String> defaultUsage() {
-        return Collections.singletonList("%prefix% &cUsage: &7/bank remove [player] [amount] <bankName>");
+        return Collections.singletonList("%prefix% Usage: /bank remove [player] [amount] [bankName]");
     }
 
     @Override

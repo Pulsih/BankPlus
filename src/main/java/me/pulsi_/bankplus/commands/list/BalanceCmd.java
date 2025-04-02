@@ -20,13 +20,17 @@ import java.util.List;
 
 public class BalanceCmd extends BPCommand {
 
-    public BalanceCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public BalanceCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
+    }
+
+    public BalanceCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
     }
 
     @Override
     public List<String> defaultUsage() {
-        return Collections.singletonList("%prefix% &cUsage: &7/bank balance <bankName>");
+        return Collections.singletonList("%prefix% Usage: /bank balance [bankName]");
     }
 
     @Override
@@ -91,7 +95,7 @@ public class BalanceCmd extends BPCommand {
                             BPUtils.placeValues(p, BPEconomy.getBankBalancesSum(p))
                     );
                 else {
-                    Bank bank = banks.get(0);
+                    Bank bank = banks.getFirst();
                     BPMessages.send(
                             p,
                             "Personal-Bank",
@@ -99,9 +103,7 @@ public class BalanceCmd extends BPCommand {
                     );
                 }
 
-                if (ConfigValues.isViewSoundEnabled())
-                    if (!BPUtils.playSound(ConfigValues.getPersonalSound(), (Player) s))
-                        BPLogger.warn("Occurred while trying to play PERSONAL sound for player \"" + s.getName() + "\".");
+                if (ConfigValues.isViewSoundEnabled()) BPUtils.playSound(ConfigValues.getPersonalSound(), p);
             }
         };
     }

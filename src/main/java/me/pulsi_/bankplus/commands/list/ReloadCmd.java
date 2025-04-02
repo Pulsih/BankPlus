@@ -12,8 +12,12 @@ import java.util.List;
 
 public class ReloadCmd extends BPCommand {
 
-    public ReloadCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public ReloadCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
+    }
+
+    public ReloadCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
     }
 
     @Override
@@ -57,12 +61,11 @@ public class ReloadCmd extends BPCommand {
             @Override
             public void execute() {
                 long time = System.currentTimeMillis();
-                BPMessages.send(s, "%prefix% &aThe plugin will now try to reload...");
+                BPMessages.send(s, "%prefix% The plugin will now try to reload...", false);
 
                 boolean reloaded = BankPlus.INSTANCE().getDataManager().reloadPlugin();
-                if (reloaded) BPMessages.send(s, "%prefix% &2Plugin successfully reloaded! &8(&b" + (System.currentTimeMillis() - time) + "ms&8)");
-                else BPMessages.send(s, "%prefix% &cThe plugin may not have fully reloaded due to an error, please check the console for more info.");
-
+                if (reloaded) BPMessages.send(s, "%prefix% Plugin successfully reloaded! <dark_gray>(<aqua>" + (System.currentTimeMillis() - time) + "ms</aqua>)", false);
+                else BPMessages.send(s, "%prefix% <red>The plugin may not have fully reloaded due to an error, please check the console for more info.", false);
             }
         };
     }

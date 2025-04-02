@@ -17,13 +17,17 @@ import java.util.*;
 
 public class GiveRequiredItemsCmd extends BPCommand {
 
-    public GiveRequiredItemsCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public GiveRequiredItemsCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
+    }
+
+    public GiveRequiredItemsCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
     }
 
     @Override
     public List<String> defaultUsage() {
-        return Collections.singletonList("%prefix% &cUsage: &7/bank giveRequiredItems <player> <bankName> <bankLevel> [itemName/all]");
+        return Collections.singletonList("%prefix% Usage: /bank giveRequiredItems <player> [bankName] [bankLevel] [itemName/all]");
     }
 
     @Override

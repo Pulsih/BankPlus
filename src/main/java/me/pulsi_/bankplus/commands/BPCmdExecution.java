@@ -15,7 +15,6 @@ public abstract class BPCmdExecution {
         BPCmdExecution execution = new BPCmdExecution() {
             @Override
             public void execute() {
-
             }
         };
         execution.executionType = ExecutionType.INVALID_EXECUTION;

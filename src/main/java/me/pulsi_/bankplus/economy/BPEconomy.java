@@ -572,10 +572,7 @@ public class BPEconomy {
         replacers.addAll(BPUtils.placeValues(taxes, "taxes"));
         BPMessages.send(p, "Success-Deposit", replacers);
 
-        if (ConfigValues.isDepositSoundEnabled()) {
-            if (!BPUtils.playSound(ConfigValues.getDepositSound(), p))
-                BPLogger.warn("Occurred while trying to play DEPOSIT sound for player \"" + p.getName() + "\".");
-        }
+        if (ConfigValues.isDepositSoundEnabled()) BPUtils.playSound(ConfigValues.getDepositSound(), p);
 
         afterTransactionEvent(p, TransactionType.DEPOSIT, amount);
     }
@@ -617,10 +614,7 @@ public class BPEconomy {
         replacers.addAll(BPUtils.placeValues(taxes, "taxes"));
         BPMessages.send(p, "Success-Withdraw", replacers);
 
-        if (ConfigValues.isWithdrawSoundEnabled()) {
-            if (!BPUtils.playSound(ConfigValues.getWithdrawSound(), p))
-                BPLogger.warn("Occurred while trying to play WITHDRAW sound for player \"" + p.getName() + "\".");
-        }
+        if (ConfigValues.isWithdrawSoundEnabled()) BPUtils.playSound(ConfigValues.getWithdrawSound(), p);
 
         afterTransactionEvent(p, TransactionType.WITHDRAW, amount);
     }

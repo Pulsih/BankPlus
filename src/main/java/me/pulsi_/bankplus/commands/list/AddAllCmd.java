@@ -21,13 +21,17 @@ import java.util.List;
 
 public class AddAllCmd extends BPCommand {
 
-    public AddAllCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public AddAllCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
+    }
+
+    public AddAllCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
     }
 
     @Override
     public List<String> defaultUsage() {
-        return Collections.singletonList("%prefix% &cUsage: &7/bank addall [amount] <bankName>");
+        return Collections.singletonList("%prefix% Usage: /bank addall [amount] [bankName]");
     }
 
     @Override
@@ -37,7 +41,7 @@ public class AddAllCmd extends BPCommand {
 
     @Override
     public List<String> defaultConfirmMessage() {
-        return Collections.singletonList("%prefix% &7Type the command again within 5 seconds to add to every online player (%server_online% players) the specified amount.");
+        return Collections.singletonList("%prefix% Type the command again within 5 seconds to add to every online player (%server_online% players) the specified amount.");
     }
 
     @Override
@@ -71,7 +75,7 @@ public class AddAllCmd extends BPCommand {
         return new BPCmdExecution() {
             @Override
             public void execute() {
-                BPMessages.send(s, "%prefix% &aSuccessfully added &f" + amount + " &amoney to all online players!");
+                BPMessages.send(s, "%prefix% Successfully added <white>" + amount + "</white> money to all online players!");
                 addAll(Bukkit.getOnlinePlayers(), new BigDecimal(amount), BPEconomy.get(bankName));
             }
         };
@@ -89,7 +93,7 @@ public class AddAllCmd extends BPCommand {
 
     /**
      * Method to add to each online player the selected amount, split
-     * the task every 80 players to avoid freezing in bigger servers.
+     * the task every 50 players to avoid freezing in bigger servers.
      *
      * @param onlinePlayers The initial online players list.
      * @param amount        The selected amount to add.
@@ -98,9 +102,9 @@ public class AddAllCmd extends BPCommand {
     private void addAll(Collection<? extends Player> onlinePlayers, BigDecimal amount, BPEconomy economy) {
         List<Player> copy = new ArrayList<>(onlinePlayers);
 
-        for (int i = 0; i < 80; i++) {
+        for (int i = 0; i < 50; i++) {
             if (copy.isEmpty()) return;
-            economy.addBankBalance(copy.remove(0), amount);
+            economy.addBankBalance(copy.removeFirst(), amount);
         }
 
         Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> addAll(copy, amount, economy), 1);

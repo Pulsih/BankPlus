@@ -160,24 +160,24 @@ General-Settings:
     Enabled: true
     # In seconds, put 0 to disable the delay.
     Delay: 2
-    Message: "%prefix% &aYou have earned &f%amount% money &awhile being offline!"
+    Message: "%prefix% <green>You have earned <white>%amount% money</white> while being offline!"
 
   Withdraw-Sound:
     Enabled: true
     # Sound-Type,Volume,Pitch.
-    Sound: "ENTITY_EXPERIENCE_ORB_PICKUP,5,1"
+    Sound: "entity.experience_orb.pickup,5,1"
 
   Deposit-Sound:
     Enabled: true
-    Sound: "ENTITY_EXPERIENCE_ORB_PICKUP,5,1"
+    Sound: "entity.experience_orb.pickup,5,1"
 
   View-Sound:
     Enabled: true
-    Sound: "ENTITY_EXPERIENCE_ORB_PICKUP,5,1"
+    Sound: "entity.experience_orb.pickup,5,1"
 
   Personal-Sound:
     Enabled: true
-    Sound: "ENTITY_EXPERIENCE_ORB_PICKUP,5,1"
+    Sound: "entity.experience_orb.pickup,5,1"
 
 # Interest will increase player bank balance
 # by giving a % of their bank money.
@@ -365,7 +365,7 @@ BankTop:
     Silent-Console: false
 
     # The message that will be sent when updating.
-    Message: "%prefix% &aThe BankTop has been updated!"
+    Message: "%prefix% <green>The BankTop has been updated!"
 
   # The format that will be used to
   # display the money in the banktop.
@@ -376,18 +376,18 @@ BankTop:
 
   # The message to display the banktop.
   Format:
-  - "&8&m---------&8[&a &lBank&9&lPlus &aBankTop &8]&m---------"
-  - "&61# &f%bankplus_banktop_name_1%&8: &a%bankplus_banktop_money_1%"
-  - "&a2# &f%bankplus_banktop_name_2%&8: &a%bankplus_banktop_money_2%"
-  - "&b3# &f%bankplus_banktop_name_3%&8: &a%bankplus_banktop_money_3%"
-  - "&74# &f%bankplus_banktop_name_4%&8: &a%bankplus_banktop_money_4%"
-  - "&75# &f%bankplus_banktop_name_5%&8: &a%bankplus_banktop_money_5%"
-  - "&76# &f%bankplus_banktop_name_6%&8: &a%bankplus_banktop_money_6%"
-  - "&77# &f%bankplus_banktop_name_7%&8: &a%bankplus_banktop_money_7%"
-  - "&78# &f%bankplus_banktop_name_8%&8: &a%bankplus_banktop_money_8%"
-  - "&79# &f%bankplus_banktop_name_9%&8: &a%bankplus_banktop_money_9%"
-  - "&710# &f%bankplus_banktop_name_10%&8: &a%bankplus_banktop_money_10%"
-  - "    &7&o(( The BankTop will update every 10m ))"
+  - "<dark_gray><st>---------</st>[<b><green> Bank<blue>Plus <gold>BankTop </b><dark_gray>]<st>---------"
+  - "<gold>1# <white>%bankplus_banktop_name_1%<dark_gray>: <green>%bankplus_banktop_money_1%"
+  - "<green>2# <white>%bankplus_banktop_name_2%<dark_gray>: <green>%bankplus_banktop_money_2%"
+  - "<aqua>3# <white>%bankplus_banktop_name_3%<dark_gray>: <green>%bankplus_banktop_money_3%"
+  - "<gray>4# <white>%bankplus_banktop_name_4%<dark_gray>: <green>%bankplus_banktop_money_4%"
+  - "<gray>5# <white>%bankplus_banktop_name_5%<dark_gray>: <green>%bankplus_banktop_money_5%"
+  - "<gray>6# <white>%bankplus_banktop_name_6%<dark_gray>: <green>%bankplus_banktop_money_6%"
+  - "<gray>7# <white>%bankplus_banktop_name_7%<dark_gray>: <green>%bankplus_banktop_money_7%"
+  - "<gray>8# <white>%bankplus_banktop_name_8%<dark_gray>: <green>%bankplus_banktop_money_8%"
+  - "<gray>9# <white>%bankplus_banktop_name_9%<dark_gray>: <green>%bankplus_banktop_money_9%"
+  - "<gray>10# <white>%bankplus_banktop_name_10%<dark_gray>: <green>%bankplus_banktop_money_10%"
+  - "    <gray><i>(( The BankTop will update every 10m ))"
 
 # You can use color codes.
 Placeholders:

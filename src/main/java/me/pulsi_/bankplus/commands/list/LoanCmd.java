@@ -25,23 +25,27 @@ public class LoanCmd extends BPCommand {
 
     private final BankRegistry registry;
 
-    public LoanCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public LoanCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
+        registry = BankPlus.INSTANCE().getBankRegistry();
+    }
 
+    public LoanCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
         registry = BankPlus.INSTANCE().getBankRegistry();
     }
 
     @Override
     public List<String> defaultUsage() {
         return Arrays.asList(
-                "%prefix% &cUsage: &7/bank loan [action] [playerName] [amount] <fromBankName> <toBankName>",
+                "%prefix% Usage: /bank loan [action] [playerName] [amount] [fromBankName] [toBankName]",
                 "",
-                "&7Possible actions:"
-                , " &8* &aGive"
-                , " &8* &aRequest"
-                , " &8* &aAccept"
-                , " &8* &aDeny"
-                , " &8* &aCancel"
+                "Possible actions:"
+                , " <dark_gray>*</dark_gray> Give"
+                , " <dark_gray>*</dark_gray> Request"
+                , " <dark_gray>*</dark_gray> Accept"
+                , " <dark_gray>*</dark_gray> Deny"
+                , " <dark_gray>*</dark_gray> Cancel"
         );
     }
 

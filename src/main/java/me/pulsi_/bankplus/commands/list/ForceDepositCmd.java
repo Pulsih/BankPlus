@@ -22,13 +22,17 @@ import java.util.List;
 
 public class ForceDepositCmd extends BPCommand {
 
-    public ForceDepositCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public ForceDepositCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
+    }
+
+    public ForceDepositCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
     }
 
     @Override
     public List<String> defaultUsage() {
-        return Collections.singletonList("%prefix% &cUsage: &7/bank forceDeposit [player] [amount/half/all/custom] <bankName>");
+        return Collections.singletonList("%prefix% Usage: /bank forceDeposit [player] [amount/half/all/custom] [bankName]");
     }
 
     @Override
@@ -75,7 +79,7 @@ public class ForceDepositCmd extends BPCommand {
         }
 
         String amount = args[2].toLowerCase();
-        if (!amount.equals("custom") && !amount.equals("all") && !amount.equals("half") && BPUtils.isInvalidNumber(amount, s))
+        if (!amount.equalsIgnoreCase("custom") && BPUtils.isInvalidNumber(amount, s))
             return BPCmdExecution.invalidExecution();
 
         Bank bank = BankUtils.getBank(getPossibleBank(args, 3));
@@ -89,24 +93,30 @@ public class ForceDepositCmd extends BPCommand {
          return new BPCmdExecution() {
              @Override
              public void execute() {
-                 Economy vault = BankPlus.INSTANCE().getVaultEconomy();
                  BPEconomy economy = bank.getBankEconomy();
-                 switch (amount) {
-                     case "all":
-                         economy.deposit(target, BigDecimal.valueOf(vault.getBalance(target)));
-                         break;
-
-                     case "half":
-                         economy.deposit(target, BigDecimal.valueOf(vault.getBalance(target) / 2));
-                         break;
-
-                     case "custom":
-                         economy.customDeposit(target);
-                         return;
-
-                     default:
-                         economy.deposit(target, BPFormatter.getStyledBigDecimal(amount));
+                 if (amount.equalsIgnoreCase("custom")) {
+                     economy.customDeposit(target);
+                     return;
                  }
+
+                 BigDecimal result, h = BigDecimal.valueOf(100);
+                 if (!amount.contains("%")) result = new BigDecimal(amount);
+                 else {
+                     BigDecimal percentage = new BigDecimal(amount.replace("%", ""));
+
+                     // If the percentage is <= 0 or > 100 return.
+                     if (percentage.compareTo(BigDecimal.ZERO) <= 0 || percentage.compareTo(h) > 0) {
+                         BPMessages.send(target, "Invalid-Number");
+                         return;
+                     }
+
+                     // Start from the player wallet, then modify it if it's not 100%.
+                     result = BigDecimal.valueOf(BankPlus.INSTANCE().getVaultEconomy().getBalance(target));
+
+                     // Do that only if the % is < 100% to avoid odd numbers bug.
+                     if (percentage.compareTo(h) < 0) result = result.divide(h).multiply(percentage);
+                 }
+                 economy.deposit(target, result);
              }
          };
     }
@@ -117,7 +127,7 @@ public class ForceDepositCmd extends BPCommand {
             return BPArgs.getOnlinePlayers(args);
 
         if (args.length == 3)
-            return BPArgs.getArgs(args, "1", "2", "3", "half", "all", "custom");
+            return BPArgs.getArgs(args, "1", "2", "3", "10%", "10%", "custom");
 
         if (args.length == 4)
             return BPArgs.getArgs(args, BankUtils.getAvailableBankNames(Bukkit.getPlayer(args[1])));

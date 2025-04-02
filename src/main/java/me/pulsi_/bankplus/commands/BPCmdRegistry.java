@@ -28,37 +28,36 @@ public class BPCmdRegistry {
         }
         FileConfiguration commandsConfig = configs.getConfig(commandsFile);
 
-        boolean save = new AddAllCmd(commandsConfig, "addAll").register();
-        if (new AddCmd(commandsConfig, "add").register()) save = true;
-        if (new BalanceCmd(commandsConfig, "balance", "bal").register()) save = true;
-        if (new DepositCmd(commandsConfig, "deposit").register()) save = true;
-        if (new ForceDepositCmd(commandsConfig, "forceDeposit").register()) save = true;
-        if (new ForceOpenCmd(commandsConfig, "forceOpen").register()) save = true;
-        if (new ForceUpgradeCmd(commandsConfig, "forceUpgrade").register()) save = true;
-        if (new ForceWithdrawCmd(commandsConfig, "forceWithdraw").register()) save = true;
-        if (new GiveInterestCmd(commandsConfig, "giveInterest").register()) save = true;
-        if (new GiveRequiredItemsCmd(commandsConfig, "giveRequiredItems").register()) save = true;
-        if (new HelpCmd(commandsConfig, "help").register()) save = true;
-        if (new InterestCmd(commandsConfig, "interest").register()) save = true;
-        if (new InterestMillisCmd(commandsConfig, "interestMillis").register()) save = true;
-        if (new LoanCmd(commandsConfig, "loan").register()) save = true;
-        if (new OpenCmd(commandsConfig, "open").register()) save = true;
-        if (new PayCmd(commandsConfig, "pay").register()) save = true;
-        if (new PlaceholdersCmd(commandsConfig, "placeholders").register()) save = true;
-        if (new ReloadCmd(commandsConfig, "reload").register()) save = true;
-        if (new RemoveCmd(commandsConfig, "remove").register()) save = true;
-        if (new ResetAllCmd(commandsConfig, "resetAll").register()) save = true;
-        if (new RestartInterestCmd(commandsConfig, "restartInterest").register()) save = true;
-        if (new SaveAllDataCmd(commandsConfig, "saveAllData").register()) save = true;
-        if (new SetCmd(commandsConfig, "set").register()) save = true;
-        if (new SetLevelCmd(commandsConfig, "setLevel").register()) save = true;
-        if (new TransferCmd(commandsConfig, "transfer").register()) save = true;
-        if (new UpdateBankTopCmd(commandsConfig, "updateBankTop").register()) save = true;
-        if (new UpgradeCmd(commandsConfig, "upgrade").register()) save = true;
-        if (new ViewCmd(commandsConfig, "view").register()) save = true;
-        if (new WithdrawCmd(commandsConfig, "withdraw").register()) save = true;
+        new AddAllCmd(commandsConfig, "addAll").register();
+        new AddCmd(commandsConfig, "add").register();
+        new BalanceCmd(commandsConfig, "balance", "bal").register();
+        new DepositCmd(commandsConfig, "deposit").register();
+        new ForceDepositCmd(commandsConfig, "forceDeposit").register();
+        new ForceOpenCmd(commandsConfig, "forceOpen").register();
+        new ForceUpgradeCmd(commandsConfig, "forceUpgrade").register();
+        new ForceWithdrawCmd(commandsConfig, "forceWithdraw").register();
+        new GiveInterestCmd(commandsConfig, "giveInterest").register();
+        new GiveRequiredItemsCmd(commandsConfig, "giveRequiredItems").register();
+        new HelpCmd(commandsConfig, "help").register();
+        new InterestCmd(commandsConfig, "interest").register();
+        new InterestMillisCmd(commandsConfig, "interestMillis").register();
+        new LoanCmd(commandsConfig, "loan").register();
+        new OpenCmd(commandsConfig, "open").register();
+        new PayCmd(commandsConfig, "pay").register();
+        new PlaceholdersCmd(commandsConfig, "placeholders").register();
+        new ReloadCmd(commandsConfig, "reload").register();
+        new RemoveCmd(commandsConfig, "remove").register();
+        new ResetAllCmd(commandsConfig, "resetAll").register();
+        new RestartInterestCmd(commandsConfig, "restartInterest").register();
+        new SaveAllDataCmd(commandsConfig, "saveAllData").register();
+        new SetCmd(commandsConfig, "set").register();
+        new SetLevelCmd(commandsConfig, "setLevel").register();
+        new TransferCmd(commandsConfig, "transfer").register();
+        new UpdateBankTopCmd(commandsConfig, "updateBankTop").register();
+        new UpgradeCmd(commandsConfig, "upgrade").register();
+        new ViewCmd(commandsConfig, "view").register();
+        new WithdrawCmd(commandsConfig, "withdraw").register();
 
-        if (!save) return;
         try {
             commandsConfig.save(commandsFile);
         } catch (IOException e) {

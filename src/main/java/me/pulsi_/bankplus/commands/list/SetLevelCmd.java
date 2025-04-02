@@ -17,13 +17,17 @@ import java.util.List;
 
 public class SetLevelCmd extends BPCommand {
 
-    public SetLevelCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public SetLevelCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
+    }
+
+    public SetLevelCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
     }
 
     @Override
     public List<String> defaultUsage() {
-        return Collections.singletonList("%prefix% &cUsage: &7/bank setLevel [level] <bankName>");
+        return Collections.singletonList("%prefix% Usage: /bank setLevel [level] [bankName]");
     }
 
     @Override

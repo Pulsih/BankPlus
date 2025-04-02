@@ -1,10 +1,14 @@
 package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.utils.texts.BPChat;
-import me.pulsi_.bankplus.utils.texts.BPMessages;
 import org.bukkit.Bukkit;
 
 public class BPLogger {
+
+    public static void error(Object error) {
+        if (error == null) error = "null";
+        log(BPChat.PREFIX + " <dark_gray>[<red>ERROR</red>] <red>" + error);
+    }
 
     public static void error(Throwable e, Object error) {
         error(error);
@@ -22,22 +26,15 @@ public class BPLogger {
             String name = path.substring(path.lastIndexOf(".") + 1), method = stackTraceElement.getMethodName();
             int line = stackTraceElement.getLineNumber();
 
-            error("| | [" + priority + "*] " + path + " - " + name + "#" + method + "(); [&f" + line + "&c]");
+            error("| | [" + priority + "*] " + path + " - " + name + "#" + method + "(); [<white>" + line + "<red>]");
             priority++;
         }
     }
 
-    public static void error(Object error) {
-        if (error == null) error = "null";
-        log(BPChat.prefix + "&8 [&cERROR&8] &c" + error);
-    }
-
     public static void warn(Object warn) {
         if (warn == null) warn = "null";
-        log(BPChat.prefix + "&8 [&eWARN&8] &e" + warn);
+        log(BPChat.PREFIX + "<dark_gray>[<yellow>WARN</yellow>] <yellow>" + warn);
     }
-
-
 
     public static void warn(Throwable e, Object warn) {
         warn(warn);
@@ -55,16 +52,16 @@ public class BPLogger {
             String name = path.substring(path.lastIndexOf(".") + 1), method = stackTraceElement.getMethodName();
             int line = stackTraceElement.getLineNumber();
 
-            warn("| | [" + priority + "*] " + path + " - " + name + "#" + method + "(); [&f" + line + "&e]");
+            warn("| | [" + priority + "*] " + path + " - " + name + "#" + method + "(); [<white>" + line + "<yellow>]");
             priority++;
         }
     }
 
     public static void info(Object info) {
-        log(BPChat.prefix + "&8 [&9INFO&8] &9" + info);
+        log(BPChat.PREFIX + " <dark_gray>[<blue>INFO</blue>] <blue>" + info);
     }
 
     public static void log(String message) {
-        Bukkit.getConsoleSender().sendMessage(BPMessages.format(message));
+        Bukkit.getConsoleSender().sendMessage(BPChat.color(message));
     }
 }

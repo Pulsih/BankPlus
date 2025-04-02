@@ -15,7 +15,8 @@ public class NextLevelPlaceholder extends BPPlaceholder {
 
     @Override
     public String getPlaceholder(Player p, String target, String identifier) {
-        if (!BankUtils.exist(target)) return "&cThe selected bank does not exist.";
+        if (!BankUtils.exist(target)) return bankDoesNotExist;
+
         Bank bank = BankUtils.getBank(target);
         if (!BankUtils.hasNextLevel(bank, p)) return ConfigValues.getUpgradesMaxedPlaceholder();
 

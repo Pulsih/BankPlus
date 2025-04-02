@@ -27,7 +27,6 @@ public final class BankPlus extends JavaPlugin {
 
     public static final String actualVersion = "6.3";
 
-    private static int serverVersionInt;
     private static String serverVersion;
     private static BankPlus INSTANCE;
 
@@ -55,7 +54,7 @@ public final class BankPlus extends JavaPlugin {
         PluginManager plManager = Bukkit.getPluginManager();
         if (plManager.getPlugin("Vault") == null) {
             BPLogger.log("");
-            BPLogger.log("&cCannot load " + BPChat.prefix + "&c, Vault is not installed!");
+            BPLogger.log("&cCannot load " + BPChat.PREFIX + "&c, Vault is not installed!");
             BPLogger.log("&cPlease download it in order to use this plugin!");
             BPLogger.log("");
             getServer().getPluginManager().disablePlugin(this);
@@ -69,27 +68,15 @@ public final class BankPlus extends JavaPlugin {
                 return;
             }
             BPLogger.log("");
-            BPLogger.log("&cCannot load " + BPChat.prefix + "&c, No economy plugin found!");
+            BPLogger.log("&cCannot load " + BPChat.PREFIX + "&c, No economy plugin found!");
             BPLogger.log("&cPlease download an economy plugin to use BankPlus!");
             BPLogger.log("");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
 
-        serverVersion = getServer().getVersion();
-
-        int index = serverVersion.lastIndexOf("MC:");
-        String version = serverVersion.substring(index, serverVersion.length() - 1);
-
-        int number;
-        try {
-            number = Integer.parseInt(version.split("\\.")[1]);
-        } catch (NumberFormatException e) {
-            BPLogger.error("Failed to identify server version, contact the developer if the issue persist!");
-            number = -1;
-        }
-
-        serverVersionInt = number;
+        String v = getServer().getVersion();
+        serverVersion = v.substring(v.lastIndexOf("MC:"), v.length() - 1).replace("MC: ", "");
 
         this.bpConfigs = new BPConfigs(this);
         this.bpData = new BPData(this);
@@ -140,8 +127,8 @@ public final class BankPlus extends JavaPlugin {
         return serverVersion;
     }
 
-    public static int getServerVersionInt() {
-        return serverVersionInt;
+    public static boolean isAlphaVersion() {
+        return INSTANCE.getDescription().getVersion().toLowerCase().contains("-alpha");
     }
 
     public BankRegistry getBankRegistry() {
@@ -209,8 +196,7 @@ public final class BankPlus extends JavaPlugin {
     }
 
     private boolean isPluginUpdated() {
-        String version = getDescription().getVersion();
-        String newVersion = version;
+        String newVersion = getDescription().getVersion();
         boolean updated = true;
         try {
             newVersion = new BufferedReader(new InputStreamReader(
@@ -219,18 +205,19 @@ public final class BankPlus extends JavaPlugin {
 
             updated = actualVersion.equals(newVersion);
         } catch (Exception e) {
-            BPLogger.error(e, "Could not check for updates!");
+            BPLogger.warn("Could not check for updates. (No internet connection)");
         }
 
-        if (version.toLowerCase().contains("-alpha") && !ConfigValues.isSilentInfoMessages())
+        if (isAlphaVersion() && !ConfigValues.isSilentInfoMessages())
             BPLogger.info("You are using an alpha version of the plugin, please report any bug or problem found in my discord!");
 
-        if (!ConfigValues.isSilentInfoMessages()) {
-            if (updated) BPLogger.info("The plugin is updated!");
-            else {
-                BPLogger.info("New version of the plugin available! (v" + newVersion + ").");
-                BPLogger.info("Please download the latest version here: https://www.spigotmc.org/resources/%E2%9C%A8-bankplus-%E2%9C%A8.93130/.");
-            }
+        if (updated) {
+            if (!ConfigValues.isSilentInfoMessages()) BPLogger.info("The plugin is updated!");
+        } else {
+            // Even if the info is disabled, notify when there is a new update
+            // because it is important to keep users at the latest version.
+            BPLogger.info("New version of the plugin available! (v" + newVersion + ").");
+            BPLogger.info("Please download the latest version here: https://www.spigotmc.org/resources/%E2%9C%A8-bankplus-%E2%9C%A8.93130/.");
         }
         return updated;
     }

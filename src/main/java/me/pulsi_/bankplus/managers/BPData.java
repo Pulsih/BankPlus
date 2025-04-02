@@ -45,10 +45,10 @@ public class BPData {
         long startTime = System.currentTimeMillis();
 
         BPLogger.log("");
-        BPLogger.log("    " + BPChat.prefix + "&2 Enabling plugin...");
-        BPLogger.log("    &aRunning on version &f" + plugin.getDescription().getVersion() + "&a!");
-        BPLogger.log("    &aDetected server version: &f" + BankPlus.getServerVersion());
-        BPLogger.log("    &aSetting up the plugin...");
+        BPLogger.log("    " + BPChat.PREFIX + " <green>Enabling plugin...");
+        BPLogger.log("    <green>Running on version <white>" + plugin.getDescription().getVersion() + "</white>!");
+        BPLogger.log("    <green>Detected server version: <white>" + BankPlus.getServerVersion());
+        BPLogger.log("    <green>Setting up the plugin...");
         BPLogger.log("");
 
         new bStats(plugin);
@@ -60,7 +60,7 @@ public class BPData {
         registerEvents();
         setupCommands();
 
-        BPLogger.log("    &aDone! &8(&3" + (System.currentTimeMillis() - startTime) + "ms&8)");
+        BPLogger.log("    <green>Done! <dark_gray>(<aqua>" + (System.currentTimeMillis() - startTime) + "ms</aqua>)");
         BPLogger.log("");
 
         if (ConfigValues.isBankTopEnabled()) BPBankTop.updateBankTop();
@@ -84,7 +84,7 @@ public class BPData {
         }
 
         BPLogger.log("");
-        BPLogger.log("    " + BPChat.prefix + " &cPlugin successfully disabled!");
+        BPLogger.log("    " + BPChat.PREFIX + " <red>Plugin successfully disabled!");
         BPLogger.log("");
     }
 
@@ -96,7 +96,6 @@ public class BPData {
             MultipleBanksValues.setupValues();
 
             BPCmdRegistry.registerPluginCommands();
-            BPHeads.loadSkullBasedOnVersion();
 
             if (ConfigValues.isLoggingTransactions()) plugin.getBpLogUtils().setupLoggerFile();
             if (ConfigValues.isIgnoringAfkPlayers()) plugin.getAfkManager().startCountdown();

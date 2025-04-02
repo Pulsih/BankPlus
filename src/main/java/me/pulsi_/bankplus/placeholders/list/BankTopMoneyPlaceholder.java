@@ -18,19 +18,18 @@ public class BankTopMoneyPlaceholder extends BPPlaceholder {
 
     @Override
     public String getPlaceholder(Player p, String target, String identifier) {
-        if (!ConfigValues.isBankTopEnabled())
-            return BPChat.color("&cThe banktop is not enabled!");
+        if (!ConfigValues.isBankTopEnabled()) return bankTopNotEnabled;
 
         String number = identifier.replace("banktop_money_", "");
         int position;
         try {
             position = Integer.parseInt(number);
         } catch (NumberFormatException e) {
-            return "&cInvalid banktop number!";
+            return "Invalid banktop number!";
         }
 
         if (position > ConfigValues.getBankTopSize())
-            return "&cThe banktop limit is " + ConfigValues.getBankTopSize() + "!";
+            return "The banktop limit is " + ConfigValues.getBankTopSize() + "!";
 
         BigDecimal money = BPBankTop.getBankTopBalancePlayer(position);
         switch (ConfigValues.getBankTopMoneyFormat()) {

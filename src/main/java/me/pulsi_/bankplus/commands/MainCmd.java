@@ -34,7 +34,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
         if (args.length == 0) {
             if (!BPUtils.hasPermission(s, "bankplus.use")) return true;
 
-            if (s instanceof Player) {
+            if (s instanceof Player p) {
                 if (BankUtils.getAvailableBankNames((Player) s).isEmpty()) {
                     if (ConfigValues.isShowingHelpWhenNoBanksAvailable()) BPMessages.send(s, "Help-Message");
                     else BPMessages.send(s, "No-Available-Banks");
@@ -44,7 +44,6 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                 BPMessages.send(s, "Help-Message");
                 return true;
             }
-            Player p = (Player) s;
 
             if (ConfigValues.isGuiModuleEnabled()) {
                 if (!MultipleBanksValues.enableMultipleBanksModule()) BankUtils.getBank(ConfigValues.getMainGuiName()).getBankGui().openBankGui(p);
@@ -52,16 +51,13 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                     if (!MultipleBanksValues.isDirectlyOpenIf1IsAvailable()) new BankListGui().openBankGui(p);
                     else {
                         List<Bank> availableBanks = BankUtils.getAvailableBanks(p);
-                        if (availableBanks.size() == 1) availableBanks.get(0).getBankGui().openBankGui(p);
+                        if (availableBanks.size() == 1) availableBanks.getFirst().getBankGui().openBankGui(p);
                         else new BankListGui().openBankGui(p);
                     }
                 }
             } else {
                 BPMessages.send(p, "Multiple-Personal-Bank", BPUtils.placeValues(p, BPEconomy.getBankBalancesSum(p)));
-                if (ConfigValues.isPersonalSoundEnabled()) {
-                    if (!BPUtils.playSound(ConfigValues.getPersonalSound(), p))
-                        BPLogger.warn("Occurred while trying to play PERSONAL sound for player \"" + p.getName() + "\".");
-                }
+                if (ConfigValues.isPersonalSoundEnabled()) BPUtils.playSound(ConfigValues.getPersonalSound(), p);
             }
             return true;
         }
@@ -87,7 +83,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
         if (args.length == 1) {
             List<String> cmds = new ArrayList<>();
             for (BPCommand cmd : commands.values())
-                if (s.hasPermission(cmd.permission)) cmds.add(cmd.identifier);
+                if (s.hasPermission(cmd.permission)) cmds.add(cmd.commandID);
 
             List<String> result = new ArrayList<>();
             for (String arg : cmds)

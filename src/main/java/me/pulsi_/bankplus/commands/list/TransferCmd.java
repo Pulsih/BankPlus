@@ -22,15 +22,20 @@ import java.util.Set;
 
 public class TransferCmd extends BPCommand {
 
-    public TransferCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public TransferCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
+    }
+
+    public TransferCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
     }
 
     @Override
     public List<String> defaultUsage() {
         return Arrays.asList(
-                "%prefix% &cUsage: &7/bank transfer [mode] | Specify a mode between &a\"filesToDatabase\" &7and &a\"databaseToFiles\"&7.",
-                "&7Use this command to &a&ntransfer&7 the playerdata from a place to another in case you &a&nswitch&7 saving mode."
+                "%prefix% Usage: /bank transfer [mode]",
+                "Specify a mode between <aqua>\"filesToDatabase\"</aqua> and <aqua>\"databaseToFiles\"</aqua>.",
+                "Use this command to transfer the playerdata from a place to another in case you switch saving mode."
         );
     }
 
@@ -41,7 +46,7 @@ public class TransferCmd extends BPCommand {
 
     @Override
     public List<String> defaultConfirmMessage() {
-        return Collections.singletonList("%prefix% &cThis command will overwrite the data from a place to another, type the command again within 5 seconds to confirm this action.");
+        return Collections.singletonList("%prefix% <red>This command will overwrite the data from a place to another, type the command again within 5 seconds to confirm.");
     }
 
     @Override
@@ -74,25 +79,25 @@ public class TransferCmd extends BPCommand {
         }
 
         if (!ConfigValues.isSqlEnabled()) {
-            BPMessages.send(s, "%prefix% &cCould not initialize the task, MySQL hasn't been enabled in the config file!");
+            BPMessages.send(s, "%prefix% <red>Could not initialize the task, MySQL hasn't been enabled in the config file!", false);
             return BPCmdExecution.invalidExecution();
         }
 
         if (!BankPlus.INSTANCE().getMySql().isConnected()) {
-            BPMessages.send(s, "%prefix% &cCould not initialize the task, MySQL hasn't been connected to it's database yet! &8(Try typing /bp reload)");
+            BPMessages.send(s, "%prefix% <red>Could not initialize the task, MySQL hasn't been connected to it's database yet! <dark><i>(Try typing /bp reload)", false);
             return BPCmdExecution.invalidExecution();
         }
 
         return new BPCmdExecution() {
             @Override
             public void execute() {
-                BPMessages.send(s, "%prefix% &7Task initialized, wait a few moments...");
+                BPMessages.send(s, "%prefix% Task initialized, wait a few moments...", false);
 
                 Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
                     if (args[1].equalsIgnoreCase("filestodatabase")) filesToDatabase();
                     else databaseToFile();
 
-                    BPMessages.send(s, "%prefix% &2Task finished!");
+                    BPMessages.send(s, "%prefix% Task finished!", false);
                 });
             }
         };

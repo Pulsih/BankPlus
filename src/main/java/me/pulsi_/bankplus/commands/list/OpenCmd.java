@@ -15,13 +15,17 @@ import java.util.List;
 
 public class OpenCmd extends BPCommand {
 
-    public OpenCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public OpenCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
+    }
+
+    public OpenCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
     }
 
     @Override
     public List<String> defaultUsage() {
-        return Collections.singletonList("%prefix% &cUsage: &7/bank open <bankName>");
+        return Collections.singletonList("%prefix% Usage: /bank open [bankName]");
     }
 
     @Override

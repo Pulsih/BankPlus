@@ -58,6 +58,10 @@ public class BankGui {
         return updateDelay;
     }
 
+    public BPGuiItem getFiller() {
+        return filler;
+    }
+
     public BPGuiItem getAvailableBankListItem() {
         return availableBankListItem;
     }
@@ -80,6 +84,10 @@ public class BankGui {
 
     public void setUpdateDelay(int updateDelay) {
         this.updateDelay = updateDelay;
+    }
+
+    public void setFiller(BPGuiItem filler) {
+        this.filler = filler;
     }
 
     public void setAvailableBankListItem(BPGuiItem availableBankListItem) {
@@ -123,10 +131,8 @@ public class BankGui {
             player.setBankUpdatingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE(), () -> updateBankGuiMeta(bankInventory, p), updateDelay, updateDelay));
 
         player.setOpenedBankGui(this);
-        if (ConfigValues.isPersonalSoundEnabled()) {
-            if (!BPUtils.playSound(ConfigValues.getPersonalSound(), p))
-                BPLogger.warn("Occurred while trying to play PERSONAL sound for player \"" + p.getName() + "\".");
-        }
+        if (ConfigValues.isPersonalSoundEnabled()) BPUtils.playSound(ConfigValues.getPersonalSound(), p);
+
         p.openInventory(bankInventory);
     }
 
@@ -168,24 +174,27 @@ public class BankGui {
      * @param p                     The player that have the inventory open.
      */
     public void updateBankGuiItemMeta(int slot, Inventory playerOpenedInventory, Player p) {
-        BPGuiItem bankItem = bankItems.get(slot);
+        BPGuiItem guiItem = bankItems.get(slot);
 
-        ItemStack inventoryItem = playerOpenedInventory.getItem(slot);
-        ItemMeta meta = inventoryItem.getItemMeta();
+        ItemStack item = playerOpenedInventory.getItem(slot);
+        if (item == null) return;
 
-        List<String> actualLore = new ArrayList<>(), levelLore = bankItem.lore.get(BankUtils.getCurrentLevel(originBank, p));
-        if (levelLore == null) levelLore = bankItem.lore.get(0);
-        if (levelLore != null) for (String line : levelLore) actualLore.add(BPChat.color(line));
+        ItemMeta meta = item.getItemMeta();
 
-        String displayName = bankItem.getItem().getItemMeta().getDisplayName();
+        List<Component> lore = guiItem.lore.getOrDefault(BankUtils.getCurrentLevel(originBank, p), guiItem.lore.get(0));
+        Component displayName = guiItem.getItem().getItemMeta().displayName(); // Get the displayname of the stored item.
+
         if (BankPlus.INSTANCE().isPlaceholderApiHooked()) {
-            meta.setDisplayName(BPChat.color(PlaceholderAPI.setPlaceholders(p, displayName)));
-            meta.setLore(PlaceholderAPI.setPlaceholders(p, actualLore));
+            String sd = MiniMessage.miniMessage().serialize(displayName);
+            meta.displayName(BPChat.color(PlaceholderAPI.setPlaceholders(p, sd)));
+
+            List<String> sl = BPUtils.componentListToStringList(lore);
+            meta.lore(BPUtils.stringListToComponentList(PlaceholderAPI.setPlaceholders(p, sl)));
         } else {
-            meta.setDisplayName(BPChat.color(displayName));
-            meta.setLore(actualLore);
+            meta.displayName(displayName);
+            meta.lore(lore);
         }
-        inventoryItem.setItemMeta(meta);
+        item.setItemMeta(meta);
     }
 
     /**

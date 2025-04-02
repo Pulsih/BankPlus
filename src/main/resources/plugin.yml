@@ -3,4 +3,18 @@ version: '${version}' # Remember to change the one in BankPlus main class.
 main: me.pulsi_.bankplus.BankPlus
 api-version: '1.21'
 authors: [ Pulsi_ ]
-description: Bank plugin fully customizable.
+description: The best free bank plugin on internet!
+depend:
+  - Vault
+softdepend:
+  - PlaceholderAPI
+  - Essentials
+  - EconomyPlus
+  - CMI
+load: POSTWORLD
+commands:
+  bankplus:
+    aliases: [bankp, bank, bp]
+
+  banktop:
+    aliases: [btop]

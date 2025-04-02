@@ -18,24 +18,25 @@ public abstract class BPCommand {
 
     public final String silentArg = "silent=true";
 
-    public final String identifier, permission;
-
+    public final String commandID, permission;
     public final String[] aliases;
 
-    public final int confirmCooldown, cooldown;
-
+    public final int confirmCooldown, cooldown; // The time to confirm - The cooldown of the command.
     public final List<String> confirmMessage, cooldownMessage, usage;
 
-    private boolean hasChangedConfig = false;
+    private final HashMap<String, Long> cooldowns = new HashMap<>();
+    private final Set<String> confirm = new HashSet<>();
 
-    public BPCommand(FileConfiguration commandsConfig, String... cmdAndAliases) {
-        identifier = cmdAndAliases[0];
+    public BPCommand(FileConfiguration commandsConfig, String commandID) {
+        this(commandsConfig, commandID, null);
+    }
 
-        String id = identifier.toLowerCase();
-        permission = "bankplus." + id;
+    public BPCommand(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        this.commandID = commandID;
 
-        aliases = new String[cmdAndAliases.length - 1];
-        System.arraycopy(cmdAndAliases, 1, aliases, 0, cmdAndAliases.length - 1);
+        String id = this.commandID.toLowerCase();
+        this.permission = "bankplus." + id;
+        this.aliases = aliases;
 
         usage = getListOrSetDefault(commandsConfig, id + ".usage", defaultUsage());
         confirmCooldown = getIntOrSetDefault(commandsConfig, id + ".confirm-cooldown", defaultConfirmCooldown());
@@ -44,28 +45,39 @@ public abstract class BPCommand {
         cooldownMessage = getListOrSetDefault(commandsConfig, id + ".cooldown-message", defaultCooldownMessage());
     }
 
-    private final HashMap<String, Long> cooldowns = new HashMap<>();
-
-    private final Set<String> confirm = new HashSet<>();
-
-    private List<String> getListOrSetDefault(FileConfiguration config, String path, List<String> defaultValue) {
-        List<String> result = defaultValue;
-        if (BPUtils.pathExist(config, path)) result = BPMessages.getPossibleMessages(config, path);
+    /**
+     * Get the specified list, or if not found, place and return the fall-back value.
+     *
+     * @param config   The config where to take the list.
+     * @param path     The path where to get the list.
+     * @param fallBack The value that will be set and returned if the path is null.
+     * @return The list or fall-back.
+     */
+    private List<String> getListOrSetDefault(FileConfiguration config, String path, List<String> fallBack) {
+        List<String> result = fallBack;
+        if (!BPUtils.pathExist(config, path)) config.set(path, result);
         else {
-            if (result.isEmpty()) config.set(path, new ArrayList<>());
-            else config.set(path, result);
-            hasChangedConfig = true;
+            result = config.getStringList(path);
+            if (result.isEmpty()) {
+                String string = config.getString(path);
+                if (string != null && !string.isEmpty()) result.add(string);
+            }
         }
         return result;
     }
 
-    private int getIntOrSetDefault(FileConfiguration config, String path, int defaultValue) {
-        int result = defaultValue;
+    /**
+     * Get the specified int, or if not found, place and return the fall-back value.
+     *
+     * @param config   The config where to take the int.
+     * @param path     The path where to get the int.
+     * @param fallBack The value that will be set and returned if the path is null.
+     * @return The int or fall-back.
+     */
+    private int getIntOrSetDefault(FileConfiguration config, String path, int fallBack) {
+        int result = fallBack;
         if (BPUtils.pathExist(config, path)) result = config.getInt(path);
-        else {
-            config.set(path, result);
-            hasChangedConfig = true;
-        }
+        else config.set(path, result);
         return result;
     }
 
@@ -81,15 +93,11 @@ public abstract class BPCommand {
     }
 
     /**
-     * Register the selected command to the bankplus system, and checks if the commands file has been modified.
-     *
-     * @return true if the config file has been modified, false otherwise.
+     * Register the selected command to the bankplus system.
      */
-    public boolean register() {
-        commands.put(identifier.toLowerCase(), this);
-        for (String alias : aliases)
-            commands.put(alias.toLowerCase(), this);
-        return hasChangedConfig;
+    public void register() {
+        commands.put(commandID.toLowerCase(), this);
+        if (aliases != null) for (String alias : aliases) commands.put(alias.toLowerCase(), this);
     }
 
     /**
@@ -104,7 +112,7 @@ public abstract class BPCommand {
             String name = s.getName();
             if (!confirm.contains(name)) {
                 Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> confirm.remove(name), confirmCooldown * 20L);
-                for (String message : confirmMessage) BPMessages.send(s, message);
+                for (String message : confirmMessage) BPMessages.send(s, message, false);
                 confirm.add(name);
                 return false;
             }
@@ -124,7 +132,15 @@ public abstract class BPCommand {
         if (!BPUtils.hasPermission(s, permission) || (playerOnly() && !BPUtils.isPlayer(s))) return;
 
         if (!skipUsage() && args.length == 1) {
-            for (String usage : usage) BPMessages.send(s, usage);
+            for (String usage : usage) {
+                BPMessages.send(
+                        s,
+                        usage
+                        .replace("[", "<dark_gray>[</dark_gray>")
+                        .replace("]", "<dark_gray>]</dark_gray>"),
+                        false
+                );
+            }
             return;
         }
         if (isInCooldown(s)) return;
@@ -155,7 +171,7 @@ public abstract class BPCommand {
         if (get <= cur) return false;
 
         for (String message : cooldownMessage)
-            BPMessages.send(s, message, "%time%$" + BPFormatter.formatTime(get - cur));
+            BPMessages.send(s, message, "%time%$" + BPFormatter.formatTime(get - cur), false);
         return true;
     }
 

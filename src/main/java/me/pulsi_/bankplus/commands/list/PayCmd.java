@@ -19,17 +19,21 @@ import java.util.List;
 
 public class PayCmd extends BPCommand {
 
-    public PayCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public PayCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
+    }
+
+    public PayCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
     }
 
     @Override
     public List<String> defaultUsage() {
         return Arrays.asList(
-                "%prefix% &cUsage: &7/bank pay [player] [amount] <fromBankName> <toBankName>",
+                "%prefix% Usage: /bank pay [player] [amount] [fromBankName] [toBankName]",
                 "",
-                "&7<fromBankName> The bank from where to take the money.",
-                "&7<toBankName>: The bank where to send the money."
+                "- fromBankName: The bank from where to take the money.",
+                "- toBankName: The bank where to send the money."
         );
     }
 

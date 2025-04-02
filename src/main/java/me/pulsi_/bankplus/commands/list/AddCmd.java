@@ -18,13 +18,17 @@ import java.util.List;
 
 public class AddCmd extends BPCommand {
 
-    public AddCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public AddCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
+    }
+
+    public AddCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
     }
 
     @Override
     public List<String> defaultUsage() {
-        return Collections.singletonList("%prefix% &cUsage: &7/bank add [player] [amount] <bankName>");
+        return Collections.singletonList("%prefix% Usage: /bank add [player] [amount] [bankName]");
     }
 
     @Override

@@ -13,7 +13,7 @@ public class LevelPlaceholder extends BPPlaceholder {
 
     @Override
     public String getPlaceholder(Player p, String target, String identifier) {
-        if (!BankUtils.exist(target)) return "&cThe selected bank does not exist.";
+        if (!BankUtils.exist(target)) return bankDoesNotExist;
         return String.valueOf(BankUtils.getCurrentLevel(BankUtils.getBank(target), p));
     }
 }

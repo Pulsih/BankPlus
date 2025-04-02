@@ -1,5 +1,6 @@
 package me.pulsi_.bankplus.commands.list;
 
+import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCmdExecution;
@@ -19,13 +20,17 @@ import java.util.List;
 
 public class WithdrawCmd extends BPCommand {
 
-    public WithdrawCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public WithdrawCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
+    }
+
+    public WithdrawCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
     }
 
     @Override
     public List<String> defaultUsage() {
-        return Collections.singletonList("%prefix% &cUsage: &7/bank deposit [amount/half/all] <bankName>");
+        return Collections.singletonList("%prefix% Usage: /bank deposit [amount/half/all] [bankName]");
     }
 
     @Override
@@ -61,7 +66,7 @@ public class WithdrawCmd extends BPCommand {
     @Override
     public BPCmdExecution onExecution(CommandSender s, String[] args) {
         String amount = args[1].toLowerCase();
-        if (!amount.equals("all") && !amount.equals("half") && BPUtils.isInvalidNumber(amount, s)) return BPCmdExecution.invalidExecution();
+        if (BPUtils.isInvalidNumber(amount, s)) return BPCmdExecution.invalidExecution();
 
         Bank bank = BankUtils.getBank(getPossibleBank(args, 2));
         if (!BankUtils.exist(bank, s)) return BPCmdExecution.invalidExecution();
@@ -72,30 +77,36 @@ public class WithdrawCmd extends BPCommand {
             return BPCmdExecution.invalidExecution();
         }
 
-         return new BPCmdExecution() {
-             @Override
-             public void execute() {
-                 BPEconomy economy = bank.getBankEconomy();
-                 switch (amount) {
-                     case "all":
-                         economy.withdraw(p, economy.getBankBalance(p));
-                         break;
+        return new BPCmdExecution() {
+            @Override
+            public void execute() {
+                BigDecimal result, h = BigDecimal.valueOf(100);
+                BPEconomy economy = bank.getBankEconomy();
+                if (!amount.contains("%")) result = new BigDecimal(amount);
+                else {
+                    BigDecimal percentage = new BigDecimal(amount.replace("%", ""));
 
-                     case "half":
-                         economy.withdraw(p, economy.getBankBalance(p).divide(BigDecimal.valueOf(2)));
-                         break;
+                    // If the percentage is <= 0 or > 100 return.
+                    if (percentage.compareTo(BigDecimal.ZERO) <= 0 || percentage.compareTo(h) > 0) {
+                        BPMessages.send(p, "Invalid-Number");
+                        return;
+                    }
 
-                     default:
-                         economy.withdraw(p, BPFormatter.getStyledBigDecimal(amount));
-                 }
-             }
-         };
+                    // Start from the player bank balance, then modify it if it's not 100%.
+                    result = economy.getBankBalance(p);
+
+                    // Do that only if the % is < 100% to avoid odd numbers bug.
+                    if (percentage.compareTo(h) < 0) result = result.divide(h).multiply(percentage);
+                }
+                economy.withdraw(p, result);
+            }
+        };
     }
 
     @Override
     public List<String> tabCompletion(CommandSender s, String[] args) {
         if (args.length == 2)
-            return BPArgs.getArgs(args, "1", "2", "3");
+            return BPArgs.getArgs(args, "1", "2", "3", "10%", "20%");
 
         if (args.length == 3)
             return BPArgs.getArgs(args, BankUtils.getAvailableBankNames((Player) s));

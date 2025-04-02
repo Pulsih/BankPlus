@@ -15,13 +15,17 @@ import java.util.List;
 
 public class UpgradeCmd extends BPCommand {
 
-    public UpgradeCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public UpgradeCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
+    }
+
+    public UpgradeCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
     }
 
     @Override
     public List<String> defaultUsage() {
-        return Collections.singletonList("%prefix% &cUsage: &7/bank upgrade <bankName>");
+        return Collections.singletonList("%prefix% Usage: /bank upgrade [bankName]");
     }
 
     @Override

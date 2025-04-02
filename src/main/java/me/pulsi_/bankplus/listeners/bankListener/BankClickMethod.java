@@ -30,8 +30,7 @@ public class BankClickMethod {
         int slot = e.getSlot();
         BankGui openedBank = player.getOpenedBankGui();
 
-        if (openedBank instanceof BankListGui) {
-            BankListGui bankListGui = (BankListGui) openedBank;
+        if (openedBank instanceof BankListGui bankListGui) {
             Bank clickedBank = bankListGui.getBankListGuiClickHolder().get(slot);
             if (clickedBank != null) {
                 p.closeInventory();
@@ -40,7 +39,7 @@ public class BankClickMethod {
             return;
         }
 
-        BankGui.BankItem clickedItem = openedBank.getBankItems().get(slot);
+        BankGui.BPGuiItem clickedItem = openedBank.getBankItems().get(slot);
         if (clickedItem == null) return;
 
         BPEconomy economy = openedBank.getOriginBank().getBankEconomy();

@@ -23,17 +23,24 @@ public class ResetAllCmd extends BPCommand {
 
     private final Economy vaultEconomy;
 
-    public ResetAllCmd(FileConfiguration commandsConfig, String... aliases) {
-        super(commandsConfig, aliases);
+    public ResetAllCmd(FileConfiguration commandsConfig, String commandID) {
+        super(commandsConfig, commandID);
+        vaultEconomy = BankPlus.INSTANCE().getVaultEconomy();
+    }
+
+    public ResetAllCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
+        super(commandsConfig, commandID, aliases);
         vaultEconomy = BankPlus.INSTANCE().getVaultEconomy();
     }
 
     @Override
     public List<String> defaultUsage() {
-        return Collections.singletonList(
-                "%prefix% &cUsage: &7/bank resetall [mode] | Specify a mode between &a\"delete\" &7and" +
-                        " &a\"maintain\"&7: &adelete &7will remove all players money and they will be lost," +
-                        " &amaintain &7will move all players money from their banks to their vault balance."
+        return Arrays.asList(
+                "%prefix% Usage: /bank resetall [mode]",
+                "",
+                "Specify a mode between <aqua>\"delete\"</aqua> and <aqua>\"maintain\"</aqua>.",
+                "- delete: Will remove all players money and they will be lost",
+                "- maintain: Will move all players money from their banks to their vault balance."
         );
     }
 
@@ -45,9 +52,9 @@ public class ResetAllCmd extends BPCommand {
     @Override
     public List<String> defaultConfirmMessage() {
         return Collections.singletonList(
-                "%prefix% &cWarning, this command is going to reset everyone's bank balance," +
-                        " based on the mode you choose, this action is not reversible and may " +
-                        "take few seconds, type the command again within 5 seconds to confirm."
+                "%prefix% <red>Warning, this command is going to reset everyone's bank balance," +
+                        " based on the mode you choose, this action is not reversible, type the" +
+                        " command again within 5 seconds to confirm."
         );
     }
 
@@ -75,14 +82,14 @@ public class ResetAllCmd extends BPCommand {
     public BPCmdExecution onExecution(CommandSender s, String[] args) {
         String mode = args[1];
         if (!mode.equalsIgnoreCase("delete") && !mode.equalsIgnoreCase("maintain")) {
-            BPMessages.send(s, "%prefix% &cInvalid reset mode! Choose one between &a\"delete\" &cand &a\"maintain\"&c.");
+            BPMessages.send(s, "%prefix% Invalid reset mode! Choose one between <aqua>\"delete\"</aqua> and <aqua>\"maintain\"</aqua>.", false);
             return BPCmdExecution.invalidExecution();
         }
 
         return new BPCmdExecution() {
             @Override
             public void execute() {
-                BPMessages.send(s, "%prefix% &aSuccessfully reset all players money! &8(&aWith &f" + mode + " &amode&8)");
+                BPMessages.send(s, "%prefix% Successfully reset all players money! <dark_gray>(</dark_gray>With <white>" + mode + "</white> mode<dark_gray>)", false);
                 resetAll(Arrays.asList(Bukkit.getOfflinePlayers()), mode);
             }
         };
@@ -99,14 +106,15 @@ public class ResetAllCmd extends BPCommand {
         List<OfflinePlayer> copy = new ArrayList<>(offlinePlayers);
         List<BPEconomy> economies = BPEconomy.list();
 
-        for (int i = 0; i < 80; i++) {
+        for (int i = 0; i < 50; i++) {
             if (copy.isEmpty()) {
                 EconomyUtils.saveEveryone(true);
                 return;
             }
-            OfflinePlayer p = copy.remove(0);
+            OfflinePlayer p = copy.removeFirst();
 
-            if (mode.equalsIgnoreCase("maintain")) vaultEconomy.depositPlayer(p, BPEconomy.getBankBalancesSum(p).doubleValue());
+            if (mode.equalsIgnoreCase("maintain"))
+                vaultEconomy.depositPlayer(p, BPEconomy.getBankBalancesSum(p).doubleValue());
             for (BPEconomy economy : economies) {
                 economy.setBankBalance(p, BigDecimal.ZERO);
                 economy.setDebt(p, BigDecimal.ZERO);
