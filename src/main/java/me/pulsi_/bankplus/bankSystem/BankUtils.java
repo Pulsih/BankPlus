@@ -17,6 +17,7 @@ import net.kyori.adventure.text.serializer.ComponentSerializer;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
@@ -24,6 +25,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
@@ -44,6 +47,8 @@ public class BankUtils {
     public static final String REQUIRED_ITEMS_FIELD = "Required-Items";
     public static final String REMOVE_REQUIRED_ITEMS_FIELD = "Remove-Required-Items";
     public static final String INTEREST_LIMITER_FIELD = "Interest-Limiter";
+
+    public static final NamespacedKey customItemKey = new NamespacedKey(BankPlus.INSTANCE(), "bp_custom_item");
 
     public BankUtils() throws Exception {
         throw new Exception("This class may not be initialized.");
@@ -608,8 +613,8 @@ public class BankUtils {
     }
 
     /**
-     * Method to retrieve required items.
-     * Both from short (ItemType-Amount) and advanced method (ConfigurationSection).
+     * Method to retrieve required items both from short (ItemType-Amount) and long method (ConfigurationSection).
+     * Custom items are now marked with a unique pdc key to make them not replicable and faster to check.
      *
      * @param levelSection The section of the bank level where to get the required items.
      * @param bankName     The name of the bank where to retrieve the items (used for debugging).
@@ -619,46 +624,64 @@ public class BankUtils {
         HashMap<String, ItemStack> requiredItems = new HashMap<>();
 
         ConfigurationSection requiredItemsSection = levelSection.getConfigurationSection(REQUIRED_ITEMS_FIELD);
-        if (requiredItemsSection != null) { // If its the long format, get the item from each section.
-            for (String itemName : requiredItemsSection.getKeys(false))
-                requiredItems.put(itemName, BPItems.getItemStackFromSection(requiredItemsSection.getConfigurationSection(itemName)));
-        } else { // Process the short format and create the required items.
-            String requiredItemsString = levelSection.getString(REQUIRED_ITEMS_FIELD);
-            if (requiredItemsString == null || requiredItemsString.isEmpty()) return requiredItems;
+        if (requiredItemsSection != null) { // Required items section != null -> Long format used.
+            String startingItemID = bankName + "_" + levelSection.getName() + "_";
 
-            List<String> items = new ArrayList<>();
-            if (!requiredItemsString.contains(",")) items.add(requiredItemsString);
-            else items.addAll(Arrays.asList(requiredItemsString.split(",")));
-
-            for (String itemID : items) {
-                if (!itemID.contains("-")) {
-                    try {
-                        requiredItems.put(itemID, new ItemStack(Material.valueOf(itemID)));
-                    } catch (IllegalArgumentException e) {
-                        BPLogger.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
-                    }
-                } else {
-                    String[] split = itemID.split("-");
-                    ItemStack item;
-                    String id;
-                    try {
-                        Material material = Material.valueOf(split[0]);
-                        id = String.valueOf(material);
-                        item = new ItemStack(material);
-                    } catch (IllegalArgumentException e) {
-                        BPLogger.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
-                        continue;
-                    }
-                    int amount = 1;
-                    try {
-                        amount = Integer.parseInt(split[1]);
-                    } catch (NumberFormatException e) {
-                        BPLogger.warn("The bank \"" + bankName + "\" contains an invalid number in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
-                    }
-
-                    item.setAmount(amount);
-                    requiredItems.put(id, item);
+            for (String itemName : requiredItemsSection.getKeys(false)) {
+                ConfigurationSection itemSection = requiredItemsSection.getConfigurationSection(itemName);
+                if (itemSection == null) {
+                    BPLogger.warn("The required item \"" + itemName + "\" has an invalid section.");
+                    continue;
                 }
+
+                ItemStack customItem = BPItems.getItemStackFromSection(itemSection);
+                ItemMeta meta = customItem.getItemMeta();
+                PersistentDataContainer data = meta.getPersistentDataContainer();
+
+                // Set an unique custom item ID to make it not replicable: bankName_bankLevel_itemName
+                data.set(customItemKey, PersistentDataType.STRING, startingItemID + itemName);
+                customItem.setItemMeta(meta);
+                requiredItems.put(itemName, customItem);
+            }
+            return requiredItems;
+        }
+
+        // Once here, the short format is the only one left.
+        String requiredItemsString = levelSection.getString(REQUIRED_ITEMS_FIELD);
+        if (requiredItemsString == null || requiredItemsString.isEmpty()) return requiredItems;
+
+        List<String> items = new ArrayList<>();
+        if (!requiredItemsString.contains(",")) items.add(requiredItemsString);
+        else items.addAll(Arrays.asList(requiredItemsString.split(",")));
+
+        for (String itemID : items) {
+            if (!itemID.contains("-")) {
+                try {
+                    requiredItems.put(itemID, new ItemStack(Material.valueOf(itemID)));
+                } catch (IllegalArgumentException e) {
+                    BPLogger.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
+                }
+            } else {
+                String[] split = itemID.split("-");
+                ItemStack item;
+                String id;
+                try {
+                    Material material = Material.valueOf(split[0]);
+                    id = String.valueOf(material);
+                    item = new ItemStack(material);
+                } catch (IllegalArgumentException e) {
+                    BPLogger.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
+                    continue;
+                }
+                int amount = 1;
+                try {
+                    amount = Integer.parseInt(split[1]);
+                } catch (NumberFormatException e) {
+                    BPLogger.warn("The bank \"" + bankName + "\" contains an invalid number in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
+                }
+
+                item.setAmount(amount);
+                requiredItems.put(id, item);
             }
         }
         return requiredItems;
@@ -673,28 +696,19 @@ public class BankUtils {
      * @return true if the checked item is a required item.
      */
     public static boolean isRequiredItem(ItemStack requiredItem, ItemStack itemToCheck) {
-        Material requiredMaterial = requiredItem.getType(), givenMaterial = itemToCheck.getType();
-        if (!requiredMaterial.equals(givenMaterial)) return false;
-
-        ItemMeta requiredMeta = requiredItem.getItemMeta(), givenMeta = itemToCheck.getItemMeta();
+        ItemMeta requiredMeta = requiredItem.getItemMeta();
         if (requiredMeta != null) {
-            if (requiredMeta.hasDisplayName()) {
-                String requiredDisplayname = requiredMeta.getDisplayName(), givenDisplayname = givenMeta.getDisplayName();
-                if (!requiredDisplayname.equals(givenDisplayname)) return false;
-            }
+            String requiredId = requiredMeta.getPersistentDataContainer().get(customItemKey, PersistentDataType.STRING);
+            // Check if it's a custom item, otherwise just check for the material.
+            if (requiredId != null) {
+                ItemMeta checkMeta = itemToCheck.getItemMeta();
+                if (checkMeta == null) return false;
 
-            if (requiredMeta.hasLore()) {
-                List<String> requiredLore = requiredMeta.getLore(), givenLore = givenMeta.getLore();
-                if (!requiredLore.equals(givenLore)) return false;
-            }
-
-            try {
-                int requiredData = requiredMeta.getCustomModelData(), givenData = givenMeta.getCustomModelData();
-                if (requiredData != givenData) return false;
-            } catch (IllegalStateException | NoSuchMethodError e) {
+                String checkId = checkMeta.getPersistentDataContainer().get(customItemKey, PersistentDataType.STRING);
+                return requiredId.equals(checkId);
             }
         }
-        return true;
+        return requiredItem.getType().equals(itemToCheck.getType());
     }
 
     /**

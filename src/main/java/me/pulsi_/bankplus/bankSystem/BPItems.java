@@ -81,6 +81,49 @@ public class BPItems {
     }
 
     /**
+     * Automatically get the item stack with all attributes, except lore, from the item section. (displayname, glowing, flags etc...)
+     * For example the gui items doesn't need to have the lore, since it is got in a different way.
+     *
+     * @param itemSection The item section in the config.
+     * @return An ItemStack.
+     */
+    public static ItemStack getNoLoreItemStackFromSection(ConfigurationSection itemSection) {
+        if (itemSection == null) return BPItems.UNKNOWN_ITEM.clone();
+
+        ItemStack item = BPItems.createItemStack(itemSection.getString(MATERIAL_KEY));
+
+        int amount = itemSection.getInt(AMOUNT_KEY);
+        if (amount > 1) item.setAmount(amount);
+
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return item;
+
+        String displayname = itemSection.getString(DISPLAYNAME_KEY);
+        meta.displayName(displayname == null ? DISPLAYNAME_NOT_FOUND : BPChat.color(displayname));
+
+        for (String flag : itemSection.getStringList(ITEM_FLAGS_KEY)) {
+            try {
+                meta.addItemFlags(ItemFlag.valueOf(flag));
+            } catch (IllegalArgumentException e) {
+                BPLogger.warn("Could not set item flag \"" + flag + "\" to item \"" + itemSection + "\" because it's not a valid item flag.");
+            }
+        }
+
+        int modelData = itemSection.getInt(CUSTOM_MODEL_DATA_KEY);
+        if (modelData > 0) {
+            try {
+                meta.setCustomModelData(modelData);
+            } catch (NoSuchMethodError e) { // Do that to add support for older minecraft versions.
+                BPLogger.warn("Cannot set custom model data to the item: \"" + displayname + "\"&e. Custom model data is only available on 1.14.4+ servers!");
+            }
+        }
+        item.setItemMeta(meta);
+
+        if (itemSection.getBoolean(GLOWING_KEY)) item.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
+        return item;
+    }
+
+    /**
      * From the material String, process it and create an item stack or head. (only material).
      *
      * @param material The material string.

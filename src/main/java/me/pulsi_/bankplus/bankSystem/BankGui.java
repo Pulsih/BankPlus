@@ -18,6 +18,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitTask;
+import org.checkerframework.checker.units.qual.C;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -181,15 +182,25 @@ public class BankGui {
 
         ItemMeta meta = item.getItemMeta();
 
-        List<Component> lore = guiItem.lore.getOrDefault(BankUtils.getCurrentLevel(originBank, p), guiItem.lore.get(0));
-        Component displayName = guiItem.getItem().getItemMeta().displayName(); // Get the displayname of the stored item.
+        MiniMessage mm = MiniMessage.miniMessage();
+        Component italicRemover = mm.deserialize("<!italic>");
+
+        List<Component> lore = new ArrayList<>();
+        for (Component line : guiItem.lore.getOrDefault(BankUtils.getCurrentLevel(originBank, p), guiItem.lore.get(0)))
+            // For each lore line, add a reset component to avoid the italic lore bug.
+            lore.add(italicRemover.append(line));
+
+        Component displayName = italicRemover.append(guiItem.getItem().getItemMeta().displayName());
 
         if (BankPlus.INSTANCE().isPlaceholderApiHooked()) {
-            String sd = MiniMessage.miniMessage().serialize(displayName);
-            meta.displayName(BPChat.color(PlaceholderAPI.setPlaceholders(p, sd)));
-
-            List<String> sl = BPUtils.componentListToStringList(lore);
-            meta.lore(BPUtils.stringListToComponentList(PlaceholderAPI.setPlaceholders(p, sl)));
+            meta.displayName(
+                    BPChat.color(PlaceholderAPI.setPlaceholders(p, mm.serialize(displayName)))
+            );
+            meta.lore(
+                    BPUtils.stringListToComponentList(
+                            PlaceholderAPI.setPlaceholders(p, BPUtils.componentListToStringList(lore))
+                    )
+            );
         } else {
             meta.displayName(displayName);
             meta.lore(lore);
@@ -213,6 +224,11 @@ public class BankGui {
             return item;
         }
 
+        /**
+         * Get the lore of the item, based on the specified level.
+         *
+         * @return The lore as: K: Level - V: Lore
+         */
         public HashMap<Integer, List<Component>> getLore() {
             return lore;
         }
@@ -243,7 +259,7 @@ public class BankGui {
 
         public static BPGuiItem loadBankItem(ConfigurationSection itemSection) {
             BPGuiItem guiItem = new BPGuiItem();
-            guiItem.setItem(BPItems.getItemStackFromSection(itemSection));
+            guiItem.setItem(BPItems.getNoLoreItemStackFromSection(itemSection));
             guiItem.setLore(BankUtils.getLevelLore(itemSection));
             guiItem.setActions(itemSection.getStringList("Actions"));
             guiItem.setPlayerHead("head-%player%".equalsIgnoreCase(itemSection.getString(BPItems.MATERIAL_KEY)));

@@ -54,8 +54,8 @@ public final class BankPlus extends JavaPlugin {
         PluginManager plManager = Bukkit.getPluginManager();
         if (plManager.getPlugin("Vault") == null) {
             BPLogger.log("");
-            BPLogger.log("&cCannot load " + BPChat.PREFIX + "&c, Vault is not installed!");
-            BPLogger.log("&cPlease download it in order to use this plugin!");
+            BPLogger.log("<red>Cannot load " + BPChat.PREFIX + ", Vault is not installed!");
+            BPLogger.log("<red>Please download it in order to use this plugin!");
             BPLogger.log("");
             getServer().getPluginManager().disablePlugin(this);
             return;
@@ -68,8 +68,8 @@ public final class BankPlus extends JavaPlugin {
                 return;
             }
             BPLogger.log("");
-            BPLogger.log("&cCannot load " + BPChat.PREFIX + "&c, No economy plugin found!");
-            BPLogger.log("&cPlease download an economy plugin to use BankPlus!");
+            BPLogger.log("<red>Cannot load " + BPChat.PREFIX + "&c, No economy plugin found!");
+            BPLogger.log("<red>Please download an economy plugin to use BankPlus!");
             BPLogger.log("");
             getServer().getPluginManager().disablePlugin(this);
             return;

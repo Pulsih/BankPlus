@@ -131,6 +131,7 @@ Items:
   Filler:
     Displayname: " "
     Material: "BLACK_STAINED_GLASS_PANE"
+    # You can apply all the values the same as other items.
 
   # You can add as many items as you want.
   WithdrawButton1: # The name of the item can be whatever you want. (Except for "Filler")
