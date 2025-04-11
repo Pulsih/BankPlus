@@ -3,23 +3,15 @@ package me.pulsi_.bankplus.interest;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
-import me.pulsi_.bankplus.economy.BPEconomy;
-import me.pulsi_.bankplus.economy.TransactionType;
 import me.pulsi_.bankplus.managers.BPTaskManager;
 import me.pulsi_.bankplus.utils.BPUtils;
-import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.ConfigValues;
-import me.pulsi_.bankplus.values.MessageValues;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
-
-import static me.pulsi_.bankplus.values.ConfigValues.isOfflineInterestDifferentRate;
 
 public class BPInterest {
 
@@ -106,12 +98,12 @@ public class BPInterest {
         public abstract void giveInterest(OfflinePlayer p);
 
         /**
-         * Calculate the amount of money that the player will receive from the interest.
+         * Calculate the amount of money that the player would receive with the current interest rate.
          *
-         * @param bank            The bank where the money should be deposited.
-         * @param p               The player.
+         * @param bank            The bank where to calculate the interest.
+         * @param p               The player to retrieve bank level and other information.
          * @param defaultInterest The interest rate as fallback.
-         * @return The amount of money with all calculations already made (interest limiter).
+         * @return The amount of money with all calculations (interest limiter) already made.
          */
         public static BigDecimal getInterestMoney(Bank bank, OfflinePlayer p, BigDecimal defaultInterest) {
             BigDecimal playerBalance = bank.getBankEconomy().getBankBalance(p);

@@ -3,7 +3,6 @@ plugins { java }
 group = "me.pulsi_"
 version = "6.4-Alpha8"
 
-
 /*tasks.withType<Jar> { // To simplify the testing, set the path directly into the plugins folder.
     destinationDirectory.set(File("C:\\Users\\faste\\Desktop\\Test Servers\\1.21.4\\plugins"))
 }*/
@@ -45,7 +44,7 @@ dependencies {
     ) // CMI-Api: 9.7.4.1 (https://github.com/Zrips/CMI-API/releases)
 
     implementation("net.essentialsx:EssentialsX:2.21.0") {
-        // It is requesting spigot api but it goes in conflict with paper api.
+        // It is requesting spigot api, but it goes in conflict with paper api.
         exclude("org.spigotmc")
     }
 }

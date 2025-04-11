@@ -12,7 +12,6 @@ import me.pulsi_.bankplus.events.BPAfterTransactionEvent;
 import me.pulsi_.bankplus.events.BPPreTransactionEvent;
 import me.pulsi_.bankplus.listeners.playerChat.PlayerChatMethod;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
-import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPSets;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;

@@ -23,7 +23,6 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 
 public class BPUtils {
@@ -89,7 +88,7 @@ public class BPUtils {
      * Tries to convert the specified string to a number, or returns
      * the fallback value in case the string is not a valid number.
      *
-     * @param number The number string to convert.
+     * @param number   The number string to convert.
      * @param fallBack The fall-back value in case the string is not a valid number.
      * @return The converted string or fall-back.
      */
@@ -101,26 +100,22 @@ public class BPUtils {
      * Tries to convert the specified string to a number, or returns
      * the fallback value in case the string is not a valid number.
      *
-     * @param number The number string to convert.
-     * @param fallBack The fall-back value in case the string is not a valid number.
+     * @param number       The number string to convert.
+     * @param fallBack     The fall-back value in case the string is not a valid number.
      * @param errorMessage The message to show in the console warning.
      * @return The converted string or fall-back.
      */
     public static <T extends Number> T convertToNumber(String number, T fallBack, String errorMessage) {
         try {
-            if (fallBack instanceof Integer) {
-                return (T) Integer.valueOf(number);
-            } else if (fallBack instanceof Double) {
-                return (T) Double.valueOf(number);
-            } else if (fallBack instanceof Float) {
-                return (T) Float.valueOf(number);
-            } else if (fallBack instanceof Long) {
-                return (T) Long.valueOf(number);
-            } else if (fallBack instanceof Short) {
-                return (T) Short.valueOf(number);
-            } else if (fallBack instanceof Byte) {
-                return (T) Byte.valueOf(number);
-            }
+            return switch (fallBack) {
+                case Integer ignored -> (T) Integer.valueOf(number);
+                case Double ignored -> (T) Double.valueOf(number);
+                case Float ignored -> (T) Float.valueOf(number);
+                case Long ignored -> (T) Long.valueOf(number);
+                case Short ignored -> (T) Short.valueOf(number);
+                case Byte ignored -> (T) Byte.valueOf(number);
+                default -> fallBack;
+            };
         } catch (NumberFormatException e) {
             if (errorMessage != null) BPLogger.warn(errorMessage);
         }
@@ -151,9 +146,12 @@ public class BPUtils {
 
             title = mm.deserialize(values[0]);
             subtitle = mm.deserialize(values[1]);
-            if (l > 2) fadeIn = convertToNumber(values[2], fadeIn, "The fadeIn value in the title \"" + titleString + "\" is invalid.");
-            if (l > 3) stay = convertToNumber(values[3], stay, "The stay value in the title \"" + titleString + "\" is invalid.");
-            if (l > 4) fadeOut = convertToNumber(values[4], fadeOut, "The fadeOut value in the title \"" + titleString + "\" is invalid.");
+            if (l > 2)
+                fadeIn = convertToNumber(values[2], fadeIn, "The fadeIn value in the title \"" + titleString + "\" is invalid.");
+            if (l > 3)
+                stay = convertToNumber(values[3], stay, "The stay value in the title \"" + titleString + "\" is invalid.");
+            if (l > 4)
+                fadeOut = convertToNumber(values[4], fadeOut, "The fadeOut value in the title \"" + titleString + "\" is invalid.");
         }
 
         p.showTitle(Title.title(title, subtitle, Title.Times.times(toTicks(fadeIn), toTicks(stay), toTicks(fadeOut))));
@@ -181,7 +179,8 @@ public class BPUtils {
 
             soundName = values[0]; // If there is a "," there will be 2 values.
             volume = convertToNumber(values[1], volume, "The volume value in the sound \"" + soundString + "\" is invalid.");
-            if (l > 2) pitch = convertToNumber(values[2], pitch, "The pitch value in the sound \"" + soundString + "\" is invalid.");
+            if (l > 2)
+                pitch = convertToNumber(values[2], pitch, "The pitch value in the sound \"" + soundString + "\" is invalid.");
         }
 
         Sound sound;
@@ -198,6 +197,7 @@ public class BPUtils {
 
     /**
      * Create a Duration instance of delay in ticks.
+     *
      * @param ticks The ticks.
      * @return The duration instance in ticks.
      */

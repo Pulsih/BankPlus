@@ -21,7 +21,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.net.URL;
+import java.net.URI;
 
 public final class BankPlus extends JavaPlugin {
 
@@ -54,22 +54,22 @@ public final class BankPlus extends JavaPlugin {
         PluginManager plManager = Bukkit.getPluginManager();
         if (plManager.getPlugin("Vault") == null) {
             BPLogger.log("");
-            BPLogger.log("<red>Cannot load " + BPChat.PREFIX + ", Vault is not installed!");
-            BPLogger.log("<red>Please download it in order to use this plugin!");
+            BPLogger.log("<red>Cannot load " + BPChat.PREFIX + ", Vault is not installed.");
+            BPLogger.log("<red>Please download it in order to use this plugin.");
             BPLogger.log("");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
         if (!setupEconomy()) {
             if (tries < 4) {
-                BPLogger.warn("BankPlus didn't find any economy plugin on this server! The plugin will re-search in 2 seconds! (" + tries + " try)");
+                BPLogger.warn("BankPlus didn't find any economy plugin on this server, the plugin will re-search in 2 seconds. (" + tries + " try)");
                 Bukkit.getScheduler().runTaskLater(this, this::onEnable, 40);
                 tries++;
                 return;
             }
             BPLogger.log("");
-            BPLogger.log("<red>Cannot load " + BPChat.PREFIX + "&c, No economy plugin found!");
-            BPLogger.log("<red>Please download an economy plugin to use BankPlus!");
+            BPLogger.log("<red>Cannot load " + BPChat.PREFIX + ", No economy plugin found.");
+            BPLogger.log("<red>Please download an economy plugin to use this plugin.");
             BPLogger.log("");
             getServer().getPluginManager().disablePlugin(this);
             return;
@@ -200,7 +200,7 @@ public final class BankPlus extends JavaPlugin {
         boolean updated = true;
         try {
             newVersion = new BufferedReader(new InputStreamReader(
-                    new URL("https://api.spigotmc.org/legacy/update.php?resource=93130").openConnection().getInputStream()
+                    URI.create("https://api.spigotmc.org/legacy/update.php?resource=93130").toURL().openConnection().getInputStream()
             )).readLine();
 
             updated = actualVersion.equals(newVersion);
