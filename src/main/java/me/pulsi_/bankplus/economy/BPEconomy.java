@@ -1,5 +1,6 @@
 package me.pulsi_.bankplus.economy;
 
+import com.earth2me.essentials.config.annotations.DeleteIfIncomplete;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.BPPlayerManager;
@@ -139,49 +140,38 @@ public class BPEconomy {
     }
 
     /**
-     * Load the specified UUID holder.
+     * Cache the player information to use and modify them faster.
+     * <p>
+     * Data is ONLY LOADED FROM FILES, changes are then synchronized with MySQL database. (if enabled)
      *
-     * @param uuid          The uuid to load.
-     * @param wasRegistered If not, it will load the holder with the join start amount.
-     * @param load          If false, this method will only return the holder object and won't register it to the hashmap.
+     * @param uuid          The player uuid to load.
+     * @param wasRegistered If false, it will load money as first join amount.
+     * @param load          If false, the holder won't be cached.
      * @return The holder created.
      */
     public Holder loadPlayerHolder(UUID uuid, boolean wasRegistered, boolean load) {
         if (load) loadedPlayers.add(uuid);
         if (isPlayerBalanceLoaded(uuid)) return holders.get(uuid);
 
+        boolean useStartAmount = !wasRegistered && BankUtils.isMainBank(originBank);
+
+        FileConfiguration config = new BPPlayerManager(uuid).getPlayerConfig();
         Holder holder = new Holder();
 
-        BigDecimal debt, money, offlineInterest;
-        int level;
-
-        boolean useStartAmount = !wasRegistered && BankUtils.isMainBank(originBank);
-        if (BankPlus.INSTANCE().getMySql().isConnected()) {
-            SQLPlayerManager pManager = new SQLPlayerManager(uuid);
-
-            String bankName = originBank.getIdentifier();
-            debt = pManager.getDebt(bankName);
-            money = useStartAmount ? ConfigValues.getStartAmount() : pManager.getMoney(bankName);
-            offlineInterest = pManager.getOfflineInterest(bankName);
-            level = pManager.getLevel(bankName);
-        } else {
-            FileConfiguration config = new BPPlayerManager(uuid).getPlayerConfig();
-
-            debt = BPFormatter.getStyledBigDecimal(config.getString(debtPath));
-            money = useStartAmount ? ConfigValues.getStartAmount() : BPFormatter.getStyledBigDecimal(config.getString(moneyPath));
-            offlineInterest = BPFormatter.getStyledBigDecimal(config.getString(interestPath));
-            level = Math.max(config.getInt(levelPath), 1);
-        }
-
-        holder.debt = debt;
-        holder.money = money;
-        holder.offlineInterest = offlineInterest;
-        holder.bankLevel = level;
+        holder.debt = BPFormatter.getStyledBigDecimal(config.getString(debtPath));
+        holder.money = useStartAmount ? ConfigValues.getStartAmount() : BPFormatter.getStyledBigDecimal(config.getString(moneyPath));
+        holder.offlineInterest = BPFormatter.getStyledBigDecimal(config.getString(interestPath));
+        holder.bankLevel = Math.max(config.getInt(levelPath), 1);
 
         if (load) holders.put(uuid, holder);
         return holder;
     }
 
+    /**
+     * Remove the player holder from the cache, this method does not save changes, so it is important to save them before calling this method.
+     *
+     * @param uuid The player UUID.
+     */
     public void unloadPlayerBalance(UUID uuid) {
         holders.remove(uuid);
 

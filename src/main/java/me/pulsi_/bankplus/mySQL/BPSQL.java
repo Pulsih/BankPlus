@@ -10,6 +10,15 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+/**
+ * BankPlus MySQL system save both database and files to synchronize
+ * them, local files data is always available and updated, and will
+ * be updated on the database.
+ * <p>
+ * In case the database is not available or the connection has been
+ * closed, the data will continue to be saved locally, and once the
+ * database will connect again the local data will be updated.
+ */
 public class BPSQL {
 
     private final BPSQLMethods sqlMethods;
@@ -36,10 +45,10 @@ public class BPSQL {
         boolean uuid = ConfigValues.isStoringUUIDs();
         for (String bankName : BPEconomy.nameList()) {
             if (uuid) {
-                if (getSqlMethods().get(bankName, "uuid", "WHERE uuid='" + p.getUniqueId() + "'").isEmpty())
+                if ((boolean) getSqlMethods().has(bankName, "uuid", "WHERE uuid='" + p.getUniqueId() + "'").result)
                     createNewDefault(bankName, p);
             } else {
-                if (getSqlMethods().get(bankName, "account_name", "WHERE account_name='" + p.getName() + "'").isEmpty())
+                if ((boolean) getSqlMethods().has(bankName, "account_name", "WHERE account_name='" + p.getName() + "'").result)
                     createNewDefault(bankName, p);
             }
         }
@@ -71,12 +80,11 @@ public class BPSQL {
            );
     }
 
-    public boolean isConnected() {
-        return ConfigValues.isSqlEnabled() && connection != null;
-    }
-
+    /**
+     * Creates a new instance of the connection and assign it.
+     * This method also enables the SQLMethods.
+     */
     public void connect() {
-        if (isConnected()) return;
         try {
             connection = DriverManager.getConnection(url, username, password);
             sqlMethods.connectToDatabase();
@@ -86,11 +94,15 @@ public class BPSQL {
         }
     }
 
+    /**
+     * Disconnect the database.
+     */
     public void disconnect() {
-        if (!isConnected()) return;
         try {
-            connection.close();
-            connection = null;
+            if (connection != null) {
+                connection.close();
+                connection = null;
+            }
             BPLogger.info("Database successfully disconnected!");
         } catch (SQLException e) {
             BPLogger.warn(e, "Could not disconnect bankplus from his database!");

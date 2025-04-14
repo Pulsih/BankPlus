@@ -17,14 +17,15 @@ import java.util.UUID;
 public class EconomyUtils {
 
     /**
-     * Save the selected player balance.
+     * Save the selected player information.
      *
      * @param uuid The player UUID.
      */
     public static void savePlayer(UUID uuid, boolean unload) {
-        if (BankPlus.INSTANCE().getMySql().isConnected()) {
+        if (ConfigValues.isSqlEnabled()) { // If MySQL is enabled, save the data also in the database.
             SQLPlayerManager pManager = new SQLPlayerManager(uuid);
-            for (BPEconomy economy : BPEconomy.list()) {
+
+            for (BPEconomy economy : BPEconomy.list())
                 pManager.updatePlayer(
                         economy.getOriginBank().getIdentifier(),
                         economy.getDebt(uuid),
@@ -32,24 +33,25 @@ public class EconomyUtils {
                         economy.getBankLevel(uuid),
                         economy.getOfflineInterest(uuid)
                 );
-            }
-        } else {
-            BPPlayerManager manager = new BPPlayerManager(uuid);
-
-            File file = manager.getPlayerFile();
-            FileConfiguration config = manager.getPlayerConfig(file);
-
-            for (BPEconomy economy : BPEconomy.list()) {
-                String name = economy.getOriginBank().getIdentifier();
-                config.set("banks." + name + ".debt", BPFormatter.styleBigDecimal(economy.getDebt(uuid)));
-                config.set("banks." + name + ".level", economy.getBankLevel(uuid));
-                config.set("banks." + name + ".money", BPFormatter.styleBigDecimal(economy.getBankBalance(uuid)));
-                config.set("banks." + name + ".interest", BPFormatter.styleBigDecimal(economy.getOfflineInterest(uuid)));
-            }
-            manager.savePlayerFile(config, file);
         }
+
+        BPPlayerManager manager = new BPPlayerManager(uuid);
+
+        File file = manager.getPlayerFile();
+        FileConfiguration config = manager.getPlayerConfig(file);
+
+        for (BPEconomy economy : BPEconomy.list()) {
+            String name = economy.getOriginBank().getIdentifier();
+            config.set("banks." + name + ".debt", economy.getDebt(uuid).toPlainString());
+            config.set("banks." + name + ".level", economy.getBankLevel(uuid));
+            config.set("banks." + name + ".money", economy.getBankBalance(uuid).toPlainString());
+            config.set("banks." + name + ".interest", economy.getOfflineInterest(uuid).toPlainString());
+        }
+        manager.savePlayerFile(config, file);
+
         if (unload) PlayerRegistry.unloadPlayer(uuid);
     }
+
 
     /**
      * Load all the online players balance.
@@ -62,7 +64,7 @@ public class EconomyUtils {
     /**
      * Save everyone's balance.
      *
-     * @param async Choose if executing this action asynchronously to increase the server performance. (DO NOT USE ON SERVER SHOTDOWN)
+     * @param async Choose if executing this action asynchronously to increase the server performance. (DO NOT USE ON SERVER SHUTDOWN)
      */
     public static void saveEveryone(boolean async) {
         if (async) {
