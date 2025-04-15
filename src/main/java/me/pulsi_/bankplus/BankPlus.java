@@ -81,7 +81,7 @@ public final class BankPlus extends JavaPlugin {
         this.bpConfigs = new BPConfigs(this);
         this.bpData = new BPData(this);
         this.BPAfk = new BPAFK(this);
-        this.interest = new BPInterest(this);
+        this.interest = new BPInterest();
 
         if (!BPConfigs.isUpdated()) {
             BPVersions.renameInterestMoneyGiveToRate();
