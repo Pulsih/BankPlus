@@ -69,19 +69,8 @@ public class BPData {
 
     public void shutdownPlugin() {
         EconomyUtils.saveEveryone(false);
-
-        BPConfigs configs = plugin.getConfigs();
-        File file = configs.getFile("saves.yml");
-        FileConfiguration savesConfig = configs.getConfig(file);
-
-        if (ConfigValues.isInterestEnabled()) plugin.getInterest().saveInterest(savesConfig);
-        BPLoanRegistry.saveAllLoans(savesConfig);
-
-        try {
-            savesConfig.save(file);
-        } catch (IOException e) {
-            BPLogger.error(e, "Failed to save changes to \"saves.yml\" file! " + e.getMessage());
-        }
+        if (ConfigValues.isInterestEnabled()) plugin.getInterest().saveInterest();
+        BPLoanRegistry.saveAllLoans();
 
         BPLogger.log("");
         BPLogger.log("    " + BPChat.PREFIX + " <red>Plugin successfully disabled!");
@@ -109,8 +98,9 @@ public class BPData {
 
             plugin.getBankRegistry().loadBanks();
 
-            if (ConfigValues.isSqlEnabled()) {
-                BPSQL sql = plugin.getMySql();
+            BPSQL sql = plugin.getMySql();
+            if (!ConfigValues.isSqlEnabled()) sql.disconnect();
+            else {
                 sql.disconnect();
                 sql.setupMySQL();
                 sql.connect();

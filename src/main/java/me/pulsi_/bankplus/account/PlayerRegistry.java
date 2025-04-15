@@ -20,9 +20,12 @@ public class PlayerRegistry {
     }
 
     public static BPPlayer loadPlayer(Player p, boolean wasRegistered) {
-        for (BPEconomy economy : BPEconomy.list()) economy.loadPlayerHolder(p, wasRegistered);
         BPPlayer bpPlayer = new BPPlayer(p);
         players.putIfAbsent(p.getUniqueId(), bpPlayer);
+        for (BPEconomy economy : BPEconomy.list()) economy.loadPlayerHolder(p, wasRegistered);
+        // Do that to avoid players messing with transactions
+        // before loading their data, avoiding dupe bugs.
+        bpPlayer.setLoaded(true);
         return bpPlayer;
     }
 
@@ -32,6 +35,10 @@ public class PlayerRegistry {
     }
 
     public static BPPlayer get(OfflinePlayer p) {
-        return players.get(p.getUniqueId());
+        return get(p.getUniqueId());
+    }
+
+    public static BPPlayer get(UUID uuid) {
+        return players.get(uuid);
     }
 }

@@ -40,9 +40,7 @@ public class PlayerServerListener implements Listener {
 
         int loadDelay = ConfigValues.getLoadDelay();
         if (loadDelay <= 0) PlayerRegistry.loadPlayer(p, wasRegistered);
-        else {
-            Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> PlayerRegistry.loadPlayer(p, wasRegistered), loadDelay);
-        }
+        else Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> PlayerRegistry.loadPlayer(p, wasRegistered), loadDelay);
 
         if (!ConfigValues.isNotifyingOfflineInterest()) return;
 

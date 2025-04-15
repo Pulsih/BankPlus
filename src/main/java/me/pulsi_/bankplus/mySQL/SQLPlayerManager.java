@@ -101,7 +101,7 @@ public class SQLPlayerManager {
 
             String level = get(bankName, "bank_level");
             try {
-                this.bankLevel = Integer.parseInt(level);
+                this.bankLevel = Math.max(1, Integer.parseInt(level));
             } catch (Throwable t) {
                 this.bankLevel = 1;
             }

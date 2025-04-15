@@ -5,6 +5,7 @@ import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.managers.BPTaskManager;
 import me.pulsi_.bankplus.utils.BPUtils;
+import me.pulsi_.bankplus.utils.SavesFile;
 import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -15,14 +16,10 @@ import java.util.List;
 
 public class BPInterest {
 
+    public static final String INTEREST_SAVE_PATH = "interest-save";
+
     private long cooldown = 0;
     private boolean wasDisabled = true, isOfflineInterestEnabled;
-
-    private final BankPlus plugin;
-
-    public BPInterest(BankPlus plugin) {
-        this.plugin = plugin;
-    }
 
     /**
      * Restart the interest cooldown.
@@ -34,11 +31,7 @@ public class BPInterest {
         isOfflineInterestEnabled = ConfigValues.isOfflineInterestEnabled();
 
         long interestSave = 0;
-
-        if (loadFromFile) {
-            FileConfiguration config = plugin.getConfigs().getConfig("saves.yml");
-            if (config != null) interestSave = config.getLong("interest-save");
-        }
+        if (loadFromFile) interestSave = SavesFile.getLong(INTEREST_SAVE_PATH);
 
         if (interestSave > 0) cooldown = System.currentTimeMillis() + interestSave;
         else cooldown = System.currentTimeMillis() + ConfigValues.getInterestDelay();
@@ -54,8 +47,8 @@ public class BPInterest {
         Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), this::giveInterest);
     }
 
-    public void saveInterest(FileConfiguration savesConfig) {
-        savesConfig.set("interest-save", getInterestCooldownMillis());
+    public void saveInterest() {
+        SavesFile.set(INTEREST_SAVE_PATH, getInterestCooldownMillis());
     }
 
     private void loopInterest() {

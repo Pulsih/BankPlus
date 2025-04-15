@@ -7,6 +7,7 @@ import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.economy.TransactionType;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
+import me.pulsi_.bankplus.utils.SavesFile;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
@@ -15,6 +16,8 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -120,18 +123,26 @@ public class BPLoanRegistry {
      * Save all currently registered loans.
      * @param savesConfig The saves file where to save the loans.
      */
-    public static void saveAllLoans(FileConfiguration savesConfig) {
+    public static void saveAllLoans() {
+        File file = SavesFile.getFile();
+        FileConfiguration config = SavesFile.getConfig();
         for (BPLoan loan : loans) {
             String path = "loans." + loan.getReceiver().getUniqueId() + ".";
 
-            if (loan.getSender() != null) savesConfig.set(path + "sender", loan.getSender().getUniqueId());
-            savesConfig.set(path + "money-to-return", loan.getMoneyToReturn());
-            savesConfig.set(path + "instalments", loan.getInstalments());
-            savesConfig.set(path + "instalments-point", loan.getInstalmentsPoint());
-            savesConfig.set(path + "time-left", loan.getTimeLeft());
-            savesConfig.set(path + "from", loan.getSenderBank());
-            savesConfig.set(path + "to", loan.getReceiverBank());
-            savesConfig.set(path + "requested-bank", loan.getRequestedBank());
+            if (loan.getSender() != null) config.set(path + "sender", loan.getSender().getUniqueId());
+            config.set(path + "money-to-return", loan.getMoneyToReturn());
+            config.set(path + "instalments", loan.getInstalments());
+            config.set(path + "instalments-point", loan.getInstalmentsPoint());
+            config.set(path + "time-left", loan.getTimeLeft());
+            config.set(path + "from", loan.getSenderBank());
+            config.set(path + "to", loan.getReceiverBank());
+            config.set(path + "requested-bank", loan.getRequestedBank());
+        }
+
+        try {
+            config.save(file);
+        } catch (IOException e) {
+            BPLogger.warn("Could not save loans to saves.yml file: " + e.getMessage());
         }
     }
 

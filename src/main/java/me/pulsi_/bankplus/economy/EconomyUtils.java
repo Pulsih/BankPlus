@@ -4,6 +4,7 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayerManager;
 import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.managers.BPTaskManager;
+import me.pulsi_.bankplus.mySQL.BPSQL;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.values.ConfigValues;
@@ -22,19 +23,6 @@ public class EconomyUtils {
      * @param uuid The player UUID.
      */
     public static void savePlayer(UUID uuid, boolean unload) {
-        if (ConfigValues.isSqlEnabled()) { // If MySQL is enabled, save the data also in the database.
-            SQLPlayerManager pManager = new SQLPlayerManager(uuid);
-
-            for (BPEconomy economy : BPEconomy.list())
-                pManager.updatePlayer(
-                        economy.getOriginBank().getIdentifier(),
-                        economy.getDebt(uuid),
-                        economy.getBankBalance(uuid),
-                        economy.getBankLevel(uuid),
-                        economy.getOfflineInterest(uuid)
-                );
-        }
-
         BPPlayerManager manager = new BPPlayerManager(uuid);
 
         File file = manager.getPlayerFile();
@@ -48,6 +36,18 @@ public class EconomyUtils {
             config.set("banks." + name + ".interest", economy.getOfflineInterest(uuid).toPlainString());
         }
         manager.savePlayerFile(config, file);
+
+        if (BankPlus.INSTANCE().getMySql().isConnected()) { // If MySQL is enabled, save the data also in the database.
+            SQLPlayerManager pManager = new SQLPlayerManager(uuid);
+            for (BPEconomy economy : BPEconomy.list())
+                pManager.updatePlayer(
+                        economy.getOriginBank().getIdentifier(),
+                        economy.getDebt(uuid),
+                        economy.getBankBalance(uuid),
+                        economy.getBankLevel(uuid),
+                        economy.getOfflineInterest(uuid)
+                );
+        }
 
         if (unload) PlayerRegistry.unloadPlayer(uuid);
     }

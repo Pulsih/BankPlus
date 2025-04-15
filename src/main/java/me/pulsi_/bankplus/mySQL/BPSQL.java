@@ -45,10 +45,10 @@ public class BPSQL {
         boolean uuid = ConfigValues.isStoringUUIDs();
         for (String bankName : BPEconomy.nameList()) {
             if (uuid) {
-                if ((boolean) getSqlMethods().has(bankName, "uuid", "WHERE uuid='" + p.getUniqueId() + "'").result)
+                if (!(boolean) getSqlMethods().has(bankName, "uuid", "WHERE uuid='" + p.getUniqueId() + "'").result)
                     createNewDefault(bankName, p);
             } else {
-                if ((boolean) getSqlMethods().has(bankName, "account_name", "WHERE account_name='" + p.getName() + "'").result)
+                if (!(boolean) getSqlMethods().has(bankName, "account_name", "WHERE account_name='" + p.getName() + "'").result)
                     createNewDefault(bankName, p);
             }
         }
@@ -102,10 +102,22 @@ public class BPSQL {
             if (connection != null) {
                 connection.close();
                 connection = null;
+                BPLogger.info("Database successfully disconnected!");
             }
-            BPLogger.info("Database successfully disconnected!");
         } catch (SQLException e) {
             BPLogger.warn(e, "Could not disconnect bankplus from his database!");
+        }
+    }
+
+    /**
+     * Check if the connection to the database is present and isn't closed.
+     * @return true if it's correctly connected, false otherwise.
+     */
+    public boolean isConnected() {
+        try {
+            return connection != null && !connection.isClosed();
+        } catch (SQLException e) {
+            return false;
         }
     }
 
