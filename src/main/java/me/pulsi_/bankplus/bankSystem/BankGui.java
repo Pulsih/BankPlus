@@ -183,10 +183,11 @@ public class BankGui {
         MiniMessage mm = MiniMessage.miniMessage();
         Component italicRemover = mm.deserialize("<!italic>");
 
-        List<Component> lore = new ArrayList<>();
-        for (Component line : guiItem.lore.getOrDefault(BankUtils.getCurrentLevel(originBank, p), guiItem.lore.get(0)))
-            // For each lore line, add a reset component to avoid the italic lore bug.
-            lore.add(italicRemover.append(line));
+        List<Component> lore = new ArrayList<>(), defaultLore = guiItem.lore.get(0);
+        if (defaultLore != null)
+            for (Component line : guiItem.lore.getOrDefault(BankUtils.getCurrentLevel(originBank, p), defaultLore))
+                // For each lore line, add a reset component to avoid the italic lore bug.
+                lore.add(italicRemover.append(line));
 
         Component displayName = italicRemover.append(guiItem.getItem().getItemMeta().displayName());
 
