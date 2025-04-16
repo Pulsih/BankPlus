@@ -9,6 +9,7 @@ import org.bukkit.OfflinePlayer;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.UUID;
 
 /**
  * BankPlus MySQL system save both database and files to synchronize
@@ -42,15 +43,26 @@ public class BPSQL {
     }
 
     public void fillEmptyRecords(OfflinePlayer p) {
-        boolean uuid = ConfigValues.isStoringUUIDs();
+        boolean storeWithUUID = ConfigValues.isStoringUUIDs();
+        UUID uuid = p.getUniqueId();
+        String name = p.getName();
+
         for (String bankName : BPEconomy.nameList()) {
-            if (uuid) {
-                if (!(boolean) getSqlMethods().has(bankName, "uuid", "WHERE uuid='" + p.getUniqueId() + "'").result)
-                    createNewDefault(bankName, p);
+            String v, check;
+            if (storeWithUUID) {
+                v = "uuid";
+                check = "WHERE uuid='" + uuid + "'";
             } else {
-                if (!(boolean) getSqlMethods().has(bankName, "account_name", "WHERE account_name='" + p.getName() + "'").result)
-                    createNewDefault(bankName, p);
+                v = "account_name";
+                check = "WHERE account_name='" + name + "'";
             }
+
+            Object bool = getSqlMethods().has(bankName, v, check).result;
+            if (bool == null) {
+                BPLogger.warn("Could not check if player \"" + name + "\" is registered to the database. (Probably no connection or timeout)");
+                return;
+            }
+            if (!(boolean) bool) createNewDefault(bankName, p);
         }
     }
 

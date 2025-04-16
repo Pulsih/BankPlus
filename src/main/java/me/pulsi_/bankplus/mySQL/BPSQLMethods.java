@@ -48,12 +48,14 @@ public class BPSQLMethods {
             return SQLResponse.fail();
         }
 
+        Object result = null;
         try {
-            return SQLResponse.success(task.run());
+            result = task.run();
         } catch (SQLException e) {
             BPLogger.error(e, errorMessage);
-            return SQLResponse.fail();
+            return SQLResponse.fail(result);
         }
+        return SQLResponse.success(result);
     }
 
     /**
@@ -218,6 +220,12 @@ public class BPSQLMethods {
 
         public static SQLResponse fail() {
             return new SQLResponse();
+        }
+
+        public static SQLResponse fail(Object result) {
+            SQLResponse response = fail();
+            response.result = result;
+            return response;
         }
 
         public static SQLResponse success() {
