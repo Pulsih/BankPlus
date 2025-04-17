@@ -71,7 +71,7 @@ public class GiveRequiredItemsCmd extends BPCommand {
         Bank bank = BankUtils.getBank(getPossibleBank(args, 2));
         if (!BankUtils.exist(bank, s)) return BPCmdExecution.invalidExecution();
 
-        if (args.length == 3) {
+        if (args.length <= 3) {
             BPMessages.send(s, "Specify-Number");
             return BPCmdExecution.invalidExecution();
         }

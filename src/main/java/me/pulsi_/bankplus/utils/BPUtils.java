@@ -365,16 +365,18 @@ public class BPUtils {
      */
     public static String getRequiredItemsFormatted(Collection<ItemStack> requiredItems) {
         StringBuilder builder = new StringBuilder();
+        MiniMessage mm = MiniMessage.miniMessage();
+
         int i = 0;
         for (ItemStack requiredItem : requiredItems) {
             int amount = requiredItem.getAmount();
 
-            String name;
+            Component displayname;
             ItemMeta meta = requiredItem.getItemMeta();
-            if (meta != null && meta.hasDisplayName()) name = meta.getDisplayName();
-            else name = requiredItem.getType().toString();
+            if (meta != null && meta.hasDisplayName()) displayname = meta.displayName();
+            else displayname = requiredItem.displayName();
 
-            builder.append(amount).append(" ").append(name);
+            builder.append(amount).append(" ").append(mm.serialize(displayname));
             if (i == requiredItems.size() - 1) continue;
             if (i + 1 == requiredItems.size() - 1) builder.append(" and ");
             else builder.append(", ");
