@@ -230,7 +230,7 @@ public class BPSQLMethods {
 
         public static SQLResponse success() {
             SQLResponse response = new SQLResponse();
-            response.result = true;
+            response.success = true;
             return response;
         }
 
