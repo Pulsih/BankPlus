@@ -6,6 +6,7 @@ import io.papermc.paper.datacomponent.DataComponentTypes;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.texts.BPChat;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -52,11 +53,13 @@ public class BPItems {
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return item;
 
+        Component italicRemover = MiniMessage.miniMessage().deserialize("<!italic>");
+
         String displayname = itemSection.getString(DISPLAYNAME_KEY);
-        if (displayname != null) meta.displayName(BPChat.color(displayname));
+        if (displayname != null) meta.displayName(italicRemover.append(BPChat.color(displayname)));
 
         List<Component> lore = new ArrayList<>();
-        for (String lines : itemSection.getStringList(LORE_KEY)) lore.add(BPChat.color(lines));
+        for (String lines : itemSection.getStringList(LORE_KEY)) lore.add(italicRemover.append(BPChat.color(lines)));
         meta.lore(lore);
 
         for (String flag : itemSection.getStringList(ITEM_FLAGS_KEY)) {
