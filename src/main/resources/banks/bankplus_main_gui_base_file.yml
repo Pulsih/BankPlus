@@ -103,10 +103,12 @@ Levels:
     Cost: "10000"
     Required-Items: # This works exactly the same as the items in "Items" section.
       # "Special Diamond" and "Special Emerald" are just example
-      # items to show that you can use custom required items.
+      # items to show that you how to use custom required items.
       #
-      # By doing that, you will be able to upgrade the bank only if
-      # the item has the same properties of the one specified here.
+      # Custom items have a hidden unique id, so you will be able to upgrade the bank
+      # only if you give these items with the bankplus giveRequiredItems command.
+      #
+      # If you want to use a normal minecraft item, specify ONLY the Material.
       CustomDiamond:
         Material: "DIAMOND"
         Amount: 4
@@ -120,6 +122,9 @@ Levels:
         Lore:
           - "<gray>An emerald created for showing how the custom upgrade item works :)."
         Glowing: true
+      NormalDiamond:
+        Material: "DIAMOND"
+        Amount: 2
     Remove-Required-Items: true
     Capacity: "200000"
     Interest: "20%"

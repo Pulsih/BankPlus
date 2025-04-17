@@ -23,9 +23,10 @@ import java.util.UUID;
  */
 public class BPItems {
 
+    public static final Component DISPLAYNAME_NOT_FOUND = BPChat.color("<red>Displayname not found.");
+
     public static final ItemStack UNKNOWN_ITEM = new ItemStack(Material.STONE);
 
-    public static final Component DISPLAYNAME_NOT_FOUND = BPChat.color("<red>Displayname not found.");
     public static final String MATERIAL_KEY = "Material";
     public static final String AMOUNT_KEY = "Amount";
     public static final String DISPLAYNAME_KEY = "Displayname";
@@ -52,7 +53,7 @@ public class BPItems {
         if (meta == null) return item;
 
         String displayname = itemSection.getString(DISPLAYNAME_KEY);
-        meta.displayName(displayname == null ? DISPLAYNAME_NOT_FOUND : BPChat.color(displayname));
+        if (displayname != null) meta.displayName(BPChat.color(displayname));
 
         List<Component> lore = new ArrayList<>();
         for (String lines : itemSection.getStringList(LORE_KEY)) lore.add(BPChat.color(lines));
@@ -99,7 +100,7 @@ public class BPItems {
         if (meta == null) return item;
 
         String displayname = itemSection.getString(DISPLAYNAME_KEY);
-        meta.displayName(displayname == null ? DISPLAYNAME_NOT_FOUND : BPChat.color(displayname));
+        if (displayname != null) meta.displayName(BPChat.color(displayname));
 
         for (String flag : itemSection.getStringList(ITEM_FLAGS_KEY)) {
             try {

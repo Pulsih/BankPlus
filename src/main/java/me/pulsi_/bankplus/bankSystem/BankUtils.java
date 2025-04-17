@@ -631,8 +631,19 @@ public class BankUtils {
                 ItemMeta meta = customItem.getItemMeta();
                 PersistentDataContainer data = meta.getPersistentDataContainer();
 
-                // Set an unique custom item ID to make it not replicable: bankName_bankLevel_itemName
-                data.set(customItemKey, PersistentDataType.STRING, startingItemID + itemName);
+                // If an item specify ONLY Material or Amount, don't add the custom unique id.
+                // Custom required items are only items with meta modified. (lore, name, glowing..)
+                if (
+                        itemSection.get(BPItems.DISPLAYNAME_KEY) != null ||
+                        itemSection.get(BPItems.LORE_KEY) != null ||
+                        itemSection.get(BPItems.GLOWING_KEY) != null ||
+                        itemSection.get(BPItems.CUSTOM_MODEL_DATA_KEY) != null ||
+                        itemSection.get(BPItems.ITEM_FLAGS_KEY) != null
+                ) {
+                    // Set an unique custom item ID to make it not replicable: bankName_bankLevel_itemName
+                    data.set(customItemKey, PersistentDataType.STRING, startingItemID + itemName);
+                }
+
                 customItem.setItemMeta(meta);
                 requiredItems.put(itemName, customItem);
             }
