@@ -42,28 +42,41 @@ public class BPSQL {
         BPLogger.info("MySQL setup finished!");
     }
 
+    /**
+     * Loop through all different bank tables, and if the specified player record does not exist, create it.
+     *
+     * @param p The player to register.
+     */
     public void fillEmptyRecords(OfflinePlayer p) {
+        for (String bankName : BPEconomy.nameList())
+            if (!isRegistered(p, bankName)) createNewDefault(bankName, p);
+    }
+
+    /**
+     * Check if the player record is present in the given bank name table.
+     *
+     * @param p        The player to check for registration.
+     * @param bankName The bank table name.
+     * @return true if there is a player record, false otherwise.
+     */
+    public boolean isRegistered(OfflinePlayer p, String bankName) {
         boolean storeWithUUID = ConfigValues.isStoringUUIDs();
-        UUID uuid = p.getUniqueId();
-        String name = p.getName();
 
-        for (String bankName : BPEconomy.nameList()) {
-            String v, check;
-            if (storeWithUUID) {
-                v = "uuid";
-                check = "WHERE uuid='" + uuid + "'";
-            } else {
-                v = "account_name";
-                check = "WHERE account_name='" + name + "'";
-            }
-
-            Object bool = getSqlMethods().has(bankName, v, check).result;
-            if (bool == null) {
-                BPLogger.warn("Could not check if player \"" + name + "\" is registered to the database. (Probably no connection or timeout)");
-                return;
-            }
-            if (!(boolean) bool) createNewDefault(bankName, p);
+        String name = p.getName(), v, check;
+        if (storeWithUUID) {
+            v = "uuid";
+            check = "WHERE uuid='" + p.getUniqueId() + "'";
+        } else {
+            v = "account_name";
+            check = "WHERE account_name='" + name + "'";
         }
+
+        Object exists = getSqlMethods().has(bankName, v, check).result;
+        if (exists == null) {
+            BPLogger.warn("Could not check if player \"" + name + "\" is registered to the database. (Probably no connection or timeout)");
+            return false;
+        }
+        return (boolean) exists;
     }
 
     public void createNewDefault(String bankName, OfflinePlayer p) {
@@ -80,16 +93,16 @@ public class BPSQL {
 
     public void setupTables() {
         for (String bankName : BPEconomy.nameList())
-           getSqlMethods().createTable(
-                   bankName,
-                   "uuid varchar(255)",
-                   "account_name varchar(255)",
-                   "bank_level varchar(255)",
-                   "money varchar(255)",
-                   "interest varchar(255)",
-                   "debt varchar(255)",
-                   "PRIMARY KEY (uuid)"
-           );
+            getSqlMethods().createTable(
+                    bankName,
+                    "uuid varchar(255)",
+                    "account_name varchar(255)",
+                    "bank_level varchar(255)",
+                    "money varchar(255)",
+                    "interest varchar(255)",
+                    "debt varchar(255)",
+                    "PRIMARY KEY (uuid)"
+            );
     }
 
     /**
@@ -123,6 +136,7 @@ public class BPSQL {
 
     /**
      * Check if the connection to the database is present and isn't closed.
+     *
      * @return true if it's correctly connected, false otherwise.
      */
     public boolean isConnected() {

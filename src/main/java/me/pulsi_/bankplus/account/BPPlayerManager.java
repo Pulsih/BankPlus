@@ -77,13 +77,16 @@ public class BPPlayerManager {
     }
 
     public boolean isPlayerRegistered() {
+        BPSQL sql = BankPlus.INSTANCE().getMySql();
+        if (sql.getConnection() != null) {
+            sql.fillEmptyRecords(p);
+            return sql.isRegistered(p, ConfigValues.getMainGuiName());
+        }
+
         return getPlayerFile().exists();
     }
 
     public void registerPlayer() {
-        BPSQL sql = BankPlus.INSTANCE().getMySql();
-        if (sql.getConnection() != null) sql.fillEmptyRecords(p);
-
         File file = getPlayerFile();
         if (file.exists()) return;
 
@@ -96,8 +99,8 @@ public class BPPlayerManager {
     }
 
     public File getPlayerFile() {
-        String identifier = (ConfigValues.isStoringUUIDs() ? p.getUniqueId().toString() : p.getName());
-        return new File(BankPlus.INSTANCE().getDataFolder(), "playerdata" + File.separator + identifier + ".yml");
+        String id = (ConfigValues.isStoringUUIDs() ? p.getUniqueId().toString() : p.getName());
+        return new File(BankPlus.INSTANCE().getDataFolder(), "playerdata" + File.separator + id + ".yml");
     }
 
     public FileConfiguration getPlayerConfig() {

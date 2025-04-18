@@ -1,5 +1,6 @@
 package me.pulsi_.bankplus.listeners.playerChat;
 
+import io.papermc.paper.event.player.AsyncChatEvent;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
@@ -9,6 +10,7 @@ import me.pulsi_.bankplus.utils.BPSets;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.ConfigValues;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -19,32 +21,31 @@ import java.math.BigDecimal;
 
 public class PlayerChatMethod {
 
-    public static void process(AsyncPlayerChatEvent e) {
+    public static void process(AsyncChatEvent e) {
         Player p = e.getPlayer();
         if (!isTyping(p)) return;
 
-        BPPlayer player = PlayerRegistry.get(p);
-
-        BankGui openedBank = player.getOpenedBankGui();
+        BankGui openedBank = PlayerRegistry.get(p).getOpenedBankGui();
         if (openedBank == null) {
-            BPLogger.warn("BankPlus chat-transaction failed for player " + p.getName() + ", he did not have an opened bank. (Try again and if the problem persist contact the developer)");
             BPSets.removePlayerFromDepositing(p);
             BPSets.removePlayerFromWithdrawing(p);
             return;
         }
+        e.setCancelled(true);
 
-        String message = ChatColor.stripColor(e.getMessage());
-        if (message.endsWith(".")) message = message.substring(0, message.length() - 1);
+        MiniMessage mm = MiniMessage.miniMessage();
+        String text = mm.serialize(e.message());
 
-        if (hasTypedExit(message, p, e)) {
+        // If some chat format plugin is adding a "." at the end, remove it.
+        if (text.endsWith(".")) text = text.substring(0, text.length() - 1);
+        if (hasTypedExit(text, p)) {
             reopenBank(p, openedBank);
             return;
         }
-        e.setCancelled(true);
 
         BigDecimal amount;
         try {
-            amount = new BigDecimal(message);
+            amount = new BigDecimal(text);
         } catch (NumberFormatException ex) {
             BPMessages.send(p, "Invalid-Number");
             return;
@@ -61,9 +62,8 @@ public class PlayerChatMethod {
         reopenBank(p, openedBank);
     }
 
-    private static boolean hasTypedExit(String message, Player p, AsyncPlayerChatEvent e) {
+    private static boolean hasTypedExit(String message, Player p) {
         if (isTyping(p) && !message.toLowerCase().contains(ConfigValues.getChatExitMessage().toLowerCase())) return false;
-        e.setCancelled(true);
         executeExitCommands(p);
         return true;
     }
