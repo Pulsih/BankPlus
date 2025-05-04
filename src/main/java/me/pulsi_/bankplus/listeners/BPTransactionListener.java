@@ -96,23 +96,16 @@ public class BPTransactionListener implements Listener {
         StringBuilder builder = new StringBuilder(date + " | " + p.getName() + " -> ");
 
         TransactionType type = e.getTransactionType();
-
         builder.append(type.name());
 
         if (type.equals(TransactionType.DEPOSIT)) {
             BigDecimal taxes = ConfigValues.getDepositTaxes();
-            if (taxes.doubleValue() > 0)
-                builder.append(" (Taxes: ")
-                        .append(taxes)
-                        .append("%)");
+            if (taxes.doubleValue() > 0) builder.append(" (Taxes: ").append(taxes).append("%)");
         }
 
         if (type.equals(TransactionType.WITHDRAW)) {
             BigDecimal taxes = ConfigValues.getWithdrawTaxes();
-            if (taxes.doubleValue() > 0)
-                builder.append(" (Taxes: ")
-                        .append(taxes)
-                        .append("%)");
+            if (taxes.doubleValue() > 0) builder.append(" (Taxes: ").append(taxes).append("%)");
         }
 
         builder.append(

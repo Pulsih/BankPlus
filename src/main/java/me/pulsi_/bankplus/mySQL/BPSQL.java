@@ -2,14 +2,15 @@ package me.pulsi_.bankplus.mySQL;
 
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPLogger;
-import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.OfflinePlayer;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * BankPlus MySQL system save both database and files to synchronize
@@ -22,14 +23,53 @@ import java.util.UUID;
  */
 public class BPSQL {
 
-    private final BPSQLMethods sqlMethods;
+    /**
+     * Get the string of default arguments that a bankplus table has.
+     *
+     * @return The default arguments of the bankplus table.
+     */
+    public static String GET_TABLE_ARGUMENTS() {
+        return "uuid varchar(255)," +
+                "account_name varchar(255)," +
+                "bank_level varchar(255)," +
+                "money varchar(255)," +
+                "interest varchar(255)," +
+                "debt varchar(255)," +
+                "PRIMARY KEY (uuid)";
+    }
+
+    /**
+     * Return a string representing all the default arguments for that specified player.
+     * More specifically, returns the following values:
+     * - UUID
+     * - Name
+     * - BankLevel = 1
+     * - Money = 0 (Or default amount)
+     * - Interest = 0
+     * - Debt = 0
+     *
+     * @param p The player where to retrieve the arguments.
+     * @return The argument based on the specified player.
+     */
+    public static String GET_DEFAULT_PLAYER_ARGUMENTS(OfflinePlayer p, String bankName) {
+        return p.getUniqueId() + "," +
+                p.getName() + "," +
+                "1," +
+                (ConfigValues.getMainGuiName().equals(bankName) ? ConfigValues.getStartAmount() : "0") + "," +
+                "0," +
+                "0";
+    }
+
     private String username, password, url;
     private Connection connection;
 
-    public BPSQL() {
-        sqlMethods = new BPSQLMethods(this);
+    public Connection getConnection() {
+        return connection;
     }
 
+    /**
+     * Initialize the MySQL system, loading all the necessary values.
+     */
     public void setupMySQL() {
         String host = ConfigValues.getSqlHost();
         String port = ConfigValues.getSqlPort();
@@ -43,13 +83,13 @@ public class BPSQL {
     }
 
     /**
-     * Loop through all different bank tables, and if the specified player record does not exist, create it.
+     * Register the player create a new record on each bank tables.
      *
      * @param p The player to register.
      */
-    public void fillEmptyRecords(OfflinePlayer p) {
+    public void registerPlayer(OfflinePlayer p) {
         for (String bankName : BPEconomy.nameList())
-            if (!isRegistered(p, bankName)) createNewDefault(bankName, p);
+            if (!isRegistered(p, bankName)) update("INSERT INTO " + bankName + " VALUES (" + GET_DEFAULT_PLAYER_ARGUMENTS(p, bankName) + ")");
     }
 
     /**
@@ -62,47 +102,21 @@ public class BPSQL {
     public boolean isRegistered(OfflinePlayer p, String bankName) {
         boolean storeWithUUID = ConfigValues.isStoringUUIDs();
 
-        String name = p.getName(), v, check;
-        if (storeWithUUID) {
-            v = "uuid";
-            check = "WHERE uuid='" + p.getUniqueId() + "'";
-        } else {
-            v = "account_name";
-            check = "WHERE account_name='" + name + "'";
-        }
+        String name = p.getName(), check;
+        if (storeWithUUID) check = "uuid='" + p.getUniqueId() + "'";
+        else check = "account_name='" + name + "'";
 
-        Object exists = getSqlMethods().has(bankName, v, check).result;
-        if (exists == null) {
-            BPLogger.warn("Could not check if player \"" + name + "\" is registered to the database. (Probably no connection or timeout)");
+        String query = "SELECT * FROM " + bankName + " WHERE " + check;
+
+        // Execute the query having as result a list where there should be the player's UUID.
+        BPSQLResponse response = query(query, "uuid");
+        if (!response.success) {
+            BPLogger.warn("Could not check if player \"" + name + "\" is registered to the database. (Reason: " + response.errorMessage + ")");
             return false;
         }
-        return (boolean) exists;
-    }
 
-    public void createNewDefault(String bankName, OfflinePlayer p) {
-        getSqlMethods().insertInto(
-                bankName,
-                p.getUniqueId().toString(),
-                p.getName(),
-                "1",
-                BPFormatter.styleBigDecimal(ConfigValues.getStartAmount()),
-                "0",
-                "0"
-        );
-    }
-
-    public void setupTables() {
-        for (String bankName : BPEconomy.nameList())
-            getSqlMethods().createTable(
-                    bankName,
-                    "uuid varchar(255)",
-                    "account_name varchar(255)",
-                    "bank_level varchar(255)",
-                    "money varchar(255)",
-                    "interest varchar(255)",
-                    "debt varchar(255)",
-                    "PRIMARY KEY (uuid)"
-            );
+        // If the result is empty, it means that the player hasn't been registered yet.
+        return !response.result.isEmpty();
     }
 
     /**
@@ -112,7 +126,11 @@ public class BPSQL {
     public void connect() {
         try {
             connection = DriverManager.getConnection(url, username, password);
-            sqlMethods.connectToDatabase();
+
+            // Create all the missing tables.
+            for (String bankName : BPEconomy.nameList())
+                update("CREATE TABLE IF NOT EXISTS " + bankName + " (" + GET_TABLE_ARGUMENTS() + ")");
+
             BPLogger.info("Database successfully connected!");
         } catch (SQLException e) {
             BPLogger.warn(e, "Could not connect bankplus to it's database!");
@@ -147,11 +165,69 @@ public class BPSQL {
         }
     }
 
-    public Connection getConnection() {
-        return connection;
+    /**
+     * Try to execute the given update.
+     *
+     * @param update The update to process in the database.
+     * @return A SQL response with useful information in case something fails.
+     */
+    public BPSQLResponse update(String update) {
+        try {
+            connection.prepareStatement(update).executeUpdate();
+            return BPSQLResponse.success();
+        } catch (SQLException e) {
+            return BPSQLResponse.fail(e);
+        }
     }
 
-    public BPSQLMethods getSqlMethods() {
-        return sqlMethods;
+    /**
+     * Try to execute the given query.
+     *
+     * @param query      The query to execute and retrieve from the database.
+     * @param columnName The column where to get the list of results.
+     * @return A SQL response with useful information in case something fails.
+     */
+    public BPSQLResponse query(String query, String columnName) {
+        try {
+            ResultSet set = connection.prepareStatement(query).executeQuery();
+
+            List<String> result = new ArrayList<>();
+            while (set.next()) result.add(set.getString(columnName));
+
+            return BPSQLResponse.success(result);
+        } catch (SQLException e) {
+            return BPSQLResponse.fail(e);
+        }
+    }
+
+    public static class BPSQLResponse {
+
+        private final List<String> result;
+        private final boolean success;
+        private final String errorMessage;
+
+        public BPSQLResponse(boolean success, String errorMessage) {
+            this.result = new ArrayList<>();
+            this.success = success;
+            this.errorMessage = errorMessage;
+        }
+
+        public BPSQLResponse(boolean success, String errorMessage, List<String> result) {
+            this.result = result;
+            this.success = success;
+            this.errorMessage = errorMessage;
+        }
+
+        public static BPSQLResponse success() {
+            return new BPSQLResponse(true, null);
+        }
+
+        public static BPSQLResponse success(List<String> result) {
+            return new BPSQLResponse(true, null, result);
+        }
+
+        public static BPSQLResponse fail(SQLException e) {
+            return new BPSQLResponse(false, e.getMessage());
+        }
     }
 }

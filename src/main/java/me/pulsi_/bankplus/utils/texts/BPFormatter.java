@@ -39,7 +39,6 @@ public class BPFormatter {
      */
     public static String formatPrecise(BigDecimal amount) {
         BigDecimal thousand = new BigDecimal(1000), scale = thousand;
-        if (amount.compareTo(thousand) < 0) return amount.toPlainString();
 
         int count = 0;
         while (amount.compareTo(scale) >= 0 && count < limit) {
@@ -59,7 +58,6 @@ public class BPFormatter {
      */
     public static String formatLong(BigDecimal amount) {
         BigDecimal thousand = new BigDecimal(1000), scale = thousand;
-        if (amount.compareTo(thousand) < 0) return amount.toPlainString();
 
         int count = 0;
         while (amount.compareTo(scale) >= 0 && count < limit) {

@@ -79,7 +79,7 @@ public class BPPlayerManager {
     public boolean isPlayerRegistered() {
         BPSQL sql = BankPlus.INSTANCE().getMySql();
         if (sql.getConnection() != null) {
-            sql.fillEmptyRecords(p);
+            sql.registerPlayer(p);
             return sql.isRegistered(p, ConfigValues.getMainGuiName());
         }
 

@@ -20,7 +20,7 @@ public class PlayerChatMethod {
 
     public static void process(AsyncChatEvent e) {
         Player p = e.getPlayer();
-        if (!(BPUtils.isDepositing(p) || BPUtils.isWithdrawing(p))) return;
+        if (!BPUtils.isDepositing(p) && !BPUtils.isWithdrawing(p)) return;
 
         BankGui openedBank = PlayerRegistry.get(p).getOpenedBankGui();
         if (openedBank == null) {

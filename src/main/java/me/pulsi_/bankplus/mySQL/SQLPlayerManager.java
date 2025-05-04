@@ -5,7 +5,6 @@ import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -50,7 +49,7 @@ public class SQLPlayerManager {
      * @return true on successful load, false otherwise.
      */
     public boolean updatePlayer(String bankName, BigDecimal debt, BigDecimal balance, int level, BigDecimal offlineInterest) {
-        bpsql.fillEmptyRecords(p);
+        bpsql.registerPlayer(p);
 
         String condition;
         if (ConfigValues.isStoringUUIDs()) condition = "WHERE uuid='" + uuid + "'";

@@ -99,12 +99,11 @@ public class BPData {
             plugin.getBankRegistry().loadBanks();
 
             BPSQL sql = plugin.getMySql();
-            if (!ConfigValues.isSqlEnabled()) sql.disconnect();
-            else {
-                sql.disconnect();
+            sql.disconnect();
+
+            if (ConfigValues.isSqlEnabled()) {
                 sql.setupMySQL();
                 sql.connect();
-                sql.setupTables();
             }
 
             if (!BPTaskManager.contains(BPTaskManager.MONEY_SAVING_TASK)) EconomyUtils.restartSavingInterval();
@@ -138,14 +137,14 @@ public class BPData {
             case "LOW":
                 plManager.registerEvents(new PlayerChatLow(), plugin);
                 break;
-            default:
-                plManager.registerEvents(new PlayerChatNormal(), plugin);
-                break;
             case "HIGH":
                 plManager.registerEvents(new PlayerChatHigh(), plugin);
                 break;
             case "HIGHEST":
                 plManager.registerEvents(new PlayerChatHighest(), plugin);
+                break;
+            default:
+                plManager.registerEvents(new PlayerChatNormal(), plugin);
                 break;
         }
 
@@ -158,14 +157,14 @@ public class BPData {
             case "LOW":
                 plManager.registerEvents(new BankClickLow(), plugin);
                 break;
-            default:
-                plManager.registerEvents(new BankClickNormal(), plugin);
-                break;
             case "HIGH":
                 plManager.registerEvents(new BankClickHigh(), plugin);
                 break;
             case "HIGHEST":
                 plManager.registerEvents(new BankClickHighest(), plugin);
+                break;
+            default:
+                plManager.registerEvents(new BankClickNormal(), plugin);
                 break;
         }
     }
