@@ -25,7 +25,7 @@ public class OnlineInterestMethod extends BPInterest.InterestMethod {
     public void giveInterest(OfflinePlayer offlinePlayer) {
         Player p = offlinePlayer.getPlayer();
         if (p == null) {
-            BPLogger.warn("Could not process interest for player \"" + offlinePlayer.getName() + "\". (The player resulted as null)");
+            BPLogger.Console.warn("Could not process interest for player \"" + offlinePlayer.getName() + "\". (The player resulted as null)");
             return;
         }
         if (!p.hasPermission(ONLINE_INTEREST_PERMISSION)) return;

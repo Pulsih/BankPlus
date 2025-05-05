@@ -77,10 +77,9 @@ public class BPPlayerManager {
     }
 
     public boolean isPlayerRegistered() {
-        BPSQL sql = BankPlus.INSTANCE().getMySql();
-        if (sql.getConnection() != null) {
-            sql.registerPlayer(p);
-            return sql.isRegistered(p, ConfigValues.getMainGuiName());
+        if (BPSQL.getConnection() != null) {
+            BPSQL.registerPlayer(p);
+            return BPSQL.isRegistered(p, ConfigValues.getMainGuiName());
         }
 
         return getPlayerFile().exists();
@@ -94,7 +93,7 @@ public class BPPlayerManager {
             file.getParentFile().mkdir();
             file.createNewFile();
         } catch (IOException e) {
-            BPLogger.warn("Something went wrong while registering " + p.getName() + ": " + e.getMessage());
+            BPLogger.Console.warn("Something went wrong while registering " + p.getName() + ": " + e.getMessage());
         }
     }
 
@@ -115,7 +114,7 @@ public class BPPlayerManager {
         try {
             config.save(file);
         } catch (IOException e) {
-            BPLogger.error(e.getMessage());
+            BPLogger.Console.error(e.getMessage());
         }
     }
 }

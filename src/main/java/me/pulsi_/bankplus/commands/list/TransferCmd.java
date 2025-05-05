@@ -132,14 +132,13 @@ public class TransferCmd extends BPCommand {
             if (!pManager.isPlayerRegistered()) continue;
 
             FileConfiguration config = pManager.getPlayerConfig();
-            SQLPlayerManager sqlManager = new SQLPlayerManager(p);
+            SQLPlayerManager pm = new SQLPlayerManager(p);
 
             for (String bankName : banks) {
-                SQLPlayerManager.PlayerResult result = sqlManager.getPlayerResult(bankName);
-                config.set("banks." + bankName + ".debt", result.debt.toPlainString());
-                config.set("banks." + bankName + ".interest", result.offlineInterest.toPlainString());
-                config.set("banks." + bankName + ".level", result.bankLevel);
-                config.set("banks." + bankName + ".money", result.money.toPlainString());
+                config.set("banks." + bankName + ".debt", pm.getDebt(bankName).toPlainString());
+                config.set("banks." + bankName + ".interest", pm.getOfflineInterest(bankName).toPlainString());
+                config.set("banks." + bankName + ".level", pm.getLevel(bankName));
+                config.set("banks." + bankName + ".money", pm.getMoney(bankName).toPlainString());
             }
 
             pManager.savePlayerFile(config, pManager.getPlayerFile());

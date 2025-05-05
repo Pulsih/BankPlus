@@ -2,11 +2,9 @@ package me.pulsi_.bankplus;
 
 import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.interest.BPInterest;
-import me.pulsi_.bankplus.logSystem.BPLogUtils;
 import me.pulsi_.bankplus.managers.BPAFK;
 import me.pulsi_.bankplus.managers.BPConfigs;
 import me.pulsi_.bankplus.managers.BPData;
-import me.pulsi_.bankplus.mySQL.BPSQL;
 import me.pulsi_.bankplus.placeholders.BPPlaceholders;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPVersions;
@@ -30,9 +28,7 @@ public final class BankPlus extends JavaPlugin {
     private static String serverVersion;
     private static BankPlus INSTANCE;
 
-    private final BPLogUtils bpLogUtils = new BPLogUtils();
     private final BankRegistry bankRegistry = new BankRegistry();
-    private final BPSQL sql = new BPSQL();
 
     private Economy vaultEconomy = null;
     private Permission perms = null;
@@ -53,24 +49,24 @@ public final class BankPlus extends JavaPlugin {
 
         PluginManager plManager = Bukkit.getPluginManager();
         if (plManager.getPlugin("Vault") == null) {
-            BPLogger.log("");
-            BPLogger.log("<red>Cannot load " + BPChat.PREFIX + ", Vault is not installed.");
-            BPLogger.log("<red>Please download it in order to use this plugin.");
-            BPLogger.log("");
+            BPLogger.Console.log("");
+            BPLogger.Console.log("<red>Cannot load " + BPChat.PREFIX + ", Vault is not installed.");
+            BPLogger.Console.log("<red>Please download it in order to use this plugin.");
+            BPLogger.Console.log("");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
         if (!setupEconomy()) {
             if (tries < 4) {
-                BPLogger.warn("BankPlus didn't find any economy plugin on this server, the plugin will re-search in 2 seconds. (" + tries + " try)");
+                BPLogger.Console.warn("BankPlus didn't find any economy plugin on this server, the plugin will re-search in 2 seconds. (" + tries + " try)");
                 Bukkit.getScheduler().runTaskLater(this, this::onEnable, 40);
                 tries++;
                 return;
             }
-            BPLogger.log("");
-            BPLogger.log("<red>Cannot load " + BPChat.PREFIX + ", No economy plugin found.");
-            BPLogger.log("<red>Please download an economy plugin to use this plugin.");
-            BPLogger.log("");
+            BPLogger.Console.log("");
+            BPLogger.Console.log("<red>Cannot load " + BPChat.PREFIX + ", No economy plugin found.");
+            BPLogger.Console.log("<red>Please download an economy plugin to use this plugin.");
+            BPLogger.Console.log("");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
@@ -95,18 +91,18 @@ public final class BankPlus extends JavaPlugin {
         bpData.setupPlugin();
 
         if (plManager.getPlugin("PlaceholderAPI") != null) {
-            BPLogger.info("Hooked into PlaceholderAPI!");
+            BPLogger.Console.info("Hooked into PlaceholderAPI!");
             bpPlaceholders = new BPPlaceholders();
             bpPlaceholders.registerPlaceholders();
             bpPlaceholders.register();
             isPlaceholderApiHooked = true;
         }
         if (plManager.getPlugin("Essentials") != null) {
-            BPLogger.info("Hooked into Essentials!");
+            BPLogger.Console.info("Hooked into Essentials!");
             isEssentialsXHooked = true;
         }
         if (plManager.getPlugin("CMI") != null) {
-            BPLogger.info("Hooked into CMI!");
+            BPLogger.Console.info("Hooked into CMI!");
             isCmiHooked = true;
         }
 
@@ -159,10 +155,6 @@ public final class BankPlus extends JavaPlugin {
         return isUpdated;
     }
 
-    public BPLogUtils getBpLogUtils() {
-        return bpLogUtils;
-    }
-
     public BPConfigs getConfigs() {
         return bpConfigs;
     }
@@ -183,10 +175,6 @@ public final class BankPlus extends JavaPlugin {
         return bpPlaceholders;
     }
 
-    public BPSQL getMySql() {
-        return sql;
-    }
-
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) return false;
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
@@ -205,19 +193,19 @@ public final class BankPlus extends JavaPlugin {
 
             updated = actualVersion.equals(newVersion);
         } catch (Exception e) {
-            BPLogger.warn("Could not check for updates. (No internet connection)");
+            BPLogger.Console.warn("Could not check for updates. (No internet connection)");
         }
 
         if (isAlphaVersion() && !ConfigValues.isSilentInfoMessages())
-            BPLogger.info("You are using an alpha version of the plugin, please report any bug or problem found in my discord!");
+            BPLogger.Console.info("You are using an alpha version of the plugin, please report any bug or problem found in my discord!");
 
         if (updated) {
-            if (!ConfigValues.isSilentInfoMessages()) BPLogger.info("The plugin is updated!");
+            if (!ConfigValues.isSilentInfoMessages()) BPLogger.Console.info("The plugin is updated!");
         } else {
             // Even if the info is disabled, notify when there is a new update
             // because it is important to keep users at the latest version.
-            BPLogger.info("New version of the plugin available! (v" + newVersion + ").");
-            BPLogger.info("Please download the latest version here: https://www.spigotmc.org/resources/%E2%9C%A8-bankplus-%E2%9C%A8.93130/.");
+            BPLogger.Console.info("New version of the plugin available! (v" + newVersion + ").");
+            BPLogger.Console.info("Please download the latest version here: https://www.spigotmc.org/resources/%E2%9C%A8-bankplus-%E2%9C%A8.93130/.");
         }
         return updated;
     }

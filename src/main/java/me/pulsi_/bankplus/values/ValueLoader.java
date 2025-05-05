@@ -20,7 +20,7 @@ public class ValueLoader {
     protected static BigDecimal getBigDecimal(FileConfiguration config, String path) {
         String amount = config.getString(path);
         if (BPUtils.isInvalidNumber(amount))
-            BPLogger.warn("\"" + path + "\" is an invalid number, please correct it in the config.yml.");
+            BPLogger.Console.warn("\"" + path + "\" is an invalid number, please correct it in the config.yml.");
         return BPFormatter.getStyledBigDecimal(amount);
     }
 
@@ -41,7 +41,7 @@ public class ValueLoader {
         try {
             delay = Integer.parseInt(split[0]);
         } catch (NumberFormatException e) {
-            BPLogger.warn("\"" + path + "\" is an invalid number, please correct it in the config.yml.");
+            BPLogger.Console.warn("\"" + path + "\" is an invalid number, please correct it in the config.yml.");
             return BPUtils.minutesInMilliseconds(5);
         }
 

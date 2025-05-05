@@ -32,7 +32,7 @@ public class PlayerServerListener implements Listener {
         if (pManager.isPlayerRegistered()) wasRegistered = true;
         else {
             pManager.registerPlayer();
-            if (ConfigValues.isNotifyingNewPlayer()) BPLogger.info("Successfully registered " + p.getName() + "!");
+            if (ConfigValues.isNotifyingNewPlayer()) BPLogger.Console.info("Successfully registered " + p.getName() + "!");
             wasRegistered = false;
         }
 

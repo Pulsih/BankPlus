@@ -42,7 +42,7 @@ public class BPConfigs {
                 file.getParentFile().mkdir();
                 file.createNewFile();
             } catch (IOException e) {
-                BPLogger.error(e, "Failed to to create the saves.yml file! ");
+                BPLogger.Console.error(e, "Failed to to create the saves.yml file! ");
             }
             updated = false;
         }
@@ -59,7 +59,7 @@ public class BPConfigs {
         try {
             savesConfig.save(file);
         } catch (IOException e) {
-            BPLogger.error(e, "Could not save \"saves.yml\" file!");
+            BPLogger.Console.error(e, "Could not save \"saves.yml\" file!");
         }
     }
 
@@ -87,7 +87,7 @@ public class BPConfigs {
         try {
             config.load(file);
         } catch (Exception e) {
-            BPLogger.error(e, "Could not load configuration file \"" + file + "\".");
+            BPLogger.Console.error(e, "Could not load configuration file \"" + file + "\".");
         }
         return config;
     }
@@ -127,7 +127,7 @@ public class BPConfigs {
             fileToScan = File.createTempFile(fileName, null);
             fileToScan.deleteOnExit();
         } catch (IOException e) {
-            BPLogger.warn(e, "Could not load \"" + fileName + "\" file!");
+            BPLogger.Console.warn(e, "Could not load \"" + fileName + "\" file!");
             return;
         }
 
@@ -135,7 +135,7 @@ public class BPConfigs {
         try {
             out = new FileOutputStream(fileToScan);
         } catch (FileNotFoundException e) {
-            BPLogger.warn(e, "Could not load \"" + fileName + "\" file!");
+            BPLogger.Console.warn(e, "Could not load \"" + fileName + "\" file!");
             return;
         }
         copyStream(plugin.getResource(fileName), out);
@@ -144,7 +144,7 @@ public class BPConfigs {
         try {
             scanner = new Scanner(fileToScan, "UTF-8");
         } catch (FileNotFoundException e) {
-            BPLogger.warn(e, "Could not find \"" + fileName + "\" file!");
+            BPLogger.Console.warn(e, "Could not find \"" + fileName + "\" file!");
             return;
         }
         while (scanner.hasNext()) fileAsList.add(scanner.nextLine());
@@ -257,7 +257,7 @@ public class BPConfigs {
             writer.flush();
             writer.close();
         } catch (IOException e) {
-            BPLogger.error(e, e.getMessage());
+            BPLogger.Console.error(e, e.getMessage());
         }
     }
 
@@ -280,7 +280,7 @@ public class BPConfigs {
             while ((read = in.read(buffer)) != -1)
                 out.write(buffer, 0, read);
         } catch (Exception e) {
-            BPLogger.warn(e, "Could not copy stream!");
+            BPLogger.Console.warn(e, "Could not copy stream!");
         }
     }
 

@@ -37,7 +37,7 @@ public class SavesFile {
             try {
                 file.createNewFile();
             } catch (IOException e) {
-                BPLogger.warn("Could not create saves.yml file: " + e.getMessage());
+                BPLogger.Console.warn("Could not create saves.yml file: " + e.getMessage());
             }
 
         FileConfiguration config = getConfig();
@@ -46,7 +46,7 @@ public class SavesFile {
         try {
             config.save(file);
         } catch (IOException e) {
-            BPLogger.warn("Could not save saves.yml file: " + e.getMessage());
+            BPLogger.Console.warn("Could not save saves.yml file: " + e.getMessage());
         }
     }
 }

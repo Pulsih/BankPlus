@@ -48,7 +48,8 @@ public class BPSQL {
      * - Interest = 0
      * - Debt = 0
      *
-     * @param p The player where to retrieve the arguments.
+     * @param p        The player where to retrieve the arguments.
+     * @param bankName The bank where to get the information.
      * @return The argument based on the specified player.
      */
     public static String GET_DEFAULT_PLAYER_ARGUMENTS(OfflinePlayer p, String bankName) {
@@ -60,17 +61,17 @@ public class BPSQL {
                 "0";
     }
 
-    private String username, password, url;
-    private Connection connection;
+    private static String username, password, url;
+    private static Connection connection;
 
-    public Connection getConnection() {
+    public static Connection getConnection() {
         return connection;
     }
 
     /**
      * Initialize the MySQL system, loading all the necessary values.
      */
-    public void setupMySQL() {
+    public static void setupMySQL() {
         String host = ConfigValues.getSqlHost();
         String port = ConfigValues.getSqlPort();
         String database = ConfigValues.getSqlDatabase();
@@ -78,8 +79,6 @@ public class BPSQL {
         password = ConfigValues.getSqlPassword();
 
         url = "jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=" + ConfigValues.isSqlUsingSSL();
-
-        BPLogger.info("MySQL setup finished!");
     }
 
     /**
@@ -87,23 +86,22 @@ public class BPSQL {
      *
      * @param p The player to register.
      */
-    public void registerPlayer(OfflinePlayer p) {
+    public static void registerPlayer(OfflinePlayer p) {
         for (String bankName : BPEconomy.nameList())
-            if (!isRegistered(p, bankName)) update("INSERT INTO " + bankName + " VALUES (" + GET_DEFAULT_PLAYER_ARGUMENTS(p, bankName) + ")");
+            if (!isRegistered(p, bankName))
+                update("INSERT INTO " + bankName + " VALUES (" + GET_DEFAULT_PLAYER_ARGUMENTS(p, bankName) + ")");
     }
 
     /**
-     * Check if the player record is present in the given bank name table.
+     * Check if the player record is present in the given bank table.
      *
      * @param p        The player to check for registration.
      * @param bankName The bank table name.
      * @return true if there is a player record, false otherwise.
      */
-    public boolean isRegistered(OfflinePlayer p, String bankName) {
-        boolean storeWithUUID = ConfigValues.isStoringUUIDs();
-
+    public static boolean isRegistered(OfflinePlayer p, String bankName) {
         String name = p.getName(), check;
-        if (storeWithUUID) check = "uuid='" + p.getUniqueId() + "'";
+        if (ConfigValues.isStoringUUIDs()) check = "uuid='" + p.getUniqueId() + "'";
         else check = "account_name='" + name + "'";
 
         String query = "SELECT * FROM " + bankName + " WHERE " + check;
@@ -111,7 +109,7 @@ public class BPSQL {
         // Execute the query having as result a list where there should be the player's UUID.
         BPSQLResponse response = query(query, "uuid");
         if (!response.success) {
-            BPLogger.warn("Could not check if player \"" + name + "\" is registered to the database. (Reason: " + response.errorMessage + ")");
+            BPLogger.Console.warn(true, "Could not check if player \"" + name + "\" is registered to the database. (Reason: " + response.errorMessage + ")");
             return false;
         }
 
@@ -123,32 +121,34 @@ public class BPSQL {
      * Creates a new instance of the connection and assign it.
      * This method also enables the SQLMethods.
      */
-    public void connect() {
+    public static void connect() {
         try {
             connection = DriverManager.getConnection(url, username, password);
 
             // Create all the missing tables.
-            for (String bankName : BPEconomy.nameList())
-                update("CREATE TABLE IF NOT EXISTS " + bankName + " (" + GET_TABLE_ARGUMENTS() + ")");
+            for (String bankName : BPEconomy.nameList()) {
+                BPSQLResponse r = update("CREATE TABLE IF NOT EXISTS " + bankName + " (" + GET_TABLE_ARGUMENTS() + ")");
+                if (!r.success) BPLogger.Console.warn(true, "Cannot create table +\"" + bankName + "\", reason: " + r.errorMessage);
+            }
 
-            BPLogger.info("Database successfully connected!");
+            BPLogger.Console.info("MySQL database successfully connected!");
         } catch (SQLException e) {
-            BPLogger.warn(e, "Could not connect bankplus to it's database!");
+            BPLogger.Console.warn(e, "Could not connect bankplus to it's database!");
         }
     }
 
     /**
      * Disconnect the database.
      */
-    public void disconnect() {
+    public static void disconnect() {
         try {
             if (connection != null) {
                 connection.close();
                 connection = null;
-                BPLogger.info("Database successfully disconnected!");
+                BPLogger.Console.info("MySQL database successfully disconnected!");
             }
         } catch (SQLException e) {
-            BPLogger.warn(e, "Could not disconnect bankplus from his database!");
+            BPLogger.Console.warn(e, "Could not disconnect bankplus from his database!");
         }
     }
 
@@ -157,7 +157,7 @@ public class BPSQL {
      *
      * @return true if it's correctly connected, false otherwise.
      */
-    public boolean isConnected() {
+    public static boolean isConnected() {
         try {
             return connection != null && !connection.isClosed();
         } catch (SQLException e) {
@@ -171,7 +171,7 @@ public class BPSQL {
      * @param update The update to process in the database.
      * @return A SQL response with useful information in case something fails.
      */
-    public BPSQLResponse update(String update) {
+    public static BPSQLResponse update(String update) {
         try {
             connection.prepareStatement(update).executeUpdate();
             return BPSQLResponse.success();
@@ -187,7 +187,7 @@ public class BPSQL {
      * @param columnName The column where to get the list of results.
      * @return A SQL response with useful information in case something fails.
      */
-    public BPSQLResponse query(String query, String columnName) {
+    public static BPSQLResponse query(String query, String columnName) {
         try {
             ResultSet set = connection.prepareStatement(query).executeQuery();
 
@@ -202,9 +202,9 @@ public class BPSQL {
 
     public static class BPSQLResponse {
 
-        private final List<String> result;
-        private final boolean success;
-        private final String errorMessage;
+        public final List<String> result;
+        public final boolean success;
+        public final String errorMessage;
 
         public BPSQLResponse(boolean success, String errorMessage) {
             this.result = new ArrayList<>();

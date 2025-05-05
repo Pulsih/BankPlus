@@ -39,13 +39,13 @@ public class BankTopCmd implements CommandExecutor {
         try {
             position = Integer.parseInt(numbers);
         } catch (NumberFormatException e) {
-            BPLogger.error("Invalid number for the BankTop money placeholder!");
-            BPLogger.error("Message: " + message);
+            BPLogger.Console.error("Invalid number for the BankTop money placeholder!");
+            BPLogger.Console.error("Message: " + message);
             return message;
         }
         if (position > ConfigValues.getBankTopSize()) {
-            BPLogger.error("Limit of the BankTop: " + ConfigValues.getBankTopSize());
-            BPLogger.error("Message: " + message);
+            BPLogger.Console.error("Limit of the BankTop: " + ConfigValues.getBankTopSize());
+            BPLogger.Console.error("Message: " + message);
             return message;
         }
 
@@ -78,13 +78,13 @@ public class BankTopCmd implements CommandExecutor {
         try {
             position = Integer.parseInt(numbers);
         } catch (NumberFormatException e) {
-            BPLogger.error("Invalid number for the BankTop name placeholder!");
-            BPLogger.error("Message: " + message);
+            BPLogger.Console.error("Invalid number for the BankTop name placeholder!");
+            BPLogger.Console.error("Message: " + message);
             return message;
         }
         if (position > ConfigValues.getBankTopSize()) {
-            BPLogger.error("Limit of the BankTop: " + ConfigValues.getBankTopSize());
-            BPLogger.error("Message: " + message);
+            BPLogger.Console.error("Limit of the BankTop: " + ConfigValues.getBankTopSize());
+            BPLogger.Console.error("Message: " + message);
             return message;
         }
 

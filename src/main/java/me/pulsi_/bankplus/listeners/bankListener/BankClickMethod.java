@@ -68,7 +68,7 @@ public class BankClickMethod {
                             amount = BigDecimal.valueOf(BankPlus.INSTANCE().getVaultEconomy().getBalance(p)).multiply(percentage);
                         }
                     } catch (NumberFormatException ex) {
-                        BPLogger.warn("Could not deposit because an invalid number has been specified! (Bank gui: " + bankName + ", Item slot: " + slot + ", Value: " + value + ")");
+                        BPLogger.Console.warn("Could not deposit because an invalid number has been specified! (Bank gui: " + bankName + ", Item slot: " + slot + ", Value: " + value + ")");
                         continue;
                     }
                     economy.deposit(p, amount);
@@ -95,7 +95,7 @@ public class BankClickMethod {
                             amount = economy.getBankBalance(p).multiply(percentage);
                         }
                     } catch (NumberFormatException ex) {
-                        BPLogger.warn("Could not withdraw because an invalid number has been specified! (Bank gui: " + bankName + ", Item slot: " + slot + ", Value: " + value + ")");
+                        BPLogger.Console.warn("Could not withdraw because an invalid number has been specified! (Bank gui: " + bankName + ", Item slot: " + slot + ", Value: " + value + ")");
                         continue;
                     }
                     economy.withdraw(p, amount);

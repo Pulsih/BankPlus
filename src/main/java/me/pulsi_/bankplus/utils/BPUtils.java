@@ -117,7 +117,7 @@ public class BPUtils {
                 default -> fallBack;
             };
         } catch (NumberFormatException e) {
-            if (errorMessage != null) BPLogger.warn(errorMessage);
+            if (errorMessage != null) BPLogger.Console.warn(errorMessage);
         }
         return fallBack;
     }
@@ -187,12 +187,12 @@ public class BPUtils {
         try {
             sound = Registry.SOUNDS.get(NamespacedKey.minecraft(soundName));
         } catch (IllegalArgumentException e) {
-            BPLogger.warn("The sound \"" + soundString + "\" has an invalid sound namespacekey.");
+            BPLogger.Console.warn("The sound \"" + soundString + "\" has an invalid sound namespacekey.");
             return;
         }
 
         if (sound != null) p.playSound(p.getLocation(), sound, volume, pitch);
-        else BPLogger.warn("The sound \"" + soundString + "\" has an invalid sound namespacekey.");
+        else BPLogger.Console.warn("The sound \"" + soundString + "\" has an invalid sound namespacekey.");
     }
 
     /**
@@ -341,12 +341,12 @@ public class BPUtils {
     public static boolean hasFailed(Player p, EconomyResponse response) {
         if (!response.transactionSuccess()) {
             BPMessages.send(p, "Internal-Error");
-            BPLogger.warn("Vault has failed his transaction task. To avoid dupe bugs, bankplus has also cancelled the transaction.");
-            BPLogger.warn("Additional Vault error info:");
-            BPLogger.warn("  Error message: " + response.errorMessage);
-            BPLogger.warn("  Transaction amount: " + response.amount);
-            BPLogger.warn("  Transaction type: " + response.type);
-            BPLogger.warn("  Player wallet: " + response.balance);
+            BPLogger.Console.warn("Vault has failed his transaction task. To avoid dupe bugs, bankplus has also cancelled the transaction.");
+            BPLogger.Console.warn("Additional Vault error info:");
+            BPLogger.Console.warn("  Error message: " + response.errorMessage);
+            BPLogger.Console.warn("  Transaction amount: " + response.amount);
+            BPLogger.Console.warn("  Transaction type: " + response.type);
+            BPLogger.Console.warn("  Player wallet: " + response.balance);
             return true;
         }
         return false;

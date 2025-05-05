@@ -143,7 +143,7 @@ public class BPMessages {
             return;
         }
 
-        BPLogger.error("Could not send message because receiver is neither a Player or CommandSender: " + receiver.toString());
+        BPLogger.Console.error("Could not send message because receiver is neither a Player or CommandSender: " + receiver.toString());
     }
 
     /**

@@ -623,7 +623,7 @@ public class BankUtils {
             for (String itemName : requiredItemsSection.getKeys(false)) {
                 ConfigurationSection itemSection = requiredItemsSection.getConfigurationSection(itemName);
                 if (itemSection == null) {
-                    BPLogger.warn("The required item \"" + itemName + "\" has an invalid section.");
+                    BPLogger.Console.warn("The required item \"" + itemName + "\" has an invalid section.");
                     continue;
                 }
 
@@ -663,7 +663,7 @@ public class BankUtils {
                 try {
                     requiredItems.put(itemID, new ItemStack(Material.valueOf(itemID)));
                 } catch (IllegalArgumentException e) {
-                    BPLogger.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
+                    BPLogger.Console.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
                 }
             } else {
                 String[] split = itemID.split("-");
@@ -674,14 +674,14 @@ public class BankUtils {
                     id = String.valueOf(material);
                     item = new ItemStack(material);
                 } catch (IllegalArgumentException e) {
-                    BPLogger.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
+                    BPLogger.Console.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
                     continue;
                 }
                 int amount = 1;
                 try {
                     amount = Integer.parseInt(split[1]);
                 } catch (NumberFormatException e) {
-                    BPLogger.warn("The bank \"" + bankName + "\" contains an invalid number in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
+                    BPLogger.Console.warn("The bank \"" + bankName + "\" contains an invalid number in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
                 }
 
                 item.setAmount(amount);

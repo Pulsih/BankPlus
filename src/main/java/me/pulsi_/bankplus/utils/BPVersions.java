@@ -26,7 +26,7 @@ public class BPVersions {
         try {
             scanner = new Scanner(configFile, "UTF-8");
         } catch (FileNotFoundException e) {
-            BPLogger.warn(e, "Could not convert \"" + configFile + "\" interest money-given and offline-money-given paths!");
+            BPLogger.Console.warn(e, "Could not convert \"" + configFile + "\" interest money-given and offline-money-given paths!");
             return;
         }
 
@@ -45,7 +45,7 @@ public class BPVersions {
             writer.flush();
             writer.close();
         } catch (IOException e) {
-            BPLogger.error(e, e.getMessage());
+            BPLogger.Console.error(e, e.getMessage());
         }
     }
 
@@ -63,7 +63,7 @@ public class BPVersions {
             try {
                 oldConfig.load(file);
             } catch (IOException | InvalidConfigurationException e) {
-                BPLogger.error(e, "An error has occurred while loading a user file (File name: " + file.getName() + "):");
+                BPLogger.Console.error(e, "An error has occurred while loading a user file (File name: " + file.getName() + "):");
                 continue;
             }
 
@@ -97,10 +97,10 @@ public class BPVersions {
                 newConfig.save(file);
                 converted++;
             } catch (IOException e) {
-                BPLogger.error(e, "Could not apply changes while converting the player file \"" + file.getName() + "\".");
+                BPLogger.Console.error(e, "Could not apply changes while converting the player file \"" + file.getName() + "\".");
             }
         }
-        if (converted > 0) BPLogger.info("Successfully converted " + converted + " player files to the new format!");
+        if (converted > 0) BPLogger.Console.info("Successfully converted " + converted + " player files to the new format!");
     }
 
     public static void changeBankUpgradesSection() {
@@ -112,7 +112,7 @@ public class BPVersions {
             try {
                 scanner = new Scanner(bankFile, "UTF-8");
             } catch (FileNotFoundException e) {
-                BPLogger.warn(e, "Could not find \"" + bankFile + "\" file!");
+                BPLogger.Console.warn(e, "Could not find \"" + bankFile + "\" file!");
                 continue;
             }
 
@@ -132,7 +132,7 @@ public class BPVersions {
                 writer.flush();
                 writer.close();
             } catch (IOException e) {
-                BPLogger.error(e, e.getMessage());
+                BPLogger.Console.error(e, e.getMessage());
             }
         }
     }

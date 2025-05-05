@@ -6,7 +6,6 @@ import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.managers.BPTaskManager;
 import me.pulsi_.bankplus.mySQL.BPSQL;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
-import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -37,7 +36,7 @@ public class EconomyUtils {
         }
         manager.savePlayerFile(config, file);
 
-        if (BankPlus.INSTANCE().getMySql().isConnected()) { // If MySQL is enabled, save the data also in the database.
+        if (BPSQL.isConnected()) { // If MySQL is enabled, save the data also in the database.
             SQLPlayerManager pManager = new SQLPlayerManager(uuid);
             for (BPEconomy economy : BPEconomy.list())
                 pManager.updatePlayer(

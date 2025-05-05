@@ -25,11 +25,7 @@ import me.pulsi_.bankplus.values.ConfigValues;
 import me.pulsi_.bankplus.values.MessageValues;
 import me.pulsi_.bankplus.values.MultipleBanksValues;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.PluginManager;
-
-import java.io.File;
-import java.io.IOException;
 
 public class BPData {
 
@@ -44,12 +40,12 @@ public class BPData {
     public void setupPlugin() {
         long startTime = System.currentTimeMillis();
 
-        BPLogger.log("");
-        BPLogger.log("    " + BPChat.PREFIX + " <green>Enabling plugin...");
-        BPLogger.log("    <green>Running on version <white>" + plugin.getDescription().getVersion() + "</white>!");
-        BPLogger.log("    <green>Detected server version: <white>" + BankPlus.getServerVersion());
-        BPLogger.log("    <green>Setting up the plugin...");
-        BPLogger.log("");
+        BPLogger.Console.log("");
+        BPLogger.Console.log("    " + BPChat.PREFIX + " <green>Enabling plugin...");
+        BPLogger.Console.log("    <green>Running on version <white>" + plugin.getDescription().getVersion() + "</white>!");
+        BPLogger.Console.log("    <green>Detected server version: <white>" + BankPlus.getServerVersion());
+        BPLogger.Console.log("    <green>Setting up the plugin...");
+        BPLogger.Console.log("");
 
         new bStats(plugin);
         plugin.getConfigs().setupConfigs();
@@ -60,8 +56,8 @@ public class BPData {
         registerEvents();
         setupCommands();
 
-        BPLogger.log("    <green>Done! <dark_gray>(<aqua>" + (System.currentTimeMillis() - startTime) + "ms</aqua>)");
-        BPLogger.log("");
+        BPLogger.Console.log("    <green>Done! <dark_gray>(<aqua>" + (System.currentTimeMillis() - startTime) + "ms</aqua>)");
+        BPLogger.Console.log("");
 
         if (ConfigValues.isBankTopEnabled()) BPBankTop.updateBankTop();
         start = false;
@@ -72,9 +68,9 @@ public class BPData {
         if (ConfigValues.isInterestEnabled()) plugin.getInterest().saveInterest();
         BPLoanRegistry.saveAllLoans();
 
-        BPLogger.log("");
-        BPLogger.log("    " + BPChat.PREFIX + " <red>Plugin successfully disabled!");
-        BPLogger.log("");
+        BPLogger.Console.log("");
+        BPLogger.Console.log("    " + BPChat.PREFIX + " <red>Plugin successfully disabled!");
+        BPLogger.Console.log("");
     }
 
     public boolean reloadPlugin() {
@@ -86,7 +82,8 @@ public class BPData {
 
             BPCmdRegistry.registerPluginCommands();
 
-            if (ConfigValues.isLoggingTransactions()) plugin.getBpLogUtils().setupLoggerFile();
+            BPLogger.LogsFile.setupLoggerFile();
+
             if (ConfigValues.isIgnoringAfkPlayers()) plugin.getAfkManager().startCountdown();
             if (ConfigValues.isBankTopEnabled() && !BPTaskManager.contains(BPTaskManager.BANKTOP_BROADCAST_TASK)) BPBankTop.restartBankTopUpdateTask();
 
@@ -98,12 +95,10 @@ public class BPData {
 
             plugin.getBankRegistry().loadBanks();
 
-            BPSQL sql = plugin.getMySql();
-            sql.disconnect();
-
-            if (ConfigValues.isSqlEnabled()) {
-                sql.setupMySQL();
-                sql.connect();
+            if (!ConfigValues.isSqlEnabled()) BPSQL.disconnect();
+            else {
+                BPSQL.setupMySQL();
+                BPSQL.connect();
             }
 
             if (!BPTaskManager.contains(BPTaskManager.MONEY_SAVING_TASK)) EconomyUtils.restartSavingInterval();
@@ -113,7 +108,7 @@ public class BPData {
                 if (player != null && player.getOpenedBankGui() != null) p.closeInventory();
             });
         } catch (Exception e) {
-            BPLogger.warn(e, "Something went wrong while trying to reload the plugin.");
+            BPLogger.Console.warn(e, "Something went wrong while trying to reload the plugin.");
             success = false;
         }
         return success;

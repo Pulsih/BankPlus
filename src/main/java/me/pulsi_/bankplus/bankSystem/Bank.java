@@ -92,7 +92,7 @@ public class Bank {
         try {
             config.load(file);
         } catch (IOException | InvalidConfigurationException e) {
-            BPLogger.warn(e, "Could not load \"" + identifier + "\" bank properties because it contains an invalid configuration!");
+            BPLogger.Console.warn(e, "Could not load \"" + identifier + "\" bank properties because it contains an invalid configuration!");
             return;
         }
 
@@ -108,7 +108,7 @@ public class Bank {
                 try {
                     level = Integer.parseInt(key);
                 } catch (NumberFormatException e) {
-                    BPLogger.warn("The bank \"" + identifier + "\" contains an invalid level number! (" + key + ")");
+                    BPLogger.Console.warn("The bank \"" + identifier + "\" contains an invalid level number! (" + key + ")");
                     continue;
                 }
 

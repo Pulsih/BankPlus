@@ -23,7 +23,7 @@ public class BPCmdRegistry {
             try {
                 commandsFile.createNewFile();
             } catch (IOException e) {
-                BPLogger.warn(e, "Could not create \"commands.yml\" file.");
+                BPLogger.Console.warn(e, "Could not create \"commands.yml\" file.");
             }
         }
         FileConfiguration commandsConfig = configs.getConfig(commandsFile);
@@ -61,7 +61,7 @@ public class BPCmdRegistry {
         try {
             commandsConfig.save(commandsFile);
         } catch (IOException e) {
-            BPLogger.warn(e, "Could not save \"commands.yml\" config file!");
+            BPLogger.Console.warn(e, "Could not save \"commands.yml\" config file!");
         }
     }
 }

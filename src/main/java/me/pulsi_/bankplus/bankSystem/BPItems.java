@@ -66,7 +66,7 @@ public class BPItems {
             try {
                 meta.addItemFlags(ItemFlag.valueOf(flag));
             } catch (IllegalArgumentException e) {
-                BPLogger.warn("Could not set item flag \"" + flag + "\" to item \"" + itemSection + "\" because it's not a valid item flag.");
+                BPLogger.Console.warn("Could not set item flag \"" + flag + "\" to item \"" + itemSection + "\" because it's not a valid item flag.");
             }
         }
 
@@ -75,7 +75,7 @@ public class BPItems {
             try {
                 meta.setCustomModelData(modelData);
             } catch (NoSuchMethodError e) { // Do that to add support for older minecraft versions.
-                BPLogger.warn("Cannot set custom model data to the item: \"" + displayname + "\"&e. Custom model data is only available on 1.14.4+ servers!");
+                BPLogger.Console.warn("Cannot set custom model data to the item: \"" + displayname + "\"&e. Custom model data is only available on 1.14.4+ servers!");
             }
         }
         item.setItemMeta(meta);
@@ -109,7 +109,7 @@ public class BPItems {
             try {
                 meta.addItemFlags(ItemFlag.valueOf(flag));
             } catch (IllegalArgumentException e) {
-                BPLogger.warn("Could not set item flag \"" + flag + "\" to item \"" + itemSection + "\" because it's not a valid item flag.");
+                BPLogger.Console.warn("Could not set item flag \"" + flag + "\" to item \"" + itemSection + "\" because it's not a valid item flag.");
             }
         }
 
@@ -118,7 +118,7 @@ public class BPItems {
             try {
                 meta.setCustomModelData(modelData);
             } catch (NoSuchMethodError e) { // Do that to add support for older minecraft versions.
-                BPLogger.warn("Cannot set custom model data to the item: \"" + displayname + "\"&e. Custom model data is only available on 1.14.4+ servers!");
+                BPLogger.Console.warn("Cannot set custom model data to the item: \"" + displayname + "\"&e. Custom model data is only available on 1.14.4+ servers!");
             }
         }
         item.setItemMeta(meta);
@@ -154,7 +154,7 @@ public class BPItems {
             try {
                 result = new ItemStack(Material.valueOf(itemData[0]), 1, Byte.parseByte(itemData[1]));
             } catch (IllegalArgumentException e) {
-                BPLogger.warn("Could not update item because \"" + itemData[0] + "\" is not a valid material!");
+                BPLogger.Console.warn("Could not update item because \"" + itemData[0] + "\" is not a valid material!");
             }
         }
         return result;
@@ -195,7 +195,7 @@ public class BPItems {
             head.setItemMeta(skullMeta);
             return head;
         } catch (Error | Exception e) {
-            BPLogger.warn(e, "Skull exception");
+            BPLogger.Console.warn(e, "Skull exception");
             return Bukkit.getUnsafe().modifyItemStack(head, "{SkullOwner:{Id:\"" + id + "\",Properties:{textures:[{Value:\"" + value + "\"}]}}}");
         }
     }

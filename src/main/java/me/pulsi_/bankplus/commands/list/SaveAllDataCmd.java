@@ -65,7 +65,7 @@ public class SaveAllDataCmd extends BPCommand {
                 EconomyUtils.saveEveryone(true);
                 EconomyUtils.restartSavingInterval();
 
-                if (ConfigValues.isBroadcastingSaves()) BPLogger.info("All player data have been saved!");
+                if (ConfigValues.isBroadcastingSaves()) BPLogger.Console.info("All player data have been saved!");
                 BPMessages.send(s, "%prefix% Successfully saved all player data!", false);
             }
         };

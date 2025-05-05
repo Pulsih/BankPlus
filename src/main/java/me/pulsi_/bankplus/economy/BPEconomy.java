@@ -11,8 +11,8 @@ import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.events.BPAfterTransactionEvent;
 import me.pulsi_.bankplus.events.BPPreTransactionEvent;
 import me.pulsi_.bankplus.listeners.playerChat.PlayerChatMethod;
+import me.pulsi_.bankplus.mySQL.BPSQL;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
-import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPSets;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
@@ -36,7 +36,7 @@ public class BPEconomy {
 
     private final Bank originBank;
     private final HashMap<UUID, Holder> holders = new HashMap<>();
-    private final Set<UUID> transactions = new HashSet<>();
+    private final Set<UUID> operations = new HashSet<>();
 
     private final String moneyPath, interestPath, debtPath, levelPath;
 
@@ -156,18 +156,17 @@ public class BPEconomy {
         boolean useStartAmount = !wasRegistered && BankUtils.isMainBank(originBank);
 
         Holder holder = new Holder();
-        if (BankPlus.INSTANCE().getMySql().isConnected()) {
-            SQLPlayerManager.PlayerResult r = new SQLPlayerManager(uuid).getPlayerResult(originBank.getIdentifier());
-            if (r.isSuccess()) {
-                holder.debt = r.debt;
-                holder.money = useStartAmount ? ConfigValues.getStartAmount() : r.money;
-                holder.offlineInterest = r.offlineInterest;
-                holder.bankLevel = r.bankLevel;
+        if (BPSQL.isConnected()) {
+            SQLPlayerManager pm = new SQLPlayerManager(uuid);
+            String bankName = originBank.getIdentifier();
 
-                if (load) holders.put(uuid, holder);
-                return holder;
-            } else // If the database had some problems to load data, warn about it and load locally.
-                BPLogger.warn("Could not load \"" + uuid + "\" player data from database, loading it from local saves.");
+            holder.debt = pm.getDebt(bankName);
+            holder.money = useStartAmount ? ConfigValues.getStartAmount() : pm.getMoney(bankName);
+            holder.bankLevel = pm.getLevel(bankName);
+            holder.offlineInterest = pm.getOfflineInterest(bankName);
+
+            if (load) holders.put(uuid, holder);
+            return holder;
         }
 
         FileConfiguration config = new BPPlayerManager(uuid).getPlayerConfig();
@@ -245,6 +244,8 @@ public class BPEconomy {
      * @param load Choose if loading the balance on the hashmap or not.
      */
     public BigDecimal getBankBalance(UUID uuid, boolean load) {
+        if (!isOperationAllowed(Bukkit.getOfflinePlayer(uuid))) return BigDecimal.ZERO;
+
         Holder holder = isPlayerBalanceLoaded(uuid) ? holders.get(uuid) : loadPlayerHolder(uuid, true, load);
         return holder.money;
     }
@@ -280,12 +281,12 @@ public class BPEconomy {
 
     private BigDecimal setBankBalance(OfflinePlayer p, BigDecimal amount, boolean ignoreEvents, TransactionType type) {
         BigDecimal result = BigDecimal.ZERO;
-        if (startAndCheckIfIsInTransaction(p)) return result;
+        if (!startAndCheckOperationAllowed(p)) return result;
 
         if (!ignoreEvents) {
             BPPreTransactionEvent event = preTransactionEvent(p, type, amount);
             if (event.isCancelled()) {
-                endTransaction(p);
+                endOperation(p);
                 return result;
             }
 
@@ -298,7 +299,7 @@ public class BPEconomy {
         result = result.max(amount);
         set(p, result);
 
-        if (!ignoreEvents) afterTransactionEvent(p, type, amount);
+        if (!ignoreEvents) afterTransactionEvent(p, type, result);
         return result;
     }
 
@@ -333,12 +334,12 @@ public class BPEconomy {
 
     private BigDecimal addBankBalance(OfflinePlayer p, BigDecimal amount, boolean ignoreEvents, TransactionType type) {
         BigDecimal result = BigDecimal.ZERO;
-        if (startAndCheckIfIsInTransaction(p)) return result;
+        if (!startAndCheckOperationAllowed(p)) return result;
 
         if (!ignoreEvents) {
             BPPreTransactionEvent event = preTransactionEvent(p, type, amount);
             if (event.isCancelled()) {
-                endTransaction(p);
+                endOperation(p);
                 return result;
             }
 
@@ -359,7 +360,8 @@ public class BPEconomy {
             }
         }
 
-        if (!ignoreEvents) afterTransactionEvent(p, type, amount);
+        if (!ignoreEvents) afterTransactionEvent(p, type, result);
+        endOperation(p);
         return result;
     }
 
@@ -394,12 +396,12 @@ public class BPEconomy {
 
     private BigDecimal removeBankBalance(OfflinePlayer p, BigDecimal amount, boolean ignoreEvents, TransactionType type) {
         BigDecimal result = new BigDecimal(0);
-        if (startAndCheckIfIsInTransaction(p)) return result;
+        if (!startAndCheckOperationAllowed(p)) return result;
 
         if (!ignoreEvents) {
             BPPreTransactionEvent event = preTransactionEvent(p, type, amount);
             if (event.isCancelled()) {
-                endTransaction(p);
+                endOperation(p);
                 return result;
             }
 
@@ -413,6 +415,7 @@ public class BPEconomy {
         set(p, balance.subtract(result));
 
         if (!ignoreEvents) afterTransactionEvent(p, type, result);
+        endOperation(p);
         return result;
     }
 
@@ -433,6 +436,8 @@ public class BPEconomy {
      * @return Offline interest.
      */
     public BigDecimal getOfflineInterest(UUID uuid) {
+        if (!isOperationAllowed(Bukkit.getOfflinePlayer(uuid))) return BigDecimal.ZERO;
+
         Holder holder = isPlayerBalanceLoaded(uuid) ? holders.get(uuid) : loadPlayerHolder(uuid);
         return holder.offlineInterest;
     }
@@ -444,12 +449,12 @@ public class BPEconomy {
      * @param amount The new amount.
      */
     public void setOfflineInterest(OfflinePlayer p, BigDecimal amount) {
-        if (startAndCheckIfIsInTransaction(p)) return;
+        if (!startAndCheckOperationAllowed(p)) return;
 
         Holder holder = isPlayerBalanceLoaded(p) ? holders.get(p.getUniqueId()) : loadPlayerHolder(p);
         holder.setOfflineInterest(amount);
 
-        endTransaction(p);
+        endOperation(p);
     }
 
     /**
@@ -467,6 +472,8 @@ public class BPEconomy {
      * @param uuid The player UUID.
      */
     public BigDecimal getDebt(UUID uuid) {
+        if (!isOperationAllowed(Bukkit.getOfflinePlayer(uuid))) return BigDecimal.ZERO;
+
         Holder holder = isPlayerBalanceLoaded(uuid) ? holders.get(uuid) : loadPlayerHolder(uuid);
         return holder.debt;
     }
@@ -478,12 +485,12 @@ public class BPEconomy {
      * @param amount The new debt amount.
      */
     public void setDebt(OfflinePlayer p, BigDecimal amount) {
-        if (startAndCheckIfIsInTransaction(p)) return;
+        if (!startAndCheckOperationAllowed(p)) return;
 
         Holder holder = isPlayerBalanceLoaded(p) ? holders.get(p.getUniqueId()) : loadPlayerHolder(p);
         holder.setDebt(amount);
 
-        endTransaction(p);
+        endOperation(p);
     }
 
     /**
@@ -503,17 +510,19 @@ public class BPEconomy {
      * @return The current bank level.
      */
     public int getBankLevel(UUID uuid) {
+        if (!isOperationAllowed(Bukkit.getOfflinePlayer(uuid))) return 1;
+
         Holder holder = isPlayerBalanceLoaded(uuid) ? holders.get(uuid) : loadPlayerHolder(uuid);
         return holder.bankLevel;
     }
 
     public void setBankLevel(OfflinePlayer p, int level) {
-        if (startAndCheckIfIsInTransaction(p)) return;
+        if (!startAndCheckOperationAllowed(p)) return;
 
         Holder holder = isPlayerBalanceLoaded(p) ? holders.get(p.getUniqueId()) : loadPlayerHolder(p);
         holder.setBankLevel(level);
 
-        endTransaction(p);
+        endOperation(p);
     }
 
     /**
@@ -522,7 +531,7 @@ public class BPEconomy {
     private void set(OfflinePlayer p, BigDecimal amount) {
         Holder pHolder = isPlayerBalanceLoaded(p) ? holders.get(p.getUniqueId()) : loadPlayerHolder(p);
         pHolder.setMoney(amount);
-        endTransaction(p);
+        endOperation(p);
     }
 
     /**
@@ -532,7 +541,9 @@ public class BPEconomy {
      * @param amount The amount to deposit.
      */
     public void deposit(Player p, BigDecimal amount) {
-        if (BPUtils.isBankFull(p, originBank) || isInTransaction(p)) return;
+        // There is no need to check for startAndCheckOperationAllowed because
+        // it is done at the end of the method when adding bank balance.
+        if (BPUtils.isBankFull(p, originBank)) return;
 
         BPPreTransactionEvent event = preTransactionEvent(p, TransactionType.DEPOSIT, amount);
         if (event.isCancelled()) return;
@@ -544,8 +555,8 @@ public class BPEconomy {
         BigDecimal wallet = BigDecimal.valueOf(economy.getBalance(p));
         if (!BPUtils.checkPreRequisites(wallet, amount, p)) return;
 
-        if (wallet.compareTo(amount) < 0)
-            amount = wallet; // If it's more than the player's wallet, use the wallet amount.
+        // If it's more than the player's wallet, use the wallet amount.
+        if (wallet.compareTo(amount) < 0) amount = wallet;
 
         BigDecimal maxDeposit = ConfigValues.getMaxDepositAmount(); // If it's more than the max deposit amount, use the max amount.
         if (maxDeposit.compareTo(BigDecimal.ZERO) > 0 && amount.compareTo(maxDeposit) >= 0) amount = maxDeposit;
@@ -587,8 +598,8 @@ public class BPEconomy {
      * @param amount The amount to withdraw.
      */
     public void withdraw(Player p, BigDecimal amount) {
-        if (isInTransaction(p)) return;
-
+        // There is no need to check for startAndCheckOperationAllowed because
+        // it is done at the end of the method when removing bank balance.
         BPPreTransactionEvent event = preTransactionEvent(p, TransactionType.WITHDRAW, amount);
         if (event.isCancelled()) return;
 
@@ -675,7 +686,7 @@ public class BPEconomy {
      * @param toBank The bank where the money will be added.
      */
     public void pay(Player from, Player to, BigDecimal amount, Bank toBank) {
-        if (isInTransaction(from)) return;
+        if (!startAndCheckOperationAllowed(from) || !startAndCheckOperationAllowed(to)) return;
 
         BigDecimal senderBalance = getBankBalance(from);
         // Check if the sender has at least more than 0 money
@@ -722,24 +733,49 @@ public class BPEconomy {
     }
 
     /**
-     * Set the player in a transaction state and check if it is doing one.
+     * Check if the specified player is allowed to perform any type of operation.
+     * <p>
+     * This method will deny operations in case the player is online but
+     * not yet loaded, or when he is already performing another operation.
+     * <p>
+     * This method, once called, will also automatically set the player
+     * in an operating state if all the other check passes.
      *
-     * @param p The player that is doing the transaction.
-     * @return true if is in transaction or cannot do a transaction for any reasons (for example hasn't been loaded yet), false otherwise.
+     * @param p The player to check.
+     * @return true if the transaction is allowed, false otherwise.
      */
-    private boolean startAndCheckIfIsInTransaction(OfflinePlayer p) {
+    private boolean startAndCheckOperationAllowed(OfflinePlayer p) {
+        if (!isOperationAllowed(p) || operations.contains(p.getUniqueId())) return false;
+
+        operations.add(p.getUniqueId());
+        return true;
+    }
+
+    /**
+     * Check if the specified player is allowed to perform any type of operation.
+     * <p>
+     * This method will deny operations in case the player is online but
+     * not yet loaded, or when he is already performing another operation.
+     * <p>
+     * This method does not automatically set the player in operating state if the check are passed.
+     *
+     * @param p The player to check.
+     * @return true if the transaction is allowed, false otherwise.
+     */
+    private boolean isOperationAllowed(OfflinePlayer p) {
+        if (!p.isOnline()) return true;
+
         BPPlayer bpPlayer = PlayerRegistry.get(p);
-        if (bpPlayer == null || !bpPlayer.isLoaded() || transactions.contains(p.getUniqueId())) return true;
-        transactions.add(p.getUniqueId());
-        return false;
+        return bpPlayer != null && bpPlayer.isLoaded();
     }
 
-    private boolean isInTransaction(OfflinePlayer p) {
-        return transactions.contains(p.getUniqueId());
-    }
-
-    private void endTransaction(OfflinePlayer p) {
-        transactions.remove(p.getUniqueId());
+    /**
+     * Remove the specified player from the operating state.
+     *
+     * @param p The player.
+     */
+    private void endOperation(OfflinePlayer p) {
+        operations.remove(p.getUniqueId());
     }
 
     private static class Holder {

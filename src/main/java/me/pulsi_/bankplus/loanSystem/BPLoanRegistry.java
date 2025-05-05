@@ -71,13 +71,13 @@ public class BPLoanRegistry {
                 String senderUUID = values.getString("sender");
                 if (senderUUID != null) sender = Bukkit.getOfflinePlayer(UUID.fromString(senderUUID));
             } catch (IllegalArgumentException e) {
-                BPLogger.warn(e, "Could not load \"" + receiverUUID + "\" loan! (Invalid UUID specified)");
+                BPLogger.Console.warn(e, "Could not load \"" + receiverUUID + "\" loan! (Invalid UUID specified)");
                 continue;
             }
 
             String moneyToReturn = values.getString("money-to-return");
             if (moneyToReturn == null || BPUtils.isInvalidNumber(moneyToReturn)) {
-                BPLogger.warn("Could not load \"" + receiverUUID + "\" loan! (An invalid money-to-return amount has been specified)");
+                BPLogger.Console.warn("Could not load \"" + receiverUUID + "\" loan! (An invalid money-to-return amount has been specified)");
                 continue;
             }
 
@@ -86,7 +86,7 @@ public class BPLoanRegistry {
             String requestedBank = values.getString("requested-bank");
             if (requestedBank != null) {
                 if (!BankUtils.exist(requestedBank)) {
-                    BPLogger.warn("The loan \"" + receiverUUID + "\" specified an invalid bank to take the money, using the main bank.");
+                    BPLogger.Console.warn("The loan \"" + receiverUUID + "\" specified an invalid bank to take the money, using the main bank.");
                     requestedBank = ConfigValues.getMainGuiName();
                 }
 
@@ -96,15 +96,15 @@ public class BPLoanRegistry {
                 String fromBank = ConfigValues.getMainGuiName(), toBank = ConfigValues.getMainGuiName();
                 String fromBankString = values.getString("from"), toBankString = values.getString("to");
 
-                if (fromBankString == null) BPLogger.warn("The loan \"" + receiverUUID + "\" did not specify a bank to take the money, using the main bank.");
+                if (fromBankString == null) BPLogger.Console.warn("The loan \"" + receiverUUID + "\" did not specify a bank to take the money, using the main bank.");
                 else if (!BankUtils.exist(fromBankString)) {
-                    BPLogger.warn("The loan \"" + receiverUUID + "\" specified an invalid bank to take the money, using the main bank.");
+                    BPLogger.Console.warn("The loan \"" + receiverUUID + "\" specified an invalid bank to take the money, using the main bank.");
                     fromBank = fromBankString;
                 }
 
-                if (toBankString == null) BPLogger.warn("The loan \"" + receiverUUID + "\" did not specify a bank to give the money, using the main bank.");
+                if (toBankString == null) BPLogger.Console.warn("The loan \"" + receiverUUID + "\" did not specify a bank to give the money, using the main bank.");
                 else if (!BankUtils.exist(toBankString)) {
-                    BPLogger.warn("The loan \"" + receiverUUID + "\" specified an invalid bank to give the money, using the main bank.");
+                    BPLogger.Console.warn("The loan \"" + receiverUUID + "\" specified an invalid bank to give the money, using the main bank.");
                     toBank = toBankString;
                 }
 
@@ -142,7 +142,7 @@ public class BPLoanRegistry {
         try {
             config.save(file);
         } catch (IOException e) {
-            BPLogger.warn("Could not save loans to saves.yml file: " + e.getMessage());
+            BPLogger.Console.warn("Could not save loans to saves.yml file: " + e.getMessage());
         }
     }
 
