@@ -13,7 +13,7 @@ import me.pulsi_.bankplus.events.BPPreTransactionEvent;
 import me.pulsi_.bankplus.listeners.playerChat.PlayerChatMethod;
 import me.pulsi_.bankplus.mySQL.BPSQL;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
-import me.pulsi_.bankplus.utils.BPSets;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
@@ -642,15 +642,15 @@ public class BPEconomy {
         if (MessageValues.isTitleCustomAmountEnabled()) BPUtils.sendTitle(MessageValues.getCustomDepositTitle(), p);
 
         BPMessages.send(p, "Chat-Deposit");
-        BPSets.addPlayerToDeposit(p);
         p.closeInventory();
 
-        BPPlayer pl = PlayerRegistry.get(p);
+        BPPlayer bpPlayer = PlayerRegistry.get(p);
         BankGui bankGui = getOriginBank().getBankGui();
-        pl.setOpenedBankGui(bankGui);
+        bpPlayer.setOpenedBankGui(bankGui);
+        bpPlayer.setDepositing(true);
 
-        pl.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> {
-            PlayerChatMethod.reopenBank(p, bankGui);
+        bpPlayer.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> {
+            PlayerChatMethod.reopenBank(bpPlayer, bankGui);
             BPMessages.send(p, "Chat-Time-Expired");
         }, ConfigValues.getChatExitTime() * 20L));
     }
@@ -664,15 +664,15 @@ public class BPEconomy {
         if (MessageValues.isTitleCustomAmountEnabled()) BPUtils.sendTitle(MessageValues.getCustomWithdrawTitle(), p);
 
         BPMessages.send(p, "Chat-Withdraw");
-        BPSets.addPlayerToWithdraw(p);
         p.closeInventory();
 
-        BPPlayer pl = PlayerRegistry.get(p);
+        BPPlayer bpPlayer = PlayerRegistry.get(p);
         BankGui bankGui = getOriginBank().getBankGui();
-        pl.setOpenedBankGui(bankGui);
+        bpPlayer.setOpenedBankGui(bankGui);
+        bpPlayer.setWithdrawing(true);
 
-        pl.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> {
-            PlayerChatMethod.reopenBank(p, bankGui);
+        bpPlayer.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> {
+            PlayerChatMethod.reopenBank(bpPlayer, bankGui);
             BPMessages.send(p, "Chat-Time-Expired");
         }, ConfigValues.getChatExitTime() * 20L));
     }
@@ -766,7 +766,9 @@ public class BPEconomy {
         if (!p.isOnline()) return true;
 
         BPPlayer bpPlayer = PlayerRegistry.get(p);
-        return bpPlayer != null && bpPlayer.isLoaded();
+        boolean allowed = bpPlayer != null && bpPlayer.isLoaded();
+        if (!allowed) BPLogger.LogsFile.log(p.getName() + "'s transaction has been blocked because he hasn't been loaded yet.");
+        return allowed;
     }
 
     /**

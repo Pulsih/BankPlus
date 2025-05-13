@@ -12,6 +12,9 @@ public class BPPlayer {
     private BukkitTask bankUpdatingTask, closingTask;
     private boolean loaded = false;
 
+    // Values to check if the player is doing a deposit or withdraw through chat.
+    private boolean depositing, withdrawing;
+
     public BPPlayer(Player player) {
         this.player = player;
     }
@@ -36,6 +39,14 @@ public class BPPlayer {
         return loaded;
     }
 
+    public boolean isDepositing() {
+        return depositing;
+    }
+
+    public boolean isWithdrawing() {
+        return withdrawing;
+    }
+
     public void setOpenedBankGui(BankGui openedBankGui) {
         this.openedBankGui = openedBankGui;
     }
@@ -50,5 +61,13 @@ public class BPPlayer {
 
     public void setLoaded(boolean loaded) {
         this.loaded = loaded;
+    }
+
+    public void setDepositing(boolean depositing) {
+        this.depositing = depositing;
+    }
+
+    public void setWithdrawing(boolean withdrawing) {
+        this.withdrawing = withdrawing;
     }
 }

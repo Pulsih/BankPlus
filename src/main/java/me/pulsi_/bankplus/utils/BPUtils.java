@@ -64,14 +64,6 @@ public class BPUtils {
         }
     }
 
-    public static boolean isDepositing(Player p) {
-        return BPSets.playerDepositing.contains(p.getUniqueId());
-    }
-
-    public static boolean isWithdrawing(Player p) {
-        return BPSets.playerWithdrawing.contains(p.getUniqueId());
-    }
-
     public static boolean isPlayer(CommandSender s) {
         if (s instanceof Player) return true;
         BPMessages.send(s, "Not-Player");

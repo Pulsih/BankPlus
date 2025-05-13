@@ -7,7 +7,6 @@ import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.economy.EconomyUtils;
 import me.pulsi_.bankplus.utils.BPLogger;
-import me.pulsi_.bankplus.utils.BPSets;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.ConfigValues;
@@ -67,10 +66,10 @@ public class PlayerServerListener implements Listener {
         if (player != null) {
             BukkitTask updating = player.getBankUpdatingTask();
             if (updating != null) updating.cancel();
-        }
 
-        BPSets.removePlayerFromDepositing(p);
-        BPSets.removePlayerFromWithdrawing(p);
+            player.setDepositing(false);
+            player.setWithdrawing(false);
+        }
 
         if (ConfigValues.isSavingOnQuit()) EconomyUtils.savePlayer(p.getUniqueId(), true);
     }
