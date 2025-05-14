@@ -252,6 +252,13 @@ public class BPEconomy {
 
     /**
      * Set the selected amount in the selected bank.
+     * <p>
+     * ! IMPORTANT !
+     * Do not use methods to manage player balance in
+     * BPTransactionListeners without ignoring the events,
+     * it can cause an infinite loop and make the server crash.
+     * <p>
+     * To fix that, use the method #(OfflinePlayer, BigDecimal, Boolean(ignoreEvents))
      *
      * @return Number representing the actual amount set.
      */
@@ -271,6 +278,13 @@ public class BPEconomy {
 
     /**
      * Set the selected amount in the selected bank.
+     * <p>
+     * ! IMPORTANT !
+     * Do not use methods to manage player balance in
+     * BPTransactionListeners without ignoring the events,
+     * it can cause an infinite loop and make the server crash.
+     * <p>
+     * To fix that, use the method #(OfflinePlayer, BigDecimal, Boolean(ignoreEvents))
      *
      * @param type Override the transaction type with the one you choose.
      * @return Number representing the actual amount set.
@@ -305,6 +319,13 @@ public class BPEconomy {
 
     /**
      * Add the selected amount to the selected bank.
+     * <p>
+     * ! IMPORTANT !
+     * Do not use methods to manage player balance in
+     * BPTransactionListeners without ignoring the events,
+     * it can cause an infinite loop and make the server crash.
+     * <p>
+     * To fix that, use the method #(OfflinePlayer, BigDecimal, Boolean(ignoreEvents))
      *
      * @return Number representing the actual amount added.
      */
@@ -324,6 +345,13 @@ public class BPEconomy {
 
     /**
      * Add the selected amount to the selected bank.
+     * <p>
+     * ! IMPORTANT !
+     * Do not use methods to manage player balance in
+     * BPTransactionListeners without ignoring the events,
+     * it can cause an infinite loop and make the server crash.
+     * <p>
+     * To fix that, use the method #(OfflinePlayer, BigDecimal, Boolean(ignoreEvents))
      *
      * @param type Override the transaction type with the one you choose.
      * @return Number representing the actual amount added.
@@ -367,6 +395,13 @@ public class BPEconomy {
 
     /**
      * Remove the selected amount.
+     * <p>
+     * ! IMPORTANT !
+     * Do not use methods to manage player balance in
+     * BPTransactionListeners without ignoring the events,
+     * it can cause an infinite loop and make the server crash.
+     * <p>
+     * To fix that, use the method #(OfflinePlayer, BigDecimal, Boolean(ignoreEvents))
      *
      * @return Number representing the actual amount removed.
      */
@@ -386,6 +421,13 @@ public class BPEconomy {
 
     /**
      * Remove the selected amount.
+     * <p>
+     * ! IMPORTANT !
+     * Do not use methods to manage player balance in
+     * BPTransactionListeners without ignoring the events,
+     * it can cause an infinite loop and make the server crash.
+     * <p>
+     * To fix that, use the method #(OfflinePlayer, BigDecimal, Boolean(ignoreEvents))
      *
      * @param type Override the transaction type with the one you choose.
      * @return Number representing the actual amount removed.
@@ -767,7 +809,8 @@ public class BPEconomy {
 
         BPPlayer bpPlayer = PlayerRegistry.get(p);
         boolean allowed = bpPlayer != null && bpPlayer.isLoaded();
-        if (!allowed) BPLogger.LogsFile.log(p.getName() + "'s transaction has been blocked because he hasn't been loaded yet.");
+        if (!allowed)
+            BPLogger.LogsFile.log(p.getName() + "'s transaction has been blocked because he hasn't been loaded yet.");
         return allowed;
     }
 

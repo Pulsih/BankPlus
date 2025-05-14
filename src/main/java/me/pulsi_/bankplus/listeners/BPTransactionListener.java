@@ -59,7 +59,7 @@ public class BPTransactionListener implements Listener {
         BigDecimal debt = economy.getDebt(p);
         if (debt.compareTo(BigDecimal.ZERO) <= 0) return;
 
-        BigDecimal removed = economy.removeBankBalance(p, debt);
+        BigDecimal removed = economy.removeBankBalance(p, debt, true);
         if (removed.compareTo(BigDecimal.ZERO) <= 0) return;
 
         BigDecimal newDebt = debt.subtract(removed);
