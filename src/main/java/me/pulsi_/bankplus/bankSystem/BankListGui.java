@@ -70,7 +70,7 @@ public class BankListGui extends BankGui {
     public void placeContent(HashMap<Integer, BPGuiItem> items, Inventory bankInventory, Player p) {
         int slot = 0;
 
-        for (Bank bank : BankPlus.INSTANCE().getBankRegistry().getBanks().values()) {
+        for (Bank bank : BankRegistry.getBanks().values()) {
             if (MultipleBanksValues.isShowNotAvailableBanks() && !BankUtils.isAvailable(bank, p)) continue;
 
             BankGui gui = bank.getBankGui();

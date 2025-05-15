@@ -1,7 +1,7 @@
 plugins { java }
 
 group = "me.pulsi_"
-version = "6.4-Alpha13"
+version = "6.4-Alpha14"
 
 /*tasks.withType<Jar> { // To simplify the testing, set the path directly into the plugins folder.
     destinationDirectory.set(File("C:\\Users\\faste\\Desktop\\Test Servers\\1.21.4\\plugins"))

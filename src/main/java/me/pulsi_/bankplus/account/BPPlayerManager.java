@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.account;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.Bank;
+import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.mySQL.BPSQL;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -45,7 +46,7 @@ public class BPPlayerManager {
             hasChanges = true;
         }
 
-        for (Bank bank : BankUtils.getBanks()) {
+        for (Bank bank : BankRegistry.getBanks().values()) {
             String bankName = bank.getIdentifier();
             String sBalance = config.getString("banks." + bankName + ".money");
             String sLevel = config.getString("banks." + bankName + ".level");

@@ -103,7 +103,7 @@ public class BankClickMethod {
                 break;
 
                 case "[upgrade]":
-                    BankUtils.upgradeBank(BankUtils.getBank(bankName), p);
+                    BankUtils.upgradeBank(BankRegistry.getBank(bankName), p);
             }
         }
     }

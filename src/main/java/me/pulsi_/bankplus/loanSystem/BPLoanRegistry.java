@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.loanSystem;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.Bank;
+import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.economy.TransactionType;
@@ -90,7 +91,7 @@ public class BPLoanRegistry {
                     requestedBank = ConfigValues.getMainGuiName();
                 }
 
-                loan = new BPLoan(receiver, BankUtils.getBank(requestedBank));
+                loan = new BPLoan(receiver, BankRegistry.getBank(requestedBank));
             } else {
 
                 String fromBank = ConfigValues.getMainGuiName(), toBank = ConfigValues.getMainGuiName();
@@ -108,7 +109,7 @@ public class BPLoanRegistry {
                     toBank = toBankString;
                 }
 
-                loan = new BPLoan(sender, receiver, BankUtils.getBank(fromBank), BankUtils.getBank(toBank));
+                loan = new BPLoan(sender, receiver, BankRegistry.getBank(fromBank), BankRegistry.getBank(toBank));
             }
 
             loan.setMoneyToReturn(new BigDecimal(moneyToReturn));

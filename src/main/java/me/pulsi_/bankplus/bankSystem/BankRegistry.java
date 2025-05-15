@@ -14,6 +14,10 @@ public class BankRegistry {
 
     private static final HashMap<String, Bank> banks = new HashMap<>();
 
+    public static Bank getBank(String bankName) {
+        return banks.get(bankName);
+    }
+
     public static HashMap<String, Bank> getBanks() {
         return banks;
     }

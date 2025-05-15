@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.commands;
 
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankListGui;
+import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.utils.BPUtils;
@@ -45,7 +46,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
             }
 
             if (ConfigValues.isGuiModuleEnabled()) {
-                if (!MultipleBanksValues.enableMultipleBanksModule()) BankUtils.getBank(ConfigValues.getMainGuiName()).getBankGui().openBankGui(p);
+                if (!MultipleBanksValues.enableMultipleBanksModule()) BankRegistry.getBank(ConfigValues.getMainGuiName()).getBankGui().openBankGui(p);
                 else {
                     if (!MultipleBanksValues.isDirectlyOpenIf1IsAvailable()) new BankListGui().openBankGui(p);
                     else {

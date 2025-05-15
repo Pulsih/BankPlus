@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.bankSystem.Bank;
+import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
@@ -60,7 +61,7 @@ public class UpgradeCmd extends BPCommand {
 
     @Override
     public BPCmdExecution onExecution(CommandSender s, String[] args) {
-        Bank bank = BankUtils.getBank(getPossibleBank(args, 1));
+        Bank bank = BankRegistry.getBank(getPossibleBank(args, 1));
         if (!BankUtils.exist(bank, s)) return BPCmdExecution.invalidExecution();
 
         Player p = (Player) s;

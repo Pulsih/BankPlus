@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.bankSystem.Bank;
+import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
@@ -83,7 +84,7 @@ public class PayCmd extends BPCommand {
         String num = args[2];
         if (BPUtils.isInvalidNumber(num, s)) return BPCmdExecution.invalidExecution();
 
-        Bank fromBank = BankUtils.getBank(getPossibleBank(args, 3));
+        Bank fromBank = BankRegistry.getBank(getPossibleBank(args, 3));
 
         if (!BankUtils.exist(fromBank, s)) return BPCmdExecution.invalidExecution();
         if (!BankUtils.isAvailable(fromBank, sender)) {
@@ -91,7 +92,7 @@ public class PayCmd extends BPCommand {
             return BPCmdExecution.invalidExecution();
         }
 
-        Bank toBank = BankUtils.getBank(getPossibleBank(args, 4));
+        Bank toBank = BankRegistry.getBank(getPossibleBank(args, 4));
 
         if (!BankUtils.exist(toBank, s)) return BPCmdExecution.invalidExecution();
         if (!BankUtils.isAvailable(toBank, target)) {

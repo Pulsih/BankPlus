@@ -1,5 +1,6 @@
 package me.pulsi_.bankplus.commands.list;
 
+import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
@@ -77,7 +78,7 @@ public class ForceOpenCmd extends BPCommand {
         return new BPCmdExecution() {
             @Override
             public void execute() {
-                BankUtils.getBank(bankName).getBankGui().openBankGui(target, true);
+                BankRegistry.getBank(bankName).getBankGui().openBankGui(target, true);
                 if (!isSilent(args)) BPMessages.send(s, "Force-Open", "%player%$" + target.getName(), "%bank%$" + bankName);
             }
         };

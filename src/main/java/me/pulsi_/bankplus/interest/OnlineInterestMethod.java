@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.interest;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.Bank;
+import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.economy.TransactionType;
@@ -31,7 +32,7 @@ public class OnlineInterestMethod extends BPInterest.InterestMethod {
         if (!p.hasPermission(ONLINE_INTEREST_PERMISSION)) return;
 
         List<Bank> availableBanks = new ArrayList<>(); // List of available banks for the player.
-        for (Bank bank : BankUtils.getBanks())
+        for (Bank bank : BankRegistry.getBanks().values())
             // If the bank gives interest even if not available, still add it.
             if (bank.isGiveInterestIfNotAvailable() || BankUtils.isAvailable(bank, p)) availableBanks.add(bank);
         if (availableBanks.isEmpty()) return;

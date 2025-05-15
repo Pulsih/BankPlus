@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.account;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.Bank;
+import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.mySQL.BPSQL;
@@ -41,7 +42,7 @@ public class PlayerRegistry {
     public static BPPlayer loadPlayer(Player p, boolean wasRegistered) {
         BPPlayer bpPlayer = new BPPlayer(p);
 
-        for (Bank bank : BankUtils.getBanks())
+        for (Bank bank : BankRegistry.getBanks().values())
             bpPlayer = loadPlayer(p, bank, wasRegistered);
 
         return bpPlayer;

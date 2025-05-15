@@ -23,16 +23,8 @@ import java.util.List;
 
 public class LoanCmd extends BPCommand {
 
-    private final BankRegistry registry;
-
     public LoanCmd(FileConfiguration commandsConfig, String commandID) {
         super(commandsConfig, commandID);
-        registry = BankPlus.INSTANCE().getBankRegistry();
-    }
-
-    public LoanCmd(FileConfiguration commandsConfig, String commandID, String... aliases) {
-        super(commandsConfig, commandID, aliases);
-        registry = BankPlus.INSTANCE().getBankRegistry();
     }
 
     @Override
@@ -136,7 +128,7 @@ public class LoanCmd extends BPCommand {
 
         // If the target name is the name of a bank, it means that
         // the player is trying to request a loan from a bank.
-        if (action.equals("request") && registry.getBanks().containsKey(targetName)) {
+        if (action.equals("request") && BankUtils.exist(targetName)) {
             if (!BankUtils.isAvailable(targetName, sender)) {
                 BPMessages.send(sender, "Cannot-Access-Bank");
                 return BPCmdExecution.invalidExecution();
@@ -145,7 +137,7 @@ public class LoanCmd extends BPCommand {
             return new BPCmdExecution() {
                 @Override
                 public void execute() {
-                    LoanUtils.sendLoan(sender, BankUtils.getBank(targetName), amount);
+                    LoanUtils.sendLoan(sender, BankRegistry.getBank(targetName), amount);
                 }
             };
         } else {
@@ -156,7 +148,7 @@ public class LoanCmd extends BPCommand {
             }
 
             // Check if the bank specified by the request sender is available for him.
-            Bank senderBank = BankUtils.getBank(getPossibleBank(args, 4));
+            Bank senderBank = BankRegistry.getBank(getPossibleBank(args, 4));
 
             if (!BankUtils.exist(senderBank, s)) return BPCmdExecution.invalidExecution();
             if (!BankUtils.isAvailable(senderBank, sender)) {
@@ -165,7 +157,7 @@ public class LoanCmd extends BPCommand {
             }
 
             // Check if the bank specified by the request sender is available for the request target.
-            Bank receiverBank = BankUtils.getBank(getPossibleBank(args, 5));
+            Bank receiverBank = BankRegistry.getBank(getPossibleBank(args, 5));
 
             if (!BankUtils.exist(receiverBank, s)) return BPCmdExecution.invalidExecution();
             if (!BankUtils.isAvailable(receiverBank, target)) {

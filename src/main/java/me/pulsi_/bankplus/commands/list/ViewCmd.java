@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.Bank;
+import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
@@ -88,7 +89,7 @@ public class ViewCmd extends BPCommand {
                             return;
                         }
                     } else {
-                        Bank bank = BankUtils.getBank(args[2]);
+                        Bank bank = BankRegistry.getBank(args[2]);
                         if (!BankUtils.exist(bank, s)) return;
 
                         if (!BankUtils.isAvailable(bank, target)) {

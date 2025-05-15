@@ -2,6 +2,7 @@ package me.pulsi_.bankplus.utils;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.Bank;
+import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
@@ -316,7 +317,7 @@ public class BPUtils {
     }
 
     public static boolean isBankFull(Player p) {
-        return isBankFull(p, BankUtils.getBank(ConfigValues.getMainGuiName()));
+        return isBankFull(p, BankRegistry.getBank(ConfigValues.getMainGuiName()));
     }
 
     public static boolean isBankFull(Player p, Bank bank) {

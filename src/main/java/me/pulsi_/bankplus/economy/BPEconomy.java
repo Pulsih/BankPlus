@@ -59,7 +59,7 @@ public class BPEconomy {
      * @return The economy of the specified bank, or null if invalid.
      */
     public static BPEconomy get(String bankName) {
-        Bank bank = BankUtils.getBank(bankName);
+        Bank bank = BankRegistry.getBank(bankName);
         if (bank == null) return null;
         return bank.getBankEconomy();
     }

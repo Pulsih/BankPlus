@@ -47,14 +47,6 @@ public class BankUtils {
         throw new Exception("This class may not be initialized.");
     }
 
-    public static Bank getBank(String bankName) {
-        return BankPlus.INSTANCE().getBankRegistry().getBanks().get(bankName);
-    }
-
-    public static Collection<Bank> getBanks() {
-        return BankPlus.INSTANCE().getBankRegistry().getBanks().values();
-    }
-
     /**
      * Checks if the selected bank is registered.
      *
@@ -94,7 +86,7 @@ public class BankUtils {
      * @return true if it is registered, false otherwise.
      */
     public static boolean exist(String bankName, CommandSender s) {
-        boolean exist = getBank(bankName) != null;
+        boolean exist = BankRegistry.getBank(bankName) != null;
         if (!exist) BPMessages.send(s, "Invalid-Bank");
         return exist;
     }
@@ -379,7 +371,7 @@ public class BankUtils {
         List<Bank> availableBanks = new ArrayList<>();
         if (p == null) return availableBanks;
 
-        for (Bank bank : getBanks())
+        for (Bank bank : BankRegistry.getBanks().values())
             if (isAvailable(bank, p)) availableBanks.add(bank);
 
         return availableBanks;
@@ -395,7 +387,7 @@ public class BankUtils {
         List<String> availableBanks = new ArrayList<>();
         if (p == null) return availableBanks;
 
-        for (String bankName : BankPlus.INSTANCE().getBankRegistry().getBanks().keySet())
+        for (String bankName : BankRegistry.getBanks().keySet())
             if (isAvailable(bankName, p)) availableBanks.add(bankName);
 
         return availableBanks;
@@ -409,7 +401,7 @@ public class BankUtils {
      * @return true if available, false otherwise.
      */
     public static boolean isAvailable(String bankName, OfflinePlayer p) {
-        return isAvailable(getBank(bankName), p);
+        return isAvailable(BankRegistry.getBank(bankName), p);
     }
 
     /**

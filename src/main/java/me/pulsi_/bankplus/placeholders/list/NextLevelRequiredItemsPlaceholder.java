@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.placeholders.list;
 
 import me.pulsi_.bankplus.bankSystem.Bank;
+import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.placeholders.BPPlaceholder;
 import me.pulsi_.bankplus.utils.BPUtils;
@@ -21,7 +22,7 @@ public class NextLevelRequiredItemsPlaceholder extends BPPlaceholder {
     public String getPlaceholder(Player p, String target, String identifier) {
         if (!BankUtils.exist(target)) return bankDoesNotExist;
 
-        Bank bank = BankUtils.getBank(target);
+        Bank bank = BankRegistry.getBank(target);
         if (!BankUtils.hasNextLevel(bank, p)) return ConfigValues.getUpgradesMaxedPlaceholder();
 
         HashMap<String, ItemStack> requiredItems = BankUtils.getRequiredItems(bank, BankUtils.getCurrentLevel(bank, p) + 1);
