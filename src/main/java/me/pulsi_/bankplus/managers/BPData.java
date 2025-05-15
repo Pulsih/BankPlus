@@ -3,6 +3,7 @@ package me.pulsi_.bankplus.managers;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
+import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.bankTop.BPBankTop;
 import me.pulsi_.bankplus.commands.BPCmdRegistry;
 import me.pulsi_.bankplus.commands.BankTopCmd;
@@ -81,7 +82,6 @@ public class BPData {
             MultipleBanksValues.setupValues();
 
             BPCmdRegistry.registerPluginCommands();
-
             BPLogger.LogsFile.setupLoggerFile();
 
             if (ConfigValues.isIgnoringAfkPlayers()) plugin.getAfkManager().startCountdown();
@@ -93,13 +93,13 @@ public class BPData {
             BPInterest interest = plugin.getInterest();
             if (ConfigValues.isInterestEnabled() && interest.wasDisabled()) interest.restartInterest(start);
 
-            plugin.getBankRegistry().loadBanks();
-
             if (!ConfigValues.isSqlEnabled()) BPSQL.disconnect();
             else {
                 BPSQL.setupMySQL();
                 BPSQL.connect();
             }
+
+            BankRegistry.loadBanks();
 
             if (!BPTaskManager.contains(BPTaskManager.MONEY_SAVING_TASK)) EconomyUtils.restartSavingInterval();
 

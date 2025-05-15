@@ -22,22 +22,8 @@ import java.util.UUID;
 
 public class BPTransactionListener implements Listener {
 
-    public static class Pair<K, V> {
-        private final K key;
-        private final V value;
+    public record Pair<K, V>(K key, V value) {
 
-        public K getKey() {
-            return key;
-        }
-
-        public V getValue() {
-            return value;
-        }
-
-        public Pair(K key, V value) {
-            this.key = key;
-            this.value = value;
-        }
     }
 
     private final HashMap<UUID, Pair<BigDecimal, Double>> logHolder = new HashMap<>();
@@ -89,9 +75,9 @@ public class BPTransactionListener implements Listener {
                 " - %1 [%2] Bank: [%3 -> %4] Vault: [%5 -> %6]\n"
                         .replace("%1", BPFormatter.styleBigDecimal(e.getTransactionAmount()))
                         .replace("%2", e.getBankName())
-                        .replace("%3", BPFormatter.styleBigDecimal(pair.getKey()))
+                        .replace("%3", BPFormatter.styleBigDecimal(pair.key()))
                         .replace("%4", BPFormatter.styleBigDecimal(e.getNewBalance()))
-                        .replace("%5", pair.getValue() + "")
+                        .replace("%5", pair.value() + "")
                         .replace("%6", e.getNewVaultBalance() + "")
         );
 

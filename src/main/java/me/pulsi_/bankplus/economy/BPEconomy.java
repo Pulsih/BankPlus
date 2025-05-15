@@ -32,6 +32,8 @@ import java.util.*;
 
 public class BPEconomy {
 
+    // Set of players that are loaded in this economy and can do transactions.
+    // If a player is missing in this list, all the transactions will be denied.
     private static final Set<UUID> loadedPlayers = new HashSet<>();
 
     private final Bank originBank;
@@ -50,31 +52,36 @@ public class BPEconomy {
         this.levelPath = "banks." + bankName + ".level";
     }
 
+    /**
+     * Utility method to retrieve easier an economy by its name.
+     *
+     * @param bankName The name of the bank name where to get the economy.
+     * @return The economy of the specified bank, or null if invalid.
+     */
     public static BPEconomy get(String bankName) {
         Bank bank = BankUtils.getBank(bankName);
         if (bank == null) return null;
         return bank.getBankEconomy();
     }
 
+    /**
+     * Utility method to retrieve easier all the registered economies.
+     *
+     * @return A list of economies or registered banks.
+     */
     public static List<BPEconomy> list() {
         List<BPEconomy> economies = new ArrayList<>();
-        BankPlus pl = BankPlus.INSTANCE();
-        if (pl == null) return economies;
-
-        for (Bank bank : pl.getBankRegistry().getBanks().values()) economies.add(bank.getBankEconomy());
+        for (Bank bank : BankRegistry.getBanks().values()) economies.add(bank.getBankEconomy());
         return economies;
     }
 
+    /**
+     * Utility method to retrieve easier all the registered bank names.
+     *
+     * @return A set of registered bank names.
+     */
     public static Set<String> nameList() {
-        Set<String> economies = new HashSet<>();
-
-        BankPlus pl = BankPlus.INSTANCE();
-        if (pl == null) return economies;
-
-        BankRegistry bankRegistry = pl.getBankRegistry();
-        if (bankRegistry != null) economies = bankRegistry.getBanks().keySet();
-
-        return economies;
+        return BankRegistry.getBanks().keySet();
     }
 
     /**
@@ -141,8 +148,6 @@ public class BPEconomy {
 
     /**
      * Cache the player information to use and modify them faster.
-     * <p>
-     * Data is ONLY LOADED FROM FILES, changes are then synchronized with MySQL database. (if enabled)
      *
      * @param uuid          The player uuid to load.
      * @param wasRegistered If false, it will load money as first join amount.
@@ -751,6 +756,34 @@ public class BPEconomy {
         BPMessages.send(from, "Payment-Sent", BPUtils.placeValues(to, removed));
     }
 
+    /**
+     * Check if the specified player is loaded to this economy.
+     *
+     * @param p The player to check.
+     * @return true if it's loaded, false otherwise.
+     */
+    public boolean isPlayerLoaded(OfflinePlayer p) {
+        return loadedPlayers.contains(p.getUniqueId());
+    }
+
+    /**
+     * Mark the specified player as loaded, this will allow him to do transactions.
+     *
+     * @param p The player to load.
+     */
+    public void markPlayerAsLoaded(OfflinePlayer p) {
+        loadedPlayers.add(p.getUniqueId());
+    }
+
+    /**
+     * Mark the specified player as unloaded, this will stop him to do transactions.
+     *
+     * @param p The player to unload.
+     */
+    public void markPlayerAsUnloaded(OfflinePlayer p) {
+        loadedPlayers.remove(p.getUniqueId());
+    }
+
     private boolean minimumAmount(Player p, BigDecimal amount, BigDecimal minimum) {
         if (amount.compareTo(minimum) < 0) {
             BPMessages.send(p, "Minimum-Number", "%min%$" + minimum);
@@ -807,10 +840,9 @@ public class BPEconomy {
     private boolean isOperationAllowed(OfflinePlayer p) {
         if (!p.isOnline()) return true;
 
-        BPPlayer bpPlayer = PlayerRegistry.get(p);
-        boolean allowed = bpPlayer != null && bpPlayer.isLoaded();
+        boolean allowed = isPlayerLoaded(p);
         if (!allowed)
-            BPLogger.LogsFile.log(p.getName() + "'s transaction has been blocked because he hasn't been loaded yet.");
+            BPLogger.LogsFile.log(p.getName() + "'s \"" + getOriginBank().getIdentifier() + "\" transaction has been blocked because he hasn't been loaded yet.");
         return allowed;
     }
 

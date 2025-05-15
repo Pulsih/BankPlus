@@ -51,7 +51,6 @@ public class EconomyUtils {
         if (unload) PlayerRegistry.unloadPlayer(uuid);
     }
 
-
     /**
      * Load all the online players balance.
      */

@@ -28,8 +28,6 @@ public final class BankPlus extends JavaPlugin {
     private static String serverVersion;
     private static BankPlus INSTANCE;
 
-    private final BankRegistry bankRegistry = new BankRegistry();
-
     private Economy vaultEconomy = null;
     private Permission perms = null;
 
@@ -125,10 +123,6 @@ public final class BankPlus extends JavaPlugin {
 
     public static boolean isAlphaVersion() {
         return INSTANCE.getDescription().getVersion().toLowerCase().contains("-alpha");
-    }
-
-    public BankRegistry getBankRegistry() {
-        return bankRegistry;
     }
 
     public Economy getVaultEconomy() {
