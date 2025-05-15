@@ -32,10 +32,6 @@ import java.util.*;
 
 public class BPEconomy {
 
-    // Set of players that are loaded in this economy and can do transactions.
-    // If a player is missing in this list, all the transactions will be denied.
-    private static final Set<UUID> loadedPlayers = new HashSet<>();
-
     private final Bank originBank;
     private final HashMap<UUID, Holder> holders = new HashMap<>();
     private final Set<UUID> operations = new HashSet<>();
@@ -85,16 +81,6 @@ public class BPEconomy {
     }
 
     /**
-     * Get a set of all loaded player uuids.
-     * A player is loaded even if one balance holder instance is loaded in a bank economy.
-     *
-     * @return A set of UUIDs.
-     */
-    public static Set<UUID> getLoadedPlayers() {
-        return new HashSet<>(loadedPlayers);
-    }
-
-    /**
      * Return a list with all player balances of all banks.
      *
      * @return A hashmap with the player name as KEY and the sum of all the player bank balances as VALUE.
@@ -126,43 +112,48 @@ public class BPEconomy {
         return originBank;
     }
 
-    public boolean isPlayerBalanceLoaded(OfflinePlayer p) {
-        return isPlayerBalanceLoaded(p.getUniqueId());
-    }
-
-    public boolean isPlayerBalanceLoaded(UUID uuid) {
-        return holders.containsKey(uuid);
-    }
-
-    public Holder loadPlayerHolder(OfflinePlayer p) {
-        return loadPlayerHolder(p.getUniqueId(), true, true);
-    }
-
-    public Holder loadPlayerHolder(UUID uuid) {
-        return loadPlayerHolder(uuid, true, true);
-    }
-
-    public Holder loadPlayerHolder(OfflinePlayer p, boolean wasRegistered) {
-        return loadPlayerHolder(p.getUniqueId(), wasRegistered, true);
+    /**
+     * Get a set of player uuids that are loaded to this economy.
+     * @return A set of uuids.
+     */
+    public Set<UUID> getLoadedPlayers() {
+        return holders.keySet();
     }
 
     /**
-     * Cache the player information to use and modify them faster.
+     * Check if the specified player is loaded to this economy.
+     * <p>
+     * A loaded player will be able to do transactions, if a player hasn't
+     * been loaded yet (for load cooldown, or MySQL waiting for response),
+     * all his transactions will be denied to avoid dupe or other kind of problems.
      *
-     * @param uuid          The player uuid to load.
-     * @param wasRegistered If false, it will load money as first join amount.
-     * @param load          If false, the holder won't be cached.
+     * @param p The player to check.
+     * @return true if the player has been loaded, false otherwise.
+     */
+    public boolean isPlayerLoaded(OfflinePlayer p) {
+        return holders.containsKey(p.getUniqueId());
+    }
+
+    /**
+     * Load the player information, cache it and mark the player as loaded.
+     * <p>
+     * It is advised to execute this method asynchronously if
+     * loading from MySQL or other processes that requires time.
+     *
+     * @param p             The player to load.
+     * @param wasRegistered If false, the money in the main bank will be set as first join amount.
+     * @param load          If false, the holder won't be cached and will
+     *                      return only a copy of the holder to read values.
      * @return The holder created.
      */
-    public Holder loadPlayerHolder(UUID uuid, boolean wasRegistered, boolean load) {
-        if (load) loadedPlayers.add(uuid);
-        if (isPlayerBalanceLoaded(uuid)) return holders.get(uuid);
+    public Holder loadPlayer(OfflinePlayer p, boolean wasRegistered, boolean load) {
+        if (isPlayerLoaded(p)) return holders.get(p.getUniqueId());
 
         boolean useStartAmount = !wasRegistered && BankUtils.isMainBank(originBank);
 
         Holder holder = new Holder();
         if (BPSQL.isConnected()) {
-            SQLPlayerManager pm = new SQLPlayerManager(uuid);
+            SQLPlayerManager pm = new SQLPlayerManager(p);
             String bankName = originBank.getIdentifier();
 
             holder.debt = pm.getDebt(bankName);
@@ -170,48 +161,29 @@ public class BPEconomy {
             holder.bankLevel = pm.getLevel(bankName);
             holder.offlineInterest = pm.getOfflineInterest(bankName);
 
-            if (load) holders.put(uuid, holder);
+            if (load) holders.put(p.getUniqueId(), holder);
             return holder;
         }
 
-        FileConfiguration config = new BPPlayerManager(uuid).getPlayerConfig();
+        FileConfiguration config = new BPPlayerManager(p).getPlayerConfig();
 
         holder.debt = BPFormatter.getStyledBigDecimal(config.getString(debtPath));
         holder.money = useStartAmount ? ConfigValues.getStartAmount() : BPFormatter.getStyledBigDecimal(config.getString(moneyPath));
         holder.offlineInterest = BPFormatter.getStyledBigDecimal(config.getString(interestPath));
         holder.bankLevel = Math.max(config.getInt(levelPath), 1);
 
-        if (load) holders.put(uuid, holder);
+        if (load) holders.put(p.getUniqueId(), holder);
         return holder;
     }
 
     /**
-     * Remove the player holder from the cache, this method does not save changes, so it is important to save them before calling this method.
+     * Unload the player from this economy, deleting the cached holder.
      *
-     * @param uuid The player UUID.
+     * @param p The player.
+     * @return The holder that has been removed.
      */
-    public void unloadPlayerBalance(UUID uuid) {
-        holders.remove(uuid);
-
-        boolean unloadPlayer = true;
-        for (BPEconomy economy : list()) {
-            if (!economy.isPlayerBalanceLoaded(uuid)) continue;
-
-            unloadPlayer = false;
-            break;
-        }
-        if (unloadPlayer) loadedPlayers.remove(uuid);
-    }
-
-    /**
-     * Return a list with all player balances of that bank.
-     *
-     * @return A hashmap with the player name as KEY and the sum of all the player bank balances as VALUE.
-     */
-    public LinkedHashMap<String, BigDecimal> getAllBankBalances() {
-        LinkedHashMap<String, BigDecimal> balances = new LinkedHashMap<>();
-        for (OfflinePlayer p : Bukkit.getOfflinePlayers()) balances.put(p.getName(), getBankBalance(p));
-        return balances;
+    public Holder unloadPlayer(OfflinePlayer p) {
+        return holders.remove(p.getUniqueId());
     }
 
     /**
@@ -220,48 +192,17 @@ public class BPEconomy {
      * @param p The player.
      */
     public BigDecimal getBankBalance(OfflinePlayer p) {
-        return getBankBalance(p.getUniqueId(), false);
+        if (!isPlayerLoaded(p)) return BigDecimal.ZERO;
+        return holders.get(p.getUniqueId()).money;
     }
 
     /**
-     * Get the player bank balance of the selected bank.
-     *
-     * @param player The player.
-     * @param load   Choose if loading the balance on the hashmap or not.
-     */
-    public BigDecimal getBankBalance(OfflinePlayer player, boolean load) {
-        return getBankBalance(player.getUniqueId(), load);
-    }
-
-    /**
-     * Get the player bank balance of the selected bank.
-     *
-     * @param uuid The UUID of the player.
-     */
-    public BigDecimal getBankBalance(UUID uuid) {
-        return getBankBalance(uuid, true);
-    }
-
-    /**
-     * Get the player bank balance of the selected bank.
-     *
-     * @param uuid The UUID of the player.
-     * @param load Choose if loading the balance on the hashmap or not.
-     */
-    public BigDecimal getBankBalance(UUID uuid, boolean load) {
-        if (!isOperationAllowed(Bukkit.getOfflinePlayer(uuid))) return BigDecimal.ZERO;
-
-        Holder holder = isPlayerBalanceLoaded(uuid) ? holders.get(uuid) : loadPlayerHolder(uuid, true, load);
-        return holder.money;
-    }
-
-    /**
-     * Set the selected amount in the selected bank.
+     * Set the player's money to the specified amount.
      * <p>
      * ! IMPORTANT !
      * Do not use methods to manage player balance in
      * BPTransactionListeners without ignoring the events,
-     * it can cause an infinite loop and make the server crash.
+     * it will cause an infinite loop and crash the server.
      * <p>
      * To fix that, use the method #(OfflinePlayer, BigDecimal, Boolean(ignoreEvents))
      *
@@ -272,7 +213,7 @@ public class BPEconomy {
     }
 
     /**
-     * Set the selected amount in the selected bank.
+     * Set the player's money to the specified amount.
      *
      * @param ignoreEvents Choose if ignoring or not the bankplus transaction event.
      * @return Number representing the actual amount set.
@@ -282,12 +223,12 @@ public class BPEconomy {
     }
 
     /**
-     * Set the selected amount in the selected bank.
+     * Set the player's money to the specified amount.
      * <p>
      * ! IMPORTANT !
      * Do not use methods to manage player balance in
      * BPTransactionListeners without ignoring the events,
-     * it can cause an infinite loop and make the server crash.
+     * it will cause an infinite loop and crash the server.
      * <p>
      * To fix that, use the method #(OfflinePlayer, BigDecimal, Boolean(ignoreEvents))
      *
@@ -316,19 +257,19 @@ public class BPEconomy {
         if (capacity.compareTo(BigDecimal.ZERO) > 0) amount = amount.min(capacity);
 
         result = result.max(amount);
-        set(p, result);
+        setMoney(p, result);
 
         if (!ignoreEvents) afterTransactionEvent(p, type, result);
         return result;
     }
 
     /**
-     * Add the selected amount to the selected bank.
+     * Add to the player's money the specified amount.
      * <p>
      * ! IMPORTANT !
      * Do not use methods to manage player balance in
      * BPTransactionListeners without ignoring the events,
-     * it can cause an infinite loop and make the server crash.
+     * it will cause an infinite loop and crash the server.
      * <p>
      * To fix that, use the method #(OfflinePlayer, BigDecimal, Boolean(ignoreEvents))
      *
@@ -339,7 +280,7 @@ public class BPEconomy {
     }
 
     /**
-     * Add the selected amount to the selected bank.
+     * Add to the player's money the specified amount.
      *
      * @param ignoreEvents Choose if ignoring or not the bankplus transaction event.
      * @return Number representing the actual amount added.
@@ -349,12 +290,12 @@ public class BPEconomy {
     }
 
     /**
-     * Add the selected amount to the selected bank.
+     * Add to the player's money the specified amount.
      * <p>
      * ! IMPORTANT !
      * Do not use methods to manage player balance in
      * BPTransactionListeners without ignoring the events,
-     * it can cause an infinite loop and make the server crash.
+     * it will cause an infinite loop and crash the server.
      * <p>
      * To fix that, use the method #(OfflinePlayer, BigDecimal, Boolean(ignoreEvents))
      *
@@ -382,29 +323,28 @@ public class BPEconomy {
         BigDecimal capacity = BankUtils.getCapacity(originBank, p), balance = getBankBalance(p);
         if (capacity.compareTo(BigDecimal.ZERO) <= 0) {
             result = amount;
-            set(p, balance.add(result));
+            setMoney(p, balance.add(result));
         } else {
             if (balance.add(amount).compareTo(capacity) < 0) {
                 result = amount;
-                set(p, balance.add(result));
+                setMoney(p, balance.add(result));
             } else {
                 result = capacity.subtract(balance).max(BigDecimal.ZERO);
-                set(p, capacity);
+                setMoney(p, capacity);
             }
         }
 
         if (!ignoreEvents) afterTransactionEvent(p, type, result);
-        endOperation(p);
         return result;
     }
 
     /**
-     * Remove the selected amount.
+     * Remove from the player's money the specified amount.
      * <p>
      * ! IMPORTANT !
      * Do not use methods to manage player balance in
      * BPTransactionListeners without ignoring the events,
-     * it can cause an infinite loop and make the server crash.
+     * it will cause an infinite loop and crash the server.
      * <p>
      * To fix that, use the method #(OfflinePlayer, BigDecimal, Boolean(ignoreEvents))
      *
@@ -415,7 +355,7 @@ public class BPEconomy {
     }
 
     /**
-     * Remove the selected amount.
+     * Remove from the player's money the specified amount.
      *
      * @param ignoreEvents Choose if ignoring or not the bankplus transaction event.
      * @return Number representing the actual amount removed.
@@ -425,12 +365,12 @@ public class BPEconomy {
     }
 
     /**
-     * Remove the selected amount.
+     * Remove from the player's money the specified amount.
      * <p>
      * ! IMPORTANT !
      * Do not use methods to manage player balance in
      * BPTransactionListeners without ignoring the events,
-     * it can cause an infinite loop and make the server crash.
+     * it will cause an infinite loop and crash the server.
      * <p>
      * To fix that, use the method #(OfflinePlayer, BigDecimal, Boolean(ignoreEvents))
      *
@@ -442,7 +382,7 @@ public class BPEconomy {
     }
 
     private BigDecimal removeBankBalance(OfflinePlayer p, BigDecimal amount, boolean ignoreEvents, TransactionType type) {
-        BigDecimal result = new BigDecimal(0);
+        BigDecimal result = BigDecimal.ZERO;
         if (!startAndCheckOperationAllowed(p)) return result;
 
         if (!ignoreEvents) {
@@ -459,125 +399,85 @@ public class BPEconomy {
         if (balance.subtract(amount).compareTo(BigDecimal.ZERO) < 0) result = balance;
         else result = amount;
 
-        set(p, balance.subtract(result));
+        setMoney(p, balance.subtract(result));
 
         if (!ignoreEvents) afterTransactionEvent(p, type, result);
-        endOperation(p);
         return result;
     }
 
     /**
-     * Get the offline interest earned from the selected player in the selected bank.
+     * Get the offline interest earned from the player.
      *
      * @param p The player.
      * @return Offline interest.
      */
     public BigDecimal getOfflineInterest(OfflinePlayer p) {
-        return getOfflineInterest(p.getUniqueId());
+        if (!isPlayerLoaded(p)) return BigDecimal.ZERO;
+        return holders.get(p.getUniqueId()).offlineInterest;
     }
 
     /**
-     * Get the offline interest earned from the selected player in the selected bank.
-     *
-     * @param uuid The player UUID.
-     * @return Offline interest.
-     */
-    public BigDecimal getOfflineInterest(UUID uuid) {
-        if (!isOperationAllowed(Bukkit.getOfflinePlayer(uuid))) return BigDecimal.ZERO;
-
-        Holder holder = isPlayerBalanceLoaded(uuid) ? holders.get(uuid) : loadPlayerHolder(uuid);
-        return holder.offlineInterest;
-    }
-
-    /**
-     * Set the offline interest to the selected amount in the selected bank.
+     * Set the offline interest to the specified amount.
      *
      * @param p      The player.
      * @param amount The new amount.
      */
     public void setOfflineInterest(OfflinePlayer p, BigDecimal amount) {
         if (!startAndCheckOperationAllowed(p)) return;
-
-        Holder holder = isPlayerBalanceLoaded(p) ? holders.get(p.getUniqueId()) : loadPlayerHolder(p);
-        holder.setOfflineInterest(amount);
-
+        holders.get(p.getUniqueId()).setOfflineInterest(amount);
         endOperation(p);
     }
 
     /**
-     * Get the player bank debt of the selected bank.
+     * Get the player debt.
      *
      * @param p The player.
      */
     public BigDecimal getDebt(OfflinePlayer p) {
-        return getDebt(p.getUniqueId());
+        if (!isPlayerLoaded(p)) return BigDecimal.ZERO;
+        return holders.get(p.getUniqueId()).debt;
     }
 
     /**
-     * Get the player bank debt of the selected bank.
-     *
-     * @param uuid The player UUID.
-     */
-    public BigDecimal getDebt(UUID uuid) {
-        if (!isOperationAllowed(Bukkit.getOfflinePlayer(uuid))) return BigDecimal.ZERO;
-
-        Holder holder = isPlayerBalanceLoaded(uuid) ? holders.get(uuid) : loadPlayerHolder(uuid);
-        return holder.debt;
-    }
-
-    /**
-     * Set the player bank debt to the selected amount.
+     * Set the player debt to the specified amount.
      *
      * @param p      The player.
      * @param amount The new debt amount.
      */
     public void setDebt(OfflinePlayer p, BigDecimal amount) {
         if (!startAndCheckOperationAllowed(p)) return;
-
-        Holder holder = isPlayerBalanceLoaded(p) ? holders.get(p.getUniqueId()) : loadPlayerHolder(p);
-        holder.setDebt(amount);
-
+        holders.get(p.getUniqueId()).setDebt(amount);
         endOperation(p);
     }
 
     /**
-     * Get the current bank level of that player.
+     * Get the current bank level.
      *
      * @param p The player.
      * @return The current bank level.
      */
     public int getBankLevel(OfflinePlayer p) {
-        return getBankLevel(p.getUniqueId());
+        if (!isPlayerLoaded(p)) return 1;
+        return holders.get(p.getUniqueId()).bankLevel;
     }
 
     /**
-     * Get the current bank level of that player.
+     * Set the player's bank to the specified level.
      *
-     * @param uuid The player UUID.
-     * @return The current bank level.
+     * @param p     The player.
+     * @param level The new level to set.
      */
-    public int getBankLevel(UUID uuid) {
-        if (!isOperationAllowed(Bukkit.getOfflinePlayer(uuid))) return 1;
-
-        Holder holder = isPlayerBalanceLoaded(uuid) ? holders.get(uuid) : loadPlayerHolder(uuid);
-        return holder.bankLevel;
-    }
-
     public void setBankLevel(OfflinePlayer p, int level) {
         if (!startAndCheckOperationAllowed(p)) return;
-
-        Holder holder = isPlayerBalanceLoaded(p) ? holders.get(p.getUniqueId()) : loadPlayerHolder(p);
-        holder.setBankLevel(level);
-
+        holders.get(p.getUniqueId()).setBankLevel(level);
         endOperation(p);
     }
 
     /**
-     * Method internally used to simplify the transactions.
+     * Method internally used to simplify the transactions, automatically end operations.
      */
-    private void set(OfflinePlayer p, BigDecimal amount) {
-        Holder pHolder = isPlayerBalanceLoaded(p) ? holders.get(p.getUniqueId()) : loadPlayerHolder(p);
-        pHolder.setMoney(amount);
+    private void setMoney(OfflinePlayer p, BigDecimal amount) {
+        holders.get(p.getUniqueId()).setMoney(amount);
         endOperation(p);
     }
 
@@ -756,34 +656,6 @@ public class BPEconomy {
         BPMessages.send(from, "Payment-Sent", BPUtils.placeValues(to, removed));
     }
 
-    /**
-     * Check if the specified player is loaded to this economy.
-     *
-     * @param p The player to check.
-     * @return true if it's loaded, false otherwise.
-     */
-    public boolean isPlayerLoaded(OfflinePlayer p) {
-        return loadedPlayers.contains(p.getUniqueId());
-    }
-
-    /**
-     * Mark the specified player as loaded, this will allow him to do transactions.
-     *
-     * @param p The player to load.
-     */
-    public void markPlayerAsLoaded(OfflinePlayer p) {
-        loadedPlayers.add(p.getUniqueId());
-    }
-
-    /**
-     * Mark the specified player as unloaded, this will stop him to do transactions.
-     *
-     * @param p The player to unload.
-     */
-    public void markPlayerAsUnloaded(OfflinePlayer p) {
-        loadedPlayers.remove(p.getUniqueId());
-    }
-
     private boolean minimumAmount(Player p, BigDecimal amount, BigDecimal minimum) {
         if (amount.compareTo(minimum) < 0) {
             BPMessages.send(p, "Minimum-Number", "%min%$" + minimum);
@@ -820,30 +692,10 @@ public class BPEconomy {
      * @return true if the transaction is allowed, false otherwise.
      */
     private boolean startAndCheckOperationAllowed(OfflinePlayer p) {
-        if (!isOperationAllowed(p) || operations.contains(p.getUniqueId())) return false;
+        if (!isPlayerLoaded(p) || operations.contains(p.getUniqueId())) return false;
 
         operations.add(p.getUniqueId());
         return true;
-    }
-
-    /**
-     * Check if the specified player is allowed to perform any type of operation.
-     * <p>
-     * This method will deny operations in case the player is online but
-     * not yet loaded, or when he is already performing another operation.
-     * <p>
-     * This method does not automatically set the player in operating state if the check are passed.
-     *
-     * @param p The player to check.
-     * @return true if the transaction is allowed, false otherwise.
-     */
-    private boolean isOperationAllowed(OfflinePlayer p) {
-        if (!p.isOnline()) return true;
-
-        boolean allowed = isPlayerLoaded(p);
-        if (!allowed)
-            BPLogger.LogsFile.log(p.getName() + "'s \"" + getOriginBank().getIdentifier() + "\" transaction has been blocked because he hasn't been loaded yet.");
-        return allowed;
     }
 
     /**

@@ -3,7 +3,6 @@ package me.pulsi_.bankplus.account;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankRegistry;
-import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.mySQL.BPSQL;
 import me.pulsi_.bankplus.utils.BPLogger;
@@ -73,21 +72,23 @@ public class PlayerRegistry {
             // If MySQL is enabled, load the player asynchronously, it may take few more
             // milliseconds but this will ensure to not affect server performance
             // and the player values will be visible after the player has been loaded.
-            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
-                economy.loadPlayerHolder(p, wasRegistered);
-                economy.markPlayerAsLoaded(p);
-            });
+            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> economy.loadPlayer(p, wasRegistered, true));
             return bpPlayer;
         }
 
-        economy.loadPlayerHolder(p, wasRegistered);
-        economy.markPlayerAsLoaded(p);
+        economy.loadPlayer(p, wasRegistered, true);
         return bpPlayer;
     }
 
-    public static BPPlayer unloadPlayer(UUID uuid) {
-        for (BPEconomy economy : BPEconomy.list()) economy.unloadPlayerBalance(uuid);
-        return players.remove(uuid);
+    /**
+     * Method to remove the BPPlayer instance from the registry and unloading the player from all economies.
+     *
+     * @param p The player to unload.
+     * @return The instance removed from the registry.
+     */
+    public static BPPlayer unloadPlayer(OfflinePlayer p) {
+        for (BPEconomy economy : BPEconomy.list()) economy.unloadPlayer(p);
+        return players.remove(p.getUniqueId());
     }
 
     public static BPPlayer get(OfflinePlayer p) {

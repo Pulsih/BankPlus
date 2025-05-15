@@ -71,6 +71,6 @@ public class PlayerServerListener implements Listener {
             player.setWithdrawing(false);
         }
 
-        if (ConfigValues.isSavingOnQuit()) EconomyUtils.savePlayer(p.getUniqueId(), true);
+        if (ConfigValues.isSavingOnQuit()) EconomyUtils.savePlayer(p, true);
     }
 }
