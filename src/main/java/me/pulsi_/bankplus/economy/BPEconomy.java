@@ -13,7 +13,6 @@ import me.pulsi_.bankplus.events.BPPreTransactionEvent;
 import me.pulsi_.bankplus.listeners.playerChat.PlayerChatMethod;
 import me.pulsi_.bankplus.mySQL.BPSQL;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
-import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
@@ -592,12 +591,12 @@ public class BPEconomy {
         p.closeInventory();
 
         BPPlayer bpPlayer = PlayerRegistry.get(p);
-        BankGui bankGui = getOriginBank().getBankGui();
-        bpPlayer.setOpenedBankGui(bankGui);
+        Bank bank = getOriginBank();
+        bpPlayer.setOpenedBank(bank);
         bpPlayer.setDepositing(true);
 
         bpPlayer.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> {
-            PlayerChatMethod.reopenBank(bpPlayer, bankGui);
+            PlayerChatMethod.reopenBank(bpPlayer, bank.getBankGui());
             BPMessages.send(p, "Chat-Time-Expired");
         }, ConfigValues.getChatExitTime() * 20L));
     }
@@ -614,12 +613,12 @@ public class BPEconomy {
         p.closeInventory();
 
         BPPlayer bpPlayer = PlayerRegistry.get(p);
-        BankGui bankGui = getOriginBank().getBankGui();
-        bpPlayer.setOpenedBankGui(bankGui);
+        Bank bank = getOriginBank();
+        bpPlayer.setOpenedBank(bank);
         bpPlayer.setWithdrawing(true);
 
         bpPlayer.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> {
-            PlayerChatMethod.reopenBank(bpPlayer, bankGui);
+            PlayerChatMethod.reopenBank(bpPlayer, bank.getBankGui());
             BPMessages.send(p, "Chat-Time-Expired");
         }, ConfigValues.getChatExitTime() * 20L));
     }

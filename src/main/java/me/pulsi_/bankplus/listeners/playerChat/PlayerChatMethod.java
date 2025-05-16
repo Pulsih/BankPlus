@@ -4,9 +4,9 @@ import io.papermc.paper.event.player.AsyncChatEvent;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
 import me.pulsi_.bankplus.account.PlayerRegistry;
+import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankGui;
 import me.pulsi_.bankplus.economy.BPEconomy;
-import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.ConfigValues;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -24,7 +24,7 @@ public class PlayerChatMethod {
         if (!bpPlayer.isDepositing() && !bpPlayer.isWithdrawing()) return;
         e.setCancelled(true);
 
-        BankGui openedBank = PlayerRegistry.get(p).getOpenedBankGui();
+        Bank openedBank = bpPlayer.getOpenedBank();
         if (openedBank == null) {
             removeFromTyping(bpPlayer);
             return;
@@ -35,7 +35,7 @@ public class PlayerChatMethod {
         // If some chat format plugin is adding a "." at the end, remove it.
         if (text.endsWith(".")) text = text.substring(0, text.length() - 1);
 
-        if (hasTypedExit(text, p)) reopenBank(bpPlayer, openedBank);
+        if (hasTypedExit(text, p)) reopenBank(bpPlayer, openedBank.getBankGui());
         else {
             BigDecimal amount;
             try {
@@ -45,11 +45,11 @@ public class PlayerChatMethod {
                 return;
             }
 
-            BPEconomy economy = openedBank.getOriginBank().getBankEconomy();
+            BPEconomy economy = openedBank.getBankEconomy();
             if (bpPlayer.isDepositing()) economy.deposit(p, amount);
             else economy.withdraw(p, amount);
 
-            reopenBank(bpPlayer, openedBank);
+            reopenBank(bpPlayer, openedBank.getBankGui());
         }
     }
 
@@ -70,7 +70,7 @@ public class PlayerChatMethod {
             if (task != null) task.cancel();
 
             removeFromTyping(bpPlayer);
-            if (ConfigValues.isReopeningBankAfterChat()) openedBankGui.openBankGui(bpPlayer.getPlayer(), true);
+            if (ConfigValues.isReopeningBankAfterChat() && ConfigValues.isGuiModuleEnabled()) openedBankGui.openBankGui(bpPlayer.getPlayer(), true);
         });
     }
 

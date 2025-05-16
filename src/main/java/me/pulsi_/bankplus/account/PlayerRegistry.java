@@ -77,6 +77,7 @@ public class PlayerRegistry {
         }
 
         economy.loadPlayer(p, wasRegistered, true);
+        players.putIfAbsent(uuid, bpPlayer);
         return bpPlayer;
     }
 

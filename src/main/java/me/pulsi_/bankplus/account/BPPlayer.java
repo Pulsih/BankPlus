@@ -1,5 +1,6 @@
 package me.pulsi_.bankplus.account;
 
+import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankGui;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
@@ -8,7 +9,7 @@ public class BPPlayer {
 
     private final Player player;
 
-    private BankGui openedBankGui;
+    private Bank openedBank;
     private BukkitTask bankUpdatingTask, closingTask;
 
     // Values to check if the player is doing a deposit or withdraw through chat.
@@ -22,8 +23,8 @@ public class BPPlayer {
         return player;
     }
 
-    public BankGui getOpenedBankGui() {
-        return openedBankGui;
+    public Bank getOpenedBank() {
+        return openedBank;
     }
 
     public BukkitTask getBankUpdatingTask() {
@@ -42,8 +43,8 @@ public class BPPlayer {
         return withdrawing;
     }
 
-    public void setOpenedBankGui(BankGui openedBankGui) {
-        this.openedBankGui = openedBankGui;
+    public void setOpenedBank(Bank openedBank) {
+        this.openedBank = openedBank;
     }
 
     public void setBankUpdatingTask(BukkitTask bankUpdatingTask) {

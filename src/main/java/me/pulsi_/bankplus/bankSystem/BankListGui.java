@@ -61,7 +61,7 @@ public class BankListGui extends BankGui {
         long delay = MultipleBanksValues.getUpdateDelay();
         if (delay >= 0) player.setBankUpdatingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE(), () -> updateBankGuiMeta(bankListInventory, p), delay, delay));
 
-        player.setOpenedBankGui(this);
+        player.setOpenedBank(getOriginBank());
         if (ConfigValues.isPersonalSoundEnabled()) BPUtils.playSound(ConfigValues.getPersonalSound(), p);
         p.openInventory(bankListInventory);
     }

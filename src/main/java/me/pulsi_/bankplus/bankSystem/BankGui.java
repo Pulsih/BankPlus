@@ -129,7 +129,7 @@ public class BankGui {
         if (updateDelay >= 0)
             player.setBankUpdatingTask(Bukkit.getScheduler().runTaskTimer(BankPlus.INSTANCE(), () -> updateBankGuiMeta(bankInventory, p), updateDelay, updateDelay));
 
-        player.setOpenedBankGui(this);
+        player.setOpenedBank(getOriginBank());
         if (ConfigValues.isPersonalSoundEnabled()) BPUtils.playSound(ConfigValues.getPersonalSound(), p);
 
         p.openInventory(bankInventory);

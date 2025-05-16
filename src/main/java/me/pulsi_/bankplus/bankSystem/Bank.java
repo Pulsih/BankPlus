@@ -38,8 +38,7 @@ public class Bank {
     public Bank(String identifier) {
         this.identifier = identifier;
         this.bankEconomy = new BPEconomy(this);
-        if (!ConfigValues.isGuiModuleEnabled()) this.bankGui = null;
-        else this.bankGui = new BankGui(this);
+        this.bankGui = new BankGui(this);
     }
 
     public String getIdentifier() {
@@ -117,9 +116,15 @@ public class Bank {
             }
         }
 
-        if (bankGui == null) return;
         bankGui.getBankItems().clear();
-
+        if (!ConfigValues.isGuiModuleEnabled()) {
+            bankGui.setTitle(BPItems.DISPLAYNAME_NOT_FOUND);
+            bankGui.setSize(0);
+            bankGui.setUpdateDelay(0);
+            bankGui.setAvailableBankListItem(null);
+            bankGui.setAvailableBankListItem(null);
+            return;
+        }
         bankGui.setTitle(config.getComponent("Title", MiniMessage.miniMessage()));
         bankGui.setSize(config.getInt("Lines"));
         bankGui.setUpdateDelay(config.getInt("Update-Delay"));

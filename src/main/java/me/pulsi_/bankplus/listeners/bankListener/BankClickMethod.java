@@ -25,10 +25,10 @@ public class BankClickMethod {
         e.setCancelled(true);
 
         BPPlayer player = PlayerRegistry.get(p);
-        if (player.getOpenedBankGui() == null) return;
+        if (player.getOpenedBank() == null) return;
 
         int slot = e.getSlot();
-        BankGui openedBank = player.getOpenedBankGui();
+        BankGui openedBank = player.getOpenedBank().getBankGui();
 
         if (openedBank instanceof BankListGui bankListGui) {
             Bank clickedBank = bankListGui.getBankListGuiClickHolder().get(slot);
