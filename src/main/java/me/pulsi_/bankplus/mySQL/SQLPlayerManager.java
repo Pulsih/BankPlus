@@ -1,6 +1,7 @@
 package me.pulsi_.bankplus.mySQL;
 
 import me.pulsi_.bankplus.utils.BPLogger;
+import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -79,10 +80,10 @@ public class SQLPlayerManager {
         else check = "account_name='" + p.getName() + "'";
 
         String update = "UPDATE " + bankName + " SET " +
-                "debt='" + debt.toPlainString() + "'," +
-                "money='" + balance.toPlainString() + "'," +
+                "debt='" + BPFormatter.styleBigDecimal(debt) + "'," +
+                "money='" + BPFormatter.styleBigDecimal(balance) + "'," +
                 "bank_level='" + Math.max(1, level) + "'," +
-                "interest='" + offlineInterest.toPlainString() + "' " +
+                "interest='" + BPFormatter.styleBigDecimal(offlineInterest) + "' " +
                 "WHERE " + check;
 
         BPSQL.BPSQLResponse response = BPSQL.update(update);
@@ -104,7 +105,7 @@ public class SQLPlayerManager {
         String query = "SELECT " + valueName + " FROM " + bankName + " WHERE " + check;
 
         BPSQL.BPSQLResponse response = BPSQL.query(query, valueName);
-        if (response.success) return response.result.getFirst();
+        if (response.success) return response.result.isEmpty() ? fallBack : response.result.getFirst();
         else {
             BPLogger.Console.warn("Cannot get \"" + valueName + "\" value from \"" + bankName + "\" table for player \"" + p.getName() + ", using \"" + fallBack + "\" as fall-back, reason: " + response.errorMessage);
             return fallBack;

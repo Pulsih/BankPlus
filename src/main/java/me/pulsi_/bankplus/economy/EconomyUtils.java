@@ -6,6 +6,7 @@ import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.managers.BPTaskManager;
 import me.pulsi_.bankplus.mySQL.BPSQL;
 import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
+import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -32,10 +33,10 @@ public class EconomyUtils {
 
         for (BPEconomy economy : BPEconomy.list()) {
             String name = economy.getOriginBank().getIdentifier();
-            config.set("banks." + name + ".debt", economy.getDebt(p).toPlainString());
+            config.set("banks." + name + ".debt", BPFormatter.styleBigDecimal(economy.getDebt(p)));
             config.set("banks." + name + ".level", economy.getBankLevel(p));
-            config.set("banks." + name + ".money", economy.getBankBalance(p).toPlainString());
-            config.set("banks." + name + ".interest", economy.getOfflineInterest(p).toPlainString());
+            config.set("banks." + name + ".money", BPFormatter.styleBigDecimal(economy.getBankBalance(p)));
+            config.set("banks." + name + ".interest", BPFormatter.styleBigDecimal(economy.getOfflineInterest(p)));
         }
         manager.savePlayerFile(config, file);
 
