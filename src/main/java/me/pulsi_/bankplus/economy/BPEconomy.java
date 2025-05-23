@@ -113,6 +113,7 @@ public class BPEconomy {
 
     /**
      * Get a set of player uuids that are loaded to this economy.
+     *
      * @return A set of uuids.
      */
     public Set<UUID> getLoadedPlayers() {
@@ -134,22 +135,32 @@ public class BPEconomy {
     }
 
     /**
-     * Load the player information, cache it and mark the player as loaded.
+     * Returns the holder instance of the specified player, this
+     * method will load it completely and may take few moments.
      * <p>
-     * It is advised to execute this method asynchronously if
-     * loading from MySQL or other processes that requires time.
+     * If the player is already loaded, it will return the registered holder.
      *
-     * @param p             The player to load.
-     * @param wasRegistered If false, the money in the main bank will be set as first join amount.
-     * @param load          If false, the holder won't be cached and will
-     *                      return only a copy of the holder to read values.
-     * @return The holder created.
+     * @param p             The player.
+     * @return The holder of the specified player.
      */
-    public Holder loadPlayer(OfflinePlayer p, boolean wasRegistered, boolean load) {
+    public Holder getHolder(OfflinePlayer p) {
+        return getHolder(p, true);
+    }
+
+    /**
+     * Returns the holder instance of the specified player, this
+     * method will load it completely and may take few moments.
+     * <p>
+     * If the player is already loaded, it will return the registered holder.
+     *
+     * @param p             The player.
+     * @param wasRegistered If false, the money in the main bank will be set as first join amount.
+     * @return The holder of the specified player.
+     */
+    public Holder getHolder(OfflinePlayer p, boolean wasRegistered) {
         if (isPlayerLoaded(p)) return holders.get(p.getUniqueId());
 
         boolean useStartAmount = !wasRegistered && BankUtils.isMainBank(originBank);
-
         Holder holder = new Holder();
         if (BPSQL.isConnected()) {
             SQLPlayerManager pm = new SQLPlayerManager(p);
@@ -160,7 +171,6 @@ public class BPEconomy {
             holder.bankLevel = pm.getLevel(bankName);
             holder.offlineInterest = pm.getOfflineInterest(bankName);
 
-            if (load) holders.put(p.getUniqueId(), holder);
             return holder;
         }
 
@@ -170,8 +180,37 @@ public class BPEconomy {
         holder.money = useStartAmount ? ConfigValues.getStartAmount() : BPFormatter.getStyledBigDecimal(config.getString(moneyPath));
         holder.offlineInterest = BPFormatter.getStyledBigDecimal(config.getString(interestPath));
         holder.bankLevel = Math.max(config.getInt(levelPath), 1);
+        return holder;
+    }
 
-        if (load) holders.put(p.getUniqueId(), holder);
+    /**
+     * Load the player information, cache it and mark the player as loaded.
+     * <p>
+     * It is advised to execute this method asynchronously if
+     * loading from MySQL or other processes that requires time.
+     *
+     * @param p             The player to load.
+     *                      return only a copy of the holder to read values.
+     * @return The holder created.
+     */
+    public Holder loadPlayer(OfflinePlayer p) {
+        return loadPlayer(p, true);
+    }
+
+    /**
+     * Load the player information, cache it and mark the player as loaded.
+     * <p>
+     * It is advised to execute this method asynchronously if
+     * loading from MySQL or other processes that requires time.
+     *
+     * @param p             The player to load.
+     * @param wasRegistered If false, the money in the main bank will be set as first join amount.
+     *                      return only a copy of the holder to read values.
+     * @return The holder created.
+     */
+    public Holder loadPlayer(OfflinePlayer p, boolean wasRegistered) {
+        Holder holder = getHolder(p, wasRegistered);
+        holders.putIfAbsent(p.getUniqueId(), holder);
         return holder;
     }
 
@@ -192,7 +231,9 @@ public class BPEconomy {
      */
     public BigDecimal getBankBalance(OfflinePlayer p) {
         if (!isPlayerLoaded(p)) return BigDecimal.ZERO;
-        return holders.get(p.getUniqueId()).money;
+        // Using #getHolder fixes the problem with offline values, loading them if not
+        // present in the hashmap, or getting the already registered for better performance.
+        return getHolder(p).money;
     }
 
     /**
@@ -412,7 +453,7 @@ public class BPEconomy {
      */
     public BigDecimal getOfflineInterest(OfflinePlayer p) {
         if (!isPlayerLoaded(p)) return BigDecimal.ZERO;
-        return holders.get(p.getUniqueId()).offlineInterest;
+        return getHolder(p).offlineInterest;
     }
 
     /**
@@ -423,7 +464,7 @@ public class BPEconomy {
      */
     public void setOfflineInterest(OfflinePlayer p, BigDecimal amount) {
         if (!startAndCheckOperationAllowed(p)) return;
-        holders.get(p.getUniqueId()).setOfflineInterest(amount);
+        loadPlayer(p).setOfflineInterest(amount);
         endOperation(p);
     }
 
@@ -434,7 +475,7 @@ public class BPEconomy {
      */
     public BigDecimal getDebt(OfflinePlayer p) {
         if (!isPlayerLoaded(p)) return BigDecimal.ZERO;
-        return holders.get(p.getUniqueId()).debt;
+        return getHolder(p).debt;
     }
 
     /**
@@ -445,7 +486,7 @@ public class BPEconomy {
      */
     public void setDebt(OfflinePlayer p, BigDecimal amount) {
         if (!startAndCheckOperationAllowed(p)) return;
-        holders.get(p.getUniqueId()).setDebt(amount);
+        loadPlayer(p).setDebt(amount);
         endOperation(p);
     }
 
@@ -457,7 +498,7 @@ public class BPEconomy {
      */
     public int getBankLevel(OfflinePlayer p) {
         if (!isPlayerLoaded(p)) return 1;
-        return holders.get(p.getUniqueId()).bankLevel;
+        return getHolder(p).bankLevel;
     }
 
     /**
@@ -468,7 +509,7 @@ public class BPEconomy {
      */
     public void setBankLevel(OfflinePlayer p, int level) {
         if (!startAndCheckOperationAllowed(p)) return;
-        holders.get(p.getUniqueId()).setBankLevel(level);
+        loadPlayer(p).setBankLevel(level);
         endOperation(p);
     }
 
@@ -476,7 +517,9 @@ public class BPEconomy {
      * Method internally used to simplify the transactions, automatically end operations.
      */
     private void setMoney(OfflinePlayer p, BigDecimal amount) {
-        holders.get(p.getUniqueId()).setMoney(amount);
+        // In set-operations, use #loadPlayer, to make sure that the instance
+        // gets cached and when the saving cycle ends the edits will be applied.
+        loadPlayer(p).setMoney(amount);
         endOperation(p);
     }
 
@@ -691,7 +734,7 @@ public class BPEconomy {
      * @return true if the transaction is allowed, false otherwise.
      */
     private boolean startAndCheckOperationAllowed(OfflinePlayer p) {
-        if (!isPlayerLoaded(p) || operations.contains(p.getUniqueId())) return false;
+        if ((p.isOnline() && !isPlayerLoaded(p)) || operations.contains(p.getUniqueId())) return false;
 
         operations.add(p.getUniqueId());
         return true;

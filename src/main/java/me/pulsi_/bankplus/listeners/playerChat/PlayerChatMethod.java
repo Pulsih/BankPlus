@@ -21,6 +21,8 @@ public class PlayerChatMethod {
     public static void process(AsyncChatEvent e) {
         Player p = e.getPlayer();
         BPPlayer bpPlayer = PlayerRegistry.get(p);
+        if (bpPlayer == null) return;
+
         if (!bpPlayer.isDepositing() && !bpPlayer.isWithdrawing()) return;
         e.setCancelled(true);
 
