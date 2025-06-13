@@ -55,7 +55,7 @@ public class PayCmd extends BPCommand {
 
     @Override
     public List<String> defaultCooldownMessage() {
-        return Collections.singletonList("%prefix% &aType again within 5 seconds to confirm your payment.");
+        return Collections.singletonList("%prefix% <green>Type again within 5 seconds to confirm your payment.");
     }
 
     @Override

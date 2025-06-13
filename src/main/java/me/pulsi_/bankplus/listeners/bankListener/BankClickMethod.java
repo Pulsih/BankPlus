@@ -45,7 +45,7 @@ public class BankClickMethod {
         BPEconomy economy = openedBank.getOriginBank().getBankEconomy();
         String bankName = openedBank.getOriginBank().getIdentifier();
         for (String action : clickedItem.getActions()) {
-            String identifier = action.substring(action.indexOf("["), action.indexOf("]") + 1), value = action.replace(identifier + " ", "");
+            String identifier = action.substring(action.indexOf("["), action.indexOf("]") + 1), value = action.replace(identifier + " ", "").replace("%player%", p.getName());
 
             switch (identifier.toLowerCase()) {
                 case "[console]":
