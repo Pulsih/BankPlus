@@ -122,7 +122,19 @@ public class BPLoanRegistry {
 
     /**
      * Save all currently registered loans.
-     * @param savesConfig The saves file where to save the loans.
+     * <p>
+     * Save format:
+     * <pre>
+     * loans:
+     *   Receiver-UUID:
+     *     money-to-return: The total amount of money to return.
+     *     instalments: The number of instalments of this loan.
+     *     instalments-point: The current instalment.
+     *     time-left: The time left before the next instalment.
+     *     from: The name of the bank where to take the money.
+     *     to: The name of the bank where to send the money.
+     *     requested-bank: Not always present, in case a loan has been requested from a back, this will be the giver bank.
+     * </pre>
      */
     public static void saveAllLoans() {
         File file = SavesFile.getFile();
@@ -135,9 +147,9 @@ public class BPLoanRegistry {
             config.set(path + "instalments", loan.getInstalments());
             config.set(path + "instalments-point", loan.getInstalmentsPoint());
             config.set(path + "time-left", loan.getTimeLeft());
-            config.set(path + "from", loan.getSenderBank());
-            config.set(path + "to", loan.getReceiverBank());
-            config.set(path + "requested-bank", loan.getRequestedBank());
+            config.set(path + "from", loan.getSenderBank().getIdentifier());
+            config.set(path + "to", loan.getReceiverBank().getIdentifier());
+            config.set(path + "requested-bank", loan.getRequestedBank().getIdentifier());
         }
 
         try {

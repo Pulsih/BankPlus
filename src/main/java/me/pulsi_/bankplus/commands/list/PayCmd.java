@@ -103,7 +103,7 @@ public class PayCmd extends BPCommand {
         return new BPCmdExecution() {
             @Override
             public void execute() {
-                fromBank.getBankEconomy().pay(sender, target, new BigDecimal(args[2]), toBank);
+                fromBank.getBankEconomy().pay(sender, target, new BigDecimal(num), toBank);
             }
         };
     }
