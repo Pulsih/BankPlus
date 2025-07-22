@@ -73,10 +73,8 @@ public class PlayerRegistry {
             // milliseconds but this will ensure to not affect server performance
             // and the player values will be visible after the player has been loaded.
             Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> economy.loadPlayer(p, wasRegistered));
-            return bpPlayer;
-        }
+        } else economy.loadPlayer(p, wasRegistered);
 
-        economy.loadPlayer(p, wasRegistered);
         players.putIfAbsent(uuid, bpPlayer);
         return bpPlayer;
     }

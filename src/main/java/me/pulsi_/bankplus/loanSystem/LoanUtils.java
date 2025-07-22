@@ -7,6 +7,7 @@ import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.economy.TransactionType;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
+import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
@@ -16,12 +17,13 @@ public class LoanUtils {
 
     /**
      * Initialize a loan request, the other player will need to accept the request to process the loan.
-     * @param sender The player sender.
-     * @param receiver The player receiver.
-     * @param amount The loan amount.
-     * @param senderBank The sender bank from where to take the money.
+     *
+     * @param sender       The player sender.
+     * @param receiver     The player receiver.
+     * @param amount       The loan amount.
+     * @param senderBank   The sender bank from where to take the money.
      * @param receiverBank The receiver bank where the money will be deposited.
-     * @param action The request action between give and request
+     * @param action       The request action between give and request
      */
     public static void sendRequest(Player sender, Player receiver, BigDecimal amount, Bank senderBank, Bank receiverBank, String action) {
         BigDecimal senderBalance = senderBank.getBankEconomy().getBankBalance(sender);
@@ -68,6 +70,7 @@ public class LoanUtils {
 
     /**
      * Accept the request.
+     *
      * @param receiver The player that has typed /bp loan accept.
      */
     public static void acceptRequest(Player receiver) {
@@ -116,6 +119,7 @@ public class LoanUtils {
 
     /**
      * Deny a loan request received.
+     *
      * @param p The player that received a loan request.
      */
     public static void denyRequest(Player p) {
@@ -134,6 +138,7 @@ public class LoanUtils {
 
     /**
      * Cancel a loan request sent.
+     *
      * @param p The player that sent the request.
      */
     public static void cancelRequest(Player p) {
@@ -152,28 +157,25 @@ public class LoanUtils {
 
     /**
      * Create and process instantly a loan request, used for bank-to-player loans.
-     * @param receiver The player that will receive the money.
+     *
+     * @param receiver   The player that will receive the money.
      * @param bankSender The bank that will give the loan. It is the same where the money will be deposited for that player.
-     * @param amount The loan amount.
+     * @param amount     The loan amount.
      */
     public static void sendLoan(Player receiver, Bank bankSender, BigDecimal amount) {
         BPEconomy bankSenderEconomy = bankSender.getBankEconomy();
         BigDecimal receiverBalance = bankSenderEconomy.getBankBalance(receiver);
-
-        if (receiverBalance.doubleValue() <= 0d) {
-            BPMessages.send(receiver, "Insufficient-Money");
-            return;
-        }
 
         if (receiverBalance.compareTo(amount) < 0) amount = receiverBalance;
 
         BPLoan loan = new BPLoan(receiver, bankSender, amount);
 
         BigDecimal receiverCapacity = BankUtils.getCapacity(bankSender, receiver);
-        if (loan.getMoneyToReturn().compareTo(receiverCapacity) > 0) {
-            BPMessages.send(receiver, "Cannot-Afford-Loan");
-            return;
-        }
+        if (ConfigValues.isLoanCheckEnoughMoney())
+            if (loan.getMoneyToReturn().compareTo(receiverCapacity) > 0) {
+                BPMessages.send(receiver, "Cannot-Afford-Loan");
+                return;
+            }
 
         // If the bank is full, instead of loosing money they will be added to the vault balance
         if (receiverBalance.add(amount).compareTo(receiverCapacity) >= 0 && receiverCapacity.compareTo(BigDecimal.ZERO) > 0) {
@@ -195,6 +197,7 @@ public class LoanUtils {
 
     /**
      * Check if the selected player has any loan request.
+     *
      * @param p The player.
      * @return true if the player has a request, false otherwise.
      */
@@ -210,6 +213,7 @@ public class LoanUtils {
 
     /**
      * Checks if the selected player has sent a request.
+     *
      * @param p The player.
      * @return true if he sent a request, false otherwise.
      */
@@ -219,6 +223,7 @@ public class LoanUtils {
 
     /**
      * Loop through all the request, check if the player p is the loan target, if yes, get the sender from that loan request.
+     *
      * @param p The player that received a request.
      * @return The player that sent the loan request.
      */

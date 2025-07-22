@@ -39,7 +39,6 @@ public class ConfigValues extends ValueLoader {
     private static boolean sqlEnabled, sqlUsingSSL;
     private static String sqlHost, sqlPort, sqlDatabase, sqlUsername, sqlPassword;
     private static long interestDelay, notifyOfflineInterestDelay, saveDelay, updateBankTopDelay;
-    private static int loanDelay;
     private static int afkPlayersTime;
     private static int maxDecimalsAmount;
     private static int bankTopSize;
@@ -71,8 +70,9 @@ public class ConfigValues extends ValueLoader {
     private static boolean broadcastingSaves;
     private static boolean guiModuleEnabled;
     private static boolean givingInterestOnVaultBalance;
+    private static boolean loanCheckEnoughMoney;
     private static BigDecimal loanMaxAmount, loanInterest;
-    private static int loanInstalments, loanAcceptTime, loadDelay;
+    private static int loanDelay, loanInstalments, loanAcceptTime, loadDelay;
 
     public static void setupValues() {
         FileConfiguration config = BankPlus.INSTANCE().getConfigs().getConfig("config.yml");
@@ -178,10 +178,12 @@ public class ConfigValues extends ValueLoader {
         broadcastingSaves = config.getBoolean("General-Settings.Save-Broadcast");
         guiModuleEnabled = config.getBoolean("General-Settings.Enable-Guis");
         givingInterestOnVaultBalance = config.getBoolean("Interest.Give-Interest-On-Vault-Balance");
+        loanCheckEnoughMoney = config.getBoolean("Loan-Settings.Enable-Check-Enough-Money");
         loanMaxAmount = getBigDecimal(config, "Loan-Settings.Max-Amount");
         loanInterest = getBigDecimal(config, "Loan-Settings.Interest");
         loanInstalments = config.getInt("Loan-Settings.Installments");
         loanAcceptTime = config.getInt("Loan-Settings.Accept-Time");
+        loanDelay = config.getInt("Loan-Settings.Delay");
     }
 
     public static List<String> getWorldsBlacklist() {
@@ -580,6 +582,10 @@ public class ConfigValues extends ValueLoader {
 
     public static boolean isGivingInterestOnVaultBalance() {
         return givingInterestOnVaultBalance;
+    }
+
+    public static boolean isLoanCheckEnoughMoney() {
+        return loanCheckEnoughMoney;
     }
 
     public static BigDecimal getLoanMaxAmount() {

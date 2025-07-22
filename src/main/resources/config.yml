@@ -330,6 +330,11 @@ Loan-Settings:
   # The max amount to give as a loan.
   Max-Amount: "5000"
 
+  # If enabling this option, before requesting a loan
+  # the plugin will check if the player will be able
+  # to give back the requested money + the interest.
+  Enable-Check-Enough-Money: true
+
   # The default interest for loans.
   Interest: "5%"
 
