@@ -93,13 +93,14 @@ public class BPData {
             BPInterest interest = plugin.getInterest();
             if (ConfigValues.isInterestEnabled() && interest.wasDisabled()) interest.restartInterest(start);
 
+            // Load the banks to the registry before to make MySQL able to create the tables.
+            BankRegistry.loadBanks();
+
             if (!ConfigValues.isSqlEnabled()) BPSQL.disconnect();
             else {
                 BPSQL.setupMySQL();
                 BPSQL.connect();
             }
-
-            BankRegistry.loadBanks();
 
             if (!BPTaskManager.contains(BPTaskManager.MONEY_SAVING_TASK)) EconomyUtils.restartSavingInterval();
 
