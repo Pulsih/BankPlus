@@ -81,17 +81,14 @@ public class BPEconomy {
 
     /**
      * Return a list with all player balances of all banks.
+     * <p>
+     * This is a heavy method, and it is preferable to call it asynchronously.
      *
      * @return A hashmap with the player name as KEY and the sum of all the player bank balances as VALUE.
      */
     public static LinkedHashMap<String, BigDecimal> getAllEconomiesBankBalances() {
         LinkedHashMap<String, BigDecimal> balances = new LinkedHashMap<>();
-        for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
-            BigDecimal balance = BigDecimal.ZERO;
-            for (String bankName : BankUtils.getAvailableBankNames(p))
-                balance = balance.add(get(bankName).getBankBalance(p));
-            balances.put(p.getName(), balance);
-        }
+        for (OfflinePlayer p : Bukkit.getOfflinePlayers()) balances.put(p.getName(), getBankBalancesSum(p));
         return balances;
     }
 
@@ -102,8 +99,13 @@ public class BPEconomy {
      */
     public static BigDecimal getBankBalancesSum(OfflinePlayer p) {
         BigDecimal amount = BigDecimal.ZERO;
-        for (BPEconomy economy : list())
-            amount = amount.add(economy.getBankBalance(p));
+        for (BPEconomy economy : list()) {
+            BigDecimal add;
+            if (economy.isPlayerLoaded(p)) add = economy.getBankBalance(p);
+            else add = economy.getHolder(p).money;
+
+            amount = amount.add(add);
+        }
         return amount;
     }
 
@@ -226,6 +228,8 @@ public class BPEconomy {
 
     /**
      * Get the player bank balance of the selected bank.
+     * <p>
+     * If the player hasn't been loaded or is offline, you should use getHolder to retrieve information.
      *
      * @param p The player.
      */
