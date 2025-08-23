@@ -1,6 +1,5 @@
 package me.pulsi_.bankplus.utils.texts;
 
-import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

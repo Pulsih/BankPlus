@@ -2,7 +2,6 @@ package me.pulsi_.bankplus.bankSystem;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.PlayerRegistry;
-import me.pulsi_.bankplus.economy.EconomyUtils;
 import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

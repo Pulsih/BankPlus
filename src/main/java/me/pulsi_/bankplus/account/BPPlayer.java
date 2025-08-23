@@ -1,7 +1,6 @@
 package me.pulsi_.bankplus.account;
 
 import me.pulsi_.bankplus.bankSystem.Bank;
-import me.pulsi_.bankplus.bankSystem.BankGui;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 

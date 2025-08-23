@@ -1,6 +1,5 @@
 package me.pulsi_.bankplus;
 
-import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.interest.BPInterest;
 import me.pulsi_.bankplus.managers.BPAFK;
 import me.pulsi_.bankplus.managers.BPConfigs;
@@ -23,7 +22,7 @@ import java.net.URI;
 
 public final class BankPlus extends JavaPlugin {
 
-    public static final String actualVersion = "6.3";
+    public static final String actualVersion = "6.4";
 
     private static String serverVersion;
     private static BankPlus INSTANCE;
