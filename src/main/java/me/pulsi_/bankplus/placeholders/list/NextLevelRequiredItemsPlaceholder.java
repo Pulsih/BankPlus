@@ -28,7 +28,7 @@ public class NextLevelRequiredItemsPlaceholder extends BPPlaceholder {
         Bank bank = BankRegistry.getBank(target);
         if (!BankUtils.hasNextLevel(bank, p)) return ConfigValues.getUpgradesMaxedPlaceholder();
 
-        HashMap<String, ItemStack> requiredItems = BankUtils.getRequiredItems(bank, BankUtils.getCurrentLevel(bank, p) + 1);
+        HashMap<String, Bank.RequiredItem> requiredItems = BankUtils.getRequiredItems(bank, BankUtils.getCurrentLevel(bank, p) + 1);
 
         if (identifier.contains("[") && identifier.contains("]")) {
             int position;
@@ -41,7 +41,7 @@ public class NextLevelRequiredItemsPlaceholder extends BPPlaceholder {
             int i = 0;
             ItemStack choice = null;
             for (String itemName : requiredItems.keySet()) {
-                choice = requiredItems.get(itemName);
+                choice = requiredItems.get(itemName).item;
                 if (i >= position - 1) break;
             }
 

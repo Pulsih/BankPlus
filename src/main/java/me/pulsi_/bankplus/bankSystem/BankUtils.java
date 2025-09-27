@@ -26,6 +26,8 @@ import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.util.*;
 
+import static me.pulsi_.bankplus.bankSystem.BPItems.AMOUNT_KEY;
+
 /**
  * Class containing tons of useful methods to manage banks and retrieve useful information.
  */
@@ -272,7 +274,7 @@ public class BankUtils {
      * @param level The level to check.
      * @return An HashMap with K = Required Item Name. V = ItemStack.
      */
-    public static HashMap<String, ItemStack> getRequiredItems(Bank bank, int level) {
+    public static HashMap<String, Bank.RequiredItem> getRequiredItems(Bank bank, int level) {
         Bank.BankLevel bankLevel = bank.getBankLevel(level);
         return bankLevel == null ? new HashMap<>() : bankLevel.requiredItems;
     }
@@ -464,10 +466,10 @@ public class BankUtils {
         // variable to make sure to remove the items only when there are
         // some and not removing possible items from the player's inventory.
         boolean canRemoveSafely = false;
-        Collection<ItemStack> requiredItems = getRequiredItems(bank, nextLevel).values();
+        Collection<Bank.RequiredItem> requiredItems = getRequiredItems(bank, nextLevel).values();
         if (!requiredItems.isEmpty()) {
-            for (ItemStack requiredItem : requiredItems) {
-                int amount = requiredItem.getAmount();
+            for (Bank.RequiredItem requiredItem : requiredItems) {
+                int amount = requiredItem.amount;
                 int playerAmount = 0;
 
                 boolean hasItem = false;
@@ -513,7 +515,7 @@ public class BankUtils {
         }
 
         if (isRemovingRequiredItems(bank, nextLevel) && canRemoveSafely)
-            for (ItemStack item : requiredItems) p.getInventory().removeItem(item);
+            for (Bank.RequiredItem requiredItem : requiredItems) p.getInventory().removeItem(requiredItem.item);
 
         setLevel(bank, p, nextLevel);
         BPMessages.send(p, "Bank-Upgraded");
@@ -605,8 +607,8 @@ public class BankUtils {
      * @param bankName     The name of the bank where to retrieve the items (used for debugging).
      * @return A list of required items.
      */
-    public static @Nonnull HashMap<String, ItemStack> retrieveRequiredItems(ConfigurationSection levelSection, String bankName) {
-        HashMap<String, ItemStack> requiredItems = new HashMap<>();
+    public static @Nonnull HashMap<String, Bank.RequiredItem> retrieveRequiredItems(ConfigurationSection levelSection, String bankName) {
+        HashMap<String, Bank.RequiredItem> requiredItems = new HashMap<>();
 
         ConfigurationSection requiredItemsSection = levelSection.getConfigurationSection(REQUIRED_ITEMS_FIELD);
         if (requiredItemsSection != null) { // Required items section != null -> Long format used.
@@ -619,8 +621,8 @@ public class BankUtils {
                     continue;
                 }
 
-                ItemStack customItem = BPItems.getItemStackFromSection(itemSection);
-                ItemMeta meta = customItem.getItemMeta();
+                ItemStack item = BPItems.getItemStackFromSection(itemSection);
+                ItemMeta meta = item.getItemMeta();
                 PersistentDataContainer data = meta.getPersistentDataContainer();
 
                 // If an item specify ONLY Material or Amount, don't add the custom unique id.
@@ -635,9 +637,16 @@ public class BankUtils {
                     // Set an unique custom item ID to make it not replicable: bankName_bankLevel_itemName
                     data.set(customItemKey, PersistentDataType.STRING, startingItemID + itemName);
                 }
+                item.setItemMeta(meta);
 
-                customItem.setItemMeta(meta);
-                requiredItems.put(itemName, customItem);
+
+                // Create the required item with amount separated to solve the amount limit of 99.
+                Bank.RequiredItem requiredItem = new Bank.RequiredItem(item);
+
+                int amount = itemSection.getInt(AMOUNT_KEY);
+                if (amount > 1) requiredItem.amount = amount;
+
+                requiredItems.put(itemName, requiredItem);
             }
             return requiredItems;
         }
@@ -653,7 +662,7 @@ public class BankUtils {
         for (String itemID : items) {
             if (!itemID.contains("-")) {
                 try {
-                    requiredItems.put(itemID, new ItemStack(Material.valueOf(itemID)));
+                    requiredItems.put(itemID, new Bank.RequiredItem(new ItemStack(Material.valueOf(itemID))));
                 } catch (IllegalArgumentException e) {
                     BPLogger.Console.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
                 }
@@ -669,6 +678,7 @@ public class BankUtils {
                     BPLogger.Console.warn("The bank \"" + bankName + "\" contains an invalid item in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
                     continue;
                 }
+
                 int amount = 1;
                 try {
                     amount = Integer.parseInt(split[1]);
@@ -676,8 +686,9 @@ public class BankUtils {
                     BPLogger.Console.warn("The bank \"" + bankName + "\" contains an invalid number in the \"Required-Items\" path at level *" + levelSection.getName() + ".");
                 }
 
-                item.setAmount(amount);
-                requiredItems.put(id, item);
+                Bank.RequiredItem requiredItem = new Bank.RequiredItem(item);
+                requiredItem.amount = amount;
+                requiredItems.put(id, requiredItem);
             }
         }
         return requiredItems;
@@ -691,8 +702,8 @@ public class BankUtils {
      * @param itemToCheck  The item to check.
      * @return true if the checked item is a required item.
      */
-    public static boolean isRequiredItem(ItemStack requiredItem, ItemStack itemToCheck) {
-        ItemMeta requiredMeta = requiredItem.getItemMeta();
+    public static boolean isRequiredItem(Bank.RequiredItem requiredItem, ItemStack itemToCheck) {
+        ItemMeta requiredMeta = requiredItem.item.getItemMeta();
         if (requiredMeta != null) {
             String requiredId = requiredMeta.getPersistentDataContainer().get(customItemKey, PersistentDataType.STRING);
             // Check if it's a custom item, otherwise just check for the material.
@@ -704,7 +715,7 @@ public class BankUtils {
                 return requiredId.equals(checkId);
             }
         }
-        return requiredItem.getType().equals(itemToCheck.getType());
+        return requiredItem.item.getType().equals(itemToCheck.getType());
     }
 
     /**

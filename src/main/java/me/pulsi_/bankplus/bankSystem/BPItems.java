@@ -47,9 +47,6 @@ public class BPItems {
 
         ItemStack item = BPItems.createItemStack(itemSection.getString(MATERIAL_KEY));
 
-        int amount = itemSection.getInt(AMOUNT_KEY);
-        if (amount > 1) item.setAmount(amount);
-
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return item;
 

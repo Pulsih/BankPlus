@@ -356,18 +356,19 @@ public class BPUtils {
      * @param requiredItems A list of required items.
      * @return A string of required items.
      */
-    public static String getRequiredItemsFormatted(Collection<ItemStack> requiredItems) {
+    public static String getRequiredItemsFormatted(Collection<Bank.RequiredItem> requiredItems) {
         StringBuilder builder = new StringBuilder();
         MiniMessage mm = MiniMessage.miniMessage();
 
         int i = 0;
-        for (ItemStack requiredItem : requiredItems) {
-            int amount = requiredItem.getAmount();
+        for (Bank.RequiredItem requiredItem : requiredItems) {
+            ItemStack item = requiredItem.item;
+            int amount = requiredItem.amount;
 
             Component displayname;
-            ItemMeta meta = requiredItem.getItemMeta();
+            ItemMeta meta = item.getItemMeta();
             if (meta != null && meta.hasDisplayName()) displayname = meta.displayName();
-            else displayname = requiredItem.displayName();
+            else displayname = item.displayName();
 
             builder.append(amount).append(" ").append(mm.serialize(displayname));
             if (i == requiredItems.size() - 1) continue;

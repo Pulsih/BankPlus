@@ -160,8 +160,18 @@ public class Bank {
 
     public static class BankLevel {
         BigDecimal cost, capacity, interest, offlineInterest, afkInterest, maxInterestAmount;
-        HashMap<String, ItemStack> requiredItems;
+        HashMap<String, RequiredItem> requiredItems;
         List<String> interestLimiter;
         boolean removeRequiredItems;
+    }
+
+    public static class RequiredItem {
+
+        public RequiredItem(ItemStack item) {
+            this.item = item;
+        }
+
+        public ItemStack item;
+        public int amount = 1;
     }
 }
