@@ -115,7 +115,7 @@ public abstract class BPCommand {
             String name = s.getName();
             if (!confirm.contains(name)) {
                 Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> confirm.remove(name), confirmCooldown * 20L);
-                for (String message : confirmMessage) BPMessages.send(s, message, false);
+                for (String message : confirmMessage) BPMessages.sendMessage(s, message);
                 confirm.add(name);
                 return false;
             }
@@ -136,12 +136,11 @@ public abstract class BPCommand {
 
         if (!skipUsage() && args.length == 1) {
             for (String usage : usage) {
-                BPMessages.send(
+                BPMessages.sendMessage(
                         s,
                         usage
                         .replace("[", "<dark_gray>[</dark_gray>")
-                        .replace("]", "<dark_gray>]</dark_gray>"),
-                        false
+                        .replace("]", "<dark_gray>]</dark_gray>")
                 );
             }
             return;
@@ -174,7 +173,7 @@ public abstract class BPCommand {
         if (get <= cur) return false;
 
         for (String message : cooldownMessage)
-            BPMessages.send(s, message, "%time%$" + BPFormatter.formatTime(get - cur), false);
+            BPMessages.sendMessage(s, message, "%time%$" + BPFormatter.formatTime(get - cur));
         return true;
     }
 

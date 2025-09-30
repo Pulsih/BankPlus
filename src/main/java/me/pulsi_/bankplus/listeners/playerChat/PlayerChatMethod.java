@@ -43,7 +43,7 @@ public class PlayerChatMethod {
             try {
                 amount = new BigDecimal(text);
             } catch (NumberFormatException ex) {
-                BPMessages.send(p, "Invalid-Number");
+                BPMessages.sendIdentifier(p, "Invalid-Number");
                 return;
             }
 

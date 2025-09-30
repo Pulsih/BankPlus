@@ -67,7 +67,7 @@ public class BankUtils {
      */
     public static boolean exist(Bank bank, CommandSender s) {
         boolean exist = bank != null;
-        if (!exist) BPMessages.send(s, "Invalid-Bank");
+        if (!exist) BPMessages.sendIdentifier(s, "Invalid-Bank");
         return exist;
     }
 
@@ -89,7 +89,7 @@ public class BankUtils {
      */
     public static boolean exist(String bankName, CommandSender s) {
         boolean exist = BankRegistry.getBank(bankName) != null;
-        if (!exist) BPMessages.send(s, "Invalid-Bank");
+        if (!exist) BPMessages.sendIdentifier(s, "Invalid-Bank");
         return exist;
     }
 
@@ -457,7 +457,7 @@ public class BankUtils {
      */
     public static void upgradeBank(Bank bank, Player p) {
         if (!hasNextLevel(bank, p)) {
-            BPMessages.send(p, "Bank-Max-Level");
+            BPMessages.sendIdentifier(p, "Bank-Max-Level");
             return;
         }
 
@@ -482,7 +482,7 @@ public class BankUtils {
                     break;
                 }
                 if (!hasItem) {
-                    BPMessages.send(p, "Insufficient-Items", "%items%$" + BPUtils.getRequiredItemsFormatted(requiredItems));
+                    BPMessages.sendIdentifier(p, "Insufficient-Items", "%items%$" + BPUtils.getRequiredItemsFormatted(requiredItems));
                     return;
                 }
             }
@@ -496,7 +496,7 @@ public class BankUtils {
 
             BigDecimal balance = economy.getBankBalance(p);
             if (balance.doubleValue() < cost.doubleValue()) {
-                BPMessages.send(p, "Insufficient-Money");
+                BPMessages.sendIdentifier(p, "Insufficient-Money");
                 return;
             }
 
@@ -507,7 +507,7 @@ public class BankUtils {
             double balance = vaultEconomy.getBalance(p);
 
             if (balance < cost.doubleValue()) {
-                BPMessages.send(p, "Insufficient-Money");
+                BPMessages.sendIdentifier(p, "Insufficient-Money");
                 return;
             }
 
@@ -518,7 +518,7 @@ public class BankUtils {
             for (Bank.RequiredItem requiredItem : requiredItems) p.getInventory().removeItem(requiredItem.item);
 
         setLevel(bank, p, nextLevel);
-        BPMessages.send(p, "Bank-Upgraded");
+        BPMessages.sendIdentifier(p, "Bank-Upgraded");
 
         if (!hasNextLevel(bank, nextLevel)) {
             for (String line : MultipleBanksValues.getAutoBanksUnlocker()) {

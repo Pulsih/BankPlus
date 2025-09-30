@@ -202,11 +202,11 @@ public class BPLoanRegistry {
         if (!isBankToPlayer) {
             // Add back a part of the amount to the sender of the loan.
             BigDecimal addedToSender = senderBank.getBankEconomy().addBankBalance(sender, currentTaskAmount, TransactionType.LOAN), extra = currentTaskAmount.subtract(addedToSender);
-            if (extra.compareTo(BigDecimal.ZERO) <= 0) BPMessages.send(sender.getPlayer(), "Loan-Payback", BPUtils.placeValues(receiver, addedToSender));
+            if (extra.compareTo(BigDecimal.ZERO) <= 0) BPMessages.sendIdentifier(sender.getPlayer(), "Loan-Payback", BPUtils.placeValues(receiver, addedToSender));
             else {
                 List<String> replacers = BPUtils.placeValues(currentTaskAmount);
                 replacers.addAll(BPUtils.placeValues(receiver, extra, "extra"));
-                BPMessages.send(sender.getPlayer(), "Loan-Payback-Full", replacers);
+                BPMessages.sendIdentifier(sender.getPlayer(), "Loan-Payback-Full", replacers);
                 BankPlus.INSTANCE().getVaultEconomy().depositPlayer(sender, extra.doubleValue());
             }
         }
@@ -215,12 +215,12 @@ public class BPLoanRegistry {
         BPEconomy receiverBankEconomy = receiverBank.getBankEconomy();
         BigDecimal removedToReceiver = receiverBankEconomy.removeBankBalance(receiver, currentTaskAmount, TransactionType.LOAN), debt = currentTaskAmount.subtract(removedToReceiver);
         if (debt.doubleValue() <= 0D) {
-            if (isBankToPlayer) BPMessages.send(receiver.getPlayer(), "Loan-Returned-Bank", BPUtils.placeValues(loan.getRequestedBank().getIdentifier(), currentTaskAmount));
-            else BPMessages.send(receiver.getPlayer(), "Loan-Returned", BPUtils.placeValues(sender, currentTaskAmount));
+            if (isBankToPlayer) BPMessages.sendIdentifier(receiver.getPlayer(), "Loan-Returned-Bank", BPUtils.placeValues(loan.getRequestedBank().getIdentifier(), currentTaskAmount));
+            else BPMessages.sendIdentifier(receiver.getPlayer(), "Loan-Returned", BPUtils.placeValues(sender, currentTaskAmount));
         } else {
             BigDecimal newDebt = receiverBankEconomy.getDebt(receiver).add(debt);
-            if (isBankToPlayer) BPMessages.send(receiver.getPlayer(), "Loan-Returned-Debt-Bank", BPUtils.placeValues(loan.getRequestedBank().getIdentifier(), newDebt));
-            else BPMessages.send(receiver.getPlayer(), "Loan-Returned-Debt", BPUtils.placeValues(sender, newDebt));
+            if (isBankToPlayer) BPMessages.sendIdentifier(receiver.getPlayer(), "Loan-Returned-Debt-Bank", BPUtils.placeValues(loan.getRequestedBank().getIdentifier(), newDebt));
+            else BPMessages.sendIdentifier(receiver.getPlayer(), "Loan-Returned-Debt", BPUtils.placeValues(sender, newDebt));
             receiverBankEconomy.setDebt(receiver, newDebt);
         }
 

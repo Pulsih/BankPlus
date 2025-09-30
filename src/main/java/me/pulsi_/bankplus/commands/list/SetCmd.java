@@ -65,12 +65,12 @@ public class SetCmd extends BPCommand {
     public BPCmdExecution onExecution(CommandSender s, String[] args) {
         OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
         if (!p.hasPlayedBefore()) {
-            BPMessages.send(s, "Invalid-Player");
+            BPMessages.sendIdentifier(s, "Invalid-Player");
             return BPCmdExecution.invalidExecution();
         }
 
         if (args.length == 2) {
-            BPMessages.send(s, "Specify-Number");
+            BPMessages.sendIdentifier(s, "Specify-Number");
             return BPCmdExecution.invalidExecution();
         }
 
@@ -84,7 +84,7 @@ public class SetCmd extends BPCommand {
             @Override
             public void execute() {
                 BigDecimal set = BPEconomy.get(bankName).setBankBalance(p, new BigDecimal(amount));
-                if (!isSilent(args)) BPMessages.send(s, "Set-Message", BPUtils.placeValues(p, set));
+                if (!isSilent(args)) BPMessages.sendIdentifier(s, "Set-Message", BPUtils.placeValues(p, set));
             }
         };
     }

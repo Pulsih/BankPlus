@@ -71,7 +71,7 @@ public class ViewCmd extends BPCommand {
 
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
         if (!target.hasPlayedBefore()) {
-            BPMessages.send(s, "Invalid-Player");
+            BPMessages.sendIdentifier(s, "Invalid-Player");
             return BPCmdExecution.invalidExecution();
         }
 
@@ -85,7 +85,7 @@ public class ViewCmd extends BPCommand {
                     if (args.length == 2) {
                         banks.addAll(BankUtils.getAvailableBanks(target));
                         if (banks.isEmpty()) {
-                            BPMessages.send(s, "No-Available-Banks-Others", "%player%$" + target.getName());
+                            BPMessages.sendIdentifier(s, "No-Available-Banks-Others", "%player%$" + target.getName());
                             return;
                         }
                     } else {
@@ -93,21 +93,21 @@ public class ViewCmd extends BPCommand {
                         if (!BankUtils.exist(bank, s)) return;
 
                         if (!BankUtils.isAvailable(bank, target)) {
-                            BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
+                            BPMessages.sendIdentifier(s, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
                             return;
                         }
                         banks.add(bank);
                     }
 
                     if (banks.size() > 1)
-                        BPMessages.send(
+                        BPMessages.sendIdentifier(
                                 s,
                                 "Multiple-Bank-Others",
                                 BPUtils.placeValues(target, BPEconomy.getBankBalancesSum(target))
                         );
                     else {
-                        Bank bank = banks.get(0);
-                        BPMessages.send(
+                        Bank bank = banks.getFirst();
+                        BPMessages.sendIdentifier(
                                 s,
                                 "Bank-Others",
                                 BPUtils.placeValues(target, bank.getBankEconomy().getBankBalance(target), BankUtils.getCurrentLevel(bank, target))

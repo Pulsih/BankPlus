@@ -19,7 +19,7 @@ public class BankTopCmd implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender s, Command command, String label, String[] args) {
         if (!ConfigValues.isBankTopEnabled()) {
-            BPMessages.send(s, "BankTop-Disabled");
+            BPMessages.sendIdentifier(s, "BankTop-Disabled");
             return false;
         }
         if (!BPUtils.hasPermission(s, "bankplus.banktop")) return false;

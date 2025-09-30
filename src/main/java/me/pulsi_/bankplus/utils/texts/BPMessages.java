@@ -22,33 +22,49 @@ public class BPMessages {
     private static boolean alertMissingMessages;
 
     /**
-     * Send the desired message to the receiver.
+     * Send the desired message to the specified receiver.
      *
-     * @param receiver   The receiver.
-     * @param identifier The message identifier in the messages file.
+     * @param receiver   The receiver (Player or CommandSender).
+     * @param text The text.
      */
-    public static void send(Object receiver, String identifier) {
-        send(receiver, identifier, null);
+    public static void sendMessage(Object receiver, String text) {
+        sendMessage(receiver, text, null);
     }
 
     /**
      * Send the desired message to the specified receiver.
-     * <p>
-     * Put a negative boolean somewhere in the replacers to send the whole
-     * identifier as message, instead of searching it in the messages file.
-     * <p>
-     * If the message is not from the messages file, a default gradient will be applied.
      *
      * @param receiver   The receiver (Player or CommandSender).
-     * @param identifier The message identifier in the messages file.
+     * @param text The text.
      * @param replacers  A list of possible replacements.
      */
-    public static void send(Object receiver, String identifier, Object... replacers) {
+    public static void sendMessage(Object receiver, String text, Object... replacers) {
+        if (receiver == null || text == null || text.isEmpty()) return;
+
+        for (String message : getReplacedMessages(text, false, replacers)) send(receiver, message);
+    }
+
+    /**
+     * Send a message defined in the "messages.yml" file from its id.
+     *
+     * @param receiver   The receiver (Player or CommandSender).
+     * @param identifier The identifier of the message.
+     */
+    public static void sendIdentifier(Object receiver, String identifier) {
+        sendIdentifier(receiver, identifier, null);
+    }
+
+    /**
+     * Send a message defined in the "messages.yml" file from its id.
+     *
+     * @param receiver   The receiver (Player or CommandSender).
+     * @param identifier The identifier of the message.
+     * @param replacers  A list of possible replacements.
+     */
+    public static void sendIdentifier(Object receiver, String identifier, Object... replacers) {
         if (receiver == null || identifier == null || identifier.isEmpty()) return;
 
-        boolean search = searchInMessages(replacers);
-        if (search && !messages.containsKey(identifier)) {
-            if (alertMissingMessages)
+        if (alertMissingMessages && !messages.containsKey(identifier)) {
                 sendMessage(
                         receiver,
                         "%prefix% <red>The message \"" + identifier + "\" is missing in the messages file!"
@@ -56,11 +72,12 @@ public class BPMessages {
             return;
         }
 
-        for (String message : getReplacedMessages(identifier, search, replacers)) sendMessage(receiver, message);
+        for (String message : getReplacedMessages(identifier, true, replacers)) send(receiver, message);
     }
 
     /**
      * Get a list of all messages from the identifier, with all the replacement applied.
+     * The replacer format is: [oldValue$newValue]
      *
      * @param identifier       The message identifier.
      * @param searchInMessages Search the id in the messages file or not.
@@ -128,7 +145,7 @@ public class BPMessages {
      * @param receiver The message receiver.
      * @param message  The message.
      */
-    private static void sendMessage(Object receiver, String message) {
+    private static void send(Object receiver, String message) {
         message = applyMessagesPrefix(message);
 
         if (receiver instanceof Player player) {
@@ -155,20 +172,5 @@ public class BPMessages {
      */
     public static String applyMessagesPrefix(String message) {
         return message.replace("%prefix%", messagesPrefix);
-    }
-
-    /**
-     * Method to check if inside the given replacers, there is a negative boolean,
-     * sending the whole identifier as message instead of searching it in the messages file.
-     *
-     * @param objects The list of replacers.
-     * @return true if the identifier is to search in the messages file, false if it needs to be sent entirely.
-     */
-    private static boolean searchInMessages(Object... objects) {
-        if (objects == null) return true;
-
-        for (Object object : objects)
-            if (object instanceof Boolean && !((boolean) object)) return false;
-        return true;
     }
 }

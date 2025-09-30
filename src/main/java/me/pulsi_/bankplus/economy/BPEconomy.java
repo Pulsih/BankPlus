@@ -576,7 +576,7 @@ public class BPEconomy {
 
         List<String> replacers = BPUtils.placeValues(p, actualDepositingMoney);
         replacers.addAll(BPUtils.placeValues(taxes, "taxes"));
-        BPMessages.send(p, "Success-Deposit", replacers);
+        BPMessages.sendIdentifier(p, "Success-Deposit", replacers);
 
         if (ConfigValues.isDepositSoundEnabled()) BPUtils.playSound(ConfigValues.getDepositSound(), p);
 
@@ -618,7 +618,7 @@ public class BPEconomy {
 
         List<String> replacers = BPUtils.placeValues(p, amount.subtract(taxes));
         replacers.addAll(BPUtils.placeValues(taxes, "taxes"));
-        BPMessages.send(p, "Success-Withdraw", replacers);
+        BPMessages.sendIdentifier(p, "Success-Withdraw", replacers);
 
         if (ConfigValues.isWithdrawSoundEnabled()) BPUtils.playSound(ConfigValues.getWithdrawSound(), p);
 
@@ -633,7 +633,7 @@ public class BPEconomy {
     public void customDeposit(Player p) {
         if (MessageValues.isTitleCustomAmountEnabled()) BPUtils.sendTitle(MessageValues.getCustomDepositTitle(), p);
 
-        BPMessages.send(p, "Chat-Deposit");
+        BPMessages.sendIdentifier(p, "Chat-Deposit");
         p.closeInventory();
 
         BPPlayer bpPlayer = PlayerRegistry.get(p);
@@ -643,7 +643,7 @@ public class BPEconomy {
 
         bpPlayer.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> {
             PlayerChatMethod.reopenBank(bpPlayer, bank.getBankGui());
-            BPMessages.send(p, "Chat-Time-Expired");
+            BPMessages.sendIdentifier(p, "Chat-Time-Expired");
         }, ConfigValues.getChatExitTime() * 20L));
     }
 
@@ -655,7 +655,7 @@ public class BPEconomy {
     public void customWithdraw(Player p) {
         if (MessageValues.isTitleCustomAmountEnabled()) BPUtils.sendTitle(MessageValues.getCustomWithdrawTitle(), p);
 
-        BPMessages.send(p, "Chat-Withdraw");
+        BPMessages.sendIdentifier(p, "Chat-Withdraw");
         p.closeInventory();
 
         BPPlayer bpPlayer = PlayerRegistry.get(p);
@@ -665,7 +665,7 @@ public class BPEconomy {
 
         bpPlayer.setClosingTask(Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> {
             PlayerChatMethod.reopenBank(bpPlayer, bank.getBankGui());
-            BPMessages.send(p, "Chat-Time-Expired");
+            BPMessages.sendIdentifier(p, "Chat-Time-Expired");
         }, ConfigValues.getChatExitTime() * 20L));
     }
 
@@ -683,27 +683,27 @@ public class BPEconomy {
         BigDecimal senderBalance = getBankBalance(from);
         // Check if the sender has at least more than 0 money
         if (senderBalance.compareTo(amount) < 0) {
-            BPMessages.send(from, "Insufficient-Money");
+            BPMessages.sendIdentifier(from, "Insufficient-Money");
             return;
         }
 
         BPEconomy toEconomy = toBank.getBankEconomy();
         // Check if the receiver of the payment has the bank full
         if (toEconomy.getBankBalance(to).compareTo(BankUtils.getCapacity(toBank, to)) >= 0) {
-            BPMessages.send(from, "Bank-Full", "%player%$" + to.getName());
+            BPMessages.sendIdentifier(from, "Bank-Full", "%player%$" + to.getName());
             return;
         }
 
         BigDecimal added = toEconomy.addBankBalance(to, amount, TransactionType.PAY), extra = amount.subtract(added);
-        BPMessages.send(to, "Payment-Received", BPUtils.placeValues(from, added));
+        BPMessages.sendIdentifier(to, "Payment-Received", BPUtils.placeValues(from, added));
 
         BigDecimal removed = removeBankBalance(from, amount.subtract(extra), TransactionType.PAY);
-        BPMessages.send(from, "Payment-Sent", BPUtils.placeValues(to, removed));
+        BPMessages.sendIdentifier(from, "Payment-Sent", BPUtils.placeValues(to, removed));
     }
 
     private boolean minimumAmount(Player p, BigDecimal amount, BigDecimal minimum) {
         if (amount.compareTo(minimum) < 0) {
-            BPMessages.send(p, "Minimum-Number", "%min%$" + minimum);
+            BPMessages.sendIdentifier(p, "Minimum-Number", "%min%$" + minimum);
             return true;
         }
         return false;

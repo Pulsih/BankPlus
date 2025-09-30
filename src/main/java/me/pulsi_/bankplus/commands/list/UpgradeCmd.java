@@ -66,7 +66,7 @@ public class UpgradeCmd extends BPCommand {
 
         Player p = (Player) s;
         if (!BankUtils.isAvailable(bank, p)) {
-            BPMessages.send(s, "Cannot-Access-Bank");
+            BPMessages.sendIdentifier(s, "Cannot-Access-Bank");
             return BPCmdExecution.invalidExecution();
         }
 

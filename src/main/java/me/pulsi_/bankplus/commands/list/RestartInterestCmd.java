@@ -59,7 +59,7 @@ public class RestartInterestCmd extends BPCommand {
     @Override
     public BPCmdExecution onExecution(CommandSender s, String[] args) {
         if (!ConfigValues.isInterestEnabled()) {
-            BPMessages.send(s, "Interest-Disabled");
+            BPMessages.sendIdentifier(s, "Interest-Disabled");
             return BPCmdExecution.invalidExecution();
         }
 
@@ -67,7 +67,7 @@ public class RestartInterestCmd extends BPCommand {
             @Override
             public void execute() {
                 BankPlus.INSTANCE().getInterest().restartInterest(false);
-                BPMessages.send(s, "%prefix% Interest cooldown restarted!", false);
+                BPMessages.sendMessage(s, "%prefix% Interest cooldown restarted!");
             }
         };
     }

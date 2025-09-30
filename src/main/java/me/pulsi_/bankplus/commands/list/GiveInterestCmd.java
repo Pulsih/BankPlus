@@ -59,14 +59,14 @@ public class GiveInterestCmd extends BPCommand {
     @Override
     public BPCmdExecution onExecution(CommandSender s, String[] args) {
         if (!ConfigValues.isInterestEnabled()) {
-            BPMessages.send(s, "Interest-Disabled");
+            BPMessages.sendIdentifier(s, "Interest-Disabled");
             return BPCmdExecution.invalidExecution();
         }
 
         return new BPCmdExecution() {
             @Override
             public void execute() {
-                BPMessages.send(s, "%prefix% Successfully given the interest! The countdown has been restarted.", false);
+                BPMessages.sendMessage(s, "%prefix% Successfully given the interest! The countdown has been restarted.");
                 BankPlus.INSTANCE().getInterest().giveInterestToEveryone();
             }
         };

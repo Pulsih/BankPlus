@@ -61,11 +61,11 @@ public class ReloadCmd extends BPCommand {
             @Override
             public void execute() {
                 long time = System.currentTimeMillis();
-                BPMessages.send(s, "%prefix% The plugin will now try to reload...", false);
+                BPMessages.sendMessage(s, "%prefix% The plugin will now try to reload...");
 
                 boolean reloaded = BankPlus.INSTANCE().getDataManager().reloadPlugin();
-                if (reloaded) BPMessages.send(s, "Reload-Success", "%time%$" + (System.currentTimeMillis() - time));
-                else BPMessages.send(s, "Reload-Fail");
+                if (reloaded) BPMessages.sendIdentifier(s, "Reload-Success", "%time%$" + (System.currentTimeMillis() - time));
+                else BPMessages.sendIdentifier(s, "Reload-Fail");
             }
         };
     }

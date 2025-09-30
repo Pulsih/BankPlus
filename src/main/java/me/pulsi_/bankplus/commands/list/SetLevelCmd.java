@@ -65,12 +65,12 @@ public class SetLevelCmd extends BPCommand {
     public BPCmdExecution onExecution(CommandSender s, String[] args) {
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
         if (!target.hasPlayedBefore()) {
-            BPMessages.send(s, "Invalid-Player");
+            BPMessages.sendIdentifier(s, "Invalid-Player");
             return BPCmdExecution.invalidExecution();
         }
 
         if (args.length == 2) {
-            BPMessages.send(s, "Specify-Number");
+            BPMessages.sendIdentifier(s, "Specify-Number");
             return BPCmdExecution.invalidExecution();
         }
 
@@ -81,7 +81,7 @@ public class SetLevelCmd extends BPCommand {
         if (!BankUtils.exist(bank, s)) return BPCmdExecution.invalidExecution();
 
         if (!BankUtils.hasLevel(bank, level)) {
-            BPMessages.send(s, "Invalid-Bank-Level");
+            BPMessages.sendIdentifier(s, "Invalid-Bank-Level");
             return BPCmdExecution.invalidExecution();
         }
 
@@ -89,7 +89,7 @@ public class SetLevelCmd extends BPCommand {
             @Override
             public void execute() {
                 BankUtils.setLevel(bank, target, Integer.parseInt(level));
-                BPMessages.send(s, "Set-Level-Message", "%player%$" + target.getName(), "%level%$" + level);
+                BPMessages.sendIdentifier(s, "Set-Level-Message", "%player%$" + target.getName(), "%level%$" + level);
             }
         };
     }

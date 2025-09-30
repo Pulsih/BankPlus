@@ -66,7 +66,7 @@ public class PlaceholdersCmd extends BPCommand {
                 List<String> placeholders =  BankPlus.INSTANCE().getBpPlaceholders().getRegisteredPlaceholders();
                 int size = placeholders.size();
 
-                BPMessages.send(s, "%prefix% Currently registered placeholders <dark_gray>(<aqua>" + size + "</aqua>)</dark_gray>:", false);
+                BPMessages.sendMessage(s, "%prefix% Currently registered placeholders <dark_gray>(<aqua>" + size + "</aqua>)</dark_gray>:");
 
                 StringBuilder builder = new StringBuilder(" <dark_gray>* ");
                 for (int i = 0; i < size; i++) {
@@ -75,7 +75,7 @@ public class PlaceholdersCmd extends BPCommand {
                     if (i + 1 >= size) builder.append("<dark_gray>]<gray>.");
                     else builder.append("<dark_gray>]<gray>, ");
                 }
-                BPMessages.send(s, builder.toString(), false);
+                BPMessages.sendMessage(s, builder.toString());
             }
         };
     }

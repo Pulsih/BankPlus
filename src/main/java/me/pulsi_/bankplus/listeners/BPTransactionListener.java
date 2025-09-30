@@ -53,7 +53,7 @@ public class BPTransactionListener implements Listener {
 
         List<String> replacers = BPUtils.placeValues(e.getTransactionAmount().min(debt));
         replacers.addAll(BPUtils.placeValues(newDebt, "debt"));
-        BPMessages.send(Bukkit.getPlayer(p.getUniqueId()), "Debt-Money-Taken", replacers);
+        BPMessages.sendIdentifier(Bukkit.getPlayer(p.getUniqueId()), "Debt-Money-Taken", replacers);
     }
 
     private void log(BPAfterTransactionEvent e) {

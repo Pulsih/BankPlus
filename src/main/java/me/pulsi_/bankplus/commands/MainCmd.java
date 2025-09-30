@@ -23,10 +23,9 @@ import static me.pulsi_.bankplus.commands.BPCmdRegistry.commands;
 public class MainCmd implements CommandExecutor, TabCompleter {
 
     public boolean onCommand(CommandSender s, Command command, String label, String[] args) {
-        if (!ConfigValues.getWorldsBlacklist().isEmpty() && s instanceof Player) {
-            Player p = (Player) s;
+        if (!ConfigValues.getWorldsBlacklist().isEmpty() && s instanceof Player p) {
             if (ConfigValues.getWorldsBlacklist().contains(p.getWorld().getName()) && !p.hasPermission("bankplus.worlds.blacklist.bypass")) {
-                BPMessages.send(p, "Cannot-Use-Bank-Here");
+                BPMessages.sendIdentifier(p, "Cannot-Use-Bank-Here");
                 return true;
             }
         }
@@ -36,12 +35,12 @@ public class MainCmd implements CommandExecutor, TabCompleter {
 
             if (s instanceof Player p) {
                 if (BankUtils.getAvailableBankNames((Player) s).isEmpty()) {
-                    if (ConfigValues.isShowingHelpWhenNoBanksAvailable()) BPMessages.send(s, "Help-Message");
-                    else BPMessages.send(s, "No-Available-Banks");
+                    if (ConfigValues.isShowingHelpWhenNoBanksAvailable()) BPMessages.sendIdentifier(s, "Help-Message");
+                    else BPMessages.sendIdentifier(s, "No-Available-Banks");
                     return true;
                 }
             } else {
-                BPMessages.send(s, "Help-Message");
+                BPMessages.sendIdentifier(s, "Help-Message");
                 return true;
             }
 
@@ -56,7 +55,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
                     }
                 }
             } else {
-                BPMessages.send(p, "Multiple-Personal-Bank", BPUtils.placeValues(p, BPEconomy.getBankBalancesSum(p)));
+                BPMessages.sendIdentifier(p, "Multiple-Personal-Bank", BPUtils.placeValues(p, BPEconomy.getBankBalancesSum(p)));
                 if (ConfigValues.isPersonalSoundEnabled()) BPUtils.playSound(ConfigValues.getPersonalSound(), p);
             }
             return true;
@@ -65,7 +64,7 @@ public class MainCmd implements CommandExecutor, TabCompleter {
         String identifier = args[0].toLowerCase();
 
         if (!commands.containsKey(identifier)) {
-            BPMessages.send(s, "Unknown-Command");
+            BPMessages.sendIdentifier(s, "Unknown-Command");
             return true;
         }
 

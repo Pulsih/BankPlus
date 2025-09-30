@@ -106,7 +106,7 @@ public class BankGui {
             if (ConfigValues.isOpeningPermissionsNeeded() && !BPUtils.hasPermission(p, "bankplus.open")) return;
 
             if (!BankUtils.isAvailable(originBank, p)) {
-                BPMessages.send(p, "Cannot-Access-Bank");
+                BPMessages.sendIdentifier(p, "Cannot-Access-Bank");
                 return;
             }
         }

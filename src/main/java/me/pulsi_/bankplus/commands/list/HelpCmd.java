@@ -59,7 +59,7 @@ public class HelpCmd extends BPCommand {
         return new BPCmdExecution() {
             @Override
             public void execute() {
-                BPMessages.send(s, "Help-Message");
+                BPMessages.sendIdentifier(s, "Help-Message");
             }
         };
     }

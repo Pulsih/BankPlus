@@ -74,25 +74,25 @@ public class TransferCmd extends BPCommand {
         String mode = args[1].toLowerCase();
 
         if (!mode.equals("filestodatabase") && !mode.equals("databasetofiles")) {
-            BPMessages.send(s, "Invalid-Action");
+            BPMessages.sendIdentifier(s, "Invalid-Action");
             return BPCmdExecution.invalidExecution();
         }
 
         if (!ConfigValues.isSqlEnabled()) {
-            BPMessages.send(s, "%prefix% <red>Could not initialize the task, MySQL hasn't been enabled in the config file!", false);
+            BPMessages.sendMessage(s, "%prefix% <red>Could not initialize the task, MySQL hasn't been enabled in the config file!");
             return BPCmdExecution.invalidExecution();
         }
 
         return new BPCmdExecution() {
             @Override
             public void execute() {
-                BPMessages.send(s, "%prefix% Task initialized, wait a few moments...", false);
+                BPMessages.sendMessage(s, "%prefix% Task initialized, wait a few moments...");
 
                 Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
                     if (args[1].equalsIgnoreCase("filestodatabase")) filesToDatabase();
                     else databaseToFile();
 
-                    BPMessages.send(s, "%prefix% Task finished!", false);
+                    BPMessages.sendMessage(s, "%prefix% Task finished!");
                 });
             }
         };

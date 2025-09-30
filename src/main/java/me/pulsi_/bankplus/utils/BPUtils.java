@@ -47,7 +47,7 @@ public class BPUtils {
      */
     public static boolean isInvalidNumber(String number, CommandSender s) {
         if (number == null || number.isEmpty()) {
-            BPMessages.send(s, "Invalid-Number");
+            BPMessages.sendIdentifier(s, "Invalid-Number");
             return true;
         }
         if (number.contains("%")) number = number.replace("%", "");
@@ -55,25 +55,25 @@ public class BPUtils {
         try {
             BigDecimal num = new BigDecimal(number);
             if (num.doubleValue() < 0) {
-                BPMessages.send(s, "Cannot-Use-Negative-Number");
+                BPMessages.sendIdentifier(s, "Cannot-Use-Negative-Number");
                 return true;
             }
             return false;
         } catch (NumberFormatException e) {
-            BPMessages.send(s, "Invalid-Number");
+            BPMessages.sendIdentifier(s, "Invalid-Number");
             return true;
         }
     }
 
     public static boolean isPlayer(CommandSender s) {
         if (s instanceof Player) return true;
-        BPMessages.send(s, "Not-Player");
+        BPMessages.sendIdentifier(s, "Not-Player");
         return false;
     }
 
     public static boolean hasPermission(CommandSender s, String permission) {
         if (s.hasPermission(permission)) return true;
-        BPMessages.send(s, "No-Permission", "%permission%$" + permission);
+        BPMessages.sendIdentifier(s, "No-Permission", "%permission%$" + permission);
         return false;
     }
 
@@ -249,12 +249,12 @@ public class BPUtils {
     }
 
     public static boolean checkPreRequisites(BigDecimal money, BigDecimal amount, Player p) {
-        if (amount.doubleValue() < 0) {
-            BPMessages.send(p, "Cannot-Use-Negative-Number");
+        if (amount.compareTo(BigDecimal.ZERO) < 0) {
+            BPMessages.sendIdentifier(p, "Cannot-Use-Negative-Number");
             return false;
         }
-        if (money.doubleValue() == 0) {
-            BPMessages.send(p, "Insufficient-Money");
+        if (money.compareTo(BigDecimal.ZERO) == 0) {
+            BPMessages.sendIdentifier(p, "Insufficient-Money");
             return false;
         }
         return true;
@@ -325,7 +325,7 @@ public class BPUtils {
         if (capacity.compareTo(BigDecimal.ZERO) <= 0) return false;
 
         if (bank.getBankEconomy().getBankBalance(p).compareTo(capacity) >= 0) {
-            BPMessages.send(p, "Cannot-Deposit-Anymore");
+            BPMessages.sendIdentifier(p, "Cannot-Deposit-Anymore");
             return true;
         }
         return false;
@@ -333,7 +333,7 @@ public class BPUtils {
 
     public static boolean hasFailed(Player p, EconomyResponse response) {
         if (!response.transactionSuccess()) {
-            BPMessages.send(p, "Internal-Error");
+            BPMessages.sendIdentifier(p, "Internal-Error");
             BPLogger.Console.warn("Vault has failed his transaction task. To avoid dupe bugs, bankplus has also cancelled the transaction.");
             BPLogger.Console.warn("Additional Vault error info:");
             BPLogger.Console.warn("  Error message: " + response.errorMessage);

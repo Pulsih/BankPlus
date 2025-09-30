@@ -66,12 +66,12 @@ public class RemoveCmd extends BPCommand {
     public BPCmdExecution onExecution(CommandSender s, String[] args) {
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
         if (!target.hasPlayedBefore()) {
-            BPMessages.send(s, "Invalid-Player");
+            BPMessages.sendIdentifier(s, "Invalid-Player");
             return BPCmdExecution.invalidExecution();
         }
 
         if (args.length == 2) {
-            BPMessages.send(s, "Specify-Number");
+            BPMessages.sendIdentifier(s, "Specify-Number");
             return BPCmdExecution.invalidExecution();
         }
         String amount = args[2];
@@ -87,8 +87,8 @@ public class RemoveCmd extends BPCommand {
                 BigDecimal removed = bank.getBankEconomy().removeBankBalance(target, new BigDecimal(amount));
 
                 if (isSilent(args)) return;
-                if (removed.compareTo(BigDecimal.ZERO) <= 0) BPMessages.send(s, "Bank-Empty", "%player%$" + target.getName());
-                else BPMessages.send(s, "Remove-Message", BPUtils.placeValues(target, removed));
+                if (removed.compareTo(BigDecimal.ZERO) <= 0) BPMessages.sendIdentifier(s, "Bank-Empty", "%player%$" + target.getName());
+                else BPMessages.sendIdentifier(s, "Remove-Message", BPUtils.placeValues(target, removed));
             }
         };
     }

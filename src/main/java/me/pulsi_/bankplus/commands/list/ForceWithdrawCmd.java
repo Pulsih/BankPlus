@@ -67,12 +67,12 @@ public class ForceWithdrawCmd extends BPCommand {
     public BPCmdExecution onExecution(CommandSender s, String[] args) {
         Player target = Bukkit.getPlayerExact(args[1]);
         if (target == null) {
-            BPMessages.send(s, "Invalid-Player");
+            BPMessages.sendIdentifier(s, "Invalid-Player");
             return BPCmdExecution.invalidExecution();
         }
 
         if (args.length == 2) {
-            BPMessages.send(s, "Specify-Number");
+            BPMessages.sendIdentifier(s, "Specify-Number");
             return BPCmdExecution.invalidExecution();
         }
 
@@ -84,7 +84,7 @@ public class ForceWithdrawCmd extends BPCommand {
         if (!BankUtils.exist(bank)) return BPCmdExecution.invalidExecution();
 
         if (!BankUtils.isAvailable(bank, target)) {
-            BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
+            BPMessages.sendIdentifier(s, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
             return BPCmdExecution.invalidExecution();
         }
 
@@ -104,7 +104,7 @@ public class ForceWithdrawCmd extends BPCommand {
 
                     // If the percentage is <= 0 or > 100 return.
                     if (percentage.compareTo(BigDecimal.ZERO) <= 0 || percentage.compareTo(h) > 0) {
-                        BPMessages.send(target, "Invalid-Number");
+                        BPMessages.sendIdentifier(target, "Invalid-Number");
                         return;
                     }
 

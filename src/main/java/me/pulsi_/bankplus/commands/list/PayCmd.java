@@ -72,12 +72,12 @@ public class PayCmd extends BPCommand {
     public BPCmdExecution onExecution(CommandSender s, String[] args) {
         Player sender = (Player) s, target = Bukkit.getPlayerExact(args[1]);
         if (target == null || target.equals(s)) {
-            BPMessages.send(s, "Invalid-Player");
+            BPMessages.sendIdentifier(s, "Invalid-Player");
             return BPCmdExecution.invalidExecution();
         }
 
         if (args.length == 2) {
-            BPMessages.send(s, "Specify-Number");
+            BPMessages.sendIdentifier(s, "Specify-Number");
             return BPCmdExecution.invalidExecution();
         }
 
@@ -88,7 +88,7 @@ public class PayCmd extends BPCommand {
 
         if (!BankUtils.exist(fromBank, s)) return BPCmdExecution.invalidExecution();
         if (!BankUtils.isAvailable(fromBank, sender)) {
-            BPMessages.send(s, "Cannot-Access-Bank");
+            BPMessages.sendIdentifier(s, "Cannot-Access-Bank");
             return BPCmdExecution.invalidExecution();
         }
 
@@ -96,7 +96,7 @@ public class PayCmd extends BPCommand {
 
         if (!BankUtils.exist(toBank, s)) return BPCmdExecution.invalidExecution();
         if (!BankUtils.isAvailable(toBank, target)) {
-            BPMessages.send(s, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
+            BPMessages.sendIdentifier(s, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
             return BPCmdExecution.invalidExecution();
         }
 

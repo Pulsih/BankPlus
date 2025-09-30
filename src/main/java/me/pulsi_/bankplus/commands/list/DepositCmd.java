@@ -72,7 +72,7 @@ public class DepositCmd extends BPCommand {
 
         Player p = (Player) s;
         if (!BankUtils.isAvailable(bank, p)) {
-            BPMessages.send(p, "Cannot-Access-Bank");
+            BPMessages.sendIdentifier(p, "Cannot-Access-Bank");
             return BPCmdExecution.invalidExecution();
         }
 
@@ -86,7 +86,7 @@ public class DepositCmd extends BPCommand {
 
                     // If the percentage is <= 0 or > 100 return.
                     if (percentage.compareTo(BigDecimal.ZERO) <= 0 || percentage.compareTo(h) > 0) {
-                        BPMessages.send(p, "Invalid-Number");
+                        BPMessages.sendIdentifier(p, "Invalid-Number");
                         return;
                     }
 

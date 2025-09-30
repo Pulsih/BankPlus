@@ -65,12 +65,12 @@ public class AddCmd extends BPCommand {
     public BPCmdExecution onExecution(CommandSender s, String[] args) {
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
         if (!target.hasPlayedBefore()) {
-            BPMessages.send(s, "Invalid-Player");
+            BPMessages.sendIdentifier(s, "Invalid-Player");
             return BPCmdExecution.invalidExecution();
         }
 
         if (args.length == 2) {
-            BPMessages.send(s, "Specify-Number");
+            BPMessages.sendIdentifier(s, "Specify-Number");
             return BPCmdExecution.invalidExecution();
         }
 
@@ -86,8 +86,8 @@ public class AddCmd extends BPCommand {
                 BigDecimal added = BPEconomy.get(bankName).addBankBalance(target, new BigDecimal(amount));
 
                 if (isSilent(args)) return;
-                if (added.compareTo(BigDecimal.ZERO) <= 0) BPMessages.send(s, "Bank-Full", "%player%$" + target.getName());
-                else BPMessages.send(s, "Add-Message", BPUtils.placeValues(target, added));
+                if (added.compareTo(BigDecimal.ZERO) <= 0) BPMessages.sendIdentifier(s, "Bank-Full", "%player%$" + target.getName());
+                else BPMessages.sendIdentifier(s, "Add-Message", BPUtils.placeValues(target, added));
             }
         };
     }

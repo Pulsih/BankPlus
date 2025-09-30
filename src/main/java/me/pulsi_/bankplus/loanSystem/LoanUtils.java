@@ -28,7 +28,7 @@ public class LoanUtils {
     public static void sendRequest(Player sender, Player receiver, BigDecimal amount, Bank senderBank, Bank receiverBank, String action) {
         BigDecimal senderBalance = senderBank.getBankEconomy().getBankBalance(sender);
         if (senderBalance.compareTo(BigDecimal.ZERO) <= 0) {
-            BPMessages.send(sender, "Insufficient-Money");
+            BPMessages.sendIdentifier(sender, "Insufficient-Money");
             return;
         }
 
@@ -47,24 +47,24 @@ public class LoanUtils {
         if (action.equals("give")) {
             BigDecimal capacity = BankUtils.getCapacity(loan.getReceiverBank(), receiver);
             if (moneyToReturn.compareTo(capacity) > 0) {
-                BPMessages.send(sender, "Cannot-Afford-Loan-Others", "%player%$" + receiver.getName());
+                BPMessages.sendIdentifier(sender, "Cannot-Afford-Loan-Others", "%player%$" + receiver.getName());
                 return;
             }
 
-            BPMessages.send(receiver, "Loan-Give-Request-Received", BPUtils.placeValues(sender, amount));
+            BPMessages.sendIdentifier(receiver, "Loan-Give-Request-Received", BPUtils.placeValues(sender, amount));
             request.setSenderIsReceiver(true);
         } else { // "request"
             BigDecimal capacity = BankUtils.getCapacity(senderBank, sender);
             if (moneyToReturn.compareTo(capacity) > 0) {
-                BPMessages.send(sender, "Cannot-Afford-Loan");
+                BPMessages.sendIdentifier(sender, "Cannot-Afford-Loan");
                 return;
             }
 
-            BPMessages.send(receiver, "Loan-Request-Received", BPUtils.placeValues(sender, amount));
+            BPMessages.sendIdentifier(receiver, "Loan-Request-Received", BPUtils.placeValues(sender, amount));
             request.setSenderIsReceiver(false);
         }
 
-        BPMessages.send(sender, "Loan-Request-Sent", "%player%$" + receiver.getName());
+        BPMessages.sendIdentifier(sender, "Loan-Request-Sent", "%player%$" + receiver.getName());
         BPLoanRegistry.queueLoanRequest(sender, request);
     }
 
@@ -75,7 +75,7 @@ public class LoanUtils {
      */
     public static void acceptRequest(Player receiver) {
         if (!hasRequest(receiver)) {
-            BPMessages.send(receiver, "No-Loan-Requests");
+            BPMessages.sendIdentifier(receiver, "No-Loan-Requests");
             return;
         }
 
@@ -107,12 +107,12 @@ public class LoanUtils {
             BankPlus.INSTANCE().getVaultEconomy().depositPlayer(receiver, extra.doubleValue());
             List<String> replacers = BPUtils.placeValues(sender, amount);
             replacers.addAll(BPUtils.placeValues(extra, "extra"));
-            BPMessages.send(receiver, "Received-Loan-Full", replacers);
+            BPMessages.sendIdentifier(receiver, "Received-Loan-Full", replacers);
         } else {
             receiverBankEconomy.addBankBalance(receiver, amount, TransactionType.LOAN);
-            BPMessages.send(receiver, "Received-Loan", BPUtils.placeValues(sender, amount));
+            BPMessages.sendIdentifier(receiver, "Received-Loan", BPUtils.placeValues(sender, amount));
         }
-        BPMessages.send(sender, "Given-Loan", BPUtils.placeValues(receiver, amount));
+        BPMessages.sendIdentifier(sender, "Given-Loan", BPUtils.placeValues(receiver, amount));
 
         BPLoanRegistry.registerLoan(loan);
     }
@@ -124,7 +124,7 @@ public class LoanUtils {
      */
     public static void denyRequest(Player p) {
         if (!hasRequest(p)) {
-            BPMessages.send(p, "No-Loan-Requests");
+            BPMessages.sendIdentifier(p, "No-Loan-Requests");
             return;
         }
 
@@ -132,8 +132,8 @@ public class LoanUtils {
         if (sender == null) return;
 
         BPLoanRegistry.getRequests().remove(sender.getUniqueId());
-        BPMessages.send(p, "Loan-Request-Received-Denied", "%player%$" + sender.getName());
-        BPMessages.send(sender, "Loan-Request-Sent-Denied", "%player%$" + p.getName());
+        BPMessages.sendIdentifier(p, "Loan-Request-Received-Denied", "%player%$" + sender.getName());
+        BPMessages.sendIdentifier(sender, "Loan-Request-Sent-Denied", "%player%$" + p.getName());
     }
 
     /**
@@ -143,7 +143,7 @@ public class LoanUtils {
      */
     public static void cancelRequest(Player p) {
         if (!hasSentRequest(p)) {
-            BPMessages.send(p, "No-Loan-Sent");
+            BPMessages.sendIdentifier(p, "No-Loan-Sent");
             return;
         }
 
@@ -151,8 +151,8 @@ public class LoanUtils {
         if (sender == null) return;
 
         BPLoanRegistry.getRequests().remove(sender.getUniqueId());
-        BPMessages.send(p, "Loan-Request-Received-Cancelled", "%player%$" + p.getName());
-        BPMessages.send(sender, "Loan-Request-Sent-Cancelled");
+        BPMessages.sendIdentifier(p, "Loan-Request-Received-Cancelled", "%player%$" + p.getName());
+        BPMessages.sendIdentifier(sender, "Loan-Request-Sent-Cancelled");
     }
 
     /**
@@ -173,7 +173,7 @@ public class LoanUtils {
         BigDecimal receiverCapacity = BankUtils.getCapacity(bankSender, receiver);
         if (ConfigValues.isLoanCheckEnoughMoney())
             if (loan.getMoneyToReturn().compareTo(receiverCapacity) > 0) {
-                BPMessages.send(receiver, "Cannot-Afford-Loan");
+                BPMessages.sendIdentifier(receiver, "Cannot-Afford-Loan");
                 return;
             }
 
@@ -186,10 +186,10 @@ public class LoanUtils {
 
             List<String> replacers = BPUtils.placeValues(bankSender.getIdentifier(), amount);
             replacers.addAll(BPUtils.placeValues(extra, "extra"));
-            BPMessages.send(receiver, "Received-Loan-Full-Bank", replacers);
+            BPMessages.sendIdentifier(receiver, "Received-Loan-Full-Bank", replacers);
         } else {
             bankSenderEconomy.addBankBalance(receiver, amount, TransactionType.LOAN);
-            BPMessages.send(receiver, "Received-Loan-Bank", BPUtils.placeValues(bankSender.getIdentifier(), amount));
+            BPMessages.sendIdentifier(receiver, "Received-Loan-Bank", BPUtils.placeValues(bankSender.getIdentifier(), amount));
         }
 
         BPLoanRegistry.registerLoan(loan);

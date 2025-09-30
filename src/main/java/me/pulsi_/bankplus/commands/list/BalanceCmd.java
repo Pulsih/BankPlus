@@ -70,7 +70,7 @@ public class BalanceCmd extends BPCommand {
         if (args.length == 1) {
             banks.addAll(BankUtils.getAvailableBanks(p));
             if (banks.isEmpty()) {
-                BPMessages.send(p, "No-Available-Banks");
+                BPMessages.sendIdentifier(p, "No-Available-Banks");
                 return BPCmdExecution.invalidExecution();
             }
 
@@ -79,7 +79,7 @@ public class BalanceCmd extends BPCommand {
             if (!BankUtils.exist(bank, s)) return BPCmdExecution.invalidExecution();
 
             if (!BankUtils.isAvailable(bank, p)) {
-                BPMessages.send(s, "Cannot-Access-Bank");
+                BPMessages.sendIdentifier(s, "Cannot-Access-Bank");
                 return BPCmdExecution.invalidExecution();
             }
             banks.add(bank);
@@ -89,14 +89,14 @@ public class BalanceCmd extends BPCommand {
             @Override
             public void execute() {
                 if (banks.size() > 1)
-                    BPMessages.send(
+                    BPMessages.sendIdentifier(
                             p,
                             "Multiple-Personal-Bank",
                             BPUtils.placeValues(p, BPEconomy.getBankBalancesSum(p))
                     );
                 else {
                     Bank bank = banks.getFirst();
-                    BPMessages.send(
+                    BPMessages.sendIdentifier(
                             p,
                             "Personal-Bank",
                             BPUtils.placeValues(p, bank.getBankEconomy().getBankBalance(p), BankUtils.getCurrentLevel(bank, p))

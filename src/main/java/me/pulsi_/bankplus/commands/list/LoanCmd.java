@@ -102,21 +102,21 @@ public class LoanCmd extends BPCommand {
         }
 
         if (LoanUtils.hasSentRequest(sender)) {
-            BPMessages.send(sender, "Loan-Already-Sent");
+            BPMessages.sendIdentifier(sender, "Loan-Already-Sent");
             return BPCmdExecution.invalidExecution();
         }
 
         if (!action.equals("give") && !action.equals("request")) {
-            BPMessages.send(sender, "Invalid-Action");
+            BPMessages.sendIdentifier(sender, "Invalid-Action");
             return BPCmdExecution.invalidExecution();
         }
 
         if (args.length == 2) {
-            BPMessages.send(sender, "Specify-Player");
+            BPMessages.sendIdentifier(sender, "Specify-Player");
             return BPCmdExecution.invalidExecution();
         }
         if (args.length == 3) {
-            BPMessages.send(sender, "Specify-Number");
+            BPMessages.sendIdentifier(sender, "Specify-Number");
             return BPCmdExecution.invalidExecution();
         }
 
@@ -129,7 +129,7 @@ public class LoanCmd extends BPCommand {
         // the player is trying to request a loan from a bank.
         if (action.equals("request") && BankUtils.exist(targetName)) {
             if (!BankUtils.isAvailable(targetName, sender)) {
-                BPMessages.send(sender, "Cannot-Access-Bank");
+                BPMessages.sendIdentifier(sender, "Cannot-Access-Bank");
                 return BPCmdExecution.invalidExecution();
             }
 
@@ -142,7 +142,7 @@ public class LoanCmd extends BPCommand {
         } else {
             Player target = Bukkit.getPlayerExact(targetName);
             if (target == null || target.equals(s)) {
-                BPMessages.send(s, "Invalid-Player");
+                BPMessages.sendIdentifier(s, "Invalid-Player");
                 return BPCmdExecution.invalidExecution();
             }
 
@@ -151,7 +151,7 @@ public class LoanCmd extends BPCommand {
 
             if (!BankUtils.exist(senderBank, s)) return BPCmdExecution.invalidExecution();
             if (!BankUtils.isAvailable(senderBank, sender)) {
-                BPMessages.send(sender, "Cannot-Access-Bank");
+                BPMessages.sendIdentifier(sender, "Cannot-Access-Bank");
                 return BPCmdExecution.invalidExecution();
             }
 
@@ -160,7 +160,7 @@ public class LoanCmd extends BPCommand {
 
             if (!BankUtils.exist(receiverBank, s)) return BPCmdExecution.invalidExecution();
             if (!BankUtils.isAvailable(receiverBank, target)) {
-                BPMessages.send(sender, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
+                BPMessages.sendIdentifier(sender, "Cannot-Access-Bank-Others", "%player%$" + target.getName());
                 return BPCmdExecution.invalidExecution();
             }
 

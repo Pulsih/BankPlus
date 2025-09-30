@@ -62,13 +62,13 @@ public class ForceOpenCmd extends BPCommand {
     @Override
     public BPCmdExecution onExecution(CommandSender s, String[] args) {
         if (!ConfigValues.isGuiModuleEnabled()) {
-            BPMessages.send(s, "Gui-Module-Disabled");
+            BPMessages.sendIdentifier(s, "Gui-Module-Disabled");
             return BPCmdExecution.invalidExecution();
         }
 
         Player target = Bukkit.getPlayerExact(args[1]);
         if (target == null) {
-            BPMessages.send(s, "Invalid-Player");
+            BPMessages.sendIdentifier(s, "Invalid-Player");
             return BPCmdExecution.invalidExecution();
         }
 
@@ -79,7 +79,7 @@ public class ForceOpenCmd extends BPCommand {
             @Override
             public void execute() {
                 BankRegistry.getBank(bankName).getBankGui().openBankGui(target, true);
-                if (!isSilent(args)) BPMessages.send(s, "Force-Open", "%player%$" + target.getName(), "%bank%$" + bankName);
+                if (!isSilent(args)) BPMessages.sendIdentifier(s, "Force-Open", "%player%$" + target.getName(), "%bank%$" + bankName);
             }
         };
     }

@@ -59,14 +59,14 @@ public class InterestMillisCmd extends BPCommand {
     @Override
     public BPCmdExecution onExecution(CommandSender s, String[] args) {
         if (!ConfigValues.isInterestEnabled()) {
-            BPMessages.send(s, "Interest-Disabled");
+            BPMessages.sendIdentifier(s, "Interest-Disabled");
             return BPCmdExecution.invalidExecution();
         }
 
         return new BPCmdExecution() {
             @Override
             public void execute() {
-                BPMessages.send(s, "Interest-Time", "%time%$" + BankPlus.INSTANCE().getInterest().getInterestCooldownMillis());
+                BPMessages.sendIdentifier(s, "Interest-Time", "%time%$" + BankPlus.INSTANCE().getInterest().getInterestCooldownMillis());
             }
         };
     }

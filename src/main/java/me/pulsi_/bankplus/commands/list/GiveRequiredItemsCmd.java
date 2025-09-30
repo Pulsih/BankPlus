@@ -65,7 +65,7 @@ public class GiveRequiredItemsCmd extends BPCommand {
     public BPCmdExecution onExecution(CommandSender s, String[] args) {
         Player target = Bukkit.getPlayerExact(args[1]);
         if (target == null) {
-            BPMessages.send(s, "Invalid-Player");
+            BPMessages.sendIdentifier(s, "Invalid-Player");
             return BPCmdExecution.invalidExecution();
         }
 
@@ -73,7 +73,7 @@ public class GiveRequiredItemsCmd extends BPCommand {
         if (!BankUtils.exist(bank, s)) return BPCmdExecution.invalidExecution();
 
         if (args.length <= 3) {
-            BPMessages.send(s, "Specify-Number");
+            BPMessages.sendIdentifier(s, "Specify-Number");
             return BPCmdExecution.invalidExecution();
         }
 
@@ -82,7 +82,7 @@ public class GiveRequiredItemsCmd extends BPCommand {
 
         int level = Integer.parseInt(levelString);
         if (!BankUtils.hasLevel(bank, level)) {
-            BPMessages.send(s, "Invalid-Bank-Level");
+            BPMessages.sendIdentifier(s, "Invalid-Bank-Level");
             return BPCmdExecution.invalidExecution();
         }
 
@@ -90,7 +90,7 @@ public class GiveRequiredItemsCmd extends BPCommand {
         Set<Bank.RequiredItem> givenItems = new HashSet<>(requiredItems.values());
 
         if (requiredItems.isEmpty()) {
-            BPMessages.send(s, "No-Available-Items");
+            BPMessages.sendIdentifier(s, "No-Available-Items");
             return BPCmdExecution.invalidExecution();
         }
 
@@ -98,7 +98,7 @@ public class GiveRequiredItemsCmd extends BPCommand {
             String choose = args[4];
             if (!choose.equalsIgnoreCase("all")) {
                 if (!requiredItems.containsKey(choose)) {
-                    BPMessages.send(s, "Invalid-Required-Item");
+                    BPMessages.sendIdentifier(s, "Invalid-Required-Item");
                     return BPCmdExecution.invalidExecution();
                 }
 

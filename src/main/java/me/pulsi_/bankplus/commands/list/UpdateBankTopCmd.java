@@ -62,7 +62,7 @@ public class UpdateBankTopCmd extends BPCommand {
             public void execute() {
                 BPBankTop.updateBankTop();
                 BPBankTop.restartBankTopUpdateTask();
-                BPMessages.send(s, "BankTop-Updated");
+                BPMessages.sendIdentifier(s, "BankTop-Updated");
             }
         };
     }

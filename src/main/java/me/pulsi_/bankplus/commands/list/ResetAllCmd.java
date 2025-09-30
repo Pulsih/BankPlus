@@ -82,14 +82,14 @@ public class ResetAllCmd extends BPCommand {
     public BPCmdExecution onExecution(CommandSender s, String[] args) {
         String mode = args[1];
         if (!mode.equalsIgnoreCase("delete") && !mode.equalsIgnoreCase("maintain")) {
-            BPMessages.send(s, "%prefix% Invalid reset mode! Choose one between <aqua>\"delete\"</aqua> and <aqua>\"maintain\"</aqua>.", false);
+            BPMessages.sendMessage(s, "%prefix% Invalid reset mode! Choose one between <aqua>\"delete\"</aqua> and <aqua>\"maintain\"</aqua>.");
             return BPCmdExecution.invalidExecution();
         }
 
         return new BPCmdExecution() {
             @Override
             public void execute() {
-                BPMessages.send(s, "%prefix% Successfully reset all players money! <dark_gray>(</dark_gray>With <white>" + mode + "</white> mode<dark_gray>)", false);
+                BPMessages.sendMessage(s, "%prefix% Successfully reset all players money! <dark_gray>(</dark_gray>With <white>" + mode + "</white> mode<dark_gray>)");
                 resetAll(Arrays.asList(Bukkit.getOfflinePlayers()), mode);
             }
         };
