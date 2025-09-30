@@ -40,7 +40,7 @@ public class BPPlaceholders extends PlaceholderExpansion {
 
     @Override
     public String onPlaceholderRequest(Player p, String identifier) {
-        if (p == null) return "Player not online";
+        if (p == null) return "Could not get player from PlaceholderAPI request.";
 
         String target = ConfigValues.getMainGuiName();
         if (identifier.contains("{") && identifier.endsWith("}"))
