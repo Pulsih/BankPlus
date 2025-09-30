@@ -581,6 +581,7 @@ public class BankUtils {
      */
     public static HashMap<Integer, List<Component>> getLevelLore(ConfigurationSection itemSection) {
         HashMap<Integer, List<Component>> lore = new HashMap<>();
+        if (itemSection == null) return lore;
 
         List<String> configLore = itemSection.getStringList(BPItems.LORE_KEY);
         if (!configLore.isEmpty()) lore.put(0, BPUtils.stringListToComponentList(configLore));
