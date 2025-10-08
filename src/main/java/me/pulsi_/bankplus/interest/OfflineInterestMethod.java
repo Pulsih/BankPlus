@@ -27,14 +27,15 @@ public class OfflineInterestMethod extends BPInterest.InterestMethod {
         for (Bank bank : BankRegistry.getBanks().values())
             // If the bank gives interest even if not available, still add it.
             if (bank.isGiveInterestIfNotAvailable() || BankUtils.isAvailable(bank, p)) availableBanks.add(bank);
+
         if (availableBanks.isEmpty()) return;
 
-        boolean interestToVault = ConfigValues.isGivingInterestOnVaultBalance(), offlineRate = ConfigValues.isOfflineInterestDifferentRate();
+        boolean interestToVault = ConfigValues.isGivingInterestOnVaultBalance();
         for (Bank bank : availableBanks) {
             BPEconomy economy = bank.getBankEconomy();
             if (economy.getBankBalance(p).compareTo(BigDecimal.ZERO) <= 0) continue;
 
-            BigDecimal interestMoney = getInterestMoney(bank, p, offlineRate ? BankUtils.getOfflineInterestRate(bank, p) : BankUtils.getInterestRate(bank, p));
+            BigDecimal interestMoney = getInterestMoney(bank, p,BankUtils.getOfflineInterestRate(bank, p));
 
             BigDecimal maxAmount = BankUtils.getMaxInterestAmount(bank, p);
             if (maxAmount.compareTo(BigDecimal.ZERO) > 0) interestMoney = interestMoney.min(maxAmount);

@@ -157,8 +157,8 @@ public class BankUtils {
      * @param p    The player.
      * @return The interest amount.
      */
-    public static BigDecimal getInterestRate(Bank bank, OfflinePlayer p) {
-        return getInterestRate(bank, p, getCurrentLevel(bank, p));
+    public static BigDecimal getOnlineInterestRate(Bank bank, OfflinePlayer p) {
+        return getOnlineInterestRate(bank, p, getCurrentLevel(bank, p));
     }
 
     /**
@@ -171,7 +171,7 @@ public class BankUtils {
      * @param level The level to check.
      * @return The interest amount.
      */
-    public static BigDecimal getInterestRate(Bank bank, OfflinePlayer p, int level) {
+    public static BigDecimal getOnlineInterestRate(Bank bank, OfflinePlayer p, int level) {
         if (ConfigValues.isInterestLimiterEnabled())
             return getLimitedInterest(bank, p, level, ConfigValues.getInterestRate());
 

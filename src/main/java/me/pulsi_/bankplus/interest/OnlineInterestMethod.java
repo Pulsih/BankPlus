@@ -48,7 +48,7 @@ public class OnlineInterestMethod extends BPInterest.InterestMethod {
             BPEconomy economy = bank.getBankEconomy();
             if (economy.getBankBalance(p).compareTo(BigDecimal.ZERO) <= 0) continue;
 
-            BigDecimal interestMoney = getInterestMoney(bank, p, isAfk ? BankUtils.getAfkInterestRate(bank, p) : BankUtils.getInterestRate(bank, p));
+            BigDecimal interestMoney = getInterestMoney(bank, p, isAfk ? BankUtils.getAfkInterestRate(bank, p) : BankUtils.getOnlineInterestRate(bank, p));
 
             BigDecimal maxAmount = BankUtils.getMaxInterestAmount(bank, p); // Max interest amount.
             if (maxAmount.compareTo(BigDecimal.ZERO) > 0) interestMoney = interestMoney.min(maxAmount);

@@ -18,6 +18,6 @@ public class NextInterestPlaceholder extends BPPlaceholder {
     public String getPlaceholder(Player p, String target, String identifier) {
         if (!BankUtils.exist(target)) return bankDoesNotExist;
         Bank bank = BankRegistry.getBank(target);
-        return getFormat(identifier, BPInterest.InterestMethod.getInterestMoney(bank, p, BankUtils.getInterestRate(bank, p)));
+        return getFormat(identifier, BPInterest.InterestMethod.getInterestMoney(bank, p, BankUtils.getOnlineInterestRate(bank, p)));
     }
 }

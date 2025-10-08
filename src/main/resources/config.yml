@@ -184,8 +184,7 @@ General-Settings:
 #
 # To restart the interest type /bank restartInterest.
 #
-# Players must have the "bankplus.receive.interest"
-# permission to receive the interest.
+# Players must have the "bankplus.receive.interest" permission to receive the interest.
 Interest:
   # Enable or disable the interest feature.
   Enabled: true
@@ -232,13 +231,8 @@ Interest:
   # The format is the same as "Interest.Delay".
   Offline-Limit: "3 d"
 
-  # Choose if the offline interest will be
-  # different from the online rate.
-  Different-Offline-Rate: false
-
-  # If 'Different-Offline-Rate' is enabled, the offline players
-  # will receive this interest rate. It works the same as the
-  # "Money-Given" above; you can edit this in the bank file.
+  # The interest rate of offline players.
+  # It works the same as "Interest.Money-Given"
   Offline-Rate: "5%"
 
   # The permission for offline players to receive interest.

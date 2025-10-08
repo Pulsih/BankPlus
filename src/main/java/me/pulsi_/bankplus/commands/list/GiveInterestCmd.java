@@ -67,7 +67,7 @@ public class GiveInterestCmd extends BPCommand {
             @Override
             public void execute() {
                 BPMessages.sendMessage(s, "%prefix% Successfully given the interest! The countdown has been restarted.");
-                BankPlus.INSTANCE().getInterest().giveInterestToEveryone();
+                BankPlus.INSTANCE().getInterest().giveInterest();
             }
         };
     }

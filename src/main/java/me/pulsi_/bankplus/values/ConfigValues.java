@@ -52,7 +52,6 @@ public class ConfigValues extends ValueLoader {
     private static boolean interestEnabled;
     private static boolean interestLimiterEnabled;
     private static boolean offlineInterestEnabled;
-    private static boolean offlineInterestDifferentRate;
     private static boolean notifyingNewPlayer;
     private static boolean silentInfoMessages;
     private static boolean updateCheckerEnabled;
@@ -154,7 +153,6 @@ public class ConfigValues extends ValueLoader {
         interestEnabled = config.getBoolean("Interest.Enabled");
         interestLimiterEnabled = config.getBoolean("Interest.Enable-Interest-Limiter");
         offlineInterestEnabled = config.getBoolean("Interest.Give-To-Offline-Players");
-        offlineInterestDifferentRate = config.getBoolean("Interest.Different-Offline-Rate");
         notifyingNewPlayer = config.getBoolean("General-Settings.Notify-Registered-Player");
         silentInfoMessages = config.getBoolean("General-Settings.Silent-Info-Messages");
         updateCheckerEnabled = config.getBoolean("Update-Checker");
@@ -496,10 +494,6 @@ public class ConfigValues extends ValueLoader {
 
     public static boolean isOfflineInterestEnabled() {
         return offlineInterestEnabled;
-    }
-
-    public static boolean isOfflineInterestDifferentRate() {
-        return offlineInterestDifferentRate;
     }
 
     public static boolean isNotifyingNewPlayer() {

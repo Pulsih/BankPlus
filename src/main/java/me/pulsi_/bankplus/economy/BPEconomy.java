@@ -233,7 +233,9 @@ public class BPEconomy {
      * @param p The player.
      */
     public BigDecimal getBankBalance(OfflinePlayer p) {
-        if (!isPlayerLoaded(p)) return BigDecimal.ZERO;
+        // If the player is online but is still loading its account, return 0.
+        if (p.isOnline() && !isPlayerLoaded(p)) return BigDecimal.ZERO;
+
         // Using #getHolder fixes the problem with offline values, loading them if not
         // present in the hashmap, or getting the already registered for better performance.
         return getHolder(p).money;

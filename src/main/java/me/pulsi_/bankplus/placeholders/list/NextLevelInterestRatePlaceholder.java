@@ -21,6 +21,6 @@ public class NextLevelInterestRatePlaceholder extends BPPlaceholder {
         Bank bank = BankRegistry.getBank(target);
         if (!BankUtils.hasNextLevel(bank, p)) return ConfigValues.getUpgradesMaxedPlaceholder();
 
-        return BankUtils.getInterestRate(bank, p, BankUtils.getCurrentLevel(bank, p) + 1) + "";
+        return BankUtils.getOnlineInterestRate(bank, p, BankUtils.getCurrentLevel(bank, p) + 1) + "";
     }
 }

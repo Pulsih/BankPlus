@@ -83,13 +83,14 @@ Levels:
     # have the default capacity set in the config.yml
     Capacity: "100000"
 
-    # The bank interest % at this level.
-    # If the interest is not specified, the bank will
-    # use the default interest rate from the config.yml
+    # The bank interest rate at this level.
+    # If this is not specified, the bank will use
+    # the default interest rate from the config.yml
     Interest: "10%"
 
-    # This offline interest will only work if the 'Different-Offline-Rate'
-    # section is enabled in the config.yml, otherwise it will use the normal interest.
+    # The bank offline interest rate at this level.
+    # If this is not specified, the bank will use the
+    # default offline interest rate from the config.yml
     Offline-Interest: "5%"
 
     # The max amount that a player can receive in interest.

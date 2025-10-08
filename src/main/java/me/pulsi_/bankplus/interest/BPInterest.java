@@ -21,6 +21,14 @@ public class BPInterest {
     private boolean wasDisabled = true, isOfflineInterestEnabled;
 
     /**
+     * Get the time left, in milliseconds, before the interest will be given.
+     * @return Time left in milliseconds.
+     */
+    public long getInterestCooldownMillis() {
+        return cooldown - System.currentTimeMillis();
+    }
+
+    /**
      * Restart the interest cooldown.
      *
      * @param loadFromFile Set to true if you want to restart the interest
@@ -37,33 +45,28 @@ public class BPInterest {
         loopInterest();
     }
 
-    public long getInterestCooldownMillis() {
-        return cooldown - System.currentTimeMillis();
-    }
-
-    public void giveInterestToEveryone() {
+    /**
+     * Give interest to every player, based on the settings in the config file.
+     */
+    public void giveInterest() {
         cooldown = System.currentTimeMillis() + ConfigValues.getInterestDelay();
-        Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), this::giveInterest);
+
+        Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
+            OnlineInterestMethod onlineInterestMethod = new OnlineInterestMethod();
+            OfflineInterestMethod offlineInterestMethod = new OfflineInterestMethod();
+
+            for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
+                if (p.isOnline()) onlineInterestMethod.giveInterest(p);
+                else if (isOfflineInterestEnabled) offlineInterestMethod.giveInterest(p);
+            }
+        });
     }
 
+    /**
+     * Save the current interest time left to the saves file.
+     */
     public void saveInterest() {
         SavesFile.set(INTEREST_SAVE_PATH, getInterestCooldownMillis());
-    }
-
-    private void loopInterest() {
-        if (!isInterestActive()) return;
-        if (getInterestCooldownMillis() <= 0) giveInterestToEveryone();
-        BPTaskManager.setTask(BPTaskManager.INTEREST_TASK, Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), this::loopInterest, 10L));
-    }
-
-    public void giveInterest() {
-        OnlineInterestMethod onlineInterestMethod = new OnlineInterestMethod();
-        OfflineInterestMethod offlineInterestMethod = new OfflineInterestMethod();
-
-        for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
-            if (p.isOnline()) onlineInterestMethod.giveInterest(p);
-            else if (isOfflineInterestEnabled) offlineInterestMethod.giveInterest(p);
-        }
     }
 
     public boolean isInterestActive() {
@@ -78,6 +81,12 @@ public class BPInterest {
 
     public boolean wasDisabled() {
         return wasDisabled;
+    }
+
+    private void loopInterest() {
+        if (!isInterestActive()) return;
+        if (getInterestCooldownMillis() <= 0) giveInterest();
+        BPTaskManager.setTask(BPTaskManager.INTEREST_TASK, Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), this::loopInterest, 10L));
     }
 
     public abstract static class InterestMethod {
