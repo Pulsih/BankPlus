@@ -18,42 +18,47 @@ import java.util.List;
 
 public class BPBankTop {
 
-    private static final List<BankTopPlayer> bankTop = new ArrayList<>();
+    /**
+     * A hashmap containing as Key the bank top position (always starting from 1 and increasing) and Value the BankTopPlayer object.
+     */
+    private static final HashMap<Integer, BankTopPlayer> bankTop = new HashMap<>();
 
     /**
      * Update the bank top.
      */
     public static void updateBankTop() {
         Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
-            bankTop.clear();
-
             HashMap<String, BigDecimal> balances = BPEconomy.getAllEconomiesBankBalances();
-            List<BigDecimal> amounts = new ArrayList<>(balances.values());
-            List<String> names = new ArrayList<>(balances.keySet());
-            Collections.sort(amounts);
+            List<BankTopPlayer> players = new ArrayList<>();
 
-            // i from the end because the balances have been sorted in ascending way, count to not overcome the banktop limit.
-            for (int i = balances.size() - 1, count = 0; i >= 0 && count < ConfigValues.getBankTopSize(); i--) {
-                BigDecimal amount = amounts.remove(i);
+            for (String name : balances.keySet()) {
+                BigDecimal balance = balances.get(name);
+                if (balance.compareTo(BigDecimal.ZERO) <= 0) continue;
 
-                for (String name : names) {
-                    if (!balances.get(name).equals(amount)) continue;
+                BankTopPlayer bankTopPlayer = new BankTopPlayer();
+                bankTopPlayer.setName(name);
+                bankTopPlayer.setBalance(balance);
 
-                    BankTopPlayer player = new BankTopPlayer();
-                    player.setBalance(amount);
-                    player.setName(name);
-                    bankTop.add(player);
+                players.add(bankTopPlayer);
+            }
 
-                    names.remove(name);
-                    count++;
-                    break;
-                }
+            bankTop.clear();
+            for (int i = 1; i <= ConfigValues.getBankTopSize(); i++) {
+                BankTopPlayer highestPlayerBal = players.getFirst();
+
+                for (BankTopPlayer player : players)
+                    if (player.getBalance().compareTo(highestPlayerBal.getBalance()) > 0)
+                        highestPlayerBal = player;
+
+                players.remove(highestPlayerBal);
+                bankTop.put(i, highestPlayerBal);
             }
 
             if (!ConfigValues.isBankTopUpdateBroadcastEnabled()) return;
 
             String message = ConfigValues.getBankTopUpdateBroadcastMessage();
-            if (!ConfigValues.isBankTopUpdateBroadcastSilentConsole()) BPLogger.Console.log(BPMessages.applyMessagesPrefix(message));
+            if (!ConfigValues.isBankTopUpdateBroadcastSilentConsole())
+                BPLogger.Console.log(BPMessages.applyMessagesPrefix(message));
             for (Player p : Bukkit.getOnlinePlayers()) BPMessages.sendMessage(p, message);
         });
     }
@@ -68,28 +73,29 @@ public class BPBankTop {
 
     /**
      * Get the balance of the player that is in that banktop position.
+     *
      * @param position A number between 1 and BankTop size.
      * @return The player balance or 0 if not found.
      */
     public static BigDecimal getBankTopBalancePlayer(int position) {
-        if (position <= 0 || position > bankTop.size()) return BigDecimal.ZERO;
-        BankTopPlayer p = bankTop.get(position - 1);
+        BankTopPlayer p = bankTop.get(position);
         return ((p == null || p.getBalance() == null) ? BigDecimal.ZERO : p.getBalance());
     }
 
     /**
      * Get the name of the player that is in that banktop position.
+     *
      * @param position A number between 1 and the BankTop size.
      * @return A player name or "playerNotFound" placeholder if none found.
      */
     public static String getBankTopNamePlayer(int position) {
-        if (position <= 0 || position > bankTop.size()) return ConfigValues.getBankTopPlayerNotFoundPlaceholder();
-        BankTopPlayer p = bankTop.get(position - 1);
+        BankTopPlayer p = bankTop.get(position);
         return ((p == null || p.getName() == null) ? ConfigValues.getBankTopPlayerNotFoundPlaceholder() : p.getName());
     }
 
     /**
      * Get the player current banktop position.
+     *
      * @param p The player.
      * @return The player current banktop position or -1 if not classified.
      */
@@ -99,15 +105,15 @@ public class BPBankTop {
 
     /**
      * Get the player current banktop position.
+     *
      * @param name The player name.
      * @return The player current banktop position or -1 if not classified.
      */
     public static int getPlayerBankTopPosition(String name) {
-        int position = -1;
-        for (int i = 0; i <= bankTop.size(); i++) {
+        for (int i = 1; i <= bankTop.size(); i++) {
             BankTopPlayer p = bankTop.get(i);
-            if (p != null && p.getName() != null && p.getName().equals(name)) return i + 1;
+            if (p != null && p.getName() != null && p.getName().equals(name)) return i;
         }
-        return position;
+        return -1;
     }
 }

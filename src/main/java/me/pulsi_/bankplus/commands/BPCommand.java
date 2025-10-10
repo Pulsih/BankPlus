@@ -202,7 +202,7 @@ public abstract class BPCommand {
      * Check if that command will skip the usage message.
      * The usage message appears when typing only the cmd identifier. (Example: /bp deposit)
      * <p>
-     * If the usage has been skipped, there could a probability that the args[1] is null.
+     * If the usage has been skipped, there is a chance that args[1] is null.
      * So when setting this to true, you should be careful and check for the existence of the first cmd argument.
      *
      * @return true if skips the usage message, false otherwise.
