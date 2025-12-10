@@ -25,6 +25,7 @@ public class PlayerChatMethod {
 
         if (!bpPlayer.isDepositing() && !bpPlayer.isWithdrawing()) return;
         e.setCancelled(true);
+        e.viewers().clear(); // Try stopping chat plugins from still sending the message.
 
         Bank openedBank = bpPlayer.getOpenedBank();
         if (openedBank == null) {

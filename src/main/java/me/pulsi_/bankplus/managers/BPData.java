@@ -19,7 +19,7 @@ import me.pulsi_.bankplus.listeners.PlayerServerListener;
 import me.pulsi_.bankplus.listeners.bankListener.*;
 import me.pulsi_.bankplus.listeners.playerChat.*;
 import me.pulsi_.bankplus.loanSystem.BPLoanRegistry;
-import me.pulsi_.bankplus.mySQL.BPSQL;
+import me.pulsi_.bankplus.sql.BPSQL;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.texts.BPChat;
 import me.pulsi_.bankplus.values.ConfigValues;
@@ -96,7 +96,7 @@ public class BPData {
             // Load the banks to the registry before to make MySQL able to create the tables.
             BankRegistry.loadBanks();
 
-            if (!ConfigValues.isSqlEnabled()) BPSQL.disconnect();
+            if (!ConfigValues.isMySqlEnabled()) BPSQL.disconnect();
             else {
                 BPSQL.setupMySQL();
                 BPSQL.connect();

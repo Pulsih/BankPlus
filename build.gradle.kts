@@ -47,6 +47,8 @@ dependencies {
         // It is requesting spigot api, but it goes in conflict with paper api.
         exclude("org.spigotmc")
     }
+
+    implementation("org.xerial:sqlite-jdbc:3.46.0.0")
 }
 
 val targetJavaVersion = 21

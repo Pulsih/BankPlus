@@ -3,11 +3,9 @@ package me.pulsi_.bankplus.debug;
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankTop.BankTopPlayer;
 import me.pulsi_.bankplus.economy.BPEconomy;
-import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -19,8 +17,6 @@ public class Debug {
     public static void debugBankTop(Object debugReceiver) {
         BPMessages.sendMessage(debugReceiver, "Simulating a banktop update:");
         BPMessages.sendMessage(debugReceiver, " ");
-
-        HashMap<Integer, BankTopPlayer> bankTop = new HashMap<>();
 
         Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
             HashMap<String, BigDecimal> balances = BPEconomy.getAllEconomiesBankBalances();
@@ -53,7 +49,6 @@ public class Debug {
                         highestPlayerBal = player;
 
                 players.remove(highestPlayerBal);
-                bankTop.put(i, highestPlayerBal);
                 BPMessages.sendMessage(debugReceiver, "|    BankTop Position #" + i + ": " + highestPlayerBal.getName() + " with " + highestPlayerBal.getBalance() + " balance.");
             }
 

@@ -1,4 +1,4 @@
-package me.pulsi_.bankplus.mySQL;
+package me.pulsi_.bankplus.sql;
 
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;

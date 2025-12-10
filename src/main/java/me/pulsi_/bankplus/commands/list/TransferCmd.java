@@ -5,7 +5,7 @@ import me.pulsi_.bankplus.account.BPPlayerManager;
 import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
-import me.pulsi_.bankplus.mySQL.SQLPlayerManager;
+import me.pulsi_.bankplus.sql.SQLPlayerManager;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
@@ -78,7 +78,7 @@ public class TransferCmd extends BPCommand {
             return BPCmdExecution.invalidExecution();
         }
 
-        if (!ConfigValues.isSqlEnabled()) {
+        if (!ConfigValues.isMySqlEnabled()) {
             BPMessages.sendMessage(s, "%prefix% <red>Could not initialize the task, MySQL hasn't been enabled in the config file!");
             return BPCmdExecution.invalidExecution();
         }

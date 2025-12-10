@@ -36,8 +36,8 @@ public class ConfigValues extends ValueLoader {
     private static String mainGuiName;
     private static String offlineInterestMessage, interestOfflinePermission;
     private static long offlineInterestLimit;
-    private static boolean sqlEnabled, sqlUsingSSL;
-    private static String sqlHost, sqlPort, sqlDatabase, sqlUsername, sqlPassword;
+    private static boolean mySqlEnabled, mySqlUsingSSL;
+    private static String mySqlHost, mySqlPort, mySqlDatabase, mySqlUsername, mySqlPassword;
     private static long interestDelay, notifyOfflineInterestDelay, saveDelay, updateBankTopDelay;
     private static int afkPlayersTime;
     private static int maxDecimalsAmount;
@@ -128,13 +128,13 @@ public class ConfigValues extends ValueLoader {
         offlineInterestMessage = config.getString("General-Settings.Offline-Interest-Earned-Message.Message");
         interestOfflinePermission = config.getString("Interest.Offline-Permission");
         offlineInterestLimit = getDelayMilliseconds(config, "Interest.Offline-Limit");
-        sqlEnabled = config.getBoolean("General-Settings.MySQL.Enabled");
-        sqlUsingSSL = config.getBoolean("General-Settings.MySQL.Use-SSL");
-        sqlHost = config.getString("General-Settings.MySQL.Host");
-        sqlPort = config.getString("General-Settings.MySQL.Port");
-        sqlDatabase = config.getString("General-Settings.MySQL.Database");
-        sqlUsername = config.getString("General-Settings.MySQL.Username");
-        sqlPassword = config.getString("General-Settings.MySQL.Password");
+        mySqlEnabled = config.getBoolean("General-Settings.MySQL.Enabled");
+        mySqlUsingSSL = config.getBoolean("General-Settings.MySQL.Use-SSL");
+        mySqlHost = config.getString("General-Settings.MySQL.Host");
+        mySqlPort = config.getString("General-Settings.MySQL.Port");
+        mySqlDatabase = config.getString("General-Settings.MySQL.Database");
+        mySqlUsername = config.getString("General-Settings.MySQL.Username");
+        mySqlPassword = config.getString("General-Settings.MySQL.Password");
         interestDelay = getDelayMilliseconds(config, "Interest.Delay");
         notifyOfflineInterestDelay = config.getLong("General-Settings.Offline-Interest-Earned-Message.Delay");
         saveDelay = config.getLong("General-Settings.Save-Delay");
@@ -396,32 +396,32 @@ public class ConfigValues extends ValueLoader {
         return offlineInterestLimit;
     }
 
-    public static boolean isSqlEnabled() {
-        return sqlEnabled;
+    public static boolean isMySqlEnabled() {
+        return mySqlEnabled;
     }
 
-    public static boolean isSqlUsingSSL() {
-        return sqlUsingSSL;
+    public static boolean isMySqlUsingSSL() {
+        return mySqlUsingSSL;
     }
 
-    public static String getSqlHost() {
-        return sqlHost;
+    public static String getMySqlHost() {
+        return mySqlHost;
     }
 
-    public static String getSqlPort() {
-        return sqlPort;
+    public static String getMySqlPort() {
+        return mySqlPort;
     }
 
-    public static String getSqlDatabase() {
-        return sqlDatabase;
+    public static String getMySqlDatabase() {
+        return mySqlDatabase;
     }
 
-    public static String getSqlUsername() {
-        return sqlUsername;
+    public static String getMySqlUsername() {
+        return mySqlUsername;
     }
 
-    public static String getSqlPassword() {
-        return sqlPassword;
+    public static String getMySqlPassword() {
+        return mySqlPassword;
     }
 
     public static long getInterestDelay() {

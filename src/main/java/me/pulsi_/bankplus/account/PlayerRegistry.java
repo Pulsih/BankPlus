@@ -4,7 +4,7 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.economy.BPEconomy;
-import me.pulsi_.bankplus.mySQL.BPSQL;
+import me.pulsi_.bankplus.sql.BPSQL;
 import me.pulsi_.bankplus.utils.BPLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
