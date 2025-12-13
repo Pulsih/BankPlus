@@ -66,15 +66,8 @@ public class PlayerRegistry {
             BPLogger.Console.error("Cannot load player " + p.getName() + " because the bank specified is null");
             return bpPlayer;
         }
-        BPEconomy economy = bank.getBankEconomy();
 
-        if (BPSQL.isConnected()) {
-            // If MySQL is enabled, load the player asynchronously, it may take few more
-            // milliseconds but this will ensure to not affect server performance
-            // and the player values will be visible after the player has been loaded.
-            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> economy.loadPlayer(p, wasRegistered));
-        } else economy.loadPlayer(p, wasRegistered);
-
+        Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> bank.getBankEconomy().loadPlayer(p, wasRegistered));
         players.putIfAbsent(uuid, bpPlayer);
         return bpPlayer;
     }

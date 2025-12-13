@@ -2,10 +2,10 @@ package me.pulsi_.bankplus.listeners;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
-import me.pulsi_.bankplus.account.BPPlayerManager;
 import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.economy.EconomyUtils;
+import me.pulsi_.bankplus.sql.BPSQL;
 import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
@@ -26,36 +26,35 @@ public class PlayerServerListener implements Listener {
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
 
-        boolean wasRegistered;
-        BPPlayerManager pManager = new BPPlayerManager(p);
-        if (pManager.isPlayerRegistered()) wasRegistered = true;
-        else {
-            pManager.registerPlayer();
-            if (ConfigValues.isNotifyingNewPlayer()) BPLogger.Console.info("Successfully registered " + p.getName() + "!");
-            wasRegistered = false;
-        }
+        Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
+            boolean wasRegistered = BPSQL.isRegistered(p, ConfigValues.getMainGuiName());
+            if (!wasRegistered && ConfigValues.isNotifyingNewPlayer())
+                    BPLogger.Console.info("Successfully registered " + p.getName() + "!");
 
-        pManager.checkForFileFixes(p, pManager);
+            BPSQL.fillRecords(p);
 
-        int loadDelay = ConfigValues.getLoadDelay();
-        if (loadDelay <= 0) PlayerRegistry.loadPlayer(p, wasRegistered);
-        else Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> PlayerRegistry.loadPlayer(p, wasRegistered), loadDelay);
+            int loadDelay = ConfigValues.getLoadDelay();
+            if (loadDelay <= 0) PlayerRegistry.loadPlayer(p, wasRegistered);
+            else Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> PlayerRegistry.loadPlayer(p, wasRegistered), loadDelay);
 
-        if (!ConfigValues.isNotifyingOfflineInterest()) return;
+            if (!ConfigValues.isNotifyingOfflineInterest()) return;
 
-        BigDecimal amount = BigDecimal.ZERO;
-        for (BPEconomy economy : BPEconomy.list()) {
-            BigDecimal offlineInterest = economy.getOfflineInterest(p);
-            amount = amount.add(offlineInterest);
-            if (offlineInterest.compareTo(BigDecimal.ZERO) > 0) economy.setOfflineInterest(p, BigDecimal.ZERO);
-        }
+            BigDecimal amount = BigDecimal.ZERO;
+            for (BPEconomy economy : BPEconomy.list()) {
+                BigDecimal offlineInterest = BPSQL.getInterest(p, economy.getOriginBank().getIdentifier());
+                if (offlineInterest.compareTo(BigDecimal.ZERO) <= 0) continue;
 
-        BigDecimal finalAmount = amount;
-        String mess = BPMessages.applyMessagesPrefix(ConfigValues.getOfflineInterestMessage());
-        if (finalAmount.compareTo(BigDecimal.ZERO) > 0)
-            Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () ->
-                            BPMessages.sendMessage(p, mess, BPUtils.placeValues(finalAmount)),
-                    ConfigValues.getNotifyOfflineInterestDelay() * 20L);
+                amount = amount.add(offlineInterest);
+                BPSQL.setInterest(p, economy.getOriginBank().getIdentifier(), BigDecimal.ZERO);
+            }
+
+            BigDecimal finalAmount = amount;
+            String mess = BPMessages.applyMessagesPrefix(ConfigValues.getOfflineInterestMessage());
+            if (finalAmount.compareTo(BigDecimal.ZERO) > 0)
+                Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () ->
+                                BPMessages.sendMessage(p, mess, BPUtils.placeValues(finalAmount)),
+                        ConfigValues.getNotifyOfflineInterestDelay() * 20L);
+        });
     }
 
     @EventHandler

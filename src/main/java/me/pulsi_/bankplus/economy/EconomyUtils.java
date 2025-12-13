@@ -1,11 +1,9 @@
 package me.pulsi_.bankplus.economy;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BPPlayerManager;
 import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.managers.BPTaskManager;
 import me.pulsi_.bankplus.sql.BPSQL;
-import me.pulsi_.bankplus.sql.SQLPlayerManager;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
@@ -26,31 +24,8 @@ public class EconomyUtils {
      * @param p The player.
      */
     public static void savePlayer(OfflinePlayer p, boolean unload) {
-        BPPlayerManager manager = new BPPlayerManager(p);
-
-        File file = manager.getPlayerFile();
-        FileConfiguration config = manager.getPlayerConfig(file);
-
-        for (BPEconomy economy : BPEconomy.list()) {
-            String name = economy.getOriginBank().getIdentifier();
-            config.set("banks." + name + ".debt", BPFormatter.styleBigDecimal(economy.getDebt(p)));
-            config.set("banks." + name + ".level", economy.getBankLevel(p));
-            config.set("banks." + name + ".money", BPFormatter.styleBigDecimal(economy.getBankBalance(p)));
-            config.set("banks." + name + ".interest", BPFormatter.styleBigDecimal(economy.getOfflineInterest(p)));
-        }
-        manager.savePlayerFile(config, file);
-
-        if (BPSQL.isConnected()) { // If MySQL is enabled, save the data also in the database.
-            SQLPlayerManager pManager = new SQLPlayerManager(p);
-            for (BPEconomy economy : BPEconomy.list())
-                pManager.updatePlayer(
-                        economy.getOriginBank().getIdentifier(),
-                        economy.getDebt(p),
-                        economy.getBankBalance(p),
-                        economy.getBankLevel(p),
-                        economy.getOfflineInterest(p)
-                );
-        }
+        for (BPEconomy economy : BPEconomy.list())
+            BPSQL.savePlayer(p, economy);
 
         if (unload) PlayerRegistry.unloadPlayer(p);
     }

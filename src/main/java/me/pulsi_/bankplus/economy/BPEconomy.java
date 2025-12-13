@@ -2,7 +2,6 @@ package me.pulsi_.bankplus.economy;
 
 import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.account.BPPlayer;
-import me.pulsi_.bankplus.account.BPPlayerManager;
 import me.pulsi_.bankplus.account.PlayerRegistry;
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankRegistry;
@@ -11,7 +10,6 @@ import me.pulsi_.bankplus.events.BPAfterTransactionEvent;
 import me.pulsi_.bankplus.events.BPPreTransactionEvent;
 import me.pulsi_.bankplus.listeners.playerChat.PlayerChatMethod;
 import me.pulsi_.bankplus.sql.BPSQL;
-import me.pulsi_.bankplus.sql.SQLPlayerManager;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
@@ -141,7 +139,7 @@ public class BPEconomy {
      * <p>
      * If the player is already loaded, it will return the registered holder.
      *
-     * @param p             The player.
+     * @param p The player.
      * @return The holder of the specified player.
      */
     public Holder getHolder(OfflinePlayer p) {
@@ -163,24 +161,13 @@ public class BPEconomy {
 
         boolean useStartAmount = !wasRegistered && BankUtils.isMainBank(originBank);
         Holder holder = new Holder();
-        if (BPSQL.isConnected()) {
-            SQLPlayerManager pm = new SQLPlayerManager(p);
-            String bankName = originBank.getIdentifier();
 
-            holder.debt = pm.getDebt(bankName);
-            holder.money = useStartAmount ? ConfigValues.getStartAmount() : pm.getMoney(bankName);
-            holder.bankLevel = pm.getLevel(bankName);
-            holder.offlineInterest = pm.getOfflineInterest(bankName);
+        String bankName = originBank.getIdentifier();
 
-            return holder;
-        }
+        holder.bankLevel = BPSQL.getBankLevel(p, bankName);
+        holder.debt = BPSQL.getDebt(p, bankName);
+        holder.money = useStartAmount ? ConfigValues.getStartAmount() : BPSQL.getMoney(p, bankName);
 
-        FileConfiguration config = new BPPlayerManager(p).getPlayerConfig();
-
-        holder.debt = BPFormatter.getStyledBigDecimal(config.getString(debtPath));
-        holder.money = useStartAmount ? ConfigValues.getStartAmount() : BPFormatter.getStyledBigDecimal(config.getString(moneyPath));
-        holder.offlineInterest = BPFormatter.getStyledBigDecimal(config.getString(interestPath));
-        holder.bankLevel = Math.max(config.getInt(levelPath), 1);
         return holder;
     }
 
@@ -190,8 +177,8 @@ public class BPEconomy {
      * It is advised to execute this method asynchronously if
      * loading from MySQL or other processes that requires time.
      *
-     * @param p             The player to load.
-     *                      return only a copy of the holder to read values.
+     * @param p The player to load.
+     *          return only a copy of the holder to read values.
      * @return The holder created.
      */
     public Holder loadPlayer(OfflinePlayer p) {
@@ -448,29 +435,6 @@ public class BPEconomy {
 
         if (!ignoreEvents) afterTransactionEvent(p, type, result);
         return result;
-    }
-
-    /**
-     * Get the offline interest earned from the player.
-     *
-     * @param p The player.
-     * @return Offline interest.
-     */
-    public BigDecimal getOfflineInterest(OfflinePlayer p) {
-        if (!isPlayerLoaded(p)) return BigDecimal.ZERO;
-        return getHolder(p).offlineInterest;
-    }
-
-    /**
-     * Set the offline interest to the specified amount.
-     *
-     * @param p      The player.
-     * @param amount The new amount.
-     */
-    public void setOfflineInterest(OfflinePlayer p, BigDecimal amount) {
-        if (!startAndCheckOperationAllowed(p)) return;
-        loadPlayer(p).setOfflineInterest(amount);
-        endOperation(p);
     }
 
     /**
@@ -756,15 +720,11 @@ public class BPEconomy {
 
     private static class Holder {
 
-        private BigDecimal money = BigDecimal.ZERO, offlineInterest = BigDecimal.ZERO, debt = BigDecimal.ZERO;
+        private BigDecimal money = BigDecimal.ZERO, debt = BigDecimal.ZERO;
         private int bankLevel = 1;
 
         public void setMoney(BigDecimal money) {
             this.money = money.max(BigDecimal.ZERO);
-        }
-
-        public void setOfflineInterest(BigDecimal offlineInterest) {
-            this.offlineInterest = offlineInterest.max(BigDecimal.ZERO);
         }
 
         public void setDebt(BigDecimal debt) {

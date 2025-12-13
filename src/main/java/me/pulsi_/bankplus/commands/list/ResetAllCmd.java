@@ -113,13 +113,12 @@ public class ResetAllCmd extends BPCommand {
             }
             OfflinePlayer p = copy.removeFirst();
 
-            if (mode.equalsIgnoreCase("maintain"))
-                vaultEconomy.depositPlayer(p, BPEconomy.getBankBalancesSum(p).doubleValue());
+            if (mode.equalsIgnoreCase("maintain")) vaultEconomy.depositPlayer(p, BPEconomy.getBankBalancesSum(p).doubleValue());
+
             for (BPEconomy economy : economies) {
                 economy.setBankBalance(p, BigDecimal.ZERO);
                 economy.setDebt(p, BigDecimal.ZERO);
                 economy.setBankLevel(p, 1);
-                economy.setOfflineInterest(p, BigDecimal.ZERO);
             }
         }
 

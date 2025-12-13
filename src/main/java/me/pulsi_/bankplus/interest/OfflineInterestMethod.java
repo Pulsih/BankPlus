@@ -6,6 +6,7 @@ import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.economy.BPEconomy;
 import me.pulsi_.bankplus.economy.TransactionType;
+import me.pulsi_.bankplus.sql.BPSQL;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.OfflinePlayer;
@@ -44,7 +45,9 @@ public class OfflineInterestMethod extends BPInterest.InterestMethod {
             if (!interestToVault) added = economy.addBankBalance(p, interestMoney, TransactionType.INTEREST);
             else BankPlus.INSTANCE().getVaultEconomy().depositPlayer(p, interestMoney.doubleValue());
 
-            economy.setOfflineInterest(p, economy.getOfflineInterest(p).add(added));
+            // Since interest needs to be updated only when the player is offline to notify it when joining, directly updated it from the database.
+            // This method is already called asynchronously.
+            BPSQL.setInterest(p, bank.getIdentifier(), BPSQL.getInterest(p, bank.getIdentifier()).add(added));
         }
     }
 }

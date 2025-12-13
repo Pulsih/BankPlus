@@ -1,11 +1,9 @@
 package me.pulsi_.bankplus.commands.list;
 
 import me.pulsi_.bankplus.BankPlus;
-import me.pulsi_.bankplus.account.BPPlayerManager;
 import me.pulsi_.bankplus.commands.BPCmdExecution;
 import me.pulsi_.bankplus.commands.BPCommand;
 import me.pulsi_.bankplus.economy.BPEconomy;
-import me.pulsi_.bankplus.sql.SQLPlayerManager;
 import me.pulsi_.bankplus.utils.texts.BPArgs;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
@@ -89,8 +87,8 @@ public class TransferCmd extends BPCommand {
                 BPMessages.sendMessage(s, "%prefix% Task initialized, wait a few moments...");
 
                 Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
-                    if (args[1].equalsIgnoreCase("filestodatabase")) filesToDatabase();
-                    else databaseToFile();
+                    if (args[1].equalsIgnoreCase("filestodatabase")) localToExternal();
+                    else externalToLocal();
 
                     BPMessages.sendMessage(s, "%prefix% Task finished!");
                 });
@@ -105,11 +103,9 @@ public class TransferCmd extends BPCommand {
         return null;
     }
 
-    private void filesToDatabase() {
+    private void localToExternal() {
         List<BPEconomy> economies = BPEconomy.list();
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
-            BPPlayerManager pManager = new BPPlayerManager(p);
-            SQLPlayerManager sqlManager = new SQLPlayerManager(p);
 
             FileConfiguration pConfig = pManager.getPlayerConfig();
             for (BPEconomy economy : economies) {
@@ -125,7 +121,7 @@ public class TransferCmd extends BPCommand {
         }
     }
 
-    private void databaseToFile() {
+    private void externalToLocal() {
         Set<String> banks = BPEconomy.nameList();
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
             BPPlayerManager pManager = new BPPlayerManager(p);

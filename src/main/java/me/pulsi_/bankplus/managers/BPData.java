@@ -96,12 +96,11 @@ public class BPData {
             // Load the banks to the registry before to make MySQL able to create the tables.
             BankRegistry.loadBanks();
 
-            if (!ConfigValues.isMySqlEnabled()) BPSQL.disconnect();
-            else {
-                BPSQL.setupMySQL();
-                BPSQL.connect();
-            }
+            BPSQL.disconnect();
+            if (ConfigValues.isMySqlEnabled()) BPSQL.MySQL.connect();
+            else BPSQL.SQLite.connect();
 
+            // Do this check to avoid restarting the saving interval if another one is finishing.
             if (!BPTaskManager.contains(BPTaskManager.MONEY_SAVING_TASK)) EconomyUtils.restartSavingInterval();
 
             Bukkit.getOnlinePlayers().forEach(p -> {

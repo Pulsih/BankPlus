@@ -83,6 +83,17 @@ public class BPSQL {
         return connection;
     }
 
+    public static void disconnect() {
+        if (connection == null) return;
+
+        try {
+            connection.close();
+            connection = null;
+        } catch (SQLException e) {
+            BPLogger.Console.error(e, "Could not close SQL connection.");
+        }
+    }
+
     /**
      * Get the bank level of the specified player in the specified bank.
      *
@@ -137,6 +148,96 @@ public class BPSQL {
         if (money.isEmpty()) return BigDecimal.ZERO;
 
         return new BigDecimal(money);
+    }
+
+    /**
+     * Set the debt of the specified player in the specified bank to the selected amount.
+     *
+     * @param player   The player.
+     * @param bankName The bank.
+     * @param newValue The new value for the money.
+     */
+    public static void setBankLevel(OfflinePlayer player, String bankName, BigDecimal newValue) {
+        set(player, bankName, SQLSearch.INTEREST, newValue.toPlainString());
+    }
+
+    /**
+     * Set the debt of the specified player in the specified bank to the selected amount.
+     *
+     * @param player   The player.
+     * @param bankName The bank.
+     * @param newValue The new value for the money.
+     */
+    public static void setDebt(OfflinePlayer player, String bankName, BigDecimal newValue) {
+        set(player, bankName, SQLSearch.INTEREST, newValue.toPlainString());
+    }
+
+    /**
+     * Set the interest (interest earned while being offline to show to the player when
+     * entering the server) of the specified player in the specified bank to the selected amount.
+     *
+     * @param player   The player.
+     * @param bankName The bank.
+     * @param newValue The new value for the money.
+     */
+    public static void setInterest(OfflinePlayer player, String bankName, BigDecimal newValue) {
+        set(player, bankName, SQLSearch.INTEREST, newValue.toPlainString());
+    }
+
+    /**
+     * Set the money of the specified player in the specified bank to the selected amount.
+     *
+     * @param player   The player.
+     * @param bankName The bank.
+     * @param newValue The new value for the money.
+     */
+    public static void setMoney(OfflinePlayer player, String bankName, BigDecimal newValue) {
+        set(player, bankName, SQLSearch.MONEY, newValue.toPlainString());
+    }
+
+    /**
+     * Save all the player's current bank statistics to the database.
+     *
+     * @param player   The player to save.
+     * @param bankEconomy The economy of the bank.
+     */
+    public static void savePlayer(OfflinePlayer player, BPEconomy bankEconomy) {
+        String bankName = bankEconomy.getOriginBank().getIdentifier();
+
+        int level = bankEconomy.getBankLevel(player);
+        String debt = bankEconomy.getDebt(player).toPlainString();
+        String money = bankEconomy.getBankBalance(player).toPlainString();
+
+        String insert = "INSERT INTO " + bankName + " (uuid, bank_level, debt, money) " + "VALUES(" +
+                player.getUniqueId() + ", " + level + ", " + debt + ", " + money + ")";
+
+        String set = "bank_level='" + level + "', " + "debt='" + debt + "', " + "money='" + money + "'";
+
+        String query;
+        if (ConfigValues.isMySqlEnabled()) query = insert + " ON DUPLICATE KEY UPDATE " + set;
+        else query = insert + " ON CONFLICT(uuid) DO UPDATE SET " + set;
+
+        try {
+            connection.prepareStatement(query).executeUpdate();
+        } catch (SQLException e) {
+            BPLogger.Console.error(e, "Cannot save player " + player.getName() + " in bank " + bankName + ".");
+        }
+    }
+
+    /**
+     * Check if the specified player is registered in the given bank table (= bank name)
+     * @param player The player to check.
+     * @param bankName The table name.
+     * @return true if a record with its uuid exists, false otherwise.
+     */
+    public static boolean isRegistered(OfflinePlayer player, String bankName) {
+        try {
+            ResultSet set = connection.prepareStatement("SELECT 1 FROM " + bankName + " WHERE uuid='" + player.getUniqueId() + "' LIMIT 1").executeQuery();
+            return set.next();
+        } catch (SQLException e) {
+            BPLogger.Console.error(e, "Cannot check if player " + player.getName() + " is registered in the bank " + bankName + ".");
+            return false;
+        }
     }
 
     /**
@@ -200,23 +301,6 @@ public class BPSQL {
             }
             BPLogger.Console.info("MySQL database successfully connected.");
         }
-
-        public static void disconnect() {
-            if (connection == null) {
-                BPLogger.Console.info("MySQL database is already disconnected.");
-                return;
-            }
-
-            try {
-                connection.close();
-                connection = null;
-            } catch (SQLException e) {
-                BPLogger.Console.error(e, "Could not close MySQL connection.");
-                return;
-            }
-            BPLogger.Console.info("MySQL successfully disconnected.");
-        }
-
     }
 
     public static class SQLite {
@@ -245,24 +329,6 @@ public class BPSQL {
             }
             BPLogger.Console.info("SQLite successfully connected.");
         }
-
-        public static void disconnect() {
-            if (connection == null) {
-                BPLogger.Console.info("SQLite database is already disconnected.");
-                return;
-            }
-
-            try {
-                connection.close();
-                connection = null;
-            } catch (SQLException e) {
-                BPLogger.Console.error(e, "Could not close SQLite connection.");
-                return;
-            }
-            BPLogger.Console.info("SQLite successfully disconnected.");
-        }
-
-
     }
 
     /**
@@ -329,12 +395,10 @@ public class BPSQL {
 
         String query;
 
-        if (ConfigValues.isMySqlEnabled())
-            query = "INSERT INTO " + bankName + " (uuid, " + columnName + ") VALUES(" + player.getUniqueId() + ", " + newValue + ") " +
-                    "ON DUPLICATE KEY UPDATE " + columnName + " = VALUES(" + newValue + ")";
-        else
-            query = "INSERT INTO " + bankName + " (uuid, " + columnName + ") VALUES(" + player.getUniqueId() + ", " + newValue + ") " +
-                    "ON CONFLICT(uuid) DO UPDATE SET " + columnName + " = '" + newValue + "'";
+        String insert = "INSERT INTO " + bankName + " (uuid, " + columnName + ") VALUES(" + player.getUniqueId() + ", " + newValue + ")";
+        String set = columnName + "='" + newValue + "'";
+        if (ConfigValues.isMySqlEnabled()) query = insert + " ON DUPLICATE KEY UPDATE " + set;
+        else query = insert + " ON CONFLICT(uuid) DO UPDATE SET " + set;
 
         try {
             connection.prepareStatement(query).executeUpdate();
