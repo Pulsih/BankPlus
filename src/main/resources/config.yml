@@ -20,7 +20,7 @@ General-Settings:
 
   # Silent some messages that are sent to the console for info
   # if you don't want to see them or to not spam the console.
-  # (Example: Update message)
+  # Examples: update nudging, player interactions...
   Silent-Info-Messages: false
 
   # Enable this option to show the help message when the player has no banks to open.
@@ -35,10 +35,10 @@ General-Settings:
     # the player files and will start storing it in the database.
     #
     # WARNING!
-    # This will reset the bankplus data! It won't delete the data in the files, but will start
-    # using the data of the database that will be empty if that's your first time enabling it!
-    #
-    # To transfer the data from the files to the database type the command "/bankplus transferData filesToDatabase"
+    # This will reset the bankplus data!
+    # It won't delete the data in the SQLite files (.db files), but BankPlus was designed to read the data of the databse
+    # but due to the fact that the MySQL database is empty, BankPlus will "lose" all it's data
+    # In order to prevent data loss, run "/bankplus transferData filesToDatabase" and you are set!
     Enabled: false
 
     Username: "root"
@@ -46,34 +46,40 @@ General-Settings:
     Port: 3306
     Database: "bankplus"
     # If you are not using one, put ""
+    # not using a password for your root account of your MySQL server is not advised
     Password: "bankplusbestplugin"
     Use-SSL: false
 
-  # Enable this option if you want to make a player execute
-  # gui actions only if he has the correct permissions.
-  # (Example: If true the player will only be able to
-  # withdraw if he has the permission bankplus.withdraw,
-  # otherwise he will be able to withdraw without the
-  # permission but only through the gui)
-  #
-  # This is useful if you want to make a player use the bank only through
-  # the gui (usually with an NPC) and prevent him to use all other commands.
+  # Enable this ONLY if you want the plugin to EXPLICITLY VERIFY if a player has
+  # the permissions to perform a certain action in the GUI
+  # For instance, if a player has the `bankplus.withdraw` permission node
+  # set to `true`, he will be able to withdraw; otherwise, he will not be allowed
+  # to withdraw the money via the GUI
+
+  # You may find this useful if you are limiting your players to the GUI and the GUI
+  # only, or you are showing players the BankPlus GUI via a NPC
   Gui-Actions-Need-Permissions: false
 
-  # You need to restart the server
-  # to apply these changes.
-  #
-  # Priorities: LOWEST, LOW, NORMAL, HIGH, HIGHEST
+  # Options for the two sub-categories:
+  # LOWEST | LOW | NORMAL | HIGH | HIGHEST
   Event-Priorities:
+    # Restart your server to apply changes
     PlayerChat: "NORMAL"
     BankClick: "NORMAL"
 
-  # The amount that a player will receive
-  # when joining for the first time
+  # The amount of money new players (players who join your server for the first time) will get
+  # This could be understood as a "newbie package"/"starter kit"
   Join-Start-Amount: '500'
 
-  # Enable or not the guis module.
-  #
+  # SHOULD WE ENABLE THE GUI AT ALL????
+#   __          __              _             
+#   \ \        / /             (_)            
+#    \ \  /\  / /_ _ _ __ _ __  _ _ __   __ _ 
+#     \ \/  \/ / _` | '__| '_ \| | '_ \ / _` |
+#      \  /\  / (_| | |  | | | | | | | | (_| |
+#       \/  \/ \__,_|_|  |_| |_|_|_| |_|\__, |
+#                                        __/ |
+#                                        |___/ 
   # If the module is not enabled, you won't
   # be able to use the multiple gui and gui
   # settings features.
@@ -180,11 +186,14 @@ General-Settings:
     Sound: "entity.experience_orb.pickup,5,1"
 
 # Interest will increase player bank balance
-# by giving a % of their bank money.
+# by giving a certain percentage of their bank money.
 #
 # To restart the interest type /bank restartInterest.
 #
 # Players must have the "bankplus.receive.interest" permission to receive the interest.
+
+# Mathematically, the two equations at play are simple interest and graduated 
+# interest (it's ok if you don't understand this)
 Interest:
   # Enable or disable the interest feature.
   Enabled: true
