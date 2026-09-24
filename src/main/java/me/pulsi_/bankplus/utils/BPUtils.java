@@ -171,6 +171,18 @@ public class BPUtils {
      * @param p           The receiver of the title.
      */
     public static void sendTitle(String titleString, Player p) {
+        sendTitle(titleString, p, -1);
+    }
+
+    /**
+     * Same as {@link #sendTitle(String, Player)}, but you can force the stay time in ticks.
+     * Pass a negative stayTicks to keep the value from the title string.
+     *
+     * @param titleString The title format.
+     * @param p           The receiver of the title.
+     * @param stayTicks   Forced stay time, or -1 to use the string value.
+     */
+    public static void sendTitle(String titleString, Player p, int stayTicks) {
         if (titleString == null || p == null) return;
 
         titleString = BPMessages.applyMessagesPrefix(titleString);
@@ -197,6 +209,8 @@ public class BPUtils {
             if (l > 4)
                 fadeOut = convertToNumber(values[4], fadeOut, "The fadeOut value in the title \"" + titleString + "\" is invalid.");
         }
+
+        if (stayTicks >= 0) stay = stayTicks;
 
         p.showTitle(Title.title(title, subtitle, Title.Times.times(toTicks(fadeIn), toTicks(stay), toTicks(fadeOut))));
     }

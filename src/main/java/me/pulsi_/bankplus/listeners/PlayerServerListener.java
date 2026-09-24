@@ -27,11 +27,15 @@ public class PlayerServerListener implements Listener {
         Player p = e.getPlayer();
 
         Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
+            if (!BankPlus.INSTANCE().isEnabled()) return;
+
             boolean wasRegistered = BPSQL.isRegistered(p, ConfigValues.getMainGuiName());
             if (!wasRegistered && ConfigValues.isNotifyingNewPlayer())
                     BPLogger.Console.info("Successfully registered " + p.getName() + "!");
 
             BPSQL.fillRecords(p);
+
+            if (!BankPlus.INSTANCE().isEnabled()) return;
 
             int loadDelay = ConfigValues.getLoadDelay();
             if (loadDelay <= 0) PlayerRegistry.loadPlayer(p, wasRegistered);
@@ -49,7 +53,7 @@ public class PlayerServerListener implements Listener {
             }
 
             BigDecimal finalAmount = amount;
-            if (finalAmount.compareTo(BigDecimal.ZERO) > 0)
+            if (finalAmount.compareTo(BigDecimal.ZERO) > 0 && BankPlus.INSTANCE().isEnabled())
                 Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () ->
                                 BPMessages.sendMessage(p, ConfigValues.getOfflineInterestMessage(), BPUtils.placeValues(finalAmount)),
                         ConfigValues.getNotifyOfflineInterestDelay() * 20L);

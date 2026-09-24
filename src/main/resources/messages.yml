@@ -48,6 +48,9 @@ Bank-Upgraded: "%prefix% <green>Successfully upgraded the bank!"
 Debt-Money-Taken: "%prefix% <red>We took <white>%amount_formatted% <red>money from your bank to pay your debt, which is now: <white>%debt_formatted%<red>."
 Reload-Success: "%prefix% Plugin successfully reloaded! <dark_gray>(<aqua>%time%ms</aqua>)"
 Reload-Fail: "%prefix% <red>The plugin may not have fully reloaded due to an error, please check the console for more info."
+Dump-Uploading: "%prefix% <gray>Creating and uploading the dump, please wait..."
+Dump-Success: "%prefix% <green>Dump uploaded successfully: <aqua>%url%"
+Dump-Fail: "%prefix% <red>Could not upload the dump, please check the console for more info."
 
 # Loans
 Loan-Request-Sent: "%prefix% <green>Successfully sent the loan request to <white>%player%<green>, waiting for a confirm..."

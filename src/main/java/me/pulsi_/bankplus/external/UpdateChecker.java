@@ -28,7 +28,7 @@ public class UpdateChecker implements Listener {
                     "version of the plugin, if you find any bug make sure to report it in my discord server. Thanks! :)";
         else message = null;
 
-        if (message != null)
+        if (message != null && BankPlus.INSTANCE().isEnabled())
             Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> {
                 p.sendMessage(" ");
                 p.sendMessage(MiniMessage.miniMessage().deserialize(message));

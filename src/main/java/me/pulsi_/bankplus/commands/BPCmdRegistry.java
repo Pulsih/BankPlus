@@ -33,6 +33,7 @@ public class BPCmdRegistry {
         new BalanceCmd(commandsConfig, "balance", "bal").register();
         new DebugCmd(commandsConfig, "debug").register();
         new DepositCmd(commandsConfig, "deposit").register();
+        new DumpCmd(commandsConfig, "dump").register();
         new ForceDepositCmd(commandsConfig, "forceDeposit").register();
         new ForceOpenCmd(commandsConfig, "forceOpen").register();
         new ForceUpgradeCmd(commandsConfig, "forceUpgrade").register();

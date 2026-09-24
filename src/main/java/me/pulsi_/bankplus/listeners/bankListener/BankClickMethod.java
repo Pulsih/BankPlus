@@ -82,14 +82,14 @@ public class BankClickMethod {
                 case "[withdraw]": {
                     if (ConfigValues.isGuiActionsNeedingPermissions() && !BPUtils.hasPermission(p, "bankplus.withdraw")) return;
 
-                    if (value.equals("CUSTOM")) {
+                    if (value.equalsIgnoreCase("CUSTOM")) {
                         economy.customWithdraw(p);
                         continue;
                     }
 
                     BigDecimal amount;
                     try {
-                        if (!value.endsWith("%")) amount = new BigDecimal(value);
+                        if (!value.endsWith("%")) amount = BPFormatter.getStyledBigDecimal(value);
                         else {
                             BigDecimal percentage = BPFormatter.getStyledBigDecimal(value.replace("%", "")).divide(BigDecimal.valueOf(100));
                             amount = economy.getBankBalance(p).multiply(percentage);

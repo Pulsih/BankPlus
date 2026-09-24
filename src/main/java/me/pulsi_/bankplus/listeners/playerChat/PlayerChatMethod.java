@@ -72,8 +72,11 @@ public class PlayerChatMethod {
             BukkitTask task = bpPlayer.getClosingTask();
             if (task != null) task.cancel();
 
+            Player p = bpPlayer.getPlayer();
+            if (p != null) p.clearTitle();
+
             removeFromTyping(bpPlayer);
-            if (ConfigValues.isReopeningBankAfterChat() && ConfigValues.isGuiModuleEnabled()) openedBankGui.openBankGui(bpPlayer.getPlayer(), true);
+            if (ConfigValues.isReopeningBankAfterChat() && ConfigValues.isGuiModuleEnabled()) openedBankGui.openBankGui(p, true);
         });
     }
 

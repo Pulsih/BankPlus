@@ -594,7 +594,7 @@ public class BPEconomy {
      * @param p The player.
      */
     public void customDeposit(Player p) {
-        if (MessageValues.isTitleCustomAmountEnabled()) BPUtils.sendTitle(MessageValues.getCustomDepositTitle(), p);
+        if (MessageValues.isTitleCustomAmountEnabled()) BPUtils.sendTitle(MessageValues.getCustomDepositTitle(), p, ConfigValues.getChatExitTime() * 20);
 
         BPMessages.sendIdentifier(p, "Chat-Deposit");
         p.closeInventory();
@@ -616,7 +616,7 @@ public class BPEconomy {
      * @param p The player.
      */
     public void customWithdraw(Player p) {
-        if (MessageValues.isTitleCustomAmountEnabled()) BPUtils.sendTitle(MessageValues.getCustomWithdrawTitle(), p);
+        if (MessageValues.isTitleCustomAmountEnabled()) BPUtils.sendTitle(MessageValues.getCustomWithdrawTitle(), p, ConfigValues.getChatExitTime() * 20);
 
         BPMessages.sendIdentifier(p, "Chat-Withdraw");
         p.closeInventory();

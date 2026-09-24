@@ -68,6 +68,7 @@ public class BPData {
         EconomyUtils.saveEveryone(false);
         if (ConfigValues.isInterestEnabled()) plugin.getInterest().saveInterest();
         BPLoanRegistry.saveAllLoans();
+        BPSQL.disconnect();
 
         BPLogger.Console.log("");
         BPLogger.Console.log("    " + BPChat.PREFIX + " <red>Plugin successfully disabled!");
