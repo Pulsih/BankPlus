@@ -275,7 +275,8 @@ public class BPSQL {
             String port = ConfigValues.getMySqlPort();
             String database = ConfigValues.getMySqlDatabase();
 
-            String url = "jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=" + ConfigValues.isMySqlUsingSSL();
+            // Timeouts so a dead mysql doesn't freeze the whole server on disable.
+            String url = "jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=" + ConfigValues.isMySqlUsingSSL() + "&connectTimeout=5000&socketTimeout=15000";
 
             try {
                 connection = DriverManager.getConnection(url, ConfigValues.getMySqlUsername(), ConfigValues.getMySqlPassword());

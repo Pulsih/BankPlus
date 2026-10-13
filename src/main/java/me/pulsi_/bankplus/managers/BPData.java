@@ -65,6 +65,11 @@ public class BPData {
     }
 
     public void shutdownPlugin() {
+        // Stop tasks first, they shouldn't keep using sql while we save & disconnect.
+        BPTaskManager.cancelTask(BPTaskManager.INTEREST_TASK);
+        BPTaskManager.cancelTask(BPTaskManager.MONEY_SAVING_TASK);
+        BPTaskManager.cancelTask(BPTaskManager.BANKTOP_BROADCAST_TASK);
+
         EconomyUtils.saveEveryone(false);
         if (ConfigValues.isInterestEnabled()) plugin.getInterest().saveInterest();
         BPLoanRegistry.saveAllLoans();

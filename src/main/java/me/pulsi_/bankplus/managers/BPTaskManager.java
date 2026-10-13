@@ -24,6 +24,11 @@ public class BPTaskManager {
         return tasks.remove(name.toLowerCase());
     }
 
+    public static void cancelTask(String name) {
+        BukkitTask task = tasks.remove(name.toLowerCase());
+        if (task != null) task.cancel();
+    }
+
     public static boolean contains(String name) {
         return tasks.containsKey(name.toLowerCase());
     }
