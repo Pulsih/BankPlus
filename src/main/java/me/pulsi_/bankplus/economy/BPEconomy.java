@@ -560,10 +560,15 @@ public class BPEconomy {
 
         BigDecimal actualDepositingMoney = finalAmount.subtract(taxes);
 
-        EconomyResponse depositResponse = economy.withdrawPlayer(p, finalAmount.doubleValue());
-        if (BPUtils.hasFailed(p, depositResponse)) return;
+        // Bank first: if the bank denies the operation nothing has been taken from the wallet yet.
+        BigDecimal added = addBankBalance(p, actualDepositingMoney, true);
+        if (added.compareTo(BigDecimal.ZERO) <= 0 && actualDepositingMoney.compareTo(BigDecimal.ZERO) > 0) return;
 
-        addBankBalance(p, actualDepositingMoney, true);
+        EconomyResponse depositResponse = economy.withdrawPlayer(p, finalAmount.doubleValue());
+        if (BPUtils.hasFailed(p, depositResponse)) {
+            removeBankBalance(p, added, true);
+            return;
+        }
 
         List<String> replacers = BPUtils.placeValues(p, actualDepositingMoney);
         replacers.addAll(BPUtils.placeValues(taxes, "taxes"));
@@ -595,6 +600,11 @@ public class BPEconomy {
         BigDecimal maxWithdraw = ConfigValues.getMaxWithdrawAmount();
         if (maxWithdraw.compareTo(BigDecimal.ZERO) > 0 && amount.compareTo(maxWithdraw) >= 0) amount = maxWithdraw;
         if (bankBal.compareTo(amount) < 0) amount = bankBal;
+
+        // Bank first: if the bank denies the operation the wallet hasn't been paid yet.
+        BigDecimal removed = removeBankBalance(p, amount, true);
+        if (removed.compareTo(BigDecimal.ZERO) <= 0 && amount.compareTo(BigDecimal.ZERO) > 0) return;
+        amount = removed;
 
         BigDecimal withdrawTaxes = ConfigValues.getWithdrawTaxes(), taxes = BigDecimal.ZERO;
         if (withdrawTaxes.compareTo(BigDecimal.ZERO) > 0 && !p.hasPermission("bankplus.withdraw.bypass-taxes")) {
@@ -729,10 +739,10 @@ public class BPEconomy {
      * @return true if the transaction is allowed, false otherwise.
      */
     private boolean startAndCheckOperationAllowed(OfflinePlayer p) {
-        if ((p.isOnline() && !isPlayerLoaded(p)) || operations.contains(p.getUniqueId())) return false;
+        if (p.isOnline() && !isPlayerLoaded(p)) return false;
 
-        operations.add(p.getUniqueId());
-        return true;
+        // Add returns false if the player already had an operation running, checking and adding in one step.
+        return operations.add(p.getUniqueId());
     }
 
     /**
