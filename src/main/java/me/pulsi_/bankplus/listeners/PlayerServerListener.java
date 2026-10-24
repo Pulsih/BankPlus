@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 
 public class PlayerServerListener implements Listener {
 
-    private static final int LOAD_ATTEMPTS = 3;
+    private static final int LOAD_ATTEMPTS = 12; // 5 seconds apart, so a short database outage doesn't lock players out.
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
@@ -69,7 +69,7 @@ public class PlayerServerListener implements Listener {
                 return;
             }
 
-            BPLogger.Console.warn("Could not load the data of " + p.getName() + ", retrying in 5 seconds. (" + attempt + "/" + LOAD_ATTEMPTS + ")");
+            if (attempt == 1) BPLogger.Console.warn("Could not load the data of " + p.getName() + ", retrying every 5 seconds for a minute.");
             Bukkit.getScheduler().runTaskLaterAsynchronously(BankPlus.INSTANCE(), () -> loadPlayerData(p, attempt + 1), 100L);
         }
     }
