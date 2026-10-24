@@ -10,8 +10,10 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * BankPlus SQL storage (MySQL or SQLite). Player balances are saved
@@ -61,6 +63,8 @@ public class BPSQL {
         return "'" + p.getUniqueId() + "','" + name + "','1','" + money + "','0','0'";
     }
 
+    // One shared connection, so everything that touches it has to wait its turn.
+    private static final Object LOCK = new Object();
     private static Connection connection;
 
     /**
@@ -73,14 +77,31 @@ public class BPSQL {
     }
 
     public static void disconnect() {
-        if (connection == null) return;
+        final Connection toClose;
+        synchronized (LOCK) {
+            toClose = connection;
+            connection = null;
+        }
+        if (toClose == null) return;
+
+        // Close with a timeout. SQLite close can hang forever if another async
+        // task still has a statement open, and we don't want that freezing stop.
+        Thread closer = new Thread(() -> {
+            try {
+                toClose.close();
+            } catch (SQLException e) {
+                BPLogger.Console.error(e, "Could not close SQL connection.");
+            }
+        }, "BankPlus-SQL-Close");
+        closer.setDaemon(true);
+        closer.start();
 
         try {
-            connection.close();
-            connection = null;
-        } catch (SQLException e) {
-            BPLogger.Console.error(e, "Could not close SQL connection.");
+            closer.join(3000);
+        } catch (InterruptedException ignored) {
         }
+
+        if (closer.isAlive()) BPLogger.Console.warn("SQL close is taking too long, continuing disable anyway.");
     }
 
     /**
@@ -206,10 +227,13 @@ public class BPSQL {
         if (ConfigValues.isMySqlEnabled()) query = insert + " ON DUPLICATE KEY UPDATE " + set;
         else query = insert + " ON CONFLICT(uuid) DO UPDATE SET " + set;
 
-        try {
-            connection.prepareStatement(query).executeUpdate();
-        } catch (SQLException e) {
-            BPLogger.Console.error(e, "Cannot save player " + player.getName() + " in bank " + bankName + ".");
+        synchronized (LOCK) {
+            if (connection == null) return;
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.executeUpdate();
+            } catch (SQLException e) {
+                BPLogger.Console.error(e, "Cannot save player " + player.getName() + " in bank " + bankName + ".");
+            }
         }
     }
 
@@ -220,12 +244,15 @@ public class BPSQL {
      * @return true if a record with its uuid exists, false otherwise.
      */
     public static boolean isRegistered(OfflinePlayer player, String bankName) {
-        try {
-            ResultSet set = connection.prepareStatement("SELECT 1 FROM " + bankName + " WHERE uuid='" + player.getUniqueId() + "' LIMIT 1").executeQuery();
-            return set.next();
-        } catch (SQLException e) {
-            BPLogger.Console.error(e, "Cannot check if player " + player.getName() + " is registered in the bank " + bankName + ".");
-            return false;
+        synchronized (LOCK) {
+            if (connection == null) return false;
+            try (PreparedStatement statement = connection.prepareStatement("SELECT 1 FROM " + bankName + " WHERE uuid='" + player.getUniqueId() + "' LIMIT 1");
+                 ResultSet set = statement.executeQuery()) {
+                return set.next();
+            } catch (SQLException e) {
+                BPLogger.Console.error(e, "Cannot check if player " + player.getName() + " is registered in the bank " + bankName + ".");
+                return false;
+            }
         }
     }
 
@@ -237,26 +264,30 @@ public class BPSQL {
      * @param player The player to register.
      */
     public static void fillRecords(OfflinePlayer player) {
-        if (ConfigValues.isMySqlEnabled())
-            for (String bank : BPEconomy.nameList()) {
-                try {
-                    connection.prepareStatement(
+        synchronized (LOCK) {
+            if (connection == null) return;
+
+            if (ConfigValues.isMySqlEnabled())
+                for (String bank : BPEconomy.nameList()) {
+                    try (PreparedStatement statement = connection.prepareStatement(
                             "INSERT IGNORE INTO " + bank + " VALUES (" + GET_DEFAULT_PLAYER_ARGUMENTS(player, bank) + ")"
-                    ).executeUpdate();
-                } catch (SQLException e) {
-                    BPLogger.Console.error(e, "Cannot insert base value in bank " + bank + " for player " + player.getName() + ".");
+                    )) {
+                        statement.executeUpdate();
+                    } catch (SQLException e) {
+                        BPLogger.Console.error(e, "Cannot insert base value in bank " + bank + " for player " + player.getName() + ".");
+                    }
                 }
-            }
-        else
-            for (String bank : BPEconomy.nameList()) {
-                try {
-                    connection.prepareStatement(
+            else
+                for (String bank : BPEconomy.nameList()) {
+                    try (PreparedStatement statement = connection.prepareStatement(
                             "INSERT OR IGNORE INTO " + bank + " VALUES (" + GET_DEFAULT_PLAYER_ARGUMENTS(player, bank) + ")"
-                    ).executeUpdate();
-                } catch (SQLException e) {
-                    BPLogger.Console.error(e, "Cannot insert base value in bank " + bank + " for player " + player.getName() + ".");
+                    )) {
+                        statement.executeUpdate();
+                    } catch (SQLException e) {
+                        BPLogger.Console.error(e, "Cannot insert base value in bank " + bank + " for player " + player.getName() + ".");
+                    }
                 }
-            }
+        }
     }
 
     public static class MySQL {
@@ -266,60 +297,74 @@ public class BPSQL {
          * This method also enables the SQLMethods.
          */
         public static void connect() {
-            if (connection != null) {
-                BPLogger.Console.warn("MySQL is already connected.");
-                return;
-            }
-
-            String host = ConfigValues.getMySqlHost();
-            String port = ConfigValues.getMySqlPort();
-            String database = ConfigValues.getMySqlDatabase();
-
-            // Timeouts so a dead mysql doesn't freeze the whole server on disable.
-            String url = "jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=" + ConfigValues.isMySqlUsingSSL() + "&connectTimeout=5000&socketTimeout=15000";
-
-            try {
-                connection = DriverManager.getConnection(url, ConfigValues.getMySqlUsername(), ConfigValues.getMySqlPassword());
-
-                // Create all the missing tables.
-                for (String bankName : BPEconomy.nameList()) {
-                    String query = "CREATE TABLE IF NOT EXISTS " + bankName + " (" + GET_TABLE_ARGUMENTS() + ")";
-                    connection.prepareStatement(query).execute();
+            synchronized (LOCK) {
+                if (connection != null) {
+                    BPLogger.Console.warn("MySQL is already connected.");
+                    return;
                 }
-            } catch (SQLException e) {
-                connection = null;
-                BPLogger.Console.error(e, "Could not connect to MySQL database.");
-                return;
+
+                String host = ConfigValues.getMySqlHost();
+                String port = ConfigValues.getMySqlPort();
+                String database = ConfigValues.getMySqlDatabase();
+
+                // Timeouts so a dead mysql doesn't freeze the whole server on disable.
+                String url = "jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=" + ConfigValues.isMySqlUsingSSL() + "&connectTimeout=5000&socketTimeout=15000";
+
+                try {
+                    connection = DriverManager.getConnection(url, ConfigValues.getMySqlUsername(), ConfigValues.getMySqlPassword());
+
+                    // Create all the missing tables.
+                    for (String bankName : BPEconomy.nameList()) {
+                        String query = "CREATE TABLE IF NOT EXISTS " + bankName + " (" + GET_TABLE_ARGUMENTS() + ")";
+                        try (PreparedStatement statement = connection.prepareStatement(query)) {
+                            statement.execute();
+                        }
+                    }
+                } catch (SQLException e) {
+                    connection = null;
+                    BPLogger.Console.error(e, "Could not connect to MySQL database.");
+                    return;
+                }
+                BPLogger.Console.info("MySQL database successfully connected.");
             }
-            BPLogger.Console.info("MySQL database successfully connected.");
         }
     }
 
     public static class SQLite {
 
         public static void connect() {
-            if (connection != null) {
-                BPLogger.Console.warn("SQLite is already connected.");
-                return;
-            }
-
-            File dbFile = new File(BankPlus.INSTANCE().getDataFolder(), "data.db");
-
-            if (!dbFile.getParentFile().exists()) dbFile.getParentFile().mkdirs();
-
-            String url = "jdbc:sqlite:" + dbFile.getAbsolutePath();
-            try {
-                connection = DriverManager.getConnection(url);
-
-                for (String bankName : BPEconomy.nameList()) {
-                    String query = "CREATE TABLE IF NOT EXISTS " + bankName + " (" + GET_TABLE_ARGUMENTS() + ")";
-                    connection.prepareStatement(query).execute();
+            synchronized (LOCK) {
+                if (connection != null) {
+                    BPLogger.Console.warn("SQLite is already connected.");
+                    return;
                 }
-            } catch (SQLException e) {
-                BPLogger.Console.error(e, "Could not connect to SQLite database.");
-                return;
+
+                File dbFile = new File(BankPlus.INSTANCE().getDataFolder(), "data.db");
+
+                if (!dbFile.getParentFile().exists()) dbFile.getParentFile().mkdirs();
+
+                String url = "jdbc:sqlite:" + dbFile.getAbsolutePath();
+                try {
+                    connection = DriverManager.getConnection(url);
+
+                    // Don't wait forever if the db file is busy.
+                    try (Statement statement = connection.createStatement()) {
+                        statement.execute("PRAGMA busy_timeout = 3000");
+                    }
+
+                    for (String bankName : BPEconomy.nameList()) {
+                        String query = "CREATE TABLE IF NOT EXISTS " + bankName + " (" + GET_TABLE_ARGUMENTS() + ")";
+                        try (PreparedStatement statement = connection.prepareStatement(query)) {
+                            statement.execute();
+                        }
+                    }
+                } catch (SQLException e) {
+                    connection = null;
+                    BPLogger.Console.error(e, "Could not connect to SQLite database.");
+                    return;
+                }
+                BPLogger.Console.info("SQLite successfully connected.");
             }
-            BPLogger.Console.info("SQLite successfully connected.");
         }
     }
 
@@ -347,19 +392,16 @@ public class BPSQL {
 
         String query = "SELECT " + columnName + " FROM " + bankName + " WHERE uuid='" + player.getUniqueId() + "'";
 
-        ResultSet set;
-        try {
-            set = connection.prepareStatement(query).executeQuery();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
-        try {
-            if (!set.next()) return "";
-            return set.getString(columnName);
-        } catch (SQLException e) {
-            BPLogger.Console.error(e, "Could not get data for player " + player.getName() + ".");
-            return "";
+        synchronized (LOCK) {
+            if (connection == null) return "";
+            try (PreparedStatement statement = connection.prepareStatement(query);
+                 ResultSet set = statement.executeQuery()) {
+                if (!set.next()) return "";
+                return set.getString(columnName);
+            } catch (SQLException e) {
+                BPLogger.Console.error(e, "Could not get data for player " + player.getName() + ".");
+                return "";
+            }
         }
     }
 
@@ -393,10 +435,13 @@ public class BPSQL {
         if (ConfigValues.isMySqlEnabled()) query = insert + " ON DUPLICATE KEY UPDATE " + set;
         else query = insert + " ON CONFLICT(uuid) DO UPDATE SET " + set;
 
-        try {
-            connection.prepareStatement(query).executeUpdate();
-        } catch (SQLException e) {
-            BPLogger.Console.error(e, "Cannot set " + columnName + " for player " + player.getName() + " in bank " + bankName + ".");
+        synchronized (LOCK) {
+            if (connection == null) return;
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.executeUpdate();
+            } catch (SQLException e) {
+                BPLogger.Console.error(e, "Cannot set " + columnName + " for player " + player.getName() + " in bank " + bankName + ".");
+            }
         }
     }
 }
