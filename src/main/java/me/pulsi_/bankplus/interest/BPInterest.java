@@ -127,11 +127,12 @@ public class BPInterest {
             for (String line : limiter) {
                 if (!line.contains(":")) continue;
 
+                // Expected format "from-to:rate%", skip the lines that don't follow it instead of throwing.
                 String[] split1 = line.split(":");
-                if (BPUtils.isInvalidNumber(split1[1])) continue;
+                if (split1.length != 2 || BPUtils.isInvalidNumber(split1[1])) continue;
 
                 String[] split2 = split1[0].split("-");
-                if (BPUtils.isInvalidNumber(split2[0]) || BPUtils.isInvalidNumber(split2[1])) continue;
+                if (split2.length != 2 || BPUtils.isInvalidNumber(split2[0]) || BPUtils.isInvalidNumber(split2[1])) continue;
 
                 String interest = split1[1].replace("%", ""), from = split2[0], to = split2[1];
                 BigDecimal interestRate = new BigDecimal(interest), fromNumber = new BigDecimal(from), toNumber = new BigDecimal(to);
