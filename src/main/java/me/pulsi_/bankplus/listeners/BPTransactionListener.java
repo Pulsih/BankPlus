@@ -16,9 +16,10 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BPTransactionListener implements Listener {
 
@@ -26,7 +27,8 @@ public class BPTransactionListener implements Listener {
 
     }
 
-    private final HashMap<UUID, Pair<BigDecimal, Double>> logHolder = new HashMap<>();
+    // Transactions also run in the async interest task, so this can't be a plain HashMap.
+    private final Map<UUID, Pair<BigDecimal, Double>> logHolder = new ConcurrentHashMap<>();
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onTransactionStart(BPPreTransactionEvent e) {
@@ -70,7 +72,9 @@ public class BPTransactionListener implements Listener {
             if (taxes.doubleValue() > 0) builder.append(" (Taxes: ").append(taxes).append("%)");
         }
 
-        Pair<BigDecimal, Double> pair = logHolder.get(e.getPlayer().getUniqueId());
+        // Missing if the logging was enabled by a reload in the middle of the transaction.
+        Pair<BigDecimal, Double> pair = logHolder.remove(e.getPlayer().getUniqueId());
+        if (pair == null) pair = new Pair<>(e.getNewBalance(), e.getNewVaultBalance());
         builder.append(
                 " - %1 [%2] Bank: [%3 -> %4] Vault: [%5 -> %6]\n"
                         .replace("%1", BPFormatter.styleBigDecimal(e.getTransactionAmount()))
