@@ -167,8 +167,8 @@ public class BPEconomy {
         String bankName = originBank.getIdentifier();
 
         holder.bankLevel = BPSQL.getBankLevel(p, bankName);
-        holder.debt = BPSQL.getDebt(p, bankName);
-        holder.money = useStartAmount ? ConfigValues.getStartAmount() : BPSQL.getMoney(p, bankName);
+        holder.setDebt(BPSQL.getDebt(p, bankName));
+        holder.setMoney(useStartAmount ? ConfigValues.getStartAmount() : BPSQL.getMoney(p, bankName));
 
         return holder;
     }
@@ -720,15 +720,18 @@ public class BPEconomy {
 
     private static class Holder {
 
+        // Hard ceiling (10^100) so a runaway balance can never outgrow the storage columns, even with unlimited capacity.
+        private static final BigDecimal MAX_AMOUNT = BigDecimal.TEN.pow(100);
+
         private BigDecimal money = BigDecimal.ZERO, debt = BigDecimal.ZERO;
         private int bankLevel = 1;
 
         public void setMoney(BigDecimal money) {
-            this.money = money.max(BigDecimal.ZERO);
+            this.money = money.max(BigDecimal.ZERO).min(MAX_AMOUNT);
         }
 
         public void setDebt(BigDecimal debt) {
-            this.debt = debt.max(BigDecimal.ZERO);
+            this.debt = debt.max(BigDecimal.ZERO).min(MAX_AMOUNT);
         }
 
         public void setBankLevel(int bankLevel) {
