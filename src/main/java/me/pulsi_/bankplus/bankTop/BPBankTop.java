@@ -27,6 +27,8 @@ public class BPBankTop {
      */
     public static void updateBankTop() {
         Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
+            if (!BankPlus.INSTANCE().isEnabled()) return;
+
             HashMap<String, BigDecimal> balances = BPEconomy.getAllEconomiesBankBalances();
             List<BankTopPlayer> players = new ArrayList<>();
 

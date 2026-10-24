@@ -56,6 +56,9 @@ public class BPInterest {
             OfflineInterestMethod offlineInterestMethod = new OfflineInterestMethod();
 
             for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
+                // Plugin is already marked disabled during onDisable, bail so we don't hold sqlite open.
+                if (!BankPlus.INSTANCE().isEnabled()) return;
+
                 if (p.isOnline()) onlineInterestMethod.giveInterest(p);
                 else if (isOfflineInterestEnabled) offlineInterestMethod.giveInterest(p);
             }

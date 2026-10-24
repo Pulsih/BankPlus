@@ -84,7 +84,10 @@ public class BPEconomy {
      */
     public static LinkedHashMap<String, BigDecimal> getAllEconomiesBankBalances() {
         LinkedHashMap<String, BigDecimal> balances = new LinkedHashMap<>();
-        for (OfflinePlayer p : Bukkit.getOfflinePlayers()) balances.put(p.getName(), getBankBalancesSum(p));
+        for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
+            if (!BankPlus.INSTANCE().isEnabled()) break;
+            balances.put(p.getName(), getBankBalancesSum(p));
+        }
         return balances;
     }
 

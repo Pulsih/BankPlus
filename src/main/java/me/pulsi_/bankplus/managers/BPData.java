@@ -71,8 +71,14 @@ public class BPData {
         BPTaskManager.cancelTask(BPTaskManager.BANKTOP_BROADCAST_TASK);
 
         EconomyUtils.saveEveryone(false);
+
+        BPLogger.Console.info("Saving interest...");
         if (ConfigValues.isInterestEnabled()) plugin.getInterest().saveInterest();
+
+        BPLogger.Console.info("Saving loans...");
         BPLoanRegistry.saveAllLoans();
+
+        BPLogger.Console.info("Closing SQL connection...");
         BPSQL.disconnect();
 
         BPLogger.Console.log("");
