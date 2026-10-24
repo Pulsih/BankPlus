@@ -484,8 +484,12 @@ public class BPEconomy {
      */
     public void setDebt(OfflinePlayer p, BigDecimal amount) {
         if (!startAndCheckOperationAllowed(p)) return;
-        loadPlayer(p).setDebt(amount);
-        endOperation(p);
+
+        try {
+            loadPlayer(p).setDebt(amount);
+        } finally {
+            endOperation(p);
+        }
     }
 
     /**
@@ -508,8 +512,12 @@ public class BPEconomy {
      */
     public void setBankLevel(OfflinePlayer p, int level) {
         if (!startAndCheckOperationAllowed(p)) return;
-        loadPlayer(p).setBankLevel(level);
-        endOperation(p);
+
+        try {
+            loadPlayer(p).setBankLevel(level);
+        } finally {
+            endOperation(p);
+        }
     }
 
     /**
