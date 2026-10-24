@@ -389,6 +389,9 @@ public class BPSQL {
                 // Timeouts so a dead mysql doesn't freeze the whole server on disable.
                 String url = "jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=" + ConfigValues.isMySqlUsingSSL() + "&connectTimeout=5000&socketTimeout=15000";
 
+                // MySQL 8+ defaults to caching_sha2_password, which without SSL fails with "Public Key Retrieval is not allowed".
+                if (!ConfigValues.isMySqlUsingSSL()) url += "&allowPublicKeyRetrieval=true";
+
                 try {
                     connection = DriverManager.getConnection(url, ConfigValues.getMySqlUsername(), ConfigValues.getMySqlPassword());
 
