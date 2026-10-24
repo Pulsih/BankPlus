@@ -287,21 +287,26 @@ public class BPEconomy {
         BigDecimal result = BigDecimal.ZERO;
         if (!startAndCheckOperationAllowed(p)) return result;
 
-        if (!ignoreEvents) {
-            BPPreTransactionEvent event = preTransactionEvent(p, type, amount);
-            if (event.isCancelled()) {
-                endOperation(p);
-                return result;
+        try {
+            if (!ignoreEvents) {
+                BPPreTransactionEvent event = preTransactionEvent(p, type, amount);
+                if (event.isCancelled()) {
+                    endOperation(p);
+                    return result;
+                }
+
+                amount = event.getTransactionAmount();
             }
 
-            amount = event.getTransactionAmount();
+            BigDecimal capacity = BankUtils.getCapacity(originBank, p);
+            if (capacity.compareTo(BigDecimal.ZERO) > 0) amount = amount.min(capacity);
+
+            result = result.max(amount);
+            setMoney(p, result);
+        } catch (RuntimeException e) {
+            endOperation(p);
+            throw e;
         }
-
-        BigDecimal capacity = BankUtils.getCapacity(originBank, p);
-        if (capacity.compareTo(BigDecimal.ZERO) > 0) amount = amount.min(capacity);
-
-        result = result.max(amount);
-        setMoney(p, result);
 
         if (!ignoreEvents) afterTransactionEvent(p, type, result);
         return result;
@@ -354,28 +359,33 @@ public class BPEconomy {
         BigDecimal result = BigDecimal.ZERO;
         if (!startAndCheckOperationAllowed(p)) return result;
 
-        if (!ignoreEvents) {
-            BPPreTransactionEvent event = preTransactionEvent(p, type, amount);
-            if (event.isCancelled()) {
-                endOperation(p);
-                return result;
+        try {
+            if (!ignoreEvents) {
+                BPPreTransactionEvent event = preTransactionEvent(p, type, amount);
+                if (event.isCancelled()) {
+                    endOperation(p);
+                    return result;
+                }
+
+                amount = event.getTransactionAmount();
             }
 
-            amount = event.getTransactionAmount();
-        }
-
-        BigDecimal capacity = BankUtils.getCapacity(originBank, p), balance = getBankBalance(p);
-        if (capacity.compareTo(BigDecimal.ZERO) <= 0) {
-            result = amount;
-            setMoney(p, balance.add(result));
-        } else {
-            if (balance.add(amount).compareTo(capacity) < 0) {
+            BigDecimal capacity = BankUtils.getCapacity(originBank, p), balance = getBankBalance(p);
+            if (capacity.compareTo(BigDecimal.ZERO) <= 0) {
                 result = amount;
                 setMoney(p, balance.add(result));
             } else {
-                result = capacity.subtract(balance).max(BigDecimal.ZERO);
-                setMoney(p, capacity);
+                if (balance.add(amount).compareTo(capacity) < 0) {
+                    result = amount;
+                    setMoney(p, balance.add(result));
+                } else {
+                    result = capacity.subtract(balance).max(BigDecimal.ZERO);
+                    setMoney(p, capacity);
+                }
             }
+        } catch (RuntimeException e) {
+            endOperation(p);
+            throw e;
         }
 
         if (!ignoreEvents) afterTransactionEvent(p, type, result);
@@ -429,21 +439,26 @@ public class BPEconomy {
         BigDecimal result = BigDecimal.ZERO;
         if (!startAndCheckOperationAllowed(p)) return result;
 
-        if (!ignoreEvents) {
-            BPPreTransactionEvent event = preTransactionEvent(p, type, amount);
-            if (event.isCancelled()) {
-                endOperation(p);
-                return result;
+        try {
+            if (!ignoreEvents) {
+                BPPreTransactionEvent event = preTransactionEvent(p, type, amount);
+                if (event.isCancelled()) {
+                    endOperation(p);
+                    return result;
+                }
+
+                amount = event.getTransactionAmount();
             }
 
-            amount = event.getTransactionAmount();
+            BigDecimal balance = getBankBalance(p);
+            if (balance.subtract(amount).compareTo(BigDecimal.ZERO) < 0) result = balance;
+            else result = amount;
+
+            setMoney(p, balance.subtract(result));
+        } catch (RuntimeException e) {
+            endOperation(p);
+            throw e;
         }
-
-        BigDecimal balance = getBankBalance(p);
-        if (balance.subtract(amount).compareTo(BigDecimal.ZERO) < 0) result = balance;
-        else result = amount;
-
-        setMoney(p, balance.subtract(result));
 
         if (!ignoreEvents) afterTransactionEvent(p, type, result);
         return result;
