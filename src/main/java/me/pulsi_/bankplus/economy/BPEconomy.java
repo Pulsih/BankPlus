@@ -470,6 +470,9 @@ public class BPEconomy {
      * @param p The player.
      */
     public BigDecimal getDebt(OfflinePlayer p) {
+        // Same as the balance: an online player still loading has nothing to read yet.
+        if (p.isOnline() && !isPlayerLoaded(p)) return BigDecimal.ZERO;
+
         return getHolder(p).debt;
     }
 
@@ -492,6 +495,8 @@ public class BPEconomy {
      * @return The current bank level.
      */
     public int getBankLevel(OfflinePlayer p) {
+        if (p.isOnline() && !isPlayerLoaded(p)) return 1;
+
         return getHolder(p).bankLevel;
     }
 
