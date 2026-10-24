@@ -6,13 +6,19 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.values.ConfigValues;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BPAFK {
 
-    private final Map<UUID, Long> afkCooldown = new HashMap<>();
-    private final List<Player> afkPlayers = new ArrayList<>();
+    // The interest runs asynchronously and reads these, while the main thread updates them.
+    private final Map<UUID, Long> afkCooldown = new ConcurrentHashMap<>();
+    private final Set<UUID> afkPlayers = ConcurrentHashMap.newKeySet();
+    private BukkitTask countdownTask;
     private boolean isPlayerCountdownActive = false;
 
     private final BankPlus plugin;
@@ -21,28 +27,46 @@ public class BPAFK {
         this.plugin = plugin;
     }
 
+    /**
+     * Check if the afk state is handled by EssentialsX or CMI. Having the option
+     * enabled without the plugin installed would throw when loading its classes.
+     */
+    public boolean isUsingExternalAfk() {
+        return (ConfigValues.isUsingEssentialsXAFK() && plugin.isEssentialsXHooked()) || (ConfigValues.isUsingCmiAfk() && plugin.isCmiHooked());
+    }
+
     public boolean isAFK(Player p) {
-        if (ConfigValues.isUsingEssentialsXAFK()) {return Essentials.getPlugin(Essentials.class).getUser(p).isAfk();}
-        if (ConfigValues.isUsingCmiAfk()) {return CMI.getInstance().getPlayerManager().getUser(p).isAfk();}
-        return afkPlayers.contains(p);
+        if (ConfigValues.isUsingEssentialsXAFK() && plugin.isEssentialsXHooked()) return Essentials.getPlugin(Essentials.class).getUser(p).isAfk();
+        if (ConfigValues.isUsingCmiAfk() && plugin.isCmiHooked()) return CMI.getInstance().getPlayerManager().getUser(p).isAfk();
+        return afkPlayers.contains(p.getUniqueId());
     }
 
     public void startCountdown() {
-        if (!ConfigValues.isIgnoringAfkPlayers() || ConfigValues.isUsingEssentialsXAFK() || ConfigValues.isUsingCmiAfk()) {
+        // Reloading calls this again, make sure there is only one countdown running.
+        if (countdownTask != null) {
+            countdownTask.cancel();
+            countdownTask = null;
+        }
+
+        if (!ConfigValues.isIgnoringAfkPlayers() || isUsingExternalAfk()) {
             isPlayerCountdownActive = false;
             return;
         }
         isPlayerCountdownActive = true;
 
+        // Forget the players that left.
+        afkPlayers.removeIf(uuid -> Bukkit.getPlayer(uuid) == null);
+        afkCooldown.keySet().removeIf(uuid -> Bukkit.getPlayer(uuid) == null);
+
         for (Player p : Bukkit.getOnlinePlayers()) {
-            if (!afkCooldown.containsKey(p.getUniqueId())) continue;
-            if (afkCooldown.get(p.getUniqueId()) > System.currentTimeMillis()) afkPlayers.remove(p);
-            else {
-                if (!afkPlayers.contains(p)) afkPlayers.add(p);
-            }
+            Long cooldown = afkCooldown.get(p.getUniqueId());
+            if (cooldown == null) continue;
+
+            if (cooldown > System.currentTimeMillis()) afkPlayers.remove(p.getUniqueId());
+            else afkPlayers.add(p.getUniqueId());
         }
 
-        Bukkit.getScheduler().runTaskLater(plugin, this::startCountdown, 20L);
+        countdownTask = Bukkit.getScheduler().runTaskLater(plugin, this::startCountdown, 20L);
     }
 
     public Map<UUID, Long> getAfkCooldown() {
