@@ -28,6 +28,9 @@ public class BPSQL {
         MONEY
     }
 
+    // Balances are stored as plain strings, and a huge one overflowed the old varchar(255) ("Data too long for column 'money'").
+    private static final int AMOUNT_COLUMN_LENGTH = 1024;
+
     /**
      * Get the string of default arguments that a bankplus table has.
      *
@@ -37,9 +40,9 @@ public class BPSQL {
         return "uuid varchar(255)," +
                 "account_name varchar(255) DEFAULT ''," +
                 "bank_level varchar(255) DEFAULT '1'," +
-                "money varchar(255) DEFAULT '0'," +
-                "interest varchar(255) DEFAULT '0'," +
-                "debt varchar(255) DEFAULT '0'," +
+                "money varchar(" + AMOUNT_COLUMN_LENGTH + ") DEFAULT '0'," +
+                "interest varchar(" + AMOUNT_COLUMN_LENGTH + ") DEFAULT '0'," +
+                "debt varchar(" + AMOUNT_COLUMN_LENGTH + ") DEFAULT '0'," +
                 "PRIMARY KEY (uuid)";
     }
 
@@ -318,6 +321,18 @@ public class BPSQL {
                         String query = "CREATE TABLE IF NOT EXISTS " + bankName + " (" + GET_TABLE_ARGUMENTS() + ")";
                         try (PreparedStatement statement = connection.prepareStatement(query)) {
                             statement.execute();
+                        }
+
+                        // Tables created by older versions still have the 255 chars columns.
+                        String widen = "ALTER TABLE " + bankName +
+                                " MODIFY money varchar(" + AMOUNT_COLUMN_LENGTH + ") DEFAULT '0'," +
+                                " MODIFY interest varchar(" + AMOUNT_COLUMN_LENGTH + ") DEFAULT '0'," +
+                                " MODIFY debt varchar(" + AMOUNT_COLUMN_LENGTH + ") DEFAULT '0'";
+                        // Not fatal: a restricted user without ALTER privileges can still work with the old columns.
+                        try (PreparedStatement statement = connection.prepareStatement(widen)) {
+                            statement.execute();
+                        } catch (SQLException e) {
+                            BPLogger.Console.warn("Could not widen the columns of the bank \"" + bankName + "\", very big balances may fail to save. (" + e.getMessage() + ")");
                         }
                     }
                 } catch (SQLException e) {
