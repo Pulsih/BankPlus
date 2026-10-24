@@ -693,8 +693,8 @@ public class BPEconomy {
      * @param toBank The bank where the money will be added.
      */
     public void pay(Player from, Player to, BigDecimal amount, Bank toBank) {
-        if (!startAndCheckOperationAllowed(from) || !startAndCheckOperationAllowed(to)) return;
-
+        // No operation is started here: the add and remove methods below start their own, and starting
+        // it twice made them deny the transaction, leaving both players blocked on the early returns.
         BigDecimal senderBalance = getBankBalance(from);
         // Check if the sender has at least more than 0 money
         if (senderBalance.compareTo(amount) < 0) {
@@ -709,11 +709,21 @@ public class BPEconomy {
             return;
         }
 
-        BigDecimal added = toEconomy.addBankBalance(to, amount, TransactionType.PAY), extra = amount.subtract(added);
-        BPMessages.sendIdentifier(to, "Payment-Received", BPUtils.placeValues(from, added));
+        // Take the money first, so a denied operation can never create money out of thin air.
+        BigDecimal removed = removeBankBalance(from, amount, TransactionType.PAY);
+        if (removed.compareTo(BigDecimal.ZERO) <= 0) return;
 
-        BigDecimal removed = removeBankBalance(from, amount.subtract(extra), TransactionType.PAY);
-        BPMessages.sendIdentifier(from, "Payment-Sent", BPUtils.placeValues(to, removed));
+        BigDecimal added = toEconomy.addBankBalance(to, removed, TransactionType.PAY), extra = removed.subtract(added);
+
+        // Give back what the receiver bank couldn't take.
+        if (extra.compareTo(BigDecimal.ZERO) > 0) addBankBalance(from, extra, true);
+        if (added.compareTo(BigDecimal.ZERO) <= 0) {
+            BPMessages.sendIdentifier(from, "Bank-Full", "%player%$" + to.getName());
+            return;
+        }
+
+        BPMessages.sendIdentifier(to, "Payment-Received", BPUtils.placeValues(from, added));
+        BPMessages.sendIdentifier(from, "Payment-Sent", BPUtils.placeValues(to, added));
     }
 
     private boolean minimumAmount(Player p, BigDecimal amount, BigDecimal minimum) {
