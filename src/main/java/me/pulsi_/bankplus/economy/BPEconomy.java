@@ -24,12 +24,14 @@ import org.bukkit.entity.Player;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BPEconomy {
 
     private final Bank originBank;
-    private final HashMap<UUID, Holder> holders = new HashMap<>();
-    private final Set<UUID> operations = new HashSet<>();
+    // Both are touched from async tasks (interest, joins, saving) and from the main thread.
+    private final Map<UUID, Holder> holders = new ConcurrentHashMap<>();
+    private final Set<UUID> operations = ConcurrentHashMap.newKeySet();
 
     // Not used anymore after the SQL saving rewrite. Keep for now, delete later if still unused.
     // private final String moneyPath, interestPath, debtPath, levelPath;
@@ -206,8 +208,10 @@ public class BPEconomy {
      */
     public Holder loadPlayer(OfflinePlayer p, boolean wasRegistered) {
         Holder holder = getHolder(p, wasRegistered);
-        holders.putIfAbsent(p.getUniqueId(), holder);
-        return holder;
+
+        // If another thread loaded it in the meantime, keep that one so everybody works on the same instance.
+        Holder existing = holders.putIfAbsent(p.getUniqueId(), holder);
+        return existing != null ? existing : holder;
     }
 
     /**
@@ -584,9 +588,10 @@ public class BPEconomy {
         }
 
         EconomyResponse withdrawResponse = BankPlus.INSTANCE().getVaultEconomy().depositPlayer(p, amount.subtract(taxes).doubleValue());
-        if (BPUtils.hasFailed(p, withdrawResponse)) return;
-
-        removeBankBalance(p, amount, true);
+        if (BPUtils.hasFailed(p, withdrawResponse)) {
+            addBankBalance(p, amount, true);
+            return;
+        }
 
         List<String> replacers = BPUtils.placeValues(p, amount.subtract(taxes));
         replacers.addAll(BPUtils.placeValues(taxes, "taxes"));

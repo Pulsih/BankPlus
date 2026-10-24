@@ -8,16 +8,18 @@ import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BankRegistry {
 
-    private static final HashMap<String, Bank> banks = new HashMap<>();
+    // Read by async tasks (interest, joins) while a reload can change it on the main thread.
+    private static final Map<String, Bank> banks = new ConcurrentHashMap<>();
 
     public static Bank getBank(String bankName) {
         return banks.get(bankName);
     }
 
-    public static HashMap<String, Bank> getBanks() {
+    public static Map<String, Bank> getBanks() {
         return banks;
     }
 

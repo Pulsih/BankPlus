@@ -2,13 +2,14 @@ package me.pulsi_.bankplus.managers;
 
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BPTaskManager {
 
     public static final String INTEREST_TASK = "interest", MONEY_SAVING_TASK = "money_saving", BANKTOP_BROADCAST_TASK = "banktop_broadcast";
 
-    private static final HashMap<String, BukkitTask> tasks = new HashMap<>();
+    private static final Map<String, BukkitTask> tasks = new ConcurrentHashMap<>();
 
     public static void setTask(String name, BukkitTask task) {
         String identifier = name.toLowerCase();

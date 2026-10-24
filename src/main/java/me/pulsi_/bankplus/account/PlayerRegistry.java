@@ -10,12 +10,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerRegistry {
 
-    private static final HashMap<UUID, BPPlayer> players = new HashMap<>();
+    private static final Map<UUID, BPPlayer> players = new ConcurrentHashMap<>();
 
     public static boolean isPlayerLoaded(OfflinePlayer p) {
         return players.containsKey(p.getUniqueId());

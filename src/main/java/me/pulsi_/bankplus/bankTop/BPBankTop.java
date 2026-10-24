@@ -14,13 +14,14 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BPBankTop {
 
     /**
      * A hashmap containing as Key the bank top position (always starting from 1 and increasing) and Value the BankTopPlayer object.
      */
-    private static final HashMap<Integer, BankTopPlayer> bankTop = new HashMap<>();
+    private static volatile Map<Integer, BankTopPlayer> bankTop = new HashMap<>();
 
     /**
      * Update the bank top.
@@ -43,7 +44,8 @@ public class BPBankTop {
                 players.add(bankTopPlayer);
             }
 
-            bankTop.clear();
+            // Build it apart and swap it at the end, so readers never see a half filled top.
+            Map<Integer, BankTopPlayer> newTop = new HashMap<>();
             for (int i = 1; i <= ConfigValues.getBankTopSize(); i++) {
                 if (players.isEmpty()) break;
 
@@ -54,8 +56,9 @@ public class BPBankTop {
                         highestPlayerBal = player;
 
                 players.remove(highestPlayerBal);
-                bankTop.put(i, highestPlayerBal);
+                newTop.put(i, highestPlayerBal);
             }
+            bankTop = newTop;
 
             if (!ConfigValues.isBankTopUpdateBroadcastEnabled()) return;
 
