@@ -22,13 +22,15 @@ public class EconomyUtils {
      * @param p The player.
      */
     public static void savePlayer(OfflinePlayer p, boolean unload) {
+        boolean saved = true;
         for (BPEconomy economy : BPEconomy.list()) {
             // Skip unloaded holders so a failed/partial load cannot overwrite SQL with defaults.
             if (!economy.isPlayerLoaded(p)) continue;
-            BPSQL.savePlayer(p, economy);
+            if (!BPSQL.savePlayer(p, economy)) saved = false;
         }
 
-        if (unload) PlayerRegistry.unloadPlayer(p);
+        // If something failed keep the player loaded, the next saving cycle will try again instead of losing the data.
+        if (unload && saved) PlayerRegistry.unloadPlayer(p);
     }
 
     /**
