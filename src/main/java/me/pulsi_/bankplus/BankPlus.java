@@ -20,6 +20,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.URLConnection;
 
 public final class BankPlus extends JavaPlugin {
 
@@ -196,11 +197,15 @@ public final class BankPlus extends JavaPlugin {
     private boolean isPluginUpdated() {
         String newVersion = getPluginMeta().getVersion();
         boolean updated = true;
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-                URI.create("https://api.spigotmc.org/legacy/update.php?resource=93130").toURL().openConnection().getInputStream()
-        ))) {
-            newVersion = reader.readLine();
-            updated = actualVersion.equals(newVersion);
+        try {
+            URLConnection connection = URI.create("https://api.spigotmc.org/legacy/update.php?resource=93130").toURL().openConnection();
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                newVersion = reader.readLine();
+                updated = actualVersion.equals(newVersion);
+            }
         } catch (Exception e) {
             BPLogger.Console.warn("Could not check for updates. (No internet connection)");
         }
