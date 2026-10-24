@@ -20,6 +20,7 @@ import org.bukkit.entity.Player;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -206,7 +207,8 @@ public class BPLoanRegistry {
         loan.setInstalmentsPoint(loan.getInstalmentsPoint() + 1);
         int instalments = loan.getInstalments();
 
-        BigDecimal currentTaskAmount = loan.getMoneyToReturn().divide(BigDecimal.valueOf(instalments));
+        // Plain divide() throws on results like 100 / 3, so give it a precision.
+        BigDecimal currentTaskAmount = loan.getMoneyToReturn().divide(BigDecimal.valueOf(Math.max(1, instalments)), MathContext.DECIMAL128);
         OfflinePlayer sender = loan.getSender(), receiver = loan.getReceiver();
         boolean isBankToPlayer = sender == null;
 
