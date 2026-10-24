@@ -786,11 +786,17 @@ public class BPEconomy {
         private int bankLevel = 1;
 
         public void setMoney(BigDecimal money) {
-            this.money = money.max(BigDecimal.ZERO).min(MAX_AMOUNT);
+            this.money = normalize(money);
         }
 
         public void setDebt(BigDecimal debt) {
-            this.debt = debt.max(BigDecimal.ZERO).min(MAX_AMOUNT);
+            this.debt = normalize(debt);
+        }
+
+        // Interest multiplies the scale of the balance on every round, so without rounding it the stored
+        // text keeps growing until it doesn't fit the column anymore.
+        private static BigDecimal normalize(BigDecimal amount) {
+            return amount.max(BigDecimal.ZERO).min(MAX_AMOUNT).setScale(Math.max(0, ConfigValues.getMaxDecimalsAmount()), RoundingMode.DOWN);
         }
 
         public void setBankLevel(int bankLevel) {
