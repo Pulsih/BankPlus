@@ -63,6 +63,11 @@ public class PlaceholdersCmd extends BPCommand {
         return new BPCmdExecution() {
             @Override
             public void execute() {
+                if (!BankPlus.INSTANCE().isPlaceholderApiHooked()) {
+                    BPMessages.sendMessage(s, "%prefix% <red>PlaceholderAPI is not installed, there are no placeholders registered.");
+                    return;
+                }
+
                 List<String> placeholders =  BankPlus.INSTANCE().getBpPlaceholders().getRegisteredPlaceholders();
                 int size = placeholders.size();
 
