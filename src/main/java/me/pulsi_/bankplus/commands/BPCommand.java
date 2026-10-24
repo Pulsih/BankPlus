@@ -1,6 +1,8 @@
 package me.pulsi_.bankplus.commands;
 
 import me.pulsi_.bankplus.BankPlus;
+import me.pulsi_.bankplus.sql.BPSQL;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPFormatter;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
@@ -11,9 +13,8 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import static me.pulsi_.bankplus.commands.BPCmdRegistry.commands;
 
@@ -28,7 +29,11 @@ public abstract class BPCommand {
     public final List<String> confirmMessage, cooldownMessage, usage;
 
     private final HashMap<String, Long> cooldowns = new HashMap<>();
-    private final Set<String> confirm = new HashSet<>();
+    // Who is confirming, with the exact command typed and when the confirmation expires.
+    private final Map<String, Confirmation> confirm = new HashMap<>();
+
+    private record Confirmation(String command, long expire) {
+    }
 
     public BPCommand(FileConfiguration commandsConfig, String commandID) {
         this(commandsConfig, commandID, (String[]) null);
@@ -110,18 +115,18 @@ public abstract class BPCommand {
      * @param s The command sender.
      * @return true if he has confirmed, false otherwise.
      */
-    private boolean hasConfirmed(CommandSender s) {
-        if (confirmCooldown > 0) {
-            String name = s.getName();
-            if (!confirm.contains(name)) {
-                Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> confirm.remove(name), confirmCooldown * 20L);
-                for (String message : confirmMessage) BPMessages.sendMessage(s, message);
-                confirm.add(name);
-                return false;
-            }
-            confirm.remove(name);
-        }
-        return true;
+    private boolean hasConfirmed(CommandSender s, String[] args) {
+        if (confirmCooldown <= 0) return true;
+
+        // Only the same command, typed again in time, counts as a confirmation. Otherwise typing a
+        // different amount or player would skip the warning of the new command.
+        String name = s.getName(), command = String.join(" ", args).toLowerCase();
+        Confirmation previous = confirm.remove(name);
+        if (previous != null && previous.command().equals(command) && previous.expire() > System.currentTimeMillis()) return true;
+
+        confirm.put(name, new Confirmation(command, System.currentTimeMillis() + (confirmCooldown * 1000L)));
+        for (String message : confirmMessage) BPMessages.sendMessage(s, message);
+        return false;
     }
 
     /**
@@ -147,11 +152,19 @@ public abstract class BPCommand {
         }
         if (isInCooldown(s)) return;
 
-        BPCmdExecution execution = onExecution(s, args);
-        if (execution.executionType == BPCmdExecution.ExecutionType.INVALID_EXECUTION) return;
-        if (!hasConfirmed(s)) return;
+        try {
+            BPCmdExecution execution = onExecution(s, args);
+            if (execution.executionType == BPCmdExecution.ExecutionType.INVALID_EXECUTION) return;
+            if (!hasConfirmed(s, args)) return;
 
-        execution.execute();
+            execution.execute();
+        } catch (BPSQL.DataException e) {
+            // The database can't be read, tell the sender instead of showing the generic server error.
+            BPMessages.sendIdentifier(s, "Internal-Error");
+            BPLogger.Console.warn(e, "Could not run \"" + commandID + "\" for " + s.getName() + ", the data is unavailable.");
+            return;
+        }
+
         if (cooldown > 0 && !(s instanceof ConsoleCommandSender)) {
             cooldowns.put(s.getName(), System.currentTimeMillis() + (cooldown * 1000L));
             Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () -> cooldowns.remove(s.getName()), cooldown * 20L);
