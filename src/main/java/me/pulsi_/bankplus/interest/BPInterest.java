@@ -4,6 +4,7 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankUtils;
 import me.pulsi_.bankplus.managers.BPTaskManager;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.SavesFile;
 import me.pulsi_.bankplus.values.ConfigValues;
@@ -59,8 +60,13 @@ public class BPInterest {
                 // Plugin is already marked disabled during onDisable, bail so we don't hold sqlite open.
                 if (!BankPlus.INSTANCE().isEnabled()) return;
 
-                if (p.isOnline()) onlineInterestMethod.giveInterest(p);
-                else if (isOfflineInterestEnabled) offlineInterestMethod.giveInterest(p);
+                // One broken player shouldn't stop everyone else from getting their interest.
+                try {
+                    if (p.isOnline()) onlineInterestMethod.giveInterest(p);
+                    else if (isOfflineInterestEnabled) offlineInterestMethod.giveInterest(p);
+                } catch (Exception e) {
+                    BPLogger.Console.warn(e, "Could not give interest to " + p.getName() + ".");
+                }
             }
         });
     }
