@@ -10,6 +10,7 @@ import me.pulsi_.bankplus.events.BPAfterTransactionEvent;
 import me.pulsi_.bankplus.events.BPPreTransactionEvent;
 import me.pulsi_.bankplus.listeners.playerChat.PlayerChatMethod;
 import me.pulsi_.bankplus.sql.BPSQL;
+import me.pulsi_.bankplus.utils.BPLogger;
 import me.pulsi_.bankplus.utils.BPUtils;
 import me.pulsi_.bankplus.utils.texts.BPMessages;
 import me.pulsi_.bankplus.values.ConfigValues;
@@ -86,7 +87,12 @@ public class BPEconomy {
         LinkedHashMap<String, BigDecimal> balances = new LinkedHashMap<>();
         for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
             if (!BankPlus.INSTANCE().isEnabled()) break;
-            balances.put(p.getName(), getBankBalancesSum(p));
+
+            try {
+                balances.put(p.getName(), getBankBalancesSum(p));
+            } catch (BPSQL.DataException e) {
+                BPLogger.Console.warn(e, "Skipping " + p.getName() + " in the bank top.");
+            }
         }
         return balances;
     }

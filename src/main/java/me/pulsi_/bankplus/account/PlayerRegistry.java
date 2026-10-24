@@ -4,6 +4,7 @@ import me.pulsi_.bankplus.BankPlus;
 import me.pulsi_.bankplus.bankSystem.Bank;
 import me.pulsi_.bankplus.bankSystem.BankRegistry;
 import me.pulsi_.bankplus.economy.BPEconomy;
+import me.pulsi_.bankplus.sql.BPSQL;
 import me.pulsi_.bankplus.utils.BPLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -67,7 +68,13 @@ public class PlayerRegistry {
         }
 
         if (BankPlus.INSTANCE().isEnabled())
-            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> bank.getBankEconomy().loadPlayer(p, wasRegistered));
+            Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
+                try {
+                    bank.getBankEconomy().loadPlayer(p, wasRegistered);
+                } catch (BPSQL.DataException e) {
+                    BPLogger.Console.error(e, "Could not load " + p.getName() + " in the bank " + bank.getIdentifier() + ", the bank will be unavailable for them.");
+                }
+            });
         players.putIfAbsent(uuid, bpPlayer);
         return bpPlayer;
     }

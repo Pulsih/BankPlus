@@ -70,6 +70,27 @@ public class BPSQL {
     private static final Object LOCK = new Object();
     private static Connection connection;
 
+    // True while the plugin wants a live connection, so a lost one gets reopened on demand.
+    private static boolean wantsConnection;
+    private static long lastCheck, lastReconnectTry;
+    private static final long CHECK_INTERVAL = 5000, RECONNECT_INTERVAL = 10000;
+
+    /**
+     * Thrown when the data of a player cannot be trusted: the database is unreachable or the stored value is
+     * not valid. It is a different case from "no record yet", which is a normal situation for new players.
+     * Callers must not fall back to default values when they get it, or the real data would get overwritten.
+     */
+    public static class DataException extends RuntimeException {
+
+        public DataException(String message) {
+            super(message);
+        }
+
+        public DataException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
     /**
      * Get the connection, that can be to MySQL or SQLite.
      *
@@ -79,9 +100,49 @@ public class BPSQL {
         return connection;
     }
 
+    /**
+     * Get the connection to use for a query, reopening it if MySQL dropped it (idle timeout, restart...).
+     * Must be called while holding the lock.
+     *
+     * @return The connection, or null if there is none and it could not be restored.
+     */
+    private static Connection current() {
+        long now = System.currentTimeMillis();
+        if (connection == null) {
+            // Don't retry on every query, a dead server would make each one wait for the connect timeout.
+            if (!wantsConnection || now - lastReconnectTry < RECONNECT_INTERVAL) return null;
+            reconnect(now);
+            return connection;
+        }
+
+        if (!ConfigValues.isMySqlEnabled() || now - lastCheck < CHECK_INTERVAL) return connection;
+        lastCheck = now;
+
+        try {
+            if (connection.isValid(2)) return connection;
+        } catch (SQLException ignored) {
+        }
+
+        BPLogger.Console.warn("Lost the MySQL connection, trying to reconnect...");
+        try {
+            connection.close();
+        } catch (SQLException ignored) {
+        }
+        connection = null;
+        reconnect(now);
+        return connection;
+    }
+
+    private static void reconnect(long now) {
+        lastReconnectTry = now;
+        if (ConfigValues.isMySqlEnabled()) MySQL.connect();
+        else SQLite.connect();
+    }
+
     public static void disconnect() {
         final Connection toClose;
         synchronized (LOCK) {
+            wantsConnection = false;
             toClose = connection;
             connection = null;
         }
@@ -118,7 +179,11 @@ public class BPSQL {
         String level = get(player, bankName, SQLSearch.BANK_LEVEL);
         if (level.isEmpty()) return 1;
 
-        return Integer.parseInt(level);
+        try {
+            return Integer.parseInt(level);
+        } catch (NumberFormatException e) {
+            throw new DataException("Invalid bank level \"" + level + "\" stored for " + player.getName() + " in bank " + bankName + ".", e);
+        }
     }
 
     /**
@@ -130,9 +195,7 @@ public class BPSQL {
      */
     public static BigDecimal getDebt(OfflinePlayer player, String bankName) {
         String debt = get(player, bankName, SQLSearch.DEBT);
-        if (debt.isEmpty()) return BigDecimal.ZERO;
-
-        return new BigDecimal(debt);
+        return parseAmount(debt, "debt", player, bankName);
     }
 
     /**
@@ -144,9 +207,7 @@ public class BPSQL {
      */
     public static BigDecimal getInterest(OfflinePlayer player, String bankName) {
         String interest = get(player, bankName, SQLSearch.INTEREST);
-        if (interest.isEmpty()) return BigDecimal.ZERO;
-
-        return new BigDecimal(interest);
+        return parseAmount(interest, "interest", player, bankName);
     }
 
     /**
@@ -158,9 +219,17 @@ public class BPSQL {
      */
     public static BigDecimal getMoney(OfflinePlayer player, String bankName) {
         String money = get(player, bankName, SQLSearch.MONEY);
-        if (money.isEmpty()) return BigDecimal.ZERO;
+        return parseAmount(money, "money", player, bankName);
+    }
 
-        return new BigDecimal(money);
+    private static BigDecimal parseAmount(String value, String column, OfflinePlayer player, String bankName) {
+        if (value.isEmpty()) return BigDecimal.ZERO;
+
+        try {
+            return new BigDecimal(value);
+        } catch (NumberFormatException e) {
+            throw new DataException("Invalid " + column + " \"" + value + "\" stored for " + player.getName() + " in bank " + bankName + ".", e);
+        }
     }
 
     /**
@@ -213,8 +282,9 @@ public class BPSQL {
      *
      * @param player   The player to save.
      * @param bankEconomy The economy of the bank.
+     * @return true if the data has been written, false if it could not be saved.
      */
-    public static void savePlayer(OfflinePlayer player, BPEconomy bankEconomy) {
+    public static boolean savePlayer(OfflinePlayer player, BPEconomy bankEconomy) {
         String bankName = bankEconomy.getOriginBank().getIdentifier();
 
         int level = bankEconomy.getBankLevel(player);
@@ -231,11 +301,14 @@ public class BPSQL {
         else query = insert + " ON CONFLICT(uuid) DO UPDATE SET " + set;
 
         synchronized (LOCK) {
-            if (connection == null) return;
+            Connection connection = current();
+            if (connection == null) return false;
             try (PreparedStatement statement = connection.prepareStatement(query)) {
                 statement.executeUpdate();
+                return true;
             } catch (SQLException e) {
                 BPLogger.Console.error(e, "Cannot save player " + player.getName() + " in bank " + bankName + ".");
+                return false;
             }
         }
     }
@@ -245,16 +318,17 @@ public class BPSQL {
      * @param player The player to check.
      * @param bankName The table name.
      * @return true if a record with its uuid exists, false otherwise.
+     * @throws DataException If the database cannot be queried.
      */
     public static boolean isRegistered(OfflinePlayer player, String bankName) {
         synchronized (LOCK) {
-            if (connection == null) return false;
+            Connection connection = current();
+            if (connection == null) throw new DataException("There is no SQL connection.");
             try (PreparedStatement statement = connection.prepareStatement("SELECT 1 FROM " + bankName + " WHERE uuid='" + player.getUniqueId() + "' LIMIT 1");
                  ResultSet set = statement.executeQuery()) {
                 return set.next();
             } catch (SQLException e) {
-                BPLogger.Console.error(e, "Cannot check if player " + player.getName() + " is registered in the bank " + bankName + ".");
-                return false;
+                throw new DataException("Cannot check if player " + player.getName() + " is registered in the bank " + bankName + ".", e);
             }
         }
     }
@@ -268,6 +342,7 @@ public class BPSQL {
      */
     public static void fillRecords(OfflinePlayer player) {
         synchronized (LOCK) {
+            Connection connection = current();
             if (connection == null) return;
 
             if (ConfigValues.isMySqlEnabled())
@@ -305,6 +380,7 @@ public class BPSQL {
                     BPLogger.Console.warn("MySQL is already connected.");
                     return;
                 }
+                wantsConnection = true;
 
                 String host = ConfigValues.getMySqlHost();
                 String port = ConfigValues.getMySqlPort();
@@ -353,6 +429,7 @@ public class BPSQL {
                     BPLogger.Console.warn("SQLite is already connected.");
                     return;
                 }
+                wantsConnection = true;
 
                 File dbFile = new File(BankPlus.INSTANCE().getDataFolder(), "data.db");
 
@@ -389,7 +466,8 @@ public class BPSQL {
      * @param player   The player.
      * @param bankName The bank where to search the value.
      * @param search   The value type.
-     * @return A string representing the bank level, debt, interest or money value.
+     * @return A string representing the bank level, debt, interest or money value, empty if the player has no record.
+     * @throws DataException If the database cannot be queried.
      */
     private static String get(OfflinePlayer player, String bankName, SQLSearch search) {
         String columnName;
@@ -408,14 +486,16 @@ public class BPSQL {
         String query = "SELECT " + columnName + " FROM " + bankName + " WHERE uuid='" + player.getUniqueId() + "'";
 
         synchronized (LOCK) {
-            if (connection == null) return "";
+            Connection connection = current();
+            if (connection == null) throw new DataException("There is no SQL connection.");
             try (PreparedStatement statement = connection.prepareStatement(query);
                  ResultSet set = statement.executeQuery()) {
                 if (!set.next()) return "";
-                return set.getString(columnName);
+
+                String value = set.getString(columnName);
+                return value == null ? "" : value;
             } catch (SQLException e) {
-                BPLogger.Console.error(e, "Could not get data for player " + player.getName() + ".");
-                return "";
+                throw new DataException("Could not get data for player " + player.getName() + " in bank " + bankName + ".", e);
             }
         }
     }
@@ -451,6 +531,7 @@ public class BPSQL {
         else query = insert + " ON CONFLICT(uuid) DO UPDATE SET " + set;
 
         synchronized (LOCK) {
+            Connection connection = current();
             if (connection == null) return;
             try (PreparedStatement statement = connection.prepareStatement(query)) {
                 statement.executeUpdate();

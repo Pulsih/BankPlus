@@ -22,11 +22,16 @@ import java.math.BigDecimal;
 
 public class PlayerServerListener implements Listener {
 
+    private static final int LOAD_ATTEMPTS = 3;
+
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
+        Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> loadPlayerData(p, 1));
+    }
 
-        Bukkit.getScheduler().runTaskAsynchronously(BankPlus.INSTANCE(), () -> {
+    private void loadPlayerData(Player p, int attempt) {
+        try {
             if (!BankPlus.INSTANCE().isEnabled()) return;
 
             boolean wasRegistered = BPSQL.isRegistered(p, ConfigValues.getMainGuiName());
@@ -57,7 +62,16 @@ public class PlayerServerListener implements Listener {
                 Bukkit.getScheduler().runTaskLater(BankPlus.INSTANCE(), () ->
                                 BPMessages.sendMessage(p, ConfigValues.getOfflineInterestMessage(), BPUtils.placeValues(finalAmount)),
                         ConfigValues.getNotifyOfflineInterestDelay() * 20L);
-        });
+        } catch (BPSQL.DataException ex) {
+            // Never load the player with default values here, the real balance would be overwritten when saving.
+            if (attempt >= LOAD_ATTEMPTS || !p.isOnline() || !BankPlus.INSTANCE().isEnabled()) {
+                BPLogger.Console.error(ex, "Could not load the data of " + p.getName() + ", their bank will stay unavailable until they rejoin.");
+                return;
+            }
+
+            BPLogger.Console.warn("Could not load the data of " + p.getName() + ", retrying in 5 seconds. (" + attempt + "/" + LOAD_ATTEMPTS + ")");
+            Bukkit.getScheduler().runTaskLaterAsynchronously(BankPlus.INSTANCE(), () -> loadPlayerData(p, attempt + 1), 100L);
+        }
     }
 
     @EventHandler
